@@ -16,6 +16,13 @@
       "subtitle": "Eagle",
       "description": "Search Item from Library",
       "mode": "view"
+    },
+    {
+      "name": "info",
+      "title": "Application Info",
+      "subtitle": "Eagle",
+      "description": "Get Eagle Application Info",
+      "mode": "view"
     }
   ],
   "dependencies": {

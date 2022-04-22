@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import fs from "fs";
-import { getItemThumbnail } from "./api";
+import { getItemThumbnail, getApplicationInfo } from "./api";
 
 export function useThumbnail(id: string, ext: string) {
   return useSWR(`/api/item/thumbnail?id=${id}`, async () => {
@@ -11,5 +11,12 @@ export function useThumbnail(id: string, ext: string) {
 
     const base64Url = `data:image/${ext};base64,${content}`;
     return base64Url;
+  });
+}
+
+export function useApplicationInfo() {
+  return useSWR("/application/info", async () => {
+    const res = await getApplicationInfo();
+    return res.data.data;
   });
 }

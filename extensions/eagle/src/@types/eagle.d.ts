@@ -1,3 +1,11 @@
+export type Application = {
+  version: string;
+  prereleaseVersion: string | null;
+  buildVersion: string;
+  execPath: string;
+  platform: string;
+};
+
 export type ColorPalette = {
   color: [number, number, number];
   ratio: number;
