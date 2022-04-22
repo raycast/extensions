@@ -22,6 +22,7 @@ export const refreshNumber = () => {
 export const localDirectoryWithFiles = (refresh: number) => {
   const [pinnedDirectory, setPinnedDirectory] = useState<DirectoryInfo[]>([]);
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
+  const [allFilesNumber, setAllFilesNumber] = useState<number>(0);
   const [directoryTags, setDirectoryTags] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = commonPreferences();
@@ -48,16 +49,20 @@ export const localDirectoryWithFiles = (refresh: number) => {
     //get directory files
     const _pinnedDirectoryContent: DirectoryWithFileInfo[] = [];
     const _fileShowNumber = getFileShowNumber(fileShowNumber);
+    let _allFilesNumber = 0;
     validDirectory.forEach((value) => {
       _directoryTags.push(value.name);
+      const files =
+        _fileShowNumber === -1
+          ? getDirectoryFiles(value.path + "/")
+          : getDirectoryFiles(value.path + "/").slice(0, _fileShowNumber);
       _pinnedDirectoryContent.push({
         directory: value,
-        files:
-          _fileShowNumber === -1
-            ? getDirectoryFiles(value.path + "/")
-            : getDirectoryFiles(value.path + "/").slice(0, _fileShowNumber),
+        files: files,
       });
+      _allFilesNumber = _allFilesNumber + files.length;
     });
+    setAllFilesNumber(_allFilesNumber);
     setDirectoryTags(_directoryTags);
     setDirectoryWithFiles(_pinnedDirectoryContent);
 
@@ -72,6 +77,7 @@ export const localDirectoryWithFiles = (refresh: number) => {
   return {
     pinnedDirectory: pinnedDirectory,
     directoryWithFiles: directoryWithFiles,
+    allFilesNumber: allFilesNumber,
     directoryTags: directoryTags,
     loading: loading,
   };

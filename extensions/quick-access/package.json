@@ -12,7 +12,7 @@
       "title": "Pin Directory",
       "icon": "pin-directory.png",
       "subtitle": "Quick Access",
-      "description": "Pin directories that can be accessed quickly.",
+      "description": "Pin directories that can be accessed quickly. To use this command, you need to select folders or open a Finder window first.",
       "mode": "no-view"
     },
     {

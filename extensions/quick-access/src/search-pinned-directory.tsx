@@ -8,13 +8,15 @@ import { LocalStorageKey } from "./utils/constants";
 import { copyFileByPath } from "./utils/applescript-utils";
 import { alertDialog, copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
 import fse from "fs-extra";
+import { ActionRemoveAllDirectories } from "./utils/ui-components";
 
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
   const { autoCopyLatestFile } = commonPreferences();
 
-  const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(refresh);
+  const { pinnedDirectory, directoryWithFiles, allFilesNumber, directoryTags, loading } =
+    localDirectoryWithFiles(refresh);
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
@@ -30,9 +32,9 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {directoryWithFiles.length === 0 ? (
+      {directoryWithFiles.length === 0 || allFilesNumber === 0 ? (
         <List.EmptyView
-          title={"No directory. Please pin first"}
+          title={directoryWithFiles.length === 0 ? "No directory. Please pin first" : "No Files."}
           description={"You can always pin directory from the Action Panel"}
           actions={
             <ActionPanel>
@@ -44,6 +46,7 @@ export default function Command() {
                   setRefresh(refreshNumber());
                 }}
               />
+              {directoryWithFiles.length != 0 && <ActionRemoveAllDirectories setRefresh={setRefresh} />}
             </ActionPanel>
           }
         />
@@ -100,30 +103,7 @@ export default function Command() {
                                 );
                               }}
                             />
-                            <Action
-                              icon={Icon.ExclamationMark}
-                              title={`Remove All Directory`}
-                              shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
-                              onAction={async () => {
-                                await alertDialog(
-                                  "⚠️Warning",
-                                  "Do you want to remove all directories?",
-                                  "Remove All",
-                                  async () => {
-                                    await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify([]));
-                                    setRefresh(refreshNumber());
-                                    await showToast(
-                                      Toast.Style.Success,
-                                      "Success!",
-                                      `${pinnedDirectory[directoryIndex].name} is removed.`
-                                    );
-                                  },
-                                  async () => {
-                                    await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
-                                  }
-                                );
-                              }}
-                            />
+                            <ActionRemoveAllDirectories setRefresh={setRefresh} />
                             <Action
                               icon={Icon.TwoArrowsClockwise}
                               title={`Reset Directory Rank`}
