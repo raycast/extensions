@@ -31,3 +31,7 @@ type Favorite = {
   subtitle: string;
   command?: string;
 };
+
+interface Preferences {
+  path?: string;
+}

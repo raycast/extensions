@@ -1,6 +1,6 @@
-import FindNotebooksCommand from "./components/findNotebooks";
-import SelfHostedCommand from "./components/selfHosted";
+import FindNotebooksCommand from "./components/FindNotebooksCommand";
+import SelfHostedCommand from "./components/SelfHostedCommand";
 
-export default function SearchInstance() {
-  return <SelfHostedCommand command={(src) => FindNotebooksCommand(src)} />;
+export default function FindNotebooksSelfHosted() {
+  return <SelfHostedCommand Command={FindNotebooksCommand} />;
 }

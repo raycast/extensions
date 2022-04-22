@@ -1,9 +1,12 @@
 {
   "name": "obsidian",
   "title": "Obsidian",
-  "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+  "description": "Control Obsidian with Raycast",
   "icon": "command-icon.png",
   "author": "marcjulian",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -17,10 +20,10 @@
   ],
   "commands": [
     {
-      "name": "index",
+      "name": "searchNoteCommand",
       "title": "Search Note",
       "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+      "description": "Search, open, view, copy, paste and edit any note in Obsidian.",
       "mode": "view",
       "preferences": [
         {
@@ -48,6 +51,13 @@
           "description": "Hide links for copying and viewing notes"
         },
         {
+          "name": "appendPrefix",
+          "type": "textfield",
+          "title": "Prefix for Append action",
+          "required": false,
+          "description": "Specify a prefix for Append action (e.g. '-')"
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -68,14 +78,21 @@
       ]
     },
     {
-      "name": "openvault",
+      "name": "openVaultCommand",
       "title": "Open Vault",
       "subtitle": "Obsidian",
-      "description": "Open a vault in Obsidian",
+      "description": "Open a vault in Obsidian.",
       "mode": "view"
     },
     {
-      "name": "createnote",
+      "name": "dailyNoteCommand",
+      "title": "Daily Note",
+      "subtitle": "Obsidian",
+      "description": "Open daily note in Obsidian. Will create new daily note when it doesn't exist yet.",
+      "mode": "view"
+    },
+    {
+      "name": "createNoteCommand",
       "title": "Create Note",
       "subtitle": "Obsidian",
       "description": "Create new note",
@@ -109,11 +126,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^17.0.43",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

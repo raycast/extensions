@@ -5,6 +5,7 @@
   "description": "Formats a JSON file with a selected indentation.",
   "icon": "command-icon.png",
   "author": "destiner",
+  "categories": ["Data", "Developer Tools"],
   "license": "MIT",
   "commands": [
     {
@@ -14,8 +15,28 @@
       "mode": "view"
     }
   ],
+  "preferences": [{
+    "name": "indent",
+    "title": "Indentation",
+    "description": "Output file indentation",
+    "type": "dropdown",
+    "required": false,
+    "data": [{
+      "title": "Tab",
+      "value": "tab"
+    }, {
+      "title": "Spaces: 2",
+      "value": "2"
+    }, {
+      "title": "Spaces: 4",
+      "value": "4"
+    }, {
+      "title": "Spaces: 8",
+      "value": "8"
+    }]
+  }],
   "dependencies": {
-    "@raycast/api": "^1.26.1"
+    "@raycast/api": "^1.28.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -30,6 +51,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

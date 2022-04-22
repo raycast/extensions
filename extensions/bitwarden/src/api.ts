@@ -1,23 +1,23 @@
-import { getPreferenceValues } from "@raycast/api";
-import execa from "execa";
+import { environment } from "@raycast/api";
+import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { VaultStatus } from "./types";
+import { Item, PasswordGeneratorOptions, VaultState } from "./types";
+import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
   private env: Record<string, string>;
-  private cliPath: string;
-  constructor() {
-    const { cliPath, clientId, clientSecret } = getPreferenceValues();
-    if (cliPath) {
-      this.cliPath = cliPath;
-    } else {
-      this.cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
+  cliPath: string;
+  constructor(clientId: string, clientSecret: string, cliPath: string) {
+    if (!cliPath) {
+      cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
     }
-    if (!existsSync(this.cliPath)) {
-      throw Error(`Invalid Cli Path: ${this.cliPath}`);
+    if (!existsSync(cliPath)) {
+      throw new Error(`Bitwarden CLI not found at ${cliPath}`);
     }
+    this.cliPath = cliPath;
     this.env = {
+      BITWARDENCLI_APPDATA_DIR: environment.supportPath,
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
@@ -32,9 +32,15 @@ export class Bitwarden {
     await this.exec(["login", "--apikey"]);
   }
 
-  async listItems<ItemType>(type: string, sessionToken: string): Promise<ItemType[]> {
-    const { stdout } = await this.exec(["list", type, "--session", sessionToken]);
-    return JSON.parse(stdout);
+  async logout(): Promise<void> {
+    await this.exec(["logout"]);
+  }
+
+  async listItems(sessionToken: string): Promise<Item[]> {
+    const { stdout } = await this.exec(["list", "items", "--session", sessionToken]);
+    const items = JSON.parse(stdout);
+    // Filter out items without a name property (they are not displayed in the bitwarden app)
+    return items.filter((item: Item) => !!item.name);
   }
 
   async getTotp(id: string, sessionToken: string): Promise<string> {
@@ -52,12 +58,18 @@ export class Bitwarden {
     await this.exec(["lock"]);
   }
 
-  async status(sessionToken: string | undefined): Promise<VaultStatus> {
-    const { stdout } = await this.exec(sessionToken ? ["status", "--session", sessionToken] : ["status"]);
-    return JSON.parse(stdout).status;
+  async status(): Promise<VaultState> {
+    const { stdout } = await this.exec(["status"]);
+    return JSON.parse(stdout);
   }
 
-  private async exec(args: string[]): Promise<execa.ExecaChildProcess> {
-    return execa(this.cliPath, args, { env: this.env });
+  async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
+    const args = options ? getPasswordGeneratingArgs(options) : [];
+    const { stdout } = await this.exec(["generate", ...args], abortController);
+    return stdout;
+  }
+
+  private async exec(args: string[], abortController?: AbortController): Promise<ExecaChildProcess> {
+    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
 }

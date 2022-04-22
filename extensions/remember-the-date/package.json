@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remember-the-date",
+  "title": "Remember the Date",
+  "description": "Creates and shows the most important date which should be remembered.",
+  "icon": "countdown.png",
+  "author": "pernielsentikaer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Date",
+      "subtitle": "Remember the Date",
+      "description": "Create new date to remember",
+      "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "Days List",
+      "subtitle": "Remember the Date",
+      "description": "List of all dates to remember",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showDate",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Show the date",
+      "description": "Should the date be visible in the list",
+      "label": "Yes, show date in the list"
+    }
+  ],
+  "categories": ["Productivity"],
+  "dependencies": {
+    "@raycast/api": "^1.32.0",
+    "moment": "^2.29.1",
+    "nanoid": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

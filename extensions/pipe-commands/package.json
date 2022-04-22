@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pipe-commands",
+  "title": "Pipe Commands",
+  "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
+  "icon": "command-icon.png",
+  "author": "pomdtr",
+    "contributors": [
+    "gasolin"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "pipe-selection-to-command",
+      "title": "Pipe Selection to Command",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on your selection.",
+      "mode": "view"
+    },
+    {
+      "name": "pipe-clipboard-to-command",
+      "title": "Pipe Clipboard to Command",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on your clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "create-pipe-command",
+      "title": "Create Pipe Command",
+      "subtitle": "Pipe Commands",
+      "description": "Generate a new Pipe Command using built-in templates.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-pipe-commands",
+      "title": "Manage Pipe Commands",
+      "subtitle": "Pipe Commands",
+      "description": "Edit your Pipe Commands.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.0",
+    "globby": "^13.1.1",
+    "jsonschema": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3",
+    "typescript-json-schema": "^0.53.0"
+  },
+  "scripts": {
+    "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ssh-manager",
+  "title": "SSH Connection Manager",
+  "description": "Quickly connect and manage multiple SSH connections",
+  "icon": "command-icon.png",
+  "author": "dimagrossman",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create",
+      "title": "Create New Connection",
+      "subtitle": "SSH Connection Manager",
+      "description": "Add a new connection to easily access it later",
+      "mode": "view"
+    },
+    {
+      "name": "show",
+      "title": "Show Connections",
+      "subtitle": "SSH Connection Manager",
+      "description": "Quickly access pre-defined ssh connections and connect to them easily",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "nanoid": "^3.3.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -18,9 +18,7 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { ReactElement } from "react";
 import tildify from "tildify";
-import { GitCachedProjectEntry, Preferences, ProjectEntry } from "./types";
-
-const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager`;
+import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -30,10 +28,19 @@ const gitClientInstalled = existsSync(gitClientPath);
 const terminalPath = preferences.terminalAppPath || "";
 const terminalInstalled = existsSync(terminalPath);
 
+const build: VSCodeBuild = preferences.build;
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
+
+const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
+
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
   const savedProjectsFile = `${storagePath}/projects.json`;
-  const cachedGitProjectsFile = `${storagePath}/projects_cache_git.json`;
+  const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
 
   const projectEntries: ProjectEntry[] = [];
   if (existsSync(savedProjectsFile)) {
@@ -41,12 +48,15 @@ function getProjectEntries(): ProjectEntry[] {
     projectEntries.push(...savedProjects);
   }
 
-  if (existsSync(cachedGitProjectsFile)) {
-    const cachedEntries: GitCachedProjectEntry[] = JSON.parse(readFileSync(cachedGitProjectsFile).toString());
-    cachedEntries.forEach(({ name, fullPath }) => {
-      projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
-    });
-  }
+  cachedProjectsFiles.forEach((cachedFile) => {
+    if (existsSync(cachedFile)) {
+      const cachedEntries: CachedProjectEntry[] = JSON.parse(readFileSync(cachedFile).toString());
+      cachedEntries.forEach(({ name, fullPath }) => {
+        projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+      });
+    }
+  });
+
   return projectEntries;
 }
 
@@ -142,7 +152,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="command-icon.png" target={path} application="Visual Studio Code" />
+            <OpenAction title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             {terminalInstalled && (
               <ActionPanel.Item
                 title="Open in Terminal"

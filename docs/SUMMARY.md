@@ -46,6 +46,7 @@
   - [HUD](api-reference/feedback/hud.md)
   - [Toast](api-reference/feedback/toast.md)
 - [Keyboard](api-reference/keyboard.md)
+- [OAuth](api-reference/oauth.md)
 - [Preferences](api-reference/preferences.md)
 - [Storage](api-reference/storage.md)
 - [User Interface](api-reference/user-interface/README.md)
@@ -65,4 +66,5 @@
 - [Changelog](changelog.md)
 - [Migration](migration/README.md)
   - [v1.28.0](migration/v1.28.0.md)
+  - [v1.31.0](migration/v1.31.0.md)
 - [FAQ](faq.md)

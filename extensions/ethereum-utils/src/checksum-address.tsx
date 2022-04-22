@@ -1,11 +1,11 @@
 import {
   ActionPanel,
-  copyTextToClipboard,
   Form,
   showHUD,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
+  Action,
+  Clipboard,
+  Toast,
 } from '@raycast/api';
 import { utils } from 'ethers';
 
@@ -23,22 +23,34 @@ export default function Command() {
     try {
       const checksumAddress = utils.getAddress(address);
       if (address === checksumAddress) {
-        showToast(ToastStyle.Success, 'Valid address (already checksummed)');
+        showToast({
+          style: Toast.Style.Success,
+          title: 'Valid address (already checksummed)',
+        });
         return;
       }
-      copyTextToClipboard(checksumAddress);
+      Clipboard.copy(checksumAddress);
       showHUD('Copied to clipboard');
     } catch (e) {
       const reason = (e as EthersError).reason;
       if (reason === 'invalid address') {
-        showToast(ToastStyle.Failure, 'Invalid input (not an address)');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Invalid input (not an address)',
+        });
         return;
       }
       if (reason === 'bad address checksum') {
-        showToast(ToastStyle.Failure, 'Invalid address (wrong checksum)');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Invalid address (wrong checksum)',
+        });
         return;
       }
-      showToast(ToastStyle.Failure, 'Unknown error');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Unknown error',
+      });
     }
   }
 
@@ -46,7 +58,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

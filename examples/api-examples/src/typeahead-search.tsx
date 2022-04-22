@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast, Icon } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -21,7 +21,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
+      accessories={[{ icon: Icon.Person, text: searchResult.username }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
