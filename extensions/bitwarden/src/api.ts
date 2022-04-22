@@ -36,34 +36,35 @@ export class Bitwarden {
 
   async checkServerUrl(serverUrl: string): Promise<void> {
     const cliServer = (await LocalStorage.getItem<string>("cliServer")) || "";
-    if (cliServer !== serverUrl) {
-      // Update the server Url
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Switching server...",
-        message: "Bitwarden server preference changed.",
-      });
+    if (cliServer === serverUrl) {
+      return;
+    }
+    // Update the server Url
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Switching server...",
+      message: "Bitwarden server preference changed.",
+    });
+    try {
       try {
-        try {
-          await this.exec(["logout"], { waitForInit: false });
-        } catch (error) {
-          // It doesn't matter if we weren't logged in.
-        }
-        // If URL is empty, set it to the default
-        await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { waitForInit: false });
-        await LocalStorage.setItem("cliServer", serverUrl);
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Success!";
-        toast.message = "Bitwarden server changed.";
+        await this.exec(["logout"], { waitForInit: false });
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to switch server.";
-        if (error instanceof Error) {
-          toast.message = error.message;
-        } else {
-          toast.message = "Unknown error occurred.";
-        }
+        // It doesn't matter if we weren't logged in.
+      }
+      // If URL is empty, set it to the default
+      await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { waitForInit: false });
+      await LocalStorage.setItem("cliServer", serverUrl);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Success!";
+      toast.message = "Bitwarden server changed.";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Unable to switch server.";
+      if (error instanceof Error) {
+        toast.message = error.message;
+      } else {
+        toast.message = "Unknown error occurred.";
       }
     }
   }
