@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Search Item",
+      "subtitle": "Eagle",
       "description": "Search Item from Library",
       "mode": "view"
     }
