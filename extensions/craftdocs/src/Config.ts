@@ -24,6 +24,8 @@ export default class Config {
       .map((str) => this.makeSpaceFromStr(pwd, str));
   }
 
+  primarySpace = () => this.spaces.find((space) => space.primary);
+
   private makeSpaceFromStr = (pwd: string, str: string): SpaceSQLite => ({
     primary: !str.includes("||"),
     path: path.join(pwd, str),
