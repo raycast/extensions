@@ -1,7 +1,7 @@
 export type ColorPalette = {
-  color: [number, number, number],
-  ratio: number,
-}
+  color: [number, number, number];
+  ratio: number;
+};
 
 export type Item = {
   id: string;
@@ -19,25 +19,25 @@ export type Item = {
   noThumbnail: boolean;
   lastModified: number;
   palettes: ColorPalette[];
-}
+};
 
 export type Folder = {
   id: string;
   name: string;
   description: string;
-  children: Folder & {
-    parent: string;
-  }[];
-  modificationTime: number
+  children: Folder &
+    {
+      parent: string;
+    }[];
+  modificationTime: number;
   tags: string[];
   imageCount: number;
   descendantImageCount: number;
   pinyin: string;
   extendTags: string[];
-}
-
+};
 
 export type EagleAPIResponse<T> = {
-  status: 'success';
+  status: "success";
   data: T;
-}
+};

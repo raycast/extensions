@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show List and Detail",
-      "description": "Template for showing a static list and a detail view",
+      "title": "Search Item",
+      "description": "Search Item from Library",
       "mode": "view"
     }
   ],
