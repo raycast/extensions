@@ -21,7 +21,9 @@
   "preferences": [
     {
       "name": "locale",
+      "description": "Search result language.",
       "type": "dropdown",
+      "required": true,
       "title": "Locale",
       "data": [
         {
@@ -69,8 +71,7 @@
           "title": "正體中文 (繁體)"
         }
       ],
-      "default": "en-US",
-      "description": "Search result language."
+      "default": "en-US"
     }
   ],
   "dependencies": {
