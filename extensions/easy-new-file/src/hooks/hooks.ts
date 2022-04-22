@@ -49,7 +49,6 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
     }
     setTemplateFiles(_templateFiles);
     setIsLoading(false);
-    await runAppleScript("");
   }, [refresh]);
 
   useEffect(() => {
