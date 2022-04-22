@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, open, Toast } from "@raycast/api";
+import {Action, ActionPanel, Clipboard, Form, open, showHUD, Toast} from "@raycast/api";
 import { CreateOptions, ExpireDate, Publicity } from "pastebin-api";
 import { useToken } from "./utils/hooks";
 import client from "./utils/client";
@@ -45,7 +45,11 @@ export default function Command() {
       toast.secondaryAction = {
         title: "Copy URL",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        onAction: () => Clipboard.copy(url),
+        onAction: () => {
+          Clipboard.copy(url);
+          toast.title = "Copied to Clipboard";
+          toast.message = url.replace("https://", "");
+        },
       };
     } catch {
       toast.style = Toast.Style.Failure;
