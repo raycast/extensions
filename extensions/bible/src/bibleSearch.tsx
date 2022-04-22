@@ -47,6 +47,19 @@ export default function Command() {
     return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
   }, [searchResult]);
 
+  function getEmptyViewText() {
+    if (isLoading) {
+      return "Searching...";
+    } else if (prefs.enterToSearch && searchResult === undefined) {
+      return "Press Enter to Search";
+    } else if (query.search === "") {
+      return "Start Typing to Search";
+    } else {
+      return "No Results";
+    }
+  }
+
+  const searchAction = <Action title="Search" onAction={performSearch} />;
   return (
     <List
       isLoading={isLoading}
@@ -76,7 +89,6 @@ export default function Command() {
           );
         }
       }}
-      actions={prefs.enterToSearch && <ActionPanel>{<Action title="Search" onAction={performSearch} />}</ActionPanel>}
     >
       {searchResult && searchResult.passages.length > 0 && detailContent ? (
         <List.Item
@@ -84,7 +96,7 @@ export default function Command() {
           detail={<List.Item.Detail markdown={detailContent.markdown} />}
           actions={
             <ActionPanel>
-              {prefs.enterToSearch && <Action title="Search" onAction={performSearch} />}
+              {prefs.enterToSearch && searchAction}
               <Action.CopyToClipboard content={detailContent.clipboardText} />
               <Action.Paste
                 content={detailContent.clipboardText}
@@ -100,8 +112,9 @@ export default function Command() {
         />
       ) : (
         <List.EmptyView
-          title={query.search === "" ? "Type To Search" : isLoading ? "Searching..." : "No Results"}
+          title={getEmptyViewText()}
           icon="../assets/extension-icon-64.png"
+          actions={<ActionPanel>{prefs.enterToSearch && searchAction}</ActionPanel>}
         />
       )}
     </List>
