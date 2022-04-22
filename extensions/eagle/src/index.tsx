@@ -44,7 +44,7 @@ function ItemDetail({ item }: { item: Item }) {
                 const color = `#${palette.color.map((c) => c.toString(16)).join("")}`;
                 const ratio = palette.ratio > 1 ? palette.ratio.toFixed(0) : palette.ratio.toFixed(1);
 
-                return <Detail.Metadata.TagList.Item text={`▆▆ (${ratio}%)`} color={color} />;
+                return <Detail.Metadata.TagList.Item text={`▆▆ (${ratio}%)`} color={color} key={index} />;
               })}
             </Detail.Metadata.TagList>
           ) : null}
@@ -56,8 +56,8 @@ function ItemDetail({ item }: { item: Item }) {
 
           {item.tags && item.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
-              {item.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item text={tag} />
+              {item.tags.map((tag, index) => (
+                <Detail.Metadata.TagList.Item text={tag} key={index} />
               ))}
             </Detail.Metadata.TagList>
           )}
