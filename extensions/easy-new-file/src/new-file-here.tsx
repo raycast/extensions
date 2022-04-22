@@ -69,16 +69,7 @@ export default function main() {
                     }}
                   />
                   <Action
-                    title={"Copy File to Clipboard"}
-                    icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
-                    onAction={async () => {
-                      await copyFileByPath(template.path);
-                      await showHUD(`${template.name} is copied to clipboard.`);
-                    }}
-                  />
-                  <Action
-                    title={"New File in Desktop"}
+                    title={"New File on Desktop"}
                     icon={Icon.Desktop}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={async () => {
@@ -87,6 +78,15 @@ export default function main() {
                       } catch (e) {
                         await showToast(Toast.Style.Failure, "Create file failure.", String(e));
                       }
+                    }}
+                  />
+                  <Action
+                    title={"Copy File to Clipboard"}
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
+                    onAction={async () => {
+                      await copyFileByPath(template.path);
+                      await showHUD(`${template.name} is copied to clipboard.`);
                     }}
                   />
                   <ActionPanel.Section title={"Template Action"}>

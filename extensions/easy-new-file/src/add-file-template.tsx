@@ -65,7 +65,8 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
       }
     >
       <Form.Description
-        text={`The template file is equivalent to the file snippets, which you can use it to create new files directly, or just copy it.`}
+        title="Information"
+        text={`Templates added will automatically be available in the New File Here command.`}
       />
       <Form.TextArea
         id={"path"}
@@ -73,7 +74,9 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         placeholder={"/xxx/xxx"}
         value={path}
         onChange={setPath}
-        info={"The selected file path is automatically fetched when entering the extension."}
+        info={
+          "Insert the full path of the file used for the template. If you select a file before opening this command, its path is automatically added."
+        }
       />
       <Form.TextField
         id={"name"}

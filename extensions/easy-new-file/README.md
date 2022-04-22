@@ -6,14 +6,16 @@ Quickly create file in the current Finder window or on the desktop.
 
 - **New File Here**: Create a new file in the current Finder window or on the desktop.
 
-  - New File Here
-  - New File with Name: Create a new file with name.
-  - Copy File to Clipboard: Create the file to clipboard.
-  - Add File Template
+  - New File Here: Create a new file in current finder window.
+  - New File with Name: Create a new file with name in current finder window.
+  - New File on Desktop: Create a new file on desktop.
+  - Copy File in Clipboard: Copy the template file to clipboard.
 
 - **Add File Template**: Add a file template that you can use in the "Create File Here" command. It will automatically fetch path of the file you selected as a template.
 
 **Preferences**
+
+- [x] Auto-open after file created
 
 - Show File Template
   - [x] Document
