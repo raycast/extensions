@@ -21,8 +21,17 @@ function ItemDetail({ item }: { item: Item }) {
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   }, [item]);
 
+  const annotation = useMemo(() => {
+    if (item.annotation) {
+      return item.annotation.replaceAll("<br>", "\n");
+    }
+
+    return "";
+  }, [item]);
+
   return (
     <Detail
+      navigationTitle={item.name}
       markdown={`# ${item.name}
   
   ![](${thumbnail})`}
@@ -43,7 +52,7 @@ function ItemDetail({ item }: { item: Item }) {
           <Detail.Metadata.Label title="ID" text={item.id} />
           <Detail.Metadata.Label title="Name" text={item.name} />
 
-          {item.annotation ? <Detail.Metadata.Label title="Annotation" text={item.annotation} /> : null}
+          {item.annotation ? <Detail.Metadata.Label title="Annotation" text={annotation} /> : null}
 
           {item.tags && item.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
