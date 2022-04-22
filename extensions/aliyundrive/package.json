@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aliyundrive",
-  "title": "aliyundrive",
-  "description": "aliyundrive extension",
+  "title": "AliyunDrive",
+  "description": "Aliyundrive Search Files Extension",
   "icon": "aliyundrive.png",
   "author": "chyroc",
   "license": "MIT",
