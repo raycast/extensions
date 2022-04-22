@@ -12,5 +12,5 @@ export default entrypoint(async () => {
   hash.write(contents);
 
   const output = hash.digest().toString("hex");
-  await setOutput(output, "MD5 Hash");
+  await setOutput(output, "Created MD5 Hash");
 });

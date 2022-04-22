@@ -85,6 +85,6 @@ export async function setOutput(output: string, title: string) {
   await RaycastClipboard.copy(output);
   await showToast({
     title: title,
-    message: "Copied to clipboard.",
+    message: "Copied output to clipboard",
   });
 }

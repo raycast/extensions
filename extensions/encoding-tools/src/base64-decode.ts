@@ -14,5 +14,5 @@ export default entrypoint(async () => {
     throw new ToastException("Clipboard contents not Base64-encoded.");
   }
 
-  await setOutput(decoded, "Base64 Decode");
+  await setOutput(decoded, "Decoded from Base64");
 });

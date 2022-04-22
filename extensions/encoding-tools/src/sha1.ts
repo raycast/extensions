@@ -12,5 +12,5 @@ export default entrypoint(async () => {
   hash.write(contents);
 
   const output = hash.digest().toString("hex");
-  await setOutput(output, "SHA1 Hash");
+  await setOutput(output, "Created SHA1 Hash");
 });

@@ -12,5 +12,5 @@ export default entrypoint(async () => {
   hash.write(contents);
 
   const output = hash.digest().toString("hex");
-  await setOutput(output, "SHA512 Hash");
+  await setOutput(output, "Created SHA512 Hash");
 });

@@ -8,5 +8,5 @@ import { entrypoint, getInput, setOutput } from "../lib/utils";
 export default entrypoint(async () => {
   const contents = await getInput();
   const output = contents.toString("base64");
-  await setOutput(output, "Base64 Encode");
+  await setOutput(output, "Encoded to Base64");
 });
