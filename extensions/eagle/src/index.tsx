@@ -1,8 +1,8 @@
 import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import useSWR from "swr";
 import { useMemo, useState } from "react";
-import { getItems } from "./utils/api";
 
+import { getItems } from "./utils/api";
 import { useThumbnail } from "./utils/query";
 import { Item } from "./@types/eagle";
 
