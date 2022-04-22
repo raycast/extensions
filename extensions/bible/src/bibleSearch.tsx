@@ -116,7 +116,7 @@ function createMarkdown(searchResult: ReferenceSearchResult) {
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
         return `${passageText}  \n${p.reference} (${versionAbbr})`;
       })
-      .join("\n\n") + `\n\n*${searchResult.copyright}*`
+      .join("\n\n") + `\n\n---\n\n*${searchResult.copyright}*`
   );
 }
 

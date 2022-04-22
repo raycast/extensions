@@ -34,7 +34,7 @@ export async function search(
 function parsePassagesFromHtml(html: string, options?: SearchOptions) {
   const $ = cheerio.load(html);
   const version = $(".publisher-info-bottom strong").text();
-  const copyright = $(".publisher-info-bottom p").text();
+  const copyright = $(".publisher-info-bottom p").first().text();
   const passages = $(".passage-cols")
     .map((_, passageEl) => {
       const reference = $(".bcv", passageEl).text();
