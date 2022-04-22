@@ -43,7 +43,9 @@ export default function useSearch({ databasesLoading, databases }: UseDB, text: 
       .map(({ database, spaceID }) => ({ database, blocks: searchBlocks(database, spaceID, query, params) }))
       .map(({ database, blocks }) => backfillBlocksWithDocumentNames(database, blocks));
 
-    setState({ resultsLoading: false, results: blocksOfSpaces.flat() });
+    const results = blocksOfSpaces.flat();
+    setState({ results, resultsLoading: false });
+    console.debug(`got ${results.length} results for query search '${text}'`)
   }, [databasesLoading, text]);
 
   return state;
