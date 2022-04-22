@@ -28,3 +28,7 @@ To connect the extension to your Jira instance you need to fill the following pr
 
 - **Jira Domain:** The domain of your Jira instance like `mycompany.atlassian.net` or with a base URL like `mycompany.atlassian.net/baseUrl/jira`.
 - **Personal Access Token:** A personal access token created as described in [Using Personal Access Tokens](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html).
+
+### Unsafe HTTPS
+
+If you JIRA instance uses a self-signed certificate, you can enable Unsafe HTTPS in the extension settings to stop network errors from occurring.
