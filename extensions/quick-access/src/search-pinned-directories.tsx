@@ -96,11 +96,7 @@ export default function Command() {
                                   JSON.stringify(_localDirectory)
                                 );
                                 setRefresh(refreshNumber());
-                                await showToast(
-                                  Toast.Style.Success,
-                                  "Success!",
-                                  `${_localDirectory[directoryIndex].name} is removed.`
-                                );
+                                await showToast(Toast.Style.Success, "Success!", `Directory is removed.`);
                               }}
                             />
                             <ActionRemoveAllDirectories setRefresh={setRefresh} />
