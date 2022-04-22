@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "NextJS Docs",
-      "description": "Search NextJS docs in Ray",
+      "title": "Search Next.js Documentation",
+      "description": "Search the Next.js documentation",
       "mode": "view"
     }
   ],
