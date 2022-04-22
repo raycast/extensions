@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Choose a License",
-      "subtitle": "View and copy/paste from choosealicense.com",
+      "subtitle": "choosealicense.com",
       "description": "Quickly add a license to your open source project",
       "mode": "view"
     }
