@@ -15,7 +15,7 @@
     },
     {
       "name": "logout",
-      "title": "AliyunDrive Clean Login Auth Cache",
+      "title": "AliyunDrive Logout",
       "description": "clean login auth cache",
       "mode": "view"
     }

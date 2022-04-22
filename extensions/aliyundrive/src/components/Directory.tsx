@@ -15,9 +15,6 @@ export default function Directory(props: IDirectoryProps) {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [fetchCursor, setFetchCursor] = useState(0);
-  const [nextPage, setNextPage] = useState("");
-  const [abort, setAbort] = useState<boolean>(false);
-  const [refresh, setRefresh] = useState(1);
   const defaultDriveID = props.defaultDriveID;
 
   const getFileList = async function (): Promise<AliyunDrive.GetFileListResp> {
@@ -31,24 +28,19 @@ export default function Directory(props: IDirectoryProps) {
 
   useEffect(() => {
     const f = async () => {
-      if (!defaultDriveID) {
-        return;
-      }
       setLoading(true);
       try {
         const fileList = await getFileList();
-        console.log("[file-list] get file", fileList.next_marker);
-        console.log("[file-list] get file", fileList);
         setLoading(false);
         setFiles(fileList.items);
+        setHasMore(fileList.next_marker !== "");
       } catch (e) {
         setLoading(false);
         await showToast(Toast.Style.Failure, "request fail", `${e}`);
-        setAbort(true);
       }
     };
     f();
-  }, [defaultDriveID, refresh]);
+  }, [fetchCursor]);
 
   return (
     <List searchBarPlaceholder={`Search AliyunDrive Files`} throttle={true} isLoading={loading}>
