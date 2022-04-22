@@ -30,15 +30,15 @@ The metadata includes the following information about each item:
       throw Error(`No website found for item ${metaItem.itemTitle}`);
     }
 
-    const url = `${website}/?a=${metaItem.profileUUID}&v=${metaItem.vaultUUID}&i=${metaItem.uuid}`;
+    const url = `${website}/?w65dshuxxsfsqfmruhggbd7v2i=${metaItem.uuid}`;
     await open(url);
   },
   edit: async (metaItem) => {
-    const url = `onepassword://edit/?a=${metaItem.profileUUID}&v=${metaItem.vaultUUID}&i=${metaItem.uuid}`;
+    const url = `onepassword://edit-item/?a=${metaItem.profileUUID}&v=${metaItem.vaultUUID}&i=${metaItem.uuid}`;
     await open(url, "com.1password.1password");
   },
   view: async (metaItem) => {
-    const url = `onepassword://view/?a=${metaItem.profileUUID}&v=${metaItem.vaultUUID}&i=${metaItem.uuid}`;
+    const url = `onepassword://view-item/?a=${metaItem.profileUUID}&v=${metaItem.vaultUUID}&i=${metaItem.uuid}`;
     await open(url, "com.1password.1password");
   },
 };
