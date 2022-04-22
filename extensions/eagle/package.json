@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "eagle",
   "title": "Eagle",
-  "description": "Eagle Extension",
+  "description": "Eagle Extension for Raycast",
   "icon": "command-icon.png",
   "author": "Yukai",
   "categories": [
