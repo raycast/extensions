@@ -1,4 +1,4 @@
-import { confirmAlert, getPreferenceValues } from "@raycast/api"
+import { getPreferenceValues } from "@raycast/api"
 import fetch, { FetchError, Response } from "node-fetch"
 import { ErrorText, PresentableError } from "./exception"
 import * as https from "https"

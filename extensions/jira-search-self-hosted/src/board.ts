@@ -18,7 +18,7 @@ interface Boards {
 export async function searchBoards(query: string): Promise<ResultItem[]> {
   const result = await jiraFetchObject<Boards>("/rest/agile/1.0/board", { name: query })
   const mapResult = async (board: Board): Promise<ResultItem> => {
-    let resultDetails: ResultItem = {
+    const resultDetails: ResultItem = {
       id: board.id.toString(),
       title: board.name,
       url: `${jiraUrl}/secure/RapidBoard.jspa?rapidView=${board.id}`,

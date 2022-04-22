@@ -1,7 +1,6 @@
 import { ResultItem, SearchCommand } from "./command"
 import { jiraFetchObject, jiraUrl } from "./jira"
 import { jiraImage } from "./image"
-import { confirmAlert } from "@raycast/api"
 
 interface Project {
   id: string
