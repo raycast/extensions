@@ -87,7 +87,7 @@ const JwtView = () => {
               {dataItems.map((item) => (
                 <Action.CopyToClipboard
                   key={item.key}
-                  title={`Copy ${item.key}${item.row ? ` (${item.row[1]})` : ""} value`}
+                  title={`Copy ${item.key}${item.row ? ` (${item.row[1]})` : ""} Value`}
                   content={item.value}
                 />
               ))}
