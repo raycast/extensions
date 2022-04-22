@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryInfo, DirectoryWithFileInfo } from "../utils/directory-info";
+import { DirectoryWithFileInfo } from "../utils/directory-info";
 import {
   checkDirectoryValid,
   commonPreferences,
@@ -9,7 +9,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { copyFileByPath } from "../utils/applescript-utils";
 
@@ -20,17 +20,14 @@ export const refreshNumber = () => {
 
 //get local directory with files
 export const localDirectoryWithFiles = (refresh: number) => {
-  const [pinnedDirectory, setPinnedDirectory] = useState<DirectoryInfo[]>([]);
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(0);
-  const [directoryTags, setDirectoryTags] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = commonPreferences();
 
   const fetchData = useCallback(async () => {
     const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
     const localDirectory = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
-    setPinnedDirectory(localDirectory);
 
     //check if directory is valid
     const validDirectory = checkDirectoryValid(localDirectory);
@@ -44,14 +41,11 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
     }
 
-    //get directory tags
-    const _directoryTags: string[] = [];
     //get directory files
     const _pinnedDirectoryContent: DirectoryWithFileInfo[] = [];
     const _fileShowNumber = getFileShowNumber(fileShowNumber);
     let _allFilesNumber = 0;
     validDirectory.forEach((value) => {
-      _directoryTags.push(value.name);
       const files =
         _fileShowNumber === -1
           ? getDirectoryFiles(value.path + "/")
@@ -62,10 +56,8 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
       _allFilesNumber = _allFilesNumber + files.length;
     });
-    setAllFilesNumber(_allFilesNumber);
-    setDirectoryTags(_directoryTags);
     setDirectoryWithFiles(_pinnedDirectoryContent);
-
+    setAllFilesNumber(_allFilesNumber);
     setLoading(false);
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
   }, [refresh]);
@@ -75,10 +67,8 @@ export const localDirectoryWithFiles = (refresh: number) => {
   }, [fetchData]);
 
   return {
-    pinnedDirectory: pinnedDirectory,
     directoryWithFiles: directoryWithFiles,
     allFilesNumber: allFilesNumber,
-    directoryTags: directoryTags,
     loading: loading,
   };
 };

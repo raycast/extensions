@@ -11,7 +11,7 @@ You can use "Access Directory" command to quickly copy the image or open the fil
 **Command**:
 
 - Pin Directory: Pin directories that can be accessed quickly. To use this command, you need to select folders or open a Finder window first. Duplicate directories will be ignored.
-- Access Directory: Quick copy, open, reveal the latest files in pinned Finder directories.
+- Search Pinned Directories: Quick copy, open, reveal the latest files in pinned Finder directories.
   - Copy to Clipboard
   - Open in Default App/Open in Finder
   - Reveal in Finder
@@ -22,6 +22,7 @@ You can use "Access Directory" command to quickly copy the image or open the fil
 
 **Preference**
 
-- Access Directory:
+- Search Pinned Directories:
+  - Auto Copy Latest File: Automatically copy the latest files in the topmost directory..
   - Number of files shown: Number of files displayed per directory.
   - Directory Sort by: Directory sorting method (default: Rank).

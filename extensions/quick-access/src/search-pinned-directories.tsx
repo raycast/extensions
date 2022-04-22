@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
-import { commonPreferences, isEmpty, isImage } from "./utils/common-utils";
+import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, DirectoryType, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
@@ -15,8 +15,7 @@ export default function Command() {
   const [refresh, setRefresh] = useState<number>(0);
   const { autoCopyLatestFile } = commonPreferences();
 
-  const { pinnedDirectory, directoryWithFiles, allFilesNumber, directoryTags, loading } =
-    localDirectoryWithFiles(refresh);
+  const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
@@ -25,9 +24,15 @@ export default function Command() {
       searchBarPlaceholder={"Search file"}
       searchBarAccessory={
         <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
-          <List.Dropdown.Item key={"All"} title={"All Directory"} value={"All"} />
-          {directoryTags.map((value, index) => {
-            return <List.Dropdown.Item key={index + value} title={value} value={value} />;
+          <List.Dropdown.Item key={"All"} title={"All Directories"} value={"All"} />
+          {directoryWithFiles.map((value, index) => {
+            return (
+              <List.Dropdown.Item
+                key={index + value.directory.name}
+                title={value.directory.name}
+                value={value.directory.name}
+              />
+            );
           })}
         </List.Dropdown>
       }
@@ -60,20 +65,14 @@ export default function Command() {
                   title={directory.directory.name}
                   subtitle={parse(directory.directory.path).dir}
                 >
-                  {directory.files.map((value, index) => (
+                  {directory.files.map((value) => (
                     <List.Item
                       key={value.id}
                       icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
                       title={value.name}
-                      accessories={index === 0 ? [{ icon: "🌟" }] : []}
                       actions={
                         <ActionPanel>
-                          <ActionsOnFile
-                            fileInfo={value}
-                            directories={pinnedDirectory}
-                            index={directoryIndex}
-                            setRefresh={setRefresh}
-                          />
+                          <ActionsOnFile fileInfo={value} index={directoryIndex} setRefresh={setRefresh} />
                           <ActionPanel.Section title="Directory Action">
                             <Action
                               icon={Icon.Pin}
@@ -89,7 +88,8 @@ export default function Command() {
                               title={`Remove Directory`}
                               shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                               onAction={async () => {
-                                const _localDirectory = [...pinnedDirectory];
+                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
                                 _localDirectory.splice(directoryIndex, 1);
                                 await LocalStorage.setItem(
                                   LocalStorageKey.LOCAL_PIN_DIRECTORY,
@@ -99,7 +99,7 @@ export default function Command() {
                                 await showToast(
                                   Toast.Style.Success,
                                   "Success!",
-                                  `${pinnedDirectory[directoryIndex].name} is removed.`
+                                  `${_localDirectory[directoryIndex].name} is removed.`
                                 );
                               }}
                             />
@@ -109,7 +109,12 @@ export default function Command() {
                               title={`Reset Directory Rank`}
                               shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
                               onAction={async () => {
-                                const _pinnedDirectory = pinnedDirectory.map((value) => {
+                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
+                                  ? []
+                                  : JSON.parse(localstorage);
+
+                                const _pinnedDirectory = _localDirectory.map((value) => {
                                   value.rank = 1;
                                   return value;
                                 });
@@ -118,11 +123,7 @@ export default function Command() {
                                   JSON.stringify(_pinnedDirectory)
                                 );
                                 setRefresh(refreshNumber());
-                                await showToast(
-                                  Toast.Style.Success,
-                                  "Success!",
-                                  `${pinnedDirectory[directoryIndex].name} is removed.`
-                                );
+                                await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
                               }}
                             />
                           </ActionPanel.Section>
@@ -141,11 +142,10 @@ export default function Command() {
 
 function ActionsOnFile(props: {
   fileInfo: FileInfo;
-  directories: DirectoryInfo[];
   index: number;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { fileInfo, directories, index, setRefresh } = props;
+  const { fileInfo, index, setRefresh } = props;
   return (
     <>
       <Action
@@ -158,7 +158,7 @@ function ActionsOnFile(props: {
           } else {
             await showHUD(copyResult);
           }
-          await upRank(directories, index, setRefresh);
+          await upRank(index, setRefresh);
         }}
       />
       <Action
@@ -168,7 +168,7 @@ function ActionsOnFile(props: {
           try {
             await open(fileInfo.path);
             await showHUD("Open in Default App");
-            await upRank(directories, index, setRefresh);
+            await upRank(index, setRefresh);
           } catch (e) {
             await showToast(Toast.Style.Failure, "Error.", String(e));
           }
@@ -182,7 +182,7 @@ function ActionsOnFile(props: {
           try {
             await open(parse(fileInfo.path).dir);
             await showHUD("Reveal in Finder");
-            await upRank(directories, index, setRefresh);
+            await upRank(index, setRefresh);
           } catch (e) {
             await showToast(Toast.Style.Failure, "Error.", String(e));
           }
@@ -216,11 +216,9 @@ function ActionsOnFile(props: {
   );
 }
 
-async function upRank(
-  directories: DirectoryInfo[],
-  index: number,
-  setRefresh: React.Dispatch<React.SetStateAction<number>>
-) {
+async function upRank(index: number, setRefresh: React.Dispatch<React.SetStateAction<number>>) {
+  const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+  const directories: DirectoryInfo[] = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
   const moreHighRank = directories.filter((value) => {
     return value.path !== directories[index].path && value.rank >= directories[index].rank;
   });

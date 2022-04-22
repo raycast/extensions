@@ -16,8 +16,8 @@
       "mode": "no-view"
     },
     {
-      "name": "search-pinned-directory",
-      "title": "Search Pinned Directory",
+      "name": "search-pinned-directories",
+      "title": "Search Pinned Directories",
       "icon": "access-directory.png",
       "subtitle": "Quick Access",
       "description": "Quick copy, open, reveal the latest files in pinned Finder directories.",
@@ -26,11 +26,11 @@
         {
           "name": "autoCopyLatestFile",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "Advanced Preference",
           "label": "Auto Copy Latest File",
           "description": "Automatically copy the latest files in the topmost directory.",
-          "default": true
+          "default": false
         },
         {
           "name": "fileShowNumber",
