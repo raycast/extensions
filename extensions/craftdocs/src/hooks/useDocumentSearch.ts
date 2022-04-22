@@ -17,7 +17,7 @@ type UseDocumentSearch = {
   results: DocBlock[];
 };
 
-type DocBlock = {
+export type DocBlock = {
   block: Block;
   blocks: Block[];
 };

@@ -2,8 +2,8 @@ import useAppExists from "./hooks/useAppExists";
 import useConfig from "./hooks/useConfig";
 import useDB from "./hooks/useDB";
 import {useState} from "react";
-import {Action, ActionPanel, List} from "@raycast/api";
 import useDocumentSearch from "./hooks/useDocumentSearch";
+import ListDocBlocks from "./components/ListDocBlocks";
 
 // noinspection JSUnusedGlobalSymbols
 export default function docsearch() {
@@ -15,17 +15,5 @@ export default function docsearch() {
   const {resultsLoading, results} = useDocumentSearch(db, query);
 
 
-  return <List isLoading={resultsLoading} isShowingDetail={true} onSearchTextChange={setQuery}>
-    {results.map(doc => <List.Item
-      key={doc.block.id}
-      title={doc.block.content}
-      detail={<List.Item.Detail markdown={doc.blocks.map(block => block.content).join('\n\n---\n\n')} />}
-      actions={
-      <ActionPanel>
-        <Action.OpenInBrowser url={`craftdocs://open?blockId=${doc.block.id}&spaceId=${doc.block.spaceID}`} />
-      </ActionPanel>
-      }
-    />)}
-    <List.Item title="title" detail={<List.Item.Detail markdown={"hello there"} />} />
-  </List>
+  return <ListDocBlocks resultsLoading={resultsLoading} setQuery={setQuery} results={results} query={query} config={config.config} />
 }

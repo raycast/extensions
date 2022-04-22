@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { Block } from "../hooks/useSearch";
 import Config from "../Config";
+import CreateDocumentItem from "./CreateDocumentItem";
 
 type ListBlocksParams = {
   isLoading: boolean;
@@ -32,19 +33,6 @@ const BlockItem = ({ block }: { block: Block }) => (
     actions={
       <ActionPanel>
         <Action.OpenInBrowser url={`craftdocs://open?blockId=${block.id}&spaceId=${block.spaceID}`} />
-      </ActionPanel>
-    }
-  />
-);
-
-const CreateDocumentItem = ({ query, spaceID }: { query: string; spaceID: string }) => (
-  <List.Item
-    title={`Create document '${query}'`}
-    actions={
-      <ActionPanel>
-        <Action.OpenInBrowser
-          url={`craftdocs://createdocument?spaceId=${spaceID}&title=${encodeURIComponent(query)}&content=&folderId=`}
-        />
       </ActionPanel>
     }
   />

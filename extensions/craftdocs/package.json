@@ -6,21 +6,27 @@
   "icon": "command-icon.png",
   "author": "bgnfu7re",
   "license": "MIT",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "search",
       "title": "Blocks Search",
       "subtitle": "Craft",
       "description": "Search documents in Craft",
-      "mode": "view"
-    },
-    {
-      "name": "docsearch",
-      "title": "Documents Search",
-      "subtitle": "Craft",
-      "description": "Search documents in Craft",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Detailed View",
+          "name": "useDetailedView",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use detailed view",
+          "description": "Changes the view of the search to show info about documents. It is messy!"
+        }
+      ]
     }
   ],
   "dependencies": {
