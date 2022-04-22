@@ -22,7 +22,6 @@
 ------
 
 
-
 **Commands:**
 
 - **Open Common Directory**: Quick access to frequently used folder directories
@@ -48,8 +47,6 @@
   - Remove Directory
   - Rest All Rank
   - Toggle Detail
-
-
 
 
 **Preferences:**

@@ -44,7 +44,7 @@ export default function OpenCommonDirectory() {
       isShowingDetail={
         showDetail && (commonDirectory.length !== 0 || (showOpenDirectory && openDirectory.length !== 0))
       }
-      searchBarPlaceholder={"Search and open"}
+      searchBarPlaceholder={"Search directory"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
       }}

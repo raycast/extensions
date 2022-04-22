@@ -99,8 +99,8 @@
           "type": "dropdown",
           "required": true,
           "title": "Primary action",
-          "description": "Primary action when move files(default: Copy).",
-          "default": "move",
+          "description": "Primary action when send files.",
+          "default": "copy",
           "data": [
             {
               "title": "Move",

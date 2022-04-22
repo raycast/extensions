@@ -3,6 +3,7 @@ import { runAppleScript } from "run-applescript";
 import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import Values = LocalStorage.Values;
+import path from "path";
 
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -115,18 +116,8 @@ export const getSelectedDirectory = async () => {
   }
 };
 
-export const checkPathAccessValid = (path: string) => {
-  try {
-    fse.accessSync(path);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-export const getDirectoryName = (path: string) => {
-  const obj = path.lastIndexOf("/");
-  return path.substring(obj + 1);
+export const getDirectoryName = (directoryPath: string) => {
+  return path.parse(directoryPath).base;
 };
 
 export const isDirectoryOrFile = (path: string) => {
