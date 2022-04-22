@@ -1,4 +1,4 @@
-[![Support Me](./metadata/donate-banner.png)](https://ko-fi.com/slavarazum)
+[![Support Me](./media/donate-banner.png)](https://ko-fi.com/slavarazum)
 
 <p align="center">
   <img width="200" height="200" src="./assets/command-icon.png">
