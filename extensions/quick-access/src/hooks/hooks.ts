@@ -92,8 +92,6 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
       }
       setIsCopy(true);
     }
-    //init applescript
-    await runAppleScript("");
   }, [pinnedDirectoryContent]);
 
   useEffect(() => {
