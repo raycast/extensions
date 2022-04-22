@@ -83,7 +83,7 @@ function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePassw
       {sortedCategories?.map((onePasswordMetaItemsCategory) => (
         <PasswordListCategory
           onePasswordMetaItemsCategory={onePasswordMetaItemsCategory}
-          key={onePasswordMetaItemsCategory.categoryUUID}
+          key={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
         />
       ))}
     </List>
