@@ -14,14 +14,14 @@ type ActionProps = {
 };
 
 async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
-  if (fs.existsSync(onePassword.cliFolder)) {
+  if (fs.existsSync(onePassword.metadataFolder)) {
     try {
       const cache = getCache();
 
       if (Array.isArray(cache)) {
         return Promise.resolve(cache);
       } else {
-        const metaItems = await fg([`${onePassword.cliFolder}/**/*.onepassword-item-metadata`], {
+        const metaItems = await fg([`${onePassword.metadataFolder}/**/*.onepassword-item-metadata`], {
           onlyFiles: true,
           deep: 2,
         });
@@ -52,7 +52,7 @@ export default function Command() {
     getPasswords().then((value) => setOnePasswordMetaItems(value as OnePasswordMetaItem[]));
   }, [setOnePasswordMetaItems]);
 
-  return fs.existsSync(onePassword.cliFolder) ? (
+  return fs.existsSync(onePassword.metadataFolder) ? (
     <PasswordList onePasswordMetaItems={onePasswordMetaItems} />
   ) : (
     <Detail markdown={onePassword.installationGuide} />

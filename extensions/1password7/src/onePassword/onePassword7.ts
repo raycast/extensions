@@ -5,7 +5,7 @@ import { OnePassword } from "./types";
 
 const onePassword: OnePassword = {
   // This is the official location, see for more information https://support.1password.com/integration-mac/
-  cliFolder: `${homedir()}/Library/Containers/com.agilebits.onepassword7/Data/Library/Caches/Metadata/1Password`,
+  metadataFolder: `${homedir()}/Library/Containers/com.agilebits.onepassword7/Data/Library/Caches/Metadata/1Password`,
   installationGuide: `
 # Spotlight and 3rd party app integrations is not enabled
 
