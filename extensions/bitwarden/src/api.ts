@@ -30,40 +30,40 @@ export class Bitwarden {
       this.env["NODE_EXTRA_CA_CERTS"] = serverCertsPath;
     }
 
-    // Check the CLI has been set to the preference
-    this.initPromise = LocalStorage.getItem<string>("cliServer").then(async (cliServer) => {
-      if ((cliServer || "") !== serverUrl) {
-        await this.setServerUrl(serverUrl);
-      }
-    });
+    // Check the CLI has been configured to use the preference Url
+    this.initPromise = this.checkServerUrl(serverUrl);
   }
 
-  async setServerUrl(url: string): Promise<void> {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Switching server...",
-      message: "Bitwarden server preference changed.",
-    });
-    // If URL is empty, set it to the default
-    try {
+  async checkServerUrl(serverUrl: string): Promise<void> {
+    const cliServer = (await LocalStorage.getItem<string>("cliServer")) || "";
+    if (cliServer !== serverUrl) {
+      // Update the server Url
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Switching server...",
+        message: "Bitwarden server preference changed.",
+      });
       try {
-        await this.exec(["logout"], { waitForInit: false });
-      } catch (error) {
-        // Doesn't matter if we weren't logged in.
-      }
-      await this.exec(["config", "server", url || DEFAULT_SERVER_URL], { waitForInit: false });
-      await LocalStorage.setItem("cliServer", url);
+        try {
+          await this.exec(["logout"], { waitForInit: false });
+        } catch (error) {
+          // It doesn't matter if we weren't logged in.
+        }
+        // If URL is empty, set it to the default
+        await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { waitForInit: false });
+        await LocalStorage.setItem("cliServer", serverUrl);
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Success!";
-      toast.message = "Bitwarden server changed.";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to switch server.";
-      if (error instanceof Error) {
-        toast.message = error.message;
-      } else {
-        toast.message = "Unknown error occurred";
+        toast.style = Toast.Style.Success;
+        toast.title = "Success!";
+        toast.message = "Bitwarden server changed.";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to switch server.";
+        if (error instanceof Error) {
+          toast.message = error.message;
+        } else {
+          toast.message = "Unknown error occurred.";
+        }
       }
     }
   }
