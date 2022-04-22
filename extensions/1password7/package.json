@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "list",
-      "title": "My Passwords",
-      "subtitle": "1Password",
-      "description": "List of all your 1Password 7 passwords in Raycast",
+      "title": "1Password",
+      "subtitle": "",
+      "description": "List of all your 1Password items",
       "mode": "view",
       "keywords": [
         "1p",
