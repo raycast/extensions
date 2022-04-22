@@ -1,7 +1,7 @@
 # Raycast Jira Search (Self-Hosted Edition)
 
 This [Raycast](https://raycast.com) extension lets you quickly find Jira issues, projects, and boards. This version is forked from the JIRA
-search extension built by @sven to work with JIRA server instances.
+search extension built by sven to work with JIRA server instances.
 
 ![screencast](assets/screencast.gif)
 
