@@ -10,7 +10,8 @@
   "commands": [
     {
       "name": "search",
-      "title": "Craft Document Search",
+      "title": "Document Search",
+      "subtitle": "Craft",
       "description": "Search documents in Craft",
       "mode": "view"
     }
