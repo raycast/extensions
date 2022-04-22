@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Color, useNavigation, Icon } from "@raycast/api";
 import { useFormula1RaceUrl, useRaces, useSeasons } from "../hooks";
 import { formatDate, getFlag, getRaceDates } from "../utils";
 import RaceSessionDetails from "../components/RaceSessionDetails";
 import RaceResultList from "../views/RaceResultList";
+import { AddToCalendar } from "./AddToCalendar";
 import { Race } from "../types";
 
 function RaceList() {
@@ -14,6 +15,7 @@ function RaceList() {
   const seasons = useSeasons();
   const [pastRaces, upcomingRaces, isLoading] = useRaces(season);
   const raceUrl = useFormula1RaceUrl(season, selectedRace);
+  const { push } = useNavigation();
 
   useEffect(() => {
     const upcomingRounds = Object.keys(upcomingRaces);
@@ -124,6 +126,11 @@ function RaceList() {
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
+                    <Action
+                      title={"Add to calendar"}
+                      icon={Icon.Calendar}
+                      onAction={() => push(<AddToCalendar race={race} raceDates={raceDates} />)}
+                    />
                     <Action.OpenInBrowser
                       title="View on Wikipedia.org"
                       url={race.url || race.Circuit.url}
