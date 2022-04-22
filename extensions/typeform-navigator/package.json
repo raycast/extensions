@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Typeform Navigator",
-      "subtitle": "Check your typeform workspaces and forms",
       "description": "List your workspaces and check your forms highlights",
       "mode": "view"
     }

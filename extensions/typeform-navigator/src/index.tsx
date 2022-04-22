@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, Detail } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, Detail, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createJsonHttpClient } from "./infra/http-client";
 import { FormDefinition, FormOverview, FormsResponse, InsightsResponse, Workspace, WorkspacesResponse } from "./dto";
@@ -31,7 +31,9 @@ export default function Command() {
       })
       .catch((e) => {
         console.error(e);
-        setError("Workspace load failed. Try later.");
+        const errorMessage = "Workspace load failed. Try later.";
+        setError(errorMessage);
+        return showErrorToast(errorMessage);
       });
   }, [workspaces]);
 
@@ -65,11 +67,11 @@ export default function Command() {
 }
 
 function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: typeof got }) {
-  const [forms, setForms] = useState<FormOverview[]>([]);
+  const [forms, setForms] = useState<FormOverview[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (forms.length > 0 || error) {
+    if (forms !== null || error) {
       return;
     }
     clientHttp
@@ -83,32 +85,45 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
       })
       .catch((e) => {
         console.error(e);
-        setError("Forms load failed. Try later.");
+        const errorMessage = "Forms load failed. Try later.";
+        setError(errorMessage);
+        return showErrorToast(errorMessage);
       });
   }, [forms, error]);
 
-  const isLoading = forms.length === 0 && error === null;
+  const isLoading = forms === null && error === null;
   console.log(IN3_DATE);
   return (
     <List isLoading={isLoading} navigationTitle={`Forms of ${workspace.name}`} searchBarPlaceholder="Type to filter">
-      {forms.map((form, idx) => {
-        const isInsights3 = isAfter(new Date(form.created_at), IN3_DATE);
-        return (
-          <List.Item
-            key={idx}
-            title={form.title}
-            accessories={[{ icon: form.settings.is_public ? Icon.Eye : Icon.EyeSlash }]}
-            actions={
-              <ActionPanel>
-                {isInsights3 && (
-                  <Action.Push title="Detail" target={<FormInsights form={form} clientHttp={clientHttp} />} />
-                )}
-                <FormActions form={form} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {forms &&
+        forms.length > 0 &&
+        forms.map((form, idx) => {
+          const isInsights3 = isAfter(new Date(form.created_at), IN3_DATE);
+          return (
+            <List.Item
+              key={idx}
+              title={form.title}
+              accessories={[{ icon: form.settings.is_public ? Icon.Eye : Icon.EyeSlash }]}
+              actions={
+                <ActionPanel>
+                  {isInsights3 && (
+                    <Action.Push title="Detail" target={<FormInsights form={form} clientHttp={clientHttp} />} />
+                  )}
+                  <FormActions form={form} />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      {forms && forms.length === 0 && (
+        <List.EmptyView
+          icon={{
+            source:
+              "https://public-assets.typeform.com/hall-of-forms/primary/hall-of-forms.9108c8b4f045aef47393dcaaeeae9c98.png",
+          }}
+          title="Empty workspace"
+        />
+      )}
     </List>
   );
 }
@@ -133,7 +148,9 @@ function FormInsights({ form, clientHttp }: { form: FormOverview; clientHttp: ty
       })
       .catch((e) => {
         console.error(e);
-        setError("Fetch data failed. Try later.");
+        const errorMessage = "Fetch data failed. Try later.";
+        setError(errorMessage);
+        return showErrorToast(errorMessage);
       });
   }, [insights, formDefinition, error]);
 
@@ -180,6 +197,7 @@ function FormInsights({ form, clientHttp }: { form: FormOverview; clientHttp: ty
 - Press \`cmd+enter\` to fill it
 - Press \`cmd+e\` to edit it
 - Grab the link into clipboard using \`cmd+.\`
+- Copy form id (${form.id}) into clipboard using \`cmd+i\`
       `}
     />
   );
@@ -188,14 +206,22 @@ function FormInsights({ form, clientHttp }: { form: FormOverview; clientHttp: ty
 function FormActions({ form }: { form: FormOverview }) {
   return (
     <>
-      <Action.OpenInBrowser title="Check results" url={`${ADMIN_FORM_BASE_URL}${form.id}/results`} />
-      <Action.OpenInBrowser title="Fill it" url={form._links.display} />
+      <Action.OpenInBrowser title="Check Results" url={`${ADMIN_FORM_BASE_URL}${form.id}/results`} />
+      <Action.OpenInBrowser title="Fill Form" url={form._links.display} />
       <Action.CopyToClipboard
-        title="Copy link"
+        title="Copy Link"
         content={form._links.display}
         shortcut={{
           modifiers: ["cmd"],
           key: ".",
+        }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Form ID"
+        content={form.id}
+        shortcut={{
+          modifiers: ["cmd"],
+          key: "i",
         }}
       />
       <Action.OpenInBrowser
@@ -208,4 +234,12 @@ function FormActions({ form }: { form: FormOverview }) {
       />
     </>
   );
+}
+
+async function showErrorToast(errorMessage: string) {
+  const options: Toast.Options = {
+    style: Toast.Style.Failure,
+    title: errorMessage,
+  };
+  await showToast(options);
 }

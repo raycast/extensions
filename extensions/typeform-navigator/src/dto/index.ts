@@ -8,9 +8,9 @@ export type Workspace = {
   name: string;
   account_id: string;
   self: {
-    href: "https://api.typeform.com/workspaces/8qUjTK";
+    href: string;
   };
-  shared: false;
+  shared: boolean;
 };
 
 export type WorkspacesResponse = {
@@ -44,13 +44,13 @@ export type InsightsResponse = {
   Metrics: {
     totals: {
       segmented_views: {
-        open: 3;
-        private: 0;
-        closed: 0;
+        open: number;
+        private: number;
+        closed: number;
       };
-      submission_starts: 1;
-      submissions: 0;
-      completion_rate: 0;
+      submission_starts: number;
+      submissions: number;
+      completion_rate: number;
       average_time_to_complete: 0;
     };
   };
@@ -60,7 +60,7 @@ export type FormDefinition = {
   id: string;
   title: string;
   settings: {
-    language: "en";
+    language: string;
   };
   fields: unknown[];
   published_at: string;
