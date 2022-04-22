@@ -9,10 +9,10 @@ import {
   showToast,
   ToastStyle,
   useNavigation,
-} from '@raycast/api';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import urljoin from 'url-join';
+} from "@raycast/api";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import urljoin from "url-join";
 
 const { locale } = getPreferenceValues<{ locale: string }>();
 
