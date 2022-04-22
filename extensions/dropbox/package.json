@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "search-dropbox-files",
-      "title": "Search Dropbox Files",
-      "description": "Search Files in Dropbox",
+      "title": "Dropbox Files Search",
+      "description": "Search Files directly in Dropbox",
       "mode": "view"
     }
   ],
@@ -18,7 +18,7 @@
     {
       "name": "dropbox_access_token",
       "title": "Dropbox Access Token",
-      "description": "dropbox access token",
+      "description": "Dropbox access token",
       "type": "password",
       "required": true
     }
