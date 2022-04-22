@@ -25,7 +25,6 @@ export default function Command() {
       isLoading={status === "loading"}
       isShowingDetail
       enableFiltering={false}
-      navigationTitle="Search on DeFiScan.live"
       searchBarPlaceholder="Search by block id/hash, address, trx id or vault id"
       onSearchTextChange={setValueText}
       searchText={valueText}
