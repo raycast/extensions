@@ -1,4 +1,4 @@
-import { closeMainWindow, showToast, ActionPanel, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast, Action } from "@raycast/api";
 import { playSong } from "./spotify-applescript";
 
 export function PlayAction(props: { itemURI: string }) {
@@ -12,7 +12,7 @@ export function PlayAction(props: { itemURI: string }) {
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Play"
       icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
       onAction={handleAction}

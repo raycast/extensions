@@ -1,42 +1,42 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-player",
-  "title": "Spotify Player",
-  "description": "Search and Play Spotify music from the Raycast",
+  "title": "Spotify Player Beta",
+  "description": "Beta Version of the Spotify Player",
   "icon": "icon.png",
   "author": "mattisssa",
+  "owner": "raycast",
   "license": "MIT",
   "commands": [
     {
       "name": "searchTracks",
       "title": "Search Tracks",
-      "subtitle": "Spotify",
+      "subtitle": "Spotify (BETA)",
       "description": "Search & Play tracks in Spotify",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "clientId",
-          "type": "password",
-          "required": true,
-          "title": "Personal Client ID",
-          "description": "Your clientId value from Spotify",
-          "placeholder": "Enter your clientId"
-        },
-        {
-          "name": "secret",
-          "type": "password",
-          "required": true,
-          "title": "Client id's secret",
-          "description": "Your secret value from Spotify",
-          "placeholder": "Enter your secret"
-        }
-      ]
+      "mode": "view"
+    },
+    {
+      "name": "searchArtists",
+      "title": "Search Artists",
+      "subtitle": "Spotify (BETA)",
+      "description": "Search Artists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "like_current_song",
+      "title": "Like Currently Playing Song",
+      "subtitle": "Spotify (BETA)",
+      "description": "Likes currently playing song",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0"
+    "@raycast/api": "^1.33.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.3"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.180",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/spotify-web-api-node": "^5.0.4",
