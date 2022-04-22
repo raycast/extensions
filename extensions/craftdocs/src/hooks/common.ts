@@ -1,5 +1,5 @@
-import {BindParams, Database, SqlValue} from "../../assets/sql-wasm-fts5";
-import {Block} from "./useSearch";
+import { BindParams, Database, SqlValue } from "../../assets/sql-wasm-fts5";
+import { Block } from "./useSearch";
 
 export const searchQuery = `
 SELECT id, content, entityType, documentId
@@ -21,7 +21,7 @@ FROM BlockSearch
 WHERE entityType = 'document'
 ORDER BY customRank
 LIMIT ?
-`
+`;
 
 export const limit = 40;
 
@@ -41,17 +41,15 @@ export const searchBlocks = (database: Database, spaceID: string, query: string,
     .flat()
     .map(sqlValueArr2Block(spaceID));
 
-
 export const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
   ...new Set(blocks.map((block) => block.documentID)),
 ];
-
 
 const termsForFTS5 = (str: string): string[] =>
   str
     .split(/\s+/)
     .map((word) => word.trim())
-    .map((word) => word.replace('"', ' '))
+    .map((word) => word.replace('"', " "))
     .map((word) => `"${word}"`);
 
 const phrasesForFTS5 = (terms: string[]): string[] => {
@@ -66,5 +64,5 @@ const phrasesForFTS5 = (terms: string[]): string[] => {
 
 export const sqlValueArr2Block =
   (spaceID: string) =>
-    ([id, content, entityType, documentID]: SqlValue[]): Block =>
-      ({id, content, entityType, documentID, spaceID} as Block);
+  ([id, content, entityType, documentID]: SqlValue[]): Block =>
+    ({ id, content, entityType, documentID, spaceID } as Block);

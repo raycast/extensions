@@ -1,7 +1,7 @@
 import useAppExists from "./hooks/useAppExists";
 import useConfig from "./hooks/useConfig";
 import useDB from "./hooks/useDB";
-import {useState} from "react";
+import { useState } from "react";
 import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
 
@@ -12,8 +12,15 @@ export default function docsearch() {
   const db = useDB(config);
 
   const [query, setQuery] = useState("");
-  const {resultsLoading, results} = useDocumentSearch(db, query);
+  const { resultsLoading, results } = useDocumentSearch(db, query);
 
-
-  return <ListDocBlocks resultsLoading={resultsLoading} setQuery={setQuery} results={results} query={query} config={config.config} />
+  return (
+    <ListDocBlocks
+      resultsLoading={resultsLoading}
+      setQuery={setQuery}
+      results={results}
+      query={query}
+      config={config.config}
+    />
+  );
 }

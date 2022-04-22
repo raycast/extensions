@@ -1,6 +1,6 @@
-import {useEffect, useState} from "react";
-import {UseDB} from "./useDB";
-import {Block} from "./useSearch";
+import { useEffect, useState } from "react";
+import { UseDB } from "./useDB";
+import { Block } from "./useSearch";
 import {
   buildMatchQuery,
   limit,
@@ -8,9 +8,9 @@ import {
   searchQuery,
   searchQueryDocumentsOnEmptyParams,
   sqlValueArr2Block,
-  uniqueDocumentIDsFromBlocks
+  uniqueDocumentIDsFromBlocks,
 } from "./common";
-import {Database} from "../../assets/sql-wasm-fts5";
+import { Database } from "../../assets/sql-wasm-fts5";
 
 type UseDocumentSearch = {
   resultsLoading: boolean;
@@ -22,23 +22,23 @@ export type DocBlock = {
   blocks: Block[];
 };
 
-export default function useDocumentSearch({databasesLoading, databases}: UseDB, text: string) {
-  const [state, setState] = useState<UseDocumentSearch>({resultsLoading: true, results: []})
+export default function useDocumentSearch({ databasesLoading, databases }: UseDB, text: string) {
+  const [state, setState] = useState<UseDocumentSearch>({ resultsLoading: true, results: [] });
 
   useEffect(() => {
     if (databasesLoading) return;
 
-    setState((prev) => ({...prev, resultsLoading: true}));
+    setState((prev) => ({ ...prev, resultsLoading: true }));
 
     const matchQuery = buildMatchQuery(text);
     const [query, params] =
       matchQuery.length > 0 ? [searchQuery, [matchQuery, limit]] : [searchQueryDocumentsOnEmptyParams, [limit]];
 
     const results = databases
-      .map(({database, spaceID}) => ({database, spaceID, blocks: searchBlocks(database, spaceID, query, params)}))
-      .map(({database, spaceID, blocks}) => documentize(database, spaceID, blocks));
+      .map(({ database, spaceID }) => ({ database, spaceID, blocks: searchBlocks(database, spaceID, query, params) }))
+      .map(({ database, spaceID, blocks }) => documentize(database, spaceID, blocks));
 
-    setState({resultsLoading: false, results: results.flat()})
+    setState({ resultsLoading: false, results: results.flat() });
   }, [databasesLoading, text]);
 
   return state;
@@ -51,19 +51,20 @@ const documentize = (database: Database, spaceID: string, blocks: Block[]) => {
 
   return database
     .exec(sql, documentIDs)
-    .map(res => res.values)
+    .map((res) => res.values)
     .flat()
     .reduce((acc, val) => {
       const block = sqlValueArr2Block(spaceID)(val);
-      let obj = acc.find(item => item.block.documentID === block.documentID);
+      let obj = acc.find((item) => item.block.documentID === block.documentID);
       if (!obj) {
-        obj = block.entityType === 'document'
-          ? {block, blocks: []} as DocBlock
-          : {block: {documentID: block.documentID}, blocks: [block]} as DocBlock;
+        obj =
+          block.entityType === "document"
+            ? ({ block, blocks: [] } as DocBlock)
+            : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
 
         acc.push(obj);
       } else {
-        if (block.entityType === 'document') {
+        if (block.entityType === "document") {
           obj.block = block;
         } else {
           obj.blocks.push(block);
@@ -72,4 +73,4 @@ const documentize = (database: Database, spaceID: string, blocks: Block[]) => {
 
       return acc;
     }, [] as DocBlock[]);
-}
+};

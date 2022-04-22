@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { UseDB } from "./useDB";
 import { Database } from "../../assets/sql-wasm-fts5";
 import {
-  buildMatchQuery, limit,
+  buildMatchQuery,
+  limit,
   searchBlocks,
   searchQuery,
   searchQueryOnEmptyParams,
-  uniqueDocumentIDsFromBlocks
+  uniqueDocumentIDsFromBlocks,
 } from "./common";
 
 export type Block = {
@@ -36,7 +37,7 @@ export default function useSearch({ databasesLoading, databases }: UseDB, text: 
 
     const results = blocksOfSpaces.flat();
     setState({ results, resultsLoading: false });
-    console.debug(`got ${results.length} results for query search '${text}'`)
+    console.debug(`got ${results.length} results for query search '${text}'`);
   }, [databasesLoading, text]);
 
   return state;
