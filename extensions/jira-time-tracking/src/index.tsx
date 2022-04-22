@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { Form, Detail, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog } from "./controllers";
 import { toSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
@@ -14,6 +14,7 @@ export default function Command() {
   const [description, setDescription] = React.useState("");
   const [selectedProject, setSelectedProject] = React.useState<string>();
   const [startedAt, setStartedAt] = React.useState<Date>(new Date());
+  const [loading, setLoading] = React.useState(true);
 
   async function handleSubmit() {
     const totalTimeWorked = toSeconds(Number(seconds), Number(minutes), Number(hours));
@@ -27,6 +28,8 @@ export default function Command() {
       return;
     }
 
+    setLoading(true);
+
     try {
       await postTimeLog(totalTimeWorked, selectedIssue.key, description, startedAt);
       const successMessage = createTimeLogSuccessMessage(selectedIssue.key, hours, minutes, seconds);
@@ -35,17 +38,27 @@ export default function Command() {
     } catch (e) {
       const message = e instanceof Error ? e.message : "Error Logging Time";
       showToast(ToastStyle.Failure, message);
+    } finally {
+      setLoading(false);
     }
   }
 
   // fetch projects on mount
   React.useEffect(() => {
     const fetchProjects = async () => {
-      const projects = await getProjects();
-      if (projects) {
-        setProjects(projects);
+      try {
+        const projects = await getProjects();
+        if (projects.length) {
+          setProjects(projects);
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Error Logging Time";
+        showToast(ToastStyle.Failure, message);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchProjects();
   }, []);
 
@@ -75,9 +88,28 @@ export default function Command() {
     setSeconds("0");
   };
 
+  const emptyMessage = `
+# No projects found
+
+No Jira projects were found using your credentials.
+
+This could happen because:
+
+- The provided jira domain has no associated projects.
+- The email credential provided is not authorized to access any projects on the provided jira domain.
+- The email credential provided is incorrect.
+- The API token credential provided is incorrect.
+
+Please check your permissions, jira account or credentials and try again.
+  `;
+
+  if (!projects && !loading) {
+    return <Detail markdown={emptyMessage} />;
+  }
+
   return (
     <Form
-      isLoading={!projects}
+      isLoading={loading}
       navigationTitle="Log Time"
       actions={
         <ActionPanel>
