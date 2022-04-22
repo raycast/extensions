@@ -7,7 +7,7 @@ import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
-import { getValidPath } from "../shared/check-path-or-increment";
+import untildify from "untildify";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -51,11 +51,7 @@ export class XcodeSwiftPlaygroundService {
     forceCreate: boolean
   ): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
-    const playgroundPath = await getValidPath(
-      parameters.location.replace(/^~/, os.homedir()),
-      parameters.name,
-      forceCreate
-    );
+    const playgroundPath = await this.getValidPath(parameters.location, parameters.name, forceCreate);
 
     if (!forceCreate && (await existsAsync(playgroundPath))) {
       return {
@@ -191,6 +187,28 @@ export class XcodeSwiftPlaygroundService {
       extension: "swift",
       contents: contents,
     };
+  }
+
+  /**
+   * return a valid file path
+   * @param location: location in which we want to save the playground file.
+   * @param filename: filename of the created or opened playground file.
+   * @param forceCreate: define if we want to force create or not.
+   */
+  async getValidPath(location: string, filename: string, forceCreate: boolean): Promise<string> {
+    let path = "";
+    let iteration = null;
+    const targetLocation = untildify(location);
+    do {
+      const dateString = new Date().toLocaleDateString("en-CA");
+      const name =
+        iteration == null
+          ? `${filename}-${dateString}.playground`
+          : `${filename}-${dateString}-${iteration}.playground`;
+      path = joinPathComponents(targetLocation, name);
+      iteration = iteration == null ? 1 : iteration + 1;
+    } while ((await existsAsync(path)) == true && forceCreate == true);
+    return path;
   }
 }
 
