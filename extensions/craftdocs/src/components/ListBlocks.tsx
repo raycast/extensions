@@ -15,7 +15,7 @@ export default function ListBlocks(params: ListBlocksParams) {
   const spaceID = config?.primarySpace()?.spaceID || "";
 
   return (
-    <List isLoading={isLoading} throttle={true} onSearchTextChange={onSearchTextChange}>
+    <List isLoading={isLoading} onSearchTextChange={onSearchTextChange}>
       {blocks.map((block) => (
         <BlockItem key={block.id} block={block} />
       ))}

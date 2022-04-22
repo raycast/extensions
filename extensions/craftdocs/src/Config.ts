@@ -15,13 +15,13 @@ export default class Config {
   spaces: SpaceSQLite[];
 
   constructor() {
-    console.debug("config constructor");
-
     const pwd = indexPath.replace("~", homedir());
 
     this.spaces = readdirSync(pwd)
       .filter((str) => str.match(/sqlite$/))
       .map((str) => this.makeSpaceFromStr(pwd, str));
+
+    console.debug("constructed config object");
   }
 
   primarySpace = () => this.spaces.find((space) => space.primary);

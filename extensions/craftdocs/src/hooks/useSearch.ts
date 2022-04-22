@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { UseDB } from "./useDB";
+import { BindParams, Database, SqlValue } from "../../assets/sql-wasm-fts5";
 
 export type Block = {
   id: string;
@@ -38,47 +39,49 @@ export default function useSearch({ databasesLoading, databases }: UseDB, text: 
     const [query, params] =
       matchQuery.length > 0 ? [searchQuery, [matchQuery, limit]] : [searchQueryOnEmptyParams, [limit]];
 
-    const blocksOfSpaces = databases.map(({ database, spaceID }) => {
-      const blocks = database
-        .exec(query, params)
-        .map((res) => res.values)
-        .flat()
-        .map(
-          ([id, content, entityType, documentID]) =>
-            ({
-              id,
-              content,
-              entityType,
-              documentID,
-              spaceID,
-            } as Block)
-        );
-
-      const documentIDs = [
-        ...new Set(blocks.filter((block) => block.entityType !== "document").map((block) => block.documentID)),
-      ];
-
-      const placeholders = new Array(documentIDs.length).fill("?").join(", ");
-
-      const sql = `select documentId, content from BlockSearch where entityType = 'document' and documentId in (${placeholders})`;
-      database
-        .exec(sql, documentIDs)
-        .map((res) => res.values)
-        .flat()
-        .map(([documentID, content]) =>
-          blocks
-            .filter((block) => block.documentID === documentID)
-            .forEach((block) => (block.documentName = content as string))
-        );
-
-      return blocks;
-    });
+    const blocksOfSpaces = databases
+      .map(({ database, spaceID }) => ({ database, blocks: searchBlocks(database, spaceID, query, params) }))
+      .map(({ database, blocks }) => backfillBlocksWithDocumentNames(database, blocks));
 
     setState({ resultsLoading: false, results: blocksOfSpaces.flat() });
   }, [databasesLoading, text]);
 
   return state;
 }
+
+const backfillBlocksWithDocumentNames = (database: Database, blocks: Block[]) => {
+  const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
+  const placeholders = new Array(documentIDs.length).fill("?").join(", ");
+  const sql = `select documentId, content from BlockSearch where entityType = 'document' and documentId in (${placeholders})`;
+
+  database
+    .exec(sql, documentIDs)
+    .map((res) => res.values)
+    .flat()
+    .map(([documentID, content]) =>
+      blocks
+        .filter((block) => block.documentID === documentID)
+        .forEach((block) => (block.documentName = content as string))
+    );
+
+  return blocks;
+};
+
+const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
+  ...new Set(blocks.filter((block) => block.entityType !== "document").map((block) => block.documentID)),
+];
+
+const searchBlocks = (database: Database, spaceID: string, query: string, params: BindParams) =>
+  database
+    .exec(query, params)
+    .map((res) => res.values)
+    .flat()
+    .map(sqlValueArr2Block(spaceID));
+
+const sqlValueArr2Block =
+  (spaceID: string) =>
+  ([id, content, entityType, documentID]: SqlValue[]): Block =>
+    ({ id, content, entityType, documentID, spaceID } as Block);
 
 const buildMatchQuery = (str: string): string => {
   if (!str || str.length === 0) return "";
@@ -93,7 +96,7 @@ const termsForFTS5 = (str: string): string[] =>
   str
     .split(/\s+/)
     .map((word) => word.trim())
-    .map((word) => word.replace('"', '\\"'))
+    .map((word) => word.replace('"', ' '))
     .map((word) => `"${word}"`);
 
 const phrasesForFTS5 = (terms: string[]): string[] => {
