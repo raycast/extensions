@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "dobby",
-      "title": "Show vaults",
+      "title": "Show Vaults",
       "subtitle": "Defichain Dobby",
       "description": "Show current vault details",
       "mode": "view"
