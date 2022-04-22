@@ -158,6 +158,7 @@
 /extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
 /extensions/justwatch-search                         @RishabSwift
+/extensions/jwt-decoder                              @gdsmith
 /extensions/kaalam                                   @heertheeswaran
 /extensions/kagi-search                              @fearoffish
 /extensions/kaomoji-search                           @allexks
