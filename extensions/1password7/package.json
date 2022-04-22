@@ -6,7 +6,8 @@
   "icon": "1password-icon.png",
   "author": "khasbilegt",
   "contributors": [
-    "thomas"
+    "thomas",
+    "dteare"
   ],
   "license": "MIT",
   "commands": [
