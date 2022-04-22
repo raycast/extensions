@@ -20,7 +20,7 @@ export default class HSLColor extends Color<HSL> {
       this,
       new HEXColor(convert.hsl.hex(this.value)),
       new RGBColor(convert.hsl.rgb(this.value)),
-      new KeywordColor(convert.hsl.keyword(this.value))
+      new KeywordColor(convert.hsl.keyword(this.value)),
     ];
   }
 

@@ -34,7 +34,7 @@ export default function useRenderColor(): RenderColor {
 
         setState(() => ({
           colors,
-          isLoading: false
+          isLoading: false,
         }));
 
         if (toast) {
@@ -45,7 +45,7 @@ export default function useRenderColor(): RenderColor {
         setState((oldState) => ({
           ...oldState,
           colors: [],
-          isLoading: searchText !== ""
+          isLoading: searchText !== "",
         }));
       }
     }, 500),
@@ -58,9 +58,9 @@ export default function useRenderColor(): RenderColor {
     cancel() {
       setState(() => ({
         colors: [],
-        isLoading: false
+        isLoading: false,
       }));
       clearSearchBar();
-    }
+    },
   };
 }

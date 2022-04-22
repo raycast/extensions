@@ -17,7 +17,7 @@ export default class HEXColor extends Color<HEX> {
       this,
       new RGBColor(convert.hex.rgb(this.value)),
       new HSLColor(convert.hex.hsl(this.value)),
-      new KeywordColor(convert.hex.keyword(this.value))
+      new KeywordColor(convert.hex.keyword(this.value)),
     ];
   }
 
