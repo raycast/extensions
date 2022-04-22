@@ -21,7 +21,7 @@ export function JwtItemActionPanel({ data, header, showDetail, toggleShowDetail,
           onAction={toggleShowDetail}
         />
         <Action.CopyToClipboard title={`Copy Payload JSON`} content={JSON.stringify(data, null, 2)} />
-        <Action.CopyToClipboard title={`Copy HEADER JSON`} content={JSON.stringify(header, null, 2)} />
+        <Action.CopyToClipboard title={`Copy Header JSON`} content={JSON.stringify(header, null, 2)} />
       </ActionPanel.Section>
     </ActionPanel>
   );
