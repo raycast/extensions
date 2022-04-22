@@ -1,9 +1,9 @@
 # Bitwarden Changelog
 
-## [Self Hosted Server] - 2022-04-23
+## [Self-hosted Server] - 2022-04-23
 
-- Added the option to use a self hosted Bitwarden server
-- Support self-signed certificates for self hosted server
+- Added the option to use a self-hosted Bitwarden server
+- Support self-signed certificates for self-hosted server
 
 ## [Isolate Extension] - 2022-04-18
 

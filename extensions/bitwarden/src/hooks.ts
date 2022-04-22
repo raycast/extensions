@@ -162,11 +162,11 @@ export function useVaultMessages(bitwardenApi: Bitwarden): {
     if (serverUrl) {
       serverMessage = serverUrl || "";
     } else if ((!serverUrl && shouldShowServer) || (serverUrl && !shouldShowServer)) {
-      // Hosted state not in sync with CLI
+      // Hosted state not in sync with CLI (we don't check for equality)
       confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Restart Required",
-        message: "Self hosted server URL preference has been changed since the extension was opened.",
+        message: "Bitwarden server URL preference has been changed since the extension was opened.",
         primaryAction: {
           title: "Close Extension",
         },

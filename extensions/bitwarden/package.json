@@ -96,7 +96,7 @@
       "required": false,
       "default": "",
       "title": "Bitwarden Server URL",
-      "description": "Optional: URL to use for self hosted servers.",
+      "description": "Optional: URL to use for self-hosted servers.",
       "placeholder": "https://bitwarden.com"
     },
     {
@@ -104,7 +104,7 @@
       "type": "textfield",
       "required": false,
       "title": "Self-signed Certificates Path",
-      "description": "Self Hosted Server: Path to self-signed TLS certificate.",
+      "description": "Self-hosted Server: Path to self-signed TLS certificate.",
       "placeholder": "absolute/path/to/your/certs.pem"
     }
   ],
