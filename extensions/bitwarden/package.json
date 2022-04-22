@@ -104,7 +104,7 @@
       "type": "textfield",
       "required": false,
       "title": "Self-signed Certificates Path",
-      "description": "Self-hosted Server: Path to self-signed TLS certificate.",
+      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
       "placeholder": "absolute/path/to/your/certs.pem"
     }
   ],
