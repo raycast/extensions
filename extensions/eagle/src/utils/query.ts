@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import useSWR from "swr";
-import { getItemThumbnail, getApplicationInfo } from "./api";
+import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from "./api";
 import { fromPathToBase64Url } from "./base64";
 
 export function useThumbnail(id: string, ext: string) {
@@ -18,4 +19,61 @@ export function useApplicationInfo() {
     const res = await getApplicationInfo();
     return res.data.data;
   });
+}
+
+export function useItemList(search: string) {
+  const { data, error } = useSWR(`/api/item/list?keyword=${search}`, () => {
+    return getItems({ keyword: search });
+  });
+
+  const items = useMemo(() => {
+    if (!data || data.data.status !== "success") return [];
+
+    return data.data.data;
+  }, [data]);
+
+  return {
+    data: items,
+    isLoading: !error && !data,
+    error,
+  };
+}
+
+export function useFolderItemList(folders?: string) {
+  const { data, error } = useSWR(
+    () => (folders ? `/api/folder/item/list?folders=${folders}` : null),
+    () => {
+      return getItems({ folders: folders });
+    }
+  );
+
+  const items = useMemo(() => {
+    if (!data || data.data.status !== "success") return [];
+
+    return data.data.data;
+  }, [data]);
+
+  return {
+    data: items,
+    isLoading: !error && !data,
+    error,
+  };
+}
+
+export function useFolderList() {
+  const { data, error } = useSWR(`/api/folder/list`, () => {
+    return getFolderList();
+  });
+
+  const items = useMemo(() => {
+    if (!data || data.data.status !== "success") return [];
+
+    return data.data.data;
+  }, [data]);
+
+  return {
+    data: items,
+    isLoading: !error && !data,
+    error,
+  };
 }

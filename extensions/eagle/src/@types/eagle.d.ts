@@ -33,10 +33,9 @@ export type Folder = {
   id: string;
   name: string;
   description: string;
-  children: Folder &
-    {
-      parent: string;
-    }[];
+  children: (Folder & {
+    parent: string;
+  })[];
   modificationTime: number;
   tags: string[];
   imageCount: number;

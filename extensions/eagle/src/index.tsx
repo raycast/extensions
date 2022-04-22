@@ -1,36 +1,19 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import useSWR from "swr";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { getItems } from "./utils/api";
-import { ItemListDetail } from "./components/ItemListDetail";
-import { ItemDetail } from "./components/ItemDetail";
+import { useItemList } from "./utils/query";
+import EagleItem from "./components/EagleItem";
 
 export default function Index() {
   const [search, setSearch] = useState("");
-  const { data } = useSWR(`/api/item/list?keyword=${search}`, () => {
-    return getItems({ keyword: search });
-  });
 
-  const items = useMemo(() => {
-    if (!data || data.data.status !== "success") return [];
-
-    return data.data.data;
-  }, [data]);
+  const { isLoading, data: items } = useItemList(search);
 
   return (
-    <List isShowingDetail onSearchTextChange={setSearch} isLoading={!data}>
+    <List isShowingDetail onSearchTextChange={setSearch} isLoading={isLoading}>
       {items.map((item) => (
-        <List.Item
-          key={item.id}
-          title={item.name}
-          detail={<ItemListDetail id={item.id} ext={item.ext} />}
-          actions={
-            <ActionPanel>
-              <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
-            </ActionPanel>
-          }
-        />
+        <EagleItem key={item.id} item={item} />
       ))}
     </List>
   );

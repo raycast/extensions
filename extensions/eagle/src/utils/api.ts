@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Application, EagleAPIResponse, Item } from "../@types/eagle";
+import { Application, EagleAPIResponse, Folder, Item } from "../@types/eagle";
 
 export const instance = axios.create({
   baseURL: "http://localhost:41595/api/",
@@ -32,6 +32,10 @@ export function getItemThumbnail(id: string) {
 
 export function getApplicationInfo() {
   return instance.get<EagleAPIResponse<Application>>("/application/info");
+}
+
+export function getFolderList() {
+  return instance.get<EagleAPIResponse<Folder[]>>("/folder/list");
 }
 
 export default instance;
