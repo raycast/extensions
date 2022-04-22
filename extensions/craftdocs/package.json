@@ -16,8 +16,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
-    "sql.js": "^1.6.2"
+    "@raycast/api": "^1.33.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
