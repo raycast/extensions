@@ -1,20 +1,7 @@
-import {
-  showToast,
-  Form,
-  ActionPanel,
-  Toast,
-  Action,
-  Detail,
-  confirmAlert,
-  popToRoot,
-  Icon,
-  Alert,
-  closeMainWindow,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
+import { useState } from "react";
 import { Bitwarden } from "./api";
-import { VaultState } from "./types";
-import { getServerUrlPreference } from "./utils";
+import { useVaultMessages } from "./hooks";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -39,49 +26,9 @@ export function TroubleshootingGuide(): JSX.Element {
 }
 
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
-  const serverUrlPreference = getServerUrlPreference();
   const { bitwardenApi, onUnlock } = props;
-  const [vaultState, setVaultState] = useState<VaultState | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    bitwardenApi.status().then((vaultState) => {
-      setVaultState(vaultState);
-    });
-  }, []);
-
-  let userMessage = "...";
-  let serverMessage = "...";
-  if (vaultState) {
-    const { status, userEmail, serverUrl } = vaultState;
-    userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
-    if (serverUrl) {
-      serverMessage = serverUrl || "";
-    } else if ((!serverUrl && serverUrlPreference) || (serverUrl && !serverUrlPreference)) {
-      // Hosted state not in sync with CLI
-      confirmAlert({
-        icon: Icon.ExclamationMark,
-        title: "Restart Required",
-        message: "Self hosted server URL preference has been changed since the extension was opened.",
-        primaryAction: {
-          title: "Close Extension",
-        },
-        dismissAction: {
-          title: "Close Raycast", // Only here to provide the necessary second option
-          style: Alert.ActionStyle.Cancel,
-        },
-      }).then((closeExtension) => {
-        if (closeExtension) {
-          popToRoot();
-        } else {
-          closeMainWindow();
-        }
-      });
-    }
-  }
-
-  // Show server field if preference set
-  const shouldShowServer = !!serverUrlPreference;
+  const { userMessage, serverMessage, shouldShowServer } = useVaultMessages(bitwardenApi);
 
   async function onSubmit(values: { password: string }) {
     if (values.password.length == 0) {
