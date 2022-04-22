@@ -20,7 +20,7 @@ export function JwtItemActionPanel({ data, header, showDetail, toggleShowDetail,
           title={`${showDetail ? "Hide" : "Show"} Detail`}
           onAction={toggleShowDetail}
         />
-        <Action.CopyToClipboard title={`Copy PAYLOAD JSON`} content={JSON.stringify(data, null, 2)} />
+        <Action.CopyToClipboard title={`Copy Payload JSON`} content={JSON.stringify(data, null, 2)} />
         <Action.CopyToClipboard title={`Copy HEADER JSON`} content={JSON.stringify(header, null, 2)} />
       </ActionPanel.Section>
     </ActionPanel>
