@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Detail, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useInterval } from "../util";
-import { client } from "../../api";
+import { useInterval } from "./util";
+import { client } from "../api";
 import { AliyunDrive, isTokenInvalid } from "@chyroc/aliyundrive";
 
 const qrcodeOpt = {

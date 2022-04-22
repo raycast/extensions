@@ -8,15 +8,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "file_list",
-      "title": "AliyunDrive My Files",
-      "description": "list my files",
+      "name": "search-files",
+      "title": "AliyunDrive Search Files",
+      "description": "search my files",
       "mode": "view"
     },
     {
-      "name": "search_file",
-      "title": "AliyunDrive Search Files",
-      "description": "search my files",
+      "name": "logout",
+      "title": "AliyunDrive Clean Login Auth Cache",
+      "description": "clean login auth cache",
       "mode": "view"
     }
   ],

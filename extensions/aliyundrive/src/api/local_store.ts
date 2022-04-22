@@ -14,6 +14,10 @@ export class LocalStore {
   async dump(data: string): Promise<void> {
     return await LocalStorage.setItem(this.key, data);
   }
+
+  async clean(): Promise<void> {
+    return await LocalStorage.removeItem(this.key);
+  }
 }
 
 export const tokenStore = new LocalStore("token");
