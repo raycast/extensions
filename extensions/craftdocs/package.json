@@ -10,7 +10,14 @@
   "commands": [
     {
       "name": "search",
-      "title": "Document Search",
+      "title": "Blocks Search",
+      "subtitle": "Craft",
+      "description": "Search documents in Craft",
+      "mode": "view"
+    },
+    {
+      "name": "docsearch",
+      "title": "Documents Search",
       "subtitle": "Craft",
       "description": "Search documents in Craft",
       "mode": "view"
