@@ -10,7 +10,7 @@ export const handleJiraResponseError = (statusCode: number, body: unknown) => {
 
   const readable = (() => {
     if (jiraErrorMessage?.includes("Worklog is null")) return "Worklog field does not exist on the selected issue.";
-    if (statusCode === 401) return "There was an a problem authenticating with your credentials.";
+    if (statusCode === 401 || statusCode === 404) return "There was an a problem authenticating with your credentials.";
     return "An Error Occurred";
   })();
 
