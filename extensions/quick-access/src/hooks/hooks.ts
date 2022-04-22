@@ -19,7 +19,7 @@ export const refreshNumber = () => {
 };
 
 //get local directory with files
-export const localDirectoryWithFiles = (autoCopyLatestFile: boolean, refresh: number) => {
+export const localDirectoryWithFiles = (refresh: number) => {
   const [pinnedDirectory, setPinnedDirectory] = useState<DirectoryInfo[]>([]);
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [directoryTags, setDirectoryTags] = useState<string[]>([]);
@@ -62,22 +62,7 @@ export const localDirectoryWithFiles = (autoCopyLatestFile: boolean, refresh: nu
     setDirectoryWithFiles(_pinnedDirectoryContent);
 
     setLoading(false);
-    if (autoCopyLatestFile && _pinnedDirectoryContent.length > 0) {
-      const noEmptyDirectoryContent = _pinnedDirectoryContent.filter((value) => {
-        return value.files.length != 0;
-      });
-      if (noEmptyDirectoryContent.length > 0) {
-        const copyResult = await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
-        if (isEmpty(copyResult)) {
-          await showToast(Toast.Style.Success, `${noEmptyDirectoryContent[0].files[0].name} is copied to clipboard!`);
-        } else {
-          await showToast(Toast.Style.Failure, copyResult + ".");
-        }
-      }
-    }
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
-    //init applescript
-    await runAppleScript("");
   }, [refresh]);
 
   useEffect(() => {
@@ -90,6 +75,34 @@ export const localDirectoryWithFiles = (autoCopyLatestFile: boolean, refresh: nu
     directoryTags: directoryTags,
     loading: loading,
   };
+};
+
+//get local directory with files
+export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryContent: DirectoryWithFileInfo[]) => {
+  const [isCopy, setIsCopy] = useState<boolean>(false);
+
+  const fetchData = useCallback(async () => {
+    if (autoCopyLatestFile && pinnedDirectoryContent.length > 0 && !isCopy) {
+      const noEmptyDirectoryContent = pinnedDirectoryContent.filter((value) => {
+        return value.files.length != 0;
+      });
+      if (noEmptyDirectoryContent.length > 0) {
+        const copyResult = await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
+        if (isEmpty(copyResult)) {
+          await showToast(Toast.Style.Success, `${noEmptyDirectoryContent[0].files[0].name} is copied to clipboard!`);
+        } else {
+          await showToast(Toast.Style.Failure, copyResult + ".");
+        }
+      }
+      setIsCopy(true);
+    }
+    //init applescript
+    await runAppleScript("");
+  }, [pinnedDirectoryContent]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 };
 
 export const alertDialog = async (

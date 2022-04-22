@@ -6,18 +6,16 @@ import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey } from "./utils/constants";
 import { copyFileByPath } from "./utils/applescript-utils";
-import { alertDialog, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import { alertDialog, copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
 import fse from "fs-extra";
 
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const { autoCopyLatestFile, showDeleteAction } = commonPreferences();
+  const { autoCopyLatestFile } = commonPreferences();
 
-  const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(
-    autoCopyLatestFile,
-    refresh
-  );
+  const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(refresh);
+  copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
     <List
@@ -72,7 +70,6 @@ export default function Command() {
                             directories={pinnedDirectory}
                             index={directoryIndex}
                             setRefresh={setRefresh}
-                            showDeleteAction={showDeleteAction}
                           />
                           <ActionPanel.Section title="Directory Action">
                             <Action
@@ -167,9 +164,8 @@ function ActionsOnFile(props: {
   directories: DirectoryInfo[];
   index: number;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
-  showDeleteAction: boolean;
 }) {
-  const { fileInfo, directories, index, setRefresh, showDeleteAction } = props;
+  const { fileInfo, directories, index, setRefresh } = props;
   return (
     <>
       <Action
@@ -212,32 +208,30 @@ function ActionsOnFile(props: {
           }
         }}
       />
-      {showDeleteAction && (
-        <Action
-          icon={Icon.Trash}
-          title={"Delete File Permanently"}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () => {
-            try {
-              await alertDialog(
-                "⚠️Warning",
-                "Deleted files cannot be recovered. Do you want to Delete?",
-                "Delete",
-                async () => {
-                  fse.removeSync(fileInfo.path);
-                  setRefresh(refreshNumber());
-                  await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} was deleted.`);
-                },
-                async () => {
-                  await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
-                }
-              );
-            } catch (e) {
-              await showToast(Toast.Style.Failure, "Error.", String(e));
-            }
-          }}
-        />
-      )}
+      <Action
+        icon={Icon.Trash}
+        title={"Delete File Permanently"}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        onAction={async () => {
+          try {
+            await alertDialog(
+              "⚠️Warning",
+              "Deleted files cannot be recovered. Do you want to Delete?",
+              "Delete",
+              async () => {
+                fse.removeSync(fileInfo.path);
+                setRefresh(refreshNumber());
+                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} was deleted.`);
+              },
+              async () => {
+                await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+              }
+            );
+          } catch (e) {
+            await showToast(Toast.Style.Failure, "Error.", String(e));
+          }
+        }}
+      />
     </>
   );
 }

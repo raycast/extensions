@@ -16,8 +16,8 @@
       "mode": "no-view"
     },
     {
-      "name": "access-directory",
-      "title": "Access Directory",
+      "name": "search-pinned-directory",
+      "title": "Search Pinned Directory",
       "icon": "access-directory.png",
       "subtitle": "Quick Access",
       "description": "Quick copy, open, reveal the latest files in pinned Finder directories.",
@@ -33,20 +33,12 @@
           "default": true
         },
         {
-          "name": "showDeleteAction",
-          "type": "checkbox",
-          "required": true,
-          "label": "Show Delete File Action",
-          "description": "Show permanent file deletion action, please check carefully.",
-          "default": true
-        },
-        {
           "name": "fileShowNumber",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Number of files shown",
           "description": "Number of files displayed per directory.",
-          "default": "3",
+          "default": "All",
           "data": [
             {
               "title": "1",
@@ -77,7 +69,7 @@
         {
           "name": "sortBy",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Directory Sort by",
           "description": "Directory sorting method (default: Rank).",
           "default": "Rank",
