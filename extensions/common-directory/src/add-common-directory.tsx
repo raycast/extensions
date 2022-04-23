@@ -63,7 +63,7 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
             <Action
               title={"Choose Directory"}
               icon={Icon.Desktop}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
               onAction={() => {
                 getChooseFolder().then((path) => {
                   setPath(path);
@@ -142,7 +142,7 @@ async function addDirectory(alias: string, directoryPath: string) {
         _SendCommonDirectory.push(newItem);
         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_OpenCommonDirectory));
         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_SendCommonDirectory));
-        await showHUD(`Add ${parsedPath.name} success`);
+        await showHUD(`${parsedPath.name} added`);
         await popToRoot({ clearSearchBar: false });
       }
     }

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
-import { DirectoryInfo, LocalDirectoryKey } from "../utils/directory-info";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../utils/directory-info";
 import { getOpenFinderWindowPath } from "../utils/common-utils";
-import { getDirectory } from "../open-common-directory";
-import { Alert, confirmAlert } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -64,12 +63,27 @@ export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
   return directoryInfo;
 };
 
+export async function getDirectory(key: string, sortBy: string) {
+  const _localDirectory = await LocalStorage.getItem(key);
+  const _commonDirectory: DirectoryInfo[] = typeof _localDirectory == "string" ? JSON.parse(_localDirectory) : [];
+  if (sortBy === SortBy.NameUp) {
+    _commonDirectory.sort(function (a, b) {
+      return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+    });
+  } else if (sortBy === SortBy.NameDown) {
+    _commonDirectory.sort(function (a, b) {
+      return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
+    });
+  }
+  return _commonDirectory;
+}
+
 export const alertDialog = async (
   title: string,
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction: () => void
+  cancelAction?: () => void
 ) => {
   const options: Alert.Options = {
     title: title,

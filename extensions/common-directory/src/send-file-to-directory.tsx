@@ -1,28 +1,25 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  List,
-  LocalStorage,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
 import React, { useState } from "react";
 import { commonPreferences, getChooseFolder, isEmpty } from "./utils/common-utils";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
-import { getDirectory, resetRank } from "./open-common-directory";
+import { resetRank } from "./open-common-directory";
 import fse from "fs-extra";
 import AddCommonDirectory from "./add-common-directory";
 import { setShowDetailLocalStorage, ShowDetailKey } from "./utils/ui-utils";
 import path from "path";
-import { alertDialog, getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
+import {
+  alertDialog,
+  getCommonDirectory,
+  getDirectory,
+  getDirectoryInfo,
+  getIsShowDetail,
+  refreshNumber,
+} from "./hooks/hooks";
+import { CopyFileActions } from "./utils/ui-component";
 
 export default function CommonDirectory() {
   const { sortBy, showOpenDirectory } = commonPreferences();
-  const { push } = useNavigation();
   const [searchValue, setSearchValue] = useState<string>("");
   const [directoryPath, setDirectoryPath] = useState<string>("");
 
@@ -66,12 +63,10 @@ export default function CommonDirectory() {
           description={"You can add directories from the Action Panel"}
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title={"Add Directory"}
-                icon={Icon.Download}
-                onAction={async () => {
-                  push(<AddCommonDirectory setRefresh={setRefresh} />);
-                }}
+                icon={Icon.Plus}
+                target={<AddCommonDirectory setRefresh={setRefresh} />}
               />
               <Action
                 title={"Toggle Details"}
@@ -155,7 +150,6 @@ function SendToDirectoryItem(props: {
     directoryContent,
   } = props;
   const { primaryAction } = commonPreferences();
-  const { push } = useNavigation();
   return (
     <List.Item
       id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
@@ -171,7 +165,7 @@ function SendToDirectoryItem(props: {
       actions={
         <ActionPanel>
           <Action
-            title={primaryAction === ActionType.COPY ? "Copy File to Directory" : "Move File to Directory"}
+            title={primaryAction === ActionType.COPY ? "Copy to Directory" : "Move to Directory"}
             icon={primaryAction === ActionType.COPY ? Icon.Clipboard : Icon.Download}
             onAction={async () => {
               await actionMoveOrCopy(directory, commonDirectory, index, primaryAction, false);
@@ -179,7 +173,7 @@ function SendToDirectoryItem(props: {
             }}
           />
           <Action
-            title={primaryAction === ActionType.COPY ? "Move File to Directory" : "Copy File to Directory"}
+            title={primaryAction === ActionType.COPY ? "Move to Directory" : "Copy to Directory"}
             icon={primaryAction === ActionType.COPY ? Icon.Download : Icon.Clipboard}
             onAction={async () => {
               if (primaryAction === ActionType.COPY) {
@@ -190,16 +184,6 @@ function SendToDirectoryItem(props: {
               setUpdateDetail(refreshNumber());
             }}
           />
-          <Action
-            title={"Copy Directory Path"}
-            icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["ctrl"], key: "c" }}
-            onAction={async () => {
-              await Clipboard.copy(directory.path);
-              await showToast(Toast.Style.Success, "Directory path copied!", directory.path);
-            }}
-          />
-
           <ActionPanel.Section title={"Advanced Action"}>
             <Action
               title={
@@ -229,21 +213,21 @@ function SendToDirectoryItem(props: {
             />
           </ActionPanel.Section>
 
+          <CopyFileActions directory={directory} />
+
           <ActionPanel.Section title={"Directory Action"}>
-            <Action
+            <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              onAction={() => {
-                push(<AddCommonDirectory setRefresh={setRefresh} />);
-              }}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              target={<AddCommonDirectory setRefresh={setRefresh} />}
             />
             {directory.isCommon && (
               <>
                 <Action
                   title={"Remove Directory"}
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                   onAction={async () => {
                     const _sendCommonDirectory = [...commonDirectory];
                     _sendCommonDirectory.splice(index, 1);
@@ -267,22 +251,14 @@ function SendToDirectoryItem(props: {
                 <Action
                   title={"Remove All Directory"}
                   icon={Icon.ExclamationMark}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   onAction={async () => {
-                    await alertDialog(
-                      "⚠️Warning",
-                      "Do you want to remove all directories?",
-                      "Remove All",
-                      async () => {
-                        await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
-                        await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
-                        setRefresh(refreshNumber());
-                        await showToast(Toast.Style.Success, "Remove All success!");
-                      },
-                      async () => {
-                        await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
-                      }
-                    );
+                    await alertDialog("⚠️Warning", "Do you want to remove all directories?", "Remove All", async () => {
+                      await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
+                      await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
+                      setRefresh(refreshNumber());
+                      await showToast(Toast.Style.Success, "Remove All success!");
+                    });
                   }}
                 />
               </>
@@ -290,7 +266,7 @@ function SendToDirectoryItem(props: {
             <Action
               title={"Rest All Rank"}
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               onAction={() => {
                 resetRank(commonDirectory, setRefresh).then(async () => {
                   await showToast(Toast.Style.Success, "Reset success!");
@@ -303,7 +279,7 @@ function SendToDirectoryItem(props: {
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
               onAction={() => {
                 setShowDetailLocalStorage(ShowDetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();
                 setRefreshDetail(refreshNumber());

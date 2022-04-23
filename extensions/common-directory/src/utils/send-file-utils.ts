@@ -1,4 +1,13 @@
-import { Alert, confirmAlert, getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Alert,
+  confirmAlert,
+  getSelectedFinderItems,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import fse from "fs-extra";
 import path, { ParsedPath } from "path";
 import { checkDirectoryEmpty, commonPreferences } from "./common-utils";
@@ -192,7 +201,7 @@ const followUpWork = async (
       secondaryAction: {
         title: "Reveal Folder",
         onAction: (toast) => {
-          open(path.parse(destPath).dir);
+          showInFinder(destPath);
           toast.hide();
         },
       },

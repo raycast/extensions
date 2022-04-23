@@ -1,28 +1,22 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  List,
-  LocalStorage,
-  open,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import AddCommonDirectory from "./add-common-directory";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import path from "path";
 import { setShowDetailLocalStorage, ShowDetailKey } from "./utils/ui-utils";
-import fse from "fs-extra";
-import { alertDialog, getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
+import {
+  alertDialog,
+  getCommonDirectory,
+  getDirectory,
+  getDirectoryInfo,
+  getIsShowDetail,
+  refreshNumber,
+} from "./hooks/hooks";
+import { CopyFileActions } from "./utils/ui-component";
 
 export default function OpenCommonDirectory() {
   const { sortBy, showOpenDirectory } = commonPreferences();
-  const { push } = useNavigation();
   const [searchValue, setSearchValue] = useState<string>("");
   const [directoryPath, setDirectoryPath] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
@@ -44,7 +38,7 @@ export default function OpenCommonDirectory() {
       isShowingDetail={
         showDetail && (commonDirectory.length !== 0 || (showOpenDirectory && openDirectory.length !== 0))
       }
-      searchBarPlaceholder={"Search directory"}
+      searchBarPlaceholder={"Search directories"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
       }}
@@ -64,12 +58,10 @@ export default function OpenCommonDirectory() {
           description={"You can always add directories from the Action Panel"}
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title={"Add Directory"}
-                icon={Icon.Download}
-                onAction={async () => {
-                  push(<AddCommonDirectory setRefresh={setRefresh} />);
-                }}
+                icon={Icon.Plus}
+                target={<AddCommonDirectory setRefresh={setRefresh} />}
               />
               <Action
                 title={"Toggle Details"}
@@ -95,7 +87,6 @@ export default function OpenCommonDirectory() {
                   return (
                     <DirectoryItem
                       key={directory.id}
-                      push={push}
                       directory={directory}
                       index={index}
                       commonDirectory={commonDirectory}
@@ -114,7 +105,6 @@ export default function OpenCommonDirectory() {
                   return (
                     <DirectoryItem
                       key={directory.id}
-                      push={push}
                       directory={directory}
                       index={index}
                       commonDirectory={openDirectory}
@@ -133,7 +123,6 @@ export default function OpenCommonDirectory() {
 }
 
 function DirectoryItem(props: {
-  push: (component: ReactNode) => void;
   directory: DirectoryInfo;
   index: number;
   commonDirectory: DirectoryInfo[];
@@ -142,7 +131,7 @@ function DirectoryItem(props: {
   showDetail: boolean;
   setRefreshDetail: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { push, directory, setRefresh, setRefreshDetail, index, commonDirectory, showDetail, directoryInfo } = props;
+  const { directory, setRefresh, setRefreshDetail, index, commonDirectory, showDetail, directoryInfo } = props;
   return (
     <List.Item
       id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
@@ -157,45 +146,28 @@ function DirectoryItem(props: {
       }
       actions={
         <ActionPanel>
-          <Action
-            title={"Open in Finder"}
-            icon={Icon.Window}
-            onAction={async () => {
-              await openOrRevealInFinder(directory, index, commonDirectory, true);
-            }}
+          <Action.Open
+            title="Open"
+            target={directory.path}
+            onOpen={() => openAndUpRank(directory, index, commonDirectory)}
           />
-          <Action
-            title={"Reveal in Finder"}
-            icon={Icon.Finder}
-            onAction={async () => {
-              await openOrRevealInFinder(directory, index, commonDirectory, false);
-            }}
-          />
-          <Action
-            title={"Copy Directory Path"}
-            icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["ctrl"], key: "c" }}
-            onAction={async () => {
-              await Clipboard.copy(directory.path);
-              await showToast(Toast.Style.Success, "Directory path copied!", directory.path);
-            }}
-          />
+          <Action.ShowInFinder path={directory.path} onShow={() => openAndUpRank(directory, index, commonDirectory)} />
+
+          <CopyFileActions directory={directory} />
 
           <ActionPanel.Section title={"Directory Action"}>
-            <Action
+            <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              onAction={() => {
-                push(<AddCommonDirectory setRefresh={setRefresh} />);
-              }}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              target={<AddCommonDirectory setRefresh={setRefresh} />}
             />
             {directory.isCommon && (
               <>
                 <Action
                   title={"Remove Directory"}
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                   onAction={async () => {
                     const _openCommonDirectory = [...commonDirectory];
                     _openCommonDirectory.splice(index, 1);
@@ -221,7 +193,7 @@ function DirectoryItem(props: {
                 <Action
                   title={"Remove All Directory"}
                   icon={Icon.ExclamationMark}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   onAction={async () => {
                     await alertDialog(
                       "⚠️Warning",
@@ -244,7 +216,7 @@ function DirectoryItem(props: {
             <Action
               title={"Rest All Rank"}
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               onAction={() => {
                 resetRank(commonDirectory, setRefresh).then(async () => {
                   await showToast(Toast.Style.Success, "Reset success!");
@@ -257,7 +229,7 @@ function DirectoryItem(props: {
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
               onAction={() => {
                 setShowDetailLocalStorage(ShowDetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
                 setRefreshDetail(refreshNumber());
@@ -270,51 +242,17 @@ function DirectoryItem(props: {
   );
 }
 
-export async function getDirectory(key: string, sortBy: string) {
-  const _localDirectory = await LocalStorage.getItem(key);
-  const _commonDirectory: DirectoryInfo[] = typeof _localDirectory == "string" ? JSON.parse(_localDirectory) : [];
-  if (sortBy === SortBy.NameUp) {
-    _commonDirectory.sort(function (a, b) {
-      return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
-    });
-  } else if (sortBy === SortBy.NameDown) {
-    _commonDirectory.sort(function (a, b) {
-      return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
-    });
-  }
-  return _commonDirectory;
-}
-
-async function openOrRevealInFinder(
-  directoryPath: DirectoryInfo,
-  index: number,
-  commonDirectory: DirectoryInfo[],
-  isOpenOrReveal: boolean
-) {
+async function openAndUpRank(directoryPath: DirectoryInfo, index: number, commonDirectory: DirectoryInfo[]) {
   try {
     let _commonDirectory = [...commonDirectory];
-    const actualPath = isOpenOrReveal ? directoryPath.path : path.parse(directoryPath.path).dir;
-    const pathValid = fse.pathExistsSync(actualPath);
-    if (pathValid) {
-      await open(actualPath);
-      await showHUD(isOpenOrReveal ? "Open in Finder" : "Reveal in Finder");
-      if (isOpenOrReveal) {
-        _commonDirectory[index].valid = true;
-      }
-      if (commonPreferences().sortBy === SortBy.Rank) {
-        _commonDirectory = await upRank([..._commonDirectory], index);
-      }
-    } else {
-      await showToast(Toast.Style.Failure, "Path has expired.");
-      if (isOpenOrReveal) {
-        _commonDirectory[index].valid = false;
-      }
+    if (commonPreferences().sortBy === SortBy.Rank) {
+      _commonDirectory = await upRank([..._commonDirectory], index);
     }
     if (directoryPath.isCommon) {
       await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_commonDirectory));
     }
   } catch (e) {
-    await showToast(Toast.Style.Failure, "Path has expired." + String(e));
+    console.error(String(e));
   }
 }
 
