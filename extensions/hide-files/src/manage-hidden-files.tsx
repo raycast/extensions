@@ -88,7 +88,7 @@ export default function Command() {
                         <Action
                           icon={Icon.Eye}
                           title={`Show File`}
-                          shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          shortcut={{ modifiers: ["ctrl"], key: "s" }}
                           onAction={async () => {
                             const _localDirectory = [...localHiddenDirectory];
                             _localDirectory.splice(index, 1);
@@ -124,7 +124,7 @@ export default function Command() {
                         <Action
                           icon={Icon.ExclamationMark}
                           title={"Show All Files"}
-                          shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+                          shortcut={{ modifiers: ["shift", "ctrl"], key: "s" }}
                           onAction={async () => {
                             await alertDialog(
                               "⚠️Warning",
