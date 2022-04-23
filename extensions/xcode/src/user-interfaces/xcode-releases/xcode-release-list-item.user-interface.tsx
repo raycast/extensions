@@ -14,7 +14,7 @@ export function xcodeReleaseListItem(xcodeRelease: XcodeRelease, index: number):
       icon={icon(xcodeRelease)}
       title={title(xcodeRelease)}
       subtitle={subtitle(xcodeRelease)}
-      accessoryTitle={accessoryTitle(xcodeRelease)}
+      accessories={[{ text: accessoryTitle(xcodeRelease) }]}
       keywords={keywords(xcodeRelease)}
       actions={actions(xcodeRelease)}
     />

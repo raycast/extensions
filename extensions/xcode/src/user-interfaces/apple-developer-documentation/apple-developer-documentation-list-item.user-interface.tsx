@@ -14,7 +14,7 @@ export function appleDeveloperDocumentationListItem(
       icon={icon(appleDeveloperDocumentationEntry)}
       title={appleDeveloperDocumentationEntry.title}
       subtitle={appleDeveloperDocumentationEntry.description}
-      accessoryTitle={appleDeveloperDocumentationEntry.platform.at(0)}
+      accessories={[{ text: appleDeveloperDocumentationEntry.platform.at(0) }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={appleDeveloperDocumentationEntry.url} />

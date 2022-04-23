@@ -42,7 +42,7 @@ export function xcodeSimulatorApplicationDetail(
           title={"Back to list"}
           actions={
             <ActionPanel>
-              <ActionPanel.Item title="Back" onAction={navigation.pop} />
+              <Action title="Back" onAction={navigation.pop} />
             </ActionPanel>
           }
         />

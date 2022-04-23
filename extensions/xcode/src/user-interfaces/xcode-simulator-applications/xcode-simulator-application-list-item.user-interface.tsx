@@ -17,10 +17,10 @@ export function xcodeSimulatorApplicationListItem(
       icon={icon(xcodeSimulatorApplication)}
       title={xcodeSimulatorApplication.name}
       subtitle={subtitle(xcodeSimulatorApplication)}
-      accessoryTitle={accessoryTitle(xcodeSimulatorApplication)}
+      accessories={[{ text: accessoryTitle(xcodeSimulatorApplication) }]}
       actions={
         <ActionPanel>
-          <ActionPanel.Item
+          <Action
             icon={Icon.Finder}
             title="View Directories"
             onAction={() => navigation.push(xcodeSimulatorApplicationDetail(xcodeSimulatorApplication, navigation))}

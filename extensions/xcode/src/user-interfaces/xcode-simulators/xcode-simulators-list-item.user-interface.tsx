@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { XcodeSimulator } from "../../models/simulator/xcode-simulator.model";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { ReactElement, ReactNode } from "react";
@@ -18,8 +18,7 @@ export function xcodeSimulatorListItem(
       icon={{ source: "xcode-simulator.png" }}
       title={xcodeSimulator.name}
       subtitle={xcodeSimulator.runtime}
-      accessoryTitle={xcodeSimulator.state}
-      accessoryIcon={accessoryIcon(xcodeSimulator)}
+      accessories={[{ text: xcodeSimulator.state, icon: accessoryIcon(xcodeSimulator) }]}
       keywords={[xcodeSimulator.name, xcodeSimulator.runtime]}
       actions={actions(xcodeSimulator, xcodeSimulatorService)}
     />
@@ -71,7 +70,7 @@ function actions(
   // Return ActionPanel
   return (
     <ActionPanel>
-      <ActionPanel.Item
+      <Action
         key={"boot-or-shutdown"}
         title={isShutdown ? "Boot" : "Shutdown"}
         onAction={async () => {

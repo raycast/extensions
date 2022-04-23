@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, List, showToast, Toast } from "@raycast/api";
 import { XcodeProjectService } from "../../services/xcode-project.service";
 import { useEffect, useState } from "react";
 import { XcodeProject } from "../../models/project/xcode-project.model";
@@ -51,7 +51,7 @@ export function XcodeAddSwiftPackageSelectXcodeProject(props: {
   // Initialize select Action provider
   const selectActionProvider = (xcodeProject: XcodeProject) => {
     return (
-      <ActionPanel.Item
+      <Action
         title="Add Swift Package"
         onAction={async () => {
           // Check if XcodeProject is a Swift Playground

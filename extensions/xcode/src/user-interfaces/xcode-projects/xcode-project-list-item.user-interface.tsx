@@ -18,7 +18,7 @@ export function xcodeProjectListItem(
       key={xcodeProject.filePath}
       title={xcodeProject.name}
       subtitle={tildify(xcodeProject.filePath)}
-      accessoryTitle={accessoryTitle(xcodeProject.type)}
+      accessories={[{ text: accessoryTitle(xcodeProject.type) }]}
       keywords={xcodeProject.keywords}
       icon={{ source: imageAssetSource(xcodeProject.type) }}
       actions={
