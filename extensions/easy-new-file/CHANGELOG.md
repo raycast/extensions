@@ -3,7 +3,7 @@
 ## [Added Easy New File] - 2022-04-25
 
 - Modify shortcut keys for certain actions
-- Add _Edit Template With_ actions for New File Here command
+- Add _Open With_ actions for New File Here command
 
 ## [Added Easy New File] - 2022-04-22
 

@@ -127,7 +127,7 @@ const addFileTemplate = async (name: string, path: string) => {
           fse.copyFileSync(path, desPath);
         });
       }
-      await showHUD("Template is added");
+      await showHUD("Template added");
       await popToRoot({ clearSearchBar: false });
     } else {
       await showToast(Toast.Style.Failure, "Folder path not supported.");

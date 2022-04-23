@@ -2,7 +2,6 @@ import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from 
 import { useCallback, useEffect, useState } from "react";
 import fse from "fs-extra";
 import path from "path";
-import { Application, getApplications } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -12,7 +11,6 @@ export const refreshNumber = () => {
 //new file here
 export const getTemplateFile = (templateFolderPath: string, refresh: number) => {
   const [templateFiles, setTemplateFiles] = useState<TemplateType[]>([]);
-  const [allApplications, setAllApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -36,17 +34,13 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
     }
     setTemplateFiles(_templateFiles);
     setIsLoading(false);
-
-    //get All Application
-    const _allApplication = await getApplications();
-    setAllApplications(_allApplication);
   }, [refresh]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return { templateFiles: templateFiles, allApplications: allApplications, isLoading: isLoading };
+  return { templateFiles: templateFiles, isLoading: isLoading };
 };
 
 //new file with name
