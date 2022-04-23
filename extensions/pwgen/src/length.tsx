@@ -22,7 +22,7 @@ export default function Command(): JSX.Element {
 
 	const generatePasswords = (): void => {
 		if (parseInt(strengthLevel) > 0 || strengthLevel === '') {
-			const length = parseInt(strengthLevel || defaultPasswordLength, 10)
+			const length = parseInt(strengthLevel, 10) || defaultPasswordLength
 
 			setPasswords([
 				new DictionaryGenerator({ length }),

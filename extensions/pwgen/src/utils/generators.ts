@@ -2,21 +2,18 @@ import { randomBytes } from 'crypto'
 import { readFileSync } from 'fs'
 
 import { ASCII_CHARACTERS, NUMBERS, PUNCTUATION } from './constants'
-import usePreferences from '../hooks/usePreferences'
+import usePreferences, { Preferences } from '../hooks/usePreferences'
 import product from './product'
 
 export class PasswordGenerator {
 	id?: string
 	title?: string
 	password: string
-	delimiter: string
-	maxWordLength: number
 	strength = 0
+	preferences: Preferences
 
 	constructor({ strength, length }: { strength?: number; length?: number }) {
-		const { delimiter, maxWordLength } = usePreferences()
-		this.delimiter = delimiter
-		this.maxWordLength = parseInt(maxWordLength, 10)
+		this.preferences = usePreferences()
 
 		const [password, passwordStrength] = this.generate({ strength, length })
 		this.password = password
@@ -95,7 +92,7 @@ export class DictionaryGenerator extends PasswordGenerator {
 			pw.push(this.data[Math.floor(Math.random() * this.data.length)])
 		}
 
-		return [pw.join(this.delimiter), Math.floor(this.entropy * iterations)]
+		return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * iterations)]
 	}
 
 	private password_by_length(length: number): [string, number] {
@@ -108,7 +105,7 @@ export class DictionaryGenerator extends PasswordGenerator {
 			pw_length += word.length + 1
 		}
 
-		return [pw.join(this.delimiter), Math.floor(this.entropy * pw_length)]
+		return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * pw_length)]
 	}
 
 	generate({ strength, length }: { strength?: number; length?: number }): [string, number] {
@@ -122,9 +119,7 @@ export class DictionaryGenerator extends PasswordGenerator {
 	get data(): string[] {
 		if (this.words) return this.words
 		try {
-			this.words = readFileSync('/usr/share/dict/words', 'utf8')
-				.split(/\r?\n/)
-				.filter((word) => word.length <= this.maxWordLength)
+			this.words = readFileSync('/usr/share/dict/words', 'utf8').split(/\r?\n/)
 
 			return this.words
 		} catch (err) {

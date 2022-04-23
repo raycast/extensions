@@ -23,7 +23,7 @@ export default function Command(): JSX.Element {
 
 	const generatePasswords = (): void => {
 		if (parseInt(strengthLevel) > 0 || strengthLevel === '') {
-			const strength = parseInt(strengthLevel || defaultPasswordStrength, 10) * ENTROPY_PER_LEVEL
+			const strength = (parseInt(strengthLevel, 10) || defaultPasswordStrength) * ENTROPY_PER_LEVEL
 
 			setPasswords([
 				new DictionaryGenerator({ strength }),
