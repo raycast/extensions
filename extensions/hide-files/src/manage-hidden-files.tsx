@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, open, showInFinder, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { extensionPreferences, isImage } from "./utils/common-utils";
 import { parse } from "path";
@@ -43,9 +43,9 @@ export default function Command() {
       {localHiddenDirectory.length === 0 ? (
         <List.EmptyView
           key={`empty-localDirectory`}
-          title={"No hidden files."}
+          title={"No hidden files"}
           icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
-          description={`You can hide files via "Hide Files" command.`}
+          description={`You can hide files via "Hide Files" command`}
         />
       ) : (
         <>
@@ -59,36 +59,16 @@ export default function Command() {
                   accessories={[{ text: parse(value.path).dir }]}
                   actions={
                     <ActionPanel>
-                      <Action
-                        icon={Icon.Window}
-                        title={value.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder"}
-                        onAction={async () => {
-                          try {
-                            await open(value.path);
-                            await showHUD(value.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder");
-                          } catch (e) {
-                            await showToast(Toast.Style.Failure, "Error.", String(e) + ".");
-                          }
-                        }}
+                      <Action.Open
+                        title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
+                        target={value.path}
                       />
-                      <Action
-                        icon={Icon.Finder}
-                        title={"Reveal in Finder"}
-                        onAction={async () => {
-                          await open(parse(value.path).dir);
-                          try {
-                            await open(parse(value.path).dir);
-                            await showHUD("Reveal in Finder");
-                          } catch (e) {
-                            await showToast(Toast.Style.Failure, "Error.", String(e) + ".");
-                          }
-                        }}
-                      />
-                      <ActionPanel.Section title="File Actions">
+                      <Action.ShowInFinder path={value.path} />
+                      <ActionPanel.Section>
                         <Action
                           icon={Icon.Eye}
-                          title={`Show File`}
-                          shortcut={{ modifiers: ["ctrl"], key: "s" }}
+                          title={`Unhide File`}
+                          shortcut={{ modifiers: ["cmd"], key: "u" }}
                           onAction={async () => {
                             const _localDirectory = [...localHiddenDirectory];
                             _localDirectory.splice(index, 1);
@@ -102,7 +82,7 @@ export default function Command() {
                             const options: Toast.Options = {
                               style: Toast.Style.Success,
                               title: `Success!`,
-                              message: `${value.name} has been shown.`,
+                              message: `${value.name} has been unhidden.`,
                               primaryAction: {
                                 title: "Open in Finder",
                                 onAction: (toast) => {
@@ -111,9 +91,9 @@ export default function Command() {
                                 },
                               },
                               secondaryAction: {
-                                title: "Reveal in Finder",
+                                title: "Show in Finder",
                                 onAction: (toast) => {
-                                  open(parse(value.path).dir);
+                                  showInFinder(value.path);
                                   toast.hide();
                                 },
                               },
@@ -123,22 +103,19 @@ export default function Command() {
                         />
                         <Action
                           icon={Icon.ExclamationMark}
-                          title={"Show All Files"}
-                          shortcut={{ modifiers: ["shift", "ctrl"], key: "s" }}
+                          title={"Unhide All Files"}
+                          shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                           onAction={async () => {
                             await alertDialog(
                               "⚠️Warning",
-                              "Do you want to show all files?",
-                              "Show All",
+                              "Do you want to unhide all files?",
+                              "Unhide All",
                               async () => {
                                 const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
                                 showHiddenFiles(filePaths.join(" "));
                                 await LocalStorage.clear();
                                 setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", "All Files have been shown.");
-                              },
-                              async () => {
-                                await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                                await showToast(Toast.Style.Success, "Success!", "All Files have been unhidden.");
                               }
                             );
                           }}

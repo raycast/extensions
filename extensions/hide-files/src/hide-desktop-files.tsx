@@ -5,7 +5,7 @@ import { getFilesInDirectory } from "./utils/common-utils";
 import { putFileOnHidePanel } from "./utils/hide-files-utils";
 
 export default async () => {
-  await showHUD("Desktop files are hidden");
+  await showHUD("Hidden desktop files");
   const desktopPath = homedir() + "/Desktop/";
   const hideDesktopFilesCommand = `chflags hidden ${desktopPath.replace(" ", `" "`)}*`;
   exec(hideDesktopFilesCommand);

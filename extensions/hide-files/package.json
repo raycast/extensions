@@ -12,14 +12,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "show-desktop-files",
-      "title": "Show Desktop Files",
-      "icon": "show-desktop-files.png",
-      "subtitle": "Hide Files",
-      "description": "Show hidden desktop files.",
-      "mode": "no-view"
-    },
-    {
       "name": "hide-desktop-files",
       "title": "Hide Desktop Files",
       "icon": "hide-desktop-files.png",
@@ -36,19 +28,27 @@
       "mode": "no-view"
     },
     {
-      "name": "show-select-files",
-      "title": "show Selected Files",
-      "icon": "show-selected-files.png",
+      "name": "unhide-desktop-files",
+      "title": "Unhide Desktop Files",
+      "icon": "unhide-desktop-files.png",
       "subtitle": "Hide Files",
-      "description": "Show selected files in the current window of the Finder.",
+      "description": "Unhide hidden desktop files.",
       "mode": "no-view"
     },
     {
-      "name": "show-all-files",
-      "title": "Show Files in Current Window",
-      "icon": "show-all-files.png",
+      "name": "unhide-select-files",
+      "title": "Unhide Selected Files",
+      "icon": "unhide-selected-files.png",
       "subtitle": "Hide Files",
-      "description": "Show all hidden files in the current window of the Finder.",
+      "description": "Unhide selected files in the current window of the Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unhide-all-files",
+      "title": "Unhide Files in Current Window",
+      "icon": "unhide-all-files.png",
+      "subtitle": "Hide Files",
+      "description": "Unhide all hidden files in the current window of the Finder.",
       "mode": "no-view"
     },
     {
