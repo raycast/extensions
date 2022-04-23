@@ -28,7 +28,7 @@ export default function main() {
   const [refresh, setRefresh] = useState<number>(0);
 
   //hooks
-  const { templateFiles, isLoading } = getTemplateFile(templateFolderPath, refresh);
+  const { templateFiles, allApplications, isLoading } = getTemplateFile(templateFolderPath, refresh);
 
   return (
     <List
@@ -109,6 +109,23 @@ export default function main() {
                         await showToast(Toast.Style.Success, "Delete template success!");
                       }}
                     />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Edit Template With...">
+                    {allApplications.map((appValue) => (
+                      <Action
+                        key={appValue.path}
+                        icon={{ fileIcon: appValue.path }}
+                        title={appValue.name}
+                        onAction={async () => {
+                          try {
+                            await open(template.path, appValue.path);
+                            await showHUD(`Edit ${template.name} with ${appValue.name}`);
+                          } catch (e) {
+                            await showToast(Toast.Style.Failure, "Error.", String(e));
+                          }
+                        }}
+                      />
+                    ))}
                   </ActionPanel.Section>
                 </ActionPanel>
               }
