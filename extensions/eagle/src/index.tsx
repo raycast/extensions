@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-import useSWR from "swr";
 import { useState } from "react";
 
 import { useItemList } from "./utils/query";

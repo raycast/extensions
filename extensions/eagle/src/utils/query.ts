@@ -3,6 +3,13 @@ import useSWR from "swr";
 import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from "./api";
 import { fromPathToBase64Url } from "./base64";
 
+/**
+ * It fetches the thumbnail of an item from the server and converts it to a base64
+ * URL
+ * @param {string} id - The id of the item
+ * @param {string} ext - The file extension of the image.
+ * @returns A base64Url
+ */
 export function useThumbnail(id: string, ext: string) {
   return useSWR(`/api/item/thumbnail?id=${id}`, async () => {
     const res = await getItemThumbnail(id);
