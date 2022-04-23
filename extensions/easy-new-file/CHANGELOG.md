@@ -1,5 +1,9 @@
 # Easy New File Changelog
 
+## [Added Easy New File] - 2022-04-25
+
+- Modify shortcut keys for certain actions
+
 ## [Added Easy New File] - 2022-04-22
 
 - Release of New File Here version 1.0

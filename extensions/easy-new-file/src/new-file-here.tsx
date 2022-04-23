@@ -34,7 +34,7 @@ export default function main() {
     <List
       isShowingDetail={false}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search and create file"}
+      searchBarPlaceholder={"Search and create files"}
       selectedItemId={templateFiles.length > 0 ? templateFiles[0].path : ""}
     >
       <List.Section title={"Template"}>

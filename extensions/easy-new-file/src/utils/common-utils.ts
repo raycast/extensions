@@ -75,12 +75,6 @@ export const checkIsFile = (path: string) => {
   }
 };
 
-export const getFileInfo = (path: string) => {
-  const obj1 = path.lastIndexOf("/");
-  const obj2 = path.lastIndexOf(".");
-  return { nameWithoutExtension: path.substring(obj1 + 1, obj2), extension: path.substring(obj2 + 1) };
-};
-
 export const getSelectedFile = async () => {
   const selectedFile: string[] = [];
   try {
