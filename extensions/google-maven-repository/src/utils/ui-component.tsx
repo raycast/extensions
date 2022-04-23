@@ -1,6 +1,6 @@
 import { artifactModel } from "../model/packages-model";
 import { ArtifactTag } from "./google-maven-utils";
-import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showHUD } from "@raycast/api";
 import { googleMavenRepository } from "./constans";
 
 export function ArtifactList(props: {
@@ -22,14 +22,7 @@ export function ArtifactList(props: {
               icon={"icon_maven.png"}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={"Copy Version"}
-                    icon={Icon.Clipboard}
-                    onAction={async () => {
-                      await Clipboard.copy(artifact.content);
-                      await showToast(Toast.Style.Success, "Success!", "Version is copied.");
-                    }}
-                  />
+                  <Action.CopyToClipboard title={"Copy Artifact Version"} content={artifact.content} />
                   <Action
                     title={"Show Maven in Browser"}
                     icon={Icon.Globe}

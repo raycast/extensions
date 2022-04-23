@@ -1,46 +1,30 @@
-import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { artifactModel } from "./model/packages-model";
-import { ArtifactTag, fetchArtifacts } from "./utils/google-maven-utils";
+import { Action, ActionPanel, Icon, List, open, showHUD } from "@raycast/api";
+import { useState } from "react";
 import { googleMavenRepository } from "./utils/constans";
+import { searchArtifacts } from "./hooks/hooks";
 
 export default function SearchGoogleArtifact() {
   const [searchContent, setSearchContent] = useState<string>("");
-  const [startSearch, setStartSearch] = useState<number[]>([0]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [artifactName, setArtifactName] = useState<string[]>([]);
-  const [artifactInfo, setArtifactInfo] = useState<artifactModel[][]>([]);
-  const [tagList, setTagList] = useState<ArtifactTag[]>([]);
+  const [startSearch, setStartSearch] = useState<string>("");
   const [currentTag, setCurrentTag] = useState<string>("");
-
-  useEffect(() => {
-    async function _fetchWallpaper() {
-      setLoading(true);
-      const { tagList, artifactName, artifactInfo } = await fetchArtifacts(searchContent);
-      setTagList(tagList);
-      setArtifactName(artifactName);
-      setArtifactInfo(artifactInfo);
-      setLoading(false);
-    }
-
-    _fetchWallpaper().then();
-  }, [startSearch]);
+  const { artifactInfo, loading } = searchArtifacts(startSearch);
 
   return (
     <List
       isShowingDetail={false}
       isLoading={loading}
-      searchBarPlaceholder={'Search artifact, like "activity"'}
+      searchBarPlaceholder={'Search artifacts, like "activity"'}
       searchBarAccessory={
         <List.Dropdown onChange={(value) => setCurrentTag(value)} tooltip={"Group"}>
-          {tagList.map((tag) => {
+          {artifactInfo.tagList.map((tag) => {
             return <List.Dropdown.Item key={tag.value} value={tag.value} title={tag.title} />;
           })}
         </List.Dropdown>
       }
       onSearchTextChange={setSearchContent}
+      throttle={true}
     >
-      {artifactName.length === 0 ? (
+      {artifactInfo.artifactName.length === 0 ? (
         <List.EmptyView
           title={`Welcome to Google's Maven Repository`}
           icon={"android-bot.svg"}
@@ -50,9 +34,7 @@ export default function SearchGoogleArtifact() {
                 title={`Search ${searchContent}`}
                 icon={Icon.Globe}
                 onAction={async () => {
-                  const _startSearch = [...startSearch];
-                  _startSearch[0]++;
-                  setStartSearch(_startSearch);
+                  setStartSearch(searchContent);
                 }}
               />
               <Action
@@ -67,10 +49,13 @@ export default function SearchGoogleArtifact() {
           }
         />
       ) : (
-        artifactInfo.map((artifacts, artifactsIndex) => {
+        artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
           return (
-            <List.Section key={artifactsIndex + artifactName[artifactsIndex]} title={artifactName[artifactsIndex]}>
-              {(currentTag === artifacts[0].artifact || currentTag == tagList[0].value) &&
+            <List.Section
+              key={artifactsIndex + artifactInfo.artifactName[artifactsIndex]}
+              title={artifactInfo.artifactName[artifactsIndex]}
+            >
+              {(currentTag === artifacts[0].artifact || currentTag == artifactInfo.tagList[0].value) &&
                 artifacts.map((artifact, artifactIndex) => {
                   return (
                     <List.Item
@@ -83,19 +68,10 @@ export default function SearchGoogleArtifact() {
                             title={`Search ${searchContent}`}
                             icon={Icon.Globe}
                             onAction={async () => {
-                              const _startSearch = [...startSearch];
-                              _startSearch[0]++;
-                              setStartSearch(_startSearch);
+                              setStartSearch(searchContent);
                             }}
                           />
-                          <Action
-                            title={"Copy Version"}
-                            icon={Icon.Clipboard}
-                            onAction={async () => {
-                              await Clipboard.copy(artifact.content);
-                              await showToast(Toast.Style.Success, "Success!", "Version is copied.");
-                            }}
-                          />
+                          <Action.CopyToClipboard title={"Copy Artifact Version"} content={artifact.content} />
                           <Action
                             title={"Show Maven in Browser"}
                             icon={Icon.Globe}
