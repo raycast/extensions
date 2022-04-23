@@ -12,7 +12,7 @@
     "commands": [{
         "name": "index",
         "title": "Search IPTV channels",
-        "description": "Search and browse and play hundreds of free IPTV  channels.",
+        "description": "Search and browse and play hundreds of free IPTV channels.",
         "mode": "view"
     }],
     "dependencies": {
