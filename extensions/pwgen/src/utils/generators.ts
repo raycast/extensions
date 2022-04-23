@@ -105,7 +105,7 @@ export class DictionaryGenerator extends PasswordGenerator {
 			pw_length += word.length + 1
 		}
 
-		return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * pw_length)]
+		return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * pw.length)]
 	}
 
 	generate({ strength, length }: { strength?: number; length?: number }): [string, number] {
