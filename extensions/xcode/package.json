@@ -90,6 +90,10 @@
       "mode": "no-view"
     }
   ],
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
   "keywords": [
     "Xcode",
     "Simulator",
