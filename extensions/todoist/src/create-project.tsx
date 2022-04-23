@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open } from "@raycast/api";
 import { AddProjectArgs, colors } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
@@ -11,6 +11,8 @@ export default function CreateProject() {
   const [favorite, setFavorite] = useState<boolean>(false);
   const [colorId, setColorId] = useState<string>();
 
+  const titleField = useRef<Form.TextField>(null);
+
   const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {
@@ -22,6 +24,7 @@ export default function CreateProject() {
   function clear() {
     setName("");
     setParentId("");
+    setColorId(String(colors[0].id));
     setFavorite(false);
   }
 
@@ -54,6 +57,7 @@ export default function CreateProject() {
         onAction: () => open(url),
       };
       clear();
+      titleField.current.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create project" });
     }
@@ -68,7 +72,14 @@ export default function CreateProject() {
       }
       isLoading={!data && !error}
     >
-      <Form.TextField id="name" title="Name" placeholder="My project" value={name} onChange={setName} />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="My project"
+        value={name}
+        onChange={setName}
+        ref={titleField}
+      />
 
       <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId}>
         {colors.map(({ name, id }) => (
