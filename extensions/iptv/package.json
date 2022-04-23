@@ -11,7 +11,7 @@
     "license": "MIT",
     "commands": [{
         "name": "index",
-        "title": "Search IPTV channels",
+        "title": "Search IPTV Channels",
         "description": "Search and browse and play hundreds of free IPTV channels.",
         "mode": "view"
     }],
