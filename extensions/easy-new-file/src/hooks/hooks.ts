@@ -1,10 +1,10 @@
-//for refresh useState
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../utils/file-type";
 import { useCallback, useEffect, useState } from "react";
 import fse from "fs-extra";
 import path from "path";
 import { Application, getApplications } from "@raycast/api";
 
+//for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
 };

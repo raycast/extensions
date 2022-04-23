@@ -1,7 +1,7 @@
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage, showToast, Toast } from "@raycast/api";
-import Values = LocalStorage.Values;
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
