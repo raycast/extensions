@@ -7,10 +7,9 @@ import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from ".
  * It fetches the thumbnail of an item from the server and returns the URL of the
  * image
  * @param {string} id - The id of the item you want to get the thumbnail for.
- * @param {string} ext - The file extension of the item.
  * @returns A function that returns a promise that resolves to a string.
  */
-export function useThumbnail(id: string, ext: string) {
+export function useThumbnail(id: string) {
   return useSWR(`/api/item/thumbnail?id=${id}`, async () => {
     const res = await getItemThumbnail(id);
     const imagePath = decodeURIComponent(res.data.data);

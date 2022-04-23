@@ -4,7 +4,7 @@ import { useThumbnail } from "../utils/query";
 import { Item } from "../@types/eagle";
 
 export function ItemDetail({ item }: { item: Item }) {
-  const { data: thumbnail } = useThumbnail(item.id, item.ext);
+  const { data: thumbnail } = useThumbnail(item.id);
 
   const lastModifiedAt = useMemo(() => {
     const date = new Date(item.modificationTime);
