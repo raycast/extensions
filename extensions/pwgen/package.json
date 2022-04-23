@@ -26,6 +26,14 @@
   ],
   "preferences": [
     {
+      "name": "specialCharacters",
+      "title": "Special Characters",
+      "description": "The special characters to use in the password generator.",
+      "type": "textfield",
+      "default": "!\"#$%&'()*+,-./:;<=>?@[]^_`{|}~",
+      "required": true
+    },
+    {
       "name": "length",
       "title": "Default password length",
       "description": "Default length of password",

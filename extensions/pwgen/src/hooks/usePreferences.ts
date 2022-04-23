@@ -1,6 +1,7 @@
 import { getPreferenceValues } from '@raycast/api'
 
 export type Preferences = {
+	specialCharacters: string
 	strength: number
 	length: number
 	delimiter: string

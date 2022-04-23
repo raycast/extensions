@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto'
 import { readFileSync } from 'fs'
 
-import { ASCII_CHARACTERS, NUMBERS, PUNCTUATION } from './constants'
+import { ASCII_CHARACTERS, NUMBERS } from './constants'
 import usePreferences, { Preferences } from '../hooks/usePreferences'
 import product from './product'
 
@@ -50,7 +50,7 @@ export class AsciiGenerator extends PasswordGenerator {
 	title = 'ASCII characters with punctuation'
 
 	get data(): string {
-		return ASCII_CHARACTERS + NUMBERS + PUNCTUATION
+		return ASCII_CHARACTERS + NUMBERS + this.preferences.specialCharacters
 	}
 }
 
