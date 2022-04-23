@@ -15,7 +15,7 @@ export default function Command() {
   const [refresh, setRefresh] = useState<number>(0);
   const { autoCopyLatestFile } = commonPreferences();
 
-  const { directoryWithFiles, allFilesNumber, allApplications, loading } = localDirectoryWithFiles(refresh);
+  const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
@@ -125,24 +125,6 @@ export default function Command() {
                               }}
                             />
                           </ActionPanel.Section>
-                          <ActionPanel.Section title="Open With...">
-                            {allApplications.map((appValue) => (
-                              <Action
-                                key={appValue.path}
-                                icon={{ fileIcon: appValue.path }}
-                                title={appValue.name}
-                                onAction={async () => {
-                                  try {
-                                    await open(fileValue.path, appValue.path);
-                                    await showHUD(`Open ${fileValue.name} with ${appValue.name}`);
-                                    await upRank(directoryIndex, setRefresh);
-                                  } catch (e) {
-                                    await showToast(Toast.Style.Failure, "Error.", String(e));
-                                  }
-                                }}
-                              />
-                            ))}
-                          </ActionPanel.Section>
                         </ActionPanel>
                       }
                     />
@@ -190,6 +172,7 @@ function ActionsOnFile(props: {
           }
         }}
       />
+      <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
       <Action
         icon={Icon.Finder}
         title={"Reveal in Finder"}

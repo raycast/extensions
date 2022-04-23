@@ -9,7 +9,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, Application, confirmAlert, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 
 //for refresh useState
@@ -21,7 +21,6 @@ export const refreshNumber = () => {
 export const localDirectoryWithFiles = (refresh: number) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(0);
-  const [allApplications, setAllApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = commonPreferences();
 
@@ -60,9 +59,6 @@ export const localDirectoryWithFiles = (refresh: number) => {
     setAllFilesNumber(_allFilesNumber);
     setLoading(false);
 
-    //get All Application
-    const _allApplication = await getApplications();
-    setAllApplications(_allApplication);
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
   }, [refresh]);
 
@@ -73,7 +69,6 @@ export const localDirectoryWithFiles = (refresh: number) => {
   return {
     directoryWithFiles: directoryWithFiles,
     allFilesNumber: allFilesNumber,
-    allApplications: allApplications,
     loading: loading,
   };
 };
