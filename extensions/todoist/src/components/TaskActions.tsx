@@ -105,6 +105,7 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
             />
           ))}
         </ActionPanel.Submenu>
+
         <Action
           id="deleteTask"
           title="Delete Task"

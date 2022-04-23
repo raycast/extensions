@@ -60,7 +60,9 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
             text={project?.name}
             icon={project?.inboxProject ? Icon.Envelope : Icon.List}
           />
+
           <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
+
           <Detail.Metadata.Label
             title="Priority"
             text={priority?.name}
@@ -77,6 +79,7 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
               ))}
             </Detail.Metadata.TagList>
           ) : null}
+
           {hasComments ? (
             <Detail.Metadata.Label
               title="Comments"

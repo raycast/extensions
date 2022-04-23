@@ -5,6 +5,7 @@ import useSWR, { mutate } from "swr";
 import TaskCommentForm from "./TaskCommentForm";
 import { todoist, handleError } from "../api";
 import { SWRKeys } from "../types";
+import removeMarkdown from "remove-markdown";
 
 interface TaskCommentsProps {
   task: Task;
@@ -38,7 +39,7 @@ export default function TaskComments({ task }: TaskCommentsProps) {
       {comments?.map((comment, index) => (
         <List.Item
           key={comment.id}
-          keywords={comment.content.split(" ")}
+          keywords={removeMarkdown(comment.content).split(" ")}
           title={`Comment #${index + 1}`}
           subtitle={formatDistanceToNow(new Date(comment.posted), { addSuffix: true })}
           detail={<List.Item.Detail markdown={comment.content} />}
