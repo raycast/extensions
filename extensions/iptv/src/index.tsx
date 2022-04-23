@@ -1,4 +1,4 @@
-import { List, showToast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { categoriesURLS, TvModelFlag } from "./interface/tvmodel";
 import { getChannels } from "./api/getChannels";
@@ -7,7 +7,7 @@ import { SearchListItem } from "./components/searchListItem";
 
 export default function Command() {
   const [channels, setTv] = useState<TvModelFlag[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const onCategoryTypeChange = (categoryValue: string) => {
     setIsLoading(true);
@@ -15,7 +15,6 @@ export default function Command() {
       .then((iptvs) => {
         setTv(iptvs);
         setIsLoading(false);
-        showToast({ title: "Loaded all channels" });
       })
       .catch(() => {
         setIsLoading(false);
