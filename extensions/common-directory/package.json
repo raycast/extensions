@@ -22,7 +22,7 @@
         {
           "name": "showOpenDirectory",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "More Directory",
           "label": "Open Directory",
           "description": "There will be some delay when fetching Open Directory.",
@@ -31,7 +31,7 @@
         {
           "name": "SortBy",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Directory Sort by",
           "description": "Directory sorting method (default: Rank).",
           "default": "Rank",
@@ -71,7 +71,7 @@
         {
           "name": "showOpenDirectory",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "More Directory",
           "label": "Open Directory",
           "description": "There will be some delay when fetching Open Directory.",
@@ -80,7 +80,7 @@
         {
           "name": "openDestDirectory",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "Advanced Operations",
           "label": "Open Destination Directory",
           "description": "After successfully moving out the files, open the destination folder.",
@@ -89,7 +89,7 @@
         {
           "name": "deleteEmptyDirectory",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "label": "Delete Empty Directory",
           "description": "After successfully moving out the files, delete the original folder if the folder is empty.",
           "default": false
@@ -97,7 +97,7 @@
         {
           "name": "primaryAction",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Primary action",
           "description": "Primary action when send files.",
           "default": "copy",
@@ -115,7 +115,7 @@
         {
           "name": "SortBy",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Directory Sort by",
           "description": "Directory sorting method (default: Rank).",
           "default": "Rank",
