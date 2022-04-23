@@ -29,7 +29,7 @@
           "required": false,
           "title": "Advanced Preference",
           "label": "Auto Copy Latest File",
-          "description": "Automatically copy the latest files in the topmost directory.",
+          "description": "Automatically copy the latest files in the topmost directory. There will be some delay when copying files.",
           "default": false
         },
         {
@@ -51,10 +51,6 @@
             {
               "title": "5",
               "value": "5"
-            },
-            {
-              "title": "8",
-              "value": "8"
             },
             {
               "title": "10",

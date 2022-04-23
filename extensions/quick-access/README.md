@@ -19,6 +19,7 @@ You can use "Access Directory" command to quickly copy the image or open the fil
   - Remove Directory
   - Remove All Directory
   - Reset Directory Rank
+  - Open With ...
 
 **Preference**
 

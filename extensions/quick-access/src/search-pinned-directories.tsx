@@ -15,13 +15,13 @@ export default function Command() {
   const [refresh, setRefresh] = useState<number>(0);
   const { autoCopyLatestFile } = commonPreferences();
 
-  const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
+  const { directoryWithFiles, allFilesNumber, allApplications, loading } = localDirectoryWithFiles(refresh);
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search file"}
+      searchBarPlaceholder={"Search files"}
       searchBarAccessory={
         <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
           <List.Dropdown.Item key={"All"} title={"All Directories"} value={"All"} />
@@ -65,14 +65,16 @@ export default function Command() {
                   title={directory.directory.name}
                   subtitle={parse(directory.directory.path).dir}
                 >
-                  {directory.files.map((value) => (
+                  {directory.files.map((fileValue) => (
                     <List.Item
-                      key={value.id}
-                      icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
-                      title={value.name}
+                      key={fileValue.id}
+                      icon={
+                        isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }
+                      }
+                      title={fileValue.name}
                       actions={
                         <ActionPanel>
-                          <ActionsOnFile fileInfo={value} index={directoryIndex} setRefresh={setRefresh} />
+                          <ActionsOnFile fileInfo={fileValue} index={directoryIndex} setRefresh={setRefresh} />
                           <ActionPanel.Section title="Directory Action">
                             <Action
                               icon={Icon.Pin}
@@ -86,7 +88,7 @@ export default function Command() {
                             <Action
                               icon={Icon.Trash}
                               title={`Remove Directory`}
-                              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                              shortcut={{ modifiers: ["ctrl"], key: "x" }}
                               onAction={async () => {
                                 const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
                                 const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
@@ -103,7 +105,7 @@ export default function Command() {
                             <Action
                               icon={Icon.TwoArrowsClockwise}
                               title={`Reset Directory Rank`}
-                              shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+                              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                               onAction={async () => {
                                 const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
                                 const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
@@ -122,6 +124,24 @@ export default function Command() {
                                 await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
                               }}
                             />
+                          </ActionPanel.Section>
+                          <ActionPanel.Section title="Open With...">
+                            {allApplications.map((appValue) => (
+                              <Action
+                                key={appValue.path}
+                                icon={{ fileIcon: appValue.path }}
+                                title={appValue.name}
+                                onAction={async () => {
+                                  try {
+                                    await open(fileValue.path, appValue.path);
+                                    await showHUD(`Open ${fileValue.name} with ${appValue.name}`);
+                                    await upRank(directoryIndex, setRefresh);
+                                  } catch (e) {
+                                    await showToast(Toast.Style.Failure, "Error.", String(e));
+                                  }
+                                }}
+                              />
+                            ))}
                           </ActionPanel.Section>
                         </ActionPanel>
                       }
@@ -187,7 +207,7 @@ function ActionsOnFile(props: {
       <Action
         icon={Icon.Trash}
         title={"Delete File Permanently"}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
         onAction={async () => {
           try {
             await alertDialog(

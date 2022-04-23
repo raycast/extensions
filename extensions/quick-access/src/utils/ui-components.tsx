@@ -9,7 +9,7 @@ export function ActionRemoveAllDirectories(props: { setRefresh: React.Dispatch<R
     <Action
       icon={Icon.ExclamationMark}
       title={`Remove All Directory`}
-      shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       onAction={async () => {
         await alertDialog(
           "⚠️Warning",
