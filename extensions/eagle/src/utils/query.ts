@@ -1,23 +1,21 @@
 import { useMemo } from "react";
 import useSWR from "swr";
+import fileUrl from "file-url";
 import { getItemThumbnail, getApplicationInfo, getItems, getFolderList } from "./api";
-import { fromPathToBase64Url } from "./base64";
 
 /**
- * It fetches the thumbnail of an item from the server and converts it to a base64
- * URL
- * @param {string} id - The id of the item
- * @param {string} ext - The file extension of the image.
- * @returns A base64Url
+ * It fetches the thumbnail of an item from the server and returns the URL of the
+ * image
+ * @param {string} id - The id of the item you want to get the thumbnail for.
+ * @param {string} ext - The file extension of the item.
+ * @returns A function that returns a promise that resolves to a string.
  */
 export function useThumbnail(id: string, ext: string) {
   return useSWR(`/api/item/thumbnail?id=${id}`, async () => {
     const res = await getItemThumbnail(id);
     const imagePath = decodeURIComponent(res.data.data);
 
-    const base64Url = await fromPathToBase64Url(imagePath, ext);
-
-    return base64Url;
+    return fileUrl(imagePath);
   });
 }
 
