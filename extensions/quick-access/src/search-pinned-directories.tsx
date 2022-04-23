@@ -1,13 +1,12 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
-import { DirectoryInfo, DirectoryType, FileInfo } from "./utils/directory-info";
+import { DirectoryInfo, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey } from "./utils/constants";
 import { copyFileByPath } from "./utils/applescript-utils";
-import { alertDialog, copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
-import fse from "fs-extra";
+import { copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
 import { ActionRemoveAllDirectories } from "./utils/ui-components";
 
 export default function Command() {
@@ -88,7 +87,7 @@ export default function Command() {
                             <Action
                               icon={Icon.Trash}
                               title={`Remove Directory`}
-                              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                              shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                               onAction={async () => {
                                 const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
                                 const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
@@ -148,7 +147,7 @@ function ActionsOnFile(props: {
     <>
       <Action
         icon={Icon.Clipboard}
-        title={"Copy to Clipboard"}
+        title={"Copy"}
         onAction={async () => {
           const copyResult = await copyFileByPath(fileInfo.path);
           if (isEmpty(copyResult)) {
@@ -159,58 +158,37 @@ function ActionsOnFile(props: {
           await upRank(index, setRefresh);
         }}
       />
-      <Action
-        icon={Icon.Window}
-        title={fileInfo.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder"}
-        onAction={async () => {
-          try {
-            await open(fileInfo.path);
-            await showHUD("Open in Default App");
-            await upRank(index, setRefresh);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
-      <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
-      <Action
-        icon={Icon.Finder}
-        title={"Reveal in Finder"}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={async () => {
-          try {
-            await open(parse(fileInfo.path).dir);
-            await showHUD("Reveal in Finder");
-            await upRank(index, setRefresh);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
-      <Action
-        icon={Icon.Trash}
-        title={"Delete File Permanently"}
-        shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
-        onAction={async () => {
-          try {
-            await alertDialog(
-              "⚠️Warning",
-              "Deleted files cannot be recovered. Do you want to Delete?",
-              "Delete",
-              async () => {
-                fse.removeSync(fileInfo.path);
-                setRefresh(refreshNumber());
-                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} was deleted.`);
-              },
-              async () => {
-                await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
-              }
-            );
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
+      <Action.Open title={"Open"} target={fileInfo.path} onOpen={async () => await upRank(index, setRefresh)} />
+
+      <ActionPanel.Section>
+        <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
+        <Action.ShowInFinder
+          shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+          path={fileInfo.path}
+          onShow={async () => await upRank(index, setRefresh)}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title={"Copy Name"}
+          content={fileInfo.name}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+        />
+        <Action.CopyToClipboard
+          title={"Copy Path"}
+          content={fileInfo.path}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Trash
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          paths={fileInfo.path}
+          onTrash={() => setRefresh(refreshNumber())}
+        />
+      </ActionPanel.Section>
     </>
   );
 }
