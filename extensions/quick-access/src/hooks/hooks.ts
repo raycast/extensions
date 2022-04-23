@@ -10,7 +10,6 @@ import {
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
 import { Alert, Application, confirmAlert, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import { copyFileByPath } from "../utils/applescript-utils";
 
 //for refresh useState
