@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/raycast/extensions/3234e7b062c103767704258282fa89427b4b67b4/extensions/xcode/assets/icon.png" alt="Xcode icon" width="200px" />
+    <img src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/xcode/assets/icon.png" alt="Xcode icon" width="200px" />
 </p>
 
 <h1 align="center">Xcode Extension for Raycast</h1>
