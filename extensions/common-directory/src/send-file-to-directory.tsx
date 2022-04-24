@@ -245,7 +245,7 @@ function SendToDirectoryItem(props: {
                       LocalDirectoryKey.OPEN_COMMON_DIRECTORY,
                       JSON.stringify(__openCommonDirectory)
                     );
-                    await showToast(Toast.Style.Success, "Remove success!");
+                    await showToast(Toast.Style.Success, "Removed successfully!");
                   }}
                 />
                 <Action
@@ -257,7 +257,7 @@ function SendToDirectoryItem(props: {
                       await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                       await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
                       setRefresh(refreshNumber());
-                      await showToast(Toast.Style.Success, "Remove All success!");
+                      await showToast(Toast.Style.Success, "Removed All successfully!");
                     });
                   }}
                 />
@@ -269,7 +269,7 @@ function SendToDirectoryItem(props: {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               onAction={() => {
                 resetRank(commonDirectory, setRefresh).then(async () => {
-                  await showToast(Toast.Style.Success, "Reset success!");
+                  await showToast(Toast.Style.Success, "Reset successfully!");
                 });
               }}
             />

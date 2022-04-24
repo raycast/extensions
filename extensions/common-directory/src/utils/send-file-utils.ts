@@ -105,7 +105,6 @@ export const getItemAndSend = async (toPath: string, action: ActionType): Promis
     await followUpWork(operationResult.sendResult, toPath, action);
     return true;
   } else {
-    await showToast(Toast.Style.Failure, "Error!", "Operation is canceled.");
     return false;
   }
 };
@@ -187,7 +186,7 @@ const followUpWork = async (
     const failedResult = moveResult.filter((item) => !item.isSuccess);
     const options: Toast.Options = {
       style: Toast.Style.Success,
-      title: `${action == ActionType.MOVE ? "Move" : "Copy"} success!`,
+      title: `${action == ActionType.MOVE ? "Moved" : "Copied"} successfully!`,
       message: `${successResult.length} item${successResult.length > 1 ? "s" : ""} success, ${
         failedResult.length
       } item${failedResult.length > 1 ? "s" : ""} failure.`,
@@ -210,7 +209,9 @@ const followUpWork = async (
     await showToast(options);
 
     if (commonPreferences().openDestDirectory) {
-      await showHUD(`${action == ActionType.MOVE ? "Move" : "Copy"} success! Open ${path.parse(destPath).base}.`);
+      await showHUD(
+        `${action == ActionType.MOVE ? "Moved" : "Copied"} successfully, Open ${path.parse(destPath).base}`
+      );
       await open(destPath);
     }
   } catch (e) {

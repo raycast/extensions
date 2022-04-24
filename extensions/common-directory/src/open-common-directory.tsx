@@ -187,7 +187,7 @@ function DirectoryItem(props: {
                       LocalDirectoryKey.SEND_COMMON_DIRECTORY,
                       JSON.stringify(__sendCommonDirectory)
                     );
-                    await showToast(Toast.Style.Success, "Remove success!");
+                    await showToast(Toast.Style.Success, "Removed successfully!");
                   }}
                 />
                 <Action
@@ -195,20 +195,12 @@ function DirectoryItem(props: {
                   icon={Icon.ExclamationMark}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   onAction={async () => {
-                    await alertDialog(
-                      "⚠️Warning",
-                      "Do you want to remove all directories?",
-                      "Remove All",
-                      async () => {
-                        await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
-                        await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
-                        setRefresh(refreshNumber);
-                        await showToast(Toast.Style.Success, "Remove All success!");
-                      },
-                      async () => {
-                        await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
-                      }
-                    );
+                    await alertDialog("⚠️Warning", "Do you want to remove all directories?", "Remove All", async () => {
+                      await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
+                      await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
+                      setRefresh(refreshNumber);
+                      await showToast(Toast.Style.Success, "Removed All successfully!");
+                    });
                   }}
                 />
               </>
@@ -219,7 +211,7 @@ function DirectoryItem(props: {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               onAction={() => {
                 resetRank(commonDirectory, setRefresh).then(async () => {
-                  await showToast(Toast.Style.Success, "Reset success!");
+                  await showToast(Toast.Style.Success, "Reset successfully!");
                 });
               }}
             />

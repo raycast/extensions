@@ -98,7 +98,7 @@ async function fetchDirectoryPath(setPath: React.Dispatch<React.SetStateAction<s
   await showToast(Toast.Style.Animated, "Fetching path...");
   const selectedDirectory = await getSelectedDirectory();
   setPath(selectedDirectory.length === 0 ? await getFinderInsertLocation() : selectedDirectory[0].slice(0, -1));
-  await showToast(Toast.Style.Success, "Fetch path success!");
+  await showToast(Toast.Style.Success, "Fetched successfully!");
 }
 
 async function addDirectory(alias: string, directoryPath: string) {
@@ -107,7 +107,7 @@ async function addDirectory(alias: string, directoryPath: string) {
   if (isValid) {
     const _type = isDirectoryOrFile(directoryPath);
     if (_type === DirectoryType.FILE) {
-      await showToast(Toast.Style.Failure, `File path not supported.`);
+      await showToast(Toast.Style.Failure, `File path is not supported.`);
     } else {
       const _localStorageOpen = await LocalStorage.getItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY);
       const _localStorageSend = await LocalStorage.getItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY);
@@ -142,7 +142,7 @@ async function addDirectory(alias: string, directoryPath: string) {
         _SendCommonDirectory.push(newItem);
         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_OpenCommonDirectory));
         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_SendCommonDirectory));
-        await showHUD(`${parsedPath.name} added`);
+        await showHUD(`${parsedPath.name} is added`);
         await popToRoot({ clearSearchBar: false });
       }
     }
