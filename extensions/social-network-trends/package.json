@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search-trends-of-social-network",
-      "title": "Search Trends of Social Network",
+      "title": "Search Trends",
       "subtitle": "Social Network Trends",
       "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
       "mode": "view"
