@@ -1,5 +1,5 @@
 import { ActionPanel, List, closeMainWindow, popToRoot, getPreferenceValues, Action } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { createEmojiList } from "generate-emoji-list";
 import { UnicodeVersion } from "generate-emoji-list/dist/createEmojiList";
@@ -67,14 +67,11 @@ export default function Main(): ReactElement {
   }, []);
 
   const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = usePersistentState<Emoji[]>("recently-used", []);
-  const addToRecentlyUsed = useCallback(
-    (emoji: Emoji) => {
-      setRecentlyUsed((list) =>
-        list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
-      );
-    },
-    [setRecentlyUsed]
-  );
+  const addToRecentlyUsed = (emoji: Emoji) => {
+    setRecentlyUsed((list) =>
+      list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
+    );
+  };
 
   const [category, setCategory] = useState<string>("");
   const [searchText, setSearchText] = useState("");
