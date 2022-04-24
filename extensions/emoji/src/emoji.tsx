@@ -35,8 +35,7 @@ const filterList = (emojis: Emoji[], recentlyUsed: Emoji[], searchText: string, 
 
 export default function Main(): ReactElement {
   const [list, setList] = usePersistentState<Emoji[]>("emoji-list-v2", []);
-  const [categories, setCategories] = useState<string[]>([]);
-
+  const [categories, setCategories] = usePersistentState<string[]>("emoji-categories", []);
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
     // https://github.com/facebook/react/pull/22114
