@@ -48,12 +48,12 @@ export function xcodeCreateSwiftPlaygroundForm(
           })}
       </Form.Dropdown>
       <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.Empty}>
-        {Object.keys(XcodeSwiftPlaygroundTemplate).map((platform) => {
+        {Object.keys(XcodeSwiftPlaygroundTemplate).map((template) => {
           return (
             <Form.Dropdown.Item
-              key={platform}
-              value={platform}
-              title={platform.charAt(0).toUpperCase() + platform.slice(1)}
+              key={template}
+              value={template}
+              title={template}
             />
           );
         })}
