@@ -4,9 +4,7 @@ import { googleMavenRepository } from "./utils/constans";
 import { searchArtifacts } from "./hooks/hooks";
 
 export default function SearchGoogleArtifact() {
-  const [searchContent, setSearchContent] = useState<string>("");
   const [startSearch, setStartSearch] = useState<string>("");
-  const [currentTag, setCurrentTag] = useState<string>("");
   const { artifactInfo, loading } = searchArtifacts(startSearch);
 
   return (
@@ -14,14 +12,7 @@ export default function SearchGoogleArtifact() {
       isShowingDetail={false}
       isLoading={loading}
       searchBarPlaceholder={'Search artifacts, like "activity"'}
-      searchBarAccessory={
-        <List.Dropdown onChange={(value) => setCurrentTag(value)} tooltip={"Group"}>
-          {artifactInfo.tagList.map((tag) => {
-            return <List.Dropdown.Item key={tag.value} value={tag.value} title={tag.title} />;
-          })}
-        </List.Dropdown>
-      }
-      onSearchTextChange={setSearchContent}
+      onSearchTextChange={setStartSearch}
       throttle={true}
     >
       {artifactInfo.artifactName.length === 0 ? (
@@ -30,13 +21,6 @@ export default function SearchGoogleArtifact() {
           icon={"android-bot.svg"}
           actions={
             <ActionPanel>
-              <Action
-                title={`Search ${searchContent}`}
-                icon={Icon.Globe}
-                onAction={async () => {
-                  setStartSearch(searchContent);
-                }}
-              />
               <Action
                 title={"Show Maven in Browser"}
                 icon={Icon.Globe}
@@ -55,37 +39,29 @@ export default function SearchGoogleArtifact() {
               key={artifactsIndex + artifactInfo.artifactName[artifactsIndex]}
               title={artifactInfo.artifactName[artifactsIndex]}
             >
-              {(currentTag === artifacts[0].artifact || currentTag == artifactInfo.tagList[0].value) &&
-                artifacts.map((artifact, artifactIndex) => {
-                  return (
-                    <List.Item
-                      key={artifactIndex + artifact.content}
-                      title={artifact.content}
-                      icon={"icon_maven.png"}
-                      actions={
-                        <ActionPanel>
-                          <Action
-                            title={`Search ${searchContent}`}
-                            icon={Icon.Globe}
-                            onAction={async () => {
-                              setStartSearch(searchContent);
-                            }}
-                          />
-                          <Action.CopyToClipboard title={"Copy Artifact Version"} content={artifact.content} />
-                          <Action
-                            title={"Show Maven in Browser"}
-                            icon={Icon.Globe}
-                            shortcut={{ modifiers: ["cmd"], key: "g" }}
-                            onAction={async () => {
-                              await open(googleMavenRepository);
-                              await showHUD("Show Maven in Browser");
-                            }}
-                          />
-                        </ActionPanel>
-                      }
-                    />
-                  );
-                })}
+              {artifacts.map((artifact, artifactIndex) => {
+                return (
+                  <List.Item
+                    key={artifactIndex + artifact.content}
+                    title={artifact.content}
+                    icon={"icon_maven.png"}
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard title={"Copy Artifact Version"} content={artifact.content} />
+                        <Action
+                          title={"Show Maven in Browser"}
+                          icon={Icon.Globe}
+                          shortcut={{ modifiers: ["cmd"], key: "g" }}
+                          onAction={async () => {
+                            await open(googleMavenRepository);
+                            await showHUD("Show Maven in Browser");
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
             </List.Section>
           );
         })

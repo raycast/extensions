@@ -1,4 +1,3 @@
-//for refresh useState
 import { useCallback, useEffect, useState } from "react";
 import { ArtifactTag, fetchArtifacts } from "../utils/google-maven-utils";
 import { artifactModel } from "../model/packages-model";
@@ -8,6 +7,7 @@ import fetch, { AbortError } from "node-fetch";
 import { allPackagesURL } from "../utils/constans";
 import { MavenModel } from "../model/maven-model";
 
+//for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
 };
