@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "find-out",
+      "name": "find-out-hidden-icon",
       "title": "Find out Hidden Icon",
       "subtitle": "Hidden Icons",
       "description": "A casual game, find out the hidden icons in 30s.",
