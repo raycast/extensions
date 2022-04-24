@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "play-without-playlist",
-      "title": "Play without Playlist",
+      "title": "Play Without Playlist",
       "subtitle": "YouTube",
       "description": "Open YouTube video from a playlist without the playlist",
       "mode": "no-view"
