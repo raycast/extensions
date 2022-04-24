@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { douyinSearchUrl, ResponseDataZhiHu, TrendZhiHu, zhihuSearchUrl, zhihuTrendApi } from "./utils/trend-utils";
+import { ResponseDataZhiHu, TrendZhiHu, zhihuSearchUrl, zhihuTrendApi } from "./utils/trend-utils";
 import { isEmpty, listIcon, listIconDark } from "./utils/common-utils";
 
 export default function TrendOfZhihu() {
@@ -43,18 +43,7 @@ export default function TrendOfZhihu() {
             accessories={[{ text: `${value.name}` }]}
             actions={
               <ActionPanel>
-                <Action
-                  icon={Icon.Desktop}
-                  title={"View in Browser"}
-                  onAction={async () => {
-                    try {
-                      await open(value.url);
-                      await showHUD(`View ${value.name} in browser`);
-                    } catch (e) {
-                      console.error(String(e));
-                    }
-                  }}
-                />
+                <Action.OpenInBrowser url={value.url} />
                 <Action
                   icon={Icon.MagnifyingGlass}
                   title={"Search by ZhiHu"}
@@ -68,23 +57,17 @@ export default function TrendOfZhihu() {
                     }
                   }}
                 />
-                <Action
-                  icon={Icon.Link}
-                  title={"Copy Trend Link"}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
-                  onAction={async () => {
-                    await Clipboard.copy(value.url);
-                    await showToast(Toast.Style.Success, "Trend link copied!");
-                  }}
-                />
-                <Action
+                <Action.CopyToClipboard
                   icon={Icon.Clipboard}
                   title={"Copy Trend Title"}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  onAction={async () => {
-                    await Clipboard.copy(value.name);
-                    await showToast(Toast.Style.Success, "Trend name copied!");
-                  }}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                  content={value.name}
+                />
+                <Action.CopyToClipboard
+                  icon={Icon.Link}
+                  title={"Copy Trend Link"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                  content={value.url}
                 />
               </ActionPanel>
             }

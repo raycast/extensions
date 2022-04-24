@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { douyinSearchUrl, douyinTrendApi, ResponseDataDouYin, TrendDouYin } from "./utils/trend-utils";
@@ -43,14 +43,7 @@ export default function TrendOfDouyin() {
             accessories={[{ text: `${(value.hot / 10000).toFixed(1)}w` }]}
             actions={
               <ActionPanel>
-                <Action
-                  icon={Icon.Desktop}
-                  title={"View in Browser"}
-                  onAction={async () => {
-                    await open(douyinSearchUrl + encodeURIComponent(value.name));
-                    await showHUD(`View ${value.name} in browser`);
-                  }}
-                />
+                <Action.OpenInBrowser url={douyinSearchUrl + encodeURIComponent(value.name)} />
                 <Action
                   icon={Icon.MagnifyingGlass}
                   title={"Search by DouYin"}
@@ -64,14 +57,17 @@ export default function TrendOfDouyin() {
                     }
                   }}
                 />
-                <Action
+                <Action.CopyToClipboard
                   icon={Icon.Clipboard}
                   title={"Copy Trend Title"}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  onAction={async () => {
-                    await Clipboard.copy(value.name);
-                    await showToast(Toast.Style.Success, "Trend copied!");
-                  }}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                  content={value.name}
+                />
+                <Action.CopyToClipboard
+                  icon={Icon.Link}
+                  title={"Copy Trend Link"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                  content={douyinSearchUrl + encodeURIComponent(value.name)}
                 />
               </ActionPanel>
             }
