@@ -13,7 +13,11 @@ export default function Command() {
           subtitle={license.subtitle}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" icon={Icon.Binoculars} target={<LicenseDetailView license={license} />} />
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Binoculars}
+                target={<LicenseDetailView license={license} />}
+              />
               <Action.OpenInBrowser title="Open in Browser" url={license.url} />
             </ActionPanel>
           }
