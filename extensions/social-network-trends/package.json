@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "social-network-trends",
   "title": "Social Network Trends",
-  "description": "Show popular trends or Search something on WeiBo, ZhiHu, and DouYin.",
+  "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
   "icon": "extension-icon/trend-social-networks.png",
   "author": "koinzhang",
   "categories": [
@@ -12,28 +12,22 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "trend-of-weibo",
-      "title": "Trend of WeiBo",
-      "icon": "extension-icon/trend-weibo.png",
+      "name": "search-trends-of-social-network",
+      "title": "Search Trends of Social Network",
       "subtitle": "Social Network Trends",
-      "description": "Show the popular trends of WeiBo.",
+      "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
       "mode": "view"
-    },
+    }
+  ],
+  "preferences": [
     {
-      "name": "trend-of-zhihu",
-      "title": "Trend of ZhiHu",
-      "icon": "extension-icon/trend-zhihu.png",
-      "subtitle": "Social Network Trends",
-      "description": "Show the popular trends of ZhiHu.",
-      "mode": "view"
-    },
-    {
-      "name": "trend-of-douyin",
-      "title": "Trend of DouYin",
-      "icon": "extension-icon/trend-douyin.png",
-      "subtitle": "Social Network Trends",
-      "description": "Show the popular trends of DouYin.",
-      "mode": "view"
+      "name": "rememberTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Preferences",
+      "label": "Remember Filter Tag",
+      "description": "Remember Gist Filter Tag.",
+      "default": false
     }
   ],
   "dependencies": {
