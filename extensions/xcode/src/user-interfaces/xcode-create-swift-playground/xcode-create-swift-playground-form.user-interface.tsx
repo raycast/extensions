@@ -66,6 +66,7 @@ export function xcodeCreateSwiftPlaygroundForm(
  * @param formValues The Form values
  * @param xcodeSwiftPlaygroundService XcodeSwiftPlaygroundService
  * @param navigation The Navigation
+ * @param forceCreate Bool value if creation of a Swift Playground should be enforced
  */
 async function onFormSubmit(
   formValues: any,
