@@ -42,10 +42,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Open in Logseq"
-              url={searchResult.url}
-            />
+            <Action.OpenInBrowser title="Open in Logseq" url={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -101,56 +98,51 @@ function useSearch() {
 
 async function performSearch(searchText: string): Promise<SearchResult[]> {
   const finalSearchResults: SearchResult[] = [];
-  await getFilesInDir(getUserConfiguredGraphPath() + "/pages").then(
-    (result) => {
-      if (getPreferenceValues().smartSearch == true && searchText.length > 0) {
-        const finalInitialResult: SearchResult[] = [];
-        //looping through entire database to see a match
-        result.forEach((element) => {
-          if (element.endsWith(".md")) {
-            //Making sure only MD files are shown
-            finalInitialResult.push({
-              name: formatResult(element),
-              description: element,
-              url: formatFilePath(element),
-            });
-          }
-        });
-        //use the minisearch index
-        const miniSearch = new MiniSearch({
-          fields: ["name"], // fields to index for full-text se¨¨arch
-          storeFields: ["name", "url"], // fields to return with search results
-          idField: "name",
-        });
-        miniSearch.addAll(finalInitialResult);
-
-        //  assingn final result to the return value of the search
-        const rawSearchResults = miniSearch.search(searchText);
-
-        for (const rawSearchResult in rawSearchResults) {
-          finalSearchResults.push({
-            name: rawSearchResults[rawSearchResult].name,
-            description: rawSearchResults[rawSearchResult].url,
-            url: rawSearchResults[rawSearchResult].url,
+  await getFilesInDir(getUserConfiguredGraphPath() + "/pages").then((result) => {
+    if (getPreferenceValues().smartSearch == true && searchText.length > 0) {
+      const finalInitialResult: SearchResult[] = [];
+      //looping through entire database to see a match
+      result.forEach((element) => {
+        if (element.endsWith(".md")) {
+          //Making sure only MD files are shown
+          finalInitialResult.push({
+            name: formatResult(element),
+            description: element,
+            url: formatFilePath(element),
           });
         }
-      } else {
-        result.forEach((element) => {
-          if (
-            element.endsWith(".md") &&
-            element.toLowerCase().includes(searchText.toLowerCase())
-          ) {
-            //Making sure only MD files are shown
-            finalSearchResults.push({
-              name: formatResult(element),
-              description: element,
-              url: formatFilePath(element),
-            });
-          }
+      });
+      //use the minisearch index
+      const miniSearch = new MiniSearch({
+        fields: ["name"], // fields to index for full-text se¨¨arch
+        storeFields: ["name", "url"], // fields to return with search results
+        idField: "name",
+      });
+      miniSearch.addAll(finalInitialResult);
+
+      //  assingn final result to the return value of the search
+      const rawSearchResults = miniSearch.search(searchText);
+
+      for (const rawSearchResult in rawSearchResults) {
+        finalSearchResults.push({
+          name: rawSearchResults[rawSearchResult].name,
+          description: rawSearchResults[rawSearchResult].url,
+          url: rawSearchResults[rawSearchResult].url,
         });
       }
+    } else {
+      result.forEach((element) => {
+        if (element.endsWith(".md") && element.toLowerCase().includes(searchText.toLowerCase())) {
+          //Making sure only MD files are shown
+          finalSearchResults.push({
+            name: formatResult(element),
+            description: element,
+            url: formatFilePath(element),
+          });
+        }
+      });
     }
-  );
+  });
   return finalSearchResults;
 }
 

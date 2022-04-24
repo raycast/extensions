@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  useNavigation,
-  showHUD,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, useNavigation, showHUD } from "@raycast/api";
 import {
   appendContentToFile,
   getTodayJournalPath,
@@ -34,16 +26,12 @@ export default function Command() {
         showGraphPathInvalidToast();
         throw e;
       })
-      .then(() =>
-        showToast({ style: Toast.Style.Animated, title: "Adding notes" })
-      )
+      .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
       .then(getTodayJournalPath)
       .then((filePath) => appendContentToFile(values.content, filePath))
       .then(() => showHUD("✅ Note added"))
       .then(pop)
-      .catch((e) =>
-        showToast({ style: Toast.Style.Failure, title: "Failed", message: e })
-      )
+      .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))
       .catch(noop);
   }
 
