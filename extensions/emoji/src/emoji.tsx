@@ -17,8 +17,14 @@ type Emoji = {
   category?: string;
 };
 
-const filterList = (list: Category[], searchText: string, category: string): Category[] => {
-  return list.map((c) => {
+const filterList = (emojis: Emoji[], recentlyUsed: Emoji[], searchText: string, category: string): Category[] => {
+  const categories = [{ category: category || "Emojis", emojis: emojis }];
+
+  if (!searchText) {
+    categories.unshift({ category: "Recently Used", emojis: recentlyUsed });
+  }
+
+  return categories.map((c) => {
     const emojis = c.emojis.filter((emoji) => {
       return category !== "" ? emoji.category === category : true;
     });
@@ -95,14 +101,7 @@ export default function Main(): ReactElement {
       }
     >
       {!isLoading
-        ? filterList(
-            [
-              { category: "Recently Used", emojis: recentlyUsed },
-              { category: category || "Emojis", emojis: list },
-            ],
-            searchText,
-            category
-          ).map((category: Category) => (
+        ? filterList(list, recentlyUsed, searchText, category).map((category: Category) => (
             <List.Section title={category.category} key={category.category}>
               {category.emojis.map((emoji) => (
                 <List.Item
