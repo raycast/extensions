@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, Icon, showToast, Toast } from "@raycast/api";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
 
@@ -59,7 +59,7 @@ export default function Command() {
     }
   }
 
-  const searchAction = <Action title="Search" onAction={performSearch} />;
+  const searchAction = <Action title="Search" icon={Icon.Binoculars} onAction={performSearch} />;
   return (
     <List
       isLoading={isLoading}
