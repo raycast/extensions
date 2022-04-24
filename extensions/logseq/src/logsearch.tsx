@@ -91,7 +91,6 @@ function useSearch() {
 
   useEffect(() => {
     search("");
-    return () => {};
   }, []);
 
   return {
@@ -101,11 +100,11 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string): Promise<SearchResult[]> {
-  let finalSearchResults: SearchResult[] = [];
+  const finalSearchResults: SearchResult[] = [];
   await getFilesInDir(getUserConfiguredGraphPath() + "/pages").then(
     (result) => {
-      if (getPreferenceValues().smartSearch == true && searchText.length > 0) { 
-        let finalInitialResult: SearchResult[] = [];
+      if (getPreferenceValues().smartSearch == true && searchText.length > 0) {
+        const finalInitialResult: SearchResult[] = [];
         //looping through entire database to see a match
         result.forEach((element) => {
           if (element.endsWith(".md")) {
@@ -118,7 +117,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
           }
         });
         //use the minisearch index
-        let miniSearch = new MiniSearch({
+        const miniSearch = new MiniSearch({
           fields: ["name"], // fields to index for full-text se¨¨arch
           storeFields: ["name", "url"], // fields to return with search results
           idField: "name",
@@ -126,7 +125,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
         miniSearch.addAll(finalInitialResult);
 
         //  assingn final result to the return value of the search
-        let rawSearchResults = miniSearch.search(searchText);
+        const rawSearchResults = miniSearch.search(searchText);
 
         for (const rawSearchResult in rawSearchResults) {
           finalSearchResults.push({
