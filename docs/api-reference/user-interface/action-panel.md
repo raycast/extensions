@@ -1,5 +1,7 @@
 # Action Panel
 
+![](../../.gitbook/assets/action-panel.png)
+
 ## API Reference
 
 ### ActionPanel

@@ -1,4 +1,4 @@
-import { Color, Icon, List, ListSection } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "./utils";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
@@ -78,16 +78,16 @@ function OutdatedList(props: { outdated?: OutdatedResults; isLoading: boolean; o
 
   return (
     <List searchBarPlaceholder={"Filter formulae by name" + String.ellipsis} isLoading={props.isLoading}>
-      <ListSection title="Formulae">
+      <List.Section title="Formulae">
         {formulae.map((formula) => (
           <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
         ))}
-      </ListSection>
-      <ListSection title="Casks">
+      </List.Section>
+      <List.Section title="Casks">
         {casks.map((cask) => (
           <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
         ))}
-      </ListSection>
+      </List.Section>
     </List>
   );
 }

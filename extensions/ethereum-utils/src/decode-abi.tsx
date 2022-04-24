@@ -4,9 +4,9 @@ import {
   Detail,
   Form,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
   useNavigation,
+  Action,
+  Toast,
 } from '@raycast/api';
 import Coder, { Constructor, Event, FunctionData } from 'abi-coder';
 import { useState } from 'react';
@@ -46,22 +46,31 @@ export default function Command() {
     } = values;
     const topics = [topic0, topic1, topic2, topic3];
     if (!isAbi(abiString)) {
-      showToast(ToastStyle.Failure, 'Invalid ABI');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid ABI',
+      });
       return;
     }
     const abi: JsonFragment[] = JSON.parse(abiString);
     const dataHex = normalizeHex(data);
     if (!isData(dataHex)) {
-      showToast(ToastStyle.Failure, 'Invalid data');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid data',
+      });
       return;
     }
     if (type === 'event') {
       const validTopic0 = !!topic0 && isEventTopic(topic0);
       const validTopics = topics.every(
-        (topic) => !!topic && (topic.length === 0 || isEventTopic(topic))
+        (topic) => !!topic && (topic.length === 0 || isEventTopic(topic)),
       );
       if (!validTopic0 || !validTopics) {
-        showToast(ToastStyle.Failure, 'Invalid event topics');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Invalid event topics',
+        });
         return;
       }
     }
@@ -71,7 +80,10 @@ export default function Command() {
         const constructor = coder.decodeConstructor(data);
         push(<DecodedDataView constr={constructor} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Conversion failed');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Conversion failed',
+        });
       }
       return;
     }
@@ -80,7 +92,10 @@ export default function Command() {
         const func = coder.decodeFunction(data);
         push(<DecodedDataView func={func} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Conversion failed');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Conversion failed',
+        });
       }
       return;
     }
@@ -90,7 +105,10 @@ export default function Command() {
         const event = coder.decodeEvent(allTopics, data);
         push(<DecodedDataView event={event} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Conversion failed');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Conversion failed',
+        });
       }
       return;
     }
@@ -100,7 +118,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -111,9 +129,9 @@ export default function Command() {
         onChange={handleAbiStringUpdate}
       />
       <Form.Dropdown id="type" title="Type" value={type} onChange={setType}>
-        <Form.DropdownItem title="Constructor" value="constructor" />
-        <Form.DropdownItem title="Function" value="function" />
-        <Form.DropdownItem title="Event" value="event" />
+        <Form.Dropdown.Item title="Constructor" value="constructor" />
+        <Form.Dropdown.Item title="Function" value="function" />
+        <Form.Dropdown.Item title="Event" value="event" />
       </Form.Dropdown>
       <Form.TextField id="data" title="Data" />
       {type === 'event' ? (

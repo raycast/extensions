@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Form, Navigation, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Navigation, showHUD, showToast, Toast } from "@raycast/api";
 import { XcodeSwiftPlaygroundService } from "../../services/xcode-swift-playground.service";
 import { XcodeSwiftPlaygroundPlatform } from "../../models/swift-playground/xcode-swift-playground-platform.model";
 import { XcodeSwiftPlayground } from "../../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundCreationParameters } from "../../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlaygroundTemplate } from "../../models/swift-playground/xcode-swift-playground-template.model";
 import tildify from "tildify";
+import { Preferences } from "../../models/utils/preferences.model";
 
 /**
  * Xcode create Swift Playground Form
@@ -15,21 +16,28 @@ export function xcodeCreateSwiftPlaygroundForm(
   xcodeSwiftPlaygroundService: XcodeSwiftPlaygroundService,
   navigation: Navigation
 ): JSX.Element {
+  const preferences = getPreferenceValues<Preferences>();
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            title={"Open or create Swift Playground"}
+            onSubmit={(formValues) => {
+              return onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, false);
+            }}
+          />
+          <Action.SubmitForm
             title={"Create Swift Playground"}
-            onSubmit={async (formValues) => {
-              await onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation);
+            onSubmit={(formValues) => {
+              return onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, true);
             }}
           />
         </ActionPanel>
       }
     >
       <Form.TextField id="name" title={"Name"} defaultValue="MyPlayground" />
-      <Form.TextField id="location" title="Location" defaultValue="~/Desktop" />
+      <Form.TextField id="location" title="Location" defaultValue={preferences.playgroundDefaultLocation} />
       <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
         {Object.keys(XcodeSwiftPlaygroundPlatform)
           .map((platform) => platform.toLocaleLowerCase())
@@ -62,14 +70,16 @@ export function xcodeCreateSwiftPlaygroundForm(
 async function onFormSubmit(
   formValues: any,
   xcodeSwiftPlaygroundService: XcodeSwiftPlaygroundService,
-  navigation: Navigation
+  navigation: Navigation,
+  forceCreate: boolean
 ) {
   // Declare Swift Playground
   let swiftPlayground: XcodeSwiftPlayground;
   try {
     // Create Swift Playground with parameters
     swiftPlayground = await xcodeSwiftPlaygroundService.createSwiftPlayground(
-      formValues as XcodeSwiftPlaygroundCreationParameters
+      formValues as XcodeSwiftPlaygroundCreationParameters,
+      forceCreate
     );
   } catch (error) {
     // Log error

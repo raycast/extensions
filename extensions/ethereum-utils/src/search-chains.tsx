@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  List,
-  ListItem,
-  OpenInBrowserAction,
-  PushAction,
-} from '@raycast/api';
+import { ActionPanel, Detail, Icon, List, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Service, { Chain } from './service';
 
@@ -30,30 +21,30 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {chains.map((chain) => (
-        <ListItem
+        <List.Item
           key={chain.chainId}
           title={chain.name}
           keywords={[chain.chain, chain.network, chain.chainId.toString()]}
           accessoryTitle={chain.chainId.toString()}
           actions={
             <ActionPanel>
-              <PushAction
+              <Action.Push
                 icon={Icon.TextDocument}
                 title="Show Details"
                 target={<ChainView chain={chain} />}
               />
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title="Copy Chain Id"
                 content={chain.chainId}
                 shortcut={{ key: 'i', modifiers: ['cmd'] }}
               />
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open Chain Homepage"
                 url={chain.infoURL}
                 shortcut={{ key: 'h', modifiers: ['cmd'] }}
               />
               {chain.explorers && chain.explorers[0] && (
-                <OpenInBrowserAction
+                <Action.OpenInBrowser
                   title="Open Chain Explorer"
                   url={chain.explorers[0].url}
                   shortcut={{ key: 'e', modifiers: ['cmd'] }}
@@ -95,17 +86,17 @@ function ChainView(props: ChainProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             title="Copy Chain Id"
             content={chain.chainId}
           />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open Chain Homepage"
             url={chain.infoURL}
             shortcut={{ key: 'h', modifiers: ['cmd'] }}
           />
           {chain.explorers && chain.explorers[0] && (
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Chain Explorer"
               url={chain.explorers[0].url}
               shortcut={{ key: 'e', modifiers: ['cmd'] }}

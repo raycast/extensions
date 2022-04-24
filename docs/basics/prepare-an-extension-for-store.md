@@ -21,7 +21,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Extensions and Commands Naming
 
-- Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/) convention
+- Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/#NYT) convention
   - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
   - ❌ `Hacker news`, `my issues`
   - 🤔 It's okay to use lower case for names and trademarks that are canonically written with lower case letters. E.g. `iOS` , `macOS` , `npm`.
@@ -73,10 +73,131 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ### Provide README if Additional Configuration Required
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
-
-- Supporting README media: Put all linked media files in a top-level **media** folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- Supporting README media: Put all linked media files in a top-level `metadata` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
 ![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
+
+### Categories
+
+![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.png)
+
+- All extensions should be published with at least one category
+- Categories are case-sensitive and should follow the [Title Case](https://titlecaseconverter.com/rules/) convention
+- Add categories in the `package.json` [manifest](https://developers.raycast.com/information/manifest) file or select the categories when you create a new extension using the **Create Extension** command
+
+#### All Categories
+
+| Category        | Example                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Applications    | [Cleanshot X](https://www.raycast.com/Aayush9029/cleanshotx) – Capture and record your screen                                                                   |
+| Communication   | [Slack Status](https://www.raycast.com/petr/slack-status) – Quickly change your Slack status.                                                                   |
+| Data            | [Random Data Generator](https://www.raycast.com/loris/random) – Generate random data using Faker library.                                                       |
+| Documentation   | [Tailwind CSS Documentation](https://www.raycast.com/vimtor/tailwindcss) – Quickly search Tailwind CSS documentation and open it in the browser.                |
+| Design Tools    | [Figma File Search](https://www.raycast.com/michaelschultz/figma-files-raycast-extension) – Lists Figma files allowing you to search and navigate to them.      |
+| Developer Tools | [Brew](https://www.raycast.com/nhojb/brew) – Search and install Homebrew formulae.                                                                              |
+| Finance         | [Coinbase Pro](https://www.raycast.com/farisaziz12/coinbase-pro) – View your Coinbase Pro portfolio.                                                            |
+| Fun             | [8 Ball](https://www.raycast.com/rocksack/8-ball) – Returns an 8 ball like answer to questions.                                                                 |
+| Media           | [Unsplash](https://www.raycast.com/eggsy/unsplash) – Search images or collections on Unsplash, download, copy or set them as wallpaper without leaving Raycast. |
+| News            | [Hacker News](https://www.raycast.com/thomas/hacker-news) – Read the latest stories of Hacker News.                                                             |
+| Productivity    | [Todoist](https://www.raycast.com/thomaslombart/todoist) – Check your Todoist tasks and quickly create new ones.                                                |
+| Security        | [1Password 7](https://www.raycast.com/khasbilegt/1password7) – Search, open or edit your 1Password 7 passwords from Raycast.                                    |
+| System          | [Coffee](https://www.raycast.com/mooxl/coffee) – Prevent the sleep function on your mac.                                                                        |
+| Web             | [Wikipedia](https://www.raycast.com/vimtor/wikipedia) – Search Wikipedia articles and view them.                                                                |
+| Other           | To be used if you think your extension doesn’t fit in any of the above categories.                                                                              |
+
+### Screenshots
+
+![An example of an extension with screenshot metadata](https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png)
+
+- Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
+- You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
+
+#### Adding Screenshots
+
+- To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
+
+![Extension folder structure with a metadata folder and screenshots](../.gitbook/assets/folder-structure.png)
+
+#### Specifications
+
+| Screenshot size                | Aspect ratio | Format | Dark mode support |
+| ------------------------------ | ------------ | ------ | ----------------- |
+| 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
+
+#### Guides and Template
+
+- This [screenshot guide and template](https://www.figma.com/community/file/1083160585697279319/Raycast---Extension-Screenshot-Template) can help you make and export a proper screenshot
+- If you feel like you can’t create screenshots and meet the specifications, ask [community](https://raycast.com/community) for help (#extensions channel)
+
+![Perfectly center the Raycast window in the required screenshot dimensions](../.gitbook/assets/screenshot-guide.png)
+
+#### Do's & Dont's
+
+- ✅ Center the main app window in the screenshot, making sure there is equal padding on either sides of the app and your extension
+- ✅ Choose a background with good contrast, that makes it clear and easy to see the app and extension you’ve made
+- ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
+- ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
+- ❌ Make sure all other app windows are hidden behind Raycast before taking a screenshot
+- ❌ Do not screenshot the window without a background (⌘⇧4 + space bar) – you will lose the vibrancy of the Raycast app window and decrease the quality of your screenshot
+- ❌ Transparent images are not accepted – all screenshots must have a background
+- ❌ Do not scale your screenshot up from its original size – this will lead to blurry pixels and a lower quality image
+- ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
+
+{% hint style="info" %}
+You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
+{% endhint %}
+
+### Version History
+
+![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
+
+- Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
+  - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
+- See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
+- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+  - Make sure your change title is within square brackets
+  - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
+- Below is an example of a changelog that follows the correct format
+
+```markdown
+# Brew Changelog
+
+## [Added a bunch of new feedback] - 2022-01-17
+
+- Improve reliability of `outdated` command
+- Add action to copy formula/cask name
+- Add cask name & tap to cask details
+- Add Toast action to cancel current action
+- Add Toast action to copy error log after failure
+
+## [New Additions] - 2022-12-13
+
+- Add greedy upgrade preference
+- Add `upgrade` command
+
+## [Fixes & Bits] - 2021-11-19
+
+- Improve discovery of brew prefix
+- Update Cask.installed correctly after installation
+- Fix installed state after uninstalling search result
+- Fix cache check after installing/uninstalling cask
+- Add uninstall action to outdated action panel
+
+## [New Commands] - 2021-11-04
+
+Add support for searching and managing casks
+
+## [Added Brew] - 2021-10-26
+
+Initial version code
+```
+
+![An extensions version history on raycast.com/store](https://user-images.githubusercontent.com/17166544/159987128-1e9f22a6-506b-4edd-bb40-e121bfdc46f8.png)
+
+{% hint style="info" %}
+You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you format your changelog correctly
+{% endhint %}
 
 ### Contributing to Existing Extensions vs Creating a New One
 

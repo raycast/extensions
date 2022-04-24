@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kubernetes-docs",
+  "title": "Kubernetes Documenation",
+  "description": "Search kubernetes official documentation",
+  "icon": "command-icon.png",
+  "author": "rpvsilva",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Documentation",
+      "subtitle": "Kubernetes",
+      "description": "Search in Kubernetes documentation",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "language",
+          "type": "dropdown",
+          "required": true,
+          "title": "Language",
+          "description": "Select the language of the kubernetes documentation",
+          "default": "en",
+          "data": [
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Indonesian",
+              "value": "id"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Korean",
+              "value": "ko"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Polish",
+              "value": "pl"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "uk"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.2",
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "~17.0.21",
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.0",
+    "typescript": "^4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

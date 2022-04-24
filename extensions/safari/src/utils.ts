@@ -3,7 +3,7 @@ import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
 
-import { showToast, ToastStyle } from "@raycast/api";
+import { Icon, showToast, Toast } from "@raycast/api";
 
 import { HistoryItem, Tab } from "./types";
 
@@ -15,9 +15,17 @@ export const executeJxa = async (script: string) => {
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {
-        showToast(ToastStyle.Failure, "Application not found", "Things must be running");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Application not found",
+          message: "Things must be running",
+        });
       } else {
-        showToast(ToastStyle.Failure, "Something went wrong", message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Something went wrong",
+          message: message,
+        });
       }
     }
   }
@@ -50,9 +58,14 @@ export const getUrlDomain = (url: string) => {
 };
 
 export const getFaviconUrl = (domain: string | undefined) => {
-  if (domain) {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
+  if (!domain) {
+    return Icon.Globe;
   }
+
+  return {
+    source: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`,
+    fallback: Icon.Globe,
+  };
 };
 
 export const formatDate = (date: string) =>

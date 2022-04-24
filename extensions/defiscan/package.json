@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "defiscan",
+  "title": "DefiScan.live",
+  "description": "Search on defiscan.live",
+  "icon": "command-icon.png",
+  "categories": [
+    "Finance"
+  ],
+  "author": "adrian-schnell",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "defi",
+      "title": "Search DefiScan.live",
+      "description": "Quick access for Block, Transaction, Address or Vault details",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.0",
+    "axios": "^0.26.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.6.2",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
