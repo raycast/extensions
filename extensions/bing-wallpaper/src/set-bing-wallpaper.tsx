@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import {
   BingImage,
   BingResponseData,
@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { homedir } from "os";
-import { deleteCache, getScreenshotDirectory, preferences, setWallpaper } from "./utils/common-utils";
+import { deleteCache, getPicturesDirectory, preferences, setWallpaper } from "./utils/common-utils";
 import fse from "fs-extra";
 
 export default function CommonDirectory() {
@@ -99,36 +99,38 @@ ${getCopyright(bingImage.copyright).copyright}`}
                     await downloadPicture(downloadSize, bingImage);
                   }}
                 />
-                <Action
-                  icon={Icon.Window}
-                  title={"Set Random Wallpaper"}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => {
-                    const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
-                    setWallpaper(
-                      getPictureName(randomImage.url) + "-" + randomImage.startdate,
-                      buildBingImageURL(randomImage.url, "raw")
-                    ).then(() => "");
-                  }}
-                />
-                <Action
-                  icon={Icon.Globe}
-                  title={"Search Picture"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
-                  onAction={async () => {
-                    await open(buildCopyrightURL(bingImage.copyrightlink));
-                    await showHUD("Search picture in browser");
-                  }}
-                />
-                <Action
-                  icon={Icon.Binoculars}
-                  title={"More Bing Wallpaper"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
-                  onAction={async () => {
-                    await open("https://github.com/niumoo/bing-wallpaper");
-                    await showHUD("Get more bing wallpaper");
-                  }}
-                />
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.TwoArrowsClockwise}
+                    title={"Set Random Wallpaper"}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => {
+                      const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
+                      setWallpaper(
+                        getPictureName(randomImage.url) + "-" + randomImage.startdate,
+                        buildBingImageURL(randomImage.url, "raw")
+                      ).then(() => "");
+                    }}
+                  />
+                  <Action
+                    icon={Icon.MagnifyingGlass}
+                    title={"Search Picture"}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+                    onAction={async () => {
+                      await open(buildCopyrightURL(bingImage.copyrightlink));
+                      await showHUD("Search picture in browser");
+                    }}
+                  />
+                  <Action
+                    icon={Icon.Globe}
+                    title={"More Bing Wallpaper"}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
+                    onAction={async () => {
+                      await open("https://github.com/niumoo/bing-wallpaper");
+                      await showHUD("Get more bing wallpaper");
+                    }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -145,7 +147,7 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
       return res.arrayBuffer();
     })
     .then(function (buffer) {
-      const picturePath = `${getScreenshotDirectory()}/${getPictureName(bingImage.url)}-${
+      const picturePath = `${getPicturesDirectory()}/${getPictureName(bingImage.url)}-${
         bingImage.startdate
       }-${downSize}.png`;
       fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
@@ -155,7 +157,7 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
           const options: Toast.Options = {
             style: Toast.Style.Success,
             title: "Download picture success!",
-            message: "Click to open picture",
+            message: `${picturePath.replace(`${homedir()}`, "~")}`,
             primaryAction: {
               title: "Open picture",
               onAction: (toast) => {
@@ -164,9 +166,9 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
               },
             },
             secondaryAction: {
-              title: "Reveal in finder",
+              title: "Show in finder",
               onAction: (toast) => {
-                open(`${homedir()}/Downloads`);
+                showInFinder(picturePath);
                 toast.hide();
               },
             },
@@ -179,7 +181,7 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
 
 async function autoDownloadPictures(downSize: string, bingImages: BingImage[]) {
   bingImages.forEach((value) => {
-    const picturePath = `${getScreenshotDirectory()}/${getPictureName(value.url)}-${value.startdate}-${downSize}.png`;
+    const picturePath = `${getPicturesDirectory()}/${getPictureName(value.url)}-${value.startdate}-${downSize}.png`;
     if (!fse.existsSync(picturePath)) {
       fetch(buildBingImageURL(value.url, downSize))
         .then(function (res) {
