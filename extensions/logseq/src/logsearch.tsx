@@ -134,10 +134,12 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
             url: rawSearchResults[rawSearchResult].url,
           });
         }
-      }
-      else {
+      } else {
         result.forEach((element) => {
-          if (element.endsWith(".md") && element.toLowerCase().includes(searchText.toLowerCase())) {
+          if (
+            element.endsWith(".md") &&
+            element.toLowerCase().includes(searchText.toLowerCase())
+          ) {
             //Making sure only MD files are shown
             finalSearchResults.push({
               name: formatResult(element),
