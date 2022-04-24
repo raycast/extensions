@@ -123,6 +123,11 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
       const source = state.state === "on" ? "power-plug.png" : "power-plug-off.png";
       const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "door") {
+      const source = state.state === "on" ? "door-open.png" : "door-closed.png";
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -327,6 +332,15 @@ export function StateListItem(props: { state: State }): JSX.Element {
             }
             case "off": {
               return "Up To Date";
+            }
+          }
+        } else if (dc === "door") {
+          switch (state.state) {
+            case "on": {
+              return "Open";
+            }
+            case "off": {
+              return "Closed";
             }
           }
         }
