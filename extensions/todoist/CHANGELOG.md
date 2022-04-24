@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Add support for comments] - 2022-04-23
+
+- Added support for comments on each task. It's now possible to add a new comment, edit it, delete it, or search through every comment's content.
+- Reset the form focus to the first field when creating a project or a task.
+
 ## [New command for searching tasks] - 2022-04-13
 
 - Added a new command to search across all your tasks with the ability to filter by project
