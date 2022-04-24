@@ -120,7 +120,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
       });
       miniSearch.addAll(finalInitialResult);
 
-      //  assingn final result to the return value of the search
+      //  assinging final result to the return value of the search
       const rawSearchResults = miniSearch.search(searchText);
 
       for (const rawSearchResult in rawSearchResults) {
