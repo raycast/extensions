@@ -1,7 +1,7 @@
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage, showToast, Toast } from "@raycast/api";
-import Values = LocalStorage.Values;
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -73,12 +73,6 @@ export const checkIsFile = (path: string) => {
   } catch (e) {
     return false;
   }
-};
-
-export const getFileInfo = (path: string) => {
-  const obj1 = path.lastIndexOf("/");
-  const obj2 = path.lastIndexOf(".");
-  return { nameWithoutExtension: path.substring(obj1 + 1, obj2), extension: path.substring(obj2 + 1) };
 };
 
 export const getSelectedFile = async () => {
