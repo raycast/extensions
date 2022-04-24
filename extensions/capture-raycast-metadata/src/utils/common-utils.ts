@@ -1,5 +1,5 @@
-import { getPreferenceValues, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
-import fs from "fs";
+import { getPreferenceValues, LocalStorage, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import fse from "fs-extra";
 import Values = LocalStorage.Values;
 import { homedir } from "os";
 import { runAppleScript } from "run-applescript";
@@ -15,6 +15,7 @@ import {
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
+    screenshotsDirectory: preferencesMap.get("screenshotsDirectory") as string,
     screenshotName: preferencesMap.get("screenshotName") as string,
     screenshotFormat: preferencesMap.get("screenshotFormat") as string,
   };
@@ -23,13 +24,16 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const checkDirectoryExists = (filePath: string) => {
-  try {
-    fs.accessSync(filePath);
-    return true;
-  } catch (e) {
-    return false;
+export const getScreenshotsDirectory = () => {
+  const directoryPreference = preferences().screenshotsDirectory;
+  let actualDirectory = directoryPreference;
+  if (directoryPreference.startsWith("~")) {
+    actualDirectory = directoryPreference.replace("~", `${homedir()}`);
   }
+  if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
+    return homedir() + "/Downloads";
+  }
+  return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
 };
 
 type CaptureResult = {
@@ -94,8 +98,8 @@ export async function captureWithInternalMonitor(raycastLocation: RaycastLocatio
   const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
   const scale = DESIRED_RAYCAST_WIDTH_IN_METADATA_PX / raycastSize.w;
 
-  const picturePath = `${homedir()}/Downloads/${await checkFileExists(
-    `${homedir()}/Downloads/`,
+  const picturePath = `${getScreenshotsDirectory()}/${buildFileName(
+    getScreenshotsDirectory() + "/",
     finalScreenshotName,
     screenshotFormat
   )}`;
@@ -113,7 +117,7 @@ export async function captureResultToast(captureResult: CaptureResult) {
     const optionsToast: Toast.Options = {
       title: "Capture Success!",
       style: Toast.Style.Success,
-      message: "Metadata saved in Download.",
+      message: `${captureResult.picturePath.replace(`${homedir()}`, "~")}`,
       primaryAction: {
         title: "Open in Finder",
         onAction: async () => {
@@ -122,9 +126,9 @@ export async function captureResultToast(captureResult: CaptureResult) {
         },
       },
       secondaryAction: {
-        title: "Reveal in Finder",
+        title: "Show in Finder",
         onAction: async () => {
-          await open(homedir() + "/Downloads/");
+          await showInFinder(captureResult.picturePath);
           await showHUD("Reveal metadata in Finder");
         },
       },
@@ -139,15 +143,15 @@ export async function captureResultToast(captureResult: CaptureResult) {
   }
 }
 
-export async function checkFileExists(path: string, name: string, extension: string) {
-  const directoryExists = await checkDirectoryExists(path + name + "." + extension);
+export function buildFileName(path: string, name: string, extension: string) {
+  const directoryExists = fse.pathExistsSync(path + name + "." + extension);
   if (!directoryExists) {
     return name + "." + extension;
   } else {
     let index = 2;
     while (directoryExists) {
       const newName = name + "-" + index + "." + extension;
-      const directoryExists = await checkDirectoryExists(path + newName);
+      const directoryExists = fse.pathExistsSync(path + newName);
       if (!directoryExists) {
         return newName;
       }

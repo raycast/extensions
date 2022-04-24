@@ -7,7 +7,7 @@ export default async () => {
   const _raycastSize = await getRaycastSize();
   const optionsAlert: Alert.Options = {
     title: "⚠️ Capture Failure!",
-    message: "Files or folders already exist in the destination path. Do you want to overwrite?",
+    message: "",
   };
 
   if (_raycastLocation[0] === -1) {
