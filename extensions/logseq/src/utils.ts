@@ -95,7 +95,7 @@ export const getFilesInDir = async(dirPath: string) => {
 }
 
 export const formatResult = (result: string) => {
-  let title = result.split("/")
+  const title = result.split("/")
 return title[title.length -1].replace(".md", "")
 }
 
