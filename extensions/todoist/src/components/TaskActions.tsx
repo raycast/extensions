@@ -7,6 +7,7 @@ import { getAPIDate, getToday } from "../helpers";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
+import TaskComments from "./TaskComments";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -104,25 +105,32 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
             />
           ))}
         </ActionPanel.Submenu>
-      </ActionPanel.Section>
 
-      <ActionPanel.Section>
-        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-
-        <Action.CopyToClipboard
-          title="Copy Task URL"
-          content={task.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
         <Action
           id="deleteTask"
           title="Delete Task"
           icon={Icon.Trash}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={() => deleteTask(task)}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+
+        {task.commentCount > 0 ? (
+          <Action.Push
+            title="Show Comments"
+            target={<TaskComments task={task} />}
+            icon={Icon.Bubble}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+          />
+        ) : null}
+
+        <Action.CopyToClipboard
+          title="Copy Task URL"
+          content={task.url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
     </>
