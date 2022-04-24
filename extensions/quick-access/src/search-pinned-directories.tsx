@@ -1,18 +1,17 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey } from "./utils/constants";
-import { copyFileByPath } from "./utils/applescript-utils";
 import { copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
-import { ActionRemoveAllDirectories } from "./utils/ui-components";
+import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
 
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const { autoCopyLatestFile } = commonPreferences();
+  const { primaryAction, autoCopyLatestFile } = commonPreferences();
 
   const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
@@ -36,7 +35,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {directoryWithFiles.length === 0 || allFilesNumber === 0 ? (
+      {(directoryWithFiles.length === 0 || allFilesNumber === 0) && !loading ? (
         <List.EmptyView
           title={directoryWithFiles.length === 0 ? "No directory. Please pin first" : "No Files."}
           description={"You can always pin directory from the Action Panel"}
@@ -73,7 +72,12 @@ export default function Command() {
                       title={fileValue.name}
                       actions={
                         <ActionPanel>
-                          <ActionsOnFile fileInfo={fileValue} index={directoryIndex} setRefresh={setRefresh} />
+                          <ActionsOnFile
+                            primaryAction={primaryAction}
+                            fileInfo={fileValue}
+                            index={directoryIndex}
+                            setRefresh={setRefresh}
+                          />
                           <ActionPanel.Section title="Directory Action">
                             <Action
                               icon={Icon.Pin}
@@ -138,27 +142,15 @@ export default function Command() {
 }
 
 function ActionsOnFile(props: {
+  primaryAction: string;
   fileInfo: FileInfo;
   index: number;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { fileInfo, index, setRefresh } = props;
+  const { primaryAction, fileInfo, index, setRefresh } = props;
   return (
     <>
-      <Action
-        icon={Icon.Clipboard}
-        title={"Copy"}
-        onAction={async () => {
-          const copyResult = await copyFileByPath(fileInfo.path);
-          if (isEmpty(copyResult)) {
-            await showHUD(`${fileInfo.name} is copied to clipboard`);
-          } else {
-            await showHUD(copyResult);
-          }
-          await upRank(index, setRefresh);
-        }}
-      />
-      <Action.Open title={"Open"} target={fileInfo.path} onOpen={async () => await upRank(index, setRefresh)} />
+      <PrimaryActionOnFile primaryAction={primaryAction} fileInfo={fileInfo} index={index} setRefresh={setRefresh} />
 
       <ActionPanel.Section>
         <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
@@ -193,7 +185,7 @@ function ActionsOnFile(props: {
   );
 }
 
-async function upRank(index: number, setRefresh: React.Dispatch<React.SetStateAction<number>>) {
+export async function upRank(index: number, setRefresh: React.Dispatch<React.SetStateAction<number>>) {
   const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
   const directories: DirectoryInfo[] = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
   const moreHighRank = directories.filter((value) => {

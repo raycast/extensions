@@ -33,6 +33,24 @@
           "default": false
         },
         {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary action for processing files.",
+          "required": false,
+          "title": "Primary action",
+          "default": "Copy",
+          "data": [
+            {
+              "title": "Copy",
+              "value": "Copy"
+            },
+            {
+              "title": "Open",
+              "value": "Open"
+            }
+          ]
+        },
+        {
           "name": "fileShowNumber",
           "type": "dropdown",
           "required": false,

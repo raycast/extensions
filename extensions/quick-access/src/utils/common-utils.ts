@@ -10,6 +10,7 @@ export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     autoCopyLatestFile: preferencesMap.get("autoCopyLatestFile") as boolean,
+    primaryAction: preferencesMap.get("primaryAction") as string,
     fileShowNumber: preferencesMap.get("fileShowNumber") as string,
     sortBy: preferencesMap.get("sortBy") as string,
   };
