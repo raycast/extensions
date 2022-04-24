@@ -5,7 +5,6 @@ import { XcodeSwiftPlayground } from "../../models/swift-playground/xcode-swift-
 import { XcodeSwiftPlaygroundCreationParameters } from "../../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlaygroundTemplate } from "../../models/swift-playground/xcode-swift-playground-template.model";
 import tildify from "tildify";
-import { Preferences } from "../../models/utils/preferences.model";
 
 /**
  * Xcode create Swift Playground Form
@@ -16,7 +15,6 @@ export function xcodeCreateSwiftPlaygroundForm(
   xcodeSwiftPlaygroundService: XcodeSwiftPlaygroundService,
   navigation: Navigation
 ): JSX.Element {
-  const preferences = getPreferenceValues<Preferences>();
   return (
     <Form
       actions={
@@ -37,7 +35,7 @@ export function xcodeCreateSwiftPlaygroundForm(
       }
     >
       <Form.TextField id="name" title={"Name"} defaultValue="MyPlayground" />
-      <Form.TextField id="location" title="Location" defaultValue={preferences.playgroundDefaultLocation} />
+      <Form.TextField id="location" title="Location" defaultValue={xcodeSwiftPlaygroundService.defaultSwiftPlaygroundLocation} />
       <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
         {Object.keys(XcodeSwiftPlaygroundPlatform)
           .map((platform) => platform.toLocaleLowerCase())

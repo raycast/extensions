@@ -2,12 +2,12 @@ import { XcodeSwiftPlaygroundCreationParameters } from "../models/swift-playgrou
 import { XcodeSwiftPlayground } from "../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundPlatform } from "../models/swift-playground/xcode-swift-playground-platform.model";
 import { execAsync } from "../shared/exec-async";
-import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
 import untildify from "untildify";
+import { getPreferenceValues } from "@raycast/api";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -41,6 +41,16 @@ export class XcodeSwiftPlaygroundService {
       `,
     },
   ];
+
+  /**
+   * The default location where a Swift Playground should be created
+   */
+  get defaultSwiftPlaygroundLocation(): string {
+    // Retrieve the preference values
+    const preferences = getPreferenceValues();
+    // Retrieve the excluded Xcode Project paths string from preference values
+    return preferences.playgroundDefaultLocation as string;
+  }
 
   /**
    * Create a new Swift Playground
