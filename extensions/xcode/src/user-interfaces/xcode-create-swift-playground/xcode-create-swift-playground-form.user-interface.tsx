@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Navigation, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Navigation, showHUD, showToast, Toast } from "@raycast/api";
 import { XcodeSwiftPlaygroundService } from "../../services/xcode-swift-playground.service";
 import { XcodeSwiftPlaygroundPlatform } from "../../models/swift-playground/xcode-swift-playground-platform.model";
 import { XcodeSwiftPlayground } from "../../models/swift-playground/xcode-swift-playground.model";
