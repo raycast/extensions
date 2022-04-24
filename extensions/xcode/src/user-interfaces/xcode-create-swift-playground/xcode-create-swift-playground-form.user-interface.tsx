@@ -49,13 +49,7 @@ export function xcodeCreateSwiftPlaygroundForm(
       </Form.Dropdown>
       <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.Empty}>
         {Object.keys(XcodeSwiftPlaygroundTemplate).map((template) => {
-          return (
-            <Form.Dropdown.Item
-              key={template}
-              value={template}
-              title={template}
-            />
-          );
+          return <Form.Dropdown.Item key={template} value={template} title={template} />;
         })}
       </Form.Dropdown>
       <Form.Checkbox id="open" label="Open in Xcode after creation" defaultValue={true} />
