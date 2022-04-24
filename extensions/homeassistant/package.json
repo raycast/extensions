@@ -216,7 +216,7 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.33.0",
     "home-assistant-js-websocket": "^5.11.1",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
