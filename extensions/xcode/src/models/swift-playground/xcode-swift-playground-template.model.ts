@@ -4,4 +4,5 @@
 export enum XcodeSwiftPlaygroundTemplate {
   empty = "empty",
   swiftUI = "swiftUI",
+  UIKit = "UIKit",
 }
