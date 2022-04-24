@@ -33,7 +33,7 @@ const validateFolderPath = (folder: string) => {
     });
 };
 
-const getUserConfiguredGraphPath = () => {
+export const getUserConfiguredGraphPath = () => {
   return untildify(getPreferenceValues().graphPath);
 };
 
@@ -89,3 +89,18 @@ export const appendContentToFile = (content: string, filePath: string) => {
     .then(() => createFileIfNotExist(filePath))
     .then(() => fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode)));
 };
+
+export const getFilesInDir = async(dirPath: string) => {
+  return fs.promises.readdir(dirPath).then((files) => files.map((file) => path.join(dirPath, file)));
+}
+
+export const formatResult = (result: string) => {
+  let title = result.split("/")
+return title[title.length -1].replace(".md", "")
+}
+
+export const formatFilePath = (pageName:string) => {
+  const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length -1]
+  const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`)
+  return finalURL
+}
