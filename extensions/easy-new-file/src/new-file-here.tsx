@@ -90,7 +90,7 @@ export default function main() {
                         await showToast(Toast.Style.Animated, "Removing template...");
                         fse.unlinkSync(template.path);
                         setRefresh(refreshNumber());
-                        await showToast(Toast.Style.Success, "Remove template success!");
+                        await showToast(Toast.Style.Success, "Removed template successfully.");
                       }}
                     />
                     <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={template.path} />
