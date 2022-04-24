@@ -8,4 +8,3 @@ A Raycast extension for copying and pasting licenses for your open source projec
 ![](./metadata/choosealicense-raycast2.png)
 ![](./metadata/choosealicense-raycast3.png)
 ![](./metadata/choosealicense-raycast4.png)
-![](./metadata/choosealicense-raycast5.png)
