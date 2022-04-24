@@ -144,10 +144,10 @@ export class XcodeSwiftPlaygroundService {
   private static swiftSourceContentsTemplateFile(template: XcodeSwiftPlaygroundTemplate): TemplateFile {
     let contents: string;
     switch (template) {
-      case XcodeSwiftPlaygroundTemplate.empty:
+      case XcodeSwiftPlaygroundTemplate.Empty:
         contents = "import Foundation\n\n";
         break;
-      case XcodeSwiftPlaygroundTemplate.swiftUI:
+      case XcodeSwiftPlaygroundTemplate.SwiftUI:
         contents = `
         import PlaygroundSupport
         import SwiftUI

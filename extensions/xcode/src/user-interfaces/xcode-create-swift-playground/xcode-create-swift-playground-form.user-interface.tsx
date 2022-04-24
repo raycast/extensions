@@ -45,7 +45,7 @@ export function xcodeCreateSwiftPlaygroundForm(
             return <Form.Dropdown.Item key={platform} value={platform} title={platform.replace("os", "OS")} />;
           })}
       </Form.Dropdown>
-      <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.empty}>
+      <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.Empty}>
         {Object.keys(XcodeSwiftPlaygroundTemplate).map((platform) => {
           return (
             <Form.Dropdown.Item
