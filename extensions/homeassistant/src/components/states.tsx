@@ -349,6 +349,9 @@ export function StateListItem(props: { state: State }): JSX.Element {
     } else if (state.entity_id.startsWith("input_button")) {
       return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
     } else if (state.entity_id.startsWith("update")) {
+      if (state.attributes.in_progress === true) {
+        return "in progress 🔄";
+      }
       const iv = state.attributes.installed_version;
       const lv = state.attributes.latest_version;
       if (state.state === "on" && lv) {

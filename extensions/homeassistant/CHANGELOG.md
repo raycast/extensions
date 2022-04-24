@@ -3,6 +3,7 @@
 ## [Add door support] - 2022-04-24
 - Add icon and state support for device class `door`
 - Add root command `Doors` to filter entities of device class `door`
+- `update` entities now show `in progress` state when an update is running
 
 ## [Add support for update entities] - 2022-04-08
 - Add support for update entities from HA 2022.04
