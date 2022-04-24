@@ -7,7 +7,7 @@ import fs from "fs";
 import untildify from "untildify";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const noop = () => {};
+export const noop = () => { };
 export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
@@ -90,17 +90,17 @@ export const appendContentToFile = (content: string, filePath: string) => {
     .then(() => fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode)));
 };
 
-export const getFilesInDir = async(dirPath: string) => {
+export const getFilesInDir = async (dirPath: string) => {
   return fs.promises.readdir(dirPath).then((files) => files.map((file) => path.join(dirPath, file)));
 }
 
 export const formatResult = (result: string) => {
   const title = result.split("/")
-return title[title.length -1].replace(".md", "")
+  return title[title.length - 1].replace(".md", "")
 }
 
-export const formatFilePath = (pageName:string) => {
-  const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length -1]
+export const formatFilePath = (pageName: string) => {
+  const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1]
   const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`)
   return finalURL
 }
