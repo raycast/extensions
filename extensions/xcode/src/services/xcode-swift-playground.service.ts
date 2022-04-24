@@ -227,7 +227,6 @@ export class XcodeSwiftPlaygroundService {
       contents: contents,
     };
   }
-
 }
 
 /**

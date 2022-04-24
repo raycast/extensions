@@ -10,7 +10,7 @@ export default async () => {
   // Show loading Toast
   const loadingToast = await showToast({
     style: Toast.Style.Animated,
-    title: "Please wait"
+    title: "Please wait",
   });
   try {
     // Delete Unsupported simulators
@@ -20,7 +20,7 @@ export default async () => {
     // Show success Toast
     await showToast({
       style: Toast.Style.Success,
-      title: "Unsupported simulators successfully deleted"
+      title: "Unsupported simulators successfully deleted",
     });
   } catch (error) {
     // Log error
@@ -30,7 +30,7 @@ export default async () => {
     // Show failure Toast
     await showToast({
       style: Toast.Style.Failure,
-      title: "An error occurred while trying to delete unsupported simulators"
+      title: "An error occurred while trying to delete unsupported simulators",
     });
   }
 };

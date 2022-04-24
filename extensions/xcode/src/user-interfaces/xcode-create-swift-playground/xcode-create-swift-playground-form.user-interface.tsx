@@ -35,7 +35,11 @@ export function xcodeCreateSwiftPlaygroundForm(
       }
     >
       <Form.TextField id="name" title={"Name"} defaultValue="MyPlayground" />
-      <Form.TextField id="location" title="Location" defaultValue={xcodeSwiftPlaygroundService.defaultSwiftPlaygroundLocation} />
+      <Form.TextField
+        id="location"
+        title="Location"
+        defaultValue={xcodeSwiftPlaygroundService.defaultSwiftPlaygroundLocation}
+      />
       <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
         {Object.keys(XcodeSwiftPlaygroundPlatform)
           .map((platform) => platform.toLocaleLowerCase())
