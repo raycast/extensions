@@ -16,7 +16,7 @@ This [Raycast](https://raycast.com) extension lets you quickly find [Redmine](ht
 
 ## Setup
 
-To connect the extension to your Redmine instance you need to fill the following prefernces:
+To connect the extension to your Redmine instance you need to fill the following preferences:
 
 - **Redmine Domain:** The domain of your Redmine instance like `mycompany.redmine.org`.
 - **API Token:** An API token created as described in [How to get my API key](https://www.redmine.org/boards/2/topics/53956/).
