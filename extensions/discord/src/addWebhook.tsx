@@ -12,7 +12,7 @@ export default function addWebhookView() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Name" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit Webhook" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
