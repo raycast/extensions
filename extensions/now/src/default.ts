@@ -1,4 +1,4 @@
-import {getPreferenceValues,Clipboard, closeMainWindow} from "@raycast/api";
+import { getPreferenceValues, Clipboard, closeMainWindow } from "@raycast/api";
 import dayjs from "dayjs";
 
 export default async () => {
@@ -8,4 +8,3 @@ export default async () => {
   await Clipboard.paste(dayjs(now).format(format));
   await closeMainWindow({ clearRootSearch: true });
 };
-
