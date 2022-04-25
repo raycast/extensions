@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
 import { createColor } from "../typeUtilities";
@@ -17,6 +17,7 @@ export interface SavedColor {
 }
 
 export interface Storage {
+  isLoading: boolean;
   state: {
     collection: SavedColor[];
   };
@@ -119,15 +120,19 @@ function storageReducer(state: InitialState, action: StorageAction) {
 
 export function useColorStorage(key: StorageKeys, initialCallback?: (state: SavedColor[]) => void): Storage {
   const [state, dispatch] = useReducer(storageReducer, storageInitialState);
+  const [isLoading, setIsLoading] = useState(true);
 
   asyncEffect(items(key), (state) => {
     dispatch({ type: StorageActions.Update, key, items: state });
+    setIsLoading(false);
+
     if (initialCallback) {
       initialCallback(state);
     }
   });
 
   return {
+    isLoading,
     state,
     clear: () => {
       dispatch({ type: StorageActions.Clear, key });

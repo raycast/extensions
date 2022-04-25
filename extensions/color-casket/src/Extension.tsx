@@ -30,7 +30,7 @@ export default function Extension({
   return (
     <ServicesContext.Provider value={{ renderer, history, favorites }}>
       <List
-        isLoading={renderer.state.isLoading}
+        isLoading={renderer.state.isLoading || history.isLoading || favorites.isLoading}
         onSearchTextChange={renderer.render}
         searchBarPlaceholder="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black..."
         throttle
