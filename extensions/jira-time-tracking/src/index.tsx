@@ -44,7 +44,7 @@ export default function Command() {
   }
 
   // fetch projects on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProjects = async () => {
       try {
         const projects = await getProjects();
