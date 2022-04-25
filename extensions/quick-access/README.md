@@ -22,10 +22,12 @@ You can use "Search Pinned Directories" command to quickly copy or open the imag
   - Remove Directory
   - Remove All Directory
   - Reset Directory Rank
+  - Toggle Detail
 
 **Preference**
 
 - Search Pinned Directories:
   - Auto Copy Latest File: Automatically copy the latest files in the topmost directory. There will be some delay when copying files.
+  - Primary action: Set the primary action in Search Pinned Directories command.
   - Number of files shown: Number of files displayed per directory.
   - Directory Sort by: Directory sorting method (default: Rank).

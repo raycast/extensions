@@ -4,34 +4,53 @@ import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/co
 import { DirectoryInfo, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
-import { LocalStorageKey } from "./utils/constants";
-import { copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
+import { copyLatestFile, getFileInfo, getIsShowDetail, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
 import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
 
 export default function Command() {
+  const { primaryAction, rememberTag, autoCopyLatestFile } = commonPreferences();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const { primaryAction, autoCopyLatestFile } = commonPreferences();
+  const [filePath, setFilePath] = useState<string>("");
+  const [refreshDetail, setRefreshDetail] = useState<number>(0);
 
+  const showDetail = getIsShowDetail(refreshDetail);
   const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
+  const fileInfo = getFileInfo(filePath);
+
+  //preference: copy the latest file
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
     <List
       isLoading={loading}
+      isShowingDetail={showDetail && allFilesNumber !== 0}
       searchBarPlaceholder={"Search files"}
+      onSelectionChange={(id) => {
+        if (typeof id === "string") {
+          setFilePath(id);
+        }
+      }}
       searchBarAccessory={
-        <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
-          <List.Dropdown.Item key={"All"} title={"All Directories"} value={"All"} />
-          {directoryWithFiles.map((value, index) => {
-            return (
-              <List.Dropdown.Item
-                key={index + value.directory.name}
-                title={value.directory.name}
-                value={value.directory.name}
-              />
-            );
-          })}
+        <List.Dropdown onChange={setTag} tooltip={"Directory type"} storeValue={rememberTag}>
+          <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
+          <List.Dropdown.Section title={"Location"}>
+            {directoryWithFiles.map((value, index) => {
+              return (
+                <List.Dropdown.Item
+                  key={index + value.directory.name}
+                  title={value.directory.name}
+                  value={value.directory.name}
+                />
+              );
+            })}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title={"Type"}>
+            {tagDirectoryTypes.map((directoryType, index) => {
+              return <List.Dropdown.Item key={index + directoryType} title={directoryType} value={directoryType} />;
+            })}
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
@@ -57,81 +76,100 @@ export default function Command() {
         <>
           {directoryWithFiles.map(
             (directory, directoryIndex) =>
-              (tag == directory.directory.name || tag == "All") && (
+              (tag == directory.directory.name || tag == "All" || tagDirectoryTypes.includes(tag)) && (
                 <List.Section
                   key={directory.directory.id}
                   title={directory.directory.name}
-                  subtitle={parse(directory.directory.path).dir}
+                  subtitle={showDetail ? "" : parse(directory.directory.path).dir}
                 >
-                  {directory.files.map((fileValue) => (
-                    <List.Item
-                      key={fileValue.id}
-                      icon={
-                        isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }
-                      }
-                      title={fileValue.name}
-                      actions={
-                        <ActionPanel>
-                          <ActionsOnFile
-                            primaryAction={primaryAction}
-                            fileInfo={fileValue}
-                            index={directoryIndex}
-                            setRefresh={setRefresh}
-                          />
-                          <ActionPanel.Section title="Directory Action">
-                            <Action
-                              icon={Icon.Pin}
-                              title={`Pin Directory`}
-                              shortcut={{ modifiers: ["cmd"], key: "d" }}
-                              onAction={async () => {
-                                await pinDirectory(false);
-                                setRefresh(refreshNumber());
-                              }}
-                            />
-                            <Action
-                              icon={Icon.Trash}
-                              title={`Remove Directory`}
-                              shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
-                              onAction={async () => {
-                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
-                                _localDirectory.splice(directoryIndex, 1);
-                                await LocalStorage.setItem(
-                                  LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                  JSON.stringify(_localDirectory)
-                                );
-                                setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", `Directory is removed.`);
-                              }}
-                            />
-                            <ActionRemoveAllDirectories setRefresh={setRefresh} />
-                            <Action
-                              icon={Icon.TwoArrowsClockwise}
-                              title={`Reset Directory Rank`}
-                              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
-                              onAction={async () => {
-                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
-                                  ? []
-                                  : JSON.parse(localstorage);
+                  {directory.files.map(
+                    (fileValue) =>
+                      (tag === fileValue.type || !tagDirectoryTypes.includes(tag)) && (
+                        <List.Item
+                          id={fileValue.path}
+                          key={fileValue.path}
+                          icon={
+                            isImage(parse(fileValue.path).ext)
+                              ? { source: fileValue.path }
+                              : { fileIcon: fileValue.path }
+                          }
+                          title={fileValue.name}
+                          detail={<List.Item.Detail markdown={fileInfo} />}
+                          actions={
+                            <ActionPanel>
+                              <ActionsOnFile
+                                primaryAction={primaryAction}
+                                fileInfo={fileValue}
+                                index={directoryIndex}
+                                setRefresh={setRefresh}
+                              />
+                              <ActionPanel.Section>
+                                <Action
+                                  icon={Icon.Pin}
+                                  title={`Pin Directory`}
+                                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                                  onAction={async () => {
+                                    await pinDirectory(false);
+                                    setRefresh(refreshNumber());
+                                  }}
+                                />
+                                <Action
+                                  icon={Icon.Trash}
+                                  title={`Remove Directory`}
+                                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
+                                  onAction={async () => {
+                                    const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                    const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
+                                    _localDirectory.splice(directoryIndex, 1);
+                                    await LocalStorage.setItem(
+                                      LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                      JSON.stringify(_localDirectory)
+                                    );
+                                    setRefresh(refreshNumber());
+                                    await showToast(Toast.Style.Success, "Success!", `Directory is removed.`);
+                                  }}
+                                />
+                                <ActionRemoveAllDirectories setRefresh={setRefresh} />
+                                <Action
+                                  icon={Icon.TwoArrowsClockwise}
+                                  title={`Reset Directory Rank`}
+                                  shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+                                  onAction={async () => {
+                                    const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                    const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
+                                      ? []
+                                      : JSON.parse(localstorage);
 
-                                const _pinnedDirectory = _localDirectory.map((value) => {
-                                  value.rank = 1;
-                                  return value;
-                                });
-                                await LocalStorage.setItem(
-                                  LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                  JSON.stringify(_pinnedDirectory)
-                                );
-                                setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
-                              }}
-                            />
-                          </ActionPanel.Section>
-                        </ActionPanel>
-                      }
-                    />
-                  ))}
+                                    const _pinnedDirectory = _localDirectory.map((value) => {
+                                      value.rank = 1;
+                                      return value;
+                                    });
+                                    await LocalStorage.setItem(
+                                      LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                      JSON.stringify(_pinnedDirectory)
+                                    );
+                                    setRefresh(refreshNumber());
+                                    await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
+                                  }}
+                                />
+                              </ActionPanel.Section>
+
+                              <ActionPanel.Section>
+                                <Action
+                                  title={"Toggle Details"}
+                                  icon={Icon.Sidebar}
+                                  shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+                                  onAction={async () => {
+                                    await LocalStorage.setItem("isShowDetail", !showDetail);
+                                    setRefreshDetail(refreshNumber());
+                                  }}
+                                />
+                              </ActionPanel.Section>
+                            </ActionPanel>
+                          }
+                        />
+                      )
+                  )}
                 </List.Section>
               )
           )}

@@ -5,6 +5,7 @@ import {
   commonPreferences,
   getDirectoryFiles,
   getFileShowNumber,
+  getFileContent,
   getLocalStorage,
   isEmpty,
 } from "../utils/common-utils";
@@ -15,6 +16,23 @@ import { copyFileByPath } from "../utils/applescript-utils";
 //for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
+};
+
+//get is show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>("isShowDetail");
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return showDetail;
 };
 
 //get local directory with files
@@ -71,6 +89,20 @@ export const localDirectoryWithFiles = (refresh: number) => {
     allFilesNumber: allFilesNumber,
     loading: loading,
   };
+};
+
+//get file or folder info
+export const getFileInfo = (filePath: string, updateDetail = 0) => {
+  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const fetchData = useCallback(async () => {
+    setDirectoryInfo(getFileContent(filePath));
+  }, [updateDetail, filePath]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return directoryInfo;
 };
 
 //get local directory with files

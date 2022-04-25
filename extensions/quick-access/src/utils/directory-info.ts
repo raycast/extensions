@@ -11,7 +11,7 @@ export interface FileInfo {
   id: string;
   name: string;
   path: string;
-  type: DirectoryType;
+  type: FileType;
   modifyTime: number;
 }
 
@@ -20,6 +20,11 @@ export interface DirectoryWithFileInfo {
   files: FileInfo[];
 }
 
+export enum FileType {
+  FOLDER = "Folder",
+  FILE = "File",
+  IMAGE = "Image",
+}
 export enum DirectoryType {
   DIRECTORY = "Directory",
   FILE = "File",

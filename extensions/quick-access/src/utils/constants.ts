@@ -2,10 +2,7 @@ export enum LocalStorageKey {
   LOCAL_PIN_DIRECTORY = "localPinDirectory",
 }
 
-export const tagDirectoryType = [
-  { title: "Folder", value: `Directory` },
-  { title: "File", value: `File` },
-];
+export const tagDirectoryTypes = ["Image", "Folder", "File"];
 
 export enum SortBy {
   Rank = "Rank",
