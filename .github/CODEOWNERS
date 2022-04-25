@@ -22,7 +22,7 @@
 /extensions/biaodian                                 @gasolin
 /extensions/bible                                    @josmithua
 /extensions/binance                                  @grzegorzkrukowski
-/extensions/bing-wallpaper                           @CheatGZ
+/extensions/bing-wallpaper                           @koinzhang
 /extensions/bitbucket                                @Lp-Francois @esarmstrong
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
@@ -40,7 +40,7 @@
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
 /extensions/canvascast                               @YodaLightsabr
-/extensions/capture-raycast-metadata                 @CheatGZ
+/extensions/capture-raycast-metadata                 @koinzhang
 /extensions/chakra-ui-docs                           @pgvr
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
@@ -58,13 +58,13 @@
 /extensions/coingecko                                @Destiner @mike182uk
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/commitlint                               @lardissone
-/extensions/common-directory                         @CheatGZ
+/extensions/common-directory                         @koinzhang
 /extensions/confluence-search                        @daviddkkim
 /extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @Rawnly
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
-/extensions/copy-path                                @CheatGZ
+/extensions/copy-path                                @koinzhang
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
@@ -93,7 +93,7 @@
 /extensions/dot-new                                  @natterstefan
 /extensions/dribbble                                 @gebeto
 /extensions/dropbox                                  @chyroc
-/extensions/easy-new-file                            @CheatGZ
+/extensions/easy-new-file                            @koinzhang
 /extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
@@ -118,7 +118,7 @@
 /extensions/git-repos                                @moored
 /extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum
-/extensions/github-gist                              @CheatGZ
+/extensions/github-gist                              @koinzhang
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-review-requests                   @resessh
 /extensions/github-stars                             @mrmartineau
@@ -132,7 +132,7 @@
 /extensions/google-chrome-profiles                   @frouo
 /extensions/google-cloud-platform-search             @klaa97
 /extensions/google-maps-search                       @ratoru
-/extensions/google-maven-repository                  @CheatGZ
+/extensions/google-maven-repository                  @koinzhang
 /extensions/google-meet                              @vitoorgomes
 /extensions/google-search                            @mblode
 /extensions/google-translate                         @gebeto @FezVrasta
@@ -147,7 +147,7 @@
 /extensions/helm-docs                                @tiagomichaelsousa
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
-/extensions/hidden-icons                             @CheatGZ
+/extensions/hidden-icons                             @koinzhang
 /extensions/homeassistant                            @tonka3000 @altrdev
 /extensions/how-long-to-beat                         @Cronos87
 /extensions/http-status-codes                        @AlexVanderbist
@@ -160,6 +160,7 @@
 /extensions/itch-io                                  @Aayush9029
 /extensions/jetbrains                                @gdsmith @gdsmith
 /extensions/jira-search                              @svenwiegand
+/extensions/jira-search-self-hosted                  @emanguy @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
 /extensions/json-to-go                               @chyroc
@@ -187,7 +188,7 @@
 /extensions/lark                                     @tmkx
 /extensions/lark-applink                             @chyroc
 /extensions/lastfm                                   @eggsy
-/extensions/life-progress                            @CheatGZ
+/extensions/life-progress                            @koinzhang
 /extensions/linguee                                  @geekdada
 /extensions/linux-command                            @jaywcjlove
 /extensions/lobsters                                 @dev99problems
@@ -224,7 +225,7 @@
 /extensions/parrot-translate                         @Haojen
 /extensions/party-parrot                             @thomaspaulmann
 /extensions/password-generator                       @joshuaiz
-/extensions/paste-without-formatting                 @CheatGZ
+/extensions/paste-without-formatting                 @koinzhang
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pinboard                                 @fe9lix
@@ -241,11 +242,11 @@
 /extensions/producthunt                              @ragnorc
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
-/extensions/quick-access                             @CheatGZ
+/extensions/quick-access                             @koinzhang
 /extensions/quick-event                              @mblode
 /extensions/quick-open-project                       @zerowidth
 /extensions/quick-search                             @iwfan
-/extensions/quick-surf                               @CheatGZ
+/extensions/quick-surf                               @koinzhang
 /extensions/quicktime                                @pradeepb28
 /extensions/quicktype                                @Aayush9029
 /extensions/radix                                    @peduarte
@@ -255,7 +256,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/random-password-generator                @textnav
 /extensions/ray-so                                   @gt-codes @RSO @dgrzedzielski
-/extensions/raycast-wallpaper                        @CheatGZ
+/extensions/raycast-wallpaper                        @koinzhang
 /extensions/raynab                                   @gogocharli
 /extensions/readwise                                 @natterstefan
 /extensions/rebrandly                                @grikomsn
@@ -289,7 +290,7 @@
 /extensions/slack                                    @momme-rtf
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
-/extensions/social-network-trends                    @CheatGZ
+/extensions/social-network-trends                    @koinzhang
 /extensions/solana-explorer                          @TrGiLong
 /extensions/sourcegraph                              @bobheadxi
 /extensions/spatie-documentation                     @danyelkeddah
