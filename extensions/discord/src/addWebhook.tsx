@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon } from "@raycast/api";
 import { WebhookChannelModel } from "./interface/webhookModel";
 import { addWebhook } from "./api/webhookStorage";
 import { ColorDropDown } from "./components/colorDropdown";
@@ -12,7 +12,7 @@ export default function addWebhookView() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Webhook" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit Webhook" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
