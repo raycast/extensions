@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, open, showHUD } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
-import { ArtifactList } from "./utils/ui-component";
-import { googleMavenRepository } from "./utils/constans";
+import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
+
 import { searchArtifacts } from "./hooks/hooks";
 
 export default function ShowGoogleArtifact(props: { packageName: string }) {
@@ -13,7 +13,7 @@ export default function ShowGoogleArtifact(props: { packageName: string }) {
     <List
       isShowingDetail={false}
       isLoading={loading}
-      searchBarPlaceholder={"Search artifacts or version"}
+      searchBarPlaceholder={"Search artifacts"}
       navigationTitle={`${packageName}`}
       searchBarAccessory={
         <List.Dropdown onChange={(value) => setCurrentTag(value)} tooltip={"Group"}>
@@ -23,25 +23,8 @@ export default function ShowGoogleArtifact(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      {artifactInfo.artifactName.length === 0 &&
-      artifactInfo.artifactInfo.length === 0 &&
-      artifactInfo.tagList.length === 0 ? (
-        <List.EmptyView
-          title={`Welcome to Google's Maven Repository`}
-          icon={"android-bot.svg"}
-          actions={
-            <ActionPanel>
-              <Action
-                title={"Show Maven in Browser"}
-                icon={Icon.Globe}
-                onAction={async () => {
-                  await open(googleMavenRepository);
-                  await showHUD("Show Maven in Browser");
-                }}
-              />
-            </ActionPanel>
-          }
-        />
+      {artifactInfo.artifactName.length === 0 && artifactInfo.artifactInfo.length === 0 ? (
+        <MavenEmptyView />
       ) : (
         artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
           return (

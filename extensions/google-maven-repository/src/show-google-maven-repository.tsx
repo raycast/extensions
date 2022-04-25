@@ -1,30 +1,16 @@
-import { Action, ActionPanel, Icon, List, open, showHUD, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { googleMavenRepository } from "./utils/constans";
 import ShowGoogleArtifact from "./show-google-artifact";
 import { getGoogleMavenRepositories } from "./hooks/hooks";
+import { MavenEmptyView } from "./utils/ui-component";
 
 export default function ShowGoogleMavenRepository() {
   const { allPackages, loading } = getGoogleMavenRepositories();
 
   return (
-    <List isShowingDetail={false} isLoading={loading} searchBarPlaceholder={"Search groups"}>
-      {allPackages.length === 0 ? (
-        <List.EmptyView
-          title={`Welcome to Google's Maven Repository`}
-          icon={"android-bot.svg"}
-          actions={
-            <ActionPanel>
-              <Action
-                title={"Show Maven in Browser"}
-                icon={Icon.Globe}
-                onAction={async () => {
-                  await open(googleMavenRepository);
-                  await showHUD("Show Maven in Browser");
-                }}
-              />
-            </ActionPanel>
-          }
-        />
+    <List isLoading={loading} searchBarPlaceholder={"Search groups"}>
+      {!loading && allPackages.length === 0 ? (
+        <MavenEmptyView />
       ) : (
         allPackages.map((value, index) => {
           return (
@@ -40,19 +26,14 @@ export default function ShowGoogleMavenRepository() {
                     icon={Icon.List}
                     target={<ShowGoogleArtifact packageName={value} />}
                   />
-                  <Action
-                    title={"Show Maven in Browser"}
-                    icon={Icon.Globe}
-                    onAction={async () => {
-                      await open(googleMavenRepository);
-                      await showHUD("Show Maven in Browser");
-                    }}
-                  />
-                  <Action.CopyToClipboard
-                    title={"Copy Group Name"}
-                    content={value}
-                    shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
-                  />
+                  <Action.CopyToClipboard title={"Copy Group Name"} content={value} />
+                  <ActionPanel.Section>
+                    <Action.OpenInBrowser
+                      title={"Show Maven in Browser"}
+                      url={googleMavenRepository}
+                      shortcut={{ modifiers: ["cmd"], key: "g" }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

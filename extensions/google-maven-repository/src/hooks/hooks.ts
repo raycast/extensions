@@ -60,9 +60,7 @@ export const getGoogleMavenRepositories = () => {
         return;
       }
       console.error(String(e));
-      await showToast(Toast.Style.Failure, String(e));
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {

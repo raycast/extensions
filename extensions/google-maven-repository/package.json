@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-maven-repository",
   "title": "Google Maven Repository",
-  "description": "Show and search for artifacts in Google's maven repository.",
+  "description": "Show and search for artifacts in Google's Maven repository.",
   "icon": "google-maven.png",
   "author": "koinzhang",
   "categories": [
@@ -16,15 +16,15 @@
       "title": "Show Google Maven Repository",
       "icon": "show-google-maven.png",
       "subtitle": "Google Maven Repository",
-      "description": "Show All artifact in Google's maven repository.",
+      "description": "Show All artifacts in Google's Maven repository.",
       "mode": "view"
     },
     {
       "name": "search-google-artifact",
-      "title": "Search Google Artifact",
+      "title": "Search Google Artifacts",
       "icon": "search-google-maven.png",
       "subtitle": "Google Maven Repository",
-      "description": "Search for an artifact in Google's maven repository.",
+      "description": "Search for an artifact in Google's Maven repository.",
       "mode": "view"
     }
   ],

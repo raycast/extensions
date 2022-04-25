@@ -1,5 +1,5 @@
 # Google Maven Repository
 
-Show and search for artifacts in Google's maven repository.
+Show and search for artifacts in Google's Maven repository.
 
-Query Api of Google's maven repository from [WanAndroid website](https://www.wanandroid.com)
+Query Api of Google's Maven repository from [WanAndroid](https://www.wanandroid.com)
