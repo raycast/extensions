@@ -32,7 +32,7 @@ export default function Command() {
             title={i.name}
             subtitle={i.content[0].language}
             icon={Icon.Document}
-            accessories={[{ text: i.folder?.name ?? 'Inbox' }]}
+            accessories={[{ text: i.folder?.name ?? "Inbox" }]}
             actions={
               <ActionPanel title="Some">
                 <ActionPanel.Section>{<Action.CopyToClipboard content={i.content[0].value} />}</ActionPanel.Section>
