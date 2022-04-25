@@ -5,16 +5,16 @@ import { toSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
 export default function Command() {
-  const [issues, setIssues] = React.useState<Issue[]>([]);
-  const [projects, setProjects] = React.useState<Project[]>();
-  const [selectedIssue, setSelectedIssue] = React.useState<Issue>();
-  const [hours, setHours] = React.useState("0");
-  const [minutes, setMinutes] = React.useState("0");
-  const [seconds, setSeconds] = React.useState("0");
-  const [description, setDescription] = React.useState("");
-  const [selectedProject, setSelectedProject] = React.useState<string>();
-  const [startedAt, setStartedAt] = React.useState<Date>(new Date());
-  const [loading, setLoading] = React.useState(true);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [projects, setProjects] = useState<Project[]>();
+  const [selectedIssue, setSelectedIssue] = useState<Issue>();
+  const [hours, setHours] = useState("0");
+  const [minutes, setMinutes] = useState("0");
+  const [seconds, setSeconds] = useState("0");
+  const [description, setDescription] = useState("");
+  const [selectedProject, setSelectedProject] = useState<string>();
+  const [startedAt, setStartedAt] = useState<Date>(new Date());
+  const [loading, setLoading] = useState(true);
 
   async function handleSubmit() {
     const totalTimeWorked = toSeconds(Number(seconds), Number(minutes), Number(hours));
