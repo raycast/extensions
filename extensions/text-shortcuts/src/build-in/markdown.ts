@@ -281,7 +281,7 @@ const markdowns = [
       visibility: true,
       tag: ["Markdown"],
     },
-    tactions: [{ type: "Live Template", content: ["[^]: "] }],
+    tactions: [{ type: "Live Template", content: ["[^1]: $TEXT$", "$TEXT$"] }],
   },
 ];
 export const MARKDOWNS_SHORTCUTS = JSON.stringify(markdowns);

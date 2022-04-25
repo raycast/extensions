@@ -22,7 +22,7 @@ import { CODERS_SHORTCUTS } from "./build-in/coder";
 import { TIMES_SHORTCUTS } from "./build-in/time";
 import { FORMAT_SHORTCUTS } from "./build-in/format";
 
-export default function SearchShortcut() {
+export default function ShortcutLibrary() {
   const [userShortcuts, setUserShortcuts] = useState<Shortcut[]>([]);
   const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);
   const [detail, setDetail] = useState<string>("");

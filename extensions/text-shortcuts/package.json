@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-shortcut",
+      "name": "shortcut-library",
       "icon": "search-icon.png",
       "title": "Shortcut Library",
       "subtitle": "Text Shortcuts",
@@ -96,8 +96,8 @@
       "mode": "view"
     },
     {
-      "name": "run-shortcut",
-      "icon": "run-icon.png",
+      "name": "run-shortcut-now",
+      "icon": "run-icon-now.png",
       "title": "Run Shortcut Now",
       "subtitle": "Text Shortcuts",
       "description": "Create text shortcut.",
