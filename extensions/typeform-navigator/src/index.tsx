@@ -241,7 +241,7 @@ function FormActions({ form }: { form: FormOverview }) {
 }
 
 function OpenWorkspaceInAdminAction({ link }: { link: string }) {
-  return <Action.OpenInBrowser title="Open in admin" url={adminUrl(link)} />;
+  return <Action.OpenInBrowser title="Open in Typeform" url={adminUrl(link)} />;
 }
 
 async function showErrorToast(errorMessage: string) {
