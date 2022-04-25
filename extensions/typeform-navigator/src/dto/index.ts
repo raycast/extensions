@@ -1,6 +1,6 @@
 export type Workspace = {
   default: boolean;
-  forms: {
+  forms?: {
     count: number;
     href: string;
   };
