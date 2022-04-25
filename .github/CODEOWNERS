@@ -117,7 +117,7 @@
 /extensions/gif-search                               @josephschmitt
 /extensions/git-repos                                @moored
 /extensions/gitfox                                   @L3K0V
-/extensions/github-for-enterprise                    @Kinbaum
+/extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-review-requests                   @resessh
@@ -354,5 +354,6 @@
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/youdao-translate                         @tiancheng92
 /extensions/youtube                                  @tonka3000
+/extensions/youtube-companion                        @sasivarnan
 /extensions/zeplin-project-search                    @dorukgunes
 /extensions/zotero                                   @sadanand-singh
