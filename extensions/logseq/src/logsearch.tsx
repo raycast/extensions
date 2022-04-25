@@ -106,9 +106,9 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
         if (element.endsWith(".md")) {
           //Making sure only MD files are shown
           finalInitialResult.push({
-            name: formatResult(element),
-            description: element,
-            url: formatFilePath(element),
+            name: formatResult(element).replace(".md", ""),
+            description: formatResult(element),
+            url: formatFilePath(element).replace(".md", ""),
           });
         }
       });
