@@ -8,7 +8,7 @@
 
 ![Preview Screenshot](./metadata/screenshot-1.png)
 
-Handful color utilities in your pocket.
+Handy color utilities in your pocket.
 
 **Color Casket** provide you simple ability to render color strings in next formats:
 
