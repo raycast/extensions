@@ -69,6 +69,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     <Action.CopyToClipboard
       key="copyGifMarkdown"
       title="Copy GIF Markdown"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
     />
   );
