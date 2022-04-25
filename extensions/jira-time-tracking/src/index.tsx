@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Form, Detail, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog } from "./controllers";
 import { toSeconds, createTimeLogSuccessMessage } from "./utils";
