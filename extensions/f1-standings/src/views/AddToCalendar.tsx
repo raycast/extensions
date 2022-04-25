@@ -29,7 +29,7 @@ export function AddToCalendar({ race, raceDates }: { race: Race; raceDates: [str
       const result = await runAppleScript(
         'set output to ""\n' +
           'tell application "Calendar"\n' +
-          "set output to name of calendars\n" +
+          "set output to name of calendars where writable is true\n" +
           "end tell\n" +
           "return output"
       );
