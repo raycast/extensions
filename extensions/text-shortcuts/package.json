@@ -14,7 +14,8 @@
     {
       "name": "search-shortcut",
       "icon": "search-icon.png",
-      "title": "Search Text Shortcut",
+      "title": "Shortcut Library",
+      "subtitle": "Text Shortcuts",
       "description": "Search and run text shortcut.",
       "mode": "view",
       "preferences": [
@@ -89,14 +90,16 @@
     {
       "name": "create-shortcut",
       "icon": "create-icon.png",
-      "title": "Create Text Shortcut",
+      "title": "Create Shortcut",
+      "subtitle": "Text Shortcuts",
       "description": "Create text shortcut.",
       "mode": "view"
     },
     {
       "name": "run-shortcut",
       "icon": "run-icon.png",
-      "title": "Run Text Shortcut Now",
+      "title": "Run Shortcut Now",
+      "subtitle": "Text Shortcuts",
       "description": "Create text shortcut.",
       "mode": "view"
     }

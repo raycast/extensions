@@ -376,7 +376,7 @@ export function TactionActions(props: {
           }}
         />
         <Action
-          title="Remove All Action"
+          title="Remove All Actions"
           icon={Icon.ExclamationMark}
           shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
           onAction={async () => {

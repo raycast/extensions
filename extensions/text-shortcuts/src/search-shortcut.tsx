@@ -120,7 +120,7 @@ export default function SearchShortcut() {
                           const _inputItem = await fetchItemInput();
                           const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                           await Clipboard.paste(_runShortcut);
-                          await showToast(Toast.Style.Success, "Paste shortcut's text");
+                          await showToast(Toast.Style.Success, "Pasted result to active app!");
                         }}
                       />
                       <Action
@@ -146,7 +146,7 @@ export default function SearchShortcut() {
                             const _inputItem = await fetchItemInput();
                             const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                             await Clipboard.paste(_runShortcut);
-                            await showToast(Toast.Style.Success, "Paste shortcut's text!");
+                            await showToast(Toast.Style.Success, "Pasted result to active app!");
                           }}
                         />
                         <Action
