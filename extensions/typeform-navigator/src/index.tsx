@@ -54,6 +54,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   title={`List Forms (${workspace.forms?.count ?? 0})`}
+                  icon={Icon.List}
                   target={<Forms workspace={workspace} clientHttp={jsonHttpClient} />}
                 />
                 <OpenWorkspaceInAdminAction link={workspace.self.href} />
