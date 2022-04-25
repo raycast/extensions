@@ -82,7 +82,7 @@ export default function CommonDirectory() {
         />
       ) : (
         <>
-          <List.Section title={"Common Directory"}>
+          <List.Section title={"Common Directories"}>
             {!loading &&
               commonDirectory.map((directory, index) => {
                 if (
@@ -104,7 +104,7 @@ export default function CommonDirectory() {
                   );
               })}
           </List.Section>
-          <List.Section title={"Open Directory"}>
+          <List.Section title={"Open Directories"}>
             {!loading &&
               openDirectory.map((directory, index) => {
                 if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
