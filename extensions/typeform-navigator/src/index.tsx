@@ -107,7 +107,11 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
               actions={
                 <ActionPanel>
                   {isInsights3 && (
-                    <Action.Push title="Detail" target={<FormInsights form={form} clientHttp={clientHttp} />} />
+                    <Action.Push
+                      title="Detail"
+                      icon={Icon.Sidebar}
+                      target={<FormInsights form={form} clientHttp={clientHttp} />}
+                    />
                   )}
                   <FormActions form={form} />
                 </ActionPanel>
