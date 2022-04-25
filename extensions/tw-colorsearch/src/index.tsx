@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, Image } from "@raycast/api";
-import React from "react";
+import { useState, useEffect } from "react";
 
 function HexToRGB(hex: string) {
   // Ommit first char which is hash symbol
@@ -301,10 +301,10 @@ const COLORS = () => {
 };
 
 export default function Command() {
-  const [searchText, setSearchText] = React.useState("");
-  const [filteredList, filterList] = React.useState(COLORS());
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(COLORS());
 
-  React.useEffect(() => {
+  useEffect(() => {
     filterList(COLORS().filter((color) => color.title.includes(searchText)));
   }, [searchText]);
 
