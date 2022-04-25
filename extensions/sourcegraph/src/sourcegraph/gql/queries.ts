@@ -151,7 +151,9 @@ export const GET_FILE_CONTENTS = gql`
   ${BLOB_CONTENTS}
   query GetFileContents($repo: String!, $rev: String!, $path: String!) {
     repository(name: $repo) {
+      id
       commit(rev: $rev) {
+        id
         blob(path: $path) {
           ...BlobContents
         }
