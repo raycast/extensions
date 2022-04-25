@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "px-to-rem-converter",
-  "title": "PX to Rem converter",
+  "title": "PX to Rem Converter",
   "description": "Conversions between PX and REM",
   "icon": "icon.png",
   "author": "raulanatol",
