@@ -4,7 +4,7 @@ import { HSL } from "color-convert/conversions";
 import Color from "./Color";
 import { HEXColor, RGBColor, KeywordColor } from "./index";
 import { isValidHSL } from "../validators";
-import { Shortcut } from "@raycast/api/types/api/app/keyboard";
+import { Keyboard } from "@raycast/api";
 
 import { parseValues } from "../typeUtilities";
 
@@ -13,7 +13,7 @@ export default class HSLColor extends Color<HSL> {
 
   public static prepareValue = <HSL>(value: string): HSL => parseValues(value) as unknown as HSL;
 
-  public readonly shortcut: Shortcut = { modifiers: ["cmd", "shift"], key: "h" };
+  public readonly shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "h" };
 
   public get alternatives(): [HSLColor, HEXColor, RGBColor, KeywordColor] {
     return [

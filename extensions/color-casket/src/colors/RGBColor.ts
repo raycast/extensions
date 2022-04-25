@@ -3,7 +3,7 @@ import convert from "color-convert";
 import Color from "./Color";
 import { RGB } from "color-convert/conversions";
 import { HEXColor, HSLColor, KeywordColor } from "./index";
-import { Shortcut } from "@raycast/api/types/api/app/keyboard";
+import { Keyboard } from "@raycast/api";
 
 import { isValidRGB } from "../validators";
 import { parseValues } from "../typeUtilities";
@@ -13,7 +13,7 @@ export default class RGBColor extends Color<RGB> {
 
   public static prepareValue = <RGB>(value: string): RGB => parseValues(value) as unknown as RGB;
 
-  public readonly shortcut: Shortcut = { modifiers: ["cmd", "shift"], key: "r" };
+  public readonly shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "r" };
 
   public get alternatives(): [RGBColor, HEXColor, HSLColor, KeywordColor] {
     return [

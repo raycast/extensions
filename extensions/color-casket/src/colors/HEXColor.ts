@@ -3,14 +3,14 @@ import { HEX } from "color-convert/conversions";
 import Color from "./Color";
 import { isValidHEX } from "../validators";
 import { RGBColor, HSLColor, KeywordColor } from "./index";
-import { Shortcut } from "@raycast/api/types/api/app/keyboard";
+import { Keyboard } from "@raycast/api";
 
 export default class HEXColor extends Color<HEX> {
   public static validator = isValidHEX;
 
   public static prepareValue = <HEX>(value: string): HEX => convert.rgb.hex(convert.hex.rgb(value)) as unknown as HEX;
 
-  public readonly shortcut: Shortcut = { modifiers: ["cmd", "shift"], key: "x" };
+  public readonly shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "x" };
 
   public get alternatives(): [HEXColor, RGBColor, HSLColor, KeywordColor] {
     return [
