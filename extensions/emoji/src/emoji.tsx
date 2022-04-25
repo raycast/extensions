@@ -93,9 +93,9 @@ export default function Main(): ReactElement {
       {!isLoading
         ? filterList(
             [
-              { category: "Recently Used", emojis: recentlyUsed },
+              !searchText && { category: "Recently Used", emojis: recentlyUsed },
               { category: category || "Emojis", emojis: list },
-            ],
+            ].filter(Boolean) as Category[],
             searchText,
             category
           ).map((category: Category) => (
