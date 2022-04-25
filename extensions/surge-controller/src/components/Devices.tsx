@@ -97,6 +97,7 @@ ${
                     title="Device Settings"
                     target={
                       <Form
+                        navigationTitle={`Device Settings - ${device.name}`}
                         actions={
                           <ActionPanel>
                             <Action.SubmitForm
@@ -110,11 +111,13 @@ ${
                         <Form.TextField
                           id="address"
                           title="address"
+                          info="Assign static ip address"
                           defaultValue={device.dhcpAssignedIP || ''}
                         />
                         <Form.Checkbox
                           id="shouldHandledBySurge"
                           label="Handled by Surge"
+                          info="Use surge as a gateway to take over all network requests from the device"
                           defaultValue={!!device.dhcpGatewayEnabled}
                         />
                       </Form>

@@ -119,7 +119,11 @@ const Backends: React.FC<props> = ({
                 >
                   <Form.TextField id="name" title="Name" placeholder="Mac Mini" />
                   <Form.TextField id="url" title="URL" placeholder="https://127.0.0.1:6171" />
-                  <Form.TextField id="xKey" title="X Key" placeholder="" />
+                  <Form.TextField
+                    id="xKey"
+                    title="X-Key"
+                    info={`X-Key is set in the surge configuration E.g.: "http-api = xkey@0.0.0.0:6171". If you want to use HTTPS please set "http-api-tls=true", and you must first configure the MitM CA certificate. You need to install the certificate manually on the client device.`}
+                  />
                 </Form>
               }
             />
