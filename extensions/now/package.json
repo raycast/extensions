@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "now",
+  "title": "Now",
+  "description": "Get now string by format.",
+  "icon": "command-icon.png",
+  "author": "basefas",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "default",
+      "title": "Now",
+      "description": "Get now string.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "default",
+      "label": "default",
+      "type": "textfield",
+      "description": "Default format.",
+      "default": "YYYY-MM-DD",
+      "title": "Default Format"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2",
+    "dayjs": "^1.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
