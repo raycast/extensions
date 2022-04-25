@@ -1,11 +1,18 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, trash } from "@raycast/api";
 import React, { useState } from "react";
 import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
-import { copyLatestFile, getFileInfo, getIsShowDetail, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import {
+  alertDialog,
+  copyLatestFile,
+  getFileInfo,
+  getIsShowDetail,
+  localDirectoryWithFiles,
+  refreshNumber,
+} from "./hooks/hooks";
 import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
 
 export default function Command() {
@@ -118,15 +125,27 @@ export default function Command() {
                                   title={`Remove Directory`}
                                   shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                                   onAction={async () => {
-                                    const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                    const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
-                                    _localDirectory.splice(directoryIndex, 1);
-                                    await LocalStorage.setItem(
-                                      LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                      JSON.stringify(_localDirectory)
+                                    await alertDialog(
+                                      Icon.XmarkCircle,
+                                      "Remove Directory",
+                                      `Are you sure you want to remove the ${directory.directory.name} directory?`,
+                                      "Remove",
+                                      async () => {
+                                        const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                        const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
+                                        _localDirectory.splice(directoryIndex, 1);
+                                        await LocalStorage.setItem(
+                                          LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                          JSON.stringify(_localDirectory)
+                                        );
+                                        setRefresh(refreshNumber());
+                                        await showToast(
+                                          Toast.Style.Success,
+                                          "Success!",
+                                          `${directory.directory.name} directory is removed.`
+                                        );
+                                      }
                                     );
-                                    setRefresh(refreshNumber());
-                                    await showToast(Toast.Style.Success, "Success!", `Directory is removed.`);
                                   }}
                                 />
                                 <ActionRemoveAllDirectories setRefresh={setRefresh} />
@@ -135,21 +154,29 @@ export default function Command() {
                                   title={`Reset Directory Rank`}
                                   shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                                   onAction={async () => {
-                                    const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                    const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
-                                      ? []
-                                      : JSON.parse(localstorage);
+                                    await alertDialog(
+                                      Icon.ExclamationMark,
+                                      "Reset All Rank",
+                                      "Are you sure you want to reset the ranking of all directories??",
+                                      "Reset All",
+                                      async () => {
+                                        const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                        const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
+                                          ? []
+                                          : JSON.parse(localstorage);
 
-                                    const _pinnedDirectory = _localDirectory.map((value) => {
-                                      value.rank = 1;
-                                      return value;
-                                    });
-                                    await LocalStorage.setItem(
-                                      LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                      JSON.stringify(_pinnedDirectory)
+                                        const _pinnedDirectory = _localDirectory.map((value) => {
+                                          value.rank = 1;
+                                          return value;
+                                        });
+                                        await LocalStorage.setItem(
+                                          LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                          JSON.stringify(_pinnedDirectory)
+                                        );
+                                        setRefresh(refreshNumber());
+                                        await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
+                                      }
                                     );
-                                    setRefresh(refreshNumber());
-                                    await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
                                   }}
                                 />
                               </ActionPanel.Section>
@@ -213,10 +240,23 @@ function ActionsOnFile(props: {
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action.Trash
+        <Action
+          icon={Icon.Trash}
+          title={"Move to trash"}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          paths={fileInfo.path}
-          onTrash={() => setRefresh(refreshNumber())}
+          onAction={async () => {
+            await alertDialog(
+              Icon.Trash,
+              "Move to Trash",
+              `Are you sure you want to move ${fileInfo.name} to the trash?`,
+              "Move to trash",
+              async () => {
+                await trash(fileInfo.path);
+                setRefresh(refreshNumber);
+                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} is moved to the trash.`);
+              }
+            );
+          }}
         />
       </ActionPanel.Section>
     </>

@@ -10,7 +10,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 
 //for refresh useState
@@ -132,13 +132,15 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
 };
 
 export const alertDialog = async (
+  icon: Icon,
   title: string,
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction: () => void
+  cancelAction?: () => void
 ) => {
   const options: Alert.Options = {
+    icon: icon,
     title: title,
     message: message,
     primaryAction: {
