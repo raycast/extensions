@@ -1,35 +1,53 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, open } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
 
 export default function Command() {
-  const [state, setState] = useState<State>({ snippets: [] });
+  const [state, setState] = useState<State>({ snippets: [], isLoading: true });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
-        setState({ snippets: res.data });
+        setState((previous) => ({ ...previous, snippets: res.data }));
       } catch (err) {
-        setState({ error: err instanceof Error ? err : new Error("Something went wrong") });
+        setState((previous) => ({
+          ...previous,
+          error: err instanceof Error ? err : new Error("Something went wrong"),
+        }));
       }
+
+      setState((previous) => ({ ...previous, isLoading: false }));
     };
 
     fetchData();
   }, []);
 
   if (state.error) {
-    showToast(Toast.Style.Failure, "massCode app is not running");
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "massCode is not running",
+      message: "Launch it or download from https://masscode.io",
+      primaryAction: {
+        title: "Download massCode",
+        onAction: (toast) => {
+          open("https://masscode.io");
+          toast.hide();
+        },
+      },
+    };
+    showToast(options);
   }
 
   return (
-    <List searchBarPlaceholder="Type to search snippets">
+    <List searchBarPlaceholder="Type to search snippets" isLoading={state.isLoading}>
       {state.snippets?.map((i) => {
         return (
           <List.Item
             key={i.id}
             title={i.name}
+            keywords={[i.content[0].language]}
             subtitle={i.content[0].language}
             icon={Icon.Document}
             accessories={[{ text: i.folder?.name ?? "Inbox" }]}

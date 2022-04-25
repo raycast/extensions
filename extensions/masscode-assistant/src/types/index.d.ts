@@ -207,4 +207,5 @@ export interface Snippet {
 export interface State {
   snippets?: Snippet[];
   error?: Error;
+  isLoading: boolean;
 }
