@@ -1,18 +1,28 @@
-import path from "path";
-
-import type { IGif as GiphyGif } from "@giphy/js-types";
 import { environment } from "@raycast/api";
-
-import type { TenorGif } from "./tenor";
 
 export interface IGif {
   id: string | number;
   title: string;
-  url: string;
+  url?: string;
   slug: string;
   preview_gif_url: string;
   gif_url: string;
-  attribution:
+  metadata?: {
+    width?: number;
+    height?: number;
+    size?: number;
+    labels?: {
+      title: string;
+      text: string;
+    }[];
+    links?: {
+      title: string;
+      target: string;
+      text: string;
+    }[];
+    tags?: string[];
+  };
+  attribution?:
     | {
         dark: string;
         light: string;
@@ -20,41 +30,25 @@ export interface IGif {
     | string;
 }
 
-export function mapGiphyResponse(giphyResp: GiphyGif) {
-  return <IGif>{
-    id: giphyResp.id,
-    title: giphyResp.title,
-    url: giphyResp.url,
-    slug: giphyResp.slug,
-    preview_gif_url: giphyResp.images.preview_gif.url,
-    gif_url: giphyResp.images.fixed_height.url,
-    attribution: "poweredby_giphy.png",
-  };
-}
+export type APIOpt = { offset?: number; limit?: number; abort?: AbortController };
 
-export function mapTenorResponse(tenorResp: TenorGif) {
-  const mediaItem = tenorResp.media[0];
-  return <IGif>{
-    id: tenorResp.id,
-    title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
-    url: tenorResp.itemurl,
-    slug: path.basename(tenorResp.itemurl),
-    preview_gif_url: mediaItem.tinygif.preview,
-    gif_url: mediaItem.tinygif.url,
-    attribution: "poweredby_tenor.png",
-  };
+export interface IGifAPI {
+  search: (term: string, opt?: APIOpt) => Promise<IGif[]>;
+  trending: (opt?: APIOpt) => Promise<IGif[]>;
+  gifs: (id: string[]) => Promise<IGif[]>;
 }
 
 export function renderGifMarkdownDetails(gif: IGif) {
-  return `
-  ## ${gif.title}
+  let md = `
+### ${gif.title}
 
-  ![${gif.title}](${gif.gif_url})
+<img alt="${gif.title}" src="${gif.gif_url}" height="200" />
 
-  \`\`\`
-  Static preview, animated preview coming soon!
-  \`\`\`
-
-  ![Powered by](file:${environment.assetsPath}/${gif.attribution})
   `;
+
+  if (gif.attribution) {
+    md += `<img height="36" alt="Powered by" src="file:${environment.assetsPath}/${gif.attribution}" />`;
+  }
+
+  return md;
 }

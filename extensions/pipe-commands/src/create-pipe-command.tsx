@@ -1,28 +1,49 @@
-import { ActionPanel, environment, Form, popToRoot, showInFinder, showToast, Action, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  environment,
+  Form,
+  popToRoot,
+  showInFinder,
+  showToast,
+  Action,
+  Toast,
+  Icon,
+  List,
+} from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
-import { ArgumentType, argumentTypes, scriptModes } from "./types";
+import { scriptModes } from "./types";
 
 const languageToProperties: Record<
   string,
   {
     extension: string;
     shebang: string;
-    comments: string;
+    commentSign: string;
     helloWorld: string;
   }
 > = {
-  Bash: { extension: ".sh", comments: "#", shebang: "#!/bin/bash", helloWorld: "echo 'Hello World!'" },
-  Python: { extension: ".py", comments: "#", shebang: "#!/usr/bin/env python3", helloWorld: "print('Hello World!')" },
+  Bash: { extension: ".sh", commentSign: "#", shebang: "#!/bin/bash", helloWorld: "echo 'Hello World!'" },
+  Python: {
+    extension: ".py",
+    commentSign: "#",
+    shebang: "#!/usr/bin/env python3",
+    helloWorld: "print('Hello World!')",
+  },
   Javascript: {
     extension: ".js",
-    comments: "//",
+    commentSign: "//",
     shebang: "#!/usr/bin/env node",
     helloWorld: "console.log('Hello World!');",
   },
-  Ruby: { extension: ".rb", comments: "#", shebang: "#!/usr/bin/env ruby", helloWorld: "puts 'Hello World!'" },
-  Swift: { extension: ".swift", comments: "//", shebang: "#!/usr/bin/swift", helloWorld: "print('Hello World!')" },
-  PHP: { extension: ".php", comments: "//", shebang: "#!/usr/bin/env php", helloWorld: "<?php echo 'Hello World!' ?>" },
+  Ruby: { extension: ".rb", commentSign: "#", shebang: "#!/usr/bin/env ruby", helloWorld: "puts 'Hello World!'" },
+  Swift: { extension: ".swift", commentSign: "//", shebang: "#!/usr/bin/swift", helloWorld: "print('Hello World!')" },
+  PHP: {
+    extension: ".php",
+    commentSign: "//",
+    shebang: "#!/usr/bin/env php",
+    helloWorld: "<?php echo 'Hello World!' ?>",
+  },
 };
 
 interface FormValues {
@@ -30,8 +51,8 @@ interface FormValues {
   title: string;
   mode: string;
   packageName?: string;
+  icon: string;
   percentEncoded: boolean;
-  type: ArgumentType;
 }
 
 export default function PipeCommandForm(): JSX.Element {
@@ -46,18 +67,22 @@ export default function PipeCommandForm(): JSX.Element {
     const filepath = resolve(environment.supportPath, `${title}${languageProperties.extension}`);
 
     const metadataLines = [
-      `${languageProperties.comments} @raycast.title ${values.title}`,
-      `${languageProperties.comments} @raycast.mode ${values.mode}`,
-      `${languageProperties.comments} @raycast.argument1 {"type": "${
-        values.type
-      }", "percentEncoded": ${!!values.percentEncoded}}`,
+      `${languageProperties.commentSign} @raycast.title ${values.title}`,
+      `${languageProperties.commentSign} @raycast.mode ${values.mode}`,
+      `${languageProperties.commentSign} @raycast.icon ${values.icon}`,
+      `${
+        languageProperties.commentSign
+      } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
 
     if (values.packageName) {
-      metadataLines.push(`${languageProperties.comments} @raycast.packageName ${values.packageName}`);
+      metadataLines.push(`${languageProperties.commentSign} @raycast.packageName ${values.packageName}`);
     }
 
-    const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
+    const help = `${languageProperties.commentSign} Documentation is available at https://github.com/raycast/extensions/blob/main/extensions/pipe-commands/README.md`;
+    const content = [languageProperties.shebang, "", help, ...metadataLines, "", languageProperties.helloWorld].join(
+      "\n"
+    );
 
     writeFileSync(filepath, content, { mode: 0o755 });
     showInFinder(filepath);
@@ -83,12 +108,12 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
-      <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
-      <Form.Dropdown title="Accept" id="type">
-        {argumentTypes.map((type) => (
-          <Form.Dropdown.Item key={type} title={type} value={type} />
+      <Form.Dropdown title="Icon" id="icon" defaultValue="text-alignleft-16">
+        {Object.entries(Icon).map(([key, value]) => (
+          <Form.Dropdown.Item icon={value} key={key} title={key} value={key} />
         ))}
       </Form.Dropdown>
+      <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Checkbox
         defaultValue={false}
         title="Percent Encoded"

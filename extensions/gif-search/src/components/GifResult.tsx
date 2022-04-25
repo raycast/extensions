@@ -1,36 +1,22 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { useContext } from "react";
 
+import { List, Icon, Color } from "@raycast/api";
+
+import { GifDetailsActions } from "./GifDetailsActions";
+
+import AppContext from "../components/AppContext";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
-import { getShowPreview, getDefaultAction } from "../preferences";
+import { getShowPreview, ServiceName } from "../preferences";
 
-export function GifResult(props: { item: IGif; index: number }) {
-  const { preview_gif_url, title, url, gif_url } = props.item;
+export function GifResult(props: { item: IGif; index: number; service?: ServiceName }) {
+  const { preview_gif_url, title, id } = props.item;
+  const { state } = useContext(AppContext);
+  const is_fav = state.favIds?.get(props.service as ServiceName)?.has(id.toString());
 
   const showPreview = getShowPreview();
-
-  const openInBrowser = <Action.OpenInBrowser key="openInBrowser" url={url} />;
-  const copyGif = (
-    <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF URL to Clipboard" content={stripQParams(gif_url)} />
-  );
-  const copyUrl = (
-    <Action.CopyToClipboard
-      key="copyPageUrl"
-      title="Copy Page URL to Clipboard"
-      content={url}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-    />
-  );
-
-  const actions = [openInBrowser, copyGif, copyUrl];
-  const defaultAction = getDefaultAction();
-  for (let index = 0; index < actions.length; index++) {
-    const action = actions[index];
-
-    if (action.key == defaultAction) {
-      // Move matching action to the front of the array to make it the default
-      actions.splice(index, 1);
-      actions.unshift(action);
-    }
+  const accessories: List.Item.Accessory[] = [];
+  if (is_fav) {
+    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow } });
   }
 
   return (
@@ -38,13 +24,8 @@ export function GifResult(props: { item: IGif; index: number }) {
       title={title}
       icon={{ source: preview_gif_url }}
       detail={showPreview && <List.Item.Detail markdown={renderGifMarkdownDetails(props.item)} />}
-      actions={<ActionPanel title={title}>{actions}</ActionPanel>}
+      actions={<GifDetailsActions item={props.item} showViewDetails={true} service={props.service} />}
+      accessories={accessories}
     />
   );
-}
-
-function stripQParams(url: string) {
-  const earl = new URL(url);
-  earl.search = "";
-  return earl.toString();
 }

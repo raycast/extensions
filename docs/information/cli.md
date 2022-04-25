@@ -30,3 +30,7 @@ You can use `ray build -e dist` to validate that your extension builds properly.
 ### Lint
 
 `ray lint` runs [ESLint](http://eslint.org) for all files in the `src` directory.
+
+### Migrate
+
+`ray migrate` [migrates](../migration/README.md) your extension to the latest version of the `@raycast/api`.
