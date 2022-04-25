@@ -119,7 +119,7 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
           icon={{
             source: "empty-workspace-placeholder.png",
           }}
-          title="Empty workspace"
+          title="Empty Workspace"
           description="Add a typeform to get started"
           actions={
             <ActionPanel>
