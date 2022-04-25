@@ -1,43 +1,67 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, trash } from "@raycast/api";
 import React, { useState } from "react";
 import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
-import { DirectoryInfo, DirectoryType, FileInfo } from "./utils/directory-info";
+import { DirectoryInfo, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
-import { LocalStorageKey } from "./utils/constants";
-import { copyFileByPath } from "./utils/applescript-utils";
-import { alertDialog, copyLatestFile, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
-import fse from "fs-extra";
-import { ActionRemoveAllDirectories } from "./utils/ui-components";
+import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
+import {
+  alertDialog,
+  copyLatestFile,
+  getFileInfo,
+  getIsShowDetail,
+  localDirectoryWithFiles,
+  refreshNumber,
+} from "./hooks/hooks";
+import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
 
 export default function Command() {
+  const { primaryAction, rememberTag, autoCopyLatestFile } = commonPreferences();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const { autoCopyLatestFile } = commonPreferences();
+  const [filePath, setFilePath] = useState<string>("");
+  const [refreshDetail, setRefreshDetail] = useState<number>(0);
 
+  const showDetail = getIsShowDetail(refreshDetail);
   const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
+  const fileInfo = getFileInfo(filePath);
+
+  //preference: copy the latest file
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
 
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search file"}
+      isShowingDetail={showDetail && allFilesNumber !== 0}
+      searchBarPlaceholder={"Search files"}
+      onSelectionChange={(id) => {
+        if (typeof id === "string") {
+          setFilePath(id);
+        }
+      }}
       searchBarAccessory={
-        <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
-          <List.Dropdown.Item key={"All"} title={"All Directories"} value={"All"} />
-          {directoryWithFiles.map((value, index) => {
-            return (
-              <List.Dropdown.Item
-                key={index + value.directory.name}
-                title={value.directory.name}
-                value={value.directory.name}
-              />
-            );
-          })}
+        <List.Dropdown onChange={setTag} tooltip={"Directory type"} storeValue={rememberTag}>
+          <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
+          <List.Dropdown.Section title={"Location"}>
+            {directoryWithFiles.map((value, index) => {
+              return (
+                <List.Dropdown.Item
+                  key={index + value.directory.name}
+                  title={value.directory.name}
+                  value={value.directory.name}
+                />
+              );
+            })}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title={"Type"}>
+            {tagDirectoryTypes.map((directoryType, index) => {
+              return <List.Dropdown.Item key={index + directoryType} title={directoryType} value={directoryType} />;
+            })}
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {directoryWithFiles.length === 0 || allFilesNumber === 0 ? (
+      {(directoryWithFiles.length === 0 || allFilesNumber === 0) && !loading ? (
         <List.EmptyView
           title={directoryWithFiles.length === 0 ? "No directory. Please pin first" : "No Files."}
           description={"You can always pin directory from the Action Panel"}
@@ -59,74 +83,120 @@ export default function Command() {
         <>
           {directoryWithFiles.map(
             (directory, directoryIndex) =>
-              (tag == directory.directory.name || tag == "All") && (
+              (tag == directory.directory.name || tag == "All" || tagDirectoryTypes.includes(tag)) && (
                 <List.Section
                   key={directory.directory.id}
                   title={directory.directory.name}
-                  subtitle={parse(directory.directory.path).dir}
+                  subtitle={showDetail ? "" : parse(directory.directory.path).dir}
                 >
-                  {directory.files.map((value) => (
-                    <List.Item
-                      key={value.id}
-                      icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
-                      title={value.name}
-                      actions={
-                        <ActionPanel>
-                          <ActionsOnFile fileInfo={value} index={directoryIndex} setRefresh={setRefresh} />
-                          <ActionPanel.Section title="Directory Action">
-                            <Action
-                              icon={Icon.Pin}
-                              title={`Pin Directory`}
-                              shortcut={{ modifiers: ["cmd"], key: "d" }}
-                              onAction={async () => {
-                                await pinDirectory(false);
-                                setRefresh(refreshNumber());
-                              }}
-                            />
-                            <Action
-                              icon={Icon.Trash}
-                              title={`Remove Directory`}
-                              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                              onAction={async () => {
-                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
-                                _localDirectory.splice(directoryIndex, 1);
-                                await LocalStorage.setItem(
-                                  LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                  JSON.stringify(_localDirectory)
-                                );
-                                setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", `Directory is removed.`);
-                              }}
-                            />
-                            <ActionRemoveAllDirectories setRefresh={setRefresh} />
-                            <Action
-                              icon={Icon.TwoArrowsClockwise}
-                              title={`Reset Directory Rank`}
-                              shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
-                              onAction={async () => {
-                                const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
-                                const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
-                                  ? []
-                                  : JSON.parse(localstorage);
+                  {directory.files.map(
+                    (fileValue) =>
+                      (tag === fileValue.type || !tagDirectoryTypes.includes(tag)) && (
+                        <List.Item
+                          id={fileValue.path}
+                          key={fileValue.path}
+                          icon={
+                            isImage(parse(fileValue.path).ext)
+                              ? { source: fileValue.path }
+                              : { fileIcon: fileValue.path }
+                          }
+                          title={fileValue.name}
+                          detail={<List.Item.Detail markdown={fileInfo} />}
+                          actions={
+                            <ActionPanel>
+                              <ActionsOnFile
+                                primaryAction={primaryAction}
+                                fileInfo={fileValue}
+                                index={directoryIndex}
+                                setRefresh={setRefresh}
+                              />
+                              <ActionPanel.Section>
+                                <Action
+                                  icon={Icon.Pin}
+                                  title={`Pin Directory`}
+                                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                                  onAction={async () => {
+                                    await pinDirectory(false);
+                                    setRefresh(refreshNumber());
+                                  }}
+                                />
+                                <Action
+                                  icon={Icon.Trash}
+                                  title={`Remove Directory`}
+                                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
+                                  onAction={async () => {
+                                    await alertDialog(
+                                      Icon.XmarkCircle,
+                                      "Remove Directory",
+                                      `Are you sure you want to remove the ${directory.directory.name} directory?`,
+                                      "Remove",
+                                      async () => {
+                                        const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                        const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
+                                        _localDirectory.splice(directoryIndex, 1);
+                                        await LocalStorage.setItem(
+                                          LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                          JSON.stringify(_localDirectory)
+                                        );
+                                        setRefresh(refreshNumber());
+                                        await showToast(
+                                          Toast.Style.Success,
+                                          "Success!",
+                                          `${directory.directory.name} directory is removed.`
+                                        );
+                                      }
+                                    );
+                                  }}
+                                />
+                                <ActionRemoveAllDirectories setRefresh={setRefresh} />
+                                <Action
+                                  icon={Icon.TwoArrowsClockwise}
+                                  title={`Reset Directory Rank`}
+                                  shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+                                  onAction={async () => {
+                                    await alertDialog(
+                                      Icon.ExclamationMark,
+                                      "Reset All Rank",
+                                      "Are you sure you want to reset the ranking of all directories??",
+                                      "Reset All",
+                                      async () => {
+                                        const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
+                                        const _localDirectory: DirectoryInfo[] = isEmpty(localstorage)
+                                          ? []
+                                          : JSON.parse(localstorage);
 
-                                const _pinnedDirectory = _localDirectory.map((value) => {
-                                  value.rank = 1;
-                                  return value;
-                                });
-                                await LocalStorage.setItem(
-                                  LocalStorageKey.LOCAL_PIN_DIRECTORY,
-                                  JSON.stringify(_pinnedDirectory)
-                                );
-                                setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
-                              }}
-                            />
-                          </ActionPanel.Section>
-                        </ActionPanel>
-                      }
-                    />
-                  ))}
+                                        const _pinnedDirectory = _localDirectory.map((value) => {
+                                          value.rank = 1;
+                                          return value;
+                                        });
+                                        await LocalStorage.setItem(
+                                          LocalStorageKey.LOCAL_PIN_DIRECTORY,
+                                          JSON.stringify(_pinnedDirectory)
+                                        );
+                                        setRefresh(refreshNumber());
+                                        await showToast(Toast.Style.Success, "Success!", `All ranks are reset.`);
+                                      }
+                                    );
+                                  }}
+                                />
+                              </ActionPanel.Section>
+
+                              <ActionPanel.Section>
+                                <Action
+                                  title={"Toggle Details"}
+                                  icon={Icon.Sidebar}
+                                  shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+                                  onAction={async () => {
+                                    await LocalStorage.setItem("isShowDetail", !showDetail);
+                                    setRefreshDetail(refreshNumber());
+                                  }}
+                                />
+                              </ActionPanel.Section>
+                            </ActionPanel>
+                          }
+                        />
+                      )
+                  )}
                 </List.Section>
               )
           )}
@@ -137,82 +207,63 @@ export default function Command() {
 }
 
 function ActionsOnFile(props: {
+  primaryAction: string;
   fileInfo: FileInfo;
   index: number;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { fileInfo, index, setRefresh } = props;
+  const { primaryAction, fileInfo, index, setRefresh } = props;
   return (
     <>
-      <Action
-        icon={Icon.Clipboard}
-        title={"Copy to Clipboard"}
-        onAction={async () => {
-          const copyResult = await copyFileByPath(fileInfo.path);
-          if (isEmpty(copyResult)) {
-            await showHUD(`${fileInfo.name} is copied to clipboard`);
-          } else {
-            await showHUD(copyResult);
-          }
-          await upRank(index, setRefresh);
-        }}
-      />
-      <Action
-        icon={Icon.Window}
-        title={fileInfo.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder"}
-        onAction={async () => {
-          try {
-            await open(fileInfo.path);
-            await showHUD("Open in Default App");
-            await upRank(index, setRefresh);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
-      <Action
-        icon={Icon.Finder}
-        title={"Reveal in Finder"}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={async () => {
-          try {
-            await open(parse(fileInfo.path).dir);
-            await showHUD("Reveal in Finder");
-            await upRank(index, setRefresh);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
-      <Action
-        icon={Icon.Trash}
-        title={"Delete File Permanently"}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        onAction={async () => {
-          try {
+      <PrimaryActionOnFile primaryAction={primaryAction} fileInfo={fileInfo} index={index} setRefresh={setRefresh} />
+
+      <ActionPanel.Section>
+        <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
+        <Action.ShowInFinder
+          shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+          path={fileInfo.path}
+          onShow={async () => await upRank(index, setRefresh)}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title={"Copy Name"}
+          content={fileInfo.name}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+        />
+        <Action.CopyToClipboard
+          title={"Copy Path"}
+          content={fileInfo.path}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Trash}
+          title={"Move to trash"}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
             await alertDialog(
-              "⚠️Warning",
-              "Deleted files cannot be recovered. Do you want to Delete?",
-              "Delete",
+              Icon.Trash,
+              "Move to Trash",
+              `Are you sure you want to move ${fileInfo.name} to the trash?`,
+              "Move to trash",
               async () => {
-                fse.removeSync(fileInfo.path);
-                setRefresh(refreshNumber());
-                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} was deleted.`);
-              },
-              async () => {
-                await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                await trash(fileInfo.path);
+                setRefresh(refreshNumber);
+                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} is moved to the trash.`);
               }
             );
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", String(e));
-          }
-        }}
-      />
+          }}
+        />
+      </ActionPanel.Section>
     </>
   );
 }
 
-async function upRank(index: number, setRefresh: React.Dispatch<React.SetStateAction<number>>) {
+export async function upRank(index: number, setRefresh: React.Dispatch<React.SetStateAction<number>>) {
   const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
   const directories: DirectoryInfo[] = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
   const moreHighRank = directories.filter((value) => {

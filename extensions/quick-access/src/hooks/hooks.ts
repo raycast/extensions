@@ -5,17 +5,34 @@ import {
   commonPreferences,
   getDirectoryFiles,
   getFileShowNumber,
+  getFileContent,
   getLocalStorage,
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 
 //for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
+};
+
+//get is show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>("isShowDetail");
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return showDetail;
 };
 
 //get local directory with files
@@ -59,6 +76,7 @@ export const localDirectoryWithFiles = (refresh: number) => {
     setDirectoryWithFiles(_pinnedDirectoryContent);
     setAllFilesNumber(_allFilesNumber);
     setLoading(false);
+
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
   }, [refresh]);
 
@@ -71,6 +89,20 @@ export const localDirectoryWithFiles = (refresh: number) => {
     allFilesNumber: allFilesNumber,
     loading: loading,
   };
+};
+
+//get file or folder info
+export const getFileInfo = (filePath: string, updateDetail = 0) => {
+  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const fetchData = useCallback(async () => {
+    setDirectoryInfo(getFileContent(filePath));
+  }, [updateDetail, filePath]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return directoryInfo;
 };
 
 //get local directory with files
@@ -100,13 +132,15 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
 };
 
 export const alertDialog = async (
+  icon: Icon,
   title: string,
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction: () => void
+  cancelAction?: () => void
 ) => {
   const options: Alert.Options = {
+    icon: icon,
     title: title,
     message: message,
     primaryAction: {
