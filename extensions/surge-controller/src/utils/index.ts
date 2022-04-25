@@ -118,7 +118,7 @@ const getProcessData = (
 ) => {
   const data: { title: string; text: string; icon: Image.ImageLike | undefined } = {
     title: 'Process',
-    text: '',
+    text: 'N/A',
     icon: undefined,
   }
   if (remoteClientPhysicalAddress) {

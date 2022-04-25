@@ -5,12 +5,14 @@ import ErrorBoundary from './ErrorBoundary'
 import { ActionPanel, Action, List, Detail } from '@raycast/api'
 import { useCallback, useEffect, useState } from 'react'
 import { getRencentRequest, getActiveRequest, getDevices } from '../api'
-import { getCurrentBackend, getProcessData, getRequestStatus, IconRequest } from '../utils'
+import { checkSystemIsIOS, getCurrentBackend, getProcessData, getRequestStatus, IconRequest } from '../utils'
 import { ApiLoaderType, DevicesT, RequestItemT, RequestsT } from '../utils/types'
 
 const Requests = () => {
   const [requestType, setRequestType] = useState('recent')
   const [currentUrl, setCurrentUrl] = useState('')
+  const [isIOS, setIsIOS] = useState(true)
+
   const requestLoader = useCallback<ApiLoaderType>(
     () => (requestType === 'recent' ? getRencentRequest() : getActiveRequest()),
     [requestType],
@@ -28,11 +30,14 @@ const Requests = () => {
   const { response: devicesList } = useRequire<DevicesT>({
     apiLoader: getDevices,
     defaultData: [],
+    disabled: isIOS,
   })
 
   useEffect(() => {
     ;(async () => {
       const { url } = await getCurrentBackend()
+      const isIOS = await checkSystemIsIOS()
+      setIsIOS(isIOS)
       setCurrentUrl(url)
     })()
   }, [])
@@ -156,6 +161,12 @@ ${request.responseHeader}
             <Detail.Metadata.TagList.Item
               text={getRequestStatus(request)}
               color={request.completed ? (request.failed ? '#ff4757' : '#32ff7e') : '#eed535'}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Interface">
+            <Detail.Metadata.TagList.Item
+              text={request.interface || 'N/A'}
+              color={request.interface ? '#00e5ff' : ''}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Policy Name" text={request.policyName} />

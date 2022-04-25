@@ -8,12 +8,6 @@ import { ApiLoaderType, CurrentProfileT } from '../utils/types'
 
 const Profiles = () => {
   const [isIOS, setIsIOS] = useState(true)
-  useEffect(() => {
-    ;(async () => {
-      const isIOS = await checkSystemIsIOS()
-      setIsIOS(isIOS)
-    })()
-  }, [])
 
   const getProfilesLoader = useCallback<ApiLoaderType>(() => getProfiles(), [isIOS])
   const { response: profileList } = useRequire<string[]>({
@@ -26,6 +20,13 @@ const Profiles = () => {
     apiLoader: getCurrentProfile,
     defaultData: {} as CurrentProfileT,
   })
+
+  useEffect(() => {
+    ;(async () => {
+      const isIOS = await checkSystemIsIOS()
+      setIsIOS(isIOS)
+    })()
+  }, [])
 
   const onChangeProfileHandle = actionBoundary(async (name: string) => {
     await changeProfile({ name: name })
