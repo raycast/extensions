@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tw-colorpicker",
-  "title": "TailwindCSS ColorPicker",
-  "description": "Search TailwindCSS colors to use the hex or rgb color value in projects that don't use TailwindCSS classes.",
+  "title": "Tailwind CSS Colorpicker",
+  "description": "Search Tailwind CSS colors to use the HEX or RGB color value in projects that don't use Tailwind CSS classes.",
   "icon": "icon-tw-logo.png",
   "author": "magicjaqk",
   "categories": [
@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Colors",
-      "subtitle": "TailwindCSS",
-      "description": "Show color list.",
+      "title": "Color Search",
+      "subtitle": "Tailwind CSS",
+      "description": "Show Tailwind CSS color list and convert to HEX or RGB.",
       "mode": "view"
     }
   ],
