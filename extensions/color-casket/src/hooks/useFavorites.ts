@@ -19,6 +19,6 @@ export default function useFavorites(): FavoritesStorage {
     ...storage,
     has: (color: AvailableColor): boolean => {
       return storage.state.collection.some(({ instance }) => instance.stringValue() === color.stringValue());
-    },
+    }
   };
 }
