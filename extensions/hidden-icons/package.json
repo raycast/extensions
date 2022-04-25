@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hidden-icons",
   "title": "Hidden Icons",
-  "description": "A casual game, find out the hidden icons in 30s.",
-  "icon": "find-out-icon.png",
+  "description": "A casual game where you need to find a hidden icon.",
+  "icon": "find-icons.png",
   "author": "koinzhang",
   "categories": [
     "Fun"
@@ -11,10 +11,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "find-out-hidden-icon",
-      "title": "Find out Hidden Icon",
+      "name": "find-hidden-icon",
+      "title": "Find Hidden Icon",
       "subtitle": "Hidden Icons",
-      "description": "A casual game, find out the hidden icons in 30s.",
+      "description": "A casual game where you need to find a hidden icon.",
       "mode": "view"
     }
   ],

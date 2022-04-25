@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { allCountDownTime, getHistoryScore, getRandomFindOutIcon, modes } from "./utils/find-out-utils";
+import { allCountDownTime, getHistoryScore, getRandomFindOutIcon, modes } from "./utils/find-icons-utils";
 import ScorePage from "./score-page";
 import { clearInterval } from "timers";
 
@@ -36,9 +36,6 @@ export default function Command() {
       if (isGaming) {
         const historyScore = await getHistoryScore();
         push(<ScorePage myScore={{ mode: difficultyMode, score: score }} historyScore={historyScore} />);
-        await showToast(Toast.Style.Success, "Your score is " + (score + 1) + " !").then((toast) => {
-          toast.hide();
-        });
       }
     }
 
@@ -61,7 +58,6 @@ export default function Command() {
         }, 1000);
         setRefreshIcon(!refreshIcon);
         setScore(0);
-        await showToast(Toast.Style.Animated, "Your score is 0 !");
       }
     }
 
@@ -94,7 +90,7 @@ export default function Command() {
       {!isGaming ? (
         <List.EmptyView
           title={`Press ↩︎ to start game`}
-          icon={"find-out-icon.png"}
+          icon={"find-icons.png"}
           actions={
             <ActionPanel>
               <Action
@@ -105,7 +101,7 @@ export default function Command() {
                 }}
               />
               <Action
-                title={"History Score"}
+                title={"Score History"}
                 icon={Icon.TextDocument}
                 shortcut={{ modifiers: ["cmd"], key: "h" }}
                 onAction={async () => {
@@ -125,18 +121,14 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={isGaming ? "Find out " + targetIcon + ". Time left: " + leftTime + "s" : "Start Game"}
+                  title={isGaming ? `Find ${targetIcon}   Score: ${score}   Time left: ${leftTime}s` : "Start Game"}
                   icon={Icon.Star}
                   onAction={async () => {
                     setLastRandomRow(index);
                     if (targetIndex == index) {
-                      await showToast(Toast.Style.Animated, "Your score is " + (score + 1) + " !");
-                      setRefreshIcon(!refreshIcon);
                       setScore(score + 1);
-                    } else {
-                      await showToast(Toast.Style.Animated, "Your score is " + score + " !", "Wrong choice.");
-                      setRefreshIcon(!refreshIcon);
                     }
+                    setRefreshIcon(!refreshIcon);
                   }}
                 />
               </ActionPanel>

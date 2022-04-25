@@ -1,7 +1,7 @@
 import { Detail, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getNumberCanvas } from "./utils/common-utils";
-import { HistoryScore } from "./utils/find-out-utils";
+import { HistoryScore } from "./utils/find-icons-utils";
 
 export default function ScorePage(props: { myScore: HistoryScore; historyScore: HistoryScore[] }) {
   const { mode, score } = props.myScore;
@@ -37,7 +37,7 @@ ${scoreCanvas}
 `}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Highest score in history" text={`---------------------`} />
+          <Detail.Metadata.Label title="Highest Score in History" text={`---------------------`} />
           {historyScore.map((historyScore) => {
             return (
               <Detail.Metadata.Label

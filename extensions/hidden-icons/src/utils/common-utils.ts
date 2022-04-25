@@ -1,21 +1,6 @@
 import { environment } from "@raycast/api";
 import fileUrl from "file-url";
 
-export const countDownTimer = (countDown: number) => {
-  const interval = setInterval(() => {
-    countDown -= 1;
-    if (countDown === 0) {
-      clearInterval(interval);
-    }
-  }, 1000);
-  interval.refresh();
-  interval.unref();
-  const timeOut = setTimeout(() => {
-    clearInterval(interval);
-  }, countDown * 1000);
-  timeOut.refresh();
-};
-
 const assetPath = environment.assetsPath;
 const numberPathList = (theme: string) => {
   return [
