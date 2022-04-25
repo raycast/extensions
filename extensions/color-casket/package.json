@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-casket",
   "title": "Color Casket",
-  "description": "Handful Color Utilities",
+  "description": "Handy Color Utilities",
   "icon": "command-icon.png",
   "author": "slava.razum",
   "categories": ["Design Tools", "Developer Tools", "Productivity"],
