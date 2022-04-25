@@ -63,7 +63,7 @@ export default function Command() {
   }, []);
 
   // fetch issues after project is selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedProject) {
       const fetchIssues = async () => {
         const issues = await getIssues(selectedProject);
