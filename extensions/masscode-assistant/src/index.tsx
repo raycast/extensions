@@ -52,8 +52,11 @@ export default function Command() {
             icon={Icon.Document}
             accessories={[{ text: i.folder?.name ?? "Inbox" }]}
             actions={
-              <ActionPanel title="Some">
-                <ActionPanel.Section>{<Action.CopyToClipboard content={i.content[0].value} />}</ActionPanel.Section>
+              <ActionPanel title="Actions">
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard content={i.content[0].value} />
+                  <Action.Paste content={i.content[0].value} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           ></List.Item>
