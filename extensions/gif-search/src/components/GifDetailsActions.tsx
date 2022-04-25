@@ -65,7 +65,13 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
   ) : undefined;
   const copyGifUrl = <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF Link" content={stripQParams(gif_url)} />;
-  const copyGifMarkdown = <Action.CopyToClipboard key="copyGifMarkdown" title="Copy GIF Markdown" content={`![${item.title}](${stripQParams(gif_url)})`} />;
+  const copyGifMarkdown = (
+    <Action.CopyToClipboard
+      key="copyGifMarkdown"
+      title="Copy GIF Markdown"
+      content={`![${item.title}](${stripQParams(gif_url)})`}
+    />
+  );
   const copyPageUrl = url ? (
     <Action.CopyToClipboard
       key="copyPageUrl"
