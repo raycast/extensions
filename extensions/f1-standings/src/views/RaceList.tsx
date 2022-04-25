@@ -77,12 +77,13 @@ function RaceList() {
                 actions={
                   <ActionPanel title={race.raceName}>
                     <Action.Push
+                      icon={{ source: "flag-checkered.png", tintColor: Color.Green }}
                       title="Show Results"
                       target={<RaceResultList season={season} round={race.round} />}
-                      icon={{ source: "flag-checkered.png", tintColor: Color.Green }}
                     />
                     {raceDates.length ? (
                       <Action
+                        icon={Icon.Sidebar}
                         title={isShowingDetail ? "Hide Sessions" : "Show Sessions"}
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
@@ -122,6 +123,7 @@ function RaceList() {
                   <ActionPanel title={race.raceName}>
                     {raceDates.length ? (
                       <Action
+                        icon={Icon.Sidebar}
                         title={isShowingDetail ? "Hide Sessions" : "Show Sessions"}
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
