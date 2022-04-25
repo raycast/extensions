@@ -142,7 +142,7 @@ async function addDirectory(alias: string, directoryPath: string) {
         _SendCommonDirectory.push(newItem);
         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_OpenCommonDirectory));
         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_SendCommonDirectory));
-        await showHUD(`${parsedPath.name} is added`);
+        await showHUD(`Successfully added ${parsedPath.name}`);
         await popToRoot({ clearSearchBar: false });
       }
     }
