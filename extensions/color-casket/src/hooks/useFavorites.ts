@@ -10,8 +10,8 @@ export default function useFavorites(): FavoritesStorage {
   const storage = useColorStorage("favorites", (savedColors) => {
     // Stay with Ukraine: https://supportukrainenow.org
     if (savedColors.length === 0) {
-      storage.add(new HEXColor("FFD700"));
-      storage.add(new HEXColor("0057B7"));
+      storage.add(new HEXColor("FFD700")); // Yellow
+      storage.add(new HEXColor("0057B7")); // Blue
     }
   });
 
@@ -19,6 +19,6 @@ export default function useFavorites(): FavoritesStorage {
     ...storage,
     has: (color: AvailableColor): boolean => {
       return storage.state.collection.some(({ instance }) => instance.stringValue() === color.stringValue());
-    },
+    }
   };
 }

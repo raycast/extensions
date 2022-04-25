@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { clearSearchBar, showToast, Toast } from "@raycast/api";
+import { clearSearchBar } from "@raycast/api";
 
 import { createTypes } from "../typeUtilities";
 import { useDebounce } from "../utilities";
@@ -26,26 +26,17 @@ export default function useRenderColor(): RenderColor {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       try {
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Color Render", message: "searching..." });
-
-        searchText.length > 0 ? toast.show() : toast.hide();
-
         const colors = createTypes(searchText);
 
         setState(() => ({
           colors,
-          isLoading: false,
+          isLoading: false
         }));
-
-        if (toast) {
-          toast.style = Toast.Style.Success;
-          toast.message = "Successful";
-        }
       } catch (error) {
         setState((oldState) => ({
           ...oldState,
           colors: [],
-          isLoading: searchText !== "",
+          isLoading: searchText !== ""
         }));
       }
     }, 500),
@@ -58,9 +49,9 @@ export default function useRenderColor(): RenderColor {
     cancel() {
       setState(() => ({
         colors: [],
-        isLoading: false,
+        isLoading: false
       }));
       clearSearchBar();
-    },
+    }
   };
 }

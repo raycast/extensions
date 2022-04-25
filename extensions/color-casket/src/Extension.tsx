@@ -35,6 +35,13 @@ export default function Extension({
         searchBarPlaceholder="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black..."
         throttle
       >
+        {renderer.state.isLoading && (
+          <List.Item
+            title="Type one of the available formats..."
+            subtitle="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black"
+          />
+        )}
+
         {renderer.state.colors?.map((color, index) => (
           <ColorListItem key={index} color={color} />
         ))}
