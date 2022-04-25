@@ -56,7 +56,7 @@ export default function Command() {
                   title={`List Forms (${workspace.forms.count})`}
                   target={<Forms workspace={workspace} clientHttp={jsonHttpClient} />}
                 />
-                <Action.OpenInBrowser title="Open in admin" url={adminUrl(workspace.self.href)} />
+                <OpenWorkspaceInAdminAction link={workspace.self.href} />
               </ActionPanel>
             }
           />
@@ -92,7 +92,6 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
   }, [forms, error]);
 
   const isLoading = forms === null && error === null;
-  console.log(IN3_DATE);
   return (
     <List isLoading={isLoading} navigationTitle={`Forms of ${workspace.name}`} searchBarPlaceholder="Type to filter">
       {forms &&
@@ -118,10 +117,15 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
       {forms && forms.length === 0 && (
         <List.EmptyView
           icon={{
-            source:
-              "https://public-assets.typeform.com/hall-of-forms/primary/hall-of-forms.9108c8b4f045aef47393dcaaeeae9c98.png",
+            source: "empty-workspace-placeholder.png",
           }}
           title="Empty workspace"
+          description="Add a typeform to get started"
+          actions={
+            <ActionPanel>
+              <OpenWorkspaceInAdminAction link={workspace.self.href} />
+            </ActionPanel>
+          }
         />
       )}
     </List>
@@ -234,6 +238,10 @@ function FormActions({ form }: { form: FormOverview }) {
       />
     </>
   );
+}
+
+function OpenWorkspaceInAdminAction({ link }: { link: string }) {
+  return <Action.OpenInBrowser title="Open in admin" url={adminUrl(link)} />;
 }
 
 async function showErrorToast(errorMessage: string) {
