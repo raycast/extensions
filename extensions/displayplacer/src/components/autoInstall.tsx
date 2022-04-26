@@ -1,0 +1,43 @@
+import { Action, ActionPanel, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
+import { useState } from "react";
+
+export function AutoInstall({
+  onRefresh = () => {
+    return;
+  },
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const PATH = getPreferenceValues<Preferences>().path;
+  return (
+    <ActionPanel>
+      {!isLoading && (
+        <Action
+          title="Install with Homebrew"
+          onAction={async () => {
+            if (isLoading) return;
+
+            setIsLoading(true);
+
+            const toast = await showToast({ style: Toast.Style.Animated, title: "Installing..." });
+            await toast.show();
+
+            try {
+              execSync(`zsh -l -c 'PATH=${PATH} brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
+              await toast.hide();
+              onRefresh();
+            } catch {
+              await toast.hide();
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Error",
+                message: "An unknown error occured while trying to install",
+              });
+            }
+            setIsLoading(false);
+          }}
+        />
+      )}
+    </ActionPanel>
+  );
+}
