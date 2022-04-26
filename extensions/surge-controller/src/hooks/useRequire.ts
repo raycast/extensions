@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { ErrorHandler } from '../utils/error'
 import { ApiLoaderCustomType, ApiLoaderType } from '../utils/types'
 import useLatestState from './useLatestState'
 import useUnmounted from './useUnmounted'
@@ -102,8 +103,6 @@ const useRequire = <T, P = undefined>({
 
       return resultData
     } catch (e) {
-      if (process.env.NODE_ENV === 'development') console.error(e)
-
       refetchTimer.current && clearTimeout(refetchTimer.current)
       if (currentUnmountStatus.current) return
       if (currentReqParams.current !== reqParams) return
@@ -111,6 +110,8 @@ const useRequire = <T, P = undefined>({
       if (currentDisabled.current) return
       if (currentDisabledByFunc.current && reqParams && currentDisabledByFunc.current(reqParams)) return
 
+      if (process.env.NODE_ENV === 'development') console.error(e)
+      ErrorHandler(e)
       setLoading(false)
       setError(true)
     }

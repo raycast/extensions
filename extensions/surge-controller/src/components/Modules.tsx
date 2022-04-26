@@ -18,7 +18,7 @@ const Modules = () => {
     defaultData: [],
   })
 
-  const onActionHandle = actionBoundary(async (name: string, status: boolean, index: number) => {
+  const handleAction = actionBoundary(async (name: string, status: boolean, index: number) => {
     await switchModule({ [name]: !status })
     moduleList[index].status = !status
     setModuleList([...moduleList])
@@ -39,7 +39,7 @@ const Modules = () => {
             icon={IconIsSelected(status)}
             actions={
               <ActionPanel>
-                <Action title="Switch" onAction={() => onActionHandle(name, status, index)} />
+                <Action title="Switch" onAction={() => handleAction(name, status, index)} />
               </ActionPanel>
             }
           />

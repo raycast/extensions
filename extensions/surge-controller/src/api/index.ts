@@ -1,7 +1,6 @@
-import https from 'https'
 import request from './request'
-import axios, { AxiosResponse, Method } from 'axios'
-import { checkSystemIsIOS, getCurrentBackend, getGroupTypeByDetail, getSortedTraffic } from '../utils'
+import { AxiosResponse, Method } from 'axios'
+import { checkSystemIsIOS, getGroupTypeByDetail, getSortedTraffic } from '../utils'
 import {
   ApiLoaderType,
   FeatureResponseT,
@@ -78,19 +77,7 @@ export const getRencentRequest = setApiLoader(api.recentRequest, methods.get, 'r
 export const getActiveRequest = setApiLoader(api.activeRequest, methods.get, 'requests')
 
 export const testBackendConnect = async () => {
-  let status = true
-  const { url, xKey } = await getCurrentBackend()
-  await axios
-    .get(api.outbound, {
-      baseURL: `${url}/v1`,
-      headers: { 'X-Key': xKey },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
-      timeout: 5000,
-    })
-    .catch(() => (status = false))
-  return status
+  await request.get(api.outbound, { timeout: 5000 })
 }
 
 export const getTraffic = async () => {

@@ -1,6 +1,7 @@
 import { Color, Icon, Image, LocalStorage } from '@raycast/api'
 import { testBackendConnect } from '../api'
 import request from '../api/request'
+import { NoBackendError } from './error'
 import { BackendsT, ConnectorTrafficT, DevicesT, RequestItemT, SystemT, TrafficResponseT } from './types'
 
 const IconIsCurrent = (condition: boolean) => ({
@@ -65,16 +66,11 @@ const checkSystemIsIOS = async () => {
   return system === 'iOS'
 }
 
-const checkBackendStatus = async (): Promise<[boolean, string, string]> => {
+const checkBackendStatus = async () => {
   const backends = Object.keys(await getBackends())
-  if (backends.length === 0) {
-    return [false, 'No available backend', 'Configure in Backends']
-  }
-  const status = await testBackendConnect()
-  if (!status) {
-    return [false, 'Backend connection failed', `Please check your 'Backends' setting`]
-  }
-  return [true, '', '']
+  if (backends.length === 0) throw NoBackendError
+  await testBackendConnect()
+  return undefined
 }
 
 const setCurrentBackendName = async (name: string) => {

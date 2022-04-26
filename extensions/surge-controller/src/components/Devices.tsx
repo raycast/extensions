@@ -31,7 +31,7 @@ const Devices = () => {
     })()
   }, [])
 
-  const onActionHandle = actionBoundary(async (data, physicalAddress: string) => {
+  const handleAction = actionBoundary(async (data, physicalAddress: string) => {
     await setDevices({ physicalAddress, ...data })
     await run()
     pop()
@@ -102,7 +102,7 @@ ${
                           <ActionPanel>
                             <Action.SubmitForm
                               title="Submit"
-                              onSubmit={(data) => onActionHandle(data, device.physicalAddress)}
+                              onSubmit={(data) => handleAction(data, device.physicalAddress)}
                             />
                           </ActionPanel>
                         }

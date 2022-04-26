@@ -228,3 +228,8 @@ export type RequestItemT = {
 }
 
 export type RequestsT = RequestItemT[]
+
+export type ErrorT = {
+  title: string
+  info: string
+}

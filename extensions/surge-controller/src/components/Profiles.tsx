@@ -28,14 +28,14 @@ const Profiles = () => {
     })()
   }, [])
 
-  const onChangeProfileHandle = actionBoundary(async (name: string) => {
+  const handleSwitch = actionBoundary(async (name: string) => {
     await changeProfile({ name: name })
     currentProfile.name = name
     setCurrentProfile({ ...currentProfile })
     await showToast(Toast.Style.Success, 'Success', `Profile has been changed to "${name}".`)
   })
 
-  const onReloadHandle = actionBoundary(async () => {
+  const handleReload = actionBoundary(async () => {
     await reloadProfile()
     await showToast(Toast.Style.Success, 'Success', 'Profile has been reloaded.')
   })
@@ -56,13 +56,13 @@ const Profiles = () => {
                   key={name}
                   title={name}
                   icon={IconIsCurrent(name === currentProfile.name)}
-                  onAction={() => onChangeProfileHandle(name)}
+                  onAction={() => handleSwitch(name)}
                 />
               ))}
             </ActionPanel.Submenu>
           )}
           <ActionPanel.Submenu title="Reload Profile" shortcut={{ modifiers: ['cmd'], key: 'r' }}>
-            <Action title="Yes" onAction={() => onReloadHandle()} />
+            <Action title="Yes" onAction={() => handleReload()} />
             <Action title="No" />
           </ActionPanel.Submenu>
           <Action.Push title="Show Profile" target={<Detail markdown={content} />} />

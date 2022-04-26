@@ -13,7 +13,7 @@ const ErrorBoundary: React.FC<Props> = ({
   error,
   icon = Icon.XmarkCircle,
   title = 'Request Fail',
-  info = `Please check your 'Backends' setting`,
+  info = `Please check your Surge status and Backends setting`,
   actions,
   children,
 }) => (

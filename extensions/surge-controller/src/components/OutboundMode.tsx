@@ -17,7 +17,7 @@ const OutboundMode = () => {
     rule: 'Rule-Based Proxy',
   }
 
-  const onActionHandle = actionBoundary(async (mode: OutboundModeNameT) => {
+  const handleAction = actionBoundary(async (mode: OutboundModeNameT) => {
     await changeOutboundMode({ mode })
     setCurrentOutboundMode(mode)
     await showToast(Toast.Style.Success, 'Success', `Outbound Mode changed to ${outboundModeTitles[mode]}`)
@@ -38,7 +38,7 @@ const OutboundMode = () => {
                 key={mode}
                 title={outboundModeTitles[mode]}
                 icon={IconIsCurrent(currentOutboundMode === mode)}
-                onAction={() => onActionHandle(mode)}
+                onAction={() => handleAction(mode)}
               />
             ))}
           </ActionPanel.Submenu>

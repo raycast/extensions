@@ -17,7 +17,7 @@ const DNS = () => {
     defaultData: [],
   })
 
-  const onActionHandle = actionBoundary(async () => {
+  const handleAction = actionBoundary(async () => {
     await flushDnsCache()
     await showToast(Toast.Style.Success, 'Success', 'The DNS cache has been flushed.')
     pop()
@@ -34,7 +34,7 @@ const DNS = () => {
               <ActionPanel>
                 <Action.OpenInBrowser title="Query IP Details" url={`https://ip.sb/ip/${data[0]}`} />
                 <ActionPanel.Submenu title="Flush DNS" shortcut={{ modifiers: ['cmd'], key: 'r' }}>
-                  <Action title="Yes" onAction={() => onActionHandle()} />
+                  <Action title="Yes" onAction={() => handleAction()} />
                   <Action title="No" />
                 </ActionPanel.Submenu>
               </ActionPanel>

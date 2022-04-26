@@ -18,7 +18,7 @@ const Capabilities = () => {
     defaultData: [],
   })
 
-  const onActionHandle = actionBoundary(async (title: string, status: boolean, i: number) => {
+  const handleAction = actionBoundary(async (title: string, status: boolean, i: number) => {
     await switchCapability(i, !status)
     capabilityList[i].status = !status
     setCapabilityList([...capabilityList])
@@ -39,7 +39,7 @@ const Capabilities = () => {
             icon={IconIsSelected(status)}
             actions={
               <ActionPanel>
-                <Action title="Switch" onAction={() => onActionHandle(title, status, i)} />
+                <Action title="Switch" onAction={() => handleAction(title, status, i)} />
               </ActionPanel>
             }
           />

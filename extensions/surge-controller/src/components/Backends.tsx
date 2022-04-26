@@ -31,7 +31,7 @@ const Backends: React.FC<props> = ({
   const [backends, setBackends] = useState<BackendsT>(backendsF as BackendsT)
   const [current, setCurrent] = useState(currentF)
 
-  const onAddHandle = async ({ name, url, xKey }: BackendFormT) => {
+  const handleSubmit = async ({ name, url, xKey }: BackendFormT) => {
     if (name === '' || url === '') return showToast(Toast.Style.Failure, `Name and URL cannot be empty`)
 
     const isExist = Object.values(backends)
@@ -46,10 +46,10 @@ const Backends: React.FC<props> = ({
     await LocalStorage.setItem(name, `${url}@${xKey}`)
     showToast(Toast.Style.Success, 'Add Success', `${name}: ${url}`)
     pop()
-    !current && onUseHandle(name)
+    !current && handleUse(name)
   }
 
-  const onDeleteHandle = async (name: string) => {
+  const handleDelete = async (name: string) => {
     await LocalStorage.removeItem(name)
     delete backends[name]
     setBackends({ ...backends })
@@ -58,21 +58,21 @@ const Backends: React.FC<props> = ({
 
     const backendKeys = Object.keys(backends)
     if (backendKeys.length === 0) {
-      onUseHandle('')
+      handleUse('')
     } else if (current === name) {
-      onUseHandle(backendKeys[0])
+      handleUse(backendKeys[0])
     }
   }
 
-  const onDeleteAllHandle = async () => {
+  const handleDeleteAll = async () => {
     await LocalStorage.clear()
     setBackends({})
     setBackendsF({})
-    onUseHandle('')
+    handleUse('')
     showToast(Toast.Style.Success, 'Delete Success')
   }
 
-  const onUseHandle = async (name: string) => {
+  const handleUse = async (name: string) => {
     setCurrent(name)
     onBackendChange(name)
   }
@@ -92,9 +92,9 @@ const Backends: React.FC<props> = ({
           ]}
           actions={
             <ActionPanel>
-              {current !== name && <Action title="Use Backend" onAction={() => onUseHandle(name)} />}
+              {current !== name && <Action title="Use Backend" onAction={() => handleUse(name)} />}
               <ActionPanel.Submenu title="Delete?">
-                <Action title="Yes" onAction={() => onDeleteHandle(name)} />
+                <Action title="Yes" onAction={() => handleDelete(name)} />
                 <Action title="No" />
               </ActionPanel.Submenu>
             </ActionPanel>
@@ -113,7 +113,7 @@ const Backends: React.FC<props> = ({
                   navigationTitle="Add Backend"
                   actions={
                     <ActionPanel>
-                      <Action.SubmitForm title="Submit" onSubmit={onAddHandle} />
+                      <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
                     </ActionPanel>
                   }
                 >
@@ -136,7 +136,7 @@ const Backends: React.FC<props> = ({
         actions={
           <ActionPanel>
             <ActionPanel.Submenu title="Delete All Backend?">
-              <Action title="Yes" onAction={onDeleteAllHandle} />
+              <Action title="Yes" onAction={handleDeleteAll} />
               <Action title="No" />
             </ActionPanel.Submenu>
           </ActionPanel>

@@ -1,4 +1,3 @@
-import { showToast, Toast } from '@raycast/api'
 import { getCurrentBackend } from '../utils'
 import axios, { AxiosError } from 'axios'
 import https from 'https'
@@ -18,24 +17,6 @@ request.interceptors.request.use(
     return config
   },
   function (error: AxiosError) {
-    return Promise.reject(error)
-  },
-)
-
-request.interceptors.response.use(
-  function (response) {
-    return response
-  },
-  async function (error: AxiosError) {
-    if (error.response?.status === 401) {
-      await showToast(
-        Toast.Style.Failure,
-        'Request Failed',
-        'xKey is invalid, Please check your xKey availability',
-      )
-    } else {
-      await showToast(Toast.Style.Failure, 'Request Failed', `Please check your 'Backends' setting`)
-    }
     return Promise.reject(error)
   },
 )

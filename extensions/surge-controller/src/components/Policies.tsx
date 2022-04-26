@@ -19,7 +19,7 @@ const Policies = () => {
     defaultData: [],
   })
 
-  const onActionHandle = actionBoundary(async (group_name: string, policy: string) => {
+  const handleAction = actionBoundary(async (group_name: string, policy: string) => {
     await changeOptionOfGroup({ group_name, policy })
     policies.forEach((item) => item.name === group_name && (item.select = policy))
     setPolicies([...policies])
@@ -44,7 +44,7 @@ const Policies = () => {
                       select={select}
                       groupName={name}
                       proxies={proxies}
-                      onActionHandle={onActionHandle}
+                      onActionHandle={handleAction}
                       isSelectType={type === 'SELECT'}
                     />
                   }
@@ -85,7 +85,7 @@ const Proxies = ({ proxies, groupName, select, isSelectType, onActionHandle }: P
     getBenchmark()
   }, [])
 
-  const onTestHandle = async (group_name: string) => {
+  const handleAction = async (group_name: string) => {
     await test({ group_name })
     getBenchmark()
   }
@@ -138,7 +138,7 @@ const Proxies = ({ proxies, groupName, select, isSelectType, onActionHandle }: P
                 <Action
                   title="Delay Test"
                   onAction={() => {
-                    onTestHandle(groupName)
+                    handleAction(groupName)
                   }}
                 />
               </ActionPanel>

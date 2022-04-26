@@ -8,12 +8,13 @@ import {
   getCurrentBackendVersion,
   checkSystemIsIOS,
 } from './utils'
-import { BackendsT, VersionT } from './utils/types'
+import { BackendsT, ErrorT, VersionT } from './utils/types'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import Backends from './components/Backends'
 import Components from './components'
 import ErrorBoundary from './components/ErrorBoundary'
 import dayjs from 'dayjs'
+import { getErrorMessage } from './utils/error'
 
 dayjs.extend(localizedFormat)
 
@@ -24,8 +25,6 @@ type ComponentT = {
   component: JSX.Element
 }
 
-let errTitle: string
-let errInfo: string
 const commponents: Array<ComponentT> = [
   {
     component: <Components.OutboundMode key="OutboundMode" />,
@@ -78,20 +77,19 @@ const commponents: Array<ComponentT> = [
 
 const Command = () => {
   const [backends, setBackends] = useState<BackendsT>({} as BackendsT)
-  const [current, setCurrent] = useState('')
   const [version, setVersion] = useState<VersionT>({} as VersionT)
+  const [errorMessage, setErrorMessage] = useState<ErrorT | undefined>()
   const [isIOS, setIsIOS] = useState(true)
   const [status, setStatus] = useState(false)
   const [loading, setloading] = useState(true)
+  const [current, setCurrent] = useState('')
 
   useEffect(() => {
     ;(async () => {
       const currentBackendName = await getCurrentBackendName()
-
+      const backends = await getBackends()
       currentBackendName && setCurrent(currentBackendName)
-
-      const items = await getBackends()
-      setBackends(items)
+      setBackends(backends)
     })()
   }, [])
 
@@ -99,16 +97,17 @@ const Command = () => {
     setloading(true)
     setStatus(false)
     ;(async () => {
-      const [status, title, info] = await checkBackendStatus()
-      if (status) {
+      const error = await checkBackendStatus().catch(getErrorMessage)
+
+      if (!error) {
         const version = await getCurrentBackendVersion()
         const isIOS = await checkSystemIsIOS()
         setIsIOS(isIOS)
         setVersion(version)
+        setStatus(true)
       }
-      errTitle = title
-      errInfo = info
-      setStatus(status)
+
+      setErrorMessage(error)
       setloading(false)
     })()
   }, [current])
@@ -147,7 +146,12 @@ const Command = () => {
         </List.Dropdown>
       }
     >
-      <ErrorBoundary error={!status} title={errTitle} info={errInfo} actions={backendsAction}>
+      <ErrorBoundary
+        error={!status}
+        title={errorMessage?.title}
+        info={errorMessage?.info}
+        actions={backendsAction}
+      >
         <List.Section title={version.deviceName} subtitle={version.version}>
           {commponents.map(({ title, icon, component, macOnly }) =>
             title
