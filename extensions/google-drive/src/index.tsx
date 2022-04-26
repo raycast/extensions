@@ -45,14 +45,18 @@ const getFiles = (path: PathLike, allowHidden: boolean): Array<FileInfo> =>
     .map((name) => join(path.toLocaleString(), name))
     .filter(isFile)
     .filter((file) => allowHidden || !isHidden(file))
-    .map((file) => ({
-      name: basename(file),
-      path: file,
-      displayPath: displayPath(file),
-      fileSizeFormatted: formatBytes(statSync(file).size),
-      createdAt: statSync(file).birthtime,
-      updatedAt: statSync(file).mtime,
-    }));
+    .map((file) => {
+      const fileStats = statSync(file);
+
+      return {
+        name: basename(file),
+        path: file,
+        displayPath: displayPath(file),
+        fileSizeFormatted: formatBytes(fileStats.size),
+        createdAt: fileStats.birthtime,
+        updatedAt: fileStats.mtime,
+      };
+    });
 
 const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<string, FileInfo> => {
   const dirs = getDirectories(path, allowHidden);
