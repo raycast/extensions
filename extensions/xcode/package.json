@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": "SvenTiigi",
   "contributors": [
     "qeude"

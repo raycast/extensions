@@ -1,5 +1,5 @@
 import { XcodeProject } from "../../models/project/xcode-project.model";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { XcodeProjectType } from "../../models/project/xcode-project-type.model";
 import tildify from "tildify";
 import { ReactNode } from "react";
@@ -36,7 +36,13 @@ export function xcodeProjectListItem(
  */
 function defaultActions(xcodeProject: XcodeProject): ReactNode {
   return [
-    <Action.OpenWith key="open-with-xcode" title="Open with Xcode" path={xcodeProject.filePath} />,
+    <Action.Open
+      application="com.apple.dt.Xcode"
+      key="open-with-xcode"
+      title="Open with Xcode"
+      target={xcodeProject.filePath}
+      icon={Icon.Hammer}
+    />,
     <Action.ShowInFinder key="show-in-finder" path={xcodeProject.filePath} />,
   ];
 }
