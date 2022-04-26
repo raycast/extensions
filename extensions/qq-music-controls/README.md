@@ -15,9 +15,9 @@ Controls:
 - toggle lyrics display
 - play modes:
   - shuffle
-  - sequencial
+  - sequential
   - repeat
 
 ## Screenshot
 
-![screenshot](../../docs/.gitbook/assets/example-qq-music-controls.png)
+![screenshot](./metadata/screenshot-01.png)
