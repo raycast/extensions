@@ -1,6 +1,6 @@
 # QQ Music Controls
 
-Control the QQ Music macOS app from Raycast.
+Control the [QQ Music](https://y.qq.com/) macOS app from Raycast.
 
 ## Features
 
