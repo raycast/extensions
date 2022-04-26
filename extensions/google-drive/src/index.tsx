@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { readdirSync, statSync, PathLike, existsSync } from "fs";
-import { join, basename, dirname, resolve } from "path";
+import { join, basename, dirname, resolve, extname } from "path";
 import { homedir, tmpdir } from "os";
 import fuzzysort from "fuzzysort";
 import { exec } from "child_process";
 import util from "util";
+
+const execAsync = util.promisify(exec);
 
 const isDirectory = (path: PathLike) => statSync(path).isDirectory();
 
@@ -70,13 +72,34 @@ const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<strin
   };
 };
 
+const NON_PREVIEWABLE_EXTENSIONS = [
+  ".zip",
+  ".rar",
+  ".7z",
+  ".tar",
+  ".gz",
+  ".bz2",
+  ".xz",
+  ".iso",
+  ".dmg",
+  ".exe",
+  ".DS_Store",
+  ".app",
+  ".gdoc",
+  ".gsheet",
+  ".gslides",
+];
+
 const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   const outputDir = tmpdir();
-  const execAsync = util.promisify(exec);
+
+  if (NON_PREVIEWABLE_EXTENSIONS.includes(extname(file.path).toLowerCase())) {
+    return null;
+  }
 
   try {
-    await execAsync(`qlmanage -t -s 512 ${escapePath(file.path)} -o ${outputDir}`, {
-      timeout: 1000 /* milliseconds */,
+    await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${outputDir}`, {
+      timeout: 500 /* milliseconds */,
       killSignal: "SIGKILL",
     });
   } catch (e) {
