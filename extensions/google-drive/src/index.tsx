@@ -181,7 +181,7 @@ export default function Command() {
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView icon={{ source: "no-items.png" }} title="No files found" />
+        <List.EmptyView title="No files found" />
       )}
     </List>
   );
