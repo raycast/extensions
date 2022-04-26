@@ -131,7 +131,7 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      if (searchText.length === 0 || Object.keys(filesMap).length === 0) {
+      if (searchText.trim().length === 0 || Object.keys(filesMap).length === 0) {
         setFilesFiltered(originalFilteredAndSortedFiles);
         return;
       }
@@ -145,22 +145,21 @@ export default function Command() {
       );
 
       setFilesFiltered(
-        (_prevFiles) =>
-          fuzzySortResults
-            .map((result) => result)
-            .sort((a, b) => {
-              if (a.score < b.score) {
-                return 1;
-              } else if (a.score > b.score) {
-                return -1;
-              } else if (filesMap[a.target] && filesMap[b.target]) {
-                return filesMap[b.target].updatedAt.getTime() - filesMap[a.target].updatedAt.getTime();
-              } else {
-                return 0;
-              }
-            })
-            .map((rating) => filesMap[rating.target])
-            .filter((file) => file) as FileInfo[]
+        fuzzySortResults
+          .map((result) => result)
+          .sort((a, b) => {
+            if (a.score < b.score) {
+              return 1;
+            } else if (a.score > b.score) {
+              return -1;
+            } else if (filesMap[a.target] && filesMap[b.target]) {
+              return filesMap[b.target].updatedAt.getTime() - filesMap[a.target].updatedAt.getTime();
+            } else {
+              return 0;
+            }
+          })
+          .map((result) => filesMap[result.target])
+          .filter((file) => file)
       );
 
       setIsFiltering(false);
@@ -180,41 +179,35 @@ export default function Command() {
       {filesFiltered.length > 0 ? (
         <List.Section title="Files">
           {filesFiltered.map((file) => (
-            <FileItem key={file.path} file={file} />
+            <List.Item
+              id={file.path}
+              key={file.path}
+              icon={{ fileIcon: file.path }}
+              title={file.name}
+              detail={<List.Item.Detail markdown={fileMetadataMarkdown(file)} />}
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
+                  <Action.ShowInFinder path={file.path} />
+                  <Action.OpenWith path={file.path} />
+                  <Action.CopyToClipboard
+                    title="Copy File Path"
+                    content={escapePath(file.displayPath)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Folder Path"
+                    content={escapePath(dirname(file.displayPath))}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  />
+                </ActionPanel>
+              }
+            />
           ))}
         </List.Section>
       ) : (
         <List.EmptyView title="No files found" />
       )}
     </List>
-  );
-}
-
-type FileItemProps = { file: FileInfo };
-function FileItem({ file }: FileItemProps): JSX.Element {
-  return (
-    <List.Item
-      id={file.path}
-      icon={{ fileIcon: file.path }}
-      title={file.name}
-      detail={<List.Item.Detail markdown={fileMetadataMarkdown(file)} />}
-      actions={
-        <ActionPanel>
-          <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
-          <Action.ShowInFinder path={file.path} />
-          <Action.OpenWith path={file.path} />
-          <Action.CopyToClipboard
-            title="Copy File Path"
-            content={escapePath(file.displayPath)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Folder Path"
-            content={escapePath(dirname(file.displayPath))}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-        </ActionPanel>
-      }
-    />
   );
 }
