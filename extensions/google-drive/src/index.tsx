@@ -106,7 +106,6 @@ export default function Command() {
         return {};
       }
 
-      console.log("preferences.showHiddenFiles", preferences.shouldShowHiddenFiles);
       return getFilesRecursively(drivePath, preferences.shouldShowHiddenFiles);
     } catch (e) {
       showToast({
