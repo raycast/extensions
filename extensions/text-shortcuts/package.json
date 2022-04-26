@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "shortcut-library",
-      "icon": "search-icon.png",
+      "icon": "shortcut-library.png",
       "title": "Shortcut Library",
       "subtitle": "Text Shortcuts",
       "description": "Search and run text shortcut.",
