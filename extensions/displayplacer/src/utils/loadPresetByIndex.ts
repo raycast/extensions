@@ -1,22 +1,47 @@
-import { LocalStorage, showHUD } from "@raycast/api";
-import { listScreenInfo, switchSettings } from "./displayplacer";
+import { closeMainWindow, LocalStorage, showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
+import { PATH, switchSettings } from "./displayplacer";
 
 export default async function loadPresetByIndex(index: number) {
   try {
-    listScreenInfo();
+    execSync(`zsh -l -c 'PATH=${PATH} displayplacer list'`);
   } catch (e) {
-    console.error(e);
-    showHUD("Error: Cannot load displayplacer utility. Ensure it's installed on your system.");
+    showToast({
+      title: "Error",
+      message: "Display Placer utility not detected on your system.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
-  const myFavs = await LocalStorage.getItem("favorites");
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Switching Display Settings...",
+  });
+
+  const myFavs = JSON.parse((await LocalStorage.getItem("favorites"))?.toString() ?? "[]");
+  console.log("myFavorites", myFavs);
+
   if (!myFavs) return;
-  const favorites: Favorite[] = JSON.parse(myFavs.toString());
-  const fav = favorites[index];
+  const fav = myFavs[index];
+
   if (!fav) {
-    showHUD("Favorite not found");
+    console.log("No favorite found at index", index);
+    await toast.hide();
+    showToast({ title: "Error", message: "Favorite not found", style: Toast.Style.Failure });
     return;
   }
-  switchSettings(fav);
+  try {
+    switchSettings(fav);
+  } catch {
+    await toast.hide();
+    showToast({
+      title: "Error",
+      message: "Display Placer not detected on your system. Please install to continue",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+  await closeMainWindow();
+  await toast.hide();
 }
