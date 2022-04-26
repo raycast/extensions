@@ -8,6 +8,7 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": ["pernielsentikaer"],
   "license": "MIT",
   "commands": [
     {
