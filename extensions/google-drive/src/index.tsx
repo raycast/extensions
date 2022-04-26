@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, FileIcon } from "@raycast/api";
 import { readdirSync, statSync, PathLike, existsSync } from "fs";
-import { join, basename, dirname, resolve } from "path";
-import { homedir } from "os";
+import { join, basename, dirname, resolve, extname } from "path";
+import { homedir, tmpdir } from "os";
 import fuzzysort from "fuzzysort";
+import { exec } from "child_process";
 
 const isDirectory = (path: PathLike) => statSync(path).isDirectory();
 
@@ -68,9 +69,78 @@ const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<strin
   };
 };
 
-const fileMetadataMarkdown = (file: FileInfo) => `
-## File Information
+const PREVIEWABLE_EXTENSIONS = [
+  ".cr2",
+  ".cr3",
+  ".heic",
+  ".heif",
+  ".icns",
+  ".icon",
+  ".icons",
+  ".jpeg",
+  ".jpg",
+  ".jpg",
+  ".png",
+  ".raf",
+  ".raw",
+  ".svg",
+  ".tiff",
+  ".webp",
+  ".gif",
+  ".mov",
+  ".mp4",
+  ".pdf",
+  ".epub",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".pages",
+  ".numbers",
+  ".key",
+  ".keynote",
+  ".svg",
+  ".txt",
+  ".rtf",
+  ".html",
+  ".htm",
+  ".csv",
+  ".md",
+  ".markdown",
+];
 
+const filePreviewPath = (file: FileInfo): null | string => {
+  const outputDir = tmpdir();
+  const extension = extname(file.path);
+
+  if (!PREVIEWABLE_EXTENSIONS.includes(extension.toLowerCase())) {
+    return null;
+  }
+
+  try {
+    exec(`qlmanage -t ${escapePath(file.path)} -o ${outputDir}`, { timeout: 500, killSignal: "SIGKILL" });
+  } catch (e) {
+    return null;
+  }
+
+  return encodeURI(`file://${outputDir}/${file.name}.png`);
+};
+
+const fileMetadataMarkdown = (file: FileInfo | null): string => {
+  if (!file) {
+    return "";
+  }
+
+  const previewPath = filePreviewPath(file);
+  const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
+  const previewImage = previewExists ? `![${file.name}](${previewPath})` : "";
+
+  return `
+${previewImage}
+
+## File Information
 **Name**\n
 ${file.name}
 
@@ -92,8 +162,8 @@ ${file.createdAt.toLocaleString()}
 ---
 
 **Updated**\n
-${file.updatedAt.toLocaleString()}
-`;
+${file.updatedAt.toLocaleString()}`;
+};
 
 type Preferences = {
   shouldShowHiddenFiles: boolean;
@@ -103,6 +173,9 @@ type Preferences = {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const drivePath = resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
+  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
+  const fileDetailMarkup = useMemo(() => fileMetadataMarkdown(selectedFile), [selectedFile]);
+  console.log({ fileDetailMarkup });
 
   const filesMap = useMemo<Record<string, FileInfo>>(() => {
     try {
@@ -179,16 +252,20 @@ export default function Command() {
       searchText={searchText}
       searchBarPlaceholder={`Search in ${displayPath(drivePath)}`}
       isLoading={isFiltering}
+      onSelectionChange={(id) => {
+        console.log({ id, file: id && filesMap[id] });
+        setSelectedFile((id && filesMap[id]) || null);
+      }}
     >
       {filesFiltered.length > 0 ? (
         <List.Section title="Files">
           {filesFiltered.map((file) => (
             <List.Item
-              id={file.path}
-              key={file.path}
+              id={file.displayPath}
+              key={file.displayPath}
               icon={{ fileIcon: file.path }}
               title={file.name}
-              detail={<List.Item.Detail markdown={fileMetadataMarkdown(file)} />}
+              detail={<List.Item.Detail markdown={fileDetailMarkup} />}
               actions={
                 <ActionPanel>
                   <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
