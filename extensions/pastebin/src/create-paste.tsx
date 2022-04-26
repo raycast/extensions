@@ -1,4 +1,4 @@
-import {Action, ActionPanel, Clipboard, Form, open, showHUD, Toast} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, open, showHUD, Toast } from "@raycast/api";
 import { CreateOptions, ExpireDate, Publicity } from "pastebin-api";
 import { useToken } from "./utils/hooks";
 import client from "./utils/client";
