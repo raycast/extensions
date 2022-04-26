@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { readdirSync, statSync, PathLike, existsSync } from "fs";
-import { join, basename, dirname } from "path";
+import { join, basename, dirname, resolve } from "path";
 import { homedir } from "os";
 import fuzzysort from "fuzzysort";
 
@@ -64,8 +64,6 @@ const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<strin
   };
 };
 
-const drivePath = join(homedir(), "Google Drive");
-
 const fileMetadataMarkdown = (file: FileInfo) => `
 ## File Information
 
@@ -95,14 +93,20 @@ ${file.updatedAt.toLocaleString()}
 
 type Preferences = {
   shouldShowHiddenFiles: boolean;
+  googleDriveRootPath: string;
 };
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const drivePath = resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
 
   const filesMap = useMemo<Record<string, FileInfo>>(() => {
     try {
       if (!existsSync(drivePath)) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `The specified Google Drive root path "${drivePath}" does not exist.`,
+        });
         return {};
       }
 
