@@ -162,6 +162,7 @@
 /extensions/jetbrains                                @gdsmith @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand
+/extensions/jira-time-tracking                       @niallpaterson
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
 /extensions/json-to-go                               @chyroc
