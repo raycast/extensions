@@ -83,7 +83,7 @@
     },
     {
       "name": "attributes",
-      "title": "All Entities with Attributes",
+      "title": "All Entities With Attributes",
       "subtitle": "Home Assistant",
       "description": "Query Home Assistant entity attributes",
       "mode": "view"
