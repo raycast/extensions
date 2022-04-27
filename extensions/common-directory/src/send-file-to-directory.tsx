@@ -278,26 +278,26 @@ function SendToDirectoryItem(props: {
                     );
                   }}
                 />
+                <Action
+                  title={"Rest All Rank"}
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+                  onAction={async () => {
+                    await alertDialog(
+                      Icon.ArrowClockwise,
+                      "Rest All Rank",
+                      "Are you sure you want to reset all rank?",
+                      "Reset All Rank",
+                      async () => {
+                        resetRank(commonDirectory, setRefresh).then(async () => {
+                          await showToast(Toast.Style.Success, "Reset successfully!");
+                        });
+                      }
+                    );
+                  }}
+                />
               </>
             )}
-            <Action
-              title={"Rest All Rank"}
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
-              onAction={async () => {
-                await alertDialog(
-                  Icon.ArrowClockwise,
-                  "Rest All Rank",
-                  "Are you sure you want to reset all rank?",
-                  "Reset All Rank",
-                  async () => {
-                    resetRank(commonDirectory, setRefresh).then(async () => {
-                      await showToast(Toast.Style.Success, "Reset successfully!");
-                    });
-                  }
-                );
-              }}
-            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title={"Detail Action"}>

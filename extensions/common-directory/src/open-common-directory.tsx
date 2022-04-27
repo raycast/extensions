@@ -220,26 +220,27 @@ function DirectoryItem(props: {
                     );
                   }}
                 />
+                <Action
+                  title={"Reset All Ranks"}
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+                  onAction={async () => {
+                    await alertDialog(
+                      Icon.ArrowClockwise,
+                      "Reset all ranks",
+                      "Are you sure you want to reset all ranks?",
+                      "Reset all ranks",
+                      async () => {
+                        console.debug(commonDirectory.length);
+                        resetRank(commonDirectory, setRefresh).then(async () => {
+                          await showToast(Toast.Style.Success, "Successfully reset ranks!");
+                        });
+                      }
+                    );
+                  }}
+                />
               </>
             )}
-            <Action
-              title={"Reset All Ranks"}
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
-              onAction={async () => {
-                await alertDialog(
-                  Icon.ArrowClockwise,
-                  "Reset all ranks",
-                  "Are you sure you want to reset all ranks?",
-                  "Reset all ranks",
-                  async () => {
-                    resetRank(commonDirectory, setRefresh).then(async () => {
-                      await showToast(Toast.Style.Success, "Successfully reset ranks!");
-                    });
-                  }
-                );
-              }}
-            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title={"Detail Action"}>
