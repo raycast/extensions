@@ -1,5 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { Application } from "./@types/eagle";
+import { checkEagleInstallation } from "./utils/checkInstall";
 import { useApplicationInfo } from "./utils/query";
 
 function SimpleTableItem({ title, text }: { title: string; text: string }) {
@@ -29,6 +30,8 @@ const infoEntries: [string, keyof Application][] = [
 
 export default function Info() {
   const { data, error } = useApplicationInfo();
+
+  checkEagleInstallation();
 
   return (
     <List isLoading={!error && !data}>

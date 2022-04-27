@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Folder } from "./@types/eagle";
 import EagleItem from "./components/EagleItem";
+import { checkEagleInstallation } from "./utils/checkInstall";
 import { useFolderItemList, useFolderList } from "./utils/query";
 
 function FolderItem({ folder }: { folder: Folder }) {
@@ -41,6 +42,8 @@ function FolderView({ folder }: { folder: Folder }) {
 
 export default function Folder() {
   const { data: folders, isLoading } = useFolderList();
+
+  checkEagleInstallation();
 
   return (
     <List isLoading={isLoading}>
