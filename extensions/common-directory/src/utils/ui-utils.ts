@@ -18,6 +18,8 @@ export const getDirectoryContent = (directoryPath: string) => {
       const files = fse.readdirSync(directoryPath);
       const isNormalFile = files.filter((value) => !value.startsWith("."));
       detailContent = `![](${fileUrl(assetPath + "/" + previewIcon)})\n
+      
+------
 
 **Name**:${parsePath.name}
 
