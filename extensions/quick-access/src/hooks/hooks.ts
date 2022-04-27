@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryWithFileInfo } from "../utils/directory-info";
+import { DirectoryWithFileInfo, FileInfo } from "../utils/directory-info";
 import {
   checkDirectoryValid,
   commonPreferences,
   getDirectoryFiles,
   getFileShowNumber,
-  getFileContent,
   getLocalStorage,
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
 import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
+import { getFileContent } from "../utils/get-file-preview";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -92,11 +92,14 @@ export const localDirectoryWithFiles = (refresh: number) => {
 };
 
 //get file or folder info
-export const getFileInfo = (filePath: string, updateDetail = 0) => {
+export const getFileInfoAndPreview = (fileInfo: FileInfo, updateDetail = 0) => {
   const [directoryInfo, setDirectoryInfo] = useState<string>("");
   const fetchData = useCallback(async () => {
-    setDirectoryInfo(getFileContent(filePath));
-  }, [updateDetail, filePath]);
+    if (isEmpty(fileInfo.path)) {
+      return;
+    }
+    setDirectoryInfo(await getFileContent(fileInfo));
+  }, [updateDetail, fileInfo]);
 
   useEffect(() => {
     void fetchData();

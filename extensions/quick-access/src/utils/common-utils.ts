@@ -1,11 +1,10 @@
-import { environment, getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
 import { DirectoryInfo, DirectoryType, FileType } from "./directory-info";
 import { imgExt } from "./constants";
 import { parse } from "path";
-import Values = LocalStorage.Values;
 import { getFinderInsertLocation } from "./applescript-utils";
-import fileUrl from "file-url";
+import Values = LocalStorage.Values;
 
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -193,64 +192,13 @@ export const getFileShowNumber = (fileShowNumber: string) => {
   }
 };
 
-function getFileSize(size: number) {
-  if (!size) return "0 KB";
-  const num = 1024.0; //byte
-  if (size < num) return size + " B";
-  if (size < Math.pow(num, 2)) return (size / num).toFixed(2) + " KB"; //kb
-  if (size < Math.pow(num, 3)) return (size / Math.pow(num, 2)).toFixed(2) + " MB"; //M
-  if (size < Math.pow(num, 4)) return (size / Math.pow(num, 3)).toFixed(2) + " G"; //G
-  return (size / Math.pow(num, 4)).toFixed(2) + " T"; //T
-}
-
-const assetPath = environment.assetsPath;
-const raycastIsLightTheme = () => {
-  return environment.theme == "light";
-};
-
-//Detail content: Image
-export const getFileContent = (filePath: string) => {
-  let detailContent = "";
-  let preview = "";
-  let size = "";
-  const parsePath = parse(filePath);
-  try {
-    if (!isEmpty(filePath)) {
-      const fileStat = fse.statSync(filePath);
-      if (fileStat.isDirectory()) {
-        const files = fse.readdirSync(filePath);
-        const isNormalFile = files.filter((value) => !value.startsWith("."));
-        const previewIcon = raycastIsLightTheme() ? "folder-icon.png" : "folder-icon@dark.png";
-        preview = `![](${fileUrl(assetPath + "/" + previewIcon)})\n`;
-        size = `**Sub-files**: ${isNormalFile.length}`;
-      } else {
-        if (imgExt.includes(parsePath.ext)) {
-          preview = `![](${fileUrl(filePath)})\n`;
-        } else {
-          preview = `![](${fileUrl(assetPath + "/file-icon.png")})\n`;
-        }
-        size = `**Size**: ${getFileSize(fileStat.size)}`;
-      }
-
-      detailContent = `${preview}
-      
-------
-
-**Name**: ${parsePath.base}
-
-**Where**: ${parsePath.dir}
-
-${size}
-
-**Created**: ${new Date(fileStat.birthtime).toLocaleString()}
-
-**Modified**: ${new Date(fileStat.mtime).toLocaleString()}
-
-**Last opened**: ${new Date(fileStat.atime).toLocaleString()}
-`;
-    }
-  } catch (e) {
-    console.error(String(e));
+export function formatBytes(sizeInBytes: number) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let unitIndex = 0;
+  while (sizeInBytes >= 1024) {
+    sizeInBytes /= 1024;
+    unitIndex++;
   }
-  return detailContent;
-};
+
+  return `${sizeInBytes.toFixed(1)} ${units[unitIndex]}`;
+}
