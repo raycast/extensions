@@ -59,8 +59,8 @@ export default function CommonDirectory() {
       {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
       (commonDirectory.length === 0 && !showOpenDirectory) ? (
         <List.EmptyView
-          title={"No directory. Please add first"}
-          description={"You can add directories from the Action Panel"}
+          title={"No directories found"}
+          description={"You can always add directories directly from the Action Panel"}
           actions={
             <ActionPanel>
               <Action.Push
@@ -254,7 +254,7 @@ function SendToDirectoryItem(props: {
                           LocalDirectoryKey.OPEN_COMMON_DIRECTORY,
                           JSON.stringify(__openCommonDirectory)
                         );
-                        await showToast(Toast.Style.Success, "Removed successfully!");
+                        await showToast(Toast.Style.Success, "Successfully removed directory!");
                       }
                     );
                   }}
@@ -273,7 +273,7 @@ function SendToDirectoryItem(props: {
                         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
                         setRefresh(refreshNumber);
-                        await showToast(Toast.Style.Success, "Successfully removed All directories!");
+                        await showToast(Toast.Style.Success, "Successfully removed all directories!");
                       }
                     );
                   }}
@@ -285,9 +285,9 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.ArrowClockwise,
-                      "Rest all ranks",
+                      "Reset all ranks",
                       "Are you sure you want to reset all ranks?",
-                      "Reset All Rank",
+                      "Reset all ranks",
                       async () => {
                         resetRank(commonDirectory, setRefresh).then(async () => {
                           await showToast(Toast.Style.Success, "Successfully reset ranks!");
