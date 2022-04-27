@@ -149,9 +149,12 @@ function DirectoryItem(props: {
           <Action.Open
             title="Open"
             target={directory.path}
-            onOpen={() => openAndUpRank(directory, index, commonDirectory)}
+            onOpen={() => openAndUpRank(directory, index, commonDirectory, setRefresh)}
           />
-          <Action.ShowInFinder path={directory.path} onShow={() => openAndUpRank(directory, index, commonDirectory)} />
+          <Action.ShowInFinder
+            path={directory.path}
+            onShow={() => openAndUpRank(directory, index, commonDirectory, setRefresh)}
+          />
 
           <CopyFileActions directory={directory} />
 
@@ -234,11 +237,17 @@ function DirectoryItem(props: {
   );
 }
 
-async function openAndUpRank(directoryPath: DirectoryInfo, index: number, commonDirectory: DirectoryInfo[]) {
+async function openAndUpRank(
+  directoryPath: DirectoryInfo,
+  index: number,
+  commonDirectory: DirectoryInfo[],
+  setRefresh: React.Dispatch<React.SetStateAction<number>>
+) {
   try {
     let _commonDirectory = [...commonDirectory];
     if (commonPreferences().sortBy === SortBy.Rank) {
       _commonDirectory = await upRank([..._commonDirectory], index);
+      setRefresh(refreshNumber());
     }
     if (directoryPath.isCommon) {
       await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_commonDirectory));
@@ -253,7 +262,9 @@ async function upRank(directories: DirectoryInfo[], index: number) {
     return value.path !== directories[index].path && value.rank >= directories[index].rank;
   });
   if (moreHighRank.length == 0) {
-    return directories;
+    return directories.sort(function (a, b) {
+      return b.rank - a.rank;
+    });
   }
   let allRank = 0;
   directories.forEach((value) => [(allRank = allRank + value.rank)]);
