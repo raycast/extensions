@@ -47,7 +47,7 @@ export default function useDocumentSearch({ databasesLoading, databases }: UseDB
 const documentize = (database: Database, spaceID: string, blocks: Block[]) => {
   const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
   const placeholders = new Array(documentIDs.length).fill("?").join(", ");
-  const sql = `SELECT id, content, entityType, documentId FROM BlockSearch WHERE documentId in (${placeholders})`;
+  const sql = `SELECT id, content, type, entityType, documentId FROM BlockSearch WHERE documentId in (${placeholders})`;
 
   return database
     .exec(sql, documentIDs)

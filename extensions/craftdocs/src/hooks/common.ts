@@ -2,21 +2,21 @@ import { BindParams, Database, SqlValue } from "../../assets/sql-wasm-fts5";
 import { Block } from "./useSearch";
 
 export const searchQuery = `
-SELECT id, content, entityType, documentId
+SELECT id, content, type, entityType, documentId
 FROM BlockSearch(?)
 ORDER BY rank + customRank
 LIMIT ?
 `;
 
 export const searchQueryOnEmptyParams = `
-SELECT id, content, entityType, documentId
+SELECT id, content, type, entityType, documentId
 FROM BlockSearch
 ORDER BY customRank
 LIMIT ?
 `;
 
 export const searchQueryDocumentsOnEmptyParams = `
-SELECT id, content, entityType, documentId
+SELECT id, content, type, entityType, documentId
 FROM BlockSearch
 WHERE entityType = 'document'
 ORDER BY customRank
@@ -64,5 +64,5 @@ const phrasesForFTS5 = (terms: string[]): string[] => {
 
 export const sqlValueArr2Block =
   (spaceID: string) =>
-  ([id, content, entityType, documentID]: SqlValue[]): Block =>
-    ({ id, content, entityType, documentID, spaceID } as Block);
+  ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
+    ({ id, content, type, entityType, documentID, spaceID } as Block);

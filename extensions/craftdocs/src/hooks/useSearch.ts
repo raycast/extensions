@@ -14,6 +14,7 @@ export type Block = {
   id: string;
   spaceID: string;
   content: string;
+  type: string;
   entityType: string;
   documentID: string;
   documentName: string;

@@ -21,8 +21,7 @@ export default function ListDocBlocks({ resultsLoading, results, setQuery, query
           detail={
             <List.Item.Detail
               markdown={doc.blocks
-                .map((block) => block.content)
-                .reverse()
+                .map((block) => block.type === 'code' ? "```\n" + block.content + "\n```" : block.content)
                 .join("\n\n")}
             />
           }
