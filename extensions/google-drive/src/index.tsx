@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { readdirSync, statSync, PathLike, existsSync } from "fs";
+import fs, { readdirSync, statSync, PathLike, existsSync, accessSync } from "fs";
 import { join, basename, dirname, resolve, extname } from "path";
 import { homedir, tmpdir } from "os";
 import fuzzysort from "fuzzysort";
@@ -62,13 +62,26 @@ const getFiles = (path: PathLike, allowHidden: boolean): Array<FileInfo> =>
       };
     });
 
+const isPathReadable = (path: PathLike): boolean => {
+  try {
+    accessSync(path, fs.constants.R_OK);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<string, FileInfo> => {
-  const dirs = getDirectories(path, allowHidden);
+  const canReadPath = isPathReadable(path);
+  const dirs = canReadPath ? getDirectories(path, allowHidden) : [];
   const files = dirs.map((dir) => getFilesRecursively(dir, allowHidden)).reduce((a, b) => ({ ...a, ...b }), {});
 
   return {
     ...files,
-    ...getFiles(path, allowHidden).reduce((acc, file) => ({ ...acc, [file.displayPath]: file }), {}),
+    ...(canReadPath ? getFiles(path, allowHidden) : []).reduce(
+      (acc, file) => ({ ...acc, [file.displayPath]: file }),
+      {}
+    ),
   };
 };
 
