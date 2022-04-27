@@ -234,7 +234,7 @@ function DirectoryItem(props: {
                   "Reset all ranks",
                   async () => {
                     resetRank(commonDirectory, setRefresh).then(async () => {
-                      await showToast(Toast.Style.Success, "Successfully resetted ranks!");
+                      await showToast(Toast.Style.Success, "Successfully reset ranks!");
                     });
                   }
                 );
