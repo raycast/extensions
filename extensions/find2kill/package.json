@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "find2kill",
+  "title": "find2kill",
+  "description": "find running process by name or port and kill them with simple click",
+  "icon": "command-icon.png",
+  "author": "xeric",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fport",
+      "title": "Find by Port to Kill",
+      "alias": "fport",
+      "description": "fport - Find by Port to Kill",
+      "mode": "view"
+    },
+    {
+      "name": "fproc",
+      "title": "Find by Name to Kill",
+      "alias": "fproc",
+      "description": "fproc - Find by Name to Kill",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
