@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { WebhookChannelModel } from "../interface/webhookModel";
 import { composeMessage } from "./sendMessage";
 import { toggleFavorite, removeWebhook } from "../api/webhookStorage";
@@ -23,16 +23,18 @@ export function SingleWebhookItem(props: { webhook: WebhookChannelModel }) {
             onAction={() => {
               toggleFavorite(props.webhook);
               showToast({ title: "Toggled Favourite", style: Toast.Style.Success });
+              popToRoot();
             }}
           />
 
           <Action
-            title="Delete Channel"
+            title="Delete Webhook"
             icon={Icon.Trash}
             shortcut={{ modifiers: ["cmd"], key: "backspace" }}
             onAction={() => {
               removeWebhook(props.webhook.name);
               showToast({ title: "Deleted Channel", message: props.webhook.name });
+              popToRoot();
             }}
           />
         </ActionPanel>

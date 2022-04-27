@@ -45,7 +45,6 @@ export function removeWebhook(name: string) {
   data.splice(index, 1);
   fs.writeFileSync(dataFilePath, JSON.stringify(data));
   showToast({ title: "Webhook removed", message: "Webhook removed successfully" });
-  popToRoot();
 }
 
 export function toggleFavorite(webhook: WebhookChannelModel) {
@@ -58,7 +57,6 @@ export function toggleFavorite(webhook: WebhookChannelModel) {
   data[index].favourite = !data[index].favourite;
   fs.writeFileSync(dataFilePath, JSON.stringify(data));
   showToast({ title: "Webhook updated", message: "Webhook updated successfully" });
-  popToRoot();
 }
 
 function getData(): WebhookChannelModel[] {

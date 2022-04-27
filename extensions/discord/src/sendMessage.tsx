@@ -1,5 +1,4 @@
-import { MessageEmbed, WebhookClient } from "discord.js";
-import { Form, ActionPanel, Action, showToast, List, Icon, Toast, popToRoot } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { WebhookChannelModel } from "./interface/webhookModel";
 import { getWebhooks } from "./api/webhookStorage";
@@ -18,7 +17,7 @@ export default function Command() {
   }, [webhooks]);
 
   return (
-    <List searchBarPlaceholder="Search for saved channels" isLoading={false}>
+    <List searchBarPlaceholder="Search for saved channels" isLoading={isLoading}>
       {
         <List.Section title="Favourites">
           {webhooks
@@ -38,7 +37,7 @@ export default function Command() {
         </List.Section>
       }
       {!isLoading && webhooks.length == 0 && (
-        <List.EmptyView icon={"command-icon.png"} title="Added Webhooks will appear here" />
+        <List.EmptyView icon={"empty-list-icon.png"} title="Added Webhooks will appear here" />
       )}
     </List>
   );
