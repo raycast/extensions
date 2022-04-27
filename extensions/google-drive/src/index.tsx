@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fs, { readdirSync, statSync, PathLike, existsSync, accessSync } from "fs";
+import fs, { readdirSync, statSync, PathLike, existsSync, accessSync, lstatSync } from "fs";
 import { join, basename, dirname, resolve, extname } from "path";
 import { homedir, tmpdir } from "os";
 import fuzzysort from "fuzzysort";
@@ -9,17 +9,19 @@ import util from "util";
 
 const execAsync = util.promisify(exec);
 
-const isDirectory = (path: PathLike) => statSync(path).isDirectory();
+const isDirectory = (path: PathLike) => lstatSync(path).isDirectory();
 
 const isHidden = (path: PathLike) => basename(path.toLocaleString()).startsWith(".");
+const isDotUnderscore = (path: PathLike) => !basename(path.toLocaleString()).startsWith("._");
 
 const getDirectories = (path: PathLike, allowHidden: boolean): Array<PathLike> =>
   readdirSync(path, "utf8")
     .map((name) => join(path.toLocaleString(), name))
+    .filter(isDotUnderscore)
     .filter(isDirectory)
     .filter((path) => allowHidden || !isHidden(path));
 
-const isFile = (path: PathLike) => statSync(path).isFile();
+const isFile = (path: PathLike) => lstatSync(path).isFile();
 
 const formatBytes = (sizeInBytes: number): string => {
   const units = ["B", "KB", "MB", "GB", "TB"];
@@ -47,6 +49,7 @@ type FileInfo = {
 const getFiles = (path: PathLike, allowHidden: boolean): Array<FileInfo> =>
   readdirSync(path)
     .map((name) => join(path.toLocaleString(), name))
+    .filter(isDotUnderscore)
     .filter(isFile)
     .filter((file) => allowHidden || !isHidden(file))
     .map((file) => {
