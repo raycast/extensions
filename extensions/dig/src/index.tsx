@@ -1,7 +1,6 @@
 import { ActionPanel, Detail, Icon, List, Action, useNavigation } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { spawn } from "child_process";
-import { STATUS_CODES } from "http";
 
 interface Result {
   title: string;
@@ -128,10 +127,6 @@ function getNSEntry(cmdLine: string) {
   return n[n.length - 1];
 }
 
-function hasWhiteSpace(s: string) {
-  return s.indexOf(" ") >= 0;
-}
-
 async function digByQuery(query: string, signal: AbortSignal): Promise<Result[]> {
   try {
     const str = query.trim();
@@ -150,7 +145,7 @@ async function digByQuery(query: string, signal: AbortSignal): Promise<Result[]>
       params.push(str);
     }
 
-    const child = spawn("host", params);
+    const child = spawn("host", params, { signal });
     child.stdout.setEncoding("utf-8");
 
     for await (const chunk of child.stdout) {
@@ -180,7 +175,6 @@ async function digByQuery(query: string, signal: AbortSignal): Promise<Result[]>
       }
     }
 
-    // Return x arr
     return output;
   } catch (e) {
     return Promise.resolve([]);
