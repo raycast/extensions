@@ -6,7 +6,7 @@ const onePassword: OnePassword = {
   // This is the default location of `opbookmarks`. @see https://github.com/dteare/opbookmarks
   metadataFolder: `${homedir()}/.config/op/bookmarks`,
   installationGuide: `
-# Enable 3rd party app integrations to use
+# Enable the 1Password command-line tool to use
 To use this extension please install the 1Password CLI and run \`opbookmarks\`.
 1. Make sure you using 1Password 8
 1. Install the [1Password CLI](https://developer.1password.com/docs/cli)
@@ -14,8 +14,9 @@ To use this extension please install the 1Password CLI and run \`opbookmarks\`.
 1. Choose 1Password > Preferences > Developers and enable CLI integration
 1. Use [opbookmarks](https://github.com/dteare/opbookmarks) to export your item metadata
 
-## This extension has no access to your passwords only to the metadata. 
-The metadata includes the following information about each item:
+## 1Password item data
+
+This extension has restricted access to your 1Password data. Only the metadata files created by \`opbookmarks\` are used. These metadata files include the following information about each item:
 - title
 - description
 - URLs
