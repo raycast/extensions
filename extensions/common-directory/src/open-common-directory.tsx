@@ -54,8 +54,8 @@ export default function OpenCommonDirectory() {
       {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
       (commonDirectory.length === 0 && !showOpenDirectory) ? (
         <List.EmptyView
-          title={"No directory. Please add first"}
-          description={"You can always add directories from the Action Panel"}
+          title={"No directories found"}
+          description={"You can always add directories directly from the Action Panel"}
           actions={
             <ActionPanel>
               <Action.Push
@@ -158,7 +158,7 @@ function DirectoryItem(props: {
 
           <CopyFileActions directory={directory} />
 
-          <ActionPanel.Section title={"Directory Action"}>
+          <ActionPanel.Section title={"Directory Actions"}>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
