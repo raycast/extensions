@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search files in Google Drive",
+      "title": "File Search",
+      "subtitle": "Google Drive",
       "description": "Search files in your locally mounted Google Drive folder",
       "mode": "view"
     }
