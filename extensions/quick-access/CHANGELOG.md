@@ -1,5 +1,10 @@
 # Quick Access Changelog
 
+## [Add Open With] - 2022-05-01
+
+- Add files count display
+- Fix Rank algorithm bugs
+
 ## [Add Open With] - 2022-04-25
 
 - Add Detail view
