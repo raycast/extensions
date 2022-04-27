@@ -14,8 +14,8 @@
     {
       "name": "list",
       "title": "1Password",
-      "subtitle": "",
-      "description": "List of all your 1Password items",
+      "subtitle": "Open or edit items",
+      "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
       "mode": "view",
       "keywords": [
         "1p",
