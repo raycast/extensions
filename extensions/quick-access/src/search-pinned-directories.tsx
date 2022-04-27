@@ -87,7 +87,7 @@ export default function Command() {
                 <List.Section
                   key={directory.directory.id}
                   title={directory.directory.name}
-                  subtitle={showDetail ? directory.files.length + "" : parse(directory.directory.path).dir}
+                  subtitle={showDetail ? "" : parse(directory.directory.path).dir}
                 >
                   {directory.files.map(
                     (fileValue) =>
@@ -269,15 +269,17 @@ export async function upRank(index: number, setRefresh: React.Dispatch<React.Set
   const moreHighRank = directories.filter((value) => {
     return value.path !== directories[index].path && value.rank >= directories[index].rank;
   });
-  if (moreHighRank.length !== 0) {
-    let allRank = 0;
-    directories.forEach((value) => [(allRank = allRank + value.rank)]);
-    directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
+  if (moreHighRank.length == 0) {
+    return directories;
   }
+  let allRank = 0;
+  directories.forEach((value) => [(allRank = allRank + value.rank)]);
+  directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
   directories.sort(function (a, b) {
     return b.rank - a.rank;
   });
-
   await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(directories));
+
   setRefresh(refreshNumber());
+  return directories;
 }
