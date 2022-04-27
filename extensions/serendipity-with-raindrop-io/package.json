@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "serendipity-with-raindrop-io",
+  "title": "Serendipity (with Raindrop.io)",
+  "description": "Open a random bookmark from your Raindrop.io collection.",
+  "icon": "command-icon.png",
+  "author": "crossa",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "random-bookmark",
+      "title": "Open Random Bookmark",
+      "subtitle": "Raindrop.io",
+      "description": "Gets a random bookmark from your collection and opens it up.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "We need your Raindrop.io test token to access your bookmarks!",
+      "link": "https://developer.raindrop.io/v1/authentication/token",
+      "placeholder": "Enter your Raindrop.io test token hereº"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2",
+    "node-fetch": "^3.2.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

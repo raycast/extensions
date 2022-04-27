@@ -1,10 +1,4 @@
-import {
-  getPreferenceValues,
-  showToast,
-  Toast,
-  showHUD,
-  open,
-} from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, showHUD, open } from "@raycast/api";
 import fetch from "node-fetch";
 
 interface Preferences {
@@ -32,11 +26,7 @@ const getNumberOfPages = async (token: string) => {
   });
 
   if (!response.ok) {
-    showToast(
-      Toast.Style.Failure,
-      "Failed to fetch your bookmarks",
-      response.statusText
-    );
+    showToast(Toast.Style.Failure, "Failed to fetch your bookmarks", response.statusText);
 
     return;
   }
@@ -52,9 +42,7 @@ export default async () => {
   await showHUD("Surfacing random bookmark...");
 
   const totalPages: number = (await getNumberOfPages(preferences.token)) || 1;
-  const randPage: number = Math.floor(
-    Math.random() * (Math.floor(totalPages) + 1)
-  );
+  const randPage: number = Math.floor(Math.random() * (Math.floor(totalPages) + 1));
 
   const url = `https://api.raindrop.io/rest/v1/raindrops/0?page=${randPage}&perpage=50`;
   const response = await fetch(url, {
@@ -65,18 +53,12 @@ export default async () => {
   });
 
   if (!response.ok) {
-    showToast(
-      Toast.Style.Failure,
-      "Failed to fetch your bookmarks",
-      response.statusText
-    );
+    showToast(Toast.Style.Failure, "Failed to fetch your bookmarks", response.statusText);
     return;
   }
 
   const json: Bookmarks = (await response.json()) as Bookmarks;
-  const randBookmark = Math.floor(
-    Math.random() * (Math.floor(json.items.length) + 1)
-  );
+  const randBookmark = Math.floor(Math.random() * (Math.floor(json.items.length) + 1));
 
   await open(json.items[randBookmark].link);
 };
