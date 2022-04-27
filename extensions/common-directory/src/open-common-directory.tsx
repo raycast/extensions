@@ -247,10 +247,10 @@ async function openAndUpRank(
     let _commonDirectory = [...commonDirectory];
     if (commonPreferences().sortBy === SortBy.Rank) {
       _commonDirectory = await upRank([..._commonDirectory], index);
-      setRefresh(refreshNumber());
     }
     if (directoryPath.isCommon) {
       await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_commonDirectory));
+      setRefresh(refreshNumber());
     }
   } catch (e) {
     console.error(String(e));
@@ -261,14 +261,11 @@ async function upRank(directories: DirectoryInfo[], index: number) {
   const moreHighRank = directories.filter((value) => {
     return value.path !== directories[index].path && value.rank >= directories[index].rank;
   });
-  if (moreHighRank.length == 0) {
-    return directories.sort(function (a, b) {
-      return b.rank - a.rank;
-    });
+  if (moreHighRank.length !== 0) {
+    let allRank = 0;
+    directories.forEach((value) => [(allRank = allRank + value.rank)]);
+    directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
   }
-  let allRank = 0;
-  directories.forEach((value) => [(allRank = allRank + value.rank)]);
-  directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
   directories.sort(function (a, b) {
     return b.rank - a.rank;
   });
