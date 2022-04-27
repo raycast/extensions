@@ -5,6 +5,9 @@
   "description": "Search and Play Spotify music from the Raycast",
   "icon": "icon.png",
   "author": "mattisssa",
+  "contributors": [
+    "dillionverma"
+  ],
   "license": "MIT",
   "commands": [
     {
