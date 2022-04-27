@@ -25,7 +25,7 @@
       "title": "Google Drive root path",
       "description": "The absolute path to the root of your Google Drive folder",
       "type": "textfield",
-      "default": "",
+      "default": "~/Google Drive",
       "placeholder": "e.g. ~/Google Drive",
       "required": true
     },
