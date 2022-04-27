@@ -43,9 +43,8 @@ function useSession() {
 }
 
 export default function Search() {
-  const { cliPath, clientId, clientSecret } = getPreferenceValues();
   try {
-    const api = new Bitwarden(clientId, clientSecret, cliPath);
+    const api = new Bitwarden();
     return <ItemList api={api} />;
   } catch (e) {
     return <TroubleshootingGuide />;
@@ -308,7 +307,7 @@ function VaultActions(props: { syncItems: () => void; lockVault: () => void; log
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         onAction={props.lockVault}
       />
-      <Action title="Logout Vault" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
+      <Action title="Logout" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
     </Fragment>
   );
 }

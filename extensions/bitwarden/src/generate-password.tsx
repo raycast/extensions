@@ -1,25 +1,9 @@
-import {
-  ActionPanel,
-  Icon,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  LocalStorage,
-  Detail,
-  getPreferenceValues,
-} from "@raycast/api";
+import { ActionPanel, Icon, Action, Form, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
 import { useOneTimePasswordHistoryWarning, usePasswordGenerator } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise } from "./utils";
-import {
-  PasswordGeneratorOptions,
-  PasswordOptionField,
-  PasswordOptionsToFieldEntries,
-  PasswordType,
-  Preferences,
-} from "./types";
+import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 import { debounce } from "throttle-debounce";
 import { TroubleshootingGuide } from "./components";
 
@@ -27,8 +11,7 @@ const FormSpace = () => <Form.Description text="" />;
 
 function GeneratePassword() {
   try {
-    const { cliPath, clientId, clientSecret } = getPreferenceValues<Preferences>();
-    const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
+    const bitwardenApi = new Bitwarden();
     return <PasswordGenerator bitwardenApi={bitwardenApi} />;
   } catch {
     return <TroubleshootingGuide />;

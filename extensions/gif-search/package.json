@@ -53,6 +53,10 @@
           "value": "copyGifUrl"
         },
         {
+          "title": "Copy GIF Markdown",
+          "value": "copyGifMarkdown"
+        },
+        {
           "title": "Add or Remove from Favorites",
           "value": "toggleFav"
         },

@@ -16,6 +16,7 @@ export enum SWRKeys {
   tasks = "tasks",
   labels = "labels",
   sections = "sections",
+  comments = "comments",
 }
 
 export enum TodayGroupBy {
