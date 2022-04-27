@@ -215,7 +215,7 @@ function SendToDirectoryItem(props: {
 
           <CopyFileActions directory={directory} />
 
-          <ActionPanel.Section title={"Directory Action"}>
+          <ActionPanel.Section title={"Directory Actions"}>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
@@ -231,7 +231,7 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.Trash,
-                      "Remove Directory",
+                      "Remove directory",
                       `Are you sure you want to remove ${directory.name}?`,
                       "Remove",
                       async () => {
@@ -266,31 +266,31 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.ExclamationMark,
-                      "Remove All Directory",
+                      "Remove all directories",
                       "Are you sure you want to remove all directories?",
-                      "Remove All",
+                      "Remove all",
                       async () => {
                         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
                         setRefresh(refreshNumber);
-                        await showToast(Toast.Style.Success, "Removed All successfully!");
+                        await showToast(Toast.Style.Success, "Successfully removed All directories!");
                       }
                     );
                   }}
                 />
                 <Action
-                  title={"Rest All Rank"}
+                  title={"Reset All Ranks"}
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                   onAction={async () => {
                     await alertDialog(
                       Icon.ArrowClockwise,
-                      "Rest All Rank",
-                      "Are you sure you want to reset all rank?",
+                      "Rest all ranks",
+                      "Are you sure you want to reset all ranks?",
                       "Reset All Rank",
                       async () => {
                         resetRank(commonDirectory, setRefresh).then(async () => {
-                          await showToast(Toast.Style.Success, "Reset successfully!");
+                          await showToast(Toast.Style.Success, "Successfully reset ranks!");
                         });
                       }
                     );
