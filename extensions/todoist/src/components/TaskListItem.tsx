@@ -7,6 +7,7 @@ import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
 import TaskActions from "./TaskActions";
+import TaskComments from "./TaskComments";
 
 interface TaskListItemProps {
   task: Task;
@@ -51,6 +52,10 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
     additionalListItemProps.accessories.push({ icon: { source: "tag.svg", tintColor: Color.SecondaryText } });
   }
 
+  if (task.commentCount > 0) {
+    additionalListItemProps.accessories.push({ icon: Icon.Bubble });
+  }
+
   const priority = priorities.find((p) => p.value === task.priority);
 
   if (priority) {
@@ -66,9 +71,7 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
-          </ActionPanel.Section>
+          <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
 
           <TaskActions task={task} />
         </ActionPanel>

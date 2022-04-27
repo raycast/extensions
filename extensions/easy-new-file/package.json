@@ -31,7 +31,7 @@
         {
           "name": "show_document",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "Show File Template",
           "description": "Show file templates for document types.",
           "default": true,
@@ -40,7 +40,7 @@
         {
           "name": "show_code",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "description": "Show file templates for code types.",
           "default": true,
           "label": "Code"
@@ -48,7 +48,7 @@
         {
           "name": "show_script",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "description": "Show file templates for script types.",
           "default": true,
           "label": "Script"

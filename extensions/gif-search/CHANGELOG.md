@@ -1,5 +1,8 @@
 # GIF Search Changelog
 
+## [Added new action] - 2022-04-25
+- Adds a new action to copy as Markdown
+
 ## [Show "Recent" GIFs] -2022-04-13
 - Adds a new "Recent" section that shows GIFs you recently performed an action on (excluding Favorites)
 - Sorts Recents and Favorites by most recently used or fav'd

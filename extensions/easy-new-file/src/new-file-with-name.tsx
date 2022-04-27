@@ -3,7 +3,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api"
 import { getFinderPath, isImage, preferences } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-here";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
-import { getFileType, initRunApplescript } from "./hooks/hooks";
+import { getFileType } from "./hooks/hooks";
 import { parse } from "path";
 
 export default function NewFileWithName(props: {
@@ -17,8 +17,6 @@ export default function NewFileWithName(props: {
   const [fileContent, setFileContent] = useState<string>("");
   //hooks
   const { isSimpleContent, fileExtension } = getFileType(newFileType, templateFiles);
-
-  initRunApplescript();
 
   return (
     <Form

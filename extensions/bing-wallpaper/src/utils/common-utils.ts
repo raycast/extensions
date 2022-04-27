@@ -18,7 +18,7 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const getScreenshotDirectory = () => {
+export const getPicturesDirectory = () => {
   const directoryPreference = preferences().downloadDirectory;
   let actualDirectory = directoryPreference;
   if (directoryPreference.startsWith("~")) {

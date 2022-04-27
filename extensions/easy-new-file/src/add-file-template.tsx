@@ -1,8 +1,9 @@
 import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./utils/common-utils";
+import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
 import { refreshNumber } from "./hooks/hooks";
+import { parse } from "path";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -15,13 +16,13 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
   const [name, setName] = useState<string>("");
 
   useEffect(() => {
-    async function _initRunAppleScript() {
+    async function _fetchFilePath() {
       const _path = await fetchFilePath(true);
       setPath(_path);
-      setName(getFileInfo(_path).nameWithoutExtension);
+      setName(parse(_path).name);
     }
 
-    _initRunAppleScript().then();
+    _fetchFilePath().then();
   }, []);
 
   return (
@@ -46,7 +47,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
               onAction={async () => {
                 const _path = await fetchFilePath();
                 setPath(_path);
-                setName(getFileInfo(_path).nameWithoutExtension);
+                setName(parse(_path).name);
               }}
             />
             <Action
@@ -56,7 +57,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
               onAction={() => {
                 getChooseFile().then((path) => {
                   setPath(path);
-                  setName(getFileInfo(path).nameWithoutExtension);
+                  setName(parse(path).name);
                 });
               }}
             />
@@ -82,10 +83,10 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         id={"name"}
         title={"Name"}
         placeholder={"File name without extension(Optional)"}
-        value={getFileInfo(path).nameWithoutExtension}
+        value={parse(path).name}
         onChange={setName}
       />
-      <Form.Description title={"Extension"} text={getFileInfo(path).extension} />
+      <Form.Description title={"Extension"} text={parse(path).name} />
     </Form>
   );
 }
@@ -110,7 +111,7 @@ const addFileTemplate = async (name: string, path: string) => {
   if (fse.existsSync(path)) {
     if (checkIsFile(path)) {
       const templateFolderPath = environment.supportPath + "/templates";
-      const desPath = templateFolderPath + "/" + name + "." + getFileInfo(path).extension;
+      const desPath = templateFolderPath + "/" + name + parse(path).ext;
       if (fse.existsSync(desPath)) {
         await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
         return;
@@ -126,7 +127,7 @@ const addFileTemplate = async (name: string, path: string) => {
           fse.copyFileSync(path, desPath);
         });
       }
-      await showHUD("Template is added");
+      await showHUD("Template added");
       await popToRoot({ clearSearchBar: false });
     } else {
       await showToast(Toast.Style.Failure, "Folder path not supported.");

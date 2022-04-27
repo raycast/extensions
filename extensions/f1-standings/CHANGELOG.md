@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [📆 Add to Apple Calendar] - (2022-04-25)
+
+- Add a new action to add all events related to a race week to a given calendar thought the Apple Calendar app.
+
 ## [🏎️ Open on Formula1.com] - (2022-03-30)
 
 - Add new action to open driver standing/constructor standing/race results on Formula1.com

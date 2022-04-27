@@ -116,7 +116,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + searchResult.url} />
             <CopyToClipboardAction
               title="Copy URL"
-              content={confluenceUrl + "/wiki" + searchResult.url}
+              content={confluenceUrl + searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
           </ActionPanel.Section>

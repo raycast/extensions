@@ -8,6 +8,7 @@ import { SWRKeys } from "../types";
 interface TaskEditProps {
   task: Task;
 }
+
 export default function TaskEdit({ task }: TaskEditProps) {
   const { pop } = useNavigation();
 
@@ -31,7 +32,7 @@ export default function TaskEdit({ task }: TaskEditProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Edit Task" onSubmit={submit} icon={Icon.Pencil} />
         </ActionPanel>
       }
     >
