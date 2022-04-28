@@ -166,6 +166,9 @@ export const indexFiles = async (
   options: IndexFilesOptions = { force: false }
 ): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
+    // Delete all the old indexed files
+    if (options.force) db.exec("DELETE from files");
+
     walkRecursivelyAndSaveFiles(path, db);
     dumpDb(db);
     await setFilesIndexedAt();

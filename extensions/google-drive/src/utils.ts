@@ -13,7 +13,7 @@ import { FileInfo, Preferences } from "./types";
 
 const execAsync = util.promisify(exec);
 export const fuzzyMatch = (source: string, target: string) =>
-  token_similarity_sort_ratio(source, target, { trySimple: true, sortBySimilarity: true });
+  token_similarity_sort_ratio(source, target, { trySimple: true });
 
 const isPathReadable = (path: PathLike): boolean => {
   try {
