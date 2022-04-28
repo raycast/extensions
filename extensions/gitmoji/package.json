@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "gitmojis": "^3.5.0"
+    "gitmojis": "^3.9.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
