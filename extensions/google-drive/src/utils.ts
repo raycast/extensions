@@ -2,13 +2,14 @@ import { exec } from "child_process";
 import util from "util";
 import { token_similarity_sort_ratio } from "fuzzball";
 import fs, { accessSync, existsSync, lstatSync, PathLike, readdirSync, statSync } from "fs";
-import { basename, extname, join } from "path";
+import { basename, extname, join, resolve } from "path";
 import { homedir, tmpdir } from "os";
 import { Database } from "sql.js";
+import { getPreferenceValues } from "@raycast/api";
 
 import { FILE_SIZE_UNITS, IGNORED_DIRECTORIES, NON_PREVIEWABLE_EXTENSIONS } from "./constants";
 import { insertFile } from "./db";
-import { FileInfo } from "./types";
+import { FileInfo, Preferences } from "./types";
 
 const execAsync = util.promisify(exec);
 export const fuzzyMatch = (source: string, target: string) =>
@@ -28,6 +29,11 @@ const isDirectory = (path: PathLike) => !isDotUnderscore(path) && pathExists(pat
 const isFile = (path: PathLike) => !isDotUnderscore(path) && pathExists(path) && lstatSync(path).isFile();
 export const displayPath = (path: PathLike): string => path.toLocaleString().replace(homedir(), "~");
 export const escapePath = (path: PathLike): string => path.toLocaleString().replace(/([^0-9a-z_\-.~/])/gi, "\\$1");
+export const getDriveRootPath = (): string => {
+  const preferences = getPreferenceValues<Preferences>();
+
+  return resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
+};
 const formatBytes = (sizeInBytes: number): string => {
   let unitIndex = 0;
   while (sizeInBytes >= 1024) {

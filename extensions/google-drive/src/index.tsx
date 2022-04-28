@@ -1,26 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, showHUD, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs";
-import { dirname, resolve } from "path";
-import { homedir } from "os";
+import { dirname } from "path";
 import { useDebounce } from "use-debounce";
 
-import { FileInfo, Preferences } from "./types";
-import {
-  buildCache,
-  dumpDb,
-  filesLastCachedAt,
-  queryFiles,
-  setFilesCachedAt,
-  shouldInvalidateFilesCache,
-  useDb,
-  walkRecursivelyAndSaveFiles,
-} from "./db";
-import { displayPath, escapePath, fileMetadataMarkdown } from "./utils";
+import { FileInfo } from "./types";
+import { buildCache, filesLastCachedAt, queryFiles, useDb } from "./db";
+import { displayPath, escapePath, fileMetadataMarkdown, getDriveRootPath } from "./utils";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const drivePath = resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
+  const drivePath = getDriveRootPath();
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
   const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");

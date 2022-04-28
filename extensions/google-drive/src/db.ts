@@ -11,7 +11,7 @@ import {
   MAX_RESULTS_WITH_SEARCH_TEXT,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
-import { fuzzyMatch, getDirectories, saveFilesInDirectory } from "./utils";
+import { fuzzyMatch, getDirectories, getDriveRootPath, saveFilesInDirectory } from "./utils";
 
 export const filesLastCachedAt = async () => {
   const lastCachedAt = await LocalStorage.getItem<string>(FILES_LAST_CACHED_AT_KEY);
@@ -48,6 +48,7 @@ const dbConnection = async () => {
   }
 
   try {
+    const db = new SQL.Database(readFileSync(DB_FILE_PATH));
     const createFilesTable = `
       CREATE TABLE IF NOT EXISTS files (
         name TEXT NOT NULL,
@@ -58,9 +59,16 @@ const dbConnection = async () => {
         updatedAt DATETIME NOT NULL,
         favorite INTEGER NOT NULL DEFAULT 0
       )`;
-    const db = new SQL.Database(readFileSync(DB_FILE_PATH));
+
+    // Delete the paths that were indexed for a Google Drive root path that was
+    // previously specified in the preferences but has been changed to
+    // another path now.
+    const deleteUnwantedFiles = `
+        DELETE FROM files
+          WHERE path NOT LIKE "${getDriveRootPath()}%"`;
 
     db.exec(createFilesTable);
+    db.exec(deleteUnwantedFiles);
 
     return db;
   } catch (e) {
