@@ -17,6 +17,23 @@
   ],
   "preferences": [
     {
+      "name": "instanceType",
+      "type": "dropdown",
+      "required": true,
+      "title": "Confluence instance type",
+      "description": "Cloud or on-premise",
+      "data": [
+        {
+          "value": "cloud",
+          "title": "Cloud"
+        },
+        {
+          "value": "on-premise",
+          "title": "On-premise"
+        }
+      ]
+    },
+    {
       "name": "instance",
       "type": "textfield",
       "required": true,
@@ -27,8 +44,8 @@
     {
       "name": "user",
       "type": "textfield",
-      "required": true,
-      "title": "Username",
+      "required": false,
+      "title": "Username (cloud only)",
       "description": "Your Account",
       "placeholder": "me@company.com"
     },

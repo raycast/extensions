@@ -30,14 +30,14 @@ export default () => {
           // Return contents
           return contents;
         } else {
-          // Otherwise return null
+          // Otherwise, return null
           return null;
         }
       })
       // Replace error with null
       .catch(() => null)
       .then((url) => {
-        // Check if a url is available
+        // Check if an url is available
         if (url) {
           // Set Swift Package url
           setSwiftPackageUrl(url);

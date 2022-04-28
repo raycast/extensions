@@ -1,5 +1,14 @@
 # Home Assistant Changelog
 
+## [Add door support] - 2022-04-24
+- Add icon and state support for device class `door`
+- Add root command `Doors` to filter entities of device class `door`
+- `update` entities now show `in progress` state when an update is running
+
+## [Add support for update entities] - 2022-04-08
+- Add support for update entities from HA 2022.04
+- Add Turn On and Turn Off actions for media players
+
 ## [Added support for helpers and auto camera image fetching] - 2022-04-03
 - Increase max. entities to `1000`
 - Remove Initial state flickering

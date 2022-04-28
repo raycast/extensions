@@ -126,6 +126,13 @@
       "subtitle": "GitLab",
       "description": "Managed My GitLab Status",
       "mode": "view"
+    },
+    {
+      "name": "commits_my",
+      "title": "My Recent Commits",
+      "subtitle": "GitLab",
+      "description": "Managed My Recent Commits",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -154,7 +161,37 @@
       "title": "CI Auto Refresh Interval (sec)",
       "description": "Refresh interval in seconds for CI Pipeline/Job lists. Values between 1-9 are not recommended. 0 mean no auto refresh at all",
       "placeholder": "10"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Preferred Primary Action",
+      "required": true,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Open in Raycast",
+          "value": "detail"
+        }
+      ],
+      "description": "Set the default action for Projects"
+    },
+    {
+      "name": "poptoroot",
+      "type": "checkbox",
+      "label": "Pop to Root after external action",
+      "required": false,
+      "default": false,
+      "title": "Behavior",
+      "description": "Pop to root after e.g. open the browser"
     }
+  ],
+  "categories": [
+    "Developer Tools"
   ],
   "contributors": [
     "Loskir",
@@ -162,13 +199,14 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.26.0",
+    "@raycast/api": "^1.31.0",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
     "node-fetch": "^2.6.1",
     "open": "^8.2.1",
+    "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
@@ -177,14 +215,19 @@
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
     "@types/react": "^17.0.20",
+    "@types/url-join": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
     "typescript": "^4.3.5"
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "fix-prettier": "prettier --write src"
   }
 }
