@@ -1,5 +1,23 @@
 # Bitwarden Changelog
 
+## [Self-hosted Server] - 2022-04-23
+
+- Added the option to use a self-hosted Bitwarden server
+- Support self-signed certificates for self-hosted server
+
+## [Isolate Extension] - 2022-04-18
+
+- Stop the Bitwarden extension from interfering with the Bitwarden CLI
+
+## [Quick Copy] - 2022-04-08
+
+- Allow copying item properties without using a dropdown
+
+## [Logout] - 2022-04-06
+
+- Added `Logout` action
+- Vault Status shown while unlocking vault
+
 ## [Login Fix] - 2022-04-01
 
 - Fix vault constantly locking
@@ -49,7 +67,7 @@
 
 - Add `Lock Vault` command
 - Show favorites at the top
-- Automatically find Brew CLI in multiple brew directories (support Apple Silicon)
+- Automatically find Bitwarden CLI in multiple brew directories (support Apple Silicon)
 
 ## [Added Bitwarden] - 2021-10-25
 

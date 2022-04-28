@@ -30,7 +30,7 @@ function renderText(text: string) {
     </svg>
   );
 
-  return `<img height="400" width="700" src="data:image/svg+xml;base64,${encodeURIComponent(renderToString(img))}" />`;
+  return `<img height="400" width="700" src="data:image/svg+xml,${encodeURIComponent(renderToString(img))}" />`;
 }
 
 export default function Command() {

@@ -1,16 +1,7 @@
-// This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-global.window = {};
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-global.window.requestAnimationFrame = setTimeout;
-
 import {
+  Action,
   ActionPanel,
-  ActionPanelItem,
-  ActionPanelSection,
-  AlertActionStyle,
+  Alert,
   Application,
   Color,
   confirmAlert,
@@ -18,12 +9,8 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  ListItem,
-  OpenInBrowserAction,
-  PushAction,
   showToast,
   Toast,
-  ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -72,15 +59,15 @@ export default function Command() {
       if (error.isAxiosError) {
         if (error.response?.status === 401) {
           await showToast(
-            ToastStyle.Failure,
+            Toast.Style.Failure,
             "Invalid Token",
             "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
           );
         } else {
-          await showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
+          await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
         }
       } else {
-        await showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
+        await showToast(Toast.Style.Failure, "Unknown Error", "Could not fetch time entries");
       }
     }
 
@@ -173,7 +160,7 @@ export default function Command() {
     }
 
     async function startOrStopTimer() {
-      const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
+      const toast = new Toast({ style: Toast.Style.Animated, title: "Loading..." });
       await toast.show();
       try {
         if (entry.is_running) {
@@ -183,20 +170,16 @@ export default function Command() {
         }
         await toast.hide();
       } catch {
-        await showToast(ToastStyle.Failure, "Error", `Could not ${entry.is_running ? "stop" : "start"} your timer`);
+        await showToast(Toast.Style.Failure, "Error", `Could not ${entry.is_running ? "stop" : "start"} your timer`);
       }
       await onComplete();
     }
 
     return dayjs(viewDate).isToday() ? (
-      <ActionPanelItem
-        title={entry.is_running ? "Stop Timer" : "Start Timer"}
-        icon={Icon.Clock}
-        onAction={startOrStopTimer}
-      />
+      <Action title={entry.is_running ? "Stop Timer" : "Start Timer"} icon={Icon.Clock} onAction={startOrStopTimer} />
     ) : (
       <>
-        <ActionPanelItem
+        <Action
           title="Start on Today"
           icon={Icon.Calendar}
           onAction={async () => {
@@ -208,7 +191,7 @@ export default function Command() {
             await changeViewDate(new Date());
           }}
         />
-        <ActionPanelItem
+        <Action
           title={entry.is_running ? "Stop Timer" : `Start on ${dayjs(viewDate).format("dddd")}`}
           icon={Icon.Clock}
           onAction={async () => {
@@ -225,7 +208,7 @@ export default function Command() {
   function SwitchViewDateActions() {
     return (
       <>
-        <ActionPanelItem
+        <Action
           title="Previous Day"
           icon={{ source: "./arrow.left@2x.png" }}
           shortcut={{ key: "arrowLeft", modifiers: ["cmd"] }}
@@ -233,7 +216,7 @@ export default function Command() {
             changeViewDate(dayjs(viewDate).subtract(1, "d").toDate());
           }}
         />
-        <ActionPanelItem
+        <Action
           title="Next Day"
           icon={{ source: "./arrow.right@2x.png" }}
           shortcut={{ key: "arrowRight", modifiers: ["cmd"] }}
@@ -242,7 +225,7 @@ export default function Command() {
           }}
         />
         {!dayjs(viewDate).isToday() && (
-          <ActionPanelItem
+          <Action
             title="Back to Today"
             icon={Icon.Calendar}
             shortcut={{ key: "t", modifiers: ["cmd"] }}
@@ -262,20 +245,20 @@ export default function Command() {
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <ActionPanelSection title="Harvest">
+          <ActionPanel.Section title="Harvest">
             <NewEntryAction onSave={init} viewDate={viewDate} />
             <OpenHarvestAppAction />
-          </ActionPanelSection>
-          <ActionPanelSection title="Change Dates">
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Change Dates">
             <SwitchViewDateActions />
-          </ActionPanelSection>
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
       <List.Section title={`${navigationTitle}`} subtitle={navSubtitle}>
         {items.map((entry) => {
           return (
-            <ListItem
+            <List.Item
               id={entry.id.toString()}
               key={entry.id}
               title={entry.project.name}
@@ -293,19 +276,19 @@ export default function Command() {
               icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
               actions={
                 <ActionPanel>
-                  <ActionPanelSection title={`${entry.project.name} | ${entry.client.name}`}>
+                  <ActionPanel.Section title={`${entry.project.name} | ${entry.client.name}`}>
                     <ToggleTimerAction onComplete={init} entry={entry} />
-                    {/* Disabling Edit Action for now so we can ship something a useable extension faster */}
-                    {/* <EditEntryAction onSave={init} entry={entry} /> */}
+                    <EditEntryAction onSave={init} entry={entry} viewDate={viewDate} />
+                    <DuplicateEntryAction onSave={init} entry={entry} viewDate={viewDate} />
                     <DeleteEntryAction onComplete={init} entry={entry} />
-                  </ActionPanelSection>
-                  <ActionPanelSection title="Harvest">
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Harvest">
                     <NewEntryAction onSave={init} viewDate={viewDate} />
                     <OpenHarvestAppAction />
-                  </ActionPanelSection>
-                  <ActionPanelSection title="Change Dates">
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Change Dates">
                     <SwitchViewDateActions />
-                  </ActionPanelSection>
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -326,7 +309,7 @@ function NewEntryAction({
   viewDate: Date;
 }) {
   return (
-    <PushAction
+    <Action.Push
       target={<New onSave={onSave} viewDate={viewDate} />}
       title="New Time Entry"
       shortcut={{ key: "n", modifiers: ["cmd"] }}
@@ -347,11 +330,31 @@ function EditEntryAction({
   viewDate: Date;
 }) {
   return (
-    <PushAction
+    <Action.Push
       target={<New onSave={onSave} entry={entry} viewDate={viewDate} />}
       title="Edit Time Entry"
       shortcut={{ key: "e", modifiers: ["cmd"] }}
       icon={Icon.Pencil}
+    />
+  );
+}
+
+function DuplicateEntryAction({
+  onSave = async () => {
+    return;
+  },
+  entry,
+}: {
+  onSave: () => Promise<void>;
+  entry: HarvestTimeEntry;
+  viewDate: Date;
+}) {
+  return (
+    <Action.Push
+      target={<New onSave={onSave} entry={{ ...entry, id: null }} />}
+      title="Duplicate Time Entry"
+      shortcut={{ key: "d", modifiers: ["cmd"] }}
+      icon={Icon.Clipboard}
     />
   );
 }
@@ -366,7 +369,7 @@ function DeleteEntryAction({
   entry: HarvestTimeEntry;
 }) {
   return (
-    <ActionPanelItem
+    <Action
       onAction={async () => {
         if (
           await confirmAlert({
@@ -375,7 +378,7 @@ function DeleteEntryAction({
             icon: Icon.Trash,
             primaryAction: {
               title: "Delete",
-              style: AlertActionStyle.Destructive,
+              style: Alert.ActionStyle.Destructive,
             },
           })
         ) {
@@ -411,7 +414,7 @@ function OpenHarvestAppAction() {
 
   if (!app) {
     return (
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         title="Open Harvest Website"
         shortcut={{ key: "o", modifiers: ["cmd"] }}
         icon={{ source: "./harvest-logo-icon.png" }}
@@ -421,12 +424,12 @@ function OpenHarvestAppAction() {
   }
 
   return (
-    <ActionPanelItem
+    <Action
       onAction={() => {
         try {
           execSync(`open ${app.path}`);
         } catch {
-          showToast(ToastStyle.Failure, "Could not Open Harvest App");
+          showToast(Toast.Style.Failure, "Could not Open Harvest App");
         }
       }}
       title="Open Harvest App"

@@ -1,6 +1,7 @@
 import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
-import { OpenInBrowserAction } from "@raycast/api/types/api/components/actions/OpenInBrowserAction";
+import { useState } from "react";
 import { Bitwarden } from "./api";
+import { useVaultMessages } from "./hooks";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -26,15 +27,27 @@ export function TroubleshootingGuide(): JSX.Element {
 
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
   const { bitwardenApi, onUnlock } = props;
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const { userMessage, serverMessage, shouldShowServer } = useVaultMessages(bitwardenApi);
+
   async function onSubmit(values: { password: string }) {
+    if (values.password.length == 0) {
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Missing password.");
+      return;
+    }
     try {
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
-      const status = await bitwardenApi.status();
-      if (status == "unauthenticated") {
+      setLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
+      const state = await bitwardenApi.status();
+      if (state.status == "unauthenticated") {
         try {
           await bitwardenApi.login();
         } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
+          showToast(
+            Toast.Style.Failure,
+            "Failed to unlock vault.",
+            `Please check your ${shouldShowServer && "Server URL, "}API Key and Secret.`
+          );
           return;
         }
       }
@@ -42,18 +55,24 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       toast.hide();
       onUnlock(sessionToken);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
+      setLoading(false);
     }
   }
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          {!isLoading && (
+            <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          )}
         </ActionPanel>
       }
     >
-      <Form.PasswordField id="password" title="Master Password" />
+      {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
+      <Form.Description title="Vault Status" text={userMessage} />
+      <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
 }

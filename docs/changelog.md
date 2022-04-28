@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.33.0 – 2022-04-20
+
+### ✨ New
+
+- **OAuth**: we've added a new API that enables you to authorize extensions through OAuth providers such as Google, Twitter, Dropbox or Spotify ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #178](https://github.com/raycast/extensions/issues/178)). The docs contain a [new detailed guide](https://developers.raycast.com/api-reference/oauth) and we've added some integration examples to the extensions repository. (Note that we currently only support OAuth 2.0 with PKCE, more on that in the [guide](https://developers.raycast.com/api-reference/oauth).)
+- **Form Focus**: use the new imperative form API to programmatically focus form items. Want to make sure a particular input is focused on mount? Form items now accept an `autoFocus` prop! ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #66](https://github.com/raycast/extensions/issues/66))
+- **Form Reset**: use the new imperative form API to reset form items’ values to their initial values.
+- **Form Info:** Use the new `info` prop on form items to show additional information about an item, e.g. to explain what this field is used for.
+- The Raycast window opens automatically when you start a development session for an extension. You can turn the behavior off in the Advanced preferences tab.
+
+### 💎 Improvements
+
+- Improved detection of default editor when you open extensions from Raycast
+- Improved templates for list, form and detail
+- Removed `react-devtools` from `devDependencies` for newly created extensions (so that you don't have to download a big dependency that you might not use)
+
+### 🐞 Fixes
+
+- Fixed an issue where animated gifs would be incorrectly scaled when size attributes are specified in markdown.
+- Form Checkbox now returns proper boolean values on submit
+
 ## 1.32.0 – 2022-04-06
 
 ### ✨ New
