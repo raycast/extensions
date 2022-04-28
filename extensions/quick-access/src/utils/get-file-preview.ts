@@ -1,19 +1,16 @@
-import { existsSync, PathLike } from "fs-extra";
+import fse, { existsSync, PathLike } from "fs-extra";
 import { FileInfo } from "./directory-info";
 import { tmpdir } from "os";
 import { APP_EXT, DMG_EXT, imgExt, NO_PREVIEW_EXTENSIONS, ZIP_EXT } from "./constants";
-import { parse, extname } from "path";
+import { parse } from "path";
 import { exec } from "child_process";
 import * as util from "util";
-import fse from "fs-extra";
 import fileUrl from "file-url";
 import { formatBytes, isEmpty } from "./common-utils";
 import { environment } from "@raycast/api";
 
 const assetPath = environment.assetsPath;
-const raycastIsLightTheme = () => {
-  return environment.theme == "light";
-};
+
 //Detail content: Image
 export const getFileContent = async (fileInfo: FileInfo) => {
   let detailContent = "";
@@ -23,16 +20,17 @@ export const getFileContent = async (fileInfo: FileInfo) => {
   try {
     if (!isEmpty(fileInfo.path)) {
       const fileStat = fse.statSync(fileInfo.path);
-      if (fileStat.isDirectory()) {
+      if (parsePath.ext === APP_EXT) {
+        preview = `<img src="${fileUrl(environment.assetsPath + "/AppIcon.icns")}" alt="${
+          fileInfo.name
+        }" height="180" />\n`;
+      } else if (fileStat.isDirectory()) {
         const files = fse.readdirSync(fileInfo.path);
         const isNormalFile = files.filter((value) => !value.startsWith("."));
-        const previewIcon = raycastIsLightTheme() ? "folder-icon.png" : "folder-icon@dark.png";
-        preview = `<img src="${fileUrl(assetPath + "/" + previewIcon)}" alt="${fileInfo.name}" height="180" />\n`;
+        preview = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${fileInfo.name}" height="180" />\n`;
         size = `**Sub-files**: ${isNormalFile.length}`;
       } else {
         if (imgExt.includes(parsePath.ext)) {
-          preview = `<img src="${fileUrl(fileInfo.path)}" alt="${fileInfo.name}" height="180" />\n`;
-        } else if (parsePath.ext === APP_EXT) {
           preview = `<img src="${fileUrl(fileInfo.path)}" alt="${fileInfo.name}" height="180" />\n`;
         } else if (ZIP_EXT.includes(parsePath.ext)) {
           preview = `<img src="${fileUrl(environment.assetsPath + "/ArchiveUtility.icns")}" alt="${

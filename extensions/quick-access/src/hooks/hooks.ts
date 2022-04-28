@@ -38,7 +38,7 @@ export const getIsShowDetail = (refreshDetail: number) => {
 //get local directory with files
 export const localDirectoryWithFiles = (refresh: number) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
-  const [allFilesNumber, setAllFilesNumber] = useState<number>(0);
+  const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = commonPreferences();
 
@@ -73,8 +73,8 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
       _allFilesNumber = _allFilesNumber + files.length;
     });
-    setDirectoryWithFiles(_pinnedDirectoryContent);
     setAllFilesNumber(_allFilesNumber);
+    setDirectoryWithFiles(_pinnedDirectoryContent);
     setLoading(false);
 
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
