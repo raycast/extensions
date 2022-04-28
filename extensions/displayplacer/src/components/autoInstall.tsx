@@ -1,6 +1,7 @@
-import { Action, ActionPanel, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
+import { PATH } from "../utils/displayplacer";
 
 export function AutoInstall({
   onRefresh = () => {
@@ -8,7 +9,6 @@ export function AutoInstall({
   },
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const PATH = getPreferenceValues<Preferences>().path;
   return (
     <ActionPanel>
       {!isLoading && (
@@ -26,8 +26,9 @@ export function AutoInstall({
               execSync(`zsh -l -c 'PATH=${PATH} brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
               await toast.hide();
               onRefresh();
-            } catch {
+            } catch (e) {
               await toast.hide();
+              console.error(e);
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Error",

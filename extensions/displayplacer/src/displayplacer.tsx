@@ -2,8 +2,8 @@ import { ActionPanel, Color, Icon, List, showHUD, showToast, Toast, useNavigatio
 import { useEffect, useState } from "react";
 import ClearLocalStorage from "./components/clearLocalStorage";
 import { Favorite } from "./components/favoritesForm";
-import Help from "./components/help";
 import NotInstalled from "./components/not-installed";
+import Config from "./config";
 import { listScreenInfo, switchSettings } from "./utils/displayplacer";
 import { useFavorites } from "./utils/use-favorites";
 
@@ -152,7 +152,7 @@ export default function DisplayPlacer() {
               icon={Icon.QuestionMark}
               actions={
                 <ActionPanel>
-                  <Action.Push icon={Icon.QuestionMark} title="Open Readme" target={<Help />} />
+                  <Action.Push icon={Icon.QuestionMark} title="Open Readme" target={<Config />} />
                 </ActionPanel>
               }
             />

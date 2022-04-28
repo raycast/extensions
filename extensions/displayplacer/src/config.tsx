@@ -101,7 +101,9 @@ To try it out now, press \`return\``}
         detail={
           <List.Item.Detail
             markdown={`# 🩺 Troubleshooting
-On rare occasions, the screen ID of your displays may change. You can re-save your presets by selecting them and choosing to *Edit Display Preset* from the actions menu.`}
+On rare occasions, the screen ID of your displays may change. You can re-save your presets by selecting them and choosing to *Edit Display Preset* from the actions menu.
+
+**Still unable to install or load presets?** You may need to add a custom shell path in the Raycast preferences for this extension. This setting can change where the system searches for where \`displayplacer\` and \`homebrew\` is installed.`}
           />
         }
       />
@@ -111,6 +113,8 @@ On rare occasions, the screen ID of your displays may change. You can re-save yo
           <List.Item.Detail
             markdown={`# 💡 Load Preset via hotkey
 If you'd like to load a preset without even launching Raycast, you can assign a hotkey to the various **Load Preset by #X** commands in the Raycast preferences > Extensions tab.
+
+![Hotkey Example](../assets/hotkey.png)
 
 If you don't plan on using this feature, you can also hide these commands so they don't clutter your Raycast menu.`}
           />
