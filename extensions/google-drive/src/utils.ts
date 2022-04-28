@@ -38,13 +38,13 @@ const formatBytes = (sizeInBytes: number): string => {
   return `${sizeInBytes.toFixed(1)} ${FILE_SIZE_UNITS[unitIndex]}`;
 };
 
-const getDirectories = (path: PathLike): Array<PathLike> =>
+export const getDirectories = (path: PathLike): Array<PathLike> =>
   readdirSync(path, "utf8")
     .map((name) => join(path.toLocaleString(), name))
     .filter(isDirectory)
     .filter((dir) => !IGNORED_DIRECTORIES.includes(basename(dir)));
 
-const saveFilesInDirectory = (path: PathLike, db: Database) =>
+export const saveFilesInDirectory = (path: PathLike, db: Database) =>
   readdirSync(path).forEach((file) => {
     const filePath = join(path.toLocaleString(), file);
 
@@ -62,11 +62,6 @@ const saveFilesInDirectory = (path: PathLike, db: Database) =>
       favorite: false,
     });
   });
-
-export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
-  saveFilesInDirectory(path, db);
-  getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
-};
 
 const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   const outputDir = tmpdir();

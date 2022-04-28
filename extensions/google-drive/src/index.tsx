@@ -1,18 +1,26 @@
-import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues, showHUD, Color } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname, resolve } from "path";
 import { homedir } from "os";
 import { useDebounce } from "use-debounce";
 
 import { FileInfo, Preferences } from "./types";
-import { dumpDb, filesLastCachedAt, queryFiles, setFilesCachedAt, shouldInvalidateFilesCache, useDb } from "./db";
-import { displayPath, escapePath, fileMetadataMarkdown, walkRecursivelyAndSaveFiles } from "./utils";
+import {
+  buildCache,
+  dumpDb,
+  filesLastCachedAt,
+  queryFiles,
+  setFilesCachedAt,
+  shouldInvalidateFilesCache,
+  useDb,
+  walkRecursivelyAndSaveFiles,
+} from "./db";
+import { displayPath, escapePath, fileMetadataMarkdown } from "./utils";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const drivePath = resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
-  // const drivePath = `${homedir}/Downloads`;
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
   const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
@@ -41,18 +49,14 @@ export default function Command() {
 
       if (db) {
         try {
-          if (await shouldInvalidateFilesCache()) {
-            walkRecursivelyAndSaveFiles(drivePath, db);
-            dumpDb(db);
-            await setFilesCachedAt();
+          const isCached = await buildCache(drivePath, db);
+          if (isCached) {
             setFilesCacheGeneratedAt(await filesLastCachedAt());
           }
 
           if (filesFiltered.length === 0) {
             setIsFetching(true);
-
-            const files = queryFiles(db, "");
-            setFilesFiltered(files);
+            setFilesFiltered(queryFiles(db, ""));
           }
         } catch (e) {
           console.error(e);
@@ -79,16 +83,28 @@ export default function Command() {
       if (!db) return;
 
       setIsFetching(true);
-
-      const files = queryFiles(db, debouncedSearchText);
-      setFilesFiltered(files);
-
+      setFilesFiltered(queryFiles(db, debouncedSearchText));
       setIsFetching(false);
     })();
   }, [debouncedSearchText]);
 
   const findFile = (displayPath?: string): FileInfo | null =>
     (displayPath && filesFiltered.find((file) => file.displayPath === displayPath)) || null;
+
+  const forceRebuildCache = useCallback(async () => {
+    if (!db) return;
+
+    setIsFetching(true);
+    setFilesFiltered([]);
+    setSearchText("");
+    showToast({ style: Toast.Style.Animated, title: "Rebuilding cache..." });
+    buildCache(drivePath, db, { force: true }).then(async () => {
+      setFilesCacheGeneratedAt(await filesLastCachedAt());
+      setFilesFiltered(queryFiles(db, ""));
+      showToast({ style: Toast.Style.Success, title: "Cache rebuild successfully! 🎉" });
+      setIsFetching(false);
+    });
+  }, [drivePath, db]);
 
   return (
     <List
@@ -125,6 +141,12 @@ export default function Command() {
                     title="Copy Folder Path"
                     content={escapePath(dirname(file.displayPath))}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  />
+                  <Action
+                    title="Rebuild Cache"
+                    icon={Icon.Hammer}
+                    onAction={forceRebuildCache}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                   />
                 </ActionPanel>
               }

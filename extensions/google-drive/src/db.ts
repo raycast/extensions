@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, PathLike, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
@@ -11,7 +11,7 @@ import {
   MAX_RESULTS_WITH_SEARCH_TEXT,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
-import { fuzzyMatch } from "./utils";
+import { fuzzyMatch, getDirectories, saveFilesInDirectory } from "./utils";
 
 export const filesLastCachedAt = async () => {
   const lastCachedAt = await LocalStorage.getItem<string>(FILES_LAST_CACHED_AT_KEY);
@@ -144,4 +144,26 @@ export const insertFile = (
           UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
   db.run(insertStatement);
+};
+
+export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
+  saveFilesInDirectory(path, db);
+  getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
+};
+
+type BuildCacheOptions = { force?: boolean };
+export const buildCache = async (
+  path: PathLike,
+  db: Database,
+  options: BuildCacheOptions = { force: false }
+): Promise<boolean> => {
+  if (options.force || (await shouldInvalidateFilesCache())) {
+    walkRecursivelyAndSaveFiles(path, db);
+    dumpDb(db);
+    await setFilesCachedAt();
+
+    return true;
+  }
+
+  return false;
 };
