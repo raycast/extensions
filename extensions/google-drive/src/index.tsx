@@ -3,6 +3,7 @@ import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues 
 import { existsSync } from "fs";
 import { dirname, resolve } from "path";
 import { homedir } from "os";
+import { useDebounce } from "use-debounce";
 
 import { FileInfo, Preferences } from "./types";
 import { persistDb, queryFiles, useDb } from "./db";
@@ -13,14 +14,17 @@ export default function Command() {
   const drivePath = resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
   // const drivePath = `${homedir}/Downloads`;
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
+  const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
-  const [isFiltering, setIsFiltering] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 100);
+  const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
   const db = useDb();
 
   useEffect(() => {
-    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(selectedFile)))();
-  }, [selectedFile]);
+    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(debouncedSelectedFile)))();
+  }, [debouncedSelectedFile]);
 
   useEffect(() => {
     if (!existsSync(drivePath)) {
@@ -55,18 +59,15 @@ export default function Command() {
     }
   }, [drivePath, db]);
 
-  const [searchText, setSearchText] = useState("");
-  const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
-
   useEffect(() => {
     (async () => {
       if (!db) return;
 
-      setIsFiltering(true);
-      setFilesFiltered(queryFiles(db, searchText));
-      setIsFiltering(false);
+      setIsFetching(true);
+      setFilesFiltered(queryFiles(db, debouncedSearchText));
+      setIsFetching(false);
     })();
-  }, [searchText]);
+  }, [debouncedSearchText]);
 
   const findFile = (displayPath?: string): FileInfo | null =>
     (displayPath && filesFiltered.find((file) => file.displayPath === displayPath)) || null;
@@ -77,9 +78,8 @@ export default function Command() {
       throttle
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      searchText={searchText}
       searchBarPlaceholder={`Search in ${displayPath(drivePath)}`}
-      isLoading={isFetching || isFiltering}
+      isLoading={isFetching}
       onSelectionChange={(id) => setSelectedFile(findFile(id))}
     >
       {filesFiltered.length > 0 ? (
