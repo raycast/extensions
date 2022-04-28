@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Mempool fees",
+      "title": "Mempool Fees",
       "description": "List current bitcoin mempool fees",
       "mode": "view"
     }
