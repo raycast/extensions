@@ -45,9 +45,8 @@ export default function Main(): ReactElement {
                     target={repo.fullPath}
                     application={getOpenWith(repo.type, preferences).bundleId}
                   />
-                  {preferences.openWith1
-                    && getOpenWith(repo.type, preferences).bundleId != preferences.openWith1.bundleId
-                    && (
+                  {preferences.openWith1 &&
+                    getOpenWith(repo.type, preferences).bundleId != preferences.openWith1.bundleId && (
                       <Action.Open
                         title={`Open in ${preferences.openWith1.name}`}
                         icon={{ fileIcon: preferences.openWith1.path }}
@@ -56,9 +55,8 @@ export default function Main(): ReactElement {
                         shortcut={{ modifiers: ["opt"], key: "return" }}
                       />
                     )}
-                  {preferences.openWith2
-                    && getOpenWith(repo.type, preferences).bundleId != preferences.openWith2.bundleId
-                    && (
+                  {preferences.openWith2 &&
+                    getOpenWith(repo.type, preferences).bundleId != preferences.openWith2.bundleId && (
                       <Action.Open
                         title={`Open in ${preferences.openWith2.name}`}
                         icon={{ fileIcon: preferences.openWith2.path }}
