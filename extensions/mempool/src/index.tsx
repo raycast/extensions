@@ -19,29 +19,34 @@ const feeText: Record<string, string> = {
 interface State {
   fees?: FeesResponse;
   error?: Error;
+  loading: boolean;
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>({ loading: true });
 
   useEffect(() => {
+    setState({ loading: true });
     async function fetchFees() {
       try {
         const response = await fetch("https://mempool.space/api/v1/fees/recommended");
         const data = (await response.json()) as FeesResponse;
-        setState({ fees: data });
+        setState((previous) => ({ ...previous, fees: data }));
       } catch (error) {
-        setState({
+        setState((previous) => ({
+          ...previous,
           error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
+        }));
       }
+
+      setState((previous) => ({ ...previous, loading: false }));
     }
 
     fetchFees();
   }, []);
 
   return (
-    <List>
+    <List isLoading={state.loading}>
       {Object.entries(state.fees || {}).map(([k, v]: [string, number]) => (
         <List.Item
           key={k}
