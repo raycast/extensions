@@ -1,27 +1,56 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import fetch from "node-fetch";
+import { useEffect, useState } from "react";
 
-const ITEMS = Array.from(Array(3).keys()).map((key) => {
-  return {
-    id: key,
-    title: "Title " + key,
-    subtitle: "Subtitle",
-    accessory: "Accessory",
-  };
-});
+interface FeesResponse {
+  fastestFee: number;
+  halfHourFee: number;
+  hourFee: number;
+  minimumFee: number;
+}
+
+const feeText: Record<string, string> = {
+  fastestFee: "High Priority",
+  halfHourFee: "Medium Priority",
+  hourFee: "Low Priority",
+  minimumFee: "Minimum Fee",
+};
+
+interface State {
+  fees?: FeesResponse;
+  error?: Error;
+}
 
 export default function Command() {
+  const [state, setState] = useState<State>({});
+
+  useEffect(() => {
+    async function fetchFees() {
+      try {
+        const response = await fetch("https://mempool.space/api/v1/fees/recommended");
+        const data = (await response.json()) as FeesResponse;
+        setState({ fees: data });
+      } catch (error) {
+        setState({
+          error: error instanceof Error ? error : new Error("Something went wrong"),
+        });
+      }
+    }
+
+    fetchFees();
+  }, []);
+
   return (
     <List>
-      {ITEMS.map((item) => (
+      {Object.entries(state.fees || {}).map(([k, v]: [string, number]) => (
         <List.Item
-          key={item.id}
-          icon="list-icon.png"
-          title={item.title}
-          subtitle={item.subtitle}
-          accessories={[{ icon: Icon.Text, text: item.accessory }]}
+          key={k}
+          title={feeText[k] || ""}
+          accessories={[{ text: `${v.toString()} sat/vB`, tooltip: "fee in satoshis per vByte" }]}
           actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={item.title} />
+            <ActionPanel title="Mempool fees">
+              <Action.OpenInBrowser url="https://mempool.space" />
+              <Action.CopyToClipboard content={v} />
             </ActionPanel>
           }
         />

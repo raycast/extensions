@@ -3,7 +3,7 @@
   "name": "mempool",
   "title": "Mempool",
   "description": "Get current bitcoin mempool information",
-  "icon": "command-icon.png",
+  "icon": "bitcoin.png",
   "author": "dillionverma",
   "categories": [
     "Finance"
@@ -12,13 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show fees",
+      "title": "Mempool fees",
       "description": "List current bitcoin mempool fees",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2"
+    "@raycast/api": "^1.33.2",
+    "node-fetch": "^3.2.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
