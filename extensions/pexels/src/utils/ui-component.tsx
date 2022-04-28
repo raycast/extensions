@@ -27,7 +27,12 @@ export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
       key={index + "_" + pexelsPhoto.id}
       icon={{ source: pexelsPhoto.src.tiny }}
       title={pexelsPhoto.photographer}
-      detail={<List.Item.Detail isLoading={false} markdown={`![](${pexelsPhoto.src.medium})`} />}
+      detail={
+        <List.Item.Detail
+          isLoading={false}
+          markdown={`<img src="${pexelsPhoto.src.medium}" alt="${pexelsPhoto.photographer}" height="256" />\n`}
+        />
+      }
       actions={
         <ActionPanel>
           <Action
