@@ -100,7 +100,7 @@ export default function Command() {
       isShowingDetail={filesFiltered.length > 0}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={`Search in ${displayPath(drivePath)}`}
+      searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
       isLoading={isFetching}
       onSelectionChange={(id) => setSelectedFile(findFile(id))}
     >
