@@ -8,6 +8,12 @@
   "categories": [
     "Finance"
   ],
+  "keywords": [
+    "bitcoin",
+    "mempool",
+    "transaction",
+    "fees"
+  ],
   "license": "MIT",
   "commands": [
     {
