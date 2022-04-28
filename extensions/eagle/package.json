@@ -18,13 +18,6 @@
       "mode": "view"
     },
     {
-      "name": "info",
-      "title": "Application Info",
-      "subtitle": "Eagle",
-      "description": "Get Eagle Application Info",
-      "mode": "view"
-    },
-    {
       "name": "folder",
       "title": "Navigate Folder",
       "subtitle": "Eagle",
