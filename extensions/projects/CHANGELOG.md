@@ -1,4 +1,4 @@
-# Search Projects Changelog
+# Projects Changelog
 
 ## Added node, maven & gradle projects support (2022-04-19)
 

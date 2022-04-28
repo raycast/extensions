@@ -1,4 +1,4 @@
-# Search Projects
+# Projects
 
 Quickly access your local projects and open them in your favorite editor or any app
 

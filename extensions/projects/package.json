@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "search-projects",
-  "title": "Search Projects",
+  "name": "projects",
+  "title": "Projects",
   "description": "Quickly access your local projects and open them in your favorite editor or any app. Supports maven, gradle, and node projects.",
   "icon": "coding-folder.png",
   "author": "ajaypremshankar",
