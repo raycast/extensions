@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "gitmoji",
-      "title": "gitmoji",
-      "description": "Search your gitmoji",
+      "title": "Gitmoji",
+      "description": "Search your Gitmoji",
       "mode": "view"
     }
   ],
