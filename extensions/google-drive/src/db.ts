@@ -6,32 +6,32 @@ import initSqlJs, { Database } from "sql.js";
 
 import {
   DB_FILE_PATH,
-  FILES_LAST_CACHED_AT_KEY,
+  FILES_LAST_INDEXED_AT_KEY,
   MAX_RESULTS_WITHOUT_SEARCH_TEXT,
   MAX_RESULTS_WITH_SEARCH_TEXT,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
 import { fuzzyMatch, getDirectories, getDriveRootPath, saveFilesInDirectory } from "./utils";
 
-export const filesLastCachedAt = async () => {
-  const lastCachedAt = await LocalStorage.getItem<string>(FILES_LAST_CACHED_AT_KEY);
-  return lastCachedAt ? new Date(lastCachedAt) : null;
+export const filesLastIndexedAt = async () => {
+  const lastIndexedAt = await LocalStorage.getItem<string>(FILES_LAST_INDEXED_AT_KEY);
+  return lastIndexedAt ? new Date(lastIndexedAt) : null;
 };
 
-export const shouldInvalidateFilesCache = async () => {
-  const lastCachedAt = await filesLastCachedAt();
+export const shouldInvalidateFilesIndex = async () => {
+  const lastIndexedAt = await filesLastIndexedAt();
 
-  if (lastCachedAt === null) return true;
+  if (lastIndexedAt === null) return true;
 
-  return lastCachedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
+  return lastIndexedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
 };
 
-const mandateFilesCacheInvalidation = async () => {
-  await LocalStorage.removeItem(FILES_LAST_CACHED_AT_KEY);
+const mandateFilesIndexInvalidation = async () => {
+  await LocalStorage.removeItem(FILES_LAST_INDEXED_AT_KEY);
 };
 
-export const setFilesCachedAt = async () => {
-  await LocalStorage.setItem(FILES_LAST_CACHED_AT_KEY, new Date().toISOString());
+export const setFilesIndexedAt = async () => {
+  await LocalStorage.setItem(FILES_LAST_INDEXED_AT_KEY, new Date().toISOString());
 };
 
 export const dumpDb = (db: Database) => {
@@ -44,7 +44,7 @@ const dbConnection = async () => {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
     db.close();
-    mandateFilesCacheInvalidation();
+    mandateFilesIndexInvalidation();
   }
 
   try {
@@ -159,16 +159,16 @@ export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void 
   getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
 };
 
-type BuildCacheOptions = { force?: boolean };
-export const buildCache = async (
+type IndexFilesOptions = { force?: boolean };
+export const indexFiles = async (
   path: PathLike,
   db: Database,
-  options: BuildCacheOptions = { force: false }
+  options: IndexFilesOptions = { force: false }
 ): Promise<boolean> => {
-  if (options.force || (await shouldInvalidateFilesCache())) {
+  if (options.force || (await shouldInvalidateFilesIndex())) {
     walkRecursivelyAndSaveFiles(path, db);
     dumpDb(db);
-    await setFilesCachedAt();
+    await setFilesIndexedAt();
 
     return true;
   }

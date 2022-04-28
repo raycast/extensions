@@ -5,7 +5,7 @@ import { dirname } from "path";
 import { useDebounce } from "use-debounce";
 
 import { FileInfo } from "./types";
-import { buildCache, filesLastCachedAt, queryFiles, useDb } from "./db";
+import { indexFiles, filesLastIndexedAt, queryFiles, useDb } from "./db";
 import { displayPath, escapePath, fileMetadataMarkdown, getDriveRootPath } from "./utils";
 
 export default function Command() {
@@ -17,7 +17,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
   const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
-  const [filesCacheGeneratedAt, setFilesCacheGeneratedAt] = useState<Date | null>(null);
+  const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
   useEffect(() => {
@@ -38,9 +38,9 @@ export default function Command() {
 
       if (db) {
         try {
-          const isCached = await buildCache(drivePath, db);
-          if (isCached) {
-            setFilesCacheGeneratedAt(await filesLastCachedAt());
+          const isIndexed = await indexFiles(drivePath, db);
+          if (isIndexed) {
+            setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
 
           if (filesFiltered.length === 0) {
@@ -63,7 +63,7 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      setFilesCacheGeneratedAt(await filesLastCachedAt());
+      setFilesIndexGeneratedAt(await filesLastIndexedAt());
     })();
   }, []);
 
@@ -80,17 +80,17 @@ export default function Command() {
   const findFile = (displayPath?: string): FileInfo | null =>
     (displayPath && filesFiltered.find((file) => file.displayPath === displayPath)) || null;
 
-  const forceRebuildCache = useCallback(async () => {
+  const reindexFiles = useCallback(async () => {
     if (!db) return;
 
     setIsFetching(true);
     setFilesFiltered([]);
     setSearchText("");
-    showToast({ style: Toast.Style.Animated, title: "Rebuilding cache..." });
-    buildCache(drivePath, db, { force: true }).then(async () => {
-      setFilesCacheGeneratedAt(await filesLastCachedAt());
+    showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
+    indexFiles(drivePath, db, { force: true }).then(async () => {
+      setFilesIndexGeneratedAt(await filesLastIndexedAt());
       setFilesFiltered(queryFiles(db, ""));
-      showToast({ style: Toast.Style.Success, title: "Cache rebuild successfully! 🎉" });
+      showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
       setIsFetching(false);
     });
   }, [drivePath, db]);
@@ -107,7 +107,7 @@ export default function Command() {
       {filesFiltered.length > 0 ? (
         <List.Section
           title="Files"
-          subtitle={filesCacheGeneratedAt ? `Cached At: ${filesCacheGeneratedAt.toLocaleString()}` : ""}
+          subtitle={filesIndexGeneratedAt ? `Indexed At: ${filesIndexGeneratedAt.toLocaleString()}` : ""}
         >
           {filesFiltered.map((file) => (
             <List.Item
@@ -132,9 +132,9 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   />
                   <Action
-                    title="Rebuild Cache"
+                    title="Reindex Files Cache"
                     icon={Icon.Hammer}
-                    onAction={forceRebuildCache}
+                    onAction={reindexFiles}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                   />
                 </ActionPanel>

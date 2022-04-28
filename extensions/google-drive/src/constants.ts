@@ -25,4 +25,4 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
 export const MAX_RESULTS_WITHOUT_SEARCH_TEXT = 1000;
 export const MAX_RESULTS_WITH_SEARCH_TEXT = 100;
 export const DB_FILE_PATH = join(`${homedir()}/.raycast-google-drive-sqlite.db`);
-export const FILES_LAST_CACHED_AT_KEY = "filesLastCachedAt";
+export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";
