@@ -1,14 +1,40 @@
-import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 
-import { DB_FILE_PATH, MAX_RESULTS_WITHOUT_SEARCH_TEXT, MAX_RESULTS_WITH_SEARCH_TEXT } from "./constants";
+import {
+  DB_FILE_PATH,
+  FILES_LAST_CACHED_AT_KEY,
+  MAX_RESULTS_WITHOUT_SEARCH_TEXT,
+  MAX_RESULTS_WITH_SEARCH_TEXT,
+} from "./constants";
 import { FileInfo, Preferences } from "./types";
 import { fuzzyMatch } from "./utils";
 
-export const persistDb = (db: Database) => {
+export const filesLastCachedAt = async () => {
+  const lastCachedAt = await LocalStorage.getItem<string>(FILES_LAST_CACHED_AT_KEY);
+  return lastCachedAt ? new Date(lastCachedAt) : null;
+};
+
+export const shouldInvalidateFilesCache = async () => {
+  const lastCachedAt = await filesLastCachedAt();
+
+  if (lastCachedAt === null) return true;
+
+  return lastCachedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
+};
+
+const mandateFilesCacheInvalidation = async () => {
+  await LocalStorage.removeItem(FILES_LAST_CACHED_AT_KEY);
+};
+
+export const setFilesCachedAt = async () => {
+  await LocalStorage.setItem(FILES_LAST_CACHED_AT_KEY, new Date().toISOString());
+};
+
+export const dumpDb = (db: Database) => {
   writeFileSync(DB_FILE_PATH, Buffer.from(db.export()));
 };
 
@@ -18,6 +44,7 @@ const dbConnection = async () => {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
     db.close();
+    mandateFilesCacheInvalidation();
   }
 
   try {
@@ -56,7 +83,7 @@ export const useDb = () => {
 
     return () => {
       if (db) {
-        persistDb(db);
+        dumpDb(db);
         db.close();
         setDb(null);
       }

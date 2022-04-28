@@ -4,6 +4,7 @@ import { join } from "path";
 export const IGNORED_DIRECTORIES = ["node_modules", "bower_components", ".git", "tmp"];
 export const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
 export const NON_PREVIEWABLE_EXTENSIONS = [
+  "",
   ".zip",
   ".rar",
   ".7z",
@@ -24,3 +25,4 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
 export const MAX_RESULTS_WITHOUT_SEARCH_TEXT = 1000;
 export const MAX_RESULTS_WITH_SEARCH_TEXT = 100;
 export const DB_FILE_PATH = join(`${homedir()}/.raycast-google-drive-sqlite.db`);
+export const FILES_LAST_CACHED_AT_KEY = "filesLastCachedAt";

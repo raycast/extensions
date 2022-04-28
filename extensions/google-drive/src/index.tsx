@@ -6,7 +6,7 @@ import { homedir } from "os";
 import { useDebounce } from "use-debounce";
 
 import { FileInfo, Preferences } from "./types";
-import { persistDb, queryFiles, useDb } from "./db";
+import { dumpDb, filesLastCachedAt, queryFiles, setFilesCachedAt, shouldInvalidateFilesCache, useDb } from "./db";
 import { displayPath, escapePath, fileMetadataMarkdown, walkRecursivelyAndSaveFiles } from "./utils";
 
 export default function Command() {
@@ -20,6 +20,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
   const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
+  const [filesCacheGeneratedAt, setFilesCacheGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
   useEffect(() => {
@@ -27,44 +28,61 @@ export default function Command() {
   }, [debouncedSelectedFile]);
 
   useEffect(() => {
-    if (!existsSync(drivePath)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `The specified Google Drive root path "${drivePath}" does not exist.`,
-      });
-
-      setIsFetching(false);
-      return;
-    }
-
-    if (db) {
-      try {
-        walkRecursivelyAndSaveFiles(drivePath, db);
-        persistDb(db);
-
-        if (filesFiltered.length === 0) {
-          setIsFetching(true);
-          setFilesFiltered(queryFiles(db, ""));
-        }
-      } catch (e) {
-        console.error(e);
+    (async () => {
+      if (!existsSync(drivePath)) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Error! Is Google Drive app running and accessible?",
-          message: `Could not read files in "${displayPath(drivePath)}"`,
+          title: `The specified Google Drive root path "${drivePath}" does not exist.`,
         });
-      } finally {
+
         setIsFetching(false);
+        return;
       }
-    }
+
+      if (db) {
+        try {
+          if (await shouldInvalidateFilesCache()) {
+            walkRecursivelyAndSaveFiles(drivePath, db);
+            dumpDb(db);
+            await setFilesCachedAt();
+            setFilesCacheGeneratedAt(await filesLastCachedAt());
+          }
+
+          if (filesFiltered.length === 0) {
+            setIsFetching(true);
+
+            const files = queryFiles(db, "");
+            setFilesFiltered(files);
+          }
+        } catch (e) {
+          console.error(e);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error! Is Google Drive app running and accessible?",
+            message: `Could not read files in "${displayPath(drivePath)}"`,
+          });
+        } finally {
+          setIsFetching(false);
+        }
+      }
+    })();
   }, [drivePath, db]);
+
+  useEffect(() => {
+    (async () => {
+      setFilesCacheGeneratedAt(await filesLastCachedAt());
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
       if (!db) return;
 
       setIsFetching(true);
-      setFilesFiltered(queryFiles(db, debouncedSearchText));
+
+      const files = queryFiles(db, debouncedSearchText);
+      setFilesFiltered(files);
+
       setIsFetching(false);
     })();
   }, [debouncedSearchText]);
@@ -75,7 +93,6 @@ export default function Command() {
   return (
     <List
       isShowingDetail={filesFiltered.length > 0}
-      throttle
       enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={`Search in ${displayPath(drivePath)}`}
@@ -83,7 +100,10 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedFile(findFile(id))}
     >
       {filesFiltered.length > 0 ? (
-        <List.Section title="Files">
+        <List.Section
+          title="Files"
+          subtitle={filesCacheGeneratedAt ? `Cached At: ${filesCacheGeneratedAt.toLocaleString()}` : ""}
+        >
           {filesFiltered.map((file) => (
             <List.Item
               id={file.displayPath}
