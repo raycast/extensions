@@ -7,7 +7,7 @@ import {WEBSERVICE_URL} from "./enum";
 
 export default function Main() {
 
-    const [coinArray, setCoinArray] = useState([]);
+    const [coins, setCoins] = useState<Coin[]>([]);
     const [showingDetail, setShowingDetail] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -18,7 +18,8 @@ export default function Main() {
 
             try {
                 const coins = await getCoins.getAllCoins();
-                setCoinArray(coins.slice(0, 1500));
+                setCoins(coins.slice(0, 1500));
+
             } catch (e) {
                 await showToast({
                     style: Toast.Style.Failure,
@@ -43,7 +44,7 @@ export default function Main() {
             navigationTitle="Coinpaprika Cryptocurrencies"
             searchBarPlaceholder="Search for your favourite Coin"
         >
-            {coinArray.map((coin: Coin) => (
+            {coins.map((coin: Coin) => (
 
                 <List.Item
                     key={coin.id}

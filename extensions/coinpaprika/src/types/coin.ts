@@ -27,6 +27,8 @@ export type Coin = {
             market_cap: number
         }
     }
+    // possibility to limit number of coins due to the performance
+    slice(number: number, number2: number): ((prevState: Coin[]) => Coin[]) | Coin[];
 }
 
 export type CoinId = {
