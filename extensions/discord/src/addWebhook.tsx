@@ -19,7 +19,6 @@ export default function addWebhookView() {
       <Form.TextField id="name" defaultValue="" placeholder="Raycast Server, Gaming Server..." title="Channel Name" />
       <Form.TextField id="url" defaultValue="" placeholder="https://discord.com/api/webhooks..." title="Webhook URL" />
       <ColorDropDown />
-      <Form.Checkbox id="favourite" label="Add to favourites" defaultValue={false} title="Add to Favourites" />
     </Form>
   );
 }

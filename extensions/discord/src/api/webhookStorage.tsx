@@ -1,4 +1,4 @@
-import { showToast, Toast, popToRoot, Action } from "@raycast/api";
+import { showToast, Toast, popToRoot } from "@raycast/api";
 import { dataFilePath, WebhookChannelModel } from "../interface/webhookModel";
 import fs from "fs";
 
@@ -45,18 +45,6 @@ export function removeWebhook(name: string) {
   data.splice(index, 1);
   fs.writeFileSync(dataFilePath, JSON.stringify(data));
   showToast({ title: "Webhook removed", message: "Webhook removed successfully" });
-}
-
-export function toggleFavorite(webhook: WebhookChannelModel) {
-  const data = getData();
-  const index = data.findIndex((w) => w.name === webhook.name);
-  if (index === -1) {
-    showToast({ title: "Webhook not found", message: "Webhook with that name not found" });
-    return;
-  }
-  data[index].favourite = !data[index].favourite;
-  fs.writeFileSync(dataFilePath, JSON.stringify(data));
-  showToast({ title: "Webhook updated", message: "Webhook updated successfully" });
 }
 
 function getData(): WebhookChannelModel[] {

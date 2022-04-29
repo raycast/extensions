@@ -19,21 +19,10 @@ export default function Command() {
   return (
     <List searchBarPlaceholder="Search for saved channels" isLoading={isLoading}>
       {
-        <List.Section title="Favourites">
-          {webhooks
-            .filter((w) => w.favourite)
-            .map((w) => (
-              <SingleWebhookItem key={w.name} webhook={w}></SingleWebhookItem>
-            ))}
-        </List.Section>
-      }
-      {
         <List.Section title="Saved Channels">
-          {webhooks
-            .filter((w) => !w.favourite)
-            .map((w) => (
-              <SingleWebhookItem key={w.name} webhook={w}></SingleWebhookItem>
-            ))}
+          {webhooks.map((webhook) => (
+            <SingleWebhookItem key={webhook.name} webhook={webhook} />
+          ))}
         </List.Section>
       }
       {!isLoading && webhooks.length == 0 && (
