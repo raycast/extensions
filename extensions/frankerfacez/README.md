@@ -1,4 +1,5 @@
-![Logo](https://raw.githubusercontent.com/davidchalifoux/FrankerFaceZ-for-Raycast/master/assets/github-logo.png)
+![Logo](github-logo.png "Logo")
+
 # FrankerFaceZ for Raycast
 Easily search the entire FrankerFaceZ emote library using [Raycast](https://www.raycast.com/).
 # How to Use
