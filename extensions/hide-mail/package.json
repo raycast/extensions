@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hide-mail",
-  "title": "Email Relay Service — Hide your real email address and protect your identity and privacy",
+  "title": "Email Relay Service — Hide Your Real Email Address and Protect Your Identity and Privacy",
   "description": "Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
   "icon": "Icon.png",
   "author": "Flatroy",
@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create random email alias",
+      "title": "Create Random Email Alias",
       "description": "It will generate and copy a random private email alias to the clipboard",
       "mode": "no-view"
     }
