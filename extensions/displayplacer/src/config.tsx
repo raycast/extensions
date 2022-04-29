@@ -59,7 +59,7 @@ Or, to install \`displayplacer\` manually, [click here](https://github.com/jakeh
         }
       />
       <List.Item
-        title="➕ Step 2: Create a Preset"
+        title="✅ Step 2: Create a Preset"
         actions={
           favorites.length === 0 && (
             <ActionPanel>
@@ -69,7 +69,7 @@ Or, to install \`displayplacer\` manually, [click here](https://github.com/jakeh
         }
         detail={
           <List.Item.Detail
-            markdown={`# ➕ Create a Preset
+            markdown={`# ✅ Create a Preset
 ${
   favorites.length > 0
     ? `✅ You already have ${favorites.length} preset${favorites.length !== 1 && "s"} saved! Proceed to Step 3.`
@@ -99,10 +99,10 @@ To try it out now, press \`⏎  return\``}
         }
       />
       <List.Item
-        title="🩺 Troubleshooting"
+        title="❓ Troubleshooting"
         detail={
           <List.Item.Detail
-            markdown={`# 🩺 Troubleshooting
+            markdown={`# ❓ Troubleshooting
 On rare occasions, the screen ID of your displays may change. You can re-save your presets by selecting them and choosing to *Edit Display Preset* from the actions menu.
 
 **Still unable to install or load presets?** You may need to add a custom shell path in the Raycast preferences for this extension. This setting can change where the system searches for where
