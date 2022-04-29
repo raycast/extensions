@@ -1,4 +1,4 @@
-import { getPreferenceValues, FormValues, showToast, ToastStyle, Color } from "@raycast/api";
+import { getPreferenceValues, showToast, Color, Form, Toast } from "@raycast/api";
 import { Client, isNotionClientError } from "@notionhq/client";
 import fetch from "node-fetch";
 import moment from "moment";
@@ -105,9 +105,15 @@ export async function fetchDatabases(): Promise<Database[]> {
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch databases");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch databases",
+      });
     }
     return [];
   }
@@ -156,9 +162,15 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch database properties",
+      });
     }
     return [];
   }
@@ -200,16 +212,22 @@ export async function queryDatabase(
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch database properties",
+      });
     }
     return [];
   }
 }
 
 // Create database page
-export async function createDatabasePage(values: FormValues): Promise<Page | undefined> {
+export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
   try {
     const { database, ...props } = values;
 
@@ -323,9 +341,15 @@ export async function createDatabasePage(values: FormValues): Promise<Page | und
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to create page");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create page",
+      });
     }
     return undefined;
   }
@@ -346,9 +370,15 @@ export async function patchPage(
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch database properties",
+      });
     }
     return undefined;
   }
@@ -370,9 +400,15 @@ export async function searchPages(query: string | undefined): Promise<Page[]> {
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to load pages");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load pages",
+      });
     }
     return [];
   }
@@ -489,27 +525,27 @@ export async function fetchPageContent(pageId: string): Promise<PageContent | un
 
       const value =
         block.type === "bulleted_list_item"
-          ? block.bulleted_list_item.text
+          ? block.bulleted_list_item.rich_text
           : block.type === "callout"
-          ? block.callout.text
+          ? block.callout.rich_text
           : block.type === "code"
-          ? block.code.text
+          ? block.code.rich_text
           : block.type === "paragraph"
-          ? block.paragraph.text
+          ? block.paragraph.rich_text
           : block.type === "heading_1"
-          ? block.heading_1.text
+          ? block.heading_1.rich_text
           : block.type === "heading_2"
-          ? block.heading_2.text
+          ? block.heading_2.rich_text
           : block.type === "heading_3"
-          ? block.heading_3.text
+          ? block.heading_3.rich_text
           : block.type === "numbered_list_item"
-          ? block.numbered_list_item.text
+          ? block.numbered_list_item.rich_text
           : block.type === "quote"
-          ? block.quote.text
+          ? block.quote.rich_text
           : block.type === "to_do"
-          ? block.to_do.text
+          ? block.to_do.rich_text
           : block.type === "toggle"
-          ? block.toggle.text
+          ? block.toggle.rich_text
           : [];
 
       value.forEach(function (text) {
@@ -541,9 +577,15 @@ export async function fetchPageContent(pageId: string): Promise<PageContent | un
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch page content");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch page content",
+      });
     }
     return undefined;
   }
@@ -568,9 +610,15 @@ export async function fetchUsers(): Promise<User[]> {
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
-      showToast(ToastStyle.Failure, err.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch users");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch users",
+      });
     }
     return [];
   }
@@ -589,7 +637,10 @@ export async function fetchExtensionReadMe(): Promise<string | undefined> {
 
     return text;
   } catch (err) {
-    showToast(ToastStyle.Failure, "Failed to load Extension README");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to load Extension README",
+    });
   }
 }
 
