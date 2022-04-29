@@ -6,7 +6,14 @@ import { useDebounce } from "use-debounce";
 
 import { FileInfo } from "./types";
 import { indexFiles, filesLastIndexedAt, queryFiles, useDb } from "./db";
-import { displayPath, escapePath, fileMetadataMarkdown, getDriveRootPath } from "./utils";
+import {
+  clearFilePreviewsCache,
+  displayPath,
+  escapePath,
+  fileMetadataMarkdown,
+  getDriveRootPath,
+  initialSetup,
+} from "./utils";
 
 export default function Command() {
   const drivePath = getDriveRootPath();
@@ -19,6 +26,8 @@ export default function Command() {
   const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
+
+  useEffect(initialSetup, []);
 
   useEffect(() => {
     (async () => setFileDetailsMarkup(await fileMetadataMarkdown(debouncedSelectedFile)))();
@@ -136,6 +145,12 @@ export default function Command() {
                     icon={Icon.Hammer}
                     onAction={reindexFiles}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  />
+                  <Action
+                    title="Clear File Previews Cache"
+                    icon={Icon.Trash}
+                    onAction={clearFilePreviewsCache}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   />
                 </ActionPanel>
               }

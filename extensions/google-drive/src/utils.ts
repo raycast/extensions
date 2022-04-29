@@ -1,13 +1,13 @@
 import { exec } from "child_process";
 import util from "util";
 import { token_similarity_sort_ratio } from "fuzzball";
-import fs, { accessSync, existsSync, lstatSync, PathLike, readdirSync, statSync } from "fs";
+import fs, { accessSync, existsSync, lstatSync, mkdirSync, PathLike, readdirSync, rmSync, statSync } from "fs";
 import { basename, extname, join, resolve } from "path";
-import { homedir, tmpdir } from "os";
+import { homedir } from "os";
 import { Database } from "sql.js";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-import { FILE_SIZE_UNITS, IGNORED_DIRECTORIES, NON_PREVIEWABLE_EXTENSIONS } from "./constants";
+import { FILE_SIZE_UNITS, IGNORED_DIRECTORIES, NON_PREVIEWABLE_EXTENSIONS, TMP_FILE_PREVIEWS_PATH } from "./constants";
 import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
 
@@ -70,14 +70,16 @@ export const saveFilesInDirectory = (path: PathLike, db: Database) =>
   });
 
 const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
-  const outputDir = tmpdir();
+  mkdirSync(TMP_FILE_PREVIEWS_PATH, { recursive: true });
+
+  if (!pathExists(TMP_FILE_PREVIEWS_PATH)) return null;
 
   if (NON_PREVIEWABLE_EXTENSIONS.includes(extname(file.path).toLowerCase())) {
     return null;
   }
 
   try {
-    await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${outputDir}`, {
+    await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${TMP_FILE_PREVIEWS_PATH}`, {
       timeout: 500 /* milliseconds */,
       killSignal: "SIGKILL",
     });
@@ -85,7 +87,26 @@ const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
     return null;
   }
 
-  return encodeURI(`file://${outputDir}/${file.name}.png`);
+  return encodeURI(`file://${TMP_FILE_PREVIEWS_PATH}/${file.name}.png`);
+};
+
+export const clearFilePreviewsCache = (shouldShowToast = false) => {
+  if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
+    rmSync(TMP_FILE_PREVIEWS_PATH, { recursive: true, force: true });
+  }
+
+  shouldShowToast &&
+    showToast({
+      style: Toast.Style.Success,
+      title: "File previews cache cleared!",
+    });
+};
+
+export const initialSetup = () => {
+  // If TMP_FILE_PREVIEWS_PATH contains more than 50 files, clear it.
+  if (pathExists(TMP_FILE_PREVIEWS_PATH) && readdirSync(TMP_FILE_PREVIEWS_PATH).length > 50) {
+    clearFilePreviewsCache(false);
+  }
 };
 
 export const fileMetadataMarkdown = async (file: FileInfo | null): Promise<string> => {
