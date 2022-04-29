@@ -35,8 +35,16 @@
       "type": "password",
       "title": "API Key",
       "placeholder": "Your YouTube enabled Google API key",
-      "required": true,
+      "required": false,
       "description": "YouTube enabled Google API key"
+    },
+    {
+      "name": "clientid",
+      "type": "password",
+      "title": "OAuth2 Client ID",
+      "placeholder": "Client ID",
+      "required": false,
+      "description": "YouTube enabled Google API OAuth2 Client ID (iOS)"
     },
     {
       "name": "primaryaction",
@@ -60,7 +68,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
-    "@raycast/api": "^1.25.2",
+    "@raycast/api": "^1.36.0",
     "javascript-time-ago": "^2.3.10",
     "node-fetch": "^3.0.0",
     "uuid": "^8.3.2"
@@ -78,6 +86,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "version": "ray version"
   }
 }

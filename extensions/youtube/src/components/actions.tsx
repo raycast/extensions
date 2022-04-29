@@ -1,4 +1,7 @@
-import { Color, Icon, OpenInBrowserAction, PushAction } from "@raycast/api";
+import { Color, Icon, Action, popToRoot } from "@raycast/api";
+import { ReactElement } from "react";
+import { logout } from "../lib/oauth";
+import { getClientID } from "../lib/youtubeapi";
 import { PlaylistList } from "./playlist";
 import { SearchVideoList } from "./video_search";
 
@@ -6,7 +9,7 @@ export function OpenChannelInBrowser(props: { channelId: string | undefined }): 
   const channelId = props.channelId;
   if (channelId) {
     return (
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         title="Open Channel in Browser"
         url={`https://youtube.com/channel/${channelId}`}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
@@ -20,7 +23,7 @@ export function SearchChannelVideosAction(props: { channelId: string | undefined
   const cid = props.channelId;
   if (cid) {
     return (
-      <PushAction
+      <Action.Push
         title="Search Channel Videos"
         target={<SearchVideoList channedId={cid} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
@@ -39,7 +42,7 @@ export function ShowRecentPlaylistVideosAction(props: {
   if (pid) {
     const title = props.title ? props.title : "Show Playlist Videos";
     return (
-      <PushAction
+      <Action.Push
         title={title}
         target={<PlaylistList playlistId={pid} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
@@ -48,4 +51,16 @@ export function ShowRecentPlaylistVideosAction(props: {
     );
   }
   return null;
+}
+
+export function LogoutAction(): ReactElement | null {
+  const handle = async () => {
+    await logout();
+    await popToRoot();
+  };
+  if (getClientID()) {
+    return <Action title="Logout" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
+  } else {
+    return null;
+  }
 }
