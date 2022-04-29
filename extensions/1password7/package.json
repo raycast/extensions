@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "list",
-      "title": "1Password",
-      "subtitle": "Open or edit items",
+      "title": "My Passwords",
+      "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
       "mode": "view",
       "keywords": [
@@ -50,7 +50,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
+    "@raycast/api": "^1.33.0",
     "sha.js": "^2.4.11"
   },
   "devDependencies": {
@@ -67,6 +67,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }
 }
