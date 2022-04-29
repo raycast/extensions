@@ -4,7 +4,7 @@ export default function CreateDocumentItem({ query, spaceID }: { query: string; 
   return (
     <List.Item
       title={`Create document '${query}'`}
-      detail={<List.Item.Detail markdown="There is no document matching your search. Press enter to create one" />}
+      detail={<List.Item.Detail markdown={`Create document '${query}'`} />}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

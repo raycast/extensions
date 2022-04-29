@@ -32,7 +32,7 @@ export default function ListDocBlocks({ resultsLoading, results, setQuery, query
           }
         />
       ))}
-      {results.length === 0 && <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />}
+      {query.length > 0 && <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />}
     </List>
   );
 }
