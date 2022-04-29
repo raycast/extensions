@@ -79,7 +79,7 @@ const getFilesRecursively = (
 ): Record<string, FileInfo> => {
   const canReadPath = isPathReadable(path);
   const dirs = canReadPath
-    ? getDirectories(path, allowHidden).filter((dir) => !excludesPaths.includes(dir.toString()))
+    ? getDirectories(path, allowHidden).filter((dir) => !excludesPaths.includes(dir.toLocaleString()))
     : [];
   const files = dirs
     .map((dir) => getFilesRecursively(dir, allowHidden, allowDir, excludesPaths))
