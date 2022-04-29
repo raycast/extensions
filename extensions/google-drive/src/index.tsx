@@ -216,7 +216,7 @@ export default function Command() {
     }
 
     return {};
-  }, [drivePath, preferences.shouldShowHiddenFiles, preferences.excludePaths]);
+  }, [drivePath, preferences.shouldShowHiddenFiles, preferences.shouldShowDirectories, preferences.excludePaths]);
   const originalFilteredAndSortedFiles = useMemo<Array<FileInfo>>(
     () => Object.values(filesMap).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
     [filesMap]
