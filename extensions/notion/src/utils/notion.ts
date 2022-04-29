@@ -2,6 +2,7 @@ import { getPreferenceValues, showToast, Color, Form, Toast } from "@raycast/api
 import { Client, isNotionClientError } from "@notionhq/client";
 import fetch from "node-fetch";
 import moment from "moment";
+import { markdownToBlocks } from "@tryfabric/martian";
 
 const notion = new Client({
   auth: getPreferenceValues().notion_token,
@@ -237,7 +238,7 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
     };
 
     if (content) {
-      arg.children = [{ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content } }] } }];
+      arg.children = markdownToBlocks(content);
     }
 
     Object.keys(props).forEach(function (formId) {

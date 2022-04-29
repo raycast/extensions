@@ -59,6 +59,7 @@
     }
   ],
   "dependencies": {
+    "@tryfabric/martian": "^1.2.0",
     "@notionhq/client": "^1.0.4",
     "@raycast/api": "^1.33.0",
     "moment": "^2.29.1",
