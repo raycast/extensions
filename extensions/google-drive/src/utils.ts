@@ -7,7 +7,13 @@ import { homedir } from "os";
 import { Database } from "sql.js";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-import { FILE_SIZE_UNITS, IGNORED_DIRECTORIES, NON_PREVIEWABLE_EXTENSIONS, TMP_FILE_PREVIEWS_PATH } from "./constants";
+import {
+  FILE_SIZE_UNITS,
+  IGNORED_DIRECTORIES,
+  MAX_TMP_FILE_PREVIES_LIMIT,
+  NON_PREVIEWABLE_EXTENSIONS,
+  TMP_FILE_PREVIEWS_PATH,
+} from "./constants";
 import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
 
@@ -104,7 +110,7 @@ export const clearFilePreviewsCache = (shouldShowToast = false) => {
 
 export const initialSetup = () => {
   // If TMP_FILE_PREVIEWS_PATH contains more than 50 files, clear it.
-  if (pathExists(TMP_FILE_PREVIEWS_PATH) && readdirSync(TMP_FILE_PREVIEWS_PATH).length > 50) {
+  if (pathExists(TMP_FILE_PREVIEWS_PATH) && readdirSync(TMP_FILE_PREVIEWS_PATH).length > MAX_TMP_FILE_PREVIES_LIMIT) {
     clearFilePreviewsCache(false);
   }
 };
