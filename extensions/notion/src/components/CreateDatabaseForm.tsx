@@ -422,6 +422,8 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
               return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;
           }
         })}
+      <Form.Separator key="separator" />
+      <Form.TextArea id="content" title="Page Content" />
     </Form>
   );
 }

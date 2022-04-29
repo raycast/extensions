@@ -229,12 +229,16 @@ export async function queryDatabase(
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
   try {
-    const { database, ...props } = values;
+    const { database, content, ...props } = values;
 
     const arg: Parameters<typeof notion.pages.create>[0] = {
       parent: { database_id: database },
       properties: {},
     };
+
+    if (content) {
+      arg.children = [{ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content } }] } }];
+    }
 
     Object.keys(props).forEach(function (formId) {
       const type = formId.match(/(?<=property::).*(?=::)/g)?.[0];
