@@ -18,7 +18,7 @@ import { FileInfo, Preferences } from "./types";
 import { Fzf } from "fzf";
 
 export const fuzzyMatch = (source: string, target: string): number => {
-  const result = new Fzf([target]).find(source);
+  const result = new Fzf([target], { sort: false }).find(source);
   return result.length > 0 ? result[0].score : 0;
 };
 
