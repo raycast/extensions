@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create and copy new email",
-      "description": "It will generate and copy a random email to the clipboard - and everything will be redirected to your real email",
+      "title": "Create random email alias",
+      "description": "It will generate and copy a random private email alias to the clipboard",
       "mode": "no-view"
     }
   ],
