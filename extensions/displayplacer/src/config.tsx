@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, environment, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AutoInstall } from "./components/autoInstall";
 import { Favorite } from "./components/favoritesForm";
@@ -114,7 +114,7 @@ On rare occasions, the screen ID of your displays may change. You can re-save yo
             markdown={`# 💡 Load Preset via hotkey
 If you'd like to load a preset without even launching Raycast, you can assign a hotkey to the various **Load Preset by #X** commands in the Raycast preferences > Extensions tab.
 
-![Hotkey Example](../assets/hotkey.png)
+![Hotkey Example](file://${environment.assetsPath}/hotkey.png)
 
 If you don't plan on using this feature, you can also hide these commands so they don't clutter your Raycast menu.`}
           />
