@@ -75,7 +75,9 @@ ${
     ? `✅ You already have ${favorites.length} preset${favorites.length !== 1 && "s"} saved! Proceed to Step 3.`
     : `Presets are created **automatically** based on your computer's current display settings. Once you've adjusted your display settings accordingly, you can save that configured into a preset using this extension.
 
-To save your current screen settings as a preset, press **⏎** \`return\` and then click the **Save Preset** button.`
+To save your current screen settings as a preset, press
+
+\`⏎ return\` and then click the **Create Preset** button.`
 }`}
           />
         }
@@ -92,7 +94,7 @@ To save your current screen settings as a preset, press **⏎** \`return\` and t
             markdown={`# 🖥️ Load Preset
 To load a preset, use the **Switch Display Preset** command to list all your presets and select one to load.
 
-To try it out now, press \`return\``}
+To try it out now, press \`⏎  return\``}
           />
         }
       />
@@ -103,7 +105,9 @@ To try it out now, press \`return\``}
             markdown={`# 🩺 Troubleshooting
 On rare occasions, the screen ID of your displays may change. You can re-save your presets by selecting them and choosing to *Edit Display Preset* from the actions menu.
 
-**Still unable to install or load presets?** You may need to add a custom shell path in the Raycast preferences for this extension. This setting can change where the system searches for where \`displayplacer\` and \`homebrew\` is installed.`}
+**Still unable to install or load presets?** You may need to add a custom shell path in the Raycast preferences for this extension. This setting can change where the system searches for where
+
+\`displayplacer\` and \`homebrew\` is installed.`}
           />
         }
       />
