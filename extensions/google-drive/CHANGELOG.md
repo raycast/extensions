@@ -8,7 +8,7 @@
 - The index gets rebuilt if it is older than 7 days.
 - Added `Reindex Files Cache` action in the action panel to forcefully rebuild the cache.
 - Added logic to automatically purge the temporary file previews in the `/tmp` directory to free-up the disk space if it grows to more than 50 previews.
-- Added `Clear File Previews Cache` action in the action panel to clear the files previews generated in the `/tmp` directory.
+- Added `Clear File Previews Cache` action in the action panel to clear the file previews generated in the `/tmp` directory.
 
 ## [Fix Shortcut Handling] - 2022-04-25
 
