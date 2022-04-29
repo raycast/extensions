@@ -32,7 +32,9 @@ export default function ListDocBlocks({ resultsLoading, results, setQuery, query
           }
         />
       ))}
-      {query.length > 0 && <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />}
+      {query.length > 0 && <List.Section title="Create new document">
+          <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />
+      </List.Section>}
     </List>
   );
 }

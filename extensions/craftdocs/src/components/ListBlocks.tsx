@@ -20,7 +20,9 @@ export default function ListBlocks(params: ListBlocksParams) {
       {blocks.map((block) => (
         <BlockItem key={block.id} block={block} />
       ))}
-      {query.length > 0 && <CreateDocumentItem query={query} spaceID={spaceID} />}
+      {query.length > 0 && <List.Section title="Create new document">
+          <CreateDocumentItem query={query} spaceID={spaceID} />
+      </List.Section>}
     </List>
   );
 }

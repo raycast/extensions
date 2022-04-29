@@ -3,7 +3,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 export default function CreateDocumentItem({ query, spaceID }: { query: string; spaceID: string }) {
   return (
     <List.Item
-      title={`Create document '${query}'`}
+      title={`Create '${query}'`}
       detail={<List.Item.Detail markdown={`Create document '${query}'`} />}
       actions={
         <ActionPanel>
