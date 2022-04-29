@@ -3,6 +3,7 @@ import { Client, isNotionClientError } from "@notionhq/client";
 import fetch from "node-fetch";
 import moment from "moment";
 import { markdownToBlocks } from "@tryfabric/martian";
+import { NotionToMarkdown } from "notion-to-md";
 
 const notion = new Client({
   auth: getPreferenceValues().notion_token,
@@ -426,159 +427,11 @@ export async function fetchPageContent(pageId: string): Promise<PageContent | un
       block_id: pageId,
     });
 
-    const pageContent: PageContent = {
-      markdown: results.length === 0 ? "*Page is empty*" : "",
+    const n2m = new NotionToMarkdown({ notionClient: notion });
+
+    return {
+      markdown: results.length === 0 ? "*Page is empty*" : n2m.toMarkdownString(await n2m.blocksToMarkdown(results)),
     };
-
-    results.forEach(function (block) {
-      if (!("type" in block)) {
-        return;
-      }
-
-      if (block.type === "image") {
-        pageContent.markdown += `![${block.image.caption[0]?.plain_text || "image"}](${
-          block.image.type === "external" ? block.image.external.url : block.image.file.url
-        })\n`;
-        return;
-      }
-
-      if (block.type === "audio") {
-        pageContent.markdown += `[${block.audio.caption[0]?.plain_text || "audio"}](${
-          block.audio.type === "external" ? block.audio.external.url : block.audio.file.url
-        })\n`;
-        return;
-      }
-
-      if (block.type === "bookmark") {
-        pageContent.markdown += `[${block.bookmark.caption[0]?.plain_text || "bookmark"}](${block.bookmark.url})\n`;
-        return;
-      }
-
-      if (block.type === "embed") {
-        pageContent.markdown += `[${block.embed.caption[0]?.plain_text || "embed"}](${block.embed.url})\n`;
-        return;
-      }
-
-      if (block.type === "link_preview") {
-        pageContent.markdown += `[link preview](${block.link_preview.url})\n`;
-        return;
-      }
-
-      if (block.type === "file") {
-        pageContent.markdown += `[${block.file.caption[0]?.plain_text || "file"}](${
-          block.file.type === "external" ? block.file.external.url : block.file.file.url
-        })\n`;
-        return;
-      }
-
-      if (block.type === "pdf") {
-        pageContent.markdown += `[${block.pdf.caption[0]?.plain_text || "pdf"}](${
-          block.pdf.type === "external" ? block.pdf.external.url : block.pdf.file.url
-        })\n`;
-        return;
-      }
-
-      if (block.type === "video") {
-        pageContent.markdown += `[${block.video.caption[0]?.plain_text || "video"}](${
-          block.video.type === "external" ? block.video.external.url : block.video.file.url
-        })\n`;
-        return;
-      }
-
-      if (block.type === "link_to_page") {
-        pageContent.markdown += `[${
-          block.link_to_page.type === "database_id" ? "Link to Database" : "Link to Page"
-        }]\n`;
-        return;
-      }
-
-      if (block.type === "synced_block") {
-        pageContent.markdown += `[${"Synced block"}]\n`;
-        return;
-      }
-
-      if (block.type === "child_database") {
-        return (pageContent.markdown += `${block.child_database.title}\n`);
-      }
-
-      if (block.type === "child_page") {
-        return (pageContent.markdown += `${block.child_page.title}\n`);
-      }
-
-      if (block.type === "equation") {
-        return (pageContent.markdown += `${block.equation.expression}\n`);
-      }
-
-      if (block.type === "divider") {
-        return (pageContent.markdown += `---\n`);
-      }
-
-      if (
-        block.type === "breadcrumb" ||
-        block.type === "column" ||
-        block.type === "column_list" ||
-        block.type === "unsupported" ||
-        block.type === "table" ||
-        block.type === "table_of_contents" ||
-        block.type === "table_row" ||
-        block.type === "template"
-      ) {
-        return;
-      }
-
-      let tempText = "";
-
-      const value =
-        block.type === "bulleted_list_item"
-          ? block.bulleted_list_item.rich_text
-          : block.type === "callout"
-          ? block.callout.rich_text
-          : block.type === "code"
-          ? block.code.rich_text
-          : block.type === "paragraph"
-          ? block.paragraph.rich_text
-          : block.type === "heading_1"
-          ? block.heading_1.rich_text
-          : block.type === "heading_2"
-          ? block.heading_2.rich_text
-          : block.type === "heading_3"
-          ? block.heading_3.rich_text
-          : block.type === "numbered_list_item"
-          ? block.numbered_list_item.rich_text
-          : block.type === "quote"
-          ? block.quote.rich_text
-          : block.type === "to_do"
-          ? block.to_do.rich_text
-          : block.type === "toggle"
-          ? block.toggle.rich_text
-          : [];
-
-      value.forEach(function (text) {
-        if (text.plain_text) {
-          let plainText = text.plain_text;
-          if (text.annotations.bold as boolean) {
-            plainText = "**" + plainText + "**";
-          } else if (text.annotations.italic as boolean) {
-            plainText = "*" + plainText + "*";
-          } else if (text.annotations.code as boolean) {
-            plainText = "`" + plainText + "`";
-          }
-
-          if (text.href) {
-            if (text.href.startsWith("/")) {
-              plainText = "[" + plainText + "](https://notion.so" + text.href + ")";
-            } else {
-              plainText = "[" + plainText + "](" + text.href + ")";
-            }
-          }
-          tempText += plainText;
-        }
-      });
-
-      pageContent.markdown += notionBlockToMarkdown(tempText, block) + "\n";
-    });
-
-    return pageContent;
   } catch (err: unknown) {
     console.error(err);
     if (isNotionClientError(err)) {
@@ -699,46 +552,6 @@ function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion
   }
 
   return page;
-}
-
-function notionBlockToMarkdown(
-  text: string,
-  block: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.blocks.children.list>>["results"]>
-): string {
-  if (!("type" in block)) {
-    return text;
-  }
-
-  switch (block.type) {
-    case "heading_1": {
-      return "# " + text;
-    }
-    case "heading_2": {
-      return "## " + text;
-    }
-    case "heading_3": {
-      return "### " + text;
-    }
-    case "bulleted_list_item": {
-      return "- " + text;
-    }
-    case "numbered_list_item": {
-      return "1. " + text;
-    }
-    case "quote": {
-      return "> " + text;
-    }
-    case "code": {
-      return "```" + block.code.language + "\n" + text + "\n```";
-    }
-    case "to_do": {
-      return "\n " + (block.to_do.checked ? "☑ " : "☐ ") + text;
-    }
-
-    default: {
-      return text;
-    }
-  }
 }
 
 export function notionColorToTintColor(notionColor: string | undefined): Color {
