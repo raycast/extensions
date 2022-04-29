@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { format } from "date-fns";
-import { displayDueDate } from "../utils";
+import { displayDueDate } from "../helpers";
 import { priorities } from "../constants";
 import { SWRKeys } from "../types";
 import { todoist, handleError } from "../api";
@@ -58,9 +58,9 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
           />
           {taskLabels && taskLabels.length > 0 ? (
             <Detail.Metadata.TagList title="Labels">
-              {taskLabels.map((taskLabel) => (
+              {taskLabels.map((taskLabel, index) => (
                 <Detail.Metadata.TagList.Item
-                  key={taskLabel?.id}
+                  key={taskLabel?.id || index}
                   text={taskLabel?.name || ""}
                   color={taskLabel.color?.value}
                 />

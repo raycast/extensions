@@ -5,6 +5,7 @@
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
+  "contributors": ["adrienbaron"],
   "license": "MIT",
   "commands": [
     {

@@ -1,6 +1,6 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import useSWR from "swr";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./utils";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
 import { todoist, handleError } from "./api";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
