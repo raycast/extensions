@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Icon, List, popToRoot, showToast, Action, Image, Toast } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
+import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
 import {
@@ -588,19 +589,23 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       );
     }
     case "climate": {
+      const tempStep = state.attributes.target_temp_step ?? 0.5;
+      const minAllowedTemp = state.attributes.min_temp ?? 7;
+      const maxAllowedTemp = state.attributes.max_temp ?? 35;
+      // Sometimes, min_temp and max_temp are not multiples of tempStep.
+      // Set the actual min and max to the nearest valid multiple of tempStep for consistency and display niceness.
+      const minNormalizedTemp = Math.ceil(minAllowedTemp / tempStep) * tempStep;
+      const maxNormalizedTemp = Math.floor(maxAllowedTemp / tempStep) * tempStep;
       const changeTempAllowed =
         state.state === "heat" || state.state === "cool" || state.state === "heat_cool" || state.state == "auto"
           ? true
           : false;
       const currentTempValue: number | undefined = state.attributes.temperature || undefined;
       const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
-      const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
-      const lowerTemp = currentTemp ? currentTemp - 0.5 : undefined;
+      const upperTemp = currentTemp ? currentTemp + tempStep : undefined;
+      const lowerTemp = currentTemp ? currentTemp - tempStep : undefined;
 
-      const temps: number[] = [];
-      for (let i = 26; i > 16; i--) {
-        temps.push(i);
-      }
+      const temps: number[] = range(minNormalizedTemp, maxNormalizedTemp, tempStep);
 
       const currentPresetMode = state.attributes.preset_mode ? state.attributes.preset_mode : "None";
       const preset_modes = state.attributes.preset_modes;
@@ -666,7 +671,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
 
             {upperTemp && changeTempAllowed && (
               <Action
-                title={`Increase Temp. 0.5`}
+                title={`Increase Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "+" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, upperTemp);
@@ -677,7 +682,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             )}
             {lowerTemp && changeTempAllowed && (
               <Action
-                title={`Decrease Temp. 0.5`}
+                title={`Decrease Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, lowerTemp);
