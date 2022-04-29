@@ -40,7 +40,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.33.2",
-    "fuzzball": "^2.1.2",
+    "fzf": "^0.5.1",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {

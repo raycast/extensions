@@ -1,6 +1,5 @@
 import { exec } from "child_process";
 import util from "util";
-import { token_similarity_sort_ratio } from "fuzzball";
 import fs, { accessSync, existsSync, lstatSync, mkdirSync, PathLike, readdirSync, rmSync, statSync } from "fs";
 import { basename, extname, join, resolve } from "path";
 import { homedir } from "os";
@@ -16,11 +15,14 @@ import {
 } from "./constants";
 import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
+import { Fzf } from "fzf";
+
+export const fuzzyMatch = (source: string, target: string): number => {
+  const result = new Fzf([target]).find(source);
+  return result.length > 0 ? result[0].score : 0;
+};
 
 const execAsync = util.promisify(exec);
-export const fuzzyMatch = (source: string, target: string) =>
-  token_similarity_sort_ratio(source, target, { trySimple: true });
-
 const isPathReadable = (path: PathLike): boolean => {
   try {
     accessSync(path, fs.constants.R_OK);
