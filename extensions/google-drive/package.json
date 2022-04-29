@@ -36,6 +36,15 @@
       "default": false,
       "label": "Show hidden files",
       "required": false
+    },
+    {
+      "name": "excludePaths",
+      "title": "Exclude Paths",
+      "description": "Comma-separated full paths to exclude from search",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "e.g. ~/Google Drive/My Drive/Share, ~/Google Drive/My Drive/Priavte",
+      "required": false
     }
   ],
   "dependencies": {
