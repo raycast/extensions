@@ -38,6 +38,14 @@
       "required": false
     },
     {
+      "name": "shouldShowDirectories",
+      "description": "Show directories in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show directories",
+      "required": false
+    },
+    {
       "name": "excludePaths",
       "title": "Exclude Paths",
       "description": "Comma-separated full paths to exclude from search",

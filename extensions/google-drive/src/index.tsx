@@ -44,10 +44,10 @@ type FileInfo = {
   createdAt: Date;
   updatedAt: Date;
 };
-const getFiles = (path: PathLike, allowHidden: boolean): Array<FileInfo> =>
+const getFiles = (path: PathLike, allowHidden: boolean, allowDir: boolean): Array<FileInfo> =>
   readdirSync(path)
     .map((name) => join(path.toLocaleString(), name))
-    .filter(isFile)
+    .filter((file) => allowDir || isFile(file))
     .filter((file) => allowHidden || !isHidden(file))
     .map((file) => {
       const fileStats = statSync(file);
@@ -74,18 +74,20 @@ const isPathReadable = (path: PathLike): boolean => {
 const getFilesRecursively = (
   path: PathLike,
   allowHidden: boolean,
+  allowDir: boolean,
   excludesPaths: string[]
 ): Record<string, FileInfo> => {
   const canReadPath = isPathReadable(path);
-  const dirs = canReadPath ? getDirectories(path, allowHidden) : [];
+  const dirs = canReadPath
+    ? getDirectories(path, allowHidden).filter((dir) => !excludesPaths.includes(dir.toString()))
+    : [];
   const files = dirs
-    .filter((dir) => !excludesPaths.includes(dir.toString()))
-    .map((dir) => getFilesRecursively(dir, allowHidden, excludesPaths))
+    .map((dir) => getFilesRecursively(dir, allowHidden, allowDir, excludesPaths))
     .reduce((a, b) => ({ ...a, ...b }), {});
 
   return {
     ...files,
-    ...(canReadPath ? getFiles(path, allowHidden) : []).reduce(
+    ...(canReadPath ? getFiles(path, allowHidden, allowDir) : []).reduce(
       (acc, file) => ({ ...acc, [file.displayPath]: file }),
       {}
     ),
@@ -168,8 +170,9 @@ ${file.updatedAt.toLocaleString()}`;
 
 type Preferences = {
   shouldShowHiddenFiles: boolean;
-  googleDriveRootPath: string;
+  shouldShowDirectories: boolean;
   excludePaths: string;
+  googleDriveRootPath: string;
 };
 
 export default function Command() {
@@ -198,7 +201,12 @@ export default function Command() {
         .map((p) => p.replace("~", homedir()))
         .map((p) => resolve(p));
 
-      return getFilesRecursively(drivePath, preferences.shouldShowHiddenFiles, excludePaths);
+      return getFilesRecursively(
+        drivePath,
+        preferences.shouldShowHiddenFiles,
+        preferences.shouldShowDirectories,
+        excludePaths
+      );
     } catch (e) {
       showToast({
         style: Toast.Style.Failure,
