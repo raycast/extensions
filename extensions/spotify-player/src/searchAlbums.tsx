@@ -14,7 +14,7 @@ export default function SpotifyList() {
 
   return (
     <List
-      searchBarPlaceholder="Search music by keywords..."
+      searchBarPlaceholder="Search albums..."
       onSearchTextChange={setSearchText}
       isLoading={response.isLoading}
       throttle
