@@ -71,10 +71,17 @@ const isPathReadable = (path: PathLike): boolean => {
   }
 };
 
-const getFilesRecursively = (path: PathLike, allowHidden: boolean): Record<string, FileInfo> => {
+const getFilesRecursively = (
+  path: PathLike,
+  allowHidden: boolean,
+  excludesPaths: string[]
+): Record<string, FileInfo> => {
   const canReadPath = isPathReadable(path);
   const dirs = canReadPath ? getDirectories(path, allowHidden) : [];
-  const files = dirs.map((dir) => getFilesRecursively(dir, allowHidden)).reduce((a, b) => ({ ...a, ...b }), {});
+  const files = dirs
+    .filter((dir) => !excludesPaths.includes(dir.toString()))
+    .map((dir) => getFilesRecursively(dir, allowHidden, excludesPaths))
+    .reduce((a, b) => ({ ...a, ...b }), {});
 
   return {
     ...files,
@@ -162,6 +169,7 @@ ${file.updatedAt.toLocaleString()}`;
 type Preferences = {
   shouldShowHiddenFiles: boolean;
   googleDriveRootPath: string;
+  excludePaths: string;
 };
 
 export default function Command() {
@@ -184,7 +192,13 @@ export default function Command() {
         return {};
       }
 
-      return getFilesRecursively(drivePath, preferences.shouldShowHiddenFiles);
+      const excludePaths = preferences.excludePaths
+        .split(",")
+        .map((p) => p.trim())
+        .map((p) => p.replace("~", homedir()))
+        .map((p) => resolve(p));
+
+      return getFilesRecursively(drivePath, preferences.shouldShowHiddenFiles, excludePaths);
     } catch (e) {
       showToast({
         style: Toast.Style.Failure,
@@ -194,7 +208,7 @@ export default function Command() {
     }
 
     return {};
-  }, [drivePath, preferences.shouldShowHiddenFiles]);
+  }, [drivePath, preferences.shouldShowHiddenFiles, preferences.excludePaths]);
   const originalFilteredAndSortedFiles = useMemo<Array<FileInfo>>(
     () => Object.values(filesMap).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
     [filesMap]
