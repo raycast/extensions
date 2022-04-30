@@ -1,7 +1,7 @@
-import { List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import React, { useState } from "react";
 import { getCollectionMedias } from "./hooks/hooks";
-import { PhotosListItem } from "./utils/ui-component";
+import { ActionToPexels, PhotosListItem } from "./utils/ui-component";
 import { Photo } from "pexels";
 
 export default function ViewCollectionMedias(props: { id: string; title: string }) {
@@ -11,7 +11,7 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
 
   return (
     <List
-      isShowingDetail={true}
+      isShowingDetail={collectionMedias?.media?.length !== 0}
       isLoading={loading}
       navigationTitle={title}
       searchBarPlaceholder={"Search photographers"}
@@ -24,9 +24,21 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
         }
       }}
     >
-      {collectionMedias?.media.map((pexelsPhoto, index) => {
-        return <PhotosListItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
-      })}
+      {!loading && collectionMedias?.media?.length === 0 ? (
+        <List.EmptyView
+          title={"Welcome to Pexels"}
+          icon={"empty-view-icon.png"}
+          actions={
+            <ActionPanel>
+              <ActionToPexels />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        collectionMedias?.media.map((pexelsPhoto, index) => {
+          return <PhotosListItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
+        })
+      )}
     </List>
   );
 }

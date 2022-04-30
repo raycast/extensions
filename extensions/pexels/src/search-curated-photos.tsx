@@ -1,7 +1,7 @@
-import { List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import React, { useState } from "react";
 import { getCuratedPhotos } from "./hooks/hooks";
-import { PhotosListItem } from "./utils/ui-component";
+import { ActionToPexels, PhotosListItem } from "./utils/ui-component";
 
 export default function SearchCuratedPhotos() {
   const [page, setPage] = useState<number>(1);
@@ -9,7 +9,7 @@ export default function SearchCuratedPhotos() {
 
   return (
     <List
-      isShowingDetail={true}
+      isShowingDetail={pexelsPhotos?.photos?.length !== 0}
       isLoading={loading}
       searchBarPlaceholder={"Search photographers"}
       onSelectionChange={(id) => {
@@ -21,9 +21,19 @@ export default function SearchCuratedPhotos() {
         }
       }}
     >
-      {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
-      ))}
+      {!loading && pexelsPhotos?.photos?.length === 0 ? (
+        <List.EmptyView
+          title={"Welcome to Pexels"}
+          icon={"empty-view-icon.png"}
+          actions={
+            <ActionPanel>
+              <ActionToPexels />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        pexelsPhotos?.photos.map((value, index) => <PhotosListItem key={index} pexelsPhoto={value} index={index} />)
+      )}
     </List>
   );
 }

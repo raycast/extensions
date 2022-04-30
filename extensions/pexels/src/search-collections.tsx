@@ -38,8 +38,16 @@ export default function SearchCollections() {
         </List.Dropdown>
       }
     >
-      {collections?.length === 0 ? (
-        <List.EmptyView title={"No Collections"} />
+      {!loading && collections?.length === 0 ? (
+        <List.EmptyView
+          title={"Welcome to Pexels"}
+          icon={"empty-view-icon.png"}
+          actions={
+            <ActionPanel>
+              <ActionToPexels />
+            </ActionPanel>
+          }
+        />
       ) : (
         collections?.map((collection) => {
           return (
