@@ -13,7 +13,7 @@ import { useLazyQuery } from "@apollo/client";
 import { GET_FILE_CONTENTS } from "../sourcegraph/gql/queries";
 import { BlobContents, GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
 import { bold, codeBlock, quoteBlock } from "../markdown";
-import { sentenceCase } from "../text";
+import { count, sentenceCase } from "../text";
 
 const link = new LinkBuilder("search");
 
@@ -210,29 +210,41 @@ function SearchResultItem({
   setSearchText: (text: string) => void;
 }) {
   const queryURL = getQueryURL(src, searchText);
-
   const { match } = searchResult;
-  let title = "";
-  let subtitle = "";
-  const accessory: List.Item.Accessory = { text: match.repository, tooltip: match.repository };
-  let drilldownAction: React.ReactElement | undefined;
 
-  const tooltipDetails: string[] = [];
+  // Title to denote the result
+  let title = "";
+  // Subtitle to show context about the result
+  let subtitle = "";
+  // Icon to denote the type of the result
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
+  // Broader context about the result, usually just the repository.
+  const accessory: List.Item.Accessory = { text: match.repository, tooltip: match.repository };
+
+  // Action to drill down on the search result.
+  let drilldownAction: React.ReactElement | undefined;
+  // Details about the match type, to present on icon hover
+  const matchTypeDetails: string[] = [];
+  // Details about the match, to present on title hover
+  const matchDetails: string[] = [];
+  // Details about the subtitle, to present on subtitle hover. Defaults to just the
+  // subtitle, which can be long and helpful to present in the results list.
+  let subtitleTooltip: string | undefined;
+
   switch (match.type) {
     case "repo":
       if (match.fork) {
         icon.source = Icon.Circle;
-        tooltipDetails.push("forked");
+        matchTypeDetails.push("forked");
       }
       if (match.archived) {
         icon.source = Icon.XmarkCircle;
-        tooltipDetails.push("archived");
+        matchTypeDetails.push("archived");
       }
       // TODO color results of all matches based on repo privacy
       if (match.private) {
         icon.tintColor = ColorPrivate;
-        tooltipDetails.push("private");
+        matchTypeDetails.push("private");
       }
       title = match.repository;
       subtitle = match.description || "";
@@ -247,16 +259,19 @@ function SearchResultItem({
         repo: match.repository,
       });
       break;
+
     case "commit":
       icon.source = Icon.MemoryChip;
       title = match.message;
-      // just get the date
-      subtitle = match.authorDate;
+      subtitle = DateTime.fromISO(match.authorDate).toRelative() || match.authorDate;
+      subtitleTooltip = match.authorDate;
+      matchDetails.push(`by ${match.authorName}`);
       drilldownAction = makeDrilldownAction("Search Revision", setSearchText, {
         repo: match.repository,
         revision: match.oid,
       });
       break;
+
     case "path":
       icon.source = Icon.TextDocument;
       title = match.path;
@@ -265,19 +280,23 @@ function SearchResultItem({
         file: match.path,
       });
       break;
+
     case "content":
       icon.source = Icon.Text;
       title = match.lineMatches.map((l) => l.line.trim()).join(" ... ");
       subtitle = match.path;
+      matchDetails.push(count(match.lineMatches.length, "line match", "line matches"));
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
       });
       break;
+
     case "symbol":
       icon.source = Icon.Link;
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
+      matchDetails.push(count(match.symbols.length, "symbol match", "symbols matches"));
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
@@ -292,10 +311,10 @@ function SearchResultItem({
 
   return (
     <List.Item
-      title={{ value: title, tooltip: title }}
-      subtitle={{ value: subtitle, tooltip: subtitle }}
+      title={{ value: title, tooltip: matchDetails.join(", ") }}
+      subtitle={{ value: subtitle, tooltip: subtitleTooltip || subtitle }}
       accessories={accessories}
-      icon={{ value: icon, tooltip: sentenceCase(`${tooltipDetails.join(", ")} ${match.type} match`) }}
+      icon={{ value: icon, tooltip: sentenceCase(`${matchTypeDetails.join(", ")} ${match.type} match`) }}
       actions={
         <ActionPanel>
           {resultActions(searchResult.url, {
