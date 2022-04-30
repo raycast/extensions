@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hide-mail",
-  "title": "Email Relay Service — Hide Your Real Email Address and Protect Your Identity and Privacy",
-  "description": "Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
+  "title": "HideMail - Email Relay Service",
+  "description": "Hide Your Real Email Address and Protect Your Identity and Privacy. Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
   "icon": "Icon.png",
   "author": "Flatroy",
   "categories": [
@@ -17,12 +17,14 @@
     {
       "name": "index",
       "title": "Create Random Email Alias",
-      "description": "It will generate and copy a random private email alias to the clipboard",
+      "subtitle": "HideMail",
+      "description": "Generate and copy a random private email alias to clipboard",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.1"
+    "@raycast/api": "^1.32.1",
+    "axios": "^0.27.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -46,7 +48,7 @@
       "name": "api_key",
       "type": "password",
       "required": true,
-      "title": "Hide Mail API Key",
+      "title": "HideMail API Key",
       "description": "Generate from our web-site - https://hidemail.app/user/api-tokens",
       "placeholder": "API Key"
     }
