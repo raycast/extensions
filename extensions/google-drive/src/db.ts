@@ -11,7 +11,7 @@ import {
   MAX_RESULTS_WITH_SEARCH_TEXT,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
-import { clearFilePreviewsCache, fuzzyMatch, getDirectories, getDriveRootPath, saveFilesInDirectory } from "./utils";
+import { clearAllFilePreviewsCache, fuzzyMatch, getDirectories, getDriveRootPath, saveFilesInDirectory } from "./utils";
 
 export const filesLastIndexedAt = async () => {
   const lastIndexedAt = await LocalStorage.getItem<string>(FILES_LAST_INDEXED_AT_KEY);
@@ -170,7 +170,7 @@ export const indexFiles = async (
       // Delete all the old indexed files
       db.exec("DELETE from files");
 
-      clearFilePreviewsCache();
+      clearAllFilePreviewsCache();
     }
 
     walkRecursivelyAndSaveFiles(path, db);
