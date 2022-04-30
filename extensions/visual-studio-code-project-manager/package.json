@@ -34,6 +34,15 @@
       "description": "Groups projects by tag instead of just showing"
     },
     {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide projects...",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tag"
+    },
+    {
       "name": "terminalAppPath",
       "type": "textfield",
       "required": false,

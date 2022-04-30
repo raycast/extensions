@@ -30,7 +30,7 @@ function getProjectEntries(): ProjectEntry[] {
   const savedProjectsFile = `${storagePath}/projects.json`;
   const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
 
-  const projectEntries: ProjectEntry[] = [];
+  let projectEntries: ProjectEntry[] = [];
   if (existsSync(savedProjectsFile)) {
     const savedProjects: ProjectEntry[] = JSON.parse(readFileSync(savedProjectsFile).toString());
     projectEntries.push(...savedProjects);
@@ -44,6 +44,10 @@ function getProjectEntries(): ProjectEntry[] {
       });
     }
   });
+
+  if (preferences.hideProjectsWithoutTag) {
+    projectEntries = projectEntries.filter(({ tags }) => Array.isArray(tags) && tags.length);
+  }
 
   return projectEntries;
 }
