@@ -60,3 +60,28 @@ export function calculateCharacter(input: string) {
     line: Array.from(input.matchAll(/\n/g)).length + 1,
   };
 }
+
+export function buildRegexp(content: string) {
+  try {
+    if (eval(content) instanceof RegExp) {
+      const regSource = content.substring(content.indexOf("/") + 1, content.lastIndexOf("/"));
+      const regModifier = content.substring(content.lastIndexOf("/") + 1);
+      return new RegExp(regSource, regModifier);
+    }
+  } catch (e) {
+    console.error(String(e));
+  }
+  return content;
+}
+
+export function camelCaseToOtherCase(str: string, linkCharacter: string) {
+  let outString = "";
+  str.split("").forEach((value) => {
+    isUpper(value) ? (outString = outString + linkCharacter + value.toLowerCase()) : (outString = outString + value);
+  });
+  return outString;
+}
+
+function isUpper(char: string) {
+  return !/\d/.test(char) && char === char.toUpperCase();
+}

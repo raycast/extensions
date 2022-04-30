@@ -76,5 +76,77 @@ const cases = [
     },
     tactions: [{ type: "Name Case", content: ["Title case"] }],
   },
+  {
+    info: {
+      name: "camelCase to snake_case",
+      id: "user_1651306768124",
+      icon: "pencil-16",
+      source: "User",
+      visibility: true,
+      tag: ["Case"],
+    },
+    tactions: [
+      {
+        type: "Name Case",
+        content: ["camelCase to snake_case"],
+      },
+    ],
+  },
+  {
+    info: {
+      name: "camelCase to kebab-case",
+      id: "user_1651306783829",
+      icon: "pencil-16",
+      source: "User",
+      visibility: true,
+      tag: ["Case"],
+    },
+    tactions: [
+      {
+        type: "Name Case",
+        content: ["camelCase to kebab-case"],
+      },
+    ],
+  },
+  {
+    info: {
+      name: "snake_case to camelCase",
+      id: "user_1651306867056",
+      icon: "pencil-16",
+      source: "User",
+      visibility: true,
+      tag: ["Case"],
+    },
+    tactions: [
+      {
+        type: "Replace",
+        content: ["-", " "],
+      },
+      {
+        type: "Name Case",
+        content: ["camelCase"],
+      },
+    ],
+  },
+  {
+    info: {
+      name: "kabab-case to camelCase",
+      id: "user_1651306886878",
+      icon: "pencil-16",
+      source: "User",
+      visibility: true,
+      tag: ["Case"],
+    },
+    tactions: [
+      {
+        type: "Replace",
+        content: ["-", " "],
+      },
+      {
+        type: "Name Case",
+        content: ["camelCase"],
+      },
+    ],
+  },
 ];
 export const CASES_SHORTCUTS = JSON.stringify(cases);
