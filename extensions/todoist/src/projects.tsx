@@ -1,4 +1,4 @@
-import { Project as TProject } from "@doist/todoist-api-typescript";
+import { getColor, Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
 import useSWR, { mutate } from "swr";
 import { todoist, handleError } from "./api";
@@ -57,7 +57,7 @@ export default function Projects() {
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={project.inboxProject ? Icon.Envelope : Icon.List}
+          icon={project.inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(project.color).value }}
           title={project.name}
           {...(project.favorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={

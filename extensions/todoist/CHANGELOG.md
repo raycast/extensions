@@ -4,6 +4,7 @@
 
 - Added a new action on projects to edit them
 - Added a new action on projects to add/remove them to/from favorites
+- Added the project's color on the Search Projects command
 - Removed the custom ordering of the tasks since Todoist already performs them
 - Displayed the sub-tasks back in the project view
 
