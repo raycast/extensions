@@ -158,26 +158,29 @@ export default function Command() {
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView title={isFetching ? "Fetching files, please wait..." : "No files found"} actions={
-          <ActionPanel>
-            {!isFetching &&
-              <>
-                <Action
-                  title="Reindex Files Cache"
-                  icon={Icon.Hammer}
-                  onAction={reindexFiles}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-                <Action
-                  title="Clear File Previews Cache"
-                  icon={Icon.Trash}
-                  onAction={clearFilePreviewsCache}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                />
-              </>
-            }
-          </ActionPanel>
-        } />
+        <List.EmptyView
+          title={isFetching ? "Fetching files, please wait..." : "No files found"}
+          actions={
+            <ActionPanel>
+              {!isFetching && (
+                <>
+                  <Action
+                    title="Reindex Files Cache"
+                    icon={Icon.Hammer}
+                    onAction={reindexFiles}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  />
+                  <Action
+                    title="Clear File Previews Cache"
+                    icon={Icon.Trash}
+                    onAction={clearFilePreviewsCache}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                  />
+                </>
+              )}
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );
