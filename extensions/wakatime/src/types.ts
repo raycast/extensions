@@ -34,6 +34,26 @@ declare global {
       };
     }
 
+    export interface Summary extends Record<"start" | "end", string> {
+      data: {
+        grand_total: Omit<StatProperty, "percent" | "seconds" | "name">;
+        categories: Array<Omit<StatProperty, "seconds">>;
+        projects: Array<Omit<StatProperty, "seconds">>;
+        languages: Array<StatProperty>;
+        editors: Array<StatProperty>;
+        operating_systems: Array<StatProperty>;
+        dependencies: Array<StatProperty>;
+        machines: Array<StatProperty & { machine_name_id: string }>;
+        branches?: Array<StatProperty>;
+        entities?: Array<StatProperty>;
+        range: Record<"date" | "start" | "end" | "text" | "timezone", string>;
+      }[];
+      cummulative_total: {
+        text: string;
+        seconds: number;
+      };
+    }
+
     export interface Stats {
       data: Record<
         | "range"

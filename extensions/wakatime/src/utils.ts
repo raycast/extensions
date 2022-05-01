@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import fetch, { RequestInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -6,6 +7,14 @@ const URL = "https://wakatime.com/api/v1";
 export async function getUser(id = "current") {
   const response = await fetch(`${URL}/users/${id}`, setHeaders());
   return (await response.json()) as WakaTime.User;
+}
+
+export async function getSummary(start: Date, id = "current") {
+  const response = await fetch(
+    `${URL}/users/${id}/summaries?start=${format(start, "yyyy-MM-dd")}&end=${format(new Date(), "yyyy-MM-dd")}`,
+    setHeaders()
+  );
+  return (await response.json()) as WakaTime.Summary;
 }
 
 function setHeaders(headers: RequestInit = {}) {
