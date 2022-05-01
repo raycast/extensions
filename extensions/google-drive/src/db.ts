@@ -178,7 +178,7 @@ export const indexFiles = async (
       // Delete all the old indexed files
       db.exec("DELETE from files");
 
-      clearAllFilePreviewsCache();
+      clearAllFilePreviewsCache(false);
     }
 
     walkRecursivelyAndSaveFiles(path, db);
