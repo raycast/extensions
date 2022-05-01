@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 
 export default function SearchDocumentation() {
   return (
@@ -13,8 +13,8 @@ export default function SearchDocumentation() {
               keywords={[item.title, section]}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={item.url} />
-                  <CopyToClipboardAction title="Copy URL" content={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
+                  <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 </ActionPanel>
               }
             />
