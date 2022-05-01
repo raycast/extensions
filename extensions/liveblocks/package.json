@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "liveblocks",
   "title": "Liveblocks",
-  "description": "Exposes the Liveblocks API via a pleasant UI.",
+  "description": "Exposes the Liveblocks API via a pleasant and easy to use UI.",
   "icon": "command-icon.png",
   "author": "dre",
   "categories": [
@@ -10,7 +10,8 @@
     "Web"
   ],
   "license": "MIT",
-  "commands": [{
+  "commands": [
+    {
       "name": "authentication",
       "title": "Authenticate",
       "description": "To use the API, you need to add a JWT token to the request’s authorization header.",
@@ -36,7 +37,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.33.2",
     "axios": "^0.26.1"
   },
   "devDependencies": {
