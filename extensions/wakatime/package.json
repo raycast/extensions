@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "dashboard",
-      "title": "Show WakaTime Stats",
-      "description": "Show your WakaTime activity",
+      "title": "Open Dashboard",
+      "description": "Show your WakaTime Dashboard",
       "mode": "view"
     }
   ],
