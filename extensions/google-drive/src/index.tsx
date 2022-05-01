@@ -167,10 +167,8 @@ export default function Command() {
     })();
   }, [debouncedSearchText]);
 
-  const findFile = (displayPathWithOptionalIdPrefix?: string): FileInfo | null =>
-    (displayPathWithOptionalIdPrefix &&
-      files.filtered.find((file) => file.displayPath === displayPathWithOptionalIdPrefix.replace(/__.+__/, ""))) ||
-    null;
+  const findFile = (displayPath?: string): FileInfo | null =>
+    (displayPath && files.filtered.find((file) => file.displayPath === displayPath)) || null;
 
   const reindexFiles = useCallback(async () => {
     if (!db) return;
@@ -214,7 +212,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
       isLoading={isFetching}
-      onSelectionChange={(id) => handleSelectionChange(findFile(id))}
+      onSelectionChange={(id) => handleSelectionChange(findFile(id?.replace(/__.+__/, "")))}
     >
       {files.filtered.length > 0 ? (
         <>
