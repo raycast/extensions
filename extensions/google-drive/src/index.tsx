@@ -15,6 +15,30 @@ import {
   initialSetup,
 } from "./utils";
 
+type ReindexFilesCacheActionProps = { reindexFiles: () => void };
+function ReindexFilesCacheAction({ reindexFiles }: ReindexFilesCacheActionProps) {
+  return (
+    <Action
+      title="Reindex Files Cache"
+      icon={Icon.Hammer}
+      onAction={reindexFiles}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+    />
+  );
+}
+
+type ClearFilePreviewsCacheActionProps = { clearFilePreviewsCache: () => void };
+function ClearFilePreviewsCacheAction({ clearFilePreviewsCache }: ClearFilePreviewsCacheActionProps) {
+  return (
+    <Action
+      title="Clear File Previews Cache"
+      icon={Icon.Trash}
+      onAction={clearFilePreviewsCache}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+    />
+  );
+}
+
 export default function Command() {
   const drivePath = getDriveRootPath();
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
@@ -140,18 +164,8 @@ export default function Command() {
                     content={escapePath(dirname(file.displayPath))}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   />
-                  <Action
-                    title="Reindex Files Cache"
-                    icon={Icon.Hammer}
-                    onAction={reindexFiles}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  />
-                  <Action
-                    title="Clear File Previews Cache"
-                    icon={Icon.Trash}
-                    onAction={clearFilePreviewsCache}
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  />
+                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+                  <ClearFilePreviewsCacheAction clearFilePreviewsCache={clearFilePreviewsCache} />
                 </ActionPanel>
               }
             />
@@ -164,18 +178,8 @@ export default function Command() {
             <ActionPanel>
               {!isFetching && (
                 <>
-                  <Action
-                    title="Reindex Files Cache"
-                    icon={Icon.Hammer}
-                    onAction={reindexFiles}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  />
-                  <Action
-                    title="Clear File Previews Cache"
-                    icon={Icon.Trash}
-                    onAction={clearFilePreviewsCache}
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  />
+                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+                  <ClearFilePreviewsCacheAction clearFilePreviewsCache={clearFilePreviewsCache} />
                 </>
               )}
             </ActionPanel>
