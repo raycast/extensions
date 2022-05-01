@@ -145,12 +145,12 @@ export const queryFiles = (db: Database, searchText: string) => {
   return files;
 };
 
-export const queryFavoriteFiles = (db: Database) => {
+export const queryFavoriteFiles = (db: Database, limit = 50) => {
   const files: Array<FileInfo> = [];
 
   if (!db) return files;
 
-  const statement = db.prepare(`SELECT * FROM files WHERE favorite = 1 ORDER BY updatedAt DESC LIMIT 50`);
+  const statement = db.prepare(`SELECT * FROM files WHERE favorite = 1 ORDER BY updatedAt DESC LIMIT ${limit}`);
   while (statement.step()) {
     files.push(statement.getAsObject() as unknown as FileInfo);
   }
@@ -189,7 +189,12 @@ export const indexFiles = async (
   options: IndexFilesOptions = { force: false }
 ): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
+    let favoriteFilePaths: Array<PathLike> = [];
+
     if (options.force) {
+      // Backup the favorite file paths before force indexing
+      favoriteFilePaths = queryFavoriteFiles(db, 1000).map((file) => file.path);
+
       // Delete all the old indexed files
       db.exec("DELETE from files");
 
@@ -197,6 +202,12 @@ export const indexFiles = async (
     }
 
     walkRecursivelyAndSaveFiles(path, db);
+
+    // Restore the favorite file paths
+    favoriteFilePaths.forEach((filePath) => {
+      db.run(`UPDATE files SET favorite = 1 WHERE path = "${filePath}"`);
+    });
+
     dumpDb(db);
     await setFilesIndexedAt();
 

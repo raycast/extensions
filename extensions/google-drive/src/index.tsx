@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -175,14 +175,25 @@ export default function Command() {
 
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
-    setSearchText("");
+
     showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
-    indexFiles(drivePath, db, { force: true }).then(async () => {
-      setFilesIndexGeneratedAt(await filesLastIndexedAt());
-      setFiles((prevFiles) => ({ ...prevFiles, files: queryFiles(db, ""), favorites: queryFavoriteFiles(db) }));
-      showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
+    try {
+      const isIndexed = await indexFiles(drivePath, db, { force: true });
+
+      if (isIndexed) {
+        setFilesIndexGeneratedAt(await filesLastIndexedAt());
+        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
+        showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
+      }
+    } catch (e) {
+      console.error(e);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "💥 Could not rebuild files index!",
+      });
+    } finally {
       setIsFetching(false);
-    });
+    }
   }, [drivePath, db]);
 
   const handleToggleFavorite = useCallback(
