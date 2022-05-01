@@ -1,0 +1,3 @@
+# wakatime
+
+Raycast Wakatime Extension
