@@ -5,9 +5,11 @@ import { getUser } from "../utils";
 
 export function useUser() {
   const [data, setData] = useState<WakaTime.User>();
+  const [isLoading, setIsLoading] = useState<boolean>();
 
   useEffect(() => {
     async function getData() {
+      setIsLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Loading User");
 
       try {
@@ -21,10 +23,12 @@ export function useUser() {
         toast.title = "Failed Loading User";
         toast.message = (err as Record<string, string>).message;
       }
+
+      setIsLoading(false);
     }
 
     getData();
   }, []);
 
-  return data;
+  return { ...(data ?? {}), isLoading };
 }
