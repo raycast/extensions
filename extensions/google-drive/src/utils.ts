@@ -118,15 +118,16 @@ const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   return encodeURI(`file://${filePreviewPath}`);
 };
 
-export const clearAllFilePreviewsCache = () => {
+export const clearAllFilePreviewsCache = (shouldShowToast = true) => {
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     rmSync(TMP_FILE_PREVIEWS_PATH, { recursive: true, force: true });
   }
 
-  showToast({
-    style: Toast.Style.Success,
-    title: "File previews cache cleared!",
-  });
+  shouldShowToast &&
+    showToast({
+      style: Toast.Style.Success,
+      title: "File previews cache cleared!",
+    });
 };
 
 const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
