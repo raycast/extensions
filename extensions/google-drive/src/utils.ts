@@ -42,6 +42,14 @@ export const getDriveRootPath = (): string => {
 
   return resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
 };
+export const getExcludePaths = (): Array<string> => {
+  const preferences = getPreferenceValues<Preferences>();
+  return preferences.excludePaths
+    .split(",")
+    .map((p) => p.trim())
+    .map((p) => p.replace("~", homedir()))
+    .map((p) => resolve(p));
+};
 const formatBytes = (sizeInBytes: number): string => {
   let unitIndex = 0;
   while (sizeInBytes >= 1024) {
@@ -58,11 +66,14 @@ export const getDirectories = (path: PathLike): Array<PathLike> =>
     .filter(isDirectory)
     .filter((dir) => !IGNORED_DIRECTORIES.includes(basename(dir)));
 
-export const saveFilesInDirectory = (path: PathLike, db: Database) =>
+export const saveFilesInDirectory = (path: PathLike, db: Database) => {
+  const preferences = getPreferenceValues<Preferences>();
+  const excludePaths = getExcludePaths();
   readdirSync(path).forEach((file) => {
     const filePath = join(path.toLocaleString(), file);
 
-    if (!isFile(filePath)) return;
+    if (!preferences.shouldShowDirectories && !isFile(filePath)) return;
+    if (excludePaths.includes(filePath)) return;
 
     const fileStats = statSync(filePath);
 
@@ -76,6 +87,7 @@ export const saveFilesInDirectory = (path: PathLike, db: Database) =>
       favorite: false,
     });
   });
+};
 
 const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   mkdirSync(TMP_FILE_PREVIEWS_PATH, { recursive: true });

@@ -9,6 +9,7 @@
     "Developer Tools",
     "Productivity"
   ],
+  "contributors": ["nametake"],
   "license": "MIT",
   "commands": [
     {
@@ -35,6 +36,23 @@
       "type": "checkbox",
       "default": false,
       "label": "Show hidden files",
+      "required": false
+    },
+    {
+      "name": "shouldShowDirectories",
+      "description": "Show directories in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show directories",
+      "required": false
+    },
+    {
+      "name": "excludePaths",
+      "title": "Exclude Paths",
+      "description": "Comma-separated full paths to exclude from search",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "e.g. ~/Google Drive/My Drive/Share, ...",
       "required": false
     }
   ],
