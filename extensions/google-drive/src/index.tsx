@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, createContext, useContext } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
@@ -15,6 +15,22 @@ import {
   initialSetup,
   isEmpty,
 } from "./utils";
+
+type CommandContextType = {
+  handleToggleFavorite: (file: FileInfo) => void;
+  reindexFiles: () => void;
+  fileDetailsMarkup: string;
+};
+const CommandContext = createContext<CommandContextType | null>(null);
+const useCommandContext = () => {
+  const context = useContext(CommandContext);
+
+  if (context === null) {
+    throw new Error("useCommandContext must be used within a CommandContext");
+  }
+
+  return context;
+};
 
 const Command = () => {
   const drivePath = getDriveRootPath();
@@ -147,78 +163,116 @@ const Command = () => {
   }, 100);
 
   return (
-    <List
-      isShowingDetail={files.filtered.length > 0}
-      enableFiltering={false}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
-      isLoading={isFetching}
-      onSelectionChange={(id) => handleSelectionChange(findFile(id?.replace(/__.+__/, "")))}
-    >
-      {files.filtered.length > 0 ? (
-        <>
-          {isEmpty(debouncedSearchText) && files.favorites.length > 0 ? (
-            <List.Section title="Favorites">
-              {files.favorites.map((file) => (
-                <ListItem
-                  idPrefix="__fav__"
-                  key={file.displayPath}
-                  file={file}
-                  handleToggleFavorite={handleToggleFavorite}
-                  reindexFiles={reindexFiles}
-                  fileDetailsMarkup={fileDetailsMarkup}
-                />
+    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup }}>
+      <List
+        isShowingDetail={files.filtered.length > 0}
+        enableFiltering={false}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
+        isLoading={isFetching}
+        onSelectionChange={(id) => handleSelectionChange(findFile(id?.replace(/__.+__/, "")))}
+      >
+        {files.filtered.length > 0 ? (
+          <>
+            {isEmpty(debouncedSearchText) && files.favorites.length > 0 ? (
+              <List.Section title="Favorites">
+                {files.favorites.map((file) => (
+                  <ListItem idPrefix="__fav__" key={file.displayPath} file={file} />
+                ))}
+              </List.Section>
+            ) : null}
+            <List.Section
+              title={isEmpty(debouncedSearchText) ? "Recent" : "Results"}
+              subtitle={
+                isEmpty(debouncedSearchText) && filesIndexGeneratedAt
+                  ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}`
+                  : ""
+              }
+            >
+              {files.filtered.map((file) => (
+                <ListItem idPrefix="" key={file.displayPath} file={file} />
               ))}
             </List.Section>
-          ) : null}
-          <List.Section
-            title={isEmpty(debouncedSearchText) ? "Recent" : "Results"}
-            subtitle={
-              isEmpty(debouncedSearchText) && filesIndexGeneratedAt
-                ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}`
-                : ""
+          </>
+        ) : (
+          <List.EmptyView
+            title={isFetching ? "Fetching files, please wait..." : "No files found"}
+            actions={
+              <ActionPanel>
+                {!isFetching && (
+                  <ActionPanel.Section title="General Actions">
+                    <ReindexFilesCacheAction />
+                    <ClearFilePreviewsCacheAction />
+                  </ActionPanel.Section>
+                )}
+              </ActionPanel>
             }
-          >
-            {files.filtered.map((file) => (
-              <ListItem
-                idPrefix=""
-                key={file.displayPath}
-                file={file}
-                handleToggleFavorite={handleToggleFavorite}
-                reindexFiles={reindexFiles}
-                fileDetailsMarkup={fileDetailsMarkup}
-              />
-            ))}
-          </List.Section>
-        </>
-      ) : (
-        <List.EmptyView
-          title={isFetching ? "Fetching files, please wait..." : "No files found"}
-          actions={
-            <ActionPanel>
-              {!isFetching && (
-                <ActionPanel.Section title="General Actions">
-                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-                  <ClearFilePreviewsCacheAction />
-                </ActionPanel.Section>
-              )}
-            </ActionPanel>
-          }
-        />
-      )}
-    </List>
+          />
+        )}
+      </List>
+    </CommandContext.Provider>
   );
 };
 
-type ReindexFilesCacheActionProps = { reindexFiles: () => void };
-const ReindexFilesCacheAction = ({ reindexFiles }: ReindexFilesCacheActionProps) => (
-  <Action
-    title="Reindex Files Cache"
-    icon={Icon.Hammer}
-    onAction={reindexFiles}
-    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-  />
-);
+type ListItemProps = {
+  file: FileInfo;
+  idPrefix: "__fav__" | "";
+};
+const ListItem = ({ file, idPrefix }: ListItemProps) => {
+  const { handleToggleFavorite, fileDetailsMarkup } = useCommandContext();
+
+  return (
+    <List.Item
+      id={`${idPrefix}${file.displayPath}`}
+      key={file.displayPath}
+      icon={{ fileIcon: file.path }}
+      title={`${file.favorite ? "⭐ " : ""}${file.name}`}
+      detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="File Actions">
+            <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
+            <Action.ShowInFinder path={file.path} />
+            <Action.OpenWith path={file.path} />
+            <Action.CopyToClipboard
+              title="Copy File Path"
+              content={escapePath(file.displayPath)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Folder Path"
+              content={escapePath(dirname(file.displayPath))}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            />
+            <Action
+              title={file.favorite ? "Unfavorite" : "Favorite"}
+              icon={Icon.Star}
+              onAction={() => handleToggleFavorite(file)}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="General Actions">
+            <ReindexFilesCacheAction />
+            <ClearFilePreviewsCacheAction />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+const ReindexFilesCacheAction = () => {
+  const { reindexFiles } = useCommandContext();
+
+  return (
+    <Action
+      title="Reindex Files Cache"
+      icon={Icon.Hammer}
+      onAction={reindexFiles}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+    />
+  );
+};
 
 const ClearFilePreviewsCacheAction = () => (
   <Action
@@ -226,52 +280,6 @@ const ClearFilePreviewsCacheAction = () => (
     icon={Icon.Trash}
     onAction={clearAllFilePreviewsCache}
     shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-  />
-);
-
-type ListItemProps = {
-  file: FileInfo;
-  handleToggleFavorite: (file: FileInfo) => void;
-  reindexFiles: () => void;
-  fileDetailsMarkup: string;
-  idPrefix: "__fav__" | "";
-};
-const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup, idPrefix }: ListItemProps) => (
-  <List.Item
-    id={`${idPrefix}${file.displayPath}`}
-    key={file.displayPath}
-    icon={{ fileIcon: file.path }}
-    title={`${file.favorite ? "⭐ " : ""}${file.name}`}
-    detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
-    actions={
-      <ActionPanel>
-        <ActionPanel.Section title="File Actions">
-          <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
-          <Action.ShowInFinder path={file.path} />
-          <Action.OpenWith path={file.path} />
-          <Action.CopyToClipboard
-            title="Copy File Path"
-            content={escapePath(file.displayPath)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Folder Path"
-            content={escapePath(dirname(file.displayPath))}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-          <Action
-            title={file.favorite ? "Unfavorite" : "Favorite"}
-            icon={Icon.Star}
-            onAction={() => handleToggleFavorite(file)}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section title="General Actions">
-          <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-          <ClearFilePreviewsCacheAction />
-        </ActionPanel.Section>
-      </ActionPanel>
-    }
   />
 );
 

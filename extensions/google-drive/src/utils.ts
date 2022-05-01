@@ -5,6 +5,7 @@ import { basename, extname, join, resolve } from "path";
 import { homedir } from "os";
 import { Database } from "sql.js";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Fzf } from "fzf";
 
 import {
   FILE_SIZE_UNITS,
@@ -15,7 +16,6 @@ import {
 } from "./constants";
 import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
-import { Fzf } from "fzf";
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
