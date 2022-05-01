@@ -5,6 +5,12 @@
 - Reuses already generated file preview instead of trying to generate a new one every time the same file is accessed.
 - On init, now the extension checks if the maximum number of file previews (500) is exceeded or not. If yes, it removes the least accessed file previews to free up the disk space.
 
+## [New Filter Preferences] - 2022-04-30
+
+- Added flag to display directories.
+- Added exclude paths preference.
+- Added Reindex action to EmptyView.
+
 ## [Use SQLite for file indexing] - 2022-04-28
 
 - Added SQLite to index files cache to fix a crash-causing bug `Error: Worker terminated due to reaching memory limit: JS heap out of memory` happening due to in-memory indexing occurring on a Google Drive containing a large number of files (see https://github.com/raycast/extensions/issues/1523).
