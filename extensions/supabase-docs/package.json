@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "supabase-docs",
-  "title": "Supabase Docs",
+  "title": "Supabase Documentation",
   "description": "Quickly search Supabase documentation and open it in the browser",
   "icon": "supabase-logo.png",
   "author": "Isaiah-Hamilton",
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search-documentation",
-      "title": "Search Supabase Documentation",
+      "title": "Search Documentation",
       "subtitle": "Supabase",
       "description": "Search Supabase documentation and open it in the browser",
       "mode": "view"
