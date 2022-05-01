@@ -9,7 +9,10 @@ export async function getUser(id = "current") {
 }
 
 function setHeaders(headers: RequestInit = {}) {
+  const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<Preferences>();
+
+  if (!API_KEY_REGEX.test(apiKey)) throw new Error("Invalid API Key");
 
   return {
     ...headers,
