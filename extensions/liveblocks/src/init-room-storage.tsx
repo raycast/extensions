@@ -39,7 +39,12 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" defaultValue="room-a04f59f647aaa9c8880ab" />
+      <Form.TextField
+        id="roomId"
+        title="Room ID"
+        placeholder="Enter room ID"
+        defaultValue="room-a04f59f647aaa9c8880ab"
+      />
       <Form.TextArea id="payload" title="Payload" placeholder="Enter payload" />
     </Form>
   );

@@ -9,7 +9,7 @@ export default function Command() {
   async function handleSubmit(values: CommandForm) {
     try {
       const { data } = await axios.get("https://liveblocks.io/api/authorize", {
-        headers: { "Authorization": `Bearer ${values.secret}` },
+        headers: { Authorization: `Bearer ${values.secret}` },
       });
 
       await LocalStorage.setItem("liveblocks-jwt", data.token);
