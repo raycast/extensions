@@ -7,7 +7,6 @@ import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
 import TaskActions from "./TaskActions";
-import TaskComments from "./TaskComments";
 
 interface TaskListItemProps {
   task: Task;
