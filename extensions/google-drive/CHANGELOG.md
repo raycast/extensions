@@ -1,5 +1,10 @@
 # Google Drive Changelog
 
+## [Optimize file previews cache] - 2022-05-01
+
+- Reuses already generated file preview instead of trying to generate a new one every time the same file is accessed.
+- On init, now the extension checks if the maximum number of file previews (500) is exceeded or not. If yes, it removes the least accessed file previews to free up the disk space.
+
 ## [New Filter Preferences] - 2022-04-30
 
 - Added flag to display directories.

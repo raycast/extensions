@@ -7,7 +7,7 @@ import { useDebounce } from "use-debounce";
 import { FileInfo } from "./types";
 import { indexFiles, filesLastIndexedAt, queryFiles, useDb } from "./db";
 import {
-  clearFilePreviewsCache,
+  clearAllFilePreviewsCache,
   displayPath,
   escapePath,
   fileMetadataMarkdown,
@@ -32,7 +32,7 @@ function ClearFilePreviewsCacheAction() {
     <Action
       title="Clear File Previews Cache"
       icon={Icon.Trash}
-      onAction={clearFilePreviewsCache}
+      onAction={clearAllFilePreviewsCache}
       shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
     />
   );

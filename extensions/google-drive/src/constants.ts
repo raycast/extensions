@@ -24,7 +24,7 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
 ];
 export const MAX_RESULTS_WITHOUT_SEARCH_TEXT = 1000;
 export const MAX_RESULTS_WITH_SEARCH_TEXT = 100;
-export const MAX_TMP_FILE_PREVIES_LIMIT = 50;
+export const MAX_TMP_FILE_PREVIEWS_LIMIT = 500; // Average size of a file preview is <20KB
 export const DB_FILE_PATH = join(homedir(), ".raycast-google-drive-sqlite.db");
 export const TMP_FILE_PREVIEWS_PATH = join(tmpdir(), "raycast-google-drive-file-previews");
 export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";

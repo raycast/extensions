@@ -12,7 +12,7 @@ import {
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
 import {
-  clearFilePreviewsCache,
+  clearAllFilePreviewsCache,
   fuzzyMatch,
   getDirectories,
   getDriveRootPath,
@@ -178,7 +178,7 @@ export const indexFiles = async (
       // Delete all the old indexed files
       db.exec("DELETE from files");
 
-      clearFilePreviewsCache();
+      clearAllFilePreviewsCache();
     }
 
     walkRecursivelyAndSaveFiles(path, db);
