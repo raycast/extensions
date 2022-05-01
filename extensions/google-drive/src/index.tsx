@@ -16,76 +16,7 @@ import {
   isEmpty,
 } from "./utils";
 
-type ReindexFilesCacheActionProps = { reindexFiles: () => void };
-function ReindexFilesCacheAction({ reindexFiles }: ReindexFilesCacheActionProps) {
-  return (
-    <Action
-      title="Reindex Files Cache"
-      icon={Icon.Hammer}
-      onAction={reindexFiles}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-    />
-  );
-}
-
-function ClearFilePreviewsCacheAction() {
-  return (
-    <Action
-      title="Clear File Previews Cache"
-      icon={Icon.Trash}
-      onAction={clearAllFilePreviewsCache}
-      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-    />
-  );
-}
-
-type ListItemProps = {
-  file: FileInfo;
-  handleToggleFavorite: (file: FileInfo) => void;
-  reindexFiles: () => void;
-  fileDetailsMarkup: string;
-  idPrefix: "__fav__" | "";
-};
-const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup, idPrefix }: ListItemProps) => (
-  <List.Item
-    id={`${idPrefix}${file.displayPath}`}
-    key={file.displayPath}
-    icon={{ fileIcon: file.path }}
-    title={`${file.favorite ? "⭐ " : ""}${file.name}`}
-    detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
-    actions={
-      <ActionPanel>
-        <ActionPanel.Section title="File Actions">
-          <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
-          <Action.ShowInFinder path={file.path} />
-          <Action.OpenWith path={file.path} />
-          <Action.CopyToClipboard
-            title="Copy File Path"
-            content={escapePath(file.displayPath)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Folder Path"
-            content={escapePath(dirname(file.displayPath))}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          />
-          <Action
-            title={file.favorite ? "Unfavorite" : "Favorite"}
-            icon={Icon.Star}
-            onAction={() => handleToggleFavorite(file)}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section title="General Actions">
-          <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-          <ClearFilePreviewsCacheAction />
-        </ActionPanel.Section>
-      </ActionPanel>
-    }
-  />
-);
-
-export default function Command() {
+const Command = () => {
   const drivePath = getDriveRootPath();
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
@@ -277,4 +208,71 @@ export default function Command() {
       )}
     </List>
   );
-}
+};
+
+type ReindexFilesCacheActionProps = { reindexFiles: () => void };
+const ReindexFilesCacheAction = ({ reindexFiles }: ReindexFilesCacheActionProps) => (
+  <Action
+    title="Reindex Files Cache"
+    icon={Icon.Hammer}
+    onAction={reindexFiles}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+  />
+);
+
+const ClearFilePreviewsCacheAction = () => (
+  <Action
+    title="Clear File Previews Cache"
+    icon={Icon.Trash}
+    onAction={clearAllFilePreviewsCache}
+    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+  />
+);
+
+type ListItemProps = {
+  file: FileInfo;
+  handleToggleFavorite: (file: FileInfo) => void;
+  reindexFiles: () => void;
+  fileDetailsMarkup: string;
+  idPrefix: "__fav__" | "";
+};
+const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup, idPrefix }: ListItemProps) => (
+  <List.Item
+    id={`${idPrefix}${file.displayPath}`}
+    key={file.displayPath}
+    icon={{ fileIcon: file.path }}
+    title={`${file.favorite ? "⭐ " : ""}${file.name}`}
+    detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+    actions={
+      <ActionPanel>
+        <ActionPanel.Section title="File Actions">
+          <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
+          <Action.ShowInFinder path={file.path} />
+          <Action.OpenWith path={file.path} />
+          <Action.CopyToClipboard
+            title="Copy File Path"
+            content={escapePath(file.displayPath)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Folder Path"
+            content={escapePath(dirname(file.displayPath))}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          />
+          <Action
+            title={file.favorite ? "Unfavorite" : "Favorite"}
+            icon={Icon.Star}
+            onAction={() => handleToggleFavorite(file)}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="General Actions">
+          <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+          <ClearFilePreviewsCacheAction />
+        </ActionPanel.Section>
+      </ActionPanel>
+    }
+  />
+);
+
+export default Command;
