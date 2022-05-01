@@ -3,7 +3,7 @@
   "name": "wakatime",
   "title": "Wakatime",
   "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "iammola",
   "categories": [
     "Productivity",
