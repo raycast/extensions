@@ -11,5 +11,7 @@ export type FileInfo = {
 
 export type Preferences = {
   shouldShowHiddenFiles: boolean;
+  shouldShowDirectories: boolean;
+  excludePaths: string;
   googleDriveRootPath: string;
 };

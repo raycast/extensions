@@ -11,7 +11,14 @@ import {
   MAX_RESULTS_WITH_SEARCH_TEXT,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
-import { clearFilePreviewsCache, fuzzyMatch, getDirectories, getDriveRootPath, saveFilesInDirectory } from "./utils";
+import {
+  clearFilePreviewsCache,
+  fuzzyMatch,
+  getDirectories,
+  getDriveRootPath,
+  getExcludePaths,
+  saveFilesInDirectory,
+} from "./utils";
 
 export const filesLastIndexedAt = async () => {
   const lastIndexedAt = await LocalStorage.getItem<string>(FILES_LAST_INDEXED_AT_KEY);
@@ -155,6 +162,7 @@ export const insertFile = (
 };
 
 export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
+  if (getExcludePaths().includes(path.toLocaleString())) return;
   saveFilesInDirectory(path, db);
   getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
 };

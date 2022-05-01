@@ -15,6 +15,29 @@ import {
   initialSetup,
 } from "./utils";
 
+type ReindexFilesCacheActionProps = { reindexFiles: () => void };
+function ReindexFilesCacheAction({ reindexFiles }: ReindexFilesCacheActionProps) {
+  return (
+    <Action
+      title="Reindex Files Cache"
+      icon={Icon.Hammer}
+      onAction={reindexFiles}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+    />
+  );
+}
+
+function ClearFilePreviewsCacheAction() {
+  return (
+    <Action
+      title="Clear File Previews Cache"
+      icon={Icon.Trash}
+      onAction={clearFilePreviewsCache}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+    />
+  );
+}
+
 export default function Command() {
   const drivePath = getDriveRootPath();
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
@@ -140,25 +163,27 @@ export default function Command() {
                     content={escapePath(dirname(file.displayPath))}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   />
-                  <Action
-                    title="Reindex Files Cache"
-                    icon={Icon.Hammer}
-                    onAction={reindexFiles}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  />
-                  <Action
-                    title="Clear File Previews Cache"
-                    icon={Icon.Trash}
-                    onAction={clearFilePreviewsCache}
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  />
+                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+                  <ClearFilePreviewsCacheAction />
                 </ActionPanel>
               }
             />
           ))}
         </List.Section>
       ) : (
-        <List.EmptyView title={isFetching ? "Fetching files, please wait..." : "No files found"} />
+        <List.EmptyView
+          title={isFetching ? "Fetching files, please wait..." : "No files found"}
+          actions={
+            <ActionPanel>
+              {!isFetching && (
+                <>
+                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+                  <ClearFilePreviewsCacheAction />
+                </>
+              )}
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );
