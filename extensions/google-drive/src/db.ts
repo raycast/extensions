@@ -145,6 +145,21 @@ export const queryFiles = (db: Database, searchText: string) => {
   return files;
 };
 
+export const queryFavoriteFiles = (db: Database) => {
+  const files: Array<FileInfo> = [];
+
+  if (!db) return files;
+
+  const statement = db.prepare(`SELECT * FROM files WHERE favorite = 1 ORDER BY updatedAt DESC LIMIT 50`);
+  while (statement.step()) {
+    files.push(statement.getAsObject() as unknown as FileInfo);
+  }
+  statement.free();
+  statement.freemem();
+
+  return files;
+};
+
 export const insertFile = (
   db: Database,
   { name, path, displayPath, fileSizeFormatted, createdAt, updatedAt }: FileInfo
@@ -189,4 +204,16 @@ export const indexFiles = async (
   }
 
   return false;
+};
+
+export const toggleFavorite = (db: Database, path: PathLike, isFavorite: boolean) => {
+  if (!db) return;
+
+  const updateStatement = `
+      UPDATE files
+        SET favorite = ${isFavorite ? 1 : 0}
+        WHERE path = "${path}"`;
+
+  db.exec(updateStatement);
+  dumpDb(db);
 };

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce } from "use-debounce";
 
 import { FileInfo } from "./types";
-import { indexFiles, filesLastIndexedAt, queryFiles, useDb } from "./db";
+import { indexFiles, filesLastIndexedAt, queryFiles, useDb, toggleFavorite, queryFavoriteFiles } from "./db";
 import {
   clearAllFilePreviewsCache,
   displayPath,
@@ -38,6 +38,52 @@ function ClearFilePreviewsCacheAction() {
   );
 }
 
+type ListItemProps = {
+  file: FileInfo;
+  handleToggleFavorite: (file: FileInfo) => void;
+  reindexFiles: () => void;
+  fileDetailsMarkup: string;
+  idPrefix: "__fav__" | "";
+};
+const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup, idPrefix }: ListItemProps) => (
+  <List.Item
+    id={`${idPrefix}${file.displayPath}`}
+    key={file.displayPath}
+    icon={{ fileIcon: file.path }}
+    title={`${file.favorite ? "⭐ " : ""}${file.name}`}
+    detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+    actions={
+      <ActionPanel>
+        <ActionPanel.Section title="File Actions">
+          <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
+          <Action.ShowInFinder path={file.path} />
+          <Action.OpenWith path={file.path} />
+          <Action.CopyToClipboard
+            title="Copy File Path"
+            content={escapePath(file.displayPath)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Folder Path"
+            content={escapePath(dirname(file.displayPath))}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          />
+          <Action
+            title={file.favorite ? "Unfavorite" : "Favorite"}
+            icon={Icon.Star}
+            onAction={() => handleToggleFavorite(file)}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="General Actions">
+          <ReindexFilesCacheAction reindexFiles={reindexFiles} />
+          <ClearFilePreviewsCacheAction />
+        </ActionPanel.Section>
+      </ActionPanel>
+    }
+  />
+);
+
 export default function Command() {
   const drivePath = getDriveRootPath();
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
@@ -47,6 +93,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
   const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
+  const [favoriteFiles, setFavoriteFiles] = useState<Array<FileInfo>>([]);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
@@ -78,6 +125,7 @@ export default function Command() {
           if (filesFiltered.length === 0) {
             setIsFetching(true);
             setFilesFiltered(queryFiles(db, ""));
+            setFavoriteFiles(queryFavoriteFiles(db));
           }
         } catch (e) {
           console.error(e);
@@ -105,27 +153,53 @@ export default function Command() {
 
       setIsFetching(true);
       setFilesFiltered(queryFiles(db, debouncedSearchText));
+
+      if (debouncedSearchText.trim().length === 0) {
+        setFavoriteFiles(queryFavoriteFiles(db));
+      }
+
       setIsFetching(false);
     })();
   }, [debouncedSearchText]);
 
-  const findFile = (displayPath?: string): FileInfo | null =>
-    (displayPath && filesFiltered.find((file) => file.displayPath === displayPath)) || null;
+  const findFile = (displayPathWithOptionalIdPrefix?: string): FileInfo | null =>
+    (displayPathWithOptionalIdPrefix &&
+      filesFiltered.find((file) => file.displayPath === displayPathWithOptionalIdPrefix.replace(/__.+__/, ""))) ||
+    null;
 
   const reindexFiles = useCallback(async () => {
     if (!db) return;
 
     setIsFetching(true);
     setFilesFiltered([]);
+    setFavoriteFiles([]);
     setSearchText("");
     showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
     indexFiles(drivePath, db, { force: true }).then(async () => {
       setFilesIndexGeneratedAt(await filesLastIndexedAt());
       setFilesFiltered(queryFiles(db, ""));
+      setFavoriteFiles(queryFavoriteFiles(db));
       showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
       setIsFetching(false);
     });
   }, [drivePath, db]);
+
+  const handleToggleFavorite = useCallback(
+    (file: FileInfo) => {
+      if (!db) return;
+
+      const updatedFile = { ...file, favorite: !file.favorite };
+      toggleFavorite(db, file.path, updatedFile.favorite);
+
+      setFilesFiltered((prevFilesFiltered) => prevFilesFiltered.map((f) => (f.path === file.path ? updatedFile : f)));
+
+      if (searchText.trim() === "") {
+        // Favorites are only shown when there's no search text
+        setFavoriteFiles(queryFavoriteFiles(db));
+      }
+    },
+    [db, setFilesFiltered, searchText]
+  );
 
   return (
     <List
@@ -137,49 +211,53 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedFile(findFile(id))}
     >
       {filesFiltered.length > 0 ? (
-        <List.Section
-          title="Files"
-          subtitle={filesIndexGeneratedAt ? `Indexed At: ${filesIndexGeneratedAt.toLocaleString()}` : ""}
-        >
-          {filesFiltered.map((file) => (
-            <List.Item
-              id={file.displayPath}
-              key={file.displayPath}
-              icon={{ fileIcon: file.path }}
-              title={file.name}
-              detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
-              actions={
-                <ActionPanel>
-                  <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
-                  <Action.ShowInFinder path={file.path} />
-                  <Action.OpenWith path={file.path} />
-                  <Action.CopyToClipboard
-                    title="Copy File Path"
-                    content={escapePath(file.displayPath)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        <>
+          {favoriteFiles.length > 0 ? (
+            <List.Section title="Favorites">
+              {filesFiltered
+                .filter((file) => file.favorite)
+                .map((file) => (
+                  <ListItem
+                    idPrefix="__fav__"
+                    key={file.displayPath}
+                    file={file}
+                    handleToggleFavorite={handleToggleFavorite}
+                    reindexFiles={reindexFiles}
+                    fileDetailsMarkup={fileDetailsMarkup}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy Folder Path"
-                    content={escapePath(dirname(file.displayPath))}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  />
-                  <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-                  <ClearFilePreviewsCacheAction />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+                ))}
+            </List.Section>
+          ) : null}
+          <List.Section
+            title={searchText.trim() === "" ? "Recent" : "Results"}
+            subtitle={
+              searchText.trim() === "" && filesIndexGeneratedAt
+                ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}`
+                : ""
+            }
+          >
+            {filesFiltered.map((file) => (
+              <ListItem
+                idPrefix=""
+                key={file.displayPath}
+                file={file}
+                handleToggleFavorite={handleToggleFavorite}
+                reindexFiles={reindexFiles}
+                fileDetailsMarkup={fileDetailsMarkup}
+              />
+            ))}
+          </List.Section>
+        </>
       ) : (
         <List.EmptyView
           title={isFetching ? "Fetching files, please wait..." : "No files found"}
           actions={
             <ActionPanel>
               {!isFetching && (
-                <>
+                <ActionPanel.Section title="General Actions">
                   <ReindexFilesCacheAction reindexFiles={reindexFiles} />
                   <ClearFilePreviewsCacheAction />
-                </>
+                </ActionPanel.Section>
               )}
             </ActionPanel>
           }
