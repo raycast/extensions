@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
-import { useDebounce } from "use-debounce";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
 
 import { FileInfo } from "./types";
 import { indexFiles, filesLastIndexedAt, queryFiles, useDb, toggleFavorite, queryFavoriteFiles } from "./db";
@@ -86,22 +86,27 @@ const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup,
 
 export default function Command() {
   const drivePath = getDriveRootPath();
-  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
-  const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
+  // const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
+  // const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
-  const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
-  const [favoriteFiles, setFavoriteFiles] = useState<Array<FileInfo>>([]);
+  const [files, setFiles] = useState<{
+    filtered: Array<FileInfo>;
+    favorites: Array<FileInfo>;
+    selected: FileInfo | null;
+  }>({ filtered: [], favorites: [], selected: null });
+  // const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
+  // const [favoriteFiles, setFavoriteFiles] = useState<Array<FileInfo>>([]);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
   useEffect(initialSetup, []);
 
   useEffect(() => {
-    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(debouncedSelectedFile)))();
-  }, [debouncedSelectedFile]);
+    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(files.selected)))();
+  }, [files.selected]);
 
   useEffect(() => {
     (async () => {
@@ -122,10 +127,15 @@ export default function Command() {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
 
-          if (filesFiltered.length === 0) {
+          if (files.filtered.length === 0) {
             setIsFetching(true);
-            setFilesFiltered(queryFiles(db, ""));
-            setFavoriteFiles(queryFavoriteFiles(db));
+            setFiles((prevFiles) => ({
+              ...prevFiles,
+              filtered: queryFiles(db, ""),
+              favorites: queryFavoriteFiles(db),
+            }));
+            // setFilesFiltered(queryFiles(db, ""));
+            // setFavoriteFiles(queryFavoriteFiles(db));
           }
         } catch (e) {
           console.error(e);
@@ -152,11 +162,16 @@ export default function Command() {
       if (!db) return;
 
       setIsFetching(true);
-      setFilesFiltered(queryFiles(db, debouncedSearchText));
+      // setFilesFiltered(queryFiles(db, debouncedSearchText));
 
-      if (debouncedSearchText.trim().length === 0) {
-        setFavoriteFiles(queryFavoriteFiles(db));
-      }
+      // if (debouncedSearchText.trim().length === 0) {
+      //   setFavoriteFiles(queryFavoriteFiles(db));
+      // }
+      setFiles((prevFiles) => ({
+        ...prevFiles,
+        files: queryFiles(db, debouncedSearchText),
+        favorites: debouncedSearchText.trim().length === 0 ? queryFavoriteFiles(db) : prevFiles.favorites,
+      }));
 
       setIsFetching(false);
     })();
@@ -164,21 +179,23 @@ export default function Command() {
 
   const findFile = (displayPathWithOptionalIdPrefix?: string): FileInfo | null =>
     (displayPathWithOptionalIdPrefix &&
-      filesFiltered.find((file) => file.displayPath === displayPathWithOptionalIdPrefix.replace(/__.+__/, ""))) ||
+      files.filtered.find((file) => file.displayPath === displayPathWithOptionalIdPrefix.replace(/__.+__/, ""))) ||
     null;
 
   const reindexFiles = useCallback(async () => {
     if (!db) return;
 
     setIsFetching(true);
-    setFilesFiltered([]);
-    setFavoriteFiles([]);
+    // setFilesFiltered([]);
+    // setFavoriteFiles([]);
+    setFiles({ filtered: [], favorites: [], selected: null });
     setSearchText("");
     showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
     indexFiles(drivePath, db, { force: true }).then(async () => {
       setFilesIndexGeneratedAt(await filesLastIndexedAt());
-      setFilesFiltered(queryFiles(db, ""));
-      setFavoriteFiles(queryFavoriteFiles(db));
+      // setFilesFiltered(queryFiles(db, ""));
+      // setFavoriteFiles(queryFavoriteFiles(db));
+      setFiles((prevFiles) => ({ ...prevFiles, files: queryFiles(db, ""), favorites: queryFavoriteFiles(db) }));
       showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
       setIsFetching(false);
     });
@@ -191,41 +208,49 @@ export default function Command() {
       const updatedFile = { ...file, favorite: !file.favorite };
       toggleFavorite(db, file.path, updatedFile.favorite);
 
-      setFilesFiltered((prevFilesFiltered) => prevFilesFiltered.map((f) => (f.path === file.path ? updatedFile : f)));
+      // setFilesFiltered((prevFilesFiltered) => prevFilesFiltered.map((f) => (f.path === file.path ? updatedFile : f)));
 
-      if (searchText.trim() === "") {
-        // Favorites are only shown when there's no search text
-        setFavoriteFiles(queryFavoriteFiles(db));
-      }
+      // if (searchText.trim() === "") {
+      //   // Favorites are only shown when there's no search text
+      //   setFavoriteFiles(queryFavoriteFiles(db));
+      // }
+
+      setFiles((prevFiles) => ({
+        ...prevFiles,
+        files: prevFiles.filtered.map((f) => (f.path === file.path ? updatedFile : f)),
+        favorites: queryFavoriteFiles(db),
+      }));
     },
-    [db, setFilesFiltered, searchText]
+    [db, setFiles, searchText]
   );
+
+  const handleSelectionChange = useDebouncedCallback((file: FileInfo | null) => {
+    setFiles((prevFiles) => ({ ...prevFiles, selected: file }));
+  }, 100);
 
   return (
     <List
-      isShowingDetail={filesFiltered.length > 0}
+      isShowingDetail={files.filtered.length > 0}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
       isLoading={isFetching}
-      onSelectionChange={(id) => setSelectedFile(findFile(id))}
+      onSelectionChange={(id) => handleSelectionChange(findFile(id))}
     >
-      {filesFiltered.length > 0 ? (
+      {files.filtered.length > 0 ? (
         <>
-          {favoriteFiles.length > 0 ? (
+          {files.favorites.length > 0 ? (
             <List.Section title="Favorites">
-              {filesFiltered
-                .filter((file) => file.favorite)
-                .map((file) => (
-                  <ListItem
-                    idPrefix="__fav__"
-                    key={file.displayPath}
-                    file={file}
-                    handleToggleFavorite={handleToggleFavorite}
-                    reindexFiles={reindexFiles}
-                    fileDetailsMarkup={fileDetailsMarkup}
-                  />
-                ))}
+              {files.favorites.map((file) => (
+                <ListItem
+                  idPrefix="__fav__"
+                  key={file.displayPath}
+                  file={file}
+                  handleToggleFavorite={handleToggleFavorite}
+                  reindexFiles={reindexFiles}
+                  fileDetailsMarkup={fileDetailsMarkup}
+                />
+              ))}
             </List.Section>
           ) : null}
           <List.Section
@@ -236,7 +261,7 @@ export default function Command() {
                 : ""
             }
           >
-            {filesFiltered.map((file) => (
+            {files.filtered.map((file) => (
               <ListItem
                 idPrefix=""
                 key={file.displayPath}
