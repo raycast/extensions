@@ -27,8 +27,7 @@ function ReindexFilesCacheAction({ reindexFiles }: ReindexFilesCacheActionProps)
   );
 }
 
-type ClearFilePreviewsCacheActionProps = { clearFilePreviewsCache: () => void };
-function ClearFilePreviewsCacheAction({ clearFilePreviewsCache }: ClearFilePreviewsCacheActionProps) {
+function ClearFilePreviewsCacheAction() {
   return (
     <Action
       title="Clear File Previews Cache"
@@ -165,7 +164,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   />
                   <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-                  <ClearFilePreviewsCacheAction clearFilePreviewsCache={clearFilePreviewsCache} />
+                  <ClearFilePreviewsCacheAction />
                 </ActionPanel>
               }
             />
@@ -179,7 +178,7 @@ export default function Command() {
               {!isFetching && (
                 <>
                   <ReindexFilesCacheAction reindexFiles={reindexFiles} />
-                  <ClearFilePreviewsCacheAction clearFilePreviewsCache={clearFilePreviewsCache} />
+                  <ClearFilePreviewsCacheAction />
                 </>
               )}
             </ActionPanel>
