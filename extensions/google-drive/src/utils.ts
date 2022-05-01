@@ -42,7 +42,7 @@ export const getDriveRootPath = (): string => {
 
   return resolve(preferences.googleDriveRootPath.trim().replace("~", homedir()));
 };
-export const getExcludePaths = (): string[] => {
+export const getExcludePaths = (): Array<string> => {
   const preferences = getPreferenceValues<Preferences>();
   return preferences.excludePaths
     .split(",")
