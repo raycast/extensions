@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "coinpaprika",
-      "title": "Check Cryptocurrencies",
+      "title": "Check Crypto Rates & Statistics",
       "subtitle": "Coinpaprika",
       "description": "Cryptocurrency Research Platform",
       "mode": "view"
