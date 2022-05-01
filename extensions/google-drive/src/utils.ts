@@ -147,10 +147,12 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
 };
 
 export const initialSetup = () => {
-  // If TMP_FILE_PREVIEWS_PATH contains more than 50 files, clear it.
-  const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
-  if (pathExists(TMP_FILE_PREVIEWS_PATH) && previewFiles.length > MAX_TMP_FILE_PREVIEWS_LIMIT) {
-    clearLeastAccessedFilePreviewsCache(previewFiles);
+  if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
+    const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
+    // If TMP_FILE_PREVIEWS_PATH contains more than 50 files, clear it.
+    if (previewFiles.length > MAX_TMP_FILE_PREVIEWS_LIMIT) {
+      clearLeastAccessedFilePreviewsCache(previewFiles);
+    }
   }
 };
 
