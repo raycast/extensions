@@ -13,6 +13,7 @@ import {
   fileMetadataMarkdown,
   getDriveRootPath,
   initialSetup,
+  isEmpty,
 } from "./utils";
 
 type ReindexFilesCacheActionProps = { reindexFiles: () => void };
@@ -86,8 +87,6 @@ const ListItem = ({ file, handleToggleFavorite, reindexFiles, fileDetailsMarkup,
 
 export default function Command() {
   const drivePath = getDriveRootPath();
-  // const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
-  // const [debouncedSelectedFile] = useDebounce(selectedFile, 100);
   const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -97,8 +96,6 @@ export default function Command() {
     favorites: Array<FileInfo>;
     selected: FileInfo | null;
   }>({ filtered: [], favorites: [], selected: null });
-  // const [filesFiltered, setFilesFiltered] = useState<Array<FileInfo>>([]);
-  // const [favoriteFiles, setFavoriteFiles] = useState<Array<FileInfo>>([]);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
@@ -134,8 +131,6 @@ export default function Command() {
               filtered: queryFiles(db, ""),
               favorites: queryFavoriteFiles(db),
             }));
-            // setFilesFiltered(queryFiles(db, ""));
-            // setFavoriteFiles(queryFavoriteFiles(db));
           }
         } catch (e) {
           console.error(e);
@@ -162,15 +157,10 @@ export default function Command() {
       if (!db) return;
 
       setIsFetching(true);
-      // setFilesFiltered(queryFiles(db, debouncedSearchText));
-
-      // if (debouncedSearchText.trim().length === 0) {
-      //   setFavoriteFiles(queryFavoriteFiles(db));
-      // }
       setFiles((prevFiles) => ({
         ...prevFiles,
         files: queryFiles(db, debouncedSearchText),
-        favorites: debouncedSearchText.trim().length === 0 ? queryFavoriteFiles(db) : prevFiles.favorites,
+        favorites: isEmpty(debouncedSearchText) ? queryFavoriteFiles(db) : prevFiles.favorites,
       }));
 
       setIsFetching(false);
@@ -186,15 +176,11 @@ export default function Command() {
     if (!db) return;
 
     setIsFetching(true);
-    // setFilesFiltered([]);
-    // setFavoriteFiles([]);
     setFiles({ filtered: [], favorites: [], selected: null });
     setSearchText("");
     showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
     indexFiles(drivePath, db, { force: true }).then(async () => {
       setFilesIndexGeneratedAt(await filesLastIndexedAt());
-      // setFilesFiltered(queryFiles(db, ""));
-      // setFavoriteFiles(queryFavoriteFiles(db));
       setFiles((prevFiles) => ({ ...prevFiles, files: queryFiles(db, ""), favorites: queryFavoriteFiles(db) }));
       showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
       setIsFetching(false);
@@ -207,13 +193,6 @@ export default function Command() {
 
       const updatedFile = { ...file, favorite: !file.favorite };
       toggleFavorite(db, file.path, updatedFile.favorite);
-
-      // setFilesFiltered((prevFilesFiltered) => prevFilesFiltered.map((f) => (f.path === file.path ? updatedFile : f)));
-
-      // if (searchText.trim() === "") {
-      //   // Favorites are only shown when there's no search text
-      //   setFavoriteFiles(queryFavoriteFiles(db));
-      // }
 
       setFiles((prevFiles) => ({
         ...prevFiles,
@@ -254,11 +233,9 @@ export default function Command() {
             </List.Section>
           ) : null}
           <List.Section
-            title={searchText.trim() === "" ? "Recent" : "Results"}
+            title={isEmpty(searchText) ? "Recent" : "Results"}
             subtitle={
-              searchText.trim() === "" && filesIndexGeneratedAt
-                ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}`
-                : ""
+              isEmpty(searchText) && filesIndexGeneratedAt ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}` : ""
             }
           >
             {files.filtered.map((file) => (

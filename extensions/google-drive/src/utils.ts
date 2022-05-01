@@ -22,6 +22,7 @@ export const fuzzyMatch = (source: string, target: string): number => {
   return result.length > 0 ? result[0].score : 0;
 };
 
+export const isEmpty = (text: string): boolean => text.trim().length === 0;
 const execAsync = util.promisify(exec);
 const isPathReadable = (path: PathLike): boolean => {
   try {
