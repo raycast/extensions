@@ -159,10 +159,9 @@ export default function Command() {
       setIsFetching(true);
       setFiles((prevFiles) => ({
         ...prevFiles,
-        files: queryFiles(db, debouncedSearchText),
+        filtered: queryFiles(db, debouncedSearchText),
         favorites: isEmpty(debouncedSearchText) ? queryFavoriteFiles(db) : prevFiles.favorites,
       }));
-
       setIsFetching(false);
     })();
   }, [debouncedSearchText]);
@@ -205,11 +204,11 @@ export default function Command() {
 
       setFiles((prevFiles) => ({
         ...prevFiles,
-        files: prevFiles.filtered.map((f) => (f.path === file.path ? updatedFile : f)),
-        favorites: queryFavoriteFiles(db),
+        filtered: prevFiles.filtered.map((f) => (f.path === file.path ? updatedFile : f)),
+        favorites: isEmpty(debouncedSearchText) ? queryFavoriteFiles(db) : prevFiles.favorites,
       }));
     },
-    [db, setFiles, searchText]
+    [db, setFiles, debouncedSearchText]
   );
 
   const handleSelectionChange = useDebouncedCallback((file: FileInfo | null) => {
@@ -227,7 +226,7 @@ export default function Command() {
     >
       {files.filtered.length > 0 ? (
         <>
-          {files.favorites.length > 0 ? (
+          {isEmpty(debouncedSearchText) && files.favorites.length > 0 ? (
             <List.Section title="Favorites">
               {files.favorites.map((file) => (
                 <ListItem
@@ -242,9 +241,11 @@ export default function Command() {
             </List.Section>
           ) : null}
           <List.Section
-            title={isEmpty(searchText) ? "Recent" : "Results"}
+            title={isEmpty(debouncedSearchText) ? "Recent" : "Results"}
             subtitle={
-              isEmpty(searchText) && filesIndexGeneratedAt ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}` : ""
+              isEmpty(debouncedSearchText) && filesIndexGeneratedAt
+                ? `Indexed: ${filesIndexGeneratedAt.toLocaleString()}`
+                : ""
             }
           >
             {files.filtered.map((file) => (
