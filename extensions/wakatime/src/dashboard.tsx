@@ -1,4 +1,4 @@
-import { Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
 
@@ -14,6 +14,11 @@ export default function Command() {
             title={data.display_name}
             accessories={[{ icon: Icon.Envelope, tooltip: data.public_email }]}
             icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={data.profile_url} />
+              </ActionPanel>
+            }
           />
         </List.Section>
       )}
