@@ -9,6 +9,7 @@
     "Developer Tools",
     "Productivity"
   ],
+  "contributors": ["nametake"],
   "license": "MIT",
   "commands": [
     {
