@@ -11,7 +11,7 @@ export default function Command() {
 
     try {
       await axios.delete(`https://liveblocks.net/api/v1/room/${values.roomId}/storage`, {
-        headers: { "Authorization": `Bearer ${jwt}` },
+        headers: { Authorization: `Bearer ${jwt}` },
       });
 
       showToast({ title: "Room storage deleted successful" });

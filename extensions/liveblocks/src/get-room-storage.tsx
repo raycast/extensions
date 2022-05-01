@@ -7,14 +7,14 @@ interface CommandForm {
 }
 
 export default function Command() {
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
 
     try {
       const { data } = await axios.get(`https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`, {
-        headers: { "Authorization": `Bearer ${jwt}` },
+        headers: { Authorization: `Bearer ${jwt}` },
       });
 
       showToast({ title: "Request successful" });
@@ -37,9 +37,15 @@ export default function Command() {
       }
     >
       <Form.Description title="Output" text={output ? output : "Waiting for output..."} />
-      <Form.Description text="" />{/* spacer */}
+      <Form.Description text="" />
+      {/* spacer */}
       <Form.Separator />
-      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" defaultValue="room-a04f59f647aaa9c8880ab" />
+      <Form.TextField
+        id="roomId"
+        title="Room ID"
+        placeholder="Enter room ID"
+        defaultValue="room-a04f59f647aaa9c8880ab"
+      />
     </Form>
   );
 }

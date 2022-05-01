@@ -8,17 +8,21 @@ interface CommandForm {
 }
 
 export default function Command() {
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
 
     try {
-      const { data } = await axios.post(`https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`, {
-        data: values.payload,
-      }, {
-        headers: { "Authorization": `Bearer ${jwt}` },
-      });
+      const { data } = await axios.post(
+        `https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`,
+        {
+          data: values.payload,
+        },
+        {
+          headers: { Authorization: `Bearer ${jwt}` },
+        }
+      );
 
       showToast({ title: "Request successful" });
 
