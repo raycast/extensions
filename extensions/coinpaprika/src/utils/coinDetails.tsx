@@ -40,8 +40,8 @@ export function FetchCoinDetails(props: CoinId) {
   
   **All Time High USD | BTC**
   * %:      ${coin.quotes.USD.percent_from_price_ath}% | ${coin.quotes[DEFAULT_CURRENCY_CRYPTO].percent_from_price_ath}%
-  * Price:  ${FormatPrice(coin.quotes.USD.price)} | ${FormatPrice(
-          coin.quotes[DEFAULT_CURRENCY_CRYPTO].price,
+  * Price:  ${FormatPrice(coin.quotes.USD.ath_price)} | ${FormatPrice(
+          coin.quotes[DEFAULT_CURRENCY_CRYPTO].ath_price,
           DEFAULT_CURRENCY_CRYPTO
         )}
   * Date:   ${FormatDate(coin.quotes.USD.ath_date)} | ${FormatDate(coin.quotes[DEFAULT_CURRENCY_CRYPTO].ath_date)}
