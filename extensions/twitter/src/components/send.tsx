@@ -1,4 +1,4 @@
-import { ActionPanel, Form, FormTextArea, popToRoot, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { twitterClient } from "../twitterapi";
 import { getErrorMessage } from "../utils";
@@ -18,14 +18,18 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
     }
     if (replyTweet) {
       await twitterClient.v1.reply(text, replyTweet.id_str);
-      await showToast(ToastStyle.Success, "Tweet created", "Reply Tweet creation successful");
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Tweet created",
+        message: "Reply Tweet creation successful",
+      });
     } else {
       await twitterClient.v1.tweet(text);
-      await showToast(ToastStyle.Success, "Tweet created", "Tweet creation successful");
+      await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
     }
     popToRoot();
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
+    await showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
 }
 
@@ -35,14 +39,13 @@ export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
   const fromTitle = rt ? "Reply" : "Tweet";
   return (
     <Form
-      onSubmit={submit}
       actions={
         <ActionPanel>
-          <SubmitFormAction title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
+          <Action.SubmitForm title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
         </ActionPanel>
       }
     >
-      <FormTextArea id="text" title={fromTitle} placeholder="What's happening?" />
+      <Form.TextArea id="text" title={fromTitle} placeholder="What's happening?" />
     </Form>
   );
 }
