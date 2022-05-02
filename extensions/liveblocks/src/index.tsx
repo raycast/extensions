@@ -1,10 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
+import {s getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   secret: string;
 }
 
-export default function main() {
+export default async () => {
   const preferences = getPreferenceValues<Preferences>();
 
   console.log(preferences);

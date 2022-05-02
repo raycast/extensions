@@ -14,7 +14,7 @@ export default function Command() {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Initializing the room",
+      title: "Initializing the room...",
     });
 
     try {
