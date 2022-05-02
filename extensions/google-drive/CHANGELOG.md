@@ -1,5 +1,11 @@
 # Google Drive Changelog
 
+## [Support favorites] - 2022-05-01
+
+- Added ability to favorite/unfavorite files.
+- Favorite files are retained both after scheduled files cache invalidation as well as after a forced reindexing.
+- Misc code refactoring and optimizations.
+
 ## [Optimize file previews cache] - 2022-05-01
 
 - Reuses already generated file preview instead of trying to generate a new one every time the same file is accessed.

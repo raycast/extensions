@@ -5,6 +5,7 @@ import { basename, extname, join, resolve } from "path";
 import { homedir } from "os";
 import { Database } from "sql.js";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Fzf } from "fzf";
 
 import {
   FILE_SIZE_UNITS,
@@ -15,13 +16,13 @@ import {
 } from "./constants";
 import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
-import { Fzf } from "fzf";
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
   return result.length > 0 ? result[0].score : 0;
 };
 
+export const isEmpty = (text: string): boolean => text.trim().length === 0;
 const execAsync = util.promisify(exec);
 const isPathReadable = (path: PathLike): boolean => {
   try {
@@ -150,7 +151,6 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
 export const initialSetup = () => {
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
-    // If TMP_FILE_PREVIEWS_PATH contains more than 50 files, clear it.
     if (previewFiles.length > MAX_TMP_FILE_PREVIEWS_LIMIT) {
       clearLeastAccessedFilePreviewsCache(previewFiles);
     }
