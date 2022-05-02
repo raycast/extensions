@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 
 import { getSummary } from "../utils";
 
-export function useSummary(range = "all", id = "current") {
-  const ranges: Record<string, Date> = {
+export function useSummary(range: Range | "all" = "all", id = "current") {
+  const rangeOrder: Range[] = ["Today", "Last 7 Days", "Last 30 Days", "Last 6 Months", "Last Year"];
+  const ranges: Record<Range, Date> = {
     Today: sub(new Date(), { days: 1 }),
     "Last 7 Days": sub(new Date(), { days: 7 }),
     "Last 30 Days": sub(new Date(), { days: 30 }),
@@ -18,7 +19,16 @@ export function useSummary(range = "all", id = "current") {
     async function getData() {
       setIsLoading(true);
       const dateRanges = range === "all" ? Object.entries(ranges) : [[range, ranges[range]] as const];
-      setData(await Promise.all(dateRanges.map(async ([key, range]) => [key, await getSummary(range, id)] as const)));
+      await Promise.all(
+        dateRanges.map(async ([key, date]) => {
+          const summary = await getSummary(date, id);
+          setData((data = []) => {
+            const newData = [...data];
+            newData.splice(rangeOrder.indexOf(key as Range), 0, [key, summary]);
+            return newData;
+          });
+        })
+      );
       setIsLoading(false);
     }
 
@@ -27,3 +37,5 @@ export function useSummary(range = "all", id = "current") {
 
   return { data, isLoading };
 }
+
+type Range = "Today" | "Last 7 Days" | "Last 30 Days" | "Last 6 Months" | "Last Year";
