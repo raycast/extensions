@@ -25,6 +25,11 @@ export async function getLeaderBoard(id?: string) {
   return (await response.json()) as WakaTime.LeaderBoard;
 }
 
+export async function getPrivateLeaderBoards() {
+  const response = await fetch(`${URL}/users/current/leaderboards`, setHeaders());
+  return (await response.json()) as WakaTime.PrivateLeaderBoards;
+}
+
 export function getDuration(seconds: number) {
   const getAmount = (rate: number, unit: string) => {
     const num = Math.floor(seconds / rate);

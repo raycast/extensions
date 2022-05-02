@@ -117,6 +117,23 @@ declare global {
       }[];
     }
 
+    export interface PrivateLeaderBoards {
+      data: {
+        can_delete: boolean;
+        can_edit: boolean;
+        created_at: string;
+        has_available_seat: boolean;
+        id: string;
+        members_count: number;
+        members_with_timezones_count: number;
+        modified_at: string;
+        name: string;
+        time_range: string;
+      }[];
+      total: number;
+      total_pages: number;
+    }
+
     type LeaderBoardUser = Record<"is_email_public" | "is_hireable" | "photo_public", boolean> &
       Record<"city", Record<"country_code" | "name" | "state" | "title", string> | null> &
       Record<
