@@ -36,7 +36,7 @@
       "name": "delete-room-storage",
       "title": "Delete Room Storage",
       "subtitle": "Liveblocks",
-      "description": "Delete a room storage.",
+      "description": "Delete all elements of the room storage.",
       "mode": "view"
     }
   ],
