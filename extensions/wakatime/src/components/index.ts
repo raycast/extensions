@@ -1,2 +1,2 @@
 export { SummaryList } from "./Summary";
-export { LeaderBoardItem } from "./Leaderboad";
+export { LeaderBoardItem } from "./Leaderboard";
