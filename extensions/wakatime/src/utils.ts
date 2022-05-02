@@ -41,7 +41,7 @@ export function cumulateSummaryDuration(
       }, {} as { [name: string]: number })
   ).sort((a, b) => b[1] - a[1]);
 
-  return obj;
+  return obj.slice(0, 5);
 }
 
 function setHeaders(headers: RequestInit = {}) {
