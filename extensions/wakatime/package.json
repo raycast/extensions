@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "dashboard",
-      "title": "Show Dashboard",
-      "description": "Show your WakaTime Dashboard",
+      "name": "summary",
+      "title": "Show Summary",
+      "description": "Show your WakaTime Summary",
       "mode": "view"
     },
     {

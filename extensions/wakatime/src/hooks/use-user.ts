@@ -10,7 +10,7 @@ export function useUser() {
   useEffect(() => {
     async function getData() {
       setIsLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Loading Dashboard");
+      const toast = await showToast(Toast.Style.Animated, "Loading Summary");
 
       try {
         const user = await getUser();
@@ -20,7 +20,7 @@ export function useUser() {
         toast.title = "Done!";
       } catch (err) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed Loading Dashboard";
+        toast.title = "Failed Loading Summary";
         toast.message = (err as Record<string, string>).message;
       }
 
