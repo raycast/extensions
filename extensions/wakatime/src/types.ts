@@ -54,50 +54,6 @@ declare global {
       };
     }
 
-    export interface Stats {
-      data: Record<
-        | "range"
-        | "human_readable_daily_average"
-        | "human_readable_total"
-        | "status"
-        | "start"
-        | "end"
-        | "timezone"
-        | "user_id"
-        | "username"
-        | "created_at"
-        | "modified_at",
-        string
-      > & {
-        categories: Array<Omit<StatProperty, "seconds">>;
-        projects: Array<Omit<StatProperty, "seconds">>;
-        languages: Array<StatProperty>;
-        editors: Array<StatProperty>;
-        operating_systems: Array<StatProperty>;
-        dependencies: Array<StatProperty>;
-        machines: Array<StatProperty & { machine_name_id: string }>;
-        best_day: Record<"date" | "text", string> & Record<"total_seconds", number>;
-      } & Record<
-          | "is_already_updating"
-          | "is_coding_activity_visible"
-          | "is_other_usage_visible"
-          | "is_stuck"
-          | "is_including_today"
-          | "is_up_to_date"
-          | "writes_only",
-          boolean
-        > &
-        Record<
-          | "holidays"
-          | "daily_average"
-          | "days_including_holidays"
-          | "days_minus_holidays"
-          | "timeout"
-          | "total_seconds",
-          number
-        >;
-    }
-
     export interface LeaderBoard
       extends Record<"page" | "total_pages" | "timeout", number>,
         Record<"language" | "country_code" | "modified_at", string>,
