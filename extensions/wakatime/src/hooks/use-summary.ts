@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { getSummary } from "../utils";
 
-export function useSummary(range: Range | "all" = "all") {
+export function useSummary() {
   const rangeOrder: Range[] = ["Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Last 6 Months", "Last Year"];
   const ranges: Record<Range, Date> = {
     Today: new Date(),
@@ -20,19 +20,10 @@ export function useSummary(range: Range | "all" = "all") {
   useEffect(() => {
     async function getData() {
       setIsLoading(true);
-      const dateRanges = range === "all" ? Object.entries(ranges) : [[range, ranges[range]] as const];
 
       try {
-        await Promise.all(
-          dateRanges.map(async ([key, date]) => {
-            const summary = await getSummary(key, date);
-            setData((data = []) => {
-              const newData = [...data];
-              newData.splice(rangeOrder.indexOf(key as Range), 0, [key, summary]);
-              return newData;
-            });
-          })
-        );
+        const data = await Promise.all(rangeOrder.map(async (v) => [v, await getSummary(v, ranges[v])] as const));
+        setData(data);
       } catch (error) {
         await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Record<string, string>).message);
       }
