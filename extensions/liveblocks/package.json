@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Preferences",
+      "name": "init-room-storage",
+      "title": "Initialize Room Storage",
       "subtitle": "Liveblocks",
-      "description": "To use the API, you need to add a JWT token to the request’s authorization header.",
+      "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
       "mode": "view",
       "preferences": [
         {
@@ -32,21 +32,32 @@
       "title": "Get Room Storage",
       "subtitle": "Liveblocks",
       "description": "Get the room storage data as a JSON.",
-      "mode": "view"
-    },
-    {
-      "name": "init-room-storage",
-      "title": "Initialize Room Storage",
-      "subtitle": "Liveblocks",
-      "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "secret",
+          "type": "textfield",
+          "required": true,
+          "title": "Secret Key",
+          "description": "You can find your Secret Key in the Liveblocks Dashboard."
+        }
+      ]
     },
     {
       "name": "delete-room-storage",
       "title": "Delete Room Storage",
       "subtitle": "Liveblocks",
       "description": "Delete all elements of the room storage.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "secret",
+          "type": "textfield",
+          "required": true,
+          "title": "Secret Key",
+          "description": "You can find your Secret Key in the Liveblocks Dashboard."
+        }
+      ]
     }
   ],
   "dependencies": {
