@@ -25,8 +25,11 @@ export async function getLeaderBoard(id?: string) {
   return (await response.json()) as WakaTime.LeaderBoard;
 }
 
-export function getDuration(seconds: number) {
-  return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) })) || "0 seconds";
+export function getDuration(seconds: number, format?: DurationFormat) {
+  return (
+    formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) }), { format }) ||
+    "0 seconds"
+  );
 }
 
 export function cumulateSummaryDuration(
@@ -67,3 +70,5 @@ function setHeaders(headers: RequestInit = {}) {
 interface Preferences {
   apiKey: string;
 }
+
+type DurationFormat = ("years" | "months" | "days" | "hours" | "minutes" | "seconds")[];
