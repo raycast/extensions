@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
@@ -5,9 +6,10 @@ import { SummaryList } from "./components";
 
 export default function Command() {
   const { data, isLoading } = useUser();
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail={showDetail}>
       {data !== undefined && (
         <List.Section title="Profile">
           <List.Item
@@ -23,7 +25,7 @@ export default function Command() {
           />
         </List.Section>
       )}
-      <SummaryList />
+      <SummaryList {...{ showDetail, setShowDetail }} />
     </List>
   );
 }
