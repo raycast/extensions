@@ -24,7 +24,7 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDet
     ...keys
       .map((key) => [
         `### ${key[0].toUpperCase()}${key.slice(1)}`,
-        ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (${getDuration(seconds)})`),
+        ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
       ])
       .flat(),
   ];

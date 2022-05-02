@@ -12,10 +12,10 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
   const md = [
     `# ${user.display_name}`,
     user.is_hireable ? "**Hireable**" : "",
-    user.city ? `- From ${user.city.title} ${getFlagEmoji(user.city.country_code)}` : "",
-    `- Rank #${rank}`,
-    `- Daily Average (${getDuration(running_total.daily_average)})`,
-    `- Hours Coded (${getDuration(running_total.total_seconds)})`,
+    user.city ? `- From ${getFlagEmoji(user.city.country_code)} ${user.city.title}` : "",
+    `- Rank **#${rank}**`,
+    `- Daily Average (**${getDuration(running_total.daily_average)}**)`,
+    `- Hours Coded (**${getDuration(running_total.total_seconds)}**)`,
     "## Languages",
     ...running_total.languages.map((item) => `- ${item.name} (${getDuration(item.total_seconds)})`),
   ];
