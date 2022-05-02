@@ -12,11 +12,20 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "authentication",
-      "title": "Authenticate",
+      "name": "index",
+      "title": "Preferences",
       "subtitle": "Liveblocks",
       "description": "To use the API, you need to add a JWT token to the request’s authorization header.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "secret",
+          "type": "textfield",
+          "required": true,
+          "title": "Secret Key",
+          "description": "You can find your Secret Key in the Liveblocks Dashboard."
+        }
+      ]
     },
     {
       "name": "get-room-storage",

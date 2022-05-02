@@ -8,20 +8,23 @@ interface CommandForm {
 export default function Command() {
   async function handleSubmit(values: CommandForm) {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Deleting the room",
+    });
 
     try {
       await axios.delete(`https://liveblocks.net/api/v1/room/${values.roomId}/storage`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 
-      showToast({ title: "Room storage deleted successful" });
+      toast.style = Toast.Style.Success;
+      toast.message = "Room deleted successfully";
 
       popToRoot();
     } catch (e) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Unable to delete room storage",
-      });
+      toast.style = Toast.Style.Failure;
+      toast.message = "Unable to delete the room";
     }
   }
 

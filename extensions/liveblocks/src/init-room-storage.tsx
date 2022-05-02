@@ -12,6 +12,10 @@ export default function Command() {
 
   async function handleSubmit(values: CommandForm) {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Initializing the room",
+    });
 
     try {
       const { data } = await axios.post(
@@ -24,14 +28,13 @@ export default function Command() {
         }
       );
 
-      showToast({ title: "Request successful" });
+      toast.style = Toast.Style.Success;
+      toast.message = "Room initialized successfully";
 
       setOutput(JSON.stringify(data));
     } catch (e) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Unable to fetch room storage",
-      });
+      toast.style = Toast.Style.Failure;
+      toast.message = "Unable to initialize room";
     }
   }
 
@@ -43,13 +46,16 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="roomId"
-        title="Room ID"
-        placeholder="Enter room ID"
-        defaultValue="room-a04f59f647aaa9c8880ab"
-      />
+      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" />
       <Form.TextArea id="payload" title="Payload" placeholder="Enter payload" />
+      {output ? (
+        <>
+          <Form.Separator />
+          {/* spacer */}
+          <Form.Description text="" />
+          <Form.Description title="Output" text={output} />
+        </>
+      ) : null}
     </Form>
   );
 }
