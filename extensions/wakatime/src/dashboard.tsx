@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { formatDuration, intervalToDuration, subSeconds } from "date-fns";
 
-import { useSummary, useUser } from "./hooks";
+import { useUser } from "./hooks";
+import { SummaryList } from "./components";
 
 export default function Command() {
-  const summary = useSummary();
   const { data, isLoading } = useUser();
 
   return (
@@ -24,27 +23,7 @@ export default function Command() {
           />
         </List.Section>
       )}
-      {summary.data !== undefined && (
-        <List.Section title="Stats Summary">
-          {summary.data.map(([key, range]) => (
-            <List.Item
-              key={key}
-              title={key}
-              accessories={[
-                {
-                  tooltip: "Cumulative Total",
-                  text: formatDuration(
-                    intervalToDuration({
-                      start: subSeconds(new Date(), range.cummulative_total.seconds),
-                      end: new Date(),
-                    })
-                  ),
-                },
-              ]}
-            />
-          ))}
-        </List.Section>
-      )}
+      <SummaryList />
     </List>
   );
 }
