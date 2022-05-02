@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useState } from "react";
 
 import { useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
@@ -17,7 +18,7 @@ export const SummaryList: React.FC<Omit<SummaryItemProps, "title" | "range">> = 
 
 const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
   const keys = ["categories", "editors", "languages", "projects"] as const;
-  const md = [
+  const [md] = useState([
     `## ${title}`,
     getDuration(range.cummulative_total.seconds),
     "---",
@@ -27,7 +28,7 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDet
         ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
       ])
       .flat(),
-  ];
+  ]);
 
   const props: Partial<List.Item.Props> = showDetail
     ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
