@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Dynamic temperature options] - 2022-05-02
+- The properties of base temperature options for climate entities (min_temp, max_temp, and target_temp_step) are now used for the climate entity instead of a hardcoded list.
+
 ## [Add door support] - 2022-04-24
 - Add icon and state support for device class `door`
 - Add root command `Doors` to filter entities of device class `door`
