@@ -75,13 +75,25 @@ export function buildRegexp(content: string) {
 }
 
 export function camelCaseToOtherCase(str: string, linkCharacter: string) {
-  let outString = "";
-  str.split("").forEach((value) => {
-    isUpper(value) ? (outString = outString + linkCharacter + value.toLowerCase()) : (outString = outString + value);
-  });
-  return outString;
+  let finalStr = str.replaceAll(" ", "");
+  try {
+    let outString = "";
+    finalStr.split("").forEach((value, index) => {
+      if (index === 0) {
+        outString = outString + value.toLowerCase();
+      } else {
+        isUpper(value)
+          ? (outString = outString + linkCharacter + value.toLowerCase())
+          : (outString = outString + value);
+      }
+    });
+    finalStr = outString;
+  } catch (e) {
+    console.error(String(e));
+  }
+  return finalStr;
 }
 
 function isUpper(char: string) {
-  return !/\d/.test(char) && char === char.toUpperCase();
+  return !/\d/.test(char) && char !== char.toLowerCase();
 }
