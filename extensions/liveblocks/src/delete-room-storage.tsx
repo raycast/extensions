@@ -1,11 +1,17 @@
 import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, popToRoot } from "@raycast/api";
 import axios from "axios";
+import { useEffect } from "react";
+import { getTokenFromSecret } from "./utils";
 
 interface CommandForm {
   roomId: string;
 }
 
 export default function Command() {
+  useEffect(() => {
+    getTokenFromSecret();
+  }, []);
+
   async function handleSubmit(values: CommandForm) {
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
     const toast = await showToast({
