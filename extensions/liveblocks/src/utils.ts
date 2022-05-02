@@ -7,8 +7,9 @@ interface Preferences {
 
 export async function getTokenFromSecret(): Promise<any> {
   const preferences = getPreferenceValues<Preferences>();
+  const token = await LocalStorage.getItem("liveblocks-jwt");
 
-  if (!preferences.secret) {
+  if (!preferences.secret || token) {
     return;
   }
 
