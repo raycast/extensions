@@ -94,7 +94,12 @@ export function WeatherList() {
           icon={getIcon(curcon.weatherCode)}
           accessories={[
             {
-              text: `humidity: ${curcon.humidity}% | wind ${getWind()} ${getWindDirectionIcon(curcon.winddirDegree)}`,
+              icon: "💧",
+              text: `${curcon.humidity}%`,
+            },
+            {
+              icon: "💨",
+              text: `${getWind()} ${getWindDirectionIcon(curcon.winddirDegree)}`,
             },
           ]}
         />
