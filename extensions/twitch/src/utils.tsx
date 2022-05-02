@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, OpenAction, showHUD, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, Action, showHUD, showToast, Toast } from "@raycast/api";
 import { Preferences, PrimaryAction } from "./interfaces/Preferences";
 import Stream from "./stream";
 
@@ -18,7 +18,7 @@ const action: React.FC<Props> = ({ live, name }) => {
     <>
       <ActionPanel>
         {primary === PrimaryAction.Browser && (
-          <OpenAction
+          <Action.Open
             title="Open Channel"
             target={`https://twitch.tv/${name}`}
             onOpen={(target) => {
@@ -26,31 +26,30 @@ const action: React.FC<Props> = ({ live, name }) => {
             }}
           />
         )}
-        <OpenAction
+        <Action
           title="Open Stream in Streamlink"
-          target="streamlink"
-          onOpen={(target) => {
+          onAction={() => {
             if (!live) {
-              showToast(ToastStyle.Failure, "This streamer is offline!");
+              showToast(Toast.Style.Failure, "This streamer is offline!");
               return;
             }
 
             if (lowlatency) {
               Stream.startLowLatencyStream(streamlinkLocation, quality, name).catch((err) => {
-                showToast(ToastStyle.Failure, err);
+                showToast(Toast.Style.Failure, err);
               });
 
               showHUD("✅ Starting Streamlink");
             } else {
               Stream.streamUsingM3U8(streamlinkLocation, quality, name).catch((err) => {
-                showToast(ToastStyle.Failure, err);
+                showToast(Toast.Style.Failure, err);
               });
               showHUD("✅ Starting Streamlink");
             }
           }}
         />
         {primary === PrimaryAction.Streamlink && (
-          <OpenAction
+          <Action.Open
             title="Open Channel"
             target={`https://twitch.tv/${name}`}
             onOpen={(target) => {
