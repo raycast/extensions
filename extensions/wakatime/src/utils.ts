@@ -21,7 +21,7 @@ export async function getSummary(key: string, start: Date, id = "current") {
 }
 
 export function getDuration(seconds: number) {
-  return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) }));
+  return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) })) || "0 seconds";
 }
 
 export function cumulateSummaryDuration(
