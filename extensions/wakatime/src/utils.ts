@@ -52,6 +52,15 @@ export function cumulateSummaryDuration(
   return obj.slice(0, 5);
 }
 
+export function getFlagEmoji(countryCode: string) {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split("")
+    .map((char) => 127397 + char.charCodeAt(0));
+
+  return String.fromCodePoint(...codePoints);
+}
+
 function setHeaders(headers: RequestInit = {}) {
   const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<Preferences>();
