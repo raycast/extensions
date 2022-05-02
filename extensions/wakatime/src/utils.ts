@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import fetch, { RequestInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
+import { format, formatDuration, intervalToDuration, subSeconds } from "date-fns";
 
 const URL = "https://wakatime.com/api/v1";
 
@@ -18,6 +18,10 @@ export async function getSummary(key: string, start: Date, id = "current") {
     setHeaders()
   );
   return (await response.json()) as WakaTime.Summary;
+}
+
+export function getDuration(seconds: number) {
+  return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) }));
 }
 
 function setHeaders(headers: RequestInit = {}) {

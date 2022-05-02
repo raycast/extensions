@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { formatDuration, intervalToDuration, subSeconds } from "date-fns";
 
 import { useSummary } from "../hooks";
+import { getDuration } from "../utils";
 
 export const SummaryList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
   const summary = useSummary();
@@ -23,9 +23,7 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDet
         accessories: [
           {
             tooltip: "Cumulative Total",
-            text: formatDuration(
-              intervalToDuration({ start: subSeconds(new Date(), range.cummulative_total.seconds), end: new Date() })
-            ),
+            text: getDuration(range.cummulative_total.seconds),
           },
         ],
       };
