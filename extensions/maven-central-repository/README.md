@@ -15,5 +15,5 @@ Official search by the maintainers of Maven Central Repository.
 - Search Artifact ID
 - Search Group ID
 - Advanced Search Options
-- Copy Dependency to Clipboard
-- Go Maven Central Repository Search
+- Copy Dependency
+- Go Maven Central Repository
