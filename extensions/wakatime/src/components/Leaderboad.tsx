@@ -39,8 +39,8 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       actions={
         <ActionPanel>
           <Action title="Show Details" icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} />
-          {user.website ? <Action.OpenInBrowser title="Go To Website" url={user.website} /> : <></>}
-          <Action.OpenInBrowser title="Go To Profile" url={`https://wakatime.com/@${user.username}`} />
+          {user.website ? <Action.OpenInBrowser title="Go to Website" url={user.website} /> : <></>}
+          <Action.OpenInBrowser title="Go To WakaTime Profile" url={`https://wakatime.com/@${user.username}`} />
         </ActionPanel>
       }
     />

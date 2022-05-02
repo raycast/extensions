@@ -15,7 +15,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="View Leaderboard" target={<LeaderBoard id={i.id} />} />
-              <Action.OpenInBrowser title="Open In Browser" url={`https://wakatime.com/leaders/sec/${i.id}`} />
+              <Action.OpenInBrowser title="Open in Browser" url={`https://wakatime.com/leaders/sec/${i.id}`} />
             </ActionPanel>
           }
           accessories={[{ text: `${i.members_count} member${i.members_count !== 1 ? "s" : ""}` }]}

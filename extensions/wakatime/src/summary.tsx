@@ -19,7 +19,7 @@ export default function Command() {
             icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={data.profile_url} />
+                <Action.OpenInBrowser url={data.profile_url} title="Open in Browser" />
               </ActionPanel>
             }
           />
