@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, Action, showHUD, showToast, Toast } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, Action, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { Preferences, PrimaryAction } from "./interfaces/Preferences";
 import Stream from "./stream";
 
@@ -20,6 +20,7 @@ const action: React.FC<Props> = ({ live, name }) => {
         {primary === PrimaryAction.Browser && (
           <Action.Open
             title="Open Channel"
+            icon={Icon.Globe}
             target={`https://twitch.tv/${name}`}
             onOpen={(target) => {
               showHUD("✅ Opening stream");
@@ -28,6 +29,7 @@ const action: React.FC<Props> = ({ live, name }) => {
         )}
         <Action
           title="Open Stream in Streamlink"
+          icon={Icon.Link}
           onAction={() => {
             if (!live) {
               showToast(Toast.Style.Failure, "This streamer is offline!");
@@ -51,6 +53,7 @@ const action: React.FC<Props> = ({ live, name }) => {
         {primary === PrimaryAction.Streamlink && (
           <Action.Open
             title="Open Channel"
+            icon={Icon.Globe}
             target={`https://twitch.tv/${name}`}
             onOpen={(target) => {
               showHUD("✅ Opening stream");
