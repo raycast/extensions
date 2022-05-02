@@ -4,14 +4,14 @@ import { format, formatDuration, intervalToDuration, subSeconds } from "date-fns
 
 const URL = "https://wakatime.com/api/v1";
 
-export async function getUser(id = "current") {
-  const response = await fetch(`${URL}/users/${id}`, setHeaders());
+export async function getUser() {
+  const response = await fetch(`${URL}/users/current`, setHeaders());
   return (await response.json()) as WakaTime.User;
 }
 
-export async function getSummary(key: string, start: Date, id = "current") {
+export async function getSummary(key: string, start: Date) {
   const response = await fetch(
-    `${URL}/users/${id}/summaries?start=${format(start, "yyyy-MM-dd")}&end=${format(
+    `${URL}/users/current/summaries?start=${format(start, "yyyy-MM-dd")}&end=${format(
       /last/i.test(key) ? new Date() : start,
       "yyyy-MM-dd"
     )}`,

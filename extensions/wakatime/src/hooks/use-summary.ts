@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { getSummary } from "../utils";
 
-export function useSummary(range: Range | "all" = "all", id = "current") {
+export function useSummary(range: Range | "all" = "all") {
   const rangeOrder: Range[] = ["Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Last 6 Months", "Last Year"];
   const ranges: Record<Range, Date> = {
     Today: new Date(),
@@ -22,7 +22,7 @@ export function useSummary(range: Range | "all" = "all", id = "current") {
       const dateRanges = range === "all" ? Object.entries(ranges) : [[range, ranges[range]] as const];
       await Promise.all(
         dateRanges.map(async ([key, date]) => {
-          const summary = await getSummary(key, date, id);
+          const summary = await getSummary(key, date);
 
           setData((data = []) => {
             const newData = [...data];
