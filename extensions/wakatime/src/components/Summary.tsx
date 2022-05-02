@@ -47,7 +47,11 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDet
       title={title}
       actions={
         <ActionPanel>
-          <Action title="Show Details" icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} />
+          <Action
+            icon={Icon.Sidebar}
+            onAction={() => setShowDetail(!showDetail)}
+            title={showDetail ? "Hide Details" : "Show Details"}
+          />
         </ActionPanel>
       }
     />

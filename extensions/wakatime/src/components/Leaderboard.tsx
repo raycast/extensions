@@ -39,7 +39,11 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       icon={user.photo_public ? { source: user.photo, mask: Image.Mask.Circle } : undefined}
       actions={
         <ActionPanel>
-          <Action title="Show Details" icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} />
+          <Action
+            icon={Icon.Sidebar}
+            onAction={() => setShowDetail(!showDetail)}
+            title={showDetail ? "Hide Details" : "Show Details"}
+          />
           {user.website ? <Action.OpenInBrowser title="Go to Website" url={user.website} /> : <></>}
           <Action.OpenInBrowser title="Go To WakaTime Profile" url={`https://wakatime.com/@${user.username}`} />
         </ActionPanel>
