@@ -1,16 +1,30 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import axios, { AxiosError } from "axios";
+import shajs from "sha.js";
 
 interface Preferences {
   secret: string;
 }
 
 export async function getTokenFromSecret(): Promise<any> {
+  // handle the preferences secret
   const preferences = getPreferenceValues<Preferences>();
-  const token = await LocalStorage.getItem("liveblocks-jwt");
 
-  if (!preferences.secret || token) {
+  if (!preferences.secret) {
     return;
+  }
+
+  // handle the hashed secret
+  const storedHashedSecret = await LocalStorage.getItem("liveblocks-secret");
+
+  if (storedHashedSecret === shajs("sha256").update(preferences.secret).digest("hex")) {
+    return;
+  }
+
+  if (!storedHashedSecret) {
+    const hashedSecret = shajs("sha256").update(preferences.secret).digest("hex");
+
+    await LocalStorage.setItem("liveblocks-secret", hashedSecret);
   }
 
   const toast = await showToast({
