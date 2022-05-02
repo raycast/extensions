@@ -1,6 +1,6 @@
+import { format } from "date-fns";
 import fetch, { RequestInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { format, formatDuration, intervalToDuration, subSeconds } from "date-fns";
 
 const URL = "https://wakatime.com/api/v1";
 
@@ -25,11 +25,20 @@ export async function getLeaderBoard(id?: string) {
   return (await response.json()) as WakaTime.LeaderBoard;
 }
 
-export function getDuration(seconds: number, format?: DurationFormat) {
-  return (
-    formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) }), { format }) ||
-    "0 seconds"
-  );
+export function getDuration(seconds: number) {
+  const getAmount = (rate: number, unit: string) => {
+    const num = Math.floor(seconds / rate);
+    seconds = Math.floor(seconds - num * rate);
+    return num === 0 ? "" : `${num} ${unit}`;
+  };
+
+  const hours = getAmount(60 * 60, "hr");
+  const minutes = getAmount(60, "min");
+  const sec = getAmount(1, "sec");
+
+  const duration = [hours, minutes, sec].filter(Boolean).join(" ");
+
+  return duration || "0 sec";
 }
 
 export function cumulateSummaryDuration(
@@ -79,5 +88,3 @@ function setHeaders(headers: RequestInit = {}) {
 interface Preferences {
   apiKey: string;
 }
-
-type DurationFormat = ("years" | "months" | "days" | "hours" | "minutes" | "seconds")[];

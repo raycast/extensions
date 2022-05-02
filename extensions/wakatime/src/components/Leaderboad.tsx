@@ -24,7 +24,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
     ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
     : {
         accessories: [
-          { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds, ["hours", "minutes"]) },
+          { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds) },
           user.city ? { tooltip: user.city.title, text: getFlagEmoji(user.city.country_code) } : {},
         ],
       };
