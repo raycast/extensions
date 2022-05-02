@@ -76,7 +76,7 @@
       "required": false,
       "default": true,
       "title": "List Behavior",
-      "description": "Show Tweets inside a Tweets List"
+      "description": "Show Tweets inside a Tweets List directly"
     }
   ],
   "dependencies": {

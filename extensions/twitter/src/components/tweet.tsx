@@ -207,6 +207,7 @@ export function TweetList(props: {
       }
     }
   }
+
   return (
     <List isLoading={props.isLoading} searchBarPlaceholder="Filter Tweets by name..." isShowingDetail={isShowingDetail}>
       {tweets?.map((tweet) => (
