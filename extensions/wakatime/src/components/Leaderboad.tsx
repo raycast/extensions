@@ -9,8 +9,19 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
   running_total,
   user,
 }) => {
+  const md = [
+    `# ${user.display_name}`,
+    user.is_hireable ? "**Hireable**" : "",
+    user.city ? `- From ${user.city.title} ${getFlagEmoji(user.city.country_code)}` : "",
+    `- Rank #${rank}`,
+    `- Daily Average (${getDuration(running_total.daily_average)})`,
+    `- Hours Coded (${getDuration(running_total.total_seconds)})`,
+    "## Languages",
+    ...running_total.languages.map((item) => `- ${item.name} (${getDuration(item.total_seconds)})`),
+  ];
+
   const props: Partial<List.Item.Props> = showDetail
-    ? { detail: <List.Item.Detail markdown="" /> }
+    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
     : {
         accessories: [
           { tooltip: "Hours Coded", text: getDuration(running_total.total_seconds, ["hours", "minutes"]) },
