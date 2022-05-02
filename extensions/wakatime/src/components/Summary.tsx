@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
@@ -46,7 +46,7 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDet
       title={title}
       actions={
         <ActionPanel>
-          <Action title="Toggle Detail" onAction={() => setShowDetail(!showDetail)} />
+          <Action title="Show Details" icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} />
         </ActionPanel>
       }
     />

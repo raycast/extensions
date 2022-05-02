@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { getDuration, getFlagEmoji } from "../utils";
 
@@ -26,7 +26,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       icon={user.photo_public ? { source: user.photo, mask: Image.Mask.Circle } : undefined}
       actions={
         <ActionPanel>
-          <Action title="Show Details" onAction={() => setShowDetail(!showDetail)} />
+          <Action title="Show Details" icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} />
           {user.website ? <Action.OpenInBrowser title="Go To Website" url={user.website} /> : <></>}
           <Action.OpenInBrowser title="Go To Profile" url={`https://wakatime.com/@${user.username}`} />
         </ActionPanel>
