@@ -10,12 +10,12 @@ import {
 } from "@raycast/api";
 
 import fs from "fs";
-import React from "react";
+import React, { useState } from "react";
 
 import { AppendNoteForm } from "../components/AppendNoteForm";
 import { SearchNotePreferences, Note } from "./interfaces";
 import { getNoteContent } from "./utils";
-import { pinNote } from "./PinNoteUtils";
+import { isNotePinned, pinNote, unpinNote } from "./PinNoteUtils";
 
 enum PrimaryAction {
   QuickLook = "quicklook",
@@ -63,6 +63,9 @@ function NoteQuickLook(props: { note: Note; vaultPath: string }) {
 
 export function NoteActions(props: { note: Note; vaultPath: string }) {
   const note = props.note;
+
+  let [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
+
   return (
     <React.Fragment>
       <Action.Push
@@ -108,12 +111,18 @@ export function NoteActions(props: { note: Note; vaultPath: string }) {
       />
 
       <Action
-        title="Pin Note"
+        title={pinned ? "Unpin Note" : "Pin Note"}
         shortcut={{ modifiers: ["opt"], key: "p" }}
         onAction={() => {
-          pinNote(note, props.vaultPath);
+          if (pinned) {
+            unpinNote(note, props.vaultPath);
+            setPinned(!pinned);
+          } else {
+            pinNote(note, props.vaultPath);
+            setPinned(!pinned);
+          }
         }}
-        icon={Icon.Pin}
+        icon={pinned ? Icon.XmarkCircle : Icon.Pin}
       />
     </React.Fragment>
   );

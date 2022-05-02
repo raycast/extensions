@@ -12,7 +12,7 @@ export function NoteList(props: {
   vaultPath: string;
 }) {
   const notes = props.notes;
-  let action = props.action;
+  const action = props.action;
 
   let isLoading = notes === undefined;
 
@@ -37,7 +37,7 @@ export function NoteList(props: {
             <ActionPanel>
               <OpenNoteActions note={note} vaultPath={props.vaultPath} />
               <NoteActions note={note} vaultPath={props.vaultPath} />
-              {action && action(note)}
+              {/* {action && action(note)} */}
             </ActionPanel>
           }
         />

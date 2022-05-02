@@ -1,5 +1,4 @@
 import { List, ActionPanel, Action, Detail, showToast, Toast, closeMainWindow, open, popToRoot } from "@raycast/api";
-import fs from "fs";
 
 import { Vault } from "./utils/interfaces";
 import { vaultPluginCheck, parseVaults } from "./utils/utils";

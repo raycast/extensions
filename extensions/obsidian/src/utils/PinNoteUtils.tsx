@@ -13,8 +13,8 @@ function getInfo(vaultPath: string) {
     fs.writeFileSync(environment.supportPath + "/data.json", "[]");
   }
 
-  let data = fs.readFileSync(environment.supportPath + "/data.json", "utf8");
-  let parsedData: DataProps[] = JSON.parse(data);
+  const data = fs.readFileSync(environment.supportPath + "/data.json", "utf8");
+  const parsedData: DataProps[] = JSON.parse(data);
 
   const vaults = parsedData.filter((vault) => vault.vaultPath == vaultPath);
   if (vaults.length == 0) {
@@ -35,10 +35,10 @@ export function getPinnedNotes(path: string): Note[] {
 export function unpinNote(note: Note, vaultPath: string) {
   const info = getInfo(vaultPath);
 
-  let pinnedNotes = info.pinnedNotes.filter((pinnedNote) => pinnedNote.key !== note.key);
+  const pinnedNotes = info.pinnedNotes.filter((pinnedNote) => pinnedNote.key !== note.key);
   info.vault.pinnedNotes = pinnedNotes;
 
-  let idx = info.data.findIndex((vault) => vault.vaultPath == vaultPath);
+  const idx = info.data.findIndex((vault) => vault.vaultPath == vaultPath);
   info.data[idx] = info.vault;
 
   fs.writeFileSync(environment.supportPath + "/data.json", JSON.stringify(info.data));
@@ -52,10 +52,15 @@ export function unpinNote(note: Note, vaultPath: string) {
   return pinnedNotes;
 }
 
+export function isNotePinned(note: Note, vaultPath: string = "") {
+  const info = getInfo(vaultPath);
+  return info.pinnedNotes.filter((pinnedNote) => pinnedNote.key == note.key).length !== 0;
+}
+
 export function pinNote(note: Note, vaultPath: string) {
   const info = getInfo(vaultPath);
 
-  if (info.pinnedNotes.filter((pinnedNote) => pinnedNote.key == note.key).length !== 0) {
+  if (isNotePinned(note, vaultPath)) {
     showToast({
       title: "Already Pinned",
       message: "'" + note.title + "' is already pinned.",
@@ -66,7 +71,7 @@ export function pinNote(note: Note, vaultPath: string) {
 
   info.vault.pinnedNotes.push(note);
 
-  let idx = info.data.findIndex((vault) => vault.vaultPath == vaultPath);
+  const idx = info.data.findIndex((vault) => vault.vaultPath == vaultPath);
   info.data[idx] = info.vault;
 
   fs.writeFileSync(environment.supportPath + "/data.json", JSON.stringify(info.data));
