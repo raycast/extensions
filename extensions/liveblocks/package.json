@@ -14,25 +14,29 @@
     {
       "name": "authentication",
       "title": "Authenticate",
+      "subtitle": "Liveblocks",
       "description": "To use the API, you need to add a JWT token to the request’s authorization header.",
       "mode": "view"
     },
     {
       "name": "get-room-storage",
       "title": "Get Room Storage",
+      "subtitle": "Liveblocks",
       "description": "Get the room storage data as a JSON.",
       "mode": "view"
     },
     {
       "name": "init-room-storage",
       "title": "Initialize Room Storage",
+      "subtitle": "Liveblocks",
       "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
       "mode": "view"
     },
     {
       "name": "delete-room-storage",
       "title": "Delete Room Storage",
-      "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
+      "subtitle": "Liveblocks",
+      "description": "Delete a room storage.",
       "mode": "view"
     }
   ],
