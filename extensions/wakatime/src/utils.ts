@@ -24,6 +24,26 @@ export function getDuration(seconds: number) {
   return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) }));
 }
 
+export function cumulateSummaryDuration(
+  { data }: WakaTime.Summary,
+  key: keyof Omit<typeof data[0], "grand_total" | "range">
+) {
+  const obj = Object.entries(
+    data
+      .map((item) => item[key])
+      .flat()
+      .reduce((acc, item) => {
+        const { name = "", total_seconds = 0 } = item ?? {};
+        return {
+          ...acc,
+          [name]: total_seconds + (acc[name] ?? 0),
+        };
+      }, {} as { [name: string]: number })
+  ).sort((a, b) => b[1] - a[1]);
+
+  return obj;
+}
+
 function setHeaders(headers: RequestInit = {}) {
   const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<Preferences>();
