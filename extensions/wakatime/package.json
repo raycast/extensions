@@ -16,6 +16,12 @@
       "title": "Open Dashboard",
       "description": "Show your WakaTime Dashboard",
       "mode": "view"
+    },
+    {
+      "name": "leaderboard",
+      "title": "Show Global Leaderboard",
+      "description": "Show your rank in the global leaderboard",
+      "mode": "view"
     }
   ],
   "preferences": [
