@@ -1,3 +1,4 @@
 export { useUser } from "./use-user";
 export { useSummary } from "./use-summary";
 export { useLeaderBoard } from "./use-leaderboard";
+export { usePrivateLeaderBoards } from "./use-private-leaderboards";
