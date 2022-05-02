@@ -1,4 +1,4 @@
-# Maven Central Repository Search
+# Maven Central Repository
 
 Official search by the maintainers of Maven Central Repository.
 

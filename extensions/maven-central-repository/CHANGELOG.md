@@ -1,4 +1,4 @@
-# Maven Central Repository Search Changelog
+# Maven Central Repository Changelog
 
 ## [Initial Version] - 2022-05-10
 

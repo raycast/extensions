@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "maven-central-repository-search",
-  "title": "Maven Central Repository Search",
+  "name": "maven-central-repository",
+  "title": "Maven Central Repository",
   "description": "Official search by the maintainers of Maven Central Repository.",
   "icon": "search-maven-central-repository.png",
   "author": "koinzhang",
