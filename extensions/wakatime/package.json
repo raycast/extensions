@@ -21,8 +21,8 @@
     {
       "name": "leaderboard",
       "subtitle": "WakaTime",
-      "title": "Show Global Leaderboard",
-      "description": "Show your rank in the global leaderboard",
+      "title": "Show Public Leaderboard",
+      "description": "Show your rank in the public global leaderboard",
       "mode": "view"
     },
     {
