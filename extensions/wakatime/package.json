@@ -13,18 +13,21 @@
   "commands": [
     {
       "name": "summary",
+      "subtitle": "WakaTime",
       "title": "Show Summary",
       "description": "Show your WakaTime Summary",
       "mode": "view"
     },
     {
       "name": "leaderboard",
+      "subtitle": "WakaTime",
       "title": "Show Global Leaderboard",
       "description": "Show your rank in the global leaderboard",
       "mode": "view"
     },
     {
       "name": "private-leaderboards",
+      "subtitle": "WakaTime",
       "title": "Show Private Leaderboards",
       "description": "Show your private leaderboards",
       "mode": "view"
