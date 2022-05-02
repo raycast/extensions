@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { sub } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -20,17 +21,22 @@ export function useSummary(range: Range | "all" = "all") {
     async function getData() {
       setIsLoading(true);
       const dateRanges = range === "all" ? Object.entries(ranges) : [[range, ranges[range]] as const];
-      await Promise.all(
-        dateRanges.map(async ([key, date]) => {
-          const summary = await getSummary(key, date);
 
-          setData((data = []) => {
-            const newData = [...data];
-            newData.splice(rangeOrder.indexOf(key as Range), 0, [key, summary]);
-            return newData;
-          });
-        })
-      );
+      try {
+        await Promise.all(
+          dateRanges.map(async ([key, date]) => {
+            const summary = await getSummary(key, date);
+            setData((data = []) => {
+              const newData = [...data];
+              newData.splice(rangeOrder.indexOf(key as Range), 0, [key, summary]);
+              return newData;
+            });
+          })
+        );
+      } catch (error) {
+        await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Record<string, string>).message);
+      }
+
       setIsLoading(false);
     }
 
