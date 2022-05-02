@@ -49,8 +49,7 @@ export default function main() {
     <>
       <List
         isLoading={loading}
-        searchBarPlaceholder="Search for a Categorie on Twitch"
-        navigationTitle="Search a Categorie"
+        navigationTitle="Search for category..."
         onSearchTextChange={(text) => setQuery(text)}
       >
         {items.map((item: Game) => {
@@ -63,7 +62,7 @@ export default function main() {
               actions={
                 <ActionPanel>
                   <OpenAction
-                    title="Open Categorie"
+                    title="Open Category"
                     target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`}
                   />
                 </ActionPanel>
