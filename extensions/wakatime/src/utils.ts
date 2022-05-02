@@ -1,11 +1,11 @@
+import fetch from "node-fetch";
 import { format } from "date-fns";
-import fetch, { RequestInit } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 
 const URL = "https://wakatime.com/api/v1";
 
 export async function getUser() {
-  const response = await fetch(`${URL}/users/current`, setHeaders());
+  const response = await fetch(`${URL}/users/current`, setAuthHeader());
   return (await response.json()) as WakaTime.User;
 }
 
@@ -15,18 +15,18 @@ export async function getSummary(key: string, start: Date) {
       /last/i.test(key) ? new Date() : start,
       "yyyy-MM-dd"
     )}`,
-    setHeaders()
+    setAuthHeader()
   );
   return (await response.json()) as WakaTime.Summary;
 }
 
 export async function getLeaderBoard(id?: string) {
-  const response = await fetch(`${URL}/${id ? `users/current/leaderboards/${id}` : "leaders"}`, setHeaders());
+  const response = await fetch(`${URL}/${id ? `users/current/leaderboards/${id}` : "leaders"}`, setAuthHeader());
   return (await response.json()) as WakaTime.LeaderBoard;
 }
 
 export async function getPrivateLeaderBoards() {
-  const response = await fetch(`${URL}/users/current/leaderboards`, setHeaders());
+  const response = await fetch(`${URL}/users/current/leaderboards`, setAuthHeader());
   return (await response.json()) as WakaTime.PrivateLeaderBoards;
 }
 
@@ -75,19 +75,13 @@ export function getFlagEmoji(countryCode: string) {
   return String.fromCodePoint(...codePoints);
 }
 
-function setHeaders(headers: RequestInit = {}) {
+function setAuthHeader() {
   const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
   const { apiKey } = getPreferenceValues<Preferences>();
 
   if (!API_KEY_REGEX.test(apiKey)) throw new Error("Invalid API Key");
 
-  return {
-    ...headers,
-    headers: {
-      ...headers.headers,
-      Authorization: `Basic ${Buffer.from(apiKey).toString("base64")}`,
-    },
-  };
+  return { headers: { Authorization: `Basic ${Buffer.from(apiKey).toString("base64")}` } };
 }
 
 interface Preferences {
