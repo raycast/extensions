@@ -6,6 +6,12 @@
 
 - Add description to the detail view if available
 
+## [1.2.0] - 2022-05-10
+
+### Features
+
+- Order snippets by last used
+
 ## [1.1.0] - 2022-05-09
 
 ### Features
