@@ -22,7 +22,8 @@ export function useSummary(range: Range | "all" = "all", id = "current") {
       const dateRanges = range === "all" ? Object.entries(ranges) : [[range, ranges[range]] as const];
       await Promise.all(
         dateRanges.map(async ([key, date]) => {
-          const summary = await getSummary(date, id);
+          const summary = await getSummary(key, date, id);
+
           setData((data = []) => {
             const newData = [...data];
             newData.splice(rangeOrder.indexOf(key as Range), 0, [key, summary]);

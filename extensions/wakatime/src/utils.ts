@@ -9,9 +9,12 @@ export async function getUser(id = "current") {
   return (await response.json()) as WakaTime.User;
 }
 
-export async function getSummary(start: Date, id = "current") {
+export async function getSummary(key: string, start: Date, id = "current") {
   const response = await fetch(
-    `${URL}/users/${id}/summaries?start=${format(start, "yyyy-MM-dd")}&end=${format(new Date(), "yyyy-MM-dd")}`,
+    `${URL}/users/${id}/summaries?start=${format(start, "yyyy-MM-dd")}&end=${format(
+      /last/i.test(key) ? new Date() : start,
+      "yyyy-MM-dd"
+    )}`,
     setHeaders()
   );
   return (await response.json()) as WakaTime.Summary;
