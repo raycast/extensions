@@ -52,7 +52,7 @@ export function unpinNote(note: Note, vaultPath: string) {
   return pinnedNotes;
 }
 
-export function isNotePinned(note: Note, vaultPath: string = "") {
+export function isNotePinned(note: Note, vaultPath: string) {
   const info = getInfo(vaultPath);
   return info.pinnedNotes.filter((pinnedNote) => pinnedNote.key == note.key).length !== 0;
 }

@@ -64,7 +64,7 @@ function NoteQuickLook(props: { note: Note; vaultPath: string }) {
 export function NoteActions(props: { note: Note; vaultPath: string }) {
   const note = props.note;
 
-  let [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
+  const [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
 
   return (
     <React.Fragment>
