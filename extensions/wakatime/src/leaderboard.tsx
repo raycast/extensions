@@ -4,8 +4,8 @@ import { useLeaderBoard } from "./hooks";
 import { LeaderBoardItem } from "./components";
 import { useState } from "react";
 
-export default function Command() {
-  const { data, isLoading } = useLeaderBoard();
+export default function Command({ id }: { id?: string }) {
+  const { data, isLoading } = useLeaderBoard(id);
   const [showDetail, setShowDetail] = useState(false);
 
   return (
