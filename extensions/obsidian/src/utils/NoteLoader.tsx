@@ -1,7 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-
-import { getPreferenceValues } from "@raycast/api";
 
 import { SearchNotePreferences, Note } from "./interfaces";
 
@@ -40,7 +39,7 @@ class NoteLoader {
     return files;
   }
 
-  getFilesHelp(dirPath: string, exFolders: Array<string>, arrayOfFiles: Array<string>) {
+  getFilesHelp(dirPath: string, exFolders: string[], arrayOfFiles: string[]) {
     const files = fs.readdirSync(dirPath);
     arrayOfFiles = arrayOfFiles || [];
 
@@ -63,7 +62,7 @@ class NoteLoader {
     return arrayOfFiles;
   }
 
-  isValidFile(file: string, exFolders: Array<string>) {
+  isValidFile(file: string, exFolders: string[]) {
     for (const folder of exFolders) {
       if (file.includes(folder)) {
         return false;

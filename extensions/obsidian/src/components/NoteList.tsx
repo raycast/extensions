@@ -1,44 +1,43 @@
-import { List, ActionPanel, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
+import React from "react";
 
-import fs from "fs";
+import { Note, SearchNotePreferences } from "../utils/interfaces";
+import { OpenNoteActions, NoteActions } from "../utils/actions";
+import { getNoteContent } from "../utils/utils";
 
-import NoteLoader from "../NoteLoader";
-import { Note } from "../interfaces";
-import { OpenNoteActions, NoteActions } from "../actions";
+export function NoteList(props: {
+  notes: Note[] | undefined;
+  action?: (note: Note) => React.ReactFragment;
+  isLoading?: boolean;
+  vaultPath: string;
+}) {
+  const notes = props.notes;
+  let action = props.action;
 
-export function NoteList(props: { vaultPath: string }) {
-  const vaultPath = props.vaultPath;
-  const [notes, setNotes] = useState<Note[]>();
-  useEffect(() => {
-    async function fetch() {
-      try {
-        await fs.promises.access(vaultPath + "/.");
-        const nl = new NoteLoader(vaultPath);
-        const _notes = nl.loadNotes();
+  let isLoading = notes === undefined;
 
-        setNotes(_notes);
-      } catch (error) {
-        showToast({
-          title: "The path set in preferences doesn't exist",
-          message: "Please set a valid path in preferences",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    fetch();
-  }, []);
+  if (notes !== undefined) {
+    isLoading = notes.length == 0;
+  }
+
+  if (props.isLoading !== undefined) {
+    isLoading = props.isLoading;
+  }
+
+  const pref: SearchNotePreferences = getPreferenceValues();
 
   return (
-    <List isLoading={notes === undefined}>
+    <List isLoading={isLoading} isShowingDetail={pref.showDetail}>
       {notes?.map((note) => (
         <List.Item
           title={note.title}
           key={note.key}
+          detail={<List.Item.Detail markdown={getNoteContent(note)} />}
           actions={
             <ActionPanel>
-              <OpenNoteActions note={note} />
-              <NoteActions note={note} />
+              <OpenNoteActions note={note} vaultPath={props.vaultPath} />
+              <NoteActions note={note} vaultPath={props.vaultPath} />
+              {action && action(note)}
             </ActionPanel>
           }
         />

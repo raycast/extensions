@@ -1,16 +1,16 @@
 import { showToast, Toast } from "@raycast/api";
 
-import { CreateNoteForm } from "./components/CreateNoteForm";
+import { parseVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
-import { parseVaults } from "./utils/utils";
+import { NoteListPinned } from "./components/NoteListPinned";
 
 export default function Command() {
   const vaults = parseVaults();
   if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <CreateNoteForm vaultPath={vault.path} />} />;
+    return <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListPinned vaultPath={vault.path} />} />;
   } else if (vaults.length == 1) {
-    return <CreateNoteForm vaultPath={vaults[0].path} />;
+    return <NoteListPinned vaultPath={vaults[0].path} />;
   } else {
     showToast({
       title: "Path Error",

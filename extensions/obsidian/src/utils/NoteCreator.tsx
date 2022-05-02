@@ -1,30 +1,40 @@
-import { showToast, Toast, confirmAlert, Icon } from "@raycast/api";
-import fs from "fs";
+import { showToast, Toast, confirmAlert, Icon, open, getPreferenceValues } from "@raycast/api";
+
 import path from "path";
+import fs from "fs";
+import { NoteFormPreferences } from "./interfaces";
 
 interface FormValue {
   path: string;
   name: string;
   content: string;
-  tags: Array<string>;
+  tags: string[];
 }
 
 class NoteCreator {
   vaultPath: string;
   noteProps: FormValue;
   saved = false;
+  openOnCreation: boolean;
 
-  constructor(noteProps: FormValue, vaultPath: string) {
+  constructor(noteProps: FormValue, vaultPath: string, openOnCreation: boolean) {
     this.vaultPath = vaultPath;
     this.noteProps = noteProps;
+    this.openOnCreation = openOnCreation;
   }
 
   createNote() {
     if (this.noteProps.name == "") {
-      showToast({ title: "Please enter a name", style: Toast.Style.Failure });
-    } else {
-      const content = this.buildNoteContent();
-      this.saveNote(content);
+      const pref: NoteFormPreferences = getPreferenceValues();
+      this.noteProps.name = pref.prefNoteName;
+    }
+    const content = this.buildNoteContent();
+    this.saveNote(content);
+    if (this.openOnCreation) {
+      const target =
+        "obsidian://open?path=" +
+        encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, this.noteProps.name + ".md"));
+      open(target);
     }
     return this.saved;
   }
