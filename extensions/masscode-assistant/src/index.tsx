@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, showToast, Toast, open } from "@raycas
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
-import SnippetContent from "./components/snippet-content"
+import SnippetContent from "./components/snippet-content";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
