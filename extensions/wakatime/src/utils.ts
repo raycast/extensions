@@ -20,6 +20,11 @@ export async function getSummary(key: string, start: Date) {
   return (await response.json()) as WakaTime.Summary;
 }
 
+export async function getLeaderBoard(id?: string) {
+  const response = await fetch(`${URL}/${id ? `users/current/leaderboards/${id}` : "leaders"}`, setHeaders());
+  return (await response.json()) as WakaTime.LeaderBoard;
+}
+
 export function getDuration(seconds: number) {
   return formatDuration(intervalToDuration({ end: new Date(), start: subSeconds(new Date(), seconds) })) || "0 seconds";
 }

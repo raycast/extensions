@@ -98,6 +98,32 @@ declare global {
         >;
     }
 
+    export interface LeaderBoard
+      extends Record<"page" | "total_pages" | "timeout", number>,
+        Record<"language" | "country_code" | "modified_at", string>,
+        Record<"is_hireable" | "writes_only", boolean> {
+      current_user: Record<"rank" | "page", number> & Record<"user", LeaderBoardUser>;
+      range: Record<"start_date" | "start_text" | "end_date" | "end_text" | "name" | "text", string>;
+      data: {
+        rank: number;
+        user: LeaderBoardUser;
+        running_total: Record<"total_seconds" | "daily_average", number> &
+          Record<"human_readable_total" | "human_readable_daily_average", string> & {
+            languages: {
+              name: string;
+              total_seconds: number;
+            }[];
+          };
+      }[];
+    }
+
+    type LeaderBoardUser = Record<"is_email_public" | "is_hireable" | "photo_public", boolean> &
+      Record<"city", Record<"country_code" | "name" | "state" | "title", string> | null> &
+      Record<
+        "id" | "email" | "username" | "photo" | "full_name" | "display_name" | "website" | "human_readable_website",
+        string
+      >;
+
     type StatProperty = Record<"digital" | "name" | "text", string> &
       Record<"hours" | "minutes" | "percent" | "seconds" | "total_seconds", number>;
   }
