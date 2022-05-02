@@ -22,6 +22,12 @@
       "title": "Show Global Leaderboard",
       "description": "Show your rank in the global leaderboard",
       "mode": "view"
+    },
+    {
+      "name": "private-leaderboards",
+      "title": "Show Private Leaderboards",
+      "description": "Show your private leaderboards",
+      "mode": "view"
     }
   ],
   "preferences": [
