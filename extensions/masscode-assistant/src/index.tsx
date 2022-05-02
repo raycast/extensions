@@ -51,7 +51,6 @@ export default function Command() {
             keywords={[i.content[0].language]}
             subtitle={i.content[0].language}
             icon={Icon.Document}
-            accessories={[{ text: i.folder?.name ?? "Inbox" }]}
             detail={<SnippetContent snippet={i} selectedFragment={0} />}
             actions={
               <ActionPanel title="Actions">
