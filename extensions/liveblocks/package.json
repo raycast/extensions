@@ -16,48 +16,30 @@
       "title": "Initialize Room Storage",
       "subtitle": "Liveblocks",
       "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "secret",
-          "type": "textfield",
-          "required": true,
-          "title": "Secret Key",
-          "description": "You can find your Secret Key in the Liveblocks Dashboard."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "get-room-storage",
       "title": "Get Room Storage",
       "subtitle": "Liveblocks",
       "description": "Get the room storage data as a JSON.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "secret",
-          "type": "textfield",
-          "required": true,
-          "title": "Secret Key",
-          "description": "You can find your Secret Key in the Liveblocks Dashboard."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "delete-room-storage",
       "title": "Delete Room Storage",
       "subtitle": "Liveblocks",
       "description": "Delete all elements of the room storage.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "secret",
-          "type": "textfield",
-          "required": true,
-          "title": "Secret Key",
-          "description": "You can find your Secret Key in the Liveblocks Dashboard."
-        }
-      ]
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "secret",
+      "type": "password",
+      "required": true,
+      "title": "Secret Key",
+      "description": "You can find your Secret Key in the Liveblocks Dashboard."
     }
   ],
   "dependencies": {
