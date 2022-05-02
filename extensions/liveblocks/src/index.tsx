@@ -1,4 +1,4 @@
-import {s getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   secret: string;
