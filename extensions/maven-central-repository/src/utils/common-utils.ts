@@ -1,14 +1,4 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import Values = LocalStorage.Values;
 import { Doc } from "./types";
-import { MAVEN_CENTRAL_REPOSITORY_SEARCH } from "./constants";
-
-export const preferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    applyTo: preferencesMap.get("applyTo") as string,
-  };
-};
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -33,11 +23,20 @@ export enum DependencyType {
 
 export const dependencyTypes = Object.values(DependencyType);
 
-export const buildDependency = (
-  doc: Doc,
-  dependenceType: DependencyType,
-  requestURL = MAVEN_CENTRAL_REPOSITORY_SEARCH
-) => {
+export const actionIcons = [
+  "action-icon/apache-maven.png",
+  "action-icon/gradle-groovy-dsl.png",
+  "action-icon/gradle-kotlin-dsl.png",
+  "action-icon/scala-sbt.png",
+  "action-icon/groovy-grape.png",
+  "action-icon/apache-ivy.png",
+  "action-icon/leiningen.png",
+  "action-icon/apache-buildr.png",
+  "action-icon/maven-central-badge.png",
+  "action-icon/purl.png",
+];
+
+export const buildDependency = (doc: Doc, dependenceType: DependencyType) => {
   switch (dependenceType) {
     case DependencyType.APACHE_MAVEN: {
       return `<dependency>
@@ -71,9 +70,7 @@ export const buildDependency = (
       return `'${doc.g}:${doc.a}:jar:${doc.latestVersion}'`;
     }
     case DependencyType.MAVEN_CENTRAL_BADGE: {
-      return `[![Maven Central](https://img.shields.io/maven-central/v/${doc.g}/${
-        doc.a
-      }.svg?label=Maven%20Central)](${encodeURI(requestURL)})'`;
+      return `[![Maven Central](https://img.shields.io/maven-central/v/${doc.g}/${doc.a}.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22${doc.g}%22%20AND%20a:%22${doc.a}%22)`;
     }
     case DependencyType.PURL: {
       return `pkg:maven/${doc.g}/${doc.a}@${doc.latestVersion}`;

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchMavenArtifact } from "./hooks/hooks";
 import { getListIcon } from "./utils/ui-utils";
-import { buildDependency, buildUpdatedDate, dependencyTypes } from "./utils/common-utils";
+import { actionIcons, buildDependency, buildUpdatedDate, dependencyTypes } from "./utils/common-utils";
 import { ActionToAdvancedSearchOptions, ActionToPexels } from "./utils/ui-components";
 import { MAVEN_CENTRAL_REPOSITORY_SEARCH } from "./utils/constants";
 
@@ -54,13 +54,14 @@ export default function SearchMavenCentralRepository() {
                   }}
                 />
                 <ActionToAdvancedSearchOptions />
-                <ActionPanel.Section title={"Dependency"}>
-                  {dependencyTypes.map((dependenceType) => {
+                <ActionPanel.Section title={"Copy Dependency"}>
+                  {dependencyTypes.map((dependenceType, index) => {
                     return (
                       <Action.CopyToClipboard
                         key={dependenceType}
-                        title={`Copy ${dependenceType}`}
-                        content={buildDependency(value, dependenceType, "")}
+                        icon={{ source: actionIcons[index] }}
+                        title={`${dependenceType}`}
+                        content={buildDependency(value, dependenceType)}
                       />
                     );
                   })}
