@@ -9,7 +9,7 @@ export default function Command() {
   const [showDetail, setShowDetail] = useState(false);
 
   return (
-    <List isLoading={isLoading} isShowingDetail={showDetail}>
+    <List isLoading={isLoading} isShowingDetail={showDetail} selectedItemId={data?.current_user.user.id}>
       {data?.data.map((item, idx) => (
         <LeaderBoardItem key={idx} {...item} {...{ showDetail, setShowDetail }} />
       ))}

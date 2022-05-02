@@ -32,6 +32,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
   return (
     <List.Item
       {...props}
+      id={user.id}
       subtitle={`#${rank}`}
       title={user.display_name}
       icon={user.photo_public ? { source: user.photo, mask: Image.Mask.Circle } : undefined}
