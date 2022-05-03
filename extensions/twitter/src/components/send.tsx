@@ -10,7 +10,7 @@ interface TweetFormValues {
 async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined) {
   try {
     const text = values.text;
-    if (text.length < 0) {
+    if (text.length <= 0) {
       throw Error("Please enter a text");
     }
     if (text.length > 280) {
