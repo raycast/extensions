@@ -332,4 +332,356 @@ const documentation = {
       title: "Experiments",
     },
   ],
+  Events: [
+    {
+      url: "https://docs.cypress.io/api/events/catalog-of-events",
+      title: "Catalog of Events",
+    },
+  ],
+  Commands: [
+    {
+      title: "and",
+      url: "https://docs.cypress.io/api/commands/and",
+    },
+    {
+      title: "as",
+      url: "https://docs.cypress.io/api/commands/as",
+    },
+    {
+      title: "blur",
+      url: "https://docs.cypress.io/api/commands/blur",
+    },
+    {
+      title: "check",
+      url: "https://docs.cypress.io/api/commands/check",
+    },
+    {
+      title: "children",
+      url: "https://docs.cypress.io/api/commands/children",
+    },
+    {
+      title: "clear",
+      url: "https://docs.cypress.io/api/commands/clear",
+    },
+    {
+      title: "clearCookie",
+      url: "https://docs.cypress.io/api/commands/clearcookie",
+    },
+    {
+      title: "clearCookies",
+      url: "https://docs.cypress.io/api/commands/clearcookies",
+    },
+    {
+      title: "clearLocalStorage",
+      url: "https://docs.cypress.io/api/commands/clearlocalstorage",
+    },
+    {
+      title: "click",
+      url: "https://docs.cypress.io/api/commands/click",
+    },
+    {
+      title: "clock",
+      url: "https://docs.cypress.io/api/commands/clock",
+    },
+    {
+      title: "closest",
+      url: "https://docs.cypress.io/api/commands/closest",
+    },
+    {
+      title: "contains",
+      url: "https://docs.cypress.io/api/commands/contains",
+    },
+    {
+      title: "dblclick",
+      url: "https://docs.cypress.io/api/commands/dblclick",
+    },
+    {
+      title: "debug",
+      url: "https://docs.cypress.io/api/commands/debug",
+    },
+    {
+      title: "document",
+      url: "https://docs.cypress.io/api/commands/document",
+    },
+    {
+      title: "each",
+      url: "https://docs.cypress.io/api/commands/each",
+    },
+    {
+      title: "end",
+      url: "https://docs.cypress.io/api/commands/end",
+    },
+    {
+      title: "eq",
+      url: "https://docs.cypress.io/api/commands/eq",
+    },
+    {
+      title: "exec",
+      url: "https://docs.cypress.io/api/commands/exec",
+    },
+    {
+      title: "filter",
+      url: "https://docs.cypress.io/api/commands/filter",
+    },
+    {
+      title: "find",
+      url: "https://docs.cypress.io/api/commands/find",
+    },
+    {
+      title: "first",
+      url: "https://docs.cypress.io/api/commands/first",
+    },
+    {
+      title: "fixture",
+      url: "https://docs.cypress.io/api/commands/fixture",
+    },
+    {
+      title: "focus",
+      url: "https://docs.cypress.io/api/commands/focus",
+    },
+    {
+      title: "focused",
+      url: "https://docs.cypress.io/api/commands/focused",
+    },
+    {
+      title: "get",
+      url: "https://docs.cypress.io/api/commands/get",
+    },
+    {
+      title: "getCookie",
+      url: "https://docs.cypress.io/api/commands/getcookie",
+    },
+    {
+      title: "getCookies",
+      url: "https://docs.cypress.io/api/commands/getcookies",
+    },
+    {
+      title: "go",
+      url: "https://docs.cypress.io/api/commands/go",
+    },
+    {
+      title: "hash",
+      url: "https://docs.cypress.io/api/commands/hash",
+    },
+    {
+      title: "hover",
+      url: "https://docs.cypress.io/api/commands/hover",
+    },
+    {
+      title: "intercept",
+      url: "https://docs.cypress.io/api/commands/intercept",
+    },
+    {
+      title: "invoke",
+      url: "https://docs.cypress.io/api/commands/invoke",
+    },
+    {
+      title: "its",
+      url: "https://docs.cypress.io/api/commands/its",
+    },
+    {
+      title: "last",
+      url: "https://docs.cypress.io/api/commands/last",
+    },
+    {
+      title: "location",
+      url: "https://docs.cypress.io/api/commands/location",
+    },
+    {
+      title: "log",
+      url: "https://docs.cypress.io/api/commands/log",
+    },
+    {
+      title: "next",
+      url: "https://docs.cypress.io/api/commands/next",
+    },
+    {
+      title: "nextAll",
+      url: "https://docs.cypress.io/api/commands/nextall",
+    },
+    {
+      title: "nextUntil",
+      url: "https://docs.cypress.io/api/commands/nextuntil",
+    },
+    {
+      title: "not",
+      url: "https://docs.cypress.io/api/commands/not",
+    },
+    {
+      title: "origin",
+      url: "https://docs.cypress.io/api/commands/origin",
+    },
+    {
+      title: "parent",
+      url: "https://docs.cypress.io/api/commands/parent",
+    },
+    {
+      title: "parents",
+      url: "https://docs.cypress.io/api/commands/parents",
+    },
+    {
+      title: "parentsUntil",
+      url: "https://docs.cypress.io/api/commands/parentsuntil",
+    },
+    {
+      title: "pause",
+      url: "https://docs.cypress.io/api/commands/pause",
+    },
+    {
+      title: "prev",
+      url: "https://docs.cypress.io/api/commands/prev",
+    },
+    {
+      title: "prevAll",
+      url: "https://docs.cypress.io/api/commands/prevall",
+    },
+    {
+      title: "prevUntil",
+      url: "https://docs.cypress.io/api/commands/prevuntil",
+    },
+    {
+      title: "readFile",
+      url: "https://docs.cypress.io/api/commands/readfile",
+    },
+    {
+      title: "reload",
+      url: "https://docs.cypress.io/api/commands/reload",
+    },
+    {
+      title: "request",
+      url: "https://docs.cypress.io/api/commands/request",
+    },
+    {
+      title: "rightclick",
+      url: "https://docs.cypress.io/api/commands/rightclick",
+    },
+    {
+      title: "root",
+      url: "https://docs.cypress.io/api/commands/root",
+    },
+    {
+      title: "route",
+      url: "https://docs.cypress.io/api/commands/route",
+    },
+    {
+      title: "screenshot",
+      url: "https://docs.cypress.io/api/commands/screenshot",
+    },
+    {
+      title: "scrollIntoView",
+      url: "https://docs.cypress.io/api/commands/scrollintoview",
+    },
+    {
+      title: "scrollTo",
+      url: "https://docs.cypress.io/api/commands/scrollto",
+    },
+    {
+      title: "select",
+      url: "https://docs.cypress.io/api/commands/select",
+    },
+    {
+      title: "selectFile",
+      url: "https://docs.cypress.io/api/commands/selectfile",
+    },
+    {
+      title: "server",
+      url: "https://docs.cypress.io/api/commands/server",
+    },
+    {
+      title: "session",
+      url: "https://docs.cypress.io/api/commands/session",
+    },
+    {
+      title: "setCookie",
+      url: "https://docs.cypress.io/api/commands/setcookie",
+    },
+    {
+      title: "shadow",
+      url: "https://docs.cypress.io/api/commands/shadow",
+    },
+    {
+      title: "should",
+      url: "https://docs.cypress.io/api/commands/should",
+    },
+    {
+      title: "siblings",
+      url: "https://docs.cypress.io/api/commands/siblings",
+    },
+    {
+      title: "spread",
+      url: "https://docs.cypress.io/api/commands/spread",
+    },
+    {
+      title: "spy",
+      url: "https://docs.cypress.io/api/commands/spy",
+    },
+    {
+      title: "stub",
+      url: "https://docs.cypress.io/api/commands/stub",
+    },
+    {
+      title: "submit",
+      url: "https://docs.cypress.io/api/commands/submit",
+    },
+    {
+      title: "task",
+      url: "https://docs.cypress.io/api/commands/task",
+    },
+    {
+      title: "then",
+      url: "https://docs.cypress.io/api/commands/then",
+    },
+    {
+      title: "tick",
+      url: "https://docs.cypress.io/api/commands/tick",
+    },
+    {
+      title: "title",
+      url: "https://docs.cypress.io/api/commands/title",
+    },
+    {
+      title: "trigger",
+      url: "https://docs.cypress.io/api/commands/trigger",
+    },
+    {
+      title: "type",
+      url: "https://docs.cypress.io/api/commands/type",
+    },
+    {
+      title: "uncheck",
+      url: "https://docs.cypress.io/api/commands/uncheck",
+    },
+    {
+      title: "url",
+      url: "https://docs.cypress.io/api/commands/url",
+    },
+    {
+      title: "viewport",
+      url: "https://docs.cypress.io/api/commands/viewport",
+    },
+    {
+      title: "visit",
+      url: "https://docs.cypress.io/api/commands/visit",
+    },
+    {
+      title: "wait",
+      url: "https://docs.cypress.io/api/commands/wait",
+    },
+    {
+      title: "window",
+      url: "https://docs.cypress.io/api/commands/window",
+    },
+    {
+      title: "within",
+      url: "https://docs.cypress.io/api/commands/within",
+    },
+    {
+      title: "wrap",
+      url: "https://docs.cypress.io/api/commands/wrap",
+    },
+    {
+      title: "writeFile",
+      url: "https://docs.cypress.io/api/commands/writefile",
+    },
+  ],
 };
