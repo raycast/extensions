@@ -25,7 +25,7 @@ export default function Command() {
         <ChangelogListItem changelog={changelog} key={changelog.id} />
       )) : (
         <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
+          icon={{ source: "hn-logo-64.png" }}
           title="No Changelogs found"
         />
       )}

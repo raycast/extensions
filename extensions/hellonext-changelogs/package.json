@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "List Hellonext Changelogs",
+      "title": "List Changelogs",
       "description": "This command will list the lastest changelogs of your organizations.",
       "mode": "view"
     }
