@@ -24,5 +24,5 @@ export default function ChangelogSingleItem({ changelog }: ChangelogSingleItemPr
         }
       />
     </>
-  )
+  );
 }

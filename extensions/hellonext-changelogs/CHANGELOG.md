@@ -1,3 +1,3 @@
 # Hellonext Changelogs Changelog
 
-## [Initial Version] - 2022-05-02
+## [Initial Version] - 2022-05-03
