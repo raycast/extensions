@@ -5,6 +5,7 @@ import { getTokenFromSecret } from "./utils";
 
 interface CommandForm {
   roomId: string;
+  type: string;
   payload: string;
 }
 
@@ -26,7 +27,10 @@ export default function Command() {
       const { data } = await axios.post(
         `https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`,
         {
-          data: values.payload,
+          data: {
+            liveblocksType: values.type,
+            data: values.payload,
+          },
         },
         {
           headers: { Authorization: `Bearer ${jwt}` },
@@ -52,15 +56,12 @@ export default function Command() {
       }
     >
       <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" />
+      <Form.Dropdown id="type" title="Type" defaultValue="LiveObject">
+        <Form.Dropdown.Item value="LiveObject" title="LiveObject" />
+        <Form.Dropdown.Item value="LiveList" title="LiveList" />
+        <Form.Dropdown.Item value="LiveMap" title="LiveMap" />
+      </Form.Dropdown>
       <Form.TextArea id="payload" title="Payload" placeholder="Enter payload" />
-      {output ? (
-        <>
-          <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
-        </>
-      ) : null}
     </Form>
   );
 }
