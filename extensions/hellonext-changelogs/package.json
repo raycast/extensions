@@ -9,12 +9,12 @@
     "Applications",
     "Productivity"
   ],
-  "subtitle": "Hellonext",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "List Changelogs",
+      "subtitle": "Hellonext",
       "description": "This command will list the latest changelogs of your organizations.",
       "mode": "view"
     }
