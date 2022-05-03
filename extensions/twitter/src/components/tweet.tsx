@@ -114,12 +114,37 @@ export function TweetListItem(props: {
   );
 }
 
+function getCleanTweetText(tweet: TweetV1): string | undefined {
+  if (tweet.full_text === undefined) {
+    return undefined;
+  }
+  if (isRetweet(tweet)) {
+    const i = tweet.full_text.indexOf(":");
+    if (i !== undefined && i > 0) {
+      return tweet.full_text.substring(i + 1).trimStart();
+    }
+  }
+  return tweet.full_text;
+}
+
+function isRetweet(tweet: TweetV1): boolean {
+  if (tweet.full_text && tweet.full_text.startsWith("RT @")) {
+    return true;
+  }
+  return false;
+}
+
 function getMarkdownFromTweet(tweet: TweetV1): string {
   const t = tweet;
-  const ownFavoriteCount = t.favorited && t.full_text && t.full_text.startsWith("RT @") ? 1 : 0;
+  const ownFavoriteCount = t.favorited && isRetweet(t) ? 1 : 0;
   const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
   const imgUrl = getPhotoUrlFromTweet(t);
-  const parts = [`## ${t.user.name} \`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
+  const retweetedText = isRetweet(t) ? " retweeted" : "";
+  const parts = [
+    `## ${t.user.name} \`@${t.user.screen_name}\`${retweetedText}`,
+    getCleanTweetText(t) || "",
+    `\`${t.created_at}\``,
+  ];
   if (imgUrl) {
     parts.push(`![${imgUrl}](${imgUrl})`);
   }
