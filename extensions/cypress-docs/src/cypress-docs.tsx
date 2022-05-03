@@ -188,4 +188,56 @@ const documentation = {
       title: "Web Security",
     },
   ],
+  "Testing Strategiess": [
+    {
+      url: "https://docs.cypress.io/guides/testing-strategies/auth0-authentication",
+      title: "Auth0 Authentication",
+    },
+    {
+      url: "https://docs.cypress.io/guides/testing-strategies/amazon-cognito-authentication",
+      title: "Amazon Cognito Authentication",
+    },
+    {
+      url: "https://docs.cypress.io/guides/testing-strategies/okta-authentication",
+      title: "Okta Authentication",
+    },
+    {
+      url: "https://docs.cypress.io/guides/testing-strategies/google-authentication",
+      title: "Google Authentication",
+    },
+    {
+      url: "https://docs.cypress.io/guides/testing-strategies/working-with-graphql",
+      title: "Working with GraphQL",
+    },
+  ],
+  "Continuous Integration": [
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/introduction",
+      title: "Introduction",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/ci-provider-examples",
+      title: "CI Provider Examples",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/circleci",
+      title: "CircleCI",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/github-actions",
+      title: "GitHub Actions",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/gitlab-ci",
+      title: "GitLab CI",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/bitbucket-pipelines",
+      title: "Bitbucket Pipelines",
+    },
+    {
+      url: "https://docs.cypress.io/guides/continuous-integration/aws-codebuild",
+      title: "AWS CodeBuild",
+    },
+  ],
 };
