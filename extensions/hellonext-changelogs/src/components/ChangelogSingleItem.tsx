@@ -10,13 +10,14 @@ export default function ChangelogSingleItem({ changelog }: ChangelogSingleItemPr
   const turndownService = new TurndownService();
   return (
     <>
-      <Detail 
+      <Detail
         markdown={changelog.description ? turndownService.turndown(changelog.description.toString()) : "No description added"}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={changelog.url} />
           </ActionPanel>
         }
+        navigationTitle={changelog.title}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Published On" text={changelog.published_on} />
