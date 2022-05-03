@@ -26,7 +26,7 @@ export default function Command() {
       )) : (
         <List.EmptyView
           icon={{ source: "hn-logo-64.png" }}
-          title="No Changelogs found"
+          title="No changelogs found"
         />
       )}
     </List>
