@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Support for 1Password 8] - 2022-03-27
+## [Support for 1Password 8] - 2022-05-03
 
 - Added support for 1Password 8
 - Added a preference to specify which app version the extension interacts with. By default, it automatically detects the installed one.
