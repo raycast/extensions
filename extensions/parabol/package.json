@@ -5,10 +5,13 @@
   "description": "Provide shortcuts to Parabol application",
   "icon": "parabol-logo.png",
   "author": "parabol",
-  "contributors": ["bjarocki"],
+  "contributors": [
+    "bjarocki"
+  ],
   "version": "0.0.1",
   "categories": [
-    "Web"
+    "Web",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
