@@ -6,8 +6,7 @@
   "icon": "cypress-logo.png",
   "author": "robertguss",
   "categories": [
-    "Documentation",
-    "Developer Tools"
+    "Documentation"
   ],
   "license": "MIT",
   "commands": [
