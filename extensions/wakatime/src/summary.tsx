@@ -1,33 +1,13 @@
-import { subDays } from "date-fns";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
-import { useUser } from "./hooks";
-import { getDuration, getSummary } from "./utils";
+import { useActivityChange, useUser } from "./hooks";
 import { ProjectsStatsList, RangeStatsList } from "./components";
 
 export default function Command() {
+  const change = useActivityChange();
   const { data, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
-  const [stats, setStats] = useState({ emoji: "", percent: 0, duration: "" });
-
-  useEffect(() => {
-    async function getData() {
-      const { data } = await getSummary("Last 1 Day", subDays(new Date(), 1));
-      const days = Object.fromEntries(data.map((day) => [day.range.text.toLowerCase(), day.grand_total.total_seconds]));
-
-      const timeDiff = Math.abs(days.today - days.yesterday);
-      const [quantifier, emoji] = days.today <= days.yesterday ? ["less", "⬇️"] : ["more", "⬆️"];
-
-      setStats({
-        emoji,
-        percent: Math.floor((timeDiff / days.yesterday) * 1e2),
-        duration: `You've spent ${getDuration(timeDiff)} ${quantifier} compared to yesterday`,
-      });
-    }
-
-    getData();
-  }, []);
 
   return (
     <List isLoading={isLoading} isShowingDetail={showDetail}>
@@ -46,8 +26,11 @@ export default function Command() {
           />
         </List.Section>
       )}
-      {!!stats.duration && (
-        <List.Item title={stats.duration} accessories={[{ text: `${stats.percent}%   ${stats.emoji}` }]} />
+      {!!change.data.duration && (
+        <List.Item
+          title={change.data.duration}
+          accessories={[{ text: `${change.data.percent}%  ${change.data.emoji}` }]}
+        />
       )}
       <RangeStatsList {...{ showDetail, setShowDetail }} />
       <ProjectsStatsList />
