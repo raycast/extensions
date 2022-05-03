@@ -16,7 +16,9 @@ To use this extension please install the 1Password CLI and run \`opbookmarks\`.
 
 ## 1Password item data
 
-This extension has restricted access to your 1Password data. Only the metadata files created by \`opbookmarks\` are used. These metadata files include the following information about each item:
+This extension has restricted access to your 1Password data. Only the metadata files created by 
+
+\`opbookmarks\` are used. These metadata files include the following information about each item:
 - title
 - description
 - URLs

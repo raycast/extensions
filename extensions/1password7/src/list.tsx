@@ -36,7 +36,7 @@ async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: "Could not read 1Passwords database",
+        message: "Could not read 1Password database",
       });
       return Promise.resolve([]);
     }
@@ -127,23 +127,27 @@ function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePassword
   );
 }
 
-function getItemAccessoryTitle(item: OnePasswordMetaItem) {
-  const vaultName = `🗄 ${item.vaultName}`;
+function getItemAccessoryItems(item: OnePasswordMetaItem) {
+  const items = [];
   if (item.accountName) {
-    return `👤 ${item.accountName} ${vaultName}`;
+    items.push({ icon: "👤", text: item.accountName });
   }
-  return vaultName;
+
+  items.push({ icon: "🗄", text: item.vaultName });
+  return items;
 }
 
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
   const onePasswordMetaItem = props.onePasswordMetaItem;
+  let subtitle = onePasswordMetaItem.categorySingularName.toLowerCase();
+  subtitle = subtitle.charAt(0).toUpperCase() + subtitle.slice(1);
 
   return (
     <List.Item
       title={onePasswordMetaItem.itemTitle}
-      subtitle={onePasswordMetaItem.categorySingularName}
+      subtitle={subtitle}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
-      accessoryTitle={getItemAccessoryTitle(onePasswordMetaItem)}
+      accessories={getItemAccessoryItems(onePasswordMetaItem)}
       actions={
         <ActionPanel>
           {onePasswordMetaItem.categoryUUID === "001" && (
@@ -205,6 +209,7 @@ const EditAction = ({ onePasswordMetaItem }: ActionProps) => {
     <Action
       icon={Icon.Gear}
       title="Edit"
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
       onAction={async () => {
         try {
           await onePassword.edit(onePasswordMetaItem);
