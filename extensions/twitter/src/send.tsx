@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
-import { TweetSendForm } from "./components/send";
+import { TweetSendThreadForm } from "./components/send";
 
 export default function SendTweetRoot(): ReactElement {
-  return <TweetSendForm />;
+  return <TweetSendThreadForm />;
 }
