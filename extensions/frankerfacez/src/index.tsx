@@ -11,6 +11,7 @@ export default function Command() {
       onSearchTextChange={search}
       searchBarPlaceholder="Search FrankerFaceZ emotes..."
       throttle
+      isShowingDetail
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
@@ -25,33 +26,39 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={"by " + String(searchResult.username)}
-      accessoryTitle={String(searchResult.uses) + " uses"}
-      icon={searchResult.url}
-      detail={
-        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
-      }
+      icon={searchResult.urls[1]}
+      detail={<List.Item.Detail markdown={getMarkdown(searchResult)} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard content={searchResult.url} />
+            <Action.CopyToClipboard content={searchResult.urls[1]} />
             <Action.OpenInBrowser url={"https://www.frankerfacez.com/emoticon/" + searchResult.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {searchResult.urls[1] && (
-              <Action.CopyToClipboard title="Copy 1x Emote" content={"https:" + searchResult.urls[1]} />
-            )}
-            {searchResult.urls[2] && (
-              <Action.CopyToClipboard title="Copy 2x Emote" content={"https:" + searchResult.urls[2]} />
-            )}
-            {searchResult.urls[4] && (
-              <Action.CopyToClipboard title="Copy 4x Emote" content={"https:" + searchResult.urls[4]} />
-            )}
+            {searchResult.urls[1] && <Action.CopyToClipboard title="Copy 1x Emote" content={searchResult.urls[1]} />}
+            {searchResult.urls[2] && <Action.CopyToClipboard title="Copy 2x Emote" content={searchResult.urls[2]} />}
+            {searchResult.urls[4] && <Action.CopyToClipboard title="Copy 4x Emote" content={searchResult.urls[4]} />}
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
+}
+
+function getMarkdown(searchresult: SearchResult): string {
+  return `
+  ### ${searchresult.name} by ${searchresult.username}
+  ![](${getLargestImage(searchresult.urls)})`;
+}
+
+function getLargestImage(urls: { 1: string; 2: string; 4: string }): string {
+  if (urls[4]) {
+    return urls[4];
+  } else if (urls[2]) {
+    return urls[2];
+  } else {
+    return urls[1];
+  }
 }
 
 function useSearch() {
@@ -140,8 +147,11 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       name: result.name,
       uses: result.usage_count,
       username: result.owner.name,
-      url: "https:" + result.urls["1"],
-      urls: result.urls,
+      urls: {
+        1: result.urls[1] && "https:" + result.urls[1],
+        2: result.urls[2] && "https:" + result.urls[2],
+        4: result.urls[4] && "https:" + result.urls[4],
+      },
     };
   });
 }
@@ -154,8 +164,7 @@ interface SearchState {
 interface SearchResult {
   id: number;
   name: string;
-  username?: string;
-  url: string;
+  username: string;
   urls: {
     1: string;
     2: string;
