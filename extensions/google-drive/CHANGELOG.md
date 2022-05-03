@@ -1,5 +1,9 @@
 # Google Drive Changelog
 
+## [Toggle details] - 2022-05-03
+
+- Added a general action to toggle the right-side details view.
+
 ## [Support favorites] - 2022-05-01
 
 - Added ability to favorite/unfavorite files.
