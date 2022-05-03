@@ -42,6 +42,7 @@ export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
   const rt = props.replyTweet;
   const submitText = rt ? "Send Reply" : "Send Tweet";
   const fromTitle = rt ? "Reply" : "Tweet";
+  const placeholder = rt ? "Tweet your reply" : "What's happening?";
   const [text, setText] = useState<string>("");
   return (
     <Form
@@ -54,7 +55,7 @@ export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
       }
     >
       <TweetLengthCounter text={text} />
-      <Form.TextArea id="text" title={fromTitle} placeholder="What's happening?" onChange={setText} />
+      <Form.TextArea id="text" title={fromTitle} placeholder={placeholder} onChange={setText} />
     </Form>
   );
 }
