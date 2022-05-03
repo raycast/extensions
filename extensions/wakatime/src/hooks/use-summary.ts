@@ -22,13 +22,18 @@ export function useSummary() {
       setIsLoading(true);
 
       try {
-        const data = rangeOrder.map(async (range) => {
-          const summary = await getSummary(range, ranges[range]);
-          if (!summary.ok) throw new Error(summary.error);
-          return [range, summary] as const;
-        });
+        await Promise.all(
+          rangeOrder.map(async (range, idx) => {
+            const summary = await getSummary(range, ranges[range]);
+            if (!summary.ok) throw new Error(summary.error);
 
-        setData(await Promise.all(data));
+            setData((data = []) => {
+              const d = [...data];
+              d.splice(idx, 0, [range, summary] as const);
+              return d;
+            });
+          })
+        );
       } catch (error) {
         await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Record<string, string>).message);
       }
