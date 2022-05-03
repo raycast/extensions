@@ -212,7 +212,7 @@ const Command = () => {
         ) : (
           <List.EmptyView
             title={isFetching ? "Fetching files, please wait..." : "No files found"}
-            actions={<ActionPanel>{!isFetching && <GeneralActions />}</ActionPanel>}
+            actions={<ActionPanel>{!isFetching && <GeneralActions showToggleDetailsAction={false} />}</ActionPanel>}
           />
         )}
       </List>
@@ -265,17 +265,19 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
   );
 };
 
-const GeneralActions = () => {
+const GeneralActions = ({ showToggleDetailsAction = true }) => {
   const { reindexFiles, toggleDetails } = useCommandContext();
 
   return (
     <ActionPanel.Section title="General Actions">
-      <Action
-        title="Toggle Details"
-        icon={Icon.Sidebar}
-        onAction={toggleDetails}
-        shortcut={{ modifiers: ["cmd"], key: "b" }}
-      />
+      {showToggleDetailsAction ? (
+        <Action
+          title="Toggle Details"
+          icon={Icon.Sidebar}
+          onAction={toggleDetails}
+          shortcut={{ modifiers: ["cmd"], key: "b" }}
+        />
+      ) : null}
       <Action
         title="Reindex Files Cache"
         icon={Icon.Hammer}
