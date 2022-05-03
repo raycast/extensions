@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
-import { RangeStatsList } from "./components";
 import { getDuration, getSummary } from "./utils";
+import { ProjectsStatsList, RangeStatsList } from "./components";
 
 export default function Command() {
   const { data, isLoading } = useUser();
@@ -50,6 +50,7 @@ export default function Command() {
         <List.Item title={stats.duration} accessories={[{ text: `${stats.percent}%   ${stats.emoji}` }]} />
       )}
       <RangeStatsList {...{ showDetail, setShowDetail }} />
+      <ProjectsStatsList />
     </List>
   );
 }

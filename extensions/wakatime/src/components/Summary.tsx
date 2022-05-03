@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
+import { formatDistance } from "date-fns";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
-import { useSummary } from "../hooks";
+import { useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
 export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
@@ -55,6 +56,38 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
         </ActionPanel>
       }
     />
+  );
+};
+
+export const ProjectsStatsList: React.FC = () => {
+  const projects = useProjects();
+  if (projects.isLoading !== false) return null;
+
+  return (
+    <List.Section title="Projects">
+      {projects.data?.data
+        ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+        .map((project) => (
+          <List.Item
+            key={project.id}
+            title={project.name}
+            actions={
+              <ActionPanel>
+                {project.has_public_url && (
+                  <Action.OpenInBrowser title="Open in Browser" url={`https://wakatime.com${project.url}`} />
+                )}
+              </ActionPanel>
+            }
+            accessories={[
+              {
+                tooltip: "Last heartbeat",
+                text: formatDistance(new Date(project.last_heartbeat_at), new Date(), { addSuffix: true }),
+              },
+            ]}
+          />
+        ))}
+    </List.Section>
   );
 };
 
