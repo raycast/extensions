@@ -684,4 +684,154 @@ const documentation = {
       url: "https://docs.cypress.io/api/commands/writefile",
     },
   ],
+  Utilities: [
+    {
+      title: "_",
+      url: "https://docs.cypress.io/api/utilities/_",
+    },
+    {
+      title: "$",
+      url: "https://docs.cypress.io/api/utilities/$",
+    },
+    {
+      title: "Blob",
+      url: "https://docs.cypress.io/api/utilities/blob",
+    },
+    {
+      title: "Buffer",
+      url: "https://docs.cypress.io/api/utilities/buffer",
+    },
+    {
+      title: "minimatch",
+      url: "https://docs.cypress.io/api/utilities/minimatch",
+    },
+    {
+      title: "Promise",
+      url: "https://docs.cypress.io/api/utilities/promise",
+    },
+    {
+      title: "sinon",
+      url: "https://docs.cypress.io/api/utilities/sinon",
+    },
+  ],
+  "Cypress API": [
+    {
+      title: "Commands",
+      url: "https://docs.cypress.io/api/cypress-api/custom-commands",
+    },
+    {
+      title: "Cookies",
+      url: "https://docs.cypress.io/api/cypress-api/cookies",
+    },
+    {
+      title: "Keyboard",
+      url: "https://docs.cypress.io/api/cypress-api/keyboard-api",
+    },
+    {
+      title: "Screenshot",
+      url: "https://docs.cypress.io/api/cypress-api/screenshot-api",
+    },
+    {
+      title: "SelectorPlayground",
+      url: "https://docs.cypress.io/api/cypress-api/selector-playground-api",
+    },
+    {
+      title: "Server",
+      url: "https://docs.cypress.io/api/cypress-api/cypress-server",
+    },
+    {
+      title: "arch",
+      url: "https://docs.cypress.io/api/cypress-api/arch",
+    },
+    {
+      title: "browser",
+      url: "https://docs.cypress.io/api/cypress-api/browser",
+    },
+    {
+      title: "config",
+      url: "https://docs.cypress.io/api/cypress-api/config",
+    },
+    {
+      title: "currentTest",
+      url: "https://docs.cypress.io/api/cypress-api/currenttest",
+    },
+    {
+      title: "dom",
+      url: "https://docs.cypress.io/api/cypress-api/dom",
+    },
+    {
+      title: "env",
+      url: "https://docs.cypress.io/api/cypress-api/env",
+    },
+    {
+      title: "isBrowser",
+      url: "https://docs.cypress.io/api/cypress-api/isbrowser",
+    },
+    {
+      title: "isCy",
+      url: "https://docs.cypress.io/api/cypress-api/iscy",
+    },
+    {
+      title: "log",
+      url: "https://docs.cypress.io/api/cypress-api/cypress-log",
+    },
+    {
+      title: "platform",
+      url: "https://docs.cypress.io/api/cypress-api/platform",
+    },
+    {
+      title: "session",
+      url: "https://docs.cypress.io/api/cypress-api/session",
+    },
+    {
+      title: "spec",
+      url: "https://docs.cypress.io/api/cypress-api/spec",
+    },
+    {
+      title: "testingType",
+      url: "https://docs.cypress.io/api/cypress-api/testing-type",
+    },
+    {
+      title: "version",
+      url: "https://docs.cypress.io/api/cypress-api/version",
+    },
+  ],
+  Plugins: [
+    {
+      title: "Writing a Plugin",
+      url: "https://docs.cypress.io/api/plugins/writing-a-plugin",
+    },
+    {
+      title: "Configuration",
+      url: "https://docs.cypress.io/api/plugins/configuration-api",
+    },
+    {
+      title: "Preprocessors",
+      url: "https://docs.cypress.io/api/plugins/preprocessors-api",
+    },
+    {
+      title: "Before Run",
+      url: "https://docs.cypress.io/api/plugins/before-run-api",
+    },
+    {
+      title: "After Run",
+      url: "https://docs.cypress.io/api/plugins/after-run-api",
+    },
+    {
+      title: "Before Spec",
+      url: "https://docs.cypress.io/api/plugins/before-spec-api",
+    },
+    {
+      title: "After Spec",
+      url: "https://docs.cypress.io/api/plugins/after-spec-api",
+    },
+    {
+      title: "Browser Launching",
+      url: "https://docs.cypress.io/api/plugins/browser-launch-api",
+    },
+    {
+      title: "After Screenshot",
+      url: "https://docs.cypress.io/api/plugins/after-screenshot-api",
+    },
+  ],
 };
