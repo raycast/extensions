@@ -65,11 +65,22 @@ const Command = () => {
       }
 
       if (db) {
+        const alreadyIndexed = !!(await filesLastIndexedAt());
         try {
+          const toast = showToast({
+            style: Toast.Style.Animated,
+            title: `${alreadyIndexed ? "Updating" : "Indexing"} files cache index ${
+              alreadyIndexed ? "" : "for the first time"
+            }`,
+            message: "This may take some time, please wait...",
+          });
+
           const isIndexed = await indexFiles(drivePath, db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
+
+          (await toast).hide();
 
           if (files.filtered.length === 0) {
             setIsFetching(true);
@@ -122,7 +133,7 @@ const Command = () => {
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
 
-    showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
+    showToast({ style: Toast.Style.Animated, title: "Rebuilding files cache index..." });
     try {
       const isIndexed = await indexFiles(drivePath, db, { force: true });
 
