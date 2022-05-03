@@ -240,4 +240,20 @@ const documentation = {
       title: "AWS CodeBuild",
     },
   ],
+  "Component Testing": [
+    {
+      url: "https://docs.cypress.io/guides/component-testing/introduction",
+      title: "Introduction",
+    },
+    {
+      url: "https://docs.cypress.io/guides/component-testing/framework-configuration",
+      title: "Framework Configuration",
+    },
+  ],
+  "Migrating to Cypress": [
+    {
+      url: "https://docs.cypress.io/guides/migrating-to-cypress/protractor",
+      title: "Protractor",
+    },
+  ],
 };
