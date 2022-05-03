@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import axios from 'axios';
 
 export const hellonextApiKey = getPreferenceValues().hellonext_api_key;
@@ -9,7 +9,10 @@ export async function getChangelogs(): Promise<[]> {
   return await axios
     .get("https://gateway.hellonext.co/api/v3/changelogs?status=published")
     .then(response => response.data.changelogs)
-    .catch(() => []);
+    .catch(() => {
+      showToast(Toast.Style.Failure, "Check your API key!")
+      return [];
+    });
 }
 
 export interface User {
