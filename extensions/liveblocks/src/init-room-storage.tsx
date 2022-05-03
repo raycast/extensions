@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getTokenFromSecret } from "./utils";
@@ -39,6 +39,13 @@ export default function Command() {
 
       toast.style = Toast.Style.Success;
       toast.message = "Room initialized successfully";
+      toast.primaryAction = {
+        title: "Open Dashboard",
+        onAction: (toast) => {
+          open("https://liveblocks.io/dashboard");
+          toast.hide();
+        },
+      };
 
       setOutput(JSON.stringify(data));
     } catch (e) {
