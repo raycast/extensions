@@ -256,4 +256,80 @@ const documentation = {
       title: "Protractor",
     },
   ],
+  Tooling: [
+    {
+      url: "https://docs.cypress.io/guides/tooling/IDE-integration",
+      title: "IDE Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/tooling/plugins-guide",
+      title: "Plugins",
+    },
+    {
+      url: "https://docs.cypress.io/guides/tooling/reporters",
+      title: "Reporters",
+    },
+    {
+      url: "https://docs.cypress.io/guides/tooling/typescript-support",
+      title: "TypeScript",
+    },
+    {
+      url: "https://docs.cypress.io/guides/tooling/visual-testing",
+      title: "Visual Testing",
+    },
+    {
+      url: "https://docs.cypress.io/guides/tooling/code-coverage",
+      title: "Code Coverage",
+    },
+  ],
+  References: [
+    {
+      url: "https://docs.cypress.io/guides/references/assertions",
+      title: "Assertions",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/configuration",
+      title: "Configuration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/client-certificates",
+      title: "Client Certificates",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/proxy-configuration",
+      title: "Proxy Configuration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/best-practices",
+      title: "Best Practices",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/error-messages",
+      title: "Error Messages",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/bundled-tools",
+      title: "Bundled Tools",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/trade-offs",
+      title: "Trade-offs",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/troubleshooting",
+      title: "Troubleshooting",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/changelog",
+      title: "Changelog",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/migration-guide",
+      title: "Migration Guide",
+    },
+    {
+      url: "https://docs.cypress.io/guides/references/experiments",
+      title: "Experiments",
+    },
+  ],
 };
