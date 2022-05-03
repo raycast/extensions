@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "supabase-docs",
-  "title": "Supabase Documentation",
-  "description": "Quickly search Supabase documentation and open it in the browser",
-  "icon": "supabase-logo.png",
-  "author": "Isaiah-Hamilton",
+  "name": "cypress-docs",
+  "title": "Cypress Docs",
+  "description": "Quickly search the Cypress docs and open them in the browser",
+  "icon": "cypress-logo.png",
+  "author": "Robert Guss",
   "categories": [
     "Documentation",
     "Developer Tools"
@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-documentation",
-      "title": "Search Documentation",
-      "subtitle": "Supabase",
-      "description": "Search Supabase documentation and open it in the browser",
+      "name": "cypress-docs",
+      "title": "Cypress Docs",
+      "subtitle": "Cypress",
+      "description": "Search the Cypress docs and open them in the browser",
       "mode": "view"
     }
   ],

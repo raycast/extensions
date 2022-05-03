@@ -8,7 +8,7 @@ export default function SearchDocumentation() {
           {items.map((item) => (
             <List.Item
               key={item.url}
-              icon="supabase-logo.png"
+              icon="cypress-logo.png"
               title={item.title}
               keywords={[item.title, section]}
               actions={
