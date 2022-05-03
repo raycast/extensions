@@ -3,6 +3,8 @@ import { isEmpty } from "../utils/common-utils";
 import axios from "axios";
 import { MAVEN_SEARCH } from "../utils/constants";
 import { Doc, MavenModel } from "../utils/types";
+import { showToast, Toast } from "@raycast/api";
+import Style = Toast.Style;
 
 export const searchMavenArtifact = (searchContent: string) => {
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -14,23 +16,23 @@ export const searchMavenArtifact = (searchContent: string) => {
       return;
     }
     setLoading(true);
-    try {
-      const axiosResponse = await axios({
-        method: "GET",
-        url: MAVEN_SEARCH,
-        params: {
-          q: searchContent,
-          rows: "20",
-          wt: "json",
-        },
+    axios({
+      method: "GET",
+      url: MAVEN_SEARCH,
+      params: {
+        q: searchContent,
+        rows: "20",
+        wt: "json",
+      },
+    })
+      .then((response) => {
+        setDocs((response.data as MavenModel).response.docs);
+        setLoading(false);
+      })
+      .catch((reason) => {
+        setLoading(false);
+        showToast(Style.Failure, String(reason));
       });
-      const mavenModel = axiosResponse.data as MavenModel;
-      const docs = mavenModel.response.docs;
-      setDocs(docs);
-    } catch (e) {
-      console.error(String(e));
-    }
-    setLoading(false);
   }, [searchContent]);
 
   useEffect(() => {
