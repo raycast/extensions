@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ruby-evaluate",
+  "title": "Ruby Evaluate",
+  "description": "Evaluate Ruby code on-the-fly",
+  "icon": "icon.png",
+  "author": "obahareth",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "ruby",
+    "evaluate",
+    "interpreter"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Evaluate Ruby Code",
+      "description": "Type in any Ruby code, to see what it evaluates to",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.33.0"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.21",
+    "@types/react": "^17.0.39",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.23.0",
+    "typescript": "^4.5.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
