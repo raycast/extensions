@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { Changelog } from "../utils/hellonext";
-import TurndownService = require('turndown');
+import TurndownService = require("turndown");
 
 interface ChangelogSingleItemProps {
   changelog: Changelog;
@@ -11,7 +11,9 @@ export default function ChangelogSingleItem({ changelog }: ChangelogSingleItemPr
   return (
     <>
       <Detail
-        markdown={changelog.description ? turndownService.turndown(changelog.description.toString()) : "No description added"}
+        markdown={
+          changelog.description ? turndownService.turndown(changelog.description.toString()) : "No description added"
+        }
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={changelog.url} />
@@ -26,5 +28,5 @@ export default function ChangelogSingleItem({ changelog }: ChangelogSingleItemPr
         }
       />
     </>
-  )
+  );
 }
