@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { useUser } from "./hooks";
-import { SummaryList } from "./components";
+import { RangeStatsList } from "./components";
 import { getDuration, getSummary } from "./utils";
 
 export default function Command() {
@@ -49,7 +49,7 @@ export default function Command() {
       {!!stats.duration && (
         <List.Item title={stats.duration} accessories={[{ text: `${stats.percent}%   ${stats.emoji}` }]} />
       )}
-      <SummaryList {...{ showDetail, setShowDetail }} />
+      <RangeStatsList {...{ showDetail, setShowDetail }} />
     </List>
   );
 }

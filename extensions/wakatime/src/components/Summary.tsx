@@ -4,19 +4,19 @@ import { useState } from "react";
 import { useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
-export const SummaryList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
+export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
   const summary = useSummary();
 
   return (
     <List.Section title="Stats Summary">
       {summary.data?.map(([key, range]) => (
-        <SummaryItem key={key} title={key} range={range} {...props} />
+        <RangeStatsItem key={key} title={key} range={range} {...props} />
       ))}
     </List.Section>
   );
 };
 
-const SummaryItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
+const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
   const keys = ["categories", "editors", "languages", "projects"] as const;
   const [md] = useState([
     `## ${title}`,

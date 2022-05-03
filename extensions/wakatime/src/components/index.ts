@@ -1,2 +1,2 @@
-export { SummaryList } from "./Summary";
+export { RangeStatsList } from "./Summary";
 export { LeaderBoardItem } from "./Leaderboard";
