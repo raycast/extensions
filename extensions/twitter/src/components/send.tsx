@@ -80,6 +80,7 @@ function TweetFragment(props: {
         id={`${index}`}
         title={`Tweet ${index > 0 ? index + 1 : ""}`}
         placeholder={placeholder}
+        value={content.text}
         onChange={(newtext) => props.onTextChange(newtext, index)}
       />
       <TweetLengthCounter text={content.text} />
@@ -166,7 +167,7 @@ export function TweetSendThreadForm(): ReactElement {
   const addTweetNumber = () => {
     const nt = [...tweets];
     for (let i = 0; i < nt.length; i++) {
-      nt[i].text = `${nt[i].text} ${i + 1}/${nt.length}`;
+      nt[i].text += ` ${i + 1}/${nt.length}`;
     }
     setTweets(nt);
   };
