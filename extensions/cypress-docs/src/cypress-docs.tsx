@@ -834,4 +834,48 @@ const documentation = {
       url: "https://docs.cypress.io/api/plugins/after-screenshot-api",
     },
   ],
+  Examples: [
+    {
+      title: "Recipes",
+      url: "https://docs.cypress.io/examples/examples/recipes",
+    },
+    {
+      title: "Tutorials",
+      url: "https://docs.cypress.io/examples/examples/tutorials",
+    },
+    {
+      title: "Applications",
+      url: "https://docs.cypress.io/examples/examples/applications",
+    },
+    {
+      title: "Docker",
+      url: "https://docs.cypress.io/examples/examples/docker",
+    },
+    {
+      title: "Workshops",
+      url: "https://docs.cypress.io/examples/examples/workshop",
+    },
+    {
+      title: "Projects",
+      url: "https://docs.cypress.io/examples/examples/projects-media",
+    },
+  ],
+  FAQ: [
+    {
+      title: "Using Cypress",
+      url: "https://docs.cypress.io/faq/questions/using-cypress-faq",
+    },
+    {
+      title: "General Questions",
+      url: "https://docs.cypress.io/faq/questions/general-questions-faq",
+    },
+    {
+      title: "Dashboard",
+      url: "https://docs.cypress.io/faq/questions/dashboard-faq",
+    },
+    {
+      title: "Company",
+      url: "https://docs.cypress.io/faq/questions/company-faq",
+    },
+  ],
 };
