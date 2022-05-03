@@ -138,4 +138,54 @@ const documentation = {
       title: "Smart Orchestration",
     },
   ],
+  Guides: [
+    {
+      url: "https://docs.cypress.io/guides/guides/command-line",
+      title: "Command Line",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/module-api",
+      title: "Module API",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/debugging",
+      title: "Debugging",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/network-requests",
+      title: "Network Requests",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/test-retries",
+      title: "Test Retries",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/parallelization",
+      title: "Parallelization",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/environment-variables",
+      title: "Environment Variables",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/stubs-spies-and-clocks",
+      title: "Stubs, Spies, and Clocks",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/screenshots-and-videos",
+      title: "Screenshots and Videos",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/launching-browsers",
+      title: "Launching Browsers",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/cross-browser-testing",
+      title: "Cross Browser Testing",
+    },
+    {
+      url: "https://docs.cypress.io/guides/guides/web-security",
+      title: "Web Security",
+    },
+  ],
 };
