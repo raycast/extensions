@@ -4,7 +4,7 @@
   "title": "Cypress Docs",
   "description": "Quickly search the Cypress docs and open them in the browser",
   "icon": "cypress-logo.png",
-  "author": "Robert Guss",
+  "author": "robertguss",
   "categories": [
     "Documentation",
     "Developer Tools"
