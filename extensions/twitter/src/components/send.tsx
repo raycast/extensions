@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { ReactElement, useState } from "react";
 import { TweetV1 } from "twitter-api-v2";
 import { twitterClient } from "../twitterapi";
 import { getErrorMessage } from "../utils";
@@ -33,19 +34,27 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
   }
 }
 
+function TweetLengthCounter(props: { text: string }): ReactElement | null {
+  return <Form.Description text={`${props.text.length}/280`} />;
+}
+
 export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
   const rt = props.replyTweet;
   const submitText = rt ? "Send Reply" : "Send Tweet";
   const fromTitle = rt ? "Reply" : "Tweet";
+  const [text, setText] = useState<string>("");
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
+          {text.length > 0 && text.length <= 280 && (
+            <Action.SubmitForm title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
+          )}
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title={fromTitle} placeholder="What's happening?" />
+      <TweetLengthCounter text={text} />
+      <Form.TextArea id="text" title={fromTitle} placeholder="What's happening?" onChange={setText} />
     </Form>
   );
 }
