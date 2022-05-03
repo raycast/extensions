@@ -17,5 +17,5 @@ export default function ChangelogListItem({ changelog }: ChangelogListItemProps)
         </ActionPanel>
       }
     />
-  )
+  );
 }
