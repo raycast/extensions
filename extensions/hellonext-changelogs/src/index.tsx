@@ -23,7 +23,7 @@ export default function Command() {
       {changelogs && changelogs?.length > 0 ? (
         changelogs.map((changelog) => <ChangelogListItem changelog={changelog} key={changelog.id} />)
       ) : (
-        <List.EmptyView icon={{ source: "hn-logo-64.png" }} title="No changelogs found" />
+        <List.EmptyView icon={{ source: "hn-logo-64.png" }} title="No changelogs found!" />
       )}
     </List>
   );
