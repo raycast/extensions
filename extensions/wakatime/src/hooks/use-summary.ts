@@ -22,8 +22,13 @@ export function useSummary() {
       setIsLoading(true);
 
       try {
-        const data = await Promise.all(rangeOrder.map(async (v) => [v, await getSummary(v, ranges[v])] as const));
-        setData(data);
+        const data = rangeOrder.map(async (range) => {
+          const summary = await getSummary(range, ranges[range]);
+          if (!summary.ok) throw new Error(summary.error);
+          return [range, summary] as const;
+        });
+
+        setData(await Promise.all(data));
       } catch (error) {
         await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Record<string, string>).message);
       }

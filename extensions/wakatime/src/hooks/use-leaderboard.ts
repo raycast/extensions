@@ -14,6 +14,8 @@ export function useLeaderBoard(id?: string) {
 
       try {
         const data = await getLeaderBoard(id);
+
+        if (!data.ok) throw new Error(data.error);
         setData(data);
 
         toast.style = Toast.Style.Success;

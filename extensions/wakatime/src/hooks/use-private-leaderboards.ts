@@ -14,6 +14,8 @@ export function usePrivateLeaderBoards() {
 
       try {
         const data = await getPrivateLeaderBoards();
+
+        if (!data.ok) throw new Error(data.error);
         setData(data);
 
         toast.style = Toast.Style.Success;

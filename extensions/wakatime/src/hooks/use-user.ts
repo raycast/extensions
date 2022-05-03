@@ -13,8 +13,10 @@ export function useUser() {
       const toast = await showToast(Toast.Style.Animated, "Loading Summary");
 
       try {
-        const user = await getUser();
-        setData(user);
+        const data = await getUser();
+
+        if (!data.ok) throw new Error(data.error);
+        setData(data);
 
         toast.style = Toast.Style.Success;
         toast.title = "Done!";
