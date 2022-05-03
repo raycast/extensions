@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, popToRoot, Icon } from "@raycast/api";
 import axios from "axios";
 import { useEffect } from "react";
 import { getTokenFromSecret } from "./utils";
@@ -20,7 +20,7 @@ export default function Command() {
     });
 
     try {
-      await axios.delete(`https://liveblocks.net/api/v1/room/${values.roomId}/storage`, {
+      await axios.delete(`https://liveblocks.net/api/v1/room/${encodeURIComponent(values.roomId)}/storage`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 
@@ -38,7 +38,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Delete Room Storage" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Delete Room Storage" onSubmit={handleSubmit} icon={Icon.Trash} />
         </ActionPanel>
       }
     >

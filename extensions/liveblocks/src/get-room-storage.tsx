@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open, Icon } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getTokenFromSecret } from "./utils";
@@ -22,12 +22,22 @@ export default function Command() {
     });
 
     try {
-      const { data } = await axios.get(`https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
+      const { data } = await axios.get(
+        `https://liveblocks.net/api/v1/room/${encodeURIComponent(values.roomId)}/storage/json`,
+        {
+          headers: { Authorization: `Bearer ${jwt}` },
+        }
+      );
 
       toast.style = Toast.Style.Success;
       toast.message = "Room storage retrieved successfully";
+      toast.primaryAction = {
+        title: "Open in Dashboard",
+        onAction: (toast) => {
+          open(`https://liveblocks.io/dashboard/rooms/${encodeURIComponent(values.roomId)}`);
+          toast.hide();
+        },
+      };
 
       setOutput(JSON.stringify(data));
     } catch (e) {
@@ -40,7 +50,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Get Room Storage" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Get Room Storage" onSubmit={handleSubmit} icon={Icon.Pencil} />
         </ActionPanel>
       }
     >

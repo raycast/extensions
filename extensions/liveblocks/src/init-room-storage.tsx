@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open, Icon } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getTokenFromSecret } from "./utils";
@@ -25,7 +25,7 @@ export default function Command() {
 
     try {
       const { data } = await axios.post(
-        `https://liveblocks.net/api/v1/room/${values.roomId}/storage/json`,
+        `https://liveblocks.net/api/v1/room/${encodeURIComponent(values.roomId)}/storage/json`,
         {
           data: {
             liveblocksType: values.type,
@@ -58,7 +58,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Initalize Room Storage" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Initalize Room Storage" onSubmit={handleSubmit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
