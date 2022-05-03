@@ -1,4 +1,4 @@
-import { ActionPanel, Color, getPreferenceValues, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Action, Toast } from "@raycast/api";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
@@ -27,7 +27,7 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
       icon={{ source: Icon.Calendar, tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
-          <PushAction title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+          <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
         </ActionPanel>
       }
     />
@@ -43,7 +43,11 @@ export function WeatherList() {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useSearch(query);
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search weather", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot search weather",
+      message: error,
+    });
   }
   if (!data) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
@@ -88,9 +92,16 @@ export function WeatherList() {
           title={getTemp()}
           subtitle={weatherDesc}
           icon={getIcon(curcon.weatherCode)}
-          accessoryTitle={`humidity: ${curcon.humidity}% | wind ${getWind()} ${getWindDirectionIcon(
-            curcon.winddirDegree
-          )}`}
+          accessories={[
+            {
+              icon: "💧",
+              text: `${curcon.humidity}%`,
+            },
+            {
+              icon: "💨",
+              text: `${getWind()} ${getWindDirectionIcon(curcon.winddirDegree)}`,
+            },
+          ]}
         />
       </List.Section>
       <List.Section title="Daily Forecast">

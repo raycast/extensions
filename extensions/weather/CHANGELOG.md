@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Add icons] - 2022-05-02
+
+- Add icons for wind and humidity
+
 ## [Fix] - 2021-10-21
 
 Fix showing the temp unit instead of wind unit.
