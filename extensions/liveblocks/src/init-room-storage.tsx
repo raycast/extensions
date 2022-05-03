@@ -29,7 +29,7 @@ export default function Command() {
         {
           data: {
             liveblocksType: values.type,
-            data: values.payload,
+            data: JSON.parse(values.payload),
           },
         },
         {
@@ -40,9 +40,9 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.message = "Room initialized successfully";
       toast.primaryAction = {
-        title: "Open Dashboard",
+        title: "Open in Dashboard",
         onAction: (toast) => {
-          open("https://liveblocks.io/dashboard");
+          open(`https://liveblocks.io/dashboard/rooms/${encodeURIComponent(values.roomId)}`);
           toast.hide();
         },
       };
