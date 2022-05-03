@@ -161,7 +161,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"replace_with" + index}
               key={"replace_with" + index}
               title={""}
-              placeholder={"with Strings"}
+              placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
                 tactions[index].content[1] = newValue;
