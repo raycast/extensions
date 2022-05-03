@@ -50,6 +50,15 @@ export async function getPrivateLeaderBoards() {
 }
 
 /**
+ * It fetches the current user's projects from the WakaTime API and returns the response as a `WakaTime.Projects` object
+ * @returns `WakaTime.Projects`
+ */
+export async function getProjects() {
+  const response = await fetch(`${URL}/users/current/projects`, setAuthHeader());
+  return (await response.json()) as WakaTime.Projects;
+}
+
+/**
  * It takes a number of seconds and returns a string representing the duration in hours, minutes, and seconds
  * @param {number} seconds - The number of seconds to convert to a duration.
  * @returns A string that represents the duration of a given number of seconds.

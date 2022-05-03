@@ -90,6 +90,31 @@ declare global {
       total_pages: number;
     }
 
+    export interface Projects extends Record<"next_page" | "page" | "prev_page" | "total" | "total_pages", number> {
+      data: Array<{
+        badge: null | {
+          color: string;
+          created_at: string;
+          id: string;
+          left_text: string;
+          link: string;
+          project_id: string;
+          snippets: Array<Record<"content" | "name", string>>;
+          title: string;
+          url: string;
+        };
+        created_at: string;
+        has_public_url: boolean;
+        human_readable_last_heartbeat_at: string;
+        id: string;
+        last_heartbeat_at: string;
+        name: string;
+        repository: null;
+        url: string;
+        urlencoded_name: string;
+      }>;
+    }
+
     type LeaderBoardUser = Record<"is_email_public" | "is_hireable" | "photo_public", boolean> &
       Record<"city", Record<"country_code" | "name" | "state" | "title", string> | null> &
       Record<
