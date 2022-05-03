@@ -84,4 +84,58 @@ const documentation = {
       title: "Cypress Studio",
     },
   ],
+  Dashboard: [
+    {
+      url: "https://docs.cypress.io/guides/dashboard/introduction",
+      title: "Introduction",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/projects",
+      title: "Projects",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/runs",
+      title: "Runs",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/organizations",
+      title: "Organizations",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/users",
+      title: "Users",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/bitbucket-integration",
+      title: "Bitbucket Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/github-integration",
+      title: "GitHub Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/gitlab-integration#Installing-the-GitLab-integration",
+      title: "GitLab Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/jira-integration",
+      title: "Jira Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/slack-integration",
+      title: "Slack Integration",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/analytics",
+      title: "Analytics",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/flaky-test-management",
+      title: "Flaky Test Management",
+    },
+    {
+      url: "https://docs.cypress.io/guides/dashboard/smart-orchestration",
+      title: "Smart Orchestration",
+    },
+  ],
 };
