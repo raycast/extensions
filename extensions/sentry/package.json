@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sentry",
+  "title": "Sentry",
+  "description": "Stay on top of your Sentry issues",
+  "icon": "icon.png",
+  "author": "thomas",
+  "contributors": [
+    "mattisssa"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Unresolved Issues",
+      "subtitle": "Sentry",
+      "description": "Lookup and modify unresolved issues in Sentry",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Auth Token",
+      "type": "textfield",
+      "description": "Auth Token to communicate with Sentry",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "javascript-time-ago": "^2.3.13",
+    "node-fetch": "^3.2.1",
+    "swr": "^1.2.2"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^6.0.0-beta.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

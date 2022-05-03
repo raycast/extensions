@@ -25,3 +25,24 @@ There are 3 parameters required for this extension to work:
 - `Enter` : Copy and Paste Password
 - `Cmd`+`Enter` : Copy Password
 - `Cmd`+`B` : Copy Username
+
+## Password Security Note
+
+This extension works by using `keepassxc-cli`(inside `KeePassXC.app`) in command line to access keepass database:
+
+- Main password is stored by raycast. (encrypted)
+- Main password will be send to `keepassxc-cli` by simulating command line interaction with nodejs api [subprocess.stdin.write](https://nodejs.org/api/child_process.html#subprocessstdin).
+
+### Related commands
+
+```bash
+# List entries
+keepassxc-cli locate -q /path/to/database.kdbx /
+
+# Get password by entry
+keepassxc-cli show -q -a Password /path/to/database.kdbx entry_name
+
+# Get username by entry
+keepassxc-cli show -q -a Username /path/to/database.kdbx entry_name
+
+```

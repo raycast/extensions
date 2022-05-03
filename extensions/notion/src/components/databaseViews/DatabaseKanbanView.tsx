@@ -1,4 +1,4 @@
-import { List, ImageLike, showToast, ToastStyle, randomId } from "@raycast/api";
+import { List, showToast, randomId, Image, Toast } from "@raycast/api";
 import { Page, DatabasePropertyOption, notionColorToTintColor } from "../../utils/notion";
 import { ActionEditPageProperty, PageListItem } from "..";
 import { DatabaseListView } from "./DatabaseListView";
@@ -31,7 +31,11 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   });
 
   if (!statusProperty) {
-    showToast(ToastStyle.Failure, "Kanban property missing", "Please edit view configuration");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Kanban property missing",
+      message: "Please edit view configuration",
+    });
     return (
       <DatabaseListView
         key={`database-${databaseId}-view-list`}
@@ -78,7 +82,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
     return source_icon;
   }
 
-  const databaseSections: { pages: Page[]; name: string; icon: ImageLike; id: string }[] = [];
+  const databaseSections: { pages: Page[]; name: string; icon: Image.ImageLike; id: string }[] = [];
   const tempSections: Record<string, Page[]> = {};
 
   databasePages.forEach(function (p) {

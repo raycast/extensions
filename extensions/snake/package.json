@@ -15,7 +15,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.2",
+    "@raycast/api": "^1.33.0",
     "bplist-parser": "^0.3.1",
     "use-interval": "^1.4.0"
   },
@@ -31,6 +31,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

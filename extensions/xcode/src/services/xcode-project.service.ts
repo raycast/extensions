@@ -1,4 +1,4 @@
-import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { XcodeProject } from "../models/project/xcode-project.model";
 import { XcodeProjectType } from "../models/project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
@@ -20,7 +20,7 @@ export class XcodeProjectService {
    */
   async cachedXcodeProjects(): Promise<XcodeProject[] | undefined> {
     // Retrieve XcodeProjects JSON from LocalStorage
-    const xcodeProjectsJSON = await getLocalStorageItem<string>(this.xcodeProjectsJSONLocalStorageKey);
+    const xcodeProjectsJSON = await LocalStorage.getItem<string>(this.xcodeProjectsJSONLocalStorageKey);
     // Check if XcodeProjects JSON is not available
     if (!xcodeProjectsJSON) {
       // Return undefined
@@ -36,7 +36,7 @@ export class XcodeProjectService {
    */
   private cacheXcodeProjects(xcodeProjects: XcodeProject[]): Promise<void> {
     // Store XcodeProjects JSON in LocalStorage
-    return setLocalStorageItem(this.xcodeProjectsJSONLocalStorageKey, JSON.stringify(xcodeProjects));
+    return LocalStorage.setItem(this.xcodeProjectsJSONLocalStorageKey, JSON.stringify(xcodeProjects));
   }
 
   /**
@@ -143,10 +143,10 @@ export class XcodeProjectService {
             // As no file extension is available in the path
             // the opened XcodeProject path is a Swift Package Project
             // which has been opened by clicking the "Package.swift" file.
-            // Therefore the path will be appended with the "Package.swift" file
+            // Therefore, the path will be appended with the "Package.swift" file
             return joinPathComponents(path, "Package.swift");
           } else {
-            // Otherwise return unmodified path
+            // Otherwise, return unmodified path
             return path;
           }
         })

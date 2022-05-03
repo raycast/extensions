@@ -1,0 +1,26 @@
+overwrite: true
+schema:
+  - https://api.github.com/graphql:
+      headers:
+        Authorization: "token ${GITHUB_TOKEN}"
+config:
+  scalars:
+    URI: string
+    DateTime: string
+    Date: string
+generates:
+  src/schema.generated.ts:
+    plugins:
+      - typescript
+    config:
+      avoidOptionals: true
+      constEnums: true
+  src/:
+    documents:
+      - "src/**/*.gql"
+    preset: near-operation-file
+    presetConfig:
+      baseTypesPath: schema.generated.ts
+    plugins:
+      - typescript-operations
+      - typescript-graphql-request

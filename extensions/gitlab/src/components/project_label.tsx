@@ -1,11 +1,11 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Label, Project, searchData } from "../gitlabapi";
 import { useCache } from "../cache";
 import { LabelList } from "./label";
 
-export function ProjectLabelList(props: { project: Project }) {
+export function ProjectLabelList(props: { project: Project }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Label[]>(
     `project_${props.project.id}_labels`,
@@ -15,7 +15,7 @@ export function ProjectLabelList(props: { project: Project }) {
     {
       deps: [searchText, props.project],
       onFilter: async (labels) => {
-        return await searchData<Label[]>(labels, {
+        return searchData<Label[]>(labels, {
           search: searchText || "",
           keys: ["name"],
           limit: 50,
@@ -25,7 +25,7 @@ export function ProjectLabelList(props: { project: Project }) {
   );
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Project labels", error);
+    showToast(Toast.Style.Failure, "Cannot search Project labels", error);
   }
 
   if (!data) {
