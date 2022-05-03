@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1password7",
   "title": "1Password 7",
-  "description": "Search, open or edit your 1Password 7 passwords from Raycast",
+  "description": "Search, open or edit your 1Password passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
   "contributors": [
-    "thomas"
+    "thomas",
+    "dteare"
   ],
   "license": "MIT",
   "commands": [
@@ -14,7 +15,7 @@
       "name": "list",
       "title": "My Passwords",
       "subtitle": "1Password",
-      "description": "List of all your 1Password 7 passwords in Raycast",
+      "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
       "mode": "view",
       "keywords": [
         "1p",
@@ -24,9 +25,32 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "appVersion",
+      "type": "dropdown",
+      "title": "1Password App Version",
+      "description": "Select the version of the 1Password app you want to use",
+      "data": [
+        {
+          "title": "Automatic (Default)",
+          "value": "automatic"
+        },
+        {
+          "title": "1Password 8",
+          "value": "onepassword8"
+        },
+        {
+          "title": "1Password 7",
+          "value": "onepassword7"
+        }
+      ],
+      "default": "automatic",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "open": "^8.3.0",
+    "@raycast/api": "^1.33.0",
     "sha.js": "^2.4.11"
   },
   "devDependencies": {
@@ -42,6 +66,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
