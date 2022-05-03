@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Changelog, getChangelogs, hellonextApiKey } from "./utils/hellonext";
 import ChangelogListItem from './components/ChangelogListItem';
