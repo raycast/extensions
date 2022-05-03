@@ -4,7 +4,7 @@ import { Changelog, getChangelogs, hellonextApiKey } from "./utils/hellonext";
 import ChangelogListItem from "./components/ChangelogListItem";
 import axios from "axios";
 
-export default fuanction Command() {
+export default function Command() {
   const [changelogs, setChangelogs] = useState<Changelog[]>();
   const [isLoading, setIsLoading] = useState(true);
 
