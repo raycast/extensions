@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   GET_REPO_README,
   GET_USER_REPOS,
+  ISSUE_PER_PAGE,
+  NOTIFICATION_PER_PAGE,
   NOTIFICATIONS,
   PER_PAGE,
   SEARCH_REPOS,
@@ -121,7 +123,7 @@ export const myIssues = (filter: string) => {
             sort: "created",
             direction: "desc",
             page: 1,
-            per_page: 40,
+            per_page: ISSUE_PER_PAGE,
           },
         }).then((response2) => {
           setProgressingIssues(response2.data as Issue[]);
@@ -186,7 +188,7 @@ export const getNotifications = (filter: string, refresh: number) => {
         access_token: accessToken,
         type: filter,
         page: "1",
-        per_page: 50,
+        per_page: NOTIFICATION_PER_PAGE,
       },
     })
       .then((response) => {

@@ -16,7 +16,12 @@ export function NotificationItem(props: {
       icon={{ source: notification.actor.avatar_url, mask: Mask.Circle }}
       title={notification.content}
       subtitle={notification.repository.human_name}
-      accessories={[{ text: notification.updated_at.substring(0, 10) }]}
+      accessories={[
+        {
+          text: notification.updated_at.substring(0, 10),
+          tooltip: "Updated: " + notification.updated_at.replace("T", " ").substring(0, 19),
+        },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={notification.content}>

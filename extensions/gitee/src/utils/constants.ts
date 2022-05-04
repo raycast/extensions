@@ -8,6 +8,8 @@ export const GET_REPO_README = (owner: string, repo: string) =>
 export const NOTIFICATIONS = "https://gitee.com/api/v5/notifications/threads";
 
 export const PER_PAGE = 20;
+export const ISSUE_PER_PAGE = 40;
+export const NOTIFICATION_PER_PAGE = 40;
 
 export enum IssueFilter {
   ALL = "all",

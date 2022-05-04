@@ -15,8 +15,11 @@ export function ReposItem(props: { repo: Repository }) {
       title={repo.human_name}
       subtitle={repo.stargazers_count === 0 ? "" : `🌟 ${repo.stargazers_count}`}
       accessories={[
-        { text: isEmpty(repo.language) ? " " : repo.language + "" },
-        { text: repo.updated_at.substring(0, 10) },
+        isEmpty(repo.language) ? {} : { text: repo.language + "", tooltip: "Language" },
+        {
+          text: repo.updated_at.substring(0, 10),
+          tooltip: "Updated: " + repo.updated_at.replace("T", " ").substring(0, 19),
+        },
       ]}
       actions={
         <ActionPanel>
