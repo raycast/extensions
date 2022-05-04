@@ -54,7 +54,6 @@ function NoteQuickLook(props: { note: Note; vaultPath: string }) {
       actions={
         <ActionPanel>
           <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
-          <NoteActions note={note} vaultPath={props.vaultPath} onPin={() => {}} />
         </ActionPanel>
       }
     />

@@ -1,9 +1,8 @@
-import { Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { Note } from "../utils/interfaces";
 import { NoteList } from "./NoteList";
-import { getPinnedNotes, unpinNote } from "../utils/PinNoteUtils";
+import { getPinnedNotes } from "../utils/PinNoteUtils";
 
 export function NoteListPinned(props: { vaultPath: string }) {
   const [pinnedNotes, setPinnedNotes] = useState<Note[]>();
