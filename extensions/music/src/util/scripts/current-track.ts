@@ -36,6 +36,6 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
 	  TE.apS("artist", trackArtist),
 	  TE.apS("album", trackAlbum),
 	  TE.apS("duration", trackDuration),
-	  TE.apS("state", getPlayerState)
+	  TE.apS("state", getPlayerState),
 	);
   };

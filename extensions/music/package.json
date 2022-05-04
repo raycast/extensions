@@ -111,6 +111,17 @@
         "album"
       ],
       "mode": "view"
+    },
+    {
+      "name": "set-rating",
+      "title": "Rate Track",
+      "subtitle": "Apple Music",
+      "description": "Rate currently playing track.",
+      "mode": "view",
+      "keywords": [
+        "track",
+        "rating"
+      ]
     }
   ],
   "dependencies": {
