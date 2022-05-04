@@ -1,3 +1,3 @@
-# Supabase Docs Changelog
+# Cypress Changelog
 
-## [Initial Version] - 2022-04-30
+## [Initial Version] - 2022-05-04
