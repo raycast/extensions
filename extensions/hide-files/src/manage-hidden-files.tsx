@@ -19,7 +19,7 @@ export default function Command() {
       isLoading={loading}
       searchBarPlaceholder="Search hidden files"
       searchBarAccessory={
-        localHiddenDirectory.length !== 0 && (
+        localHiddenDirectory.length !== 0 ? (
           <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             {
@@ -37,7 +37,7 @@ export default function Command() {
               </List.Dropdown.Section>
             }
           </List.Dropdown>
-        )
+        ) : null
       }
     >
       {localHiddenDirectory.length === 0 ? (
@@ -107,8 +107,9 @@ export default function Command() {
                           shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                           onAction={async () => {
                             await alertDialog(
-                              "⚠️Warning",
-                              "Do you want to unhide all files?",
+                              Icon.ExclamationMark,
+                              "Warning",
+                              "Are you sure you want to unhide all files?",
                               "Unhide All",
                               async () => {
                                 const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
