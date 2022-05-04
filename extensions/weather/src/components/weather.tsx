@@ -1,4 +1,4 @@
-import { ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Action, Toast } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
