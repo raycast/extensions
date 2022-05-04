@@ -10,31 +10,16 @@ import {
 } from "@raycast/api";
 
 import fs from "fs";
-import React from "react";
+import React, { useState } from "react";
 
-import { AppendNoteForm } from "./components/AppendNoteForm";
+import { AppendNoteForm } from "../components/AppendNoteForm";
 import { SearchNotePreferences, Note } from "./interfaces";
+import { getNoteContent } from "./utils";
+import { isNotePinned, pinNote, unpinNote } from "./PinNoteUtils";
 
 enum PrimaryAction {
   QuickLook = "quicklook",
   OpenInObsidian = "obsidian",
-}
-
-function getNoteContent(note: Note) {
-  const pref: SearchNotePreferences = getPreferenceValues();
-
-  let content = fs.readFileSync(note.path, "utf8") as string;
-  if (pref.removeYAML) {
-    const yamlHeader = content.match(/---(.|\n)*?---/gm);
-    if (yamlHeader) {
-      content = content.replace(yamlHeader[0], "");
-    }
-  }
-  if (pref.removeLinks) {
-    content = content.replaceAll("[[", "");
-    content = content.replaceAll("]]", "");
-  }
-  return content;
 }
 
 async function appendSelectedTextTo(note: Note) {
@@ -43,7 +28,6 @@ async function appendSelectedTextTo(note: Note) {
   if (appendPrefix === undefined) {
     appendPrefix = "";
   }
-
   try {
     const selectedText = await getSelectedText();
     if (selectedText.trim() == "") {
@@ -61,7 +45,7 @@ async function appendSelectedTextTo(note: Note) {
   }
 }
 
-function NoteQuickLook(props: { note: Note }) {
+function NoteQuickLook(props: { note: Note; vaultPath: string }) {
   const note = props.note;
   const content = getNoteContent(note);
   return (
@@ -70,15 +54,17 @@ function NoteQuickLook(props: { note: Note }) {
       actions={
         <ActionPanel>
           <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
-          <NoteActions note={note} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function NoteActions(props: { note: Note }) {
+export function NoteActions(props: { note: Note; vaultPath: string; onPin: () => void }) {
   const note = props.note;
+
+  const [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
+
   return (
     <React.Fragment>
       <Action.Push
@@ -122,16 +108,39 @@ export function NoteActions(props: { note: Note }) {
         content={`obsidian://open?path=${encodeURIComponent(note.path)}`}
         shortcut={{ modifiers: ["opt"], key: "u" }}
       />
+
+      <Action
+        title={pinned ? "Unpin Note" : "Pin Note"}
+        shortcut={{ modifiers: ["opt"], key: "p" }}
+        onAction={() => {
+          if (pinned) {
+            unpinNote(note, props.vaultPath);
+            setPinned(!pinned);
+            props.onPin();
+          } else {
+            pinNote(note, props.vaultPath);
+            setPinned(!pinned);
+            props.onPin();
+          }
+        }}
+        icon={pinned ? Icon.XmarkCircle : Icon.Pin}
+      />
     </React.Fragment>
   );
 }
 
-export function OpenNoteActions(props: { note: Note }) {
+export function OpenNoteActions(props: { note: Note; vaultPath: string }) {
   const note = props.note;
   const pref: SearchNotePreferences = getPreferenceValues();
   const primaryAction = pref.primaryAction;
 
-  const quicklook = <Action.Push title="Quick Look" target={<NoteQuickLook note={note} />} icon={Icon.Eye} />;
+  const quicklook = (
+    <Action.Push
+      title="Quick Look"
+      target={<NoteQuickLook note={note} vaultPath={props.vaultPath} />}
+      icon={Icon.Eye}
+    />
+  );
 
   const obsidian = (
     <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />

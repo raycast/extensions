@@ -2,7 +2,7 @@ export interface FormValue {
   path: string;
   name: string;
   content: string;
-  tags: Array<string>;
+  tags: string[];
 }
 
 export interface Preferences {
@@ -13,6 +13,9 @@ export interface NoteFormPreferences extends Preferences {
   prefPath: string;
   prefTag: string;
   tags: string;
+  openOnCreate: boolean;
+  prefNoteName: string;
+  folderActions: string;
 }
 
 export interface SearchNotePreferences extends Preferences {
@@ -20,7 +23,9 @@ export interface SearchNotePreferences extends Preferences {
   excludedFolders: string;
   removeYAML: boolean;
   removeLinks: boolean;
+  removeLatex: boolean;
   appendPrefix: string;
+  showDetail: boolean;
 }
 
 export interface Vault {
