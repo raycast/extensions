@@ -10,13 +10,15 @@ import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 
 export default function PlayLibraryTrack() {
-  const [tracks, setTracks] = useState<readonly Track[] | null>(null);
+  const [tracks, setTracks] = useState<readonly Track[] | null>( [] );
   const { pop } = useNavigation();
 
   const onSearch = useCallback(
-    async (next: string) => {
-      if (!next || next?.length < 1) {
-        setTracks([]);
+    async ( next: string ) => {
+      setTracks( null ) // start loading
+
+      if ( !next || next?.length < 1 ) {
+        setTracks( [] );
         return;
       }
 
@@ -26,17 +28,17 @@ export default function PlayLibraryTrack() {
         music.track.search,
         TE.matchW(
           () => {
-            showToast(Toast.Style.Failure, "Could not get tracks");
+            showToast( Toast.Style.Failure, "Could not get tracks" );
             return [] as ReadonlyArray<Track>;
           },
-          (tracks) =>
+          ( tracks ) =>
             pipe(
               tracks,
               O.fromNullable,
-              O.matchW(() => [] as ReadonlyArray<Track>, parseResult<Track>())
+              O.matchW( () => [] as ReadonlyArray<Track>, parseResult<Track>() )
             )
         ),
-        T.map(setTracks)
+        T.map( setTracks )
       )();
     },
     [setTracks]
@@ -49,7 +51,7 @@ export default function PlayLibraryTrack() {
       onSearchTextChange={onSearch}
       throttle
     >
-      {tracks?.map(({ id, name, artist, album }) => (
+      {tracks?.map( ( { id, name, artist, album } ) => (
         <List.Item
           key={id}
           title={name}
@@ -58,20 +60,20 @@ export default function PlayLibraryTrack() {
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} pop={pop} />}
         />
-      ))}
+      ) )}
     </List>
   );
 }
 
-function Actions({ name, pop }: { name: string; pop: () => void }) {
+function Actions( { name, pop }: { name: string; pop: () => void } ) {
   const title = `Start Track "${name}"`;
 
   const handleSubmit = async () => {
     await pipe(
       name,
       music.track.play,
-      TE.map(() => closeMainWindow()),
-      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this track"))
+      TE.map( () => closeMainWindow() ),
+      TE.mapLeft( () => showToast( Toast.Style.Failure, "Could not play this track" ) )
     )();
 
     pop();
