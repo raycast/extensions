@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Weather entity support] - 2022-05-03
+- Add support for weather entities (daily and hourly)
+
 ## [Dynamic temperature options] - 2022-05-02
 - The properties of base temperature options for climate entities (min_temp, max_temp, and target_temp_step) are now used for the climate entity instead of a hardcoded list.
 
