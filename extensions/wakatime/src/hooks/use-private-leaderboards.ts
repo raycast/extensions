@@ -4,7 +4,7 @@ import { showToast, Toast } from "@raycast/api";
 import { getPrivateLeaderBoards } from "../utils";
 
 export function usePrivateLeaderBoards() {
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [data, setData] = useState<WakaTime.PrivateLeaderBoards>();
 
   useEffect(() => {

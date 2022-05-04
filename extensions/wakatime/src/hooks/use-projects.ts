@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getProjects } from "../utils";
 
 export function useProjects() {
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [data, setData] = useState<WakaTime.Projects>();
 
   useEffect(() => {

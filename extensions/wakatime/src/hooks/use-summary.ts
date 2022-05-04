@@ -12,7 +12,7 @@ export function useSummary() {
     "Last 7 Days": sub(new Date(), { days: 7 }),
     "Last 30 Days": sub(new Date(), { days: 30 }),
   };
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [data, setData] = useState<Array<readonly [string, WakaTime.Summary]>>();
 
   useEffect(() => {

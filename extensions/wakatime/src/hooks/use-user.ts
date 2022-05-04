@@ -5,7 +5,7 @@ import { getUser } from "../utils";
 
 export function useUser() {
   const [data, setData] = useState<WakaTime.User>();
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function getData() {

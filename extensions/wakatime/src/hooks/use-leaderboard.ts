@@ -5,7 +5,7 @@ import { getLeaderBoard } from "../utils";
 
 export function useLeaderBoard(id?: string) {
   const [data, setData] = useState<WakaTime.LeaderBoard>();
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function getData() {

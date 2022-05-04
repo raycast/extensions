@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { getSummary, getDuration } from "../utils";
 
 export function useActivityChange() {
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [data, setData] = useState({ emoji: "", percent: 0, duration: "" });
 
   useEffect(() => {
