@@ -72,7 +72,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Initalize Room Storage" onSubmit={handleSubmit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Initialize Room Storage" onSubmit={handleSubmit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
