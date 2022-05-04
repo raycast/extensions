@@ -18,7 +18,7 @@ While Raycast for Teams is in beta, you need to activate early access to it. For
 
 ## Create Your Organization
 
-To get started, create your organization. Specify the name of the organization, a handle (used in links, e.g. `https://raycast.com/your_org/some_extension`) and optionally upload an avatar.
+To get started, create your organization. Specify the name of the organization, an handle (used in links, e.g. `https://raycast.com/your_org/some_extension`) and optionally upload an avatar.
 
 ![Create an Organization](../.gitbook/assets/teams-create-organization.png)
 
