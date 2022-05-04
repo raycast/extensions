@@ -74,7 +74,7 @@ export default function Command() {
         <Form.Dropdown.Item value="LiveList" title="LiveList" />
         <Form.Dropdown.Item value="LiveMap" title="LiveMap" />
       </Form.Dropdown>
-      <Form.TextArea id="payload" title="Payload" value={payload} onChange={setPayload} placeholder="Enter payload" />
+      <Form.TextArea id="payload" title="Payload" value={payload} onChange={setPayload} placeholder="{}" />
     </Form>
   );
 }
