@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, open, Icon } from "@raycast/api";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getTokenFromSecret } from "./utils";
 
 interface CommandForm {
@@ -12,6 +12,7 @@ interface CommandForm {
 export default function Command() {
   const [roomId, setRoomId] = useState("");
   const [payload, setPayload] = useState("");
+  const roomIdFieldRef = useRef<Form.TextField>("");
 
   useEffect(() => {
     getTokenFromSecret();
@@ -19,12 +20,8 @@ export default function Command() {
 
   async function handleSubmit(values: CommandForm) {
     if (values.roomId == "") {
+      roomIdFieldRef.current?.focus();
       showToast(Toast.Style.Failure, "Error", "Room ID is required");
-      return;
-    }
-
-    if (values.payload == "") {
-      showToast(Toast.Style.Failure, "Error", "Payload is required");
       return;
     }
 
@@ -62,6 +59,7 @@ export default function Command() {
         },
       };
 
+      roomIdFieldRef.current?.focus();
       setRoomId("");
       setPayload("");
     } catch (e) {
@@ -78,13 +76,20 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roomId" title="Room ID" value={roomId} onChange={setRoomId} placeholder="Enter room ID" />
+      <Form.TextField
+        id="roomId"
+        title="Room ID"
+        ref={roomIdFieldRef}
+        value={roomId}
+        onChange={setRoomId}
+        placeholder="Enter Room ID"
+      />
       <Form.Dropdown id="type" title="Type" defaultValue="LiveObject">
         <Form.Dropdown.Item value="LiveObject" title="LiveObject" />
         <Form.Dropdown.Item value="LiveList" title="LiveList" />
         <Form.Dropdown.Item value="LiveMap" title="LiveMap" />
       </Form.Dropdown>
-      <Form.TextArea id="payload" title="Payload" value={payload} onChange={setPayload} placeholder="{}" />
+      <Form.TextArea id="payload" title="Payload" value={payload} onChange={setPayload} placeholder="Enter Payload" />
     </Form>
   );
 }

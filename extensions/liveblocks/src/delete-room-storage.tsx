@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, popToRoot, Icon } from "@raycast/api";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getTokenFromSecret } from "./utils";
 
 interface CommandForm {
@@ -8,12 +8,15 @@ interface CommandForm {
 }
 
 export default function Command() {
+  const roomIdFieldRef = useRef<Form.TextField>("");
+
   useEffect(() => {
     getTokenFromSecret();
   }, []);
 
   async function handleSubmit(values: CommandForm) {
     if (values.roomId == "") {
+      roomIdFieldRef.current?.focus();
       showToast(Toast.Style.Failure, "Error", "Room ID is required");
       return;
     }
@@ -47,7 +50,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" />
+      <Form.TextField id="roomId" title="Room ID" ref={roomIdFieldRef} placeholder="Enter room ID" />
     </Form>
   );
 }
