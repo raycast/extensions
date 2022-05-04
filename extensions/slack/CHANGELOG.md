@@ -1,8 +1,8 @@
 # Slack Changelog
 
-## [New Command] - 2022-04-06
+## [New Command] - 2022-05-04
 
-Add an in-build `Unread Messages` command and update required permission scopes accordingly
+- Add `Unread Messages` command and update required permission scopes accordingly
 
 ## [Initial Version] - 2022-03-27
 
