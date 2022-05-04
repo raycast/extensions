@@ -1,5 +1,12 @@
 import * as TE from "fp-ts/TaskEither";
-import { tell, runScript } from "../apple-script";
+import { tell, runScript, createQueryString } from "../apple-script";
+
+const outputQuery = createQueryString({
+  id: "pId",
+  name: "pName",
+  duration: "pDuration",
+  count: "pCount",
+});
 
 const loopThroughPlaylists = (type: "subscription" | "user") => `
 	repeat with selectedPlaylist in ${type} playlists
@@ -7,7 +14,7 @@ const loopThroughPlaylists = (type: "subscription" | "user") => `
 		set pName to the name of selectedPlaylist
 		set pDuration to the duration of selectedPlaylist
 		set pCount to count (tracks of selectedPlaylist)
-		set output to output & "id: " & pId & "&nbsp;name: " & pName & "&nbsp;duration: " & pDuration & "&nbsp;count: " & pCount & "\n"
+		set output to output & ${outputQuery} & "\n"
     end repeat
 `;
 

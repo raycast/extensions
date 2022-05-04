@@ -11,6 +11,14 @@
     "player",
     "media"
   ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest",
+    "prebuild": "npm run test"
+  },
   "commands": [
     {
       "name": "toggle-play-pause",
@@ -137,12 +145,7 @@
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "typescript": "^4.4.3",
+    "vitest": "^0.10.2"
   }
 }

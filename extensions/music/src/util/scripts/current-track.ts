@@ -1,12 +1,11 @@
 import { pipe } from "fp-ts/function";
-import * as TE from "fp-ts/TaskEither";
 import * as R from "fp-ts/Reader";
 import * as RTE from "fp-ts/ReaderTaskEither";
-
-import { tell } from "../apple-script";
+import * as TE from "fp-ts/TaskEither";
+import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../costants";
-import { getPlayerState } from "./player-controls";
 import { Track } from "../models";
+
 
 export const love = tell("Music", "set loved of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
@@ -24,17 +23,34 @@ export const getCurrentTrackRating = pipe(
 );
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
-  const trackName = tell("Music", "get name of current track");
-  const trackArtist = tell("Music", "get artist of current track");
-  const trackAlbum = tell("Music", "get album of current track");
-  const trackDuration = tell("Music", "get duration of current track");
+  const querystring = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "trackArtist",
+    album: "trackAlbum",
+    duration: "trackDuration",
+    rating: "trackRating",
+  });
 
+
+
+  // prettier-ignore
   return pipe(
-    TE.Do,
-    TE.apS("name", trackName),
-    TE.apS("artist", trackArtist),
-    TE.apS("album", trackAlbum),
-    TE.apS("duration", trackDuration),
-    TE.apS("state", getPlayerState)
+    runScript(`
+      set output to ""
+        tell application "Music"
+          set t to (get current track)
+          set trackId to id of t
+          set trackName to name of t
+          set trackArtist to artist of t
+          set trackAlbum to album of t
+          set trackDuration to duration of t
+          set trackRating to rating of t
+
+          set output to ${querystring}
+        end tell
+      return output
+    `),
+    TE.map(parseQueryString<Track>())
   );
 };
