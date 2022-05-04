@@ -32,6 +32,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard content={searchResult.urls[1]} />
+            <Action.Paste content={searchResult.urls[1]} />
             <Action.OpenInBrowser url={"https://www.frankerfacez.com/emoticon/" + searchResult.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
