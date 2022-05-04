@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cypress-docs",
-  "title": "Cypress Docs",
+  "title": "Cypress Documentation",
   "description": "Quickly search the Cypress docs and open them in the browser",
   "icon": "cypress-logo.png",
   "author": "robertguss",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "cypress-docs",
-      "title": "Cypress Docs",
+      "title": "Search Documentation",
       "subtitle": "Cypress",
       "description": "Search the Cypress docs and open them in the browser",
       "mode": "view"
