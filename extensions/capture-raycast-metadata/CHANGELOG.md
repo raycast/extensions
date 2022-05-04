@@ -1,6 +1,6 @@
 # Capture Raycast Metadata Changelog
 
-## [Update Capture Raycast Metadata] - 2022-05-08
+## [Update Capture Raycast Metadata] - 2022-05-04
 
 - Increase the delay of Toast pop-ups to 0.3 second.
 
