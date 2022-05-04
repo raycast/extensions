@@ -8,15 +8,12 @@ interface CommandForm {
 }
 
 export default function Command() {
-  const roomIdFieldRef = useRef<Form.TextField>("");
-
   useEffect(() => {
     getTokenFromSecret();
   }, []);
 
   async function handleSubmit(values: CommandForm) {
     if (values.roomId == "") {
-      roomIdFieldRef.current?.focus();
       showToast(Toast.Style.Failure, "Error", "Room ID is required");
       return;
     }
@@ -50,7 +47,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roomId" title="Room ID" ref={roomIdFieldRef} placeholder="Enter room ID" />
+      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" />
     </Form>
   );
 }
