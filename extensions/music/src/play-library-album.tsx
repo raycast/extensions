@@ -2,22 +2,21 @@ import { ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNa
 import { isLeft } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
-import * as S from 'fp-ts/string';
-import * as T from 'fp-ts/Task';
+import * as S from "fp-ts/string";
+import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import React, { useState } from "react";
 import { Album } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 
-
 export default function PlayLibraryAlbum() {
-  const [albums, setAlbums] = useState<readonly Album[] | null>( null );
+  const [albums, setAlbums] = useState<readonly Album[] | null>(null);
   const { pop } = useNavigation();
 
-  const onSearch = async ( next: string ) => {
-    if ( !next || next?.length < 1 ) {
-      setAlbums( [] );
+  const onSearch = async (next: string) => {
+    if (!next || next?.length < 1) {
+      setAlbums([]);
       return;
     }
 
@@ -27,20 +26,17 @@ export default function PlayLibraryAlbum() {
       music.track.search,
       TE.matchW(
         () => {
-          showToast( Toast.Style.Failure, "Could not get albums" );
+          showToast(Toast.Style.Failure, "Could not get albums");
           return [] as ReadonlyArray<Album>;
         },
-        ( tracks ) =>
+        (tracks) =>
           pipe(
             tracks,
             O.fromNullable,
-            O.matchW(
-              () => [] as ReadonlyArray<Album>,
-              parseResult<Album>()
-            ),
+            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>())
           )
       ),
-      T.map( setAlbums )
+      T.map(setAlbums)
     )();
   };
 
@@ -53,7 +49,7 @@ export default function PlayLibraryAlbum() {
     >
       {albums &&
         albums?.length > 0 &&
-        albums.map( ( { id, name, artist, count } ) => (
+        albums.map(({ id, name, artist, count }) => (
           <List.Item
             key={id}
             title={name}
@@ -62,23 +58,23 @@ export default function PlayLibraryAlbum() {
             icon={{ source: "../assets/icon.png" }}
             actions={<Actions name={name} pop={pop} />}
           />
-        ) )}
+        ))}
     </List>
   );
 }
 
-function Actions( { name, pop }: { name: string; pop: () => void } ) {
+function Actions({ name, pop }: { name: string; pop: () => void }) {
   const title = `Start Album "${name}"`;
 
   const handleSubmit = async () => {
     await pipe(
       name,
       music.albums.play,
-      TE.map( () => closeMainWindow() ),
-      TE.mapLeft( () => showToast( Toast.Style.Failure, "Could not play this album" ) ),
-    )()
+      TE.map(() => closeMainWindow()),
+      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this album"))
+    )();
 
-    pop()
+    pop();
   };
 
   return (

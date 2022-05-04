@@ -1,6 +1,7 @@
-import { runScript } from '../apple-script';
+import { runScript } from "../apple-script";
 
-export const search = (search: string) => runScript(`
+export const search = (search: string) =>
+  runScript(`
 	set output to ""
 	set albumList to {}
 	tell application "Music"
@@ -20,7 +21,7 @@ export const search = (search: string) => runScript(`
 `);
 
 export const play = (album: string) =>
-runScript(`
+  runScript(`
 	tell application "Music"
 		if (exists playlist "Raycast DJ") then
 			delete playlist "Raycast DJ"

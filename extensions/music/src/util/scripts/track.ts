@@ -1,6 +1,7 @@
-import { runScript, tell } from '../apple-script';
+import { runScript, tell } from "../apple-script";
 
-export const search = (search: string) => runScript(`
+export const search = (search: string) =>
+  runScript(`
 	set output to ""
 		tell application "Music"
 			set results to (every track whose name contains "${search}" or artist contains "${search}")

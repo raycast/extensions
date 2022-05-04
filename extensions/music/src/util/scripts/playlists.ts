@@ -1,6 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
-import { tell, runScript } from '../apple-script';
-
+import { tell, runScript } from "../apple-script";
 
 const loopThroughPlaylists = (type: "subscription" | "user") => `
 	repeat with selectedPlaylist in ${type} playlists
@@ -10,10 +9,9 @@ const loopThroughPlaylists = (type: "subscription" | "user") => `
 		set pCount to count (tracks of selectedPlaylist)
 		set output to output & "id: " & pId & "&nbsp;name: " & pName & "&nbsp;duration: " & pDuration & "&nbsp;count: " & pCount & "\n"
     end repeat
-`
+`;
 
-export const play = (name: string): TE.TaskEither<Error, string> =>
-  tell("Music", `play playlist "${name.trim()}"`);
+export const play = (name: string): TE.TaskEither<Error, string> => tell("Music", `play playlist "${name.trim()}"`);
 
 export const getPlaylists: TE.TaskEither<Error, string> = runScript(`
 	set output to ""

@@ -125,8 +125,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "fp-ts": "^2.11.5",
+    "@raycast/api": "^1.34.1",
+    "fp-ts": "^2.12.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -134,13 +134,15 @@
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
