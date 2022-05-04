@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { googleMavenRepository } from "./utils/constans";
-import ShowGoogleArtifact from "./show-google-artifact";
+import ShowGoogleArtifacts from "./show-google-artifacts";
 import { getGoogleMavenRepositories } from "./hooks/hooks";
 import { MavenEmptyView } from "./utils/ui-component";
 
@@ -24,7 +24,7 @@ export default function ShowGoogleMavenRepository() {
                   <Action.Push
                     title="Show Artifact Info"
                     icon={Icon.List}
-                    target={<ShowGoogleArtifact packageName={value} />}
+                    target={<ShowGoogleArtifacts packageName={value} />}
                   />
                   <Action.CopyToClipboard title={"Copy Group Name"} content={value} />
                   <ActionPanel.Section>

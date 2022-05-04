@@ -4,7 +4,7 @@ import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
 
 import { searchArtifacts } from "./hooks/hooks";
 
-export default function ShowGoogleArtifact(props: { packageName: string }) {
+export default function ShowGoogleArtifacts(props: { packageName: string }) {
   const packageName = props.packageName;
   const [currentTag, setCurrentTag] = useState<string>("");
   const { artifactInfo, loading } = searchArtifacts(packageName);
