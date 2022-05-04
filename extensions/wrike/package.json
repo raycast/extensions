@@ -22,7 +22,8 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Wrike Tasks",
+      "title": "Search Tasks",
+      "subtitle": "Wrike",
       "description": "Search Wrike tasks by name",
       "mode": "view",
       "icon": "wrike_logo.png"
@@ -51,4 +52,3 @@
     "lint": "ray lint"
   }
 }
-

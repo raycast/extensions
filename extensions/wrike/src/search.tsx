@@ -1,9 +1,9 @@
-import { ActionPanel, Action, List, showToast, Toast, Detail, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Detail, LocalStorage, Icon } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { WrikeTask, SearchState } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { URLSearchParams } from "url";
-import { getCurrentUser, getRequest, statusToColorMap } from "./wrike";
+import { getRequest, statusToColorMap } from "./wrike";
 import { AbortError } from "node-fetch";
 
 export default function Command() {
@@ -13,7 +13,7 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search Wrike tasks..."
+      searchBarPlaceholder="Enter two or more characters"
       throttle
       actions={
         <ActionPanel>
@@ -21,11 +21,15 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {state.results.length === 0 ? (
+        <List.EmptyView icon={{ source: "../assets/wrike_logo_small.png" }} title="No tasks found" />
+      ) : (
+        <List.Section title="Results" subtitle={state.results.length + ""}>
+          {state.results.map((searchResult) => (
+            <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -75,20 +79,24 @@ function SearchListItem({ searchResult }: { searchResult: WrikeTask }) {
       accessories={[{ text: searchResult.status }]}
       actions={
         <ActionPanel>
-          <Action.Push title="View task detail" target={<TaskDetail task={searchResult} />} />
           <ActionPanel.Section>
+            <Action.Push
+              title="View task detail"
+              target={<TaskDetail task={searchResult} />}
+              icon={Icon.TextDocument}
+            />
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.permalink} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
+          <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard
-              title="Copy Title - Permalink"
-              content={`${searchResult.title} - ${searchResult.permalink}`}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Permalink"
+              title="Permalink"
               content={searchResult.permalink}
               shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
+            <Action.CopyToClipboard
+              title="Title and Permalink"
+              content={`${searchResult.title} - ${searchResult.permalink}`}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -109,8 +117,12 @@ function useSearch() {
         ...oldState,
         isLoading: true,
       }));
+
       try {
-        const results = await performSearch(searchText, cancelRef.current.signal);
+        let results: WrikeTask[] = [];
+        if (searchText.length != 0) {
+          results = await performSearch(searchText, cancelRef.current.signal);
+        }
         setState((oldState) => ({
           ...oldState,
           results: results,
@@ -148,21 +160,11 @@ function useSearch() {
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<WrikeTask[]> {
   const params = new URLSearchParams();
-  const currentUser = await getCurrentUser(signal);
 
   params.append("fields", `[description]`);
-
-  if (searchText.length == 0) {
-    params.append("authors", `[${currentUser?.id}]`);
-    params.append("status", "Active");
-    params.append("sortField", "UpdatedDate");
-    params.append("sortOrder", "Desc");
-    params.append("limit", "100");
-  } else {
-    params.append("title", searchText);
-    params.append("sortField", "status");
-    params.append("sortOrder", "Asc");
-  }
+  params.append("title", searchText);
+  params.append("sortField", "status");
+  params.append("sortOrder", "Asc");
 
   const response = await getRequest<WrikeTask>("tasks", params, signal);
 
