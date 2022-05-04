@@ -927,6 +927,10 @@ export default function Command() {
 
 You can use React's [useRef](https://reactjs.org/docs/hooks-reference.html#useref) hook to create variables which have access to imperative APIs (such as `.focus()` or `.reset()`) exposed by the native form items.
 
+{% hint style="info" %}
+The imperative APIs require version 1.33.0 or higher of the `@raycast/api` package.
+{% endhint %}
+
 ```typescript
 import { useRef } from "react";
 import { ActionPanel, Form, Action } from "@raycast/api";
