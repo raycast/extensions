@@ -18,6 +18,16 @@ export default function Command() {
   }, []);
 
   async function handleSubmit(values: CommandForm) {
+    if (values.roomId == "") {
+      showToast(Toast.Style.Failure, "Error", "Room ID is required");
+      return;
+    }
+
+    if (values.payload == "") {
+      showToast(Toast.Style.Failure, "Error", "Payload is required");
+      return;
+    }
+
     const jwt = await LocalStorage.getItem<string>("liveblocks-jwt");
     const toast = await showToast({
       style: Toast.Style.Animated,
