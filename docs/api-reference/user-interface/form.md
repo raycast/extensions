@@ -95,11 +95,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
-
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.PasswordField
 
@@ -183,10 +182,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.TextArea
 
@@ -273,10 +272,11 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
 
 ### Form.Checkbox
 
@@ -360,10 +360,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.DatePicker
 
@@ -451,10 +451,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 #### Form.DatePicker.Type
 
@@ -563,10 +563,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.Dropdown.Item
 
@@ -749,10 +749,10 @@ export default function Command() {
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.TagPicker.Item
 
@@ -959,24 +959,72 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           <ActionPanel.Section title="Focus">
-            <Action title="Focus TextField" onAction={() => textFieldRef.current?.focus()} />
-            <Action title="Focus TextArea" onAction={() => textAreaRef.current?.focus()} />
-            <Action title="Focus DatePicker" onAction={() => datePickerRef.current?.focus()} />
-            <Action title="Focus PasswordField" onAction={() => passwordFieldRef.current?.focus()} />
-            <Action title="Focus Dropdown" onAction={() => dropdownRef.current?.focus()} />
-            <Action title="Focus TagPicker" onAction={() => tagPickerRef.current?.focus()} />
-            <Action title="Focus First Checkbox" onAction={() => firstCheckboxRef.current?.focus()} />
-            <Action title="Focus Second Checkbox" onAction={() => secondCheckboxRef.current?.focus()} />
+            <Action
+              title="Focus TextField"
+              onAction={() => textFieldRef.current?.focus()}
+            />
+            <Action
+              title="Focus TextArea"
+              onAction={() => textAreaRef.current?.focus()}
+            />
+            <Action
+              title="Focus DatePicker"
+              onAction={() => datePickerRef.current?.focus()}
+            />
+            <Action
+              title="Focus PasswordField"
+              onAction={() => passwordFieldRef.current?.focus()}
+            />
+            <Action
+              title="Focus Dropdown"
+              onAction={() => dropdownRef.current?.focus()}
+            />
+            <Action
+              title="Focus TagPicker"
+              onAction={() => tagPickerRef.current?.focus()}
+            />
+            <Action
+              title="Focus First Checkbox"
+              onAction={() => firstCheckboxRef.current?.focus()}
+            />
+            <Action
+              title="Focus Second Checkbox"
+              onAction={() => secondCheckboxRef.current?.focus()}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Reset">
-            <Action title="Reset TextField" onAction={() => textFieldRef.current?.reset()} />
-            <Action title="Reset TextArea" onAction={() => textAreaRef.current?.reset()} />
-            <Action title="Reset DatePicker" onAction={() => datePickerRef.current?.reset()} />
-            <Action title="Reset PasswordField" onAction={() => passwordFieldRef.current?.reset()} />
-            <Action title="Reset Dropdown" onAction={() => dropdownRef.current?.reset()} />
-            <Action title="Reset TagPicker" onAction={() => tagPickerRef.current?.reset()} />
-            <Action title="Reset First Checkbox" onAction={() => firstCheckboxRef.current?.reset()} />
-            <Action title="Reset Second Checkbox" onAction={() => secondCheckboxRef.current?.reset()} />
+            <Action
+              title="Reset TextField"
+              onAction={() => textFieldRef.current?.reset()}
+            />
+            <Action
+              title="Reset TextArea"
+              onAction={() => textAreaRef.current?.reset()}
+            />
+            <Action
+              title="Reset DatePicker"
+              onAction={() => datePickerRef.current?.reset()}
+            />
+            <Action
+              title="Reset PasswordField"
+              onAction={() => passwordFieldRef.current?.reset()}
+            />
+            <Action
+              title="Reset Dropdown"
+              onAction={() => dropdownRef.current?.reset()}
+            />
+            <Action
+              title="Reset TagPicker"
+              onAction={() => tagPickerRef.current?.reset()}
+            />
+            <Action
+              title="Reset First Checkbox"
+              onAction={() => firstCheckboxRef.current?.reset()}
+            />
+            <Action
+              title="Reset Second Checkbox"
+              onAction={() => secondCheckboxRef.current?.reset()}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -984,7 +1032,11 @@ export default function Command() {
       <Form.TextField id="textField" title="TextField" ref={textFieldRef} />
       <Form.TextArea id="textArea" title="TextArea" ref={textAreaRef} />
       <Form.DatePicker id="datePicker" title="DatePicker" ref={datePickerRef} />
-      <Form.PasswordField id="passwordField" title="PasswordField" ref={passwordFieldRef} />
+      <Form.PasswordField
+        id="passwordField"
+        title="PasswordField"
+        ref={passwordFieldRef}
+      />
       <Form.Separator />
       <Form.Dropdown
         id="dropdown"

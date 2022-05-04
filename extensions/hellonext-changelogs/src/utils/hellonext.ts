@@ -30,6 +30,7 @@ export interface Changelog {
   id: number;
   title: string;
   description: string;
+  description_markdown: string;
   preview: string;
   url: string;
   published: boolean;

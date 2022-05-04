@@ -2,7 +2,7 @@
 
 Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#copy) and clear it through [`Clipboard.clear`](clipboard.md#clear). The [`Clipboard.paste`](clipboard.md#paste) function inserts text at the current cursor position in your frontmost app.
 
-The action [`Action.CopyToClipboard`](user-interface/actions.md#CopyToClipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#paste) can be used to insert text at in your frontmost app.
+The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text at in your frontmost app.
 
 ## API Reference
 
