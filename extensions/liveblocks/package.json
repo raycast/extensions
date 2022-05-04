@@ -4,7 +4,7 @@
   "title": "Liveblocks",
   "description": "Exposes the Liveblocks API via a pleasant and easy to use UI.",
   "icon": "command-icon.png",
-  "author": "dre",
+  "author": "andreaselia",
   "categories": [
     "Data",
     "Web"
