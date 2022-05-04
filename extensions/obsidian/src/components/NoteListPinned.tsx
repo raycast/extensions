@@ -13,26 +13,5 @@ export function NoteListPinned(props: { vaultPath: string }) {
     setPinnedNotes(pinnedNotes);
   }, []);
 
-  function unpinNoteAction(note: Note) {
-    return (
-      <Action
-        title="Unpin Note"
-        shortcut={{ modifiers: ["opt", "cmd"], key: "u" }}
-        onAction={() => {
-          const pinnedNotes = unpinNote(note, props.vaultPath);
-          setPinnedNotes(pinnedNotes);
-        }}
-        icon={Icon.XmarkCircle}
-      />
-    );
-  }
-
-  return (
-    <NoteList
-      notes={pinnedNotes}
-      action={unpinNoteAction}
-      isLoading={pinnedNotes === undefined}
-      vaultPath={props.vaultPath}
-    />
-  );
+  return <NoteList notes={pinnedNotes} isLoading={pinnedNotes === undefined} vaultPath={props.vaultPath} />;
 }

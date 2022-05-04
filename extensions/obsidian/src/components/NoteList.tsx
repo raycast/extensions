@@ -1,9 +1,34 @@
 import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
-import React from "react";
+import React, { useState } from "react";
 
 import { Note, SearchNotePreferences } from "../utils/interfaces";
 import { OpenNoteActions, NoteActions } from "../utils/actions";
 import { getNoteContent } from "../utils/utils";
+import { isNotePinned } from "../utils/PinNoteUtils";
+
+export function NoteListItem(props: { note: Note; vaultPath: string; key: number }) {
+  const note = props.note;
+  const [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
+
+  const pin = function () {
+    setPinned(!pinned);
+  };
+
+  return (
+    <List.Item
+      title={note.title}
+      accessories={[{ text: pinned ? "⭐️" : "" }]}
+      detail={<List.Item.Detail markdown={getNoteContent(note)} />}
+      actions={
+        <ActionPanel>
+          <OpenNoteActions note={note} vaultPath={props.vaultPath} />
+          <NoteActions note={note} vaultPath={props.vaultPath} onPin={pin} />
+          {/* {action && action(note)} */}
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export function NoteList(props: {
   notes: Note[] | undefined;
@@ -29,18 +54,7 @@ export function NoteList(props: {
   return (
     <List isLoading={isLoading} isShowingDetail={pref.showDetail}>
       {notes?.map((note) => (
-        <List.Item
-          title={note.title}
-          key={note.key}
-          detail={<List.Item.Detail markdown={getNoteContent(note)} />}
-          actions={
-            <ActionPanel>
-              <OpenNoteActions note={note} vaultPath={props.vaultPath} />
-              <NoteActions note={note} vaultPath={props.vaultPath} />
-              {/* {action && action(note)} */}
-            </ActionPanel>
-          }
-        />
+        <NoteListItem note={note} vaultPath={props.vaultPath} key={note.key} />
       ))}
     </List>
   );

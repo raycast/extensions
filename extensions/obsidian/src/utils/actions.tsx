@@ -54,14 +54,14 @@ function NoteQuickLook(props: { note: Note; vaultPath: string }) {
       actions={
         <ActionPanel>
           <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
-          <NoteActions note={note} vaultPath={props.vaultPath} />
+          <NoteActions note={note} vaultPath={props.vaultPath} onPin={() => {}} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function NoteActions(props: { note: Note; vaultPath: string }) {
+export function NoteActions(props: { note: Note; vaultPath: string; onPin: () => void }) {
   const note = props.note;
 
   const [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
@@ -117,9 +117,11 @@ export function NoteActions(props: { note: Note; vaultPath: string }) {
           if (pinned) {
             unpinNote(note, props.vaultPath);
             setPinned(!pinned);
+            props.onPin();
           } else {
             pinNote(note, props.vaultPath);
             setPinned(!pinned);
+            props.onPin();
           }
         }}
         icon={pinned ? Icon.XmarkCircle : Icon.Pin}
