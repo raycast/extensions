@@ -42,7 +42,20 @@ function UnreadMessagesOverview() {
 
   const setConversations = async () => {
     const item = await LocalStorage.getItem(conversationsStorageKey);
-    const conversations = item ? JSON.parse(item as string) : [];
+    let conversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+
+    // unselect conversations that don't exist anymore
+    if (users && channels && groups && !usersError && !channelsError && !groupsError) {
+      conversations = conversations.filter(
+        (id: string) =>
+          !!users.find((user) => user.conversationId === id) ||
+          !!channels.find((channel) => channel.id === id) ||
+          !!groups.find((group) => group.id === id)
+      );
+
+      await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
+    }
+
     if (!selectedConversations || !isEqual(selectedConversations, conversations)) {
       setSelectedConversations(conversations);
     }
@@ -66,14 +79,13 @@ function UnreadMessagesOverview() {
   }, [selectedConversations]);
 
   if (
-    unreadConversationsError &&
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUnreadConversations &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
+    (usersError &&
+      channelsError &&
+      groupsError &&
+      !isValidatingUsers &&
+      !isValidatingChannels &&
+      !isValidatingGroups) ||
+    (unreadConversationsError && !isValidatingUnreadConversations)
   ) {
     onApiError({ exitExtension: true });
   }
@@ -245,20 +257,6 @@ function Configuration() {
       }
     });
   }, []);
-
-  useEffect(() => {
-    // unselect conversations that don't exist anymore
-    if (users && channels && groups) {
-      setSelectedConversations(
-        selectedConversations.filter(
-          (id) =>
-            !!users.find((user) => user.conversationId === id) ||
-            !!channels.find((channel) => channel.id === id) ||
-            !!groups.find((group) => group.id === id)
-        )
-      );
-    }
-  }, [users, channels]);
 
   const toggleConversation = (id: string) => {
     let updatedSelectedConversations: string[] | undefined;
