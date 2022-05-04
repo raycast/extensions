@@ -76,6 +76,8 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 
 https://user-images.githubusercontent.com/64883/166630703-962ac4de-5da5-40f6-8895-25aeb92bcfb6.mp4
 
+![package list item](https://user-images.githubusercontent.com/64883/166632417-89e2e5dd-b01e-43af-984c-e4b29740f53f.gif)
+
 ### Options
 
 <img width="310" alt="image" src="https://user-images.githubusercontent.com/64883/166630716-8d9eb232-4278-42a0-9237-96da2242e2af.png">
