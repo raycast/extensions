@@ -28,6 +28,6 @@
 
 - adds a preference for choosing a default package manager (yarn or npm) and keyboard shortcuts for copying the install command based on this preference.
 
-## [Added Brew] - 2021-10-20
+## [Added extension] - 2021-10-20
 
 Initial version code
