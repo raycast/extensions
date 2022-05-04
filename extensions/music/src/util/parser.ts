@@ -20,7 +20,13 @@ const mapProperties =
 
 // use to parse run-applescript return (string)
 // see start-playlist.tsx for a full example
-export const parseResult =
-  <T extends object>() =>
-  (raw: string): ReadonlyArray<T> =>
-    pipe(raw, S.trim, S.split("\n"), A.map(flow(S.trim, S.split("&nbsp;"), mapProperties<T>())));
+export const parseResult = <T extends object>() => (raw: string): ReadonlyArray<T> => pipe(
+  raw,
+  S.trim,
+  S.split("\n"),
+  A.map(flow(
+    S.trim,
+    S.split("&nbsp;"),
+    mapProperties<T>()
+  ))
+);
