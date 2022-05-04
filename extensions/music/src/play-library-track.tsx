@@ -4,7 +4,7 @@ import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { Track } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";

@@ -6,7 +6,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 export const handleError = (error: Error) =>
   TE.tryCatch(() => showToast(Toast.Style.Failure, error.name, error.message), E.toError);
 
-export const handleTaskEitherError = (te: TE.TaskEither<Error, any>) =>
+export const handleTaskEitherError = (te: TE.TaskEither<Error, unknown>) =>
   pipe(
     te,
     TE.mapLeft((error) => {
