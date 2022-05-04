@@ -27,7 +27,7 @@ export default async () => {
       const currentTime = new Date().getTime();
       while (new Date().getTime() - currentTime < 300) {
         //To prevent capture success toast from overwriting the toast the user wants to show
-        // wait for 1 second
+        // wait for 0.3 second
       }
       await captureResultToast(captureResult);
     }
