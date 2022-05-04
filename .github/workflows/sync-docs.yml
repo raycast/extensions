@@ -5,6 +5,7 @@ on:
       - "docs/**"
     branches: ["main"]
   workflow_dispatch:
+
 jobs:
   sync-api-docs:
     if: github.repository == 'raycast/extensions'
@@ -20,10 +21,11 @@ jobs:
 
       - name: Get changed files in the docs folder
         id: changed-files
-        uses: tj-actions/changed-files@v14.3
+        uses: tj-actions/changed-files@v19
         with:
           files: |
             docs/**
+            !docs/.config.json
 
       - name: Setup git
         uses: raycast/github-actions/setup-git@master
