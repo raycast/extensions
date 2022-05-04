@@ -10,7 +10,8 @@ interface CommandForm {
 }
 
 export default function Command() {
-  const [output, setOutput] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [payload, setPayload] = useState("");
 
   useEffect(() => {
     getTokenFromSecret();
@@ -22,6 +23,10 @@ export default function Command() {
       style: Toast.Style.Animated,
       title: "Initializing the room...",
     });
+
+    if (values.payload == "") {
+      values.payload = "{}";
+    }
 
     try {
       const { data } = await axios.post(
@@ -47,7 +52,8 @@ export default function Command() {
         },
       };
 
-      setOutput(JSON.stringify(data));
+      setRoomId("");
+      setPayload("");
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.message = "Unable to initialize room";
@@ -62,13 +68,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roomId" title="Room ID" placeholder="Enter room ID" />
+      <Form.TextField id="roomId" title="Room ID" value={roomId} onChange={setRoomId} placeholder="Enter room ID" />
       <Form.Dropdown id="type" title="Type" defaultValue="LiveObject">
         <Form.Dropdown.Item value="LiveObject" title="LiveObject" />
         <Form.Dropdown.Item value="LiveList" title="LiveList" />
         <Form.Dropdown.Item value="LiveMap" title="LiveMap" />
       </Form.Dropdown>
-      <Form.TextArea id="payload" title="Payload" placeholder="Enter payload" />
+      <Form.TextArea id="payload" title="Payload" value={payload} onChange={setPayload} placeholder="Enter payload" />
     </Form>
   );
 }
