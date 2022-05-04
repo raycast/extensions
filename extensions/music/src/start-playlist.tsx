@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import * as E from 'fp-ts/Either'
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { flow, pipe } from 'fp-ts/lib/function';
+import * as TE from 'fp-ts/TaskEither';
+import { useEffect, useState } from "react";
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
-import { flow, pipe } from 'fp-ts/lib/function';
-import * as TE from 'fp-ts/TaskEither'
-import { ReadonlyNonEmptyArray } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 export default function PlaySelected() {
   const [playlists, setPlaylists] = useState<ReadonlyArray<Playlist> | null>( null );
@@ -48,17 +46,16 @@ interface ActionsProps {
 function Actions( { name, pop }: ActionsProps ) {
   const title = `Start Playlist "${name}"`;
 
-  const handleSubmit = useCallback( async () => {
-    const play = await music.playlists.play( name )();
+  const handleSubmit = async () => {
+    await pipe(
+      name,
+      music.playlists.play,
+      TE.map( () => closeMainWindow() ),
+      TE.mapLeft( () => showToast( Toast.Style.Failure, "Could not play this playlist" ) ),
+    )()
 
-    if ( E.isLeft( play ) ) {
-      await showToast( Toast.Style.Failure, "Could not play this playlist" );
-      return;
-    }
-
-    await closeMainWindow();
-    pop();
-  }, [pop] );
+    pop()
+  };
 
   return (
     <ActionPanel title={title}>

@@ -71,13 +71,14 @@ function Actions( { name, pop }: { name: string; pop: () => void } ) {
   const title = `Start Album "${name}"`;
 
   const handleSubmit = async () => {
-    const play = await music.albums.play( name )();
-    if ( isLeft( play ) ) {
-      showToast( Toast.Style.Failure, "Could not play this album" );
-      return;
-    }
-    await closeMainWindow();
-    pop();
+    await pipe(
+      name,
+      music.albums.play,
+      TE.map( () => closeMainWindow() ),
+      TE.mapLeft( () => showToast( Toast.Style.Failure, "Could not play this album" ) ),
+    )()
+
+    pop()
   };
 
   return (
