@@ -1,5 +1,10 @@
 # GitHub Gist Changelog
 
+## [Add "Load More"] - 2022-05-06
+
+- Update settings item: you can choose the number(30-100) of Gist loaded per page.
+- Add "Load More": When you select the last item in the list, the next page of Gist will be loaded automatically.
+
 ## [Fix Markdown Preview bug] - 2022-04-18
 
 - Fix Markdown files are not previewed correctly (fix: [#1331](https://github.com/raycast/extensions/issues/1331)).

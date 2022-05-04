@@ -1,18 +1,19 @@
-import { Form, getPreferenceValues, LocalStorage } from "@raycast/api";
-import Values = LocalStorage.Values;
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { parse } from "path";
-import { GistFile, GistItem } from "./gist-utils";
+import { GistItem } from "./gist-utils";
+import Values = LocalStorage.Values;
 
-export const preferences = () => {
+export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     personalAccessTokens: preferencesMap.get("access-token"),
     rememberTag: preferencesMap.get("remember-tag"),
     detail: preferencesMap.get("detail"),
     primaryAction: preferencesMap.get("primary-action"),
+    perPage: parseInt(preferencesMap.get("perPage")),
   };
 };
-export const preference = preferences();
+export const preference = commonPreferences();
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
