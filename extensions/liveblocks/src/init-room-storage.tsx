@@ -50,7 +50,7 @@ export default function Command() {
       );
 
       toast.style = Toast.Style.Success;
-      toast.message = "Room initialized successfully";
+      toast.title = "Room initialized successfully";
       toast.primaryAction = {
         title: "Open in Dashboard",
         onAction: (toast) => {
@@ -64,7 +64,7 @@ export default function Command() {
       setPayload("");
     } catch (e) {
       toast.style = Toast.Style.Failure;
-      toast.message = "Unable to initialize room";
+      toast.title = "Unable to initialize room";
     }
   }
 

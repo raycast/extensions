@@ -37,7 +37,7 @@ export default function Command() {
       );
 
       toast.style = Toast.Style.Success;
-      toast.message = "Room storage retrieved successfully";
+      toast.title = "Room storage retrieved successfully";
       toast.primaryAction = {
         title: "Open in Dashboard",
         onAction: (toast) => {
@@ -49,7 +49,7 @@ export default function Command() {
       setOutput(JSON.stringify(data));
     } catch (e) {
       toast.style = Toast.Style.Failure;
-      toast.message = "Unable to retrieve room storage";
+      toast.title = "Unable to retrieve room storage";
     }
   }
 

@@ -33,12 +33,12 @@ export default function Command() {
       });
 
       toast.style = Toast.Style.Success;
-      toast.message = "Room deleted successfully";
+      toast.title = "Room deleted successfully";
 
       popToRoot();
     } catch (e) {
       toast.style = Toast.Style.Failure;
-      toast.message = "Unable to delete the room";
+      toast.title = "Unable to delete the room";
     }
   }
 
