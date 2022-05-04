@@ -1,45 +1,47 @@
-import { ActionPanel, closeMainWindow, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { isLeft } from "fp-ts/lib/Either";
+import { ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import * as S from 'fp-ts/string';
+import * as T from 'fp-ts/Task';
 import * as TE from "fp-ts/TaskEither";
-import React, { useState } from "react";
-import { playTrack, searchForTrack } from "./util/controls";
+import React, { useCallback, useState } from "react";
 import { Track } from "./util/models";
 import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
+
 
 export default function PlayLibraryTrack() {
-  const [tracks, setTracks] = useState<Track[] | null>();
+  const [tracks, setTracks] = useState<readonly Track[] | null>( null );
   const { pop } = useNavigation();
 
-  const onSearch = async (next: string) => {
-    if (!next || next?.length < 1) {
-      setTracks([]);
+  const onSearch = useCallback( async ( next: string ) => {
+    if ( !next || next?.length < 1 ) {
+      setTracks( [] );
       return;
     }
 
-    const result = await pipe(
+    await pipe(
       next,
-      searchForTrack,
+      S.trim,
+      music.track.search,
       TE.matchW(
         () => {
-          showToast(ToastStyle.Failure, "Could not get tracks");
-          return [];
+          showToast( Toast.Style.Failure, "Could not get tracks" );
+          return [] as ReadonlyArray<Track>;
         },
-        (tracks) =>
+        ( tracks ) =>
           pipe(
             tracks,
             O.fromNullable,
             O.matchW(
-              () => [],
-              (res) => (res ? parseResult<Track>(res) : [])
-            )
+              () => [] as ReadonlyArray<Track>,
+              parseResult<Track>()
+            ),
           )
-      )
+      ),
+      T.map( setTracks )
     )();
-
-    setTracks(result);
-  };
+  }, [setTracks] );
 
   return (
     <List
@@ -48,7 +50,7 @@ export default function PlayLibraryTrack() {
       onSearchTextChange={onSearch}
       throttle
     >
-      {tracks?.map(({ id, name, artist, album }) => (
+      {tracks?.map( ( { id, name, artist, album } ) => (
         <List.Item
           key={id}
           title={name}
@@ -57,22 +59,23 @@ export default function PlayLibraryTrack() {
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} pop={pop} />}
         />
-      ))}
+      ) )}
     </List>
   );
 }
 
-function Actions({ name, pop }: { name: string; pop: () => void }) {
+function Actions( { name, pop }: { name: string; pop: () => void } ) {
   const title = `Start Track "${name}"`;
 
   const handleSubmit = async () => {
-    const play = await playTrack(name)();
-    if (isLeft(play)) {
-      showToast(ToastStyle.Failure, "Could not play this track");
-      return;
-    }
-    await closeMainWindow();
-    pop();
+    await pipe(
+      name,
+      music.track.play,
+      TE.map( () => closeMainWindow() ),
+      TE.mapLeft( () => showToast( Toast.Style.Failure, "Could not play this track" ) ),
+    )()
+
+    pop()
   };
 
   return (

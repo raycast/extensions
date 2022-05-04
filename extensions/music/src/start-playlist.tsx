@@ -1,64 +1,68 @@
-import { ActionPanel, closeMainWindow, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { Either, isLeft } from "fp-ts/lib/Either";
-import React, { useEffect, useState } from "react";
-import { getPlaylists, playPlaylist } from "./util/controls";
+import { useCallback, useEffect, useState } from "react";
+import * as E from 'fp-ts/Either'
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
+import { flow, pipe } from 'fp-ts/lib/function';
+import * as TE from 'fp-ts/TaskEither'
+import { ReadonlyNonEmptyArray } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 export default function PlaySelected() {
-  const [playlists, setPlaylists] = useState<Playlist[] | null>(null);
+  const [playlists, setPlaylists] = useState<ReadonlyArray<Playlist> | null>( null );
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    const getPlaylistNames = async () => {
-      const raw: Either<Error, string> = await getPlaylists()();
-      if (isLeft(raw)) {
-        showToast(ToastStyle.Failure, "Could not get your playlists");
-        return;
-      }
-      let result: Playlist[] = [];
-      if (raw.right?.length > 0) {
-        result = parseResult<Playlist>(raw.right);
-      }
-      setPlaylists(result);
-    };
-
-    getPlaylistNames();
-  }, []);
+  useEffect( () => {
+    pipe(
+      music.playlists.getPlaylists,
+      TE.mapLeft( _ => showToast( Toast.Style.Failure, "Could not get your playlists" ) ),
+      TE.map( flow(
+        parseResult<Playlist>(),
+        setPlaylists
+      ) ),
+    )()
+  }, [] );
 
   return (
     <List isLoading={playlists === null} searchBarPlaceholder="Search A Playlist">
       {playlists &&
         playlists?.length > 0 &&
-        playlists.map(({ id, name, duration, count }) => (
+        playlists.map( ( { id, name, duration, count } ) => (
           <List.Item
             key={id}
             title={name}
-            accessoryTitle={`🎧 ${count}  ⏱ ${Math.floor(Number(duration) / 60)} min`}
+            accessoryTitle={`🎧 ${count}  ⏱ ${Math.floor( Number( duration ) / 60 )} min`}
             icon={{ source: "../assets/icon.png" }}
             actions={<Actions name={name} pop={pop} />}
           />
-        ))}
+        ) )}
     </List>
   );
 }
 
-function Actions({ name, pop }: { name: string; pop: () => void }) {
+interface ActionsProps {
+  name: string
+  pop(): void
+}
+
+function Actions( { name, pop }: ActionsProps ) {
   const title = `Start Playlist "${name}"`;
 
-  const handleSubmit = async () => {
-    const play = await playPlaylist(name)();
-    if (isLeft(play)) {
-      showToast(ToastStyle.Failure, "Could not play this playlist");
+  const handleSubmit = useCallback( async () => {
+    const play = await music.playlists.play( name )();
+
+    if ( E.isLeft( play ) ) {
+      await showToast( Toast.Style.Failure, "Could not play this playlist" );
       return;
     }
+
     await closeMainWindow();
     pop();
-  };
+  }, [pop] );
 
   return (
     <ActionPanel title={title}>
-      <ActionPanel.Item title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit} />
     </ActionPanel>
   );
 }

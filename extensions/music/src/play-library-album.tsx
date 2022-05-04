@@ -1,44 +1,47 @@
-import { ActionPanel, closeMainWindow, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
 import { isLeft } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import * as S from 'fp-ts/string';
+import * as T from 'fp-ts/Task';
 import * as TE from "fp-ts/TaskEither";
 import React, { useState } from "react";
-import { playAlbum, searchForAlbum } from "./util/controls";
 import { Album } from "./util/models";
 import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
+
 
 export default function PlayLibraryAlbum() {
-  const [albums, setAlbums] = useState<Album[] | null>();
+  const [albums, setAlbums] = useState<readonly Album[] | null>( null );
   const { pop } = useNavigation();
 
-  const onSearch = async (next: string) => {
-    setAlbums(null);
-    if (!next || next?.length < 1) {
-      setAlbums([]);
+  const onSearch = async ( next: string ) => {
+    if ( !next || next?.length < 1 ) {
+      setAlbums( [] );
       return;
     }
 
-    const result = await pipe(
+    await pipe(
       next,
-      searchForAlbum,
+      S.trim,
+      music.track.search,
       TE.matchW(
         () => {
-          showToast(ToastStyle.Failure, "Could not get albums");
-          return [];
+          showToast( Toast.Style.Failure, "Could not get albums" );
+          return [] as ReadonlyArray<Album>;
         },
-        (albums) =>
+        ( tracks ) =>
           pipe(
-            albums,
+            tracks,
             O.fromNullable,
             O.matchW(
-              () => [],
-              (res) => (res ? parseResult<Album>(res) : [])
-            )
+              () => [] as ReadonlyArray<Album>,
+              parseResult<Album>()
+            ),
           )
-      )
+      ),
+      T.map( setAlbums )
     )();
-    setAlbums(result);
   };
 
   return (
@@ -50,7 +53,7 @@ export default function PlayLibraryAlbum() {
     >
       {albums &&
         albums?.length > 0 &&
-        albums.map(({ id, name, artist, count }) => (
+        albums.map( ( { id, name, artist, count } ) => (
           <List.Item
             key={id}
             title={name}
@@ -59,18 +62,18 @@ export default function PlayLibraryAlbum() {
             icon={{ source: "../assets/icon.png" }}
             actions={<Actions name={name} pop={pop} />}
           />
-        ))}
+        ) )}
     </List>
   );
 }
 
-function Actions({ name, pop }: { name: string; pop: () => void }) {
+function Actions( { name, pop }: { name: string; pop: () => void } ) {
   const title = `Start Album "${name}"`;
 
   const handleSubmit = async () => {
-    const play = await playAlbum(name)();
-    if (isLeft(play)) {
-      showToast(ToastStyle.Failure, "Could not play this album");
+    const play = await music.albums.play( name )();
+    if ( isLeft( play ) ) {
+      showToast( Toast.Style.Failure, "Could not play this album" );
       return;
     }
     await closeMainWindow();

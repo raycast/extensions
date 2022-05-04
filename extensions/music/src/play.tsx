@@ -1,7 +1,7 @@
 import { closeMainWindow } from "@raycast/api";
-import * as playerControls from "./util/controls";
+import * as music from "./util/scripts";
 
 export default async () => {
   await closeMainWindow();
-  await playerControls.play();
+  await music.player.play();
 };
