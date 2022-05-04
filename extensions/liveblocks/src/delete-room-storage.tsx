@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, popToRoot, Icon } from "@raycast/api";
 import axios from "axios";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { getTokenFromSecret } from "./utils";
 
 interface CommandForm {
