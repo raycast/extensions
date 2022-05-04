@@ -7,10 +7,13 @@ import { PackageListItem } from './PackagListItem'
 export default function PackageList() {
   const [results, setResults] = useState<NpmsFetchResponse>([])
   const [loading, setLoading] = useState<boolean>(false)
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true)
-    const response = await fetchPackages(text.replace(/\s/g, '+'))
+    const searchterm = text.replace(/\s/g, '+')
+    const response = await fetchPackages(searchterm)
+    setSearchTerm(searchterm)
     setResults(response)
     setLoading(false)
   }
@@ -24,7 +27,13 @@ export default function PackageList() {
     >
       {results?.length
         ? results.map((result) => {
-            return <PackageListItem key={result.package.name} result={result} />
+            return (
+              <PackageListItem
+                key={result.package.name}
+                result={result}
+                searchTerm={searchTerm}
+              />
+            )
           })
         : null}
     </List>

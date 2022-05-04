@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from '@raycast/api'
+import { showToast, Toast } from '@raycast/api'
 import fetch from 'node-fetch'
 import { NpmsFetchResponse } from '../npmsResponse.model'
 
@@ -13,7 +13,7 @@ export const fetchPackages = async (
     return json as NpmsFetchResponse
   } catch (error) {
     console.error(error)
-    showToast(ToastStyle.Failure, 'Could not fetch packages')
+    showToast(Toast.Style.Failure, 'Could not fetch packages')
     return Promise.resolve([])
   }
 }
