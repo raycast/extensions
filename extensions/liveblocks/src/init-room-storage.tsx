@@ -36,7 +36,7 @@ export default function Command() {
     }
 
     try {
-      const { data } = await axios.post(
+      await axios.post(
         `https://liveblocks.net/api/v1/room/${encodeURIComponent(values.roomId)}/storage/json`,
         {
           data: {
