@@ -7,6 +7,29 @@ import { getErrorMessage } from "../utils";
 import { Weather, WeatherConditions, WeatherData, wttr } from "../wttr";
 import { DayList } from "./day";
 
+function getHighestOccurrence(arr: string[]): string | undefined {
+  const oc: Record<string, number> = {};
+  for (const e of arr) {
+    if (e in oc) {
+      oc[e] += 1;
+    } else {
+      oc[e] = 1;
+    }
+  }
+  let highestName: string | undefined = undefined;
+  let highestValue = 0;
+  let i = 0;
+  for (const e of Object.keys(oc)) {
+    const count = oc[e];
+    if (count > highestValue) {
+      highestName = e;
+      highestValue = count;
+    }
+    i++;
+  }
+  return highestName;
+}
+
 export function DayListItem(props: { day: WeatherData; title: string }) {
   const data = props.day;
   const wd = getWeekday(data.date);
@@ -20,12 +43,14 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
     }
     return `${val} ${getTemperatureUnit()}`;
   };
+  const weatherCodes = data.hourly.map((h) => h.weatherCode);
+  const weatherCode = getHighestOccurrence(weatherCodes);
   return (
     <List.Item
       key={data.date}
       title={wd}
       subtitle={`max: ${getTemp("max")}, min: ${getTemp("min")}`}
-      icon={{ source: Icon.Calendar, tintColor: Color.PrimaryText }}
+      icon={getIcon(weatherCode || "")}
       actions={
         <ActionPanel>
           <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
