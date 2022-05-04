@@ -5,7 +5,8 @@ export const isEmpty = (string: string | null | undefined) => {
 };
 
 export const buildUpdatedDate = (timeStamp: number) => {
-  return new Date(timeStamp).toDateString().substring(4).replaceAll(" ", "-");
+  const time = new Date(timeStamp).toDateString().substring(4).replaceAll(" ", "-");
+  return time.substring(4, 6) + "-" + time.substring(0, 3) + "-" + time.substring(7);
 };
 
 export enum DependencyType {

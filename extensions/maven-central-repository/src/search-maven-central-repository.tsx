@@ -35,8 +35,8 @@ export default function SearchMavenCentralRepository() {
             key={index}
             icon={{ source: getListIcon(value.a) }}
             title={value.id}
-            subtitle={value.latestVersion}
-            accessories={[{ text: buildUpdatedDate(value.timestamp) }]}
+            subtitle={{ value: value.latestVersion, tooltip: "Latest Version" }}
+            accessories={[{ text: buildUpdatedDate(value.timestamp), tooltip: "Updated" }]}
             actions={
               <ActionPanel>
                 <Action
