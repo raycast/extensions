@@ -22,30 +22,25 @@ export default function MyRepositories() {
         </List.Dropdown>
       }
     >
-      {!loading && notifications?.length === 0 ? (
-        <GiteeEmptyView />
-      ) : (
-        <>
-          <List.Section title={"Unread"}>
-            {notifications?.map((notification) => {
-              return (
-                notification.unread && (
-                  <NotificationItem key={notification.id} notification={notification} setRefresh={setRefresh} />
-                )
-              );
-            })}
-          </List.Section>
-          <List.Section title={"Read"}>
-            {notifications?.map((notification) => {
-              return (
-                !notification.unread && (
-                  <NotificationItem key={notification.id} notification={notification} setRefresh={setRefresh} />
-                )
-              );
-            })}
-          </List.Section>
-        </>
-      )}
+      <GiteeEmptyView title={"No Notifications"} />
+      <List.Section title={"Unread"}>
+        {notifications?.map((notification) => {
+          return (
+            notification.unread && (
+              <NotificationItem key={notification.id} notification={notification} setRefresh={setRefresh} />
+            )
+          );
+        })}
+      </List.Section>
+      <List.Section title={"Read"}>
+        {notifications?.map((notification) => {
+          return (
+            !notification.unread && (
+              <NotificationItem key={notification.id} notification={notification} setRefresh={setRefresh} />
+            )
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

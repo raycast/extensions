@@ -21,25 +21,20 @@ export default function MyRepositories() {
         </List.Dropdown>
       }
     >
-      {!loading && progressingIssues?.length === 0 && openIssues.length === 0 ? (
-        <GiteeEmptyView />
-      ) : (
-        <>
-          <List.Section title={"Open"} subtitle={openIssues?.length + " issue" + (openIssues?.length > 1 ? "s" : "")}>
-            {openIssues?.map((issue) => {
-              return <IssueItem key={issue.id} issue={issue} icon={Icon.Circle} iconColor={Color.Green} />;
-            })}
-          </List.Section>
-          <List.Section
-            title={"Progressing"}
-            subtitle={progressingIssues?.length + " issue" + (progressingIssues?.length > 1 ? "s" : "")}
-          >
-            {progressingIssues?.map((issue) => {
-              return <IssueItem key={issue.id} issue={issue} icon={Icon.TwoArrowsClockwise} iconColor={Color.Yellow} />;
-            })}
-          </List.Section>
-        </>
-      )}
+      <GiteeEmptyView title={"No Issues"} />
+      <List.Section title={"Open"} subtitle={openIssues?.length + " issue" + (openIssues?.length > 1 ? "s" : "")}>
+        {openIssues?.map((issue) => {
+          return <IssueItem key={issue.id} issue={issue} icon={Icon.Circle} iconColor={Color.Green} />;
+        })}
+      </List.Section>
+      <List.Section
+        title={"Progressing"}
+        subtitle={progressingIssues?.length + " issue" + (progressingIssues?.length > 1 ? "s" : "")}
+      >
+        {progressingIssues?.map((issue) => {
+          return <IssueItem key={issue.id} issue={issue} icon={Icon.TwoArrowsClockwise} iconColor={Color.Yellow} />;
+        })}
+      </List.Section>
     </List>
   );
 }

@@ -3,11 +3,21 @@ import React, { useState } from "react";
 import { searchRepos } from "./hooks/hooks";
 import { GiteeEmptyView } from "./components/GiteeEmptyView";
 import { ReposItem } from "./components/ReposItem";
+import { isEmpty } from "./utils/common-utils";
 
 export default function SearchRepositories() {
   const [searchContent, setSearchContent] = useState<string>("");
   const { repos, loading } = searchRepos(searchContent);
 
+  const emptyViewTitle = () => {
+    if (loading) {
+      return "Loading...";
+    }
+    if (repos.length === 0 && !isEmpty(searchContent)) {
+      return "No Repositories";
+    }
+    return "Welcome to Gitee";
+  };
   return (
     <List
       isLoading={loading}
@@ -15,13 +25,10 @@ export default function SearchRepositories() {
       onSearchTextChange={setSearchContent}
       throttle={true}
     >
-      {repos.length === 0 ? (
-        <GiteeEmptyView />
-      ) : (
-        repos.map((repo) => {
-          return <ReposItem key={repo.id} repo={repo} />;
-        })
-      )}
+      <GiteeEmptyView title={emptyViewTitle()} />
+      {repos.map((repo) => {
+        return <ReposItem key={repo.id} repo={repo} />;
+      })}
     </List>
   );
 }

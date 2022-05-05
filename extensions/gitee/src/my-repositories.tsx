@@ -21,13 +21,10 @@ export default function MyRepositories() {
         }
       }}
     >
-      {!loading && repos?.length === 0 ? (
-        <GiteeEmptyView />
-      ) : (
-        repos?.map((repo) => {
-          return <ReposItem key={repo.id} repo={repo} />;
-        })
-      )}
+      <GiteeEmptyView title={"No Repositories"} />
+      {repos?.map((repo) => {
+        return <ReposItem key={repo.id} repo={repo} />;
+      })}
     </List>
   );
 }
