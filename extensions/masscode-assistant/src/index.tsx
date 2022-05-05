@@ -9,8 +9,11 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
-        setState((previous) => ({ ...previous, snippets: res.data }));
+        const { data } = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
+
+        const snippets = data.filter((i) => !i.isDeleted);
+
+        setState((previous) => ({ ...previous, snippets }));
       } catch (err) {
         setState((previous) => ({
           ...previous,
