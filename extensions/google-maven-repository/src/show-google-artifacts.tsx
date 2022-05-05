@@ -1,6 +1,7 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useState } from "react";
-import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
+import { ArtifactList } from "./utils/ui-component";
+import { googleMavenRepository } from "./utils/constans";
 
 import { searchArtifacts } from "./hooks/hooks";
 
@@ -23,7 +24,15 @@ export default function ShowGoogleArtifacts(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      <MavenEmptyView />
+      <List.EmptyView
+        title={`Welcome to Google's Maven Repository!`}
+        icon={"android-bot.svg"}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title={"Show Maven in Browser"} url={googleMavenRepository} />
+          </ActionPanel>
+        }
+      />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
           <ArtifactList
