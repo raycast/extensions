@@ -25,10 +25,10 @@
       "mode": "view"
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
+      "name": "search",
+      "title": "Search Tasks",
       "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
+      "description": "Search across all your Todoist tasks.",
       "mode": "view"
     },
     {
@@ -36,6 +36,13 @@
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "Todoist",
+      "description": "See your Todoist projects and tasks by project.",
       "mode": "view"
     },
     {
@@ -110,15 +117,17 @@
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^1.5.0",
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.33.2",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
+    "remove-markdown": "^0.3.0",
     "swr": "^1.2.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.12",
     "@types/react": "^17.0.37",
+    "@types/remove-markdown": "^0.3.1",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
     "eslint": "^8.4.1",

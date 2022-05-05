@@ -15,6 +15,9 @@ export default function Command() {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: CommandForm) {
+    if (!values.content) {
+      return showToast({ style: Toast.Style.Failure, title: "🐝 Type something to get started" });
+    }
     validateUserConfigGraphPath()
       .catch((e) => {
         showGraphPathInvalidToast();

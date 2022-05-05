@@ -26,7 +26,16 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean;
 export function getActions(item: IGif, showViewDetails: boolean, service?: ServiceName) {
   const { id, url, gif_url, slug } = item;
   const { state, dispatch } = useContext(AppContext);
-  const { favIds } = state;
+  const { favIds, recentIds } = state;
+
+  const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
+
+  const trackUsage = () => dispatch({ type: "add", save: true, recentIds: actionIds, service });
+  const removeFromRecents = () => dispatch({ type: "remove", save: true, recentIds: actionIds, service });
+
+  const addToFav = () => dispatch({ type: "add", save: true, favIds: actionIds, service });
+
+  const removeFav = () => dispatch({ type: "remove", save: true, favIds: actionIds, service });
 
   const copyFileAction = () =>
     showToast({
@@ -56,12 +65,21 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
   ) : undefined;
   const copyGifUrl = <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF Link" content={stripQParams(gif_url)} />;
+  const copyGifMarkdown = (
+    <Action.CopyToClipboard
+      key="copyGifMarkdown"
+      title="Copy GIF Markdown"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      content={`![${item.title}](${stripQParams(gif_url)})`}
+    />
+  );
   const copyPageUrl = url ? (
     <Action.CopyToClipboard
       key="copyPageUrl"
       title="Copy Page Link"
       content={url}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      onCopy={trackUsage}
     />
   ) : undefined;
   const copyFile = (
@@ -69,7 +87,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       icon={Icon.Clipboard}
       key="copyFile"
       title="Copy GIF"
-      onAction={copyFileAction}
+      onAction={() => copyFileAction().then(trackUsage)}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
@@ -80,18 +98,19 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       title="View GIF Details"
       target={<GifDetails item={item} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onPush={trackUsage}
     />
   );
 
   let toggleFav: JSX.Element | undefined;
-  if (service && favIds) {
-    const actionIds = new Map([[service, new Set([id.toString()])]]);
-    toggleFav = favIds?.get(service)?.has(id.toString()) ? (
+  const isFav = favIds?.get(service as ServiceName)?.has(id.toString());
+  if (favIds) {
+    toggleFav = isFav ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
         title="Remove from Favorites"
-        onAction={() => dispatch({ type: "remove", save: true, ids: actionIds, service })}
+        onAction={removeFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     ) : (
@@ -99,15 +118,20 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
         icon={Icon.Star}
         key="toggleFav"
         title="Add to Favorites"
-        onAction={() => dispatch({ type: "add", save: true, ids: actionIds, service })}
+        onAction={addToFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     );
   }
 
+  const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
+  const removeRecent = isRecent ? (
+    <Action icon={Icon.Clock} key="removeRecent" title="Remove from Recents" onAction={removeFromRecents} />
+  ) : undefined;
+
   const actions: Array<(JSX.Element | undefined)[]> = [
-    [copyFile, copyGifUrl],
-    [toggleFav, showViewDetails ? viewDetails : undefined],
+    [copyFile, copyGifUrl, copyGifMarkdown],
+    [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser],
   ];
 

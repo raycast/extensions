@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  SubmitFormAction,
-  Icon,
-  Detail,
-  Form,
-  FormValues,
-  showToast,
-  ToastStyle,
-  ImageMask,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Icon, Detail, Form, showToast, useNavigation, Action, Image, Toast, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   Database,
@@ -40,13 +29,14 @@ import {
   loadDatabaseView,
 } from "../utils/local-storage";
 import { useForceRenderer } from "../utils/useForceRenderer";
+import { handleOnOpenPage } from "../utils/openPage";
 
 export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender?: () => void }): JSX.Element {
   const presetDatabaseId = props.databaseId;
 
   // On form submit function
   const { pop } = useNavigation();
-  async function handleSubmit(values: FormValues) {
+  async function handleSubmit(values: Form.Values, openPage: boolean) {
     if (!validateForm(values)) {
       return;
     }
@@ -57,12 +47,21 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
     const page = await createDatabasePage(values);
     setIsLoading(false);
     if (!page) {
-      showToast(ToastStyle.Failure, "Couldn't create database page");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't create database page",
+      });
     } else {
-      showToast(ToastStyle.Success, "Page created!");
+      showToast({
+        title: "Page created!",
+      });
       props.onForceRerender?.();
 
-      pop();
+      if (openPage) {
+        handleOnOpenPage(page);
+      } else {
+        pop();
+      }
     }
   }
 
@@ -224,7 +223,9 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
 
     setDatabaseView(newDatabaseView);
     forceRerender();
-    showToast(ToastStyle.Success, "View Updated");
+    showToast({
+      title: "View Updated",
+    });
     storeDatabaseView(databaseId, newDatabaseView);
   }
 
@@ -242,7 +243,16 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <SubmitFormAction title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
+            <Action.SubmitForm
+              title="Create Page"
+              icon={Icon.Plus}
+              onSubmit={(values) => handleSubmit(values, false)}
+            />
+            <Action.SubmitForm
+              title="Create and Open Page"
+              icon={Icon.Plus}
+              onSubmit={(values) => handleSubmit(values, true)}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="View options">
             <ActionSetVisibleProperties
@@ -402,7 +412,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
                         key={"people::" + u.id}
                         value={u.id}
                         title={u.name ? u.name : "Unknown"}
-                        icon={u.avatar_url ? { source: u.avatar_url, mask: ImageMask.Circle } : undefined}
+                        icon={u.avatar_url ? { source: u.avatar_url, mask: Image.Mask.Circle } : undefined}
                       />
                     );
                   })}
@@ -412,17 +422,36 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
               return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;
           }
         })}
+      <Form.Separator key="separator" />
+      <Form.TextArea id="content" title="Page Content" />
+      <Form.Description
+        text={`Parses Markdown content into Notion Blocks.
+- Supports all heading types (heading depths 4, 5, 6 are treated as 3 for Notion)
+- Supports numbered lists, bulleted lists, to-do lists
+- Supports italics, bold, strikethrough, inline code, hyperlinks
+- Code blocks
+- Block quotes
+
+Per Notion limitations, these markdown attributes are not supported:
+- Tables (removed)
+- HTML tags (removed)
+- Thematic breaks (removed)`}
+      />
     </Form>
   );
 }
 
-function validateForm(values: FormValues): boolean {
+function validateForm(values: Form.Values): boolean {
   const valueKeys = Object.keys(values) as string[];
   const titleKey = valueKeys.filter(function (vk) {
     return vk.includes("property::title");
   })[0];
   if (!values[titleKey]) {
-    showToast(ToastStyle.Failure, "Title Required", "Please set title value");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Title Required",
+      message: "Please set title value",
+    });
     return false;
   }
   return true;

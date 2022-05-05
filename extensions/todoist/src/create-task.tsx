@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
-import { getAPIDate } from "./utils";
+import { getAPIDate } from "./helpers";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 
@@ -37,6 +37,8 @@ export default function CreateTask() {
   const [projectId, setProjectId] = useState<string>();
   const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
+
+  const titleField = useRef<Form.TextField>(null);
 
   function clear() {
     setContent("");
@@ -99,6 +101,7 @@ export default function CreateTask() {
         onAction: () => open(url),
       };
       clear();
+      titleField.current.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
@@ -115,7 +118,14 @@ export default function CreateTask() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="content" title="Title" placeholder="Buy fruits" value={content} onChange={setContent} />
+      <Form.TextField
+        id="content"
+        title="Title"
+        placeholder="Buy fruits"
+        value={content}
+        onChange={setContent}
+        ref={titleField}
+      />
 
       <Form.TextArea
         id="description"

@@ -2,9 +2,9 @@ import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-a
 import { XcodeSimulatorService } from "./xcode-simulator.service";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { readDirectoryAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
+import { LocalStorage } from "@raycast/api";
 
 /**
  * XcodeSimulatorApplicationService
@@ -25,7 +25,7 @@ export class XcodeSimulatorApplicationService {
    */
   async cachedXcodeSimulatorApplications(): Promise<XcodeSimulatorApplication[] | undefined> {
     // Retrieve XcodeSimulatorApplications JSON from LocalStorage
-    const xcodeSimulatorApplications = await getLocalStorageItem<string>(
+    const xcodeSimulatorApplications = await LocalStorage.getItem<string>(
       this.xcodeSimulatorApplicationsJSONLocalStorageKey
     );
     // Check if XcodeSimulatorApplications JSON is not available
@@ -43,7 +43,7 @@ export class XcodeSimulatorApplicationService {
    */
   private cacheXcodeSimulatorApplication(xcodeSimulatorApplications: XcodeSimulatorApplication[]): Promise<void> {
     // Store XcodeSimulatorApplications JSON in LocalStorage
-    return setLocalStorageItem(
+    return LocalStorage.setItem(
       this.xcodeSimulatorApplicationsJSONLocalStorageKey,
       JSON.stringify(xcodeSimulatorApplications)
     );

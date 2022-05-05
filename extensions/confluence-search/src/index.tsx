@@ -1,23 +1,27 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  ImageMask,
   getPreferenceValues,
   Icon,
+  ImageMask,
+  List,
+  OpenInBrowserAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const prefs: { instance: string; user: string; token: string } = getPreferenceValues();
-export const confluenceUrl = `https://${prefs.instance}`;
+const prefs: { instanceType: string; user: string; instance: string; token: string } = getPreferenceValues();
+export const confluenceUrl =
+  prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
+  Authorization:
+    prefs.instanceType == "cloud"
+      ? "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
+      : `Bearer ${prefs.token}`,
 };
 
 export default function Command() {
@@ -74,7 +78,7 @@ async function searchConfluence(searchText: string, signal: AbortSignal) {
     method: "get",
     signal: signal,
   };
-  const apiUrl = `${confluenceUrl}/wiki/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
+  const apiUrl = `${confluenceUrl}/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
   return fetch(apiUrl, init).then((response) => {
     return parseResponse(response);
   });
@@ -109,10 +113,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + "/wiki" + searchResult.url} />
+            <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + searchResult.url} />
             <CopyToClipboardAction
               title="Copy URL"
-              content={confluenceUrl + "/wiki" + searchResult.url}
+              content={confluenceUrl + searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
           </ActionPanel.Section>

@@ -1,11 +1,11 @@
-import { copyTextToClipboard } from "@raycast/api";
-import { generateSentence, notify } from "./utils";
+import { getPreferenceValues } from "@raycast/api";
+import { generateSentence, preformAction } from "./utils";
 
 export default async function SentenceCommand() {
+  const { action = "clipboard" } = getPreferenceValues();
   const output = generateSentence();
 
-  await copyTextToClipboard(output);
-  await notify();
+  await preformAction(action, output);
 
   return null;
 }
