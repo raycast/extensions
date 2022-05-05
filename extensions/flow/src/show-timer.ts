@@ -1,11 +1,20 @@
-import { runAppleScript } from "run-applescript";
-import { isFlowInstalled } from "./utils";
-import { showToast, ToastStyle } from "@raycast/api";
+import { isFlowInstalled, showTimer } from "./utils";
+import { Toast } from "@raycast/api";
 
-export default async function showTimer() {
+export default async function () {
+  const toast = new Toast({
+    title: "Showing timer",
+    style: Toast.Style.Animated,
+  });
+
+  toast.show();
+
   if (!(await isFlowInstalled())) {
-    await showToast(ToastStyle.Failure, "Flow is not installed", "https://flowapp.info/");
+    toast.title = "Flow not installed";
+    toast.message = "Install it from: https://flowapp.info/download";
+    toast.style = Toast.Style.Failure;
     return;
   }
-  await runAppleScript('tell application "Flow" to show');
+
+  await showTimer();
 }

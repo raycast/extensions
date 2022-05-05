@@ -1,5 +1,6 @@
 import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
 import { useAPM } from "./useAPM";
+import { linkDomain } from "./util";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListAPM() {
@@ -17,7 +18,7 @@ export default function CommandListAPM() {
           keywords={[apm.env].concat(apm.calls)}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://app.datadoghq.com/apm/service/${apm.name}?env=${apm.env}`} />
+              <OpenInBrowserAction url={`https://${linkDomain()}/apm/service/${apm.name}?env=${apm.env}`} />
             </ActionPanel>
           }
         />

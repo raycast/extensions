@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, List, OpenAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
@@ -10,8 +10,9 @@ const TaskItem: React.FC<{
   priority: Task["priority"];
   projectId: Task["projectId"];
   actionType: "today" | "week" | "project";
+  detailMarkdown: string;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType } = props;
+  const { id, title, priority, projectId, actionType, detailMarkdown } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -46,11 +47,12 @@ const TaskItem: React.FC<{
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
-            <OpenAction title="Open in TickTick" target={target} icon={Icon.Window} />
+            <Action.Open title="Open in TickTick" target={target} icon={Icon.Window} />
           </ActionPanel.Section>
         </ActionPanel>
       }
       accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}
+      detail={<List.Item.Detail markdown={detailMarkdown} />}
     />
   );
 };

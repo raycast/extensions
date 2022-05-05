@@ -13,7 +13,7 @@ Features
 
 ## Installing
 
-Make sure RayCast is installed and go to https://www.raycast.com/joepio/atomic
+Make sure Raycast is installed and go to https://www.raycast.com/joepio/atomic
 
 ## Running locally
 

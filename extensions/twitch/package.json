@@ -5,6 +5,10 @@
   "description": "Search for Streams, Channels or Games on Twitch",
   "icon": "icon.png",
   "author": "dieserRobin",
+  "contributors": [
+    "suth",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -116,7 +120,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.33.2",
     "node-fetch": "^3.1.0"
   },
   "devDependencies": {

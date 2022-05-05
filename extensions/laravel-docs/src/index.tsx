@@ -20,6 +20,7 @@ type docList = {
 
 const DOCS: { [key: string]: docList } = {
   master: require("./documentation/master.json"),
+  "9.x": require("./documentation/9.x.json"),
   "8.x": require("./documentation/8.x.json"),
   "7.x": require("./documentation/7.x.json"),
   "6.x": require("./documentation/6.x.json"),

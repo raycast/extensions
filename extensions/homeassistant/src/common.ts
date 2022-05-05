@@ -1,10 +1,11 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Connection, createConnection, createLongLivedTokenAuth } from "home-assistant-js-websocket";
 import { HomeAssistant } from "./haapi";
 import { createSocket } from "./socket";
 
 function getInstance(): string {
-  let result = preferences.instance?.value as string;
+  const preferences = getPreferenceValues();
+  let result = preferences.instance as string;
   if (result && result.endsWith("/")) {
     // make sure to have no trailing slash
     result = result.substring(0, result.length - 1);
@@ -13,8 +14,9 @@ function getInstance(): string {
 }
 
 export function createHomeAssistantClient(): HomeAssistant {
-  const instance = preferences.instance?.value as string;
-  const token = preferences.token?.value as string;
+  const instance = getInstance();
+  const preferences = getPreferenceValues();
+  const token = preferences.token as string;
   const hac = new HomeAssistant(instance, token);
   return hac;
 }
@@ -28,8 +30,9 @@ export async function getHAWSConnection(): Promise<Connection> {
   } else {
     console.log("create new home assistant ws con");
     const instance = getInstance();
-    const token = preferences.token?.value as string;
-    const ignoreCertificates = (preferences.ignorecerts.value as boolean) || false;
+    const preferences = getPreferenceValues();
+    const token = preferences.token as string;
+    const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
     const auth = createLongLivedTokenAuth(instance, token);
     con = await createConnection({ auth, createSocket: async () => createSocket(auth, ignoreCertificates) });
     return con;
@@ -37,7 +40,8 @@ export async function getHAWSConnection(): Promise<Connection> {
 }
 
 export function shouldDisplayEntityID(): boolean {
-  const result = (preferences.instance?.value as boolean) || false;
+  const preferences = getPreferenceValues();
+  const result = (preferences.instance as boolean) || false;
   return result;
 }
 

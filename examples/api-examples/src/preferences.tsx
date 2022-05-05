@@ -1,16 +1,23 @@
-import { List, preferences, getPreferenceValues } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
+import { useEffect } from "react";
+
+import { commands } from "../package.json";
+
+const preferenceData = commands.find((x) => x.name === "preferences")?.preferences;
 
 export default function Command() {
-  console.log("Typed preferences:", getPreferenceValues());
+  const preferences = getPreferenceValues();
+  useEffect(() => {
+    console.log("Typed preferences:", preferences);
+  }, []);
 
-  const listItems = Object.entries(preferences).map(([key, preference]) => {
-    const pref = preference as any;
+  const listItems = (preferenceData || []).map((pref) => {
     return (
       <List.Item
-        key={key}
-        title={key}
-        subtitle={String(pref.value ?? pref.default ?? "(not defined)")}
-        accessoryTitle={pref.type + (pref.required ? " (required)" : " (optional)")}
+        key={pref.name}
+        title={pref.name}
+        subtitle={String(preferences[pref.name] ?? "(not defined)")}
+        accessories={[{ text: pref.type + (pref.required ? " (required)" : " (optional)") }]}
       />
     );
   });

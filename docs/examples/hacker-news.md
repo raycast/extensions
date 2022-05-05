@@ -1,18 +1,18 @@
 ---
-description: This example shows how to show a RSS feed as a List.
+description: This example shows how to show an RSS feed as a List.
 ---
 
 # Hacker News
 
 {% hint style="info" %}
-The source code of the example can be found [here](../../examples/hacker-news). You can install it [here](https://www.raycast.com/thomas/hacker-news).
+The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/hacker-news#readme). You can install it [here](https://www.raycast.com/thomas/hacker-news).
 {% endhint %}
 
-Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.&#x20;
+Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.
 
-![Example: Read frontpage of Hacker News](<../.gitbook/assets/example-hacker-news (1).png>)
+![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.png)
 
-### Load top stories
+## Load top stories
 
 First, let's get the latest top stories. For this we use a [RSS feed](https://hnrss.org):
 
@@ -34,32 +34,36 @@ export default function Command() {
   useEffect(() => {
     async function fetchStories() {
       try {
-        const feed = await parser.parseURL("https://hnrss.org/frontpage?description=0&count=25");
+        const feed = await parser.parseURL(
+          "https://hnrss.org/frontpage?description=0&count=25"
+        );
         setState({ items: feed.items });
       } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+        setState({
+          error:
+            error instanceof Error ? error : new Error("Something went wrong"),
+        });
       }
     }
 
     fetchStories();
   }, []);
-  
-  console.log(state.items) // Prints stories
+
+  console.log(state.items); // Prints stories
 
   return <List isLoading={!state.items && !state.error} />;
 }
-
 ```
 
 Breaking this down:
 
-* We use a third-party dependency to parse the RSS feed and intially the parser.
-* We define our command state as a TypeScript interface.
-* We use [React's `useEffect`](https://reactjs.org/docs/hooks-effect.html) hook to parse the RSS feed after the command did mount.
-* We print the top stories to the console.
-* We render a list and show the loading indicator as long as we load the stories.
+- We use a third-party dependency to parse the RSS feed and intially the parser.
+- We define our command state as a TypeScript interface.
+- We use [React's `useEffect`](https://reactjs.org/docs/hooks-effect.html) hook to parse the RSS feed after the command did mount.
+- We print the top stories to the console.
+- We render a list and show the loading indicator as long as we load the stories.
 
-### Render stories
+## Render stories
 
 Now that we got the data from Hacker News, we want to render the stories. For this, we create a new React component and a few helper functions that render a story:
 
@@ -105,10 +109,9 @@ function getComments(item: Parser.Item) {
   const matches = item.contentSnippet?.match(/(?<=Comments:\s*)(\d+)/g);
   return matches?.[0];
 }
-
 ```
 
-To give the list item a nice look, we use a simple number emoji as icon, add the creator's name as subtitle and the points and comments as accessory title. Now we can render the `<StoryListItem>`:
+To give the list item a nice look, we use a simple number emoji as icon, add the creator's name as subtitle and the points and comments as accessory title. Now we can render the `<StoryListItem>`:
 
 ```typescript
 export default function Command() {
@@ -126,7 +129,7 @@ export default function Command() {
 }
 ```
 
-### Add actions
+## Add actions
 
 When we select a story in the list, we want to be able to open it in the browser and also copy it's link so that we can share it in our watercooler Slack channel. For this, we create a new React Component:
 
@@ -135,12 +138,17 @@ function Actions(props: { item: Parser.Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {props.item.link && <OpenInBrowserAction url={props.item.link} />}
-        {props.item.guid && <OpenInBrowserAction url={props.item.guid} title="Open Comments in Browser" />}
+        {props.item.link && <Action.OpenInBrowser url={props.item.link} />}
+        {props.item.guid && (
+          <Action.OpenInBrowser
+            url={props.item.guid}
+            title="Open Comments in Browser"
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {props.item.link && (
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
             shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -171,9 +179,9 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
 }
 ```
 
-### Handle errors
+## Handle errors
 
-Lastly, we want to be a good citizen and also handle errors appropriately to a gurantee a smooth experience. We'll show a toast whenever our network request fails:
+Lastly, we want to be a good citizen and handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
 
 ```typescript
 export default function Command() {
@@ -182,13 +190,17 @@ export default function Command() {
   // ...
 
   if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed loading stories",
+      message: state.error.message,
+    });
   }
 
   // ...
 }
 ```
 
-### Wrapping up
+## Wrapping up
 
-That's it, you have a working extension to read the fronpage of Hacker News. As next steps, you can add another command to show the jobs feed or add an action to copy a Markdown formatted link.&#x20;
+That's it, you have a working extension to read the fronpage of Hacker News. As next steps, you can add another command to show the jobs feed or add an action to copy a Markdown formatted link.

@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Основы",
+    "link": "https://kubernetes.io/ru/docs/concepts/"
+  },
+  {
+    "title": "Попробуйте Kubernetes",
+    "link": "https://kubernetes.io/ru/docs/tutorials/"
+  },
+  {
+    "title": "Настройка кластера",
+    "link": "https://kubernetes.io/ru/docs/setup/"
+  },
+  {
+    "title": "Просмотр справочной информации",
+    "link": "https://kubernetes.io/ru/docs/reference/"
+  },
+  {
+    "title": "Внести вклад в документацию",
+    "link": "https://kubernetes.io/ru/docs/contribute/"
+  }
+]

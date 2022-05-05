@@ -5,6 +5,11 @@
   "description": "Control the Spotify app for macOS with your keyboard.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "altrdev",
+    "ron-myers",
+    "sandypockets"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -50,15 +55,78 @@
       "mode": "no-view"
     },
     {
+      "name": "increaseVolume",
+      "title": "Increase Volume",
+      "subtitle": "Spotify",
+      "description": "Increase volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "decreaseVolume",
+      "title": "Decrease Volume",
+      "subtitle": "Spotify",
+      "description": "Decrease volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quarterVolume",
+      "title": "Set Volume to 25%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 25% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "halfVolume",
+      "title": "Set Volume to 50%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 50% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "threeQuartersVolume",
+      "title": "Set Volume to 75%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 75% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullVolume",
+      "title": "Set Volume to 100%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 100% in Spotify.",
+      "mode": "no-view"
+    },
+    {
       "name": "copyUrl",
       "title": "Copy Current Track URL",
       "subtitle": "Spotify",
       "description": "Currently playing song's URL in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotify",
+      "description": "Toggles shuffle mode in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shufflePlay",
+      "title": "Shuffle Play",
+      "subtitle": "Spotify",
+      "description": "Plays current track with shuffle enabled.",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat",
+      "title": "Toggle Repeat",
+      "subtitle": "Spotify",
+      "description": "Toggles repeat mode in Spotify.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -74,6 +142,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }
