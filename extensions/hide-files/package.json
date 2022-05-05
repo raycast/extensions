@@ -44,17 +44,17 @@
       "mode": "no-view"
     },
     {
-      "name": "unhide-all-files",
+      "name": "unhide-files-in-current-window",
       "title": "Unhide Files in Current Window",
-      "icon": "unhide-all-files.png",
+      "icon": "unhide-files-in-current-window.png",
       "subtitle": "Hide Files",
       "description": "Unhide all hidden files in the current window of the Finder.",
       "mode": "no-view"
     },
     {
-      "name": "hide-all-files",
+      "name": "hide-files-in-current-window",
       "title": "Hide Files in Current Window",
-      "icon": "hide-all-files.png",
+      "icon": "hide-files-in-current-window.png",
       "subtitle": "Hide Files",
       "description": "Hide all files in the current window of the Finder.",
       "mode": "no-view"

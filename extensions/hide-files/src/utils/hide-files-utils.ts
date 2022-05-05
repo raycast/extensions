@@ -8,7 +8,7 @@ import {
 } from "./common-utils";
 import { DirectoryInfo } from "./directory-info";
 import { parse } from "path";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import { LocalStorageKey } from "./constants";
 
 export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
@@ -49,7 +49,7 @@ export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
  */
 export const showHiddenFiles = (path: string) => {
   const hideDesktopFilesCommand = `chflags nohidden ${path}`;
-  exec(hideDesktopFilesCommand);
+  spawn(hideDesktopFilesCommand, { shell: true });
 };
 
 export const getSelectedHiddenFiles = async () => {
