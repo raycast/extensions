@@ -87,12 +87,12 @@ function SearchListItem({ searchResult }: { searchResult: WrikeTask }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.permalink} />
             <Action.Push
-              title="View task detail"
+              title="View Task Detail"
               target={<TaskDetail task={searchResult} />}
               icon={Icon.TextDocument}
             />
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.permalink} />
           </ActionPanel.Section>
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard
