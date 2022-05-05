@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useState } from "react";
-import { ActionToPexels } from "./utils/ui-component";
 import { getCollections } from "./hooks/hooks";
 import ViewCollectionMedias from "./view-collection-medias";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { collectionTags } from "./utils/costants";
+import { ActionToPexels } from "./components/action-to-pexels";
+import { PexelsEmptyView } from "./components/pexels-empty-view";
 
 export default function SearchCollections() {
   const { rememberTag } = commonPreferences();
@@ -38,40 +39,29 @@ export default function SearchCollections() {
         </List.Dropdown>
       }
     >
-      {!loading && collections?.length === 0 ? (
-        <List.EmptyView
-          title={"Welcome to Pexels"}
-          icon={"empty-view-icon.png"}
-          actions={
-            <ActionPanel>
-              <ActionToPexels />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        collections?.map((collection) => {
-          return (
-            <List.Item
-              id={collection.id + ""}
-              key={collection.id + ""}
-              icon={{ source: "collection-icon.png" }}
-              title={collection.title}
-              subtitle={isEmpty(collection.description) ? "" : collection.description + ""}
-              accessories={[{ text: `${collection.photos_count} Photos` }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    icon={Icon.Terminal}
-                    title={"View Collections"}
-                    target={<ViewCollectionMedias id={collection.id} title={collection.title} />}
-                  />
-                  <ActionToPexels />
-                </ActionPanel>
-              }
-            />
-          );
-        })
-      )}
+      <PexelsEmptyView title={"No Collections"} />
+      {collections?.map((collection) => {
+        return (
+          <List.Item
+            id={collection.id + ""}
+            key={collection.id + ""}
+            icon={{ source: "collection-icon.png" }}
+            title={collection.title}
+            subtitle={isEmpty(collection.description) ? "" : collection.description + ""}
+            accessories={[{ text: `${collection.photos_count} Photos`, tooltip: `${collection.photos_count} Photos` }]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Terminal}
+                  title={"View Collections"}
+                  target={<ViewCollectionMedias id={collection.id} title={collection.title} />}
+                />
+                <ActionToPexels />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

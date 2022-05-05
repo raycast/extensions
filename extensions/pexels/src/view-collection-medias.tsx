@@ -1,8 +1,9 @@
-import { ActionPanel, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import React, { useState } from "react";
 import { getCollectionMedias } from "./hooks/hooks";
-import { ActionToPexels, PhotosListItem } from "./utils/ui-component";
+import { PhotosListItem } from "./components/photos-list-item";
 import { Photo } from "pexels";
+import { PexelsEmptyView } from "./components/pexels-empty-view";
 
 export default function ViewCollectionMedias(props: { id: string; title: string }) {
   const { id, title } = props;
@@ -11,34 +12,23 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
 
   return (
     <List
-      isShowingDetail={collectionMedias?.media?.length !== 0}
+      isShowingDetail={collectionMedias.length !== 0}
       isLoading={loading}
       navigationTitle={title}
       searchBarPlaceholder={"Search photographers"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined") {
-          const _id = collectionMedias?.media[collectionMedias?.media.length - 1]?.id + "";
+          const _id = collectionMedias?.length - 1 + "_" + collectionMedias[collectionMedias.length - 1]?.id + "";
           if (id === _id) {
             setPage(page + 1);
           }
         }
       }}
     >
-      {!loading && collectionMedias?.media?.length === 0 ? (
-        <List.EmptyView
-          title={"Welcome to Pexels"}
-          icon={"empty-view-icon.png"}
-          actions={
-            <ActionPanel>
-              <ActionToPexels />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        collectionMedias?.media.map((pexelsPhoto, index) => {
-          return <PhotosListItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
-        })
-      )}
+      <PexelsEmptyView title={"No Photos"} />
+      {collectionMedias.map((pexelsPhoto, index) => {
+        return <PhotosListItem key={index} pexelsPhoto={pexelsPhoto as Photo} index={index} />;
+      })}
     </List>
   );
 }

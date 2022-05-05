@@ -3,7 +3,6 @@ import { buildImageName, commonPreferences, deleteCache, downloadPhoto, setWallp
 import React from "react";
 import { ActionToPexels } from "./action-to-pexels";
 import { Photo } from "pexels";
-import Mask = Image.Mask;
 import { PexelsPhoto } from "../utils/types";
 
 export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
