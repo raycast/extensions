@@ -12,22 +12,27 @@ export const getAll = runScript(`
 				set end of albumList to it
 				set trackId to the id of aTrack
 				set artistName to the artist of aTrack
-				set output to output & ${createQueryString({ id: 'trackId', name: 'albumName', artist: 'artistName', count: 'trackCount' })} & "\n"
+				set output to output & ${createQueryString({
+          id: "trackId",
+          name: "albumName",
+          artist: "artistName",
+          count: "trackCount",
+        })} & "\n"
 			end if
 		end repeat
 	end tell
 	return output
-`)
+`);
 
 export const search = (search: string) => {
-	const query = createQueryString({
-		id: 'trackId',
-		name: 'albumName',
-		artist: 'artistName',
-		count: 'trackCount'
-	})
+  const query = createQueryString({
+    id: "trackId",
+    name: "albumName",
+    artist: "artistName",
+    count: "trackCount",
+  });
 
-	return runScript(`
+  return runScript(`
 		set output to ""
 		set albumList to {}
 		tell application "Music"
@@ -45,7 +50,7 @@ export const search = (search: string) => {
 		end tell
 		return output
 	`);
-}
+};
 
 export const play = (album: string) =>
   runScript(`

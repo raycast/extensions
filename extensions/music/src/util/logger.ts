@@ -1,4 +1,4 @@
-import { environment } from '@raycast/api';
+import { environment } from "@raycast/api";
 
 export const logScript = (script: string): string => {
   // Prevent log in production

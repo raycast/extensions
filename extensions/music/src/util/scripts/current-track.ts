@@ -6,7 +6,6 @@ import { createQueryString, parseQueryString, runScript, tell } from "../apple-s
 import { STAR_VALUE } from "../costants";
 import { Track } from "../models";
 
-
 export const love = tell("Music", "set loved of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
 export const addToLibrary = tell("Music", 'duplicate current track to source "Library"');
@@ -31,8 +30,6 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
     duration: "trackDuration",
     rating: "trackRating",
   });
-
-
 
   // prettier-ignore
   return pipe(

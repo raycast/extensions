@@ -19,9 +19,9 @@ export interface Playlist {
   duration: string;
   count: string;
 
-  time: string
-  description: string
-  kind: `${'subscription' | 'user' | 'library'} playlist`
+  time: string;
+  description: string;
+  kind: `${"subscription" | "user" | "library"} playlist`;
 }
 
 export interface Album {

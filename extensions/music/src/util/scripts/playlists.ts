@@ -8,16 +8,16 @@ const outputQuery = createQueryString({
   count: "pCount",
   time: "pTime",
   kind: "pKind",
-  description: 'pDesc'
+  description: "pDesc",
 });
 
 enum PlaylistKind {
-	ALL = 'all',
-	USER = 'user',
-	SUBSCRIPTION = 'subscription'
+  ALL = "all",
+  USER = "user",
+  SUBSCRIPTION = "subscription",
 }
 
-const playListKindToString = (kind: PlaylistKind) => kind === PlaylistKind.ALL ? '' : kind;
+const playListKindToString = (kind: PlaylistKind) => (kind === PlaylistKind.ALL ? "" : kind);
 
 const loopThroughPlaylists = (kind: PlaylistKind) => `
 	repeat with selectedPlaylist in ${playListKindToString(kind)} playlists
@@ -33,16 +33,13 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
 `;
 
 export const play = (name: string): TE.TaskEither<Error, string> => tell("Music", `play playlist "${name.trim()}"`);
-export const playById = (id: string) => tell("Music", `play (every playlist whose id is "${id}")`)
+export const playById = (id: string) => tell("Music", `play (every playlist whose id is "${id}")`);
 
-export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> => runScript(`
+export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =>
+  runScript(`
 	set output to ""
         tell application "Music"
-			${
-				kind === PlaylistKind.ALL
-					? loopThroughPlaylists(PlaylistKind.ALL)
-					: loopThroughPlaylists(kind)
-			}
+			${kind === PlaylistKind.ALL ? loopThroughPlaylists(PlaylistKind.ALL) : loopThroughPlaylists(kind)}
         end tell
 	return output
 `);
