@@ -23,22 +23,19 @@ export default function ShowGoogleArtifacts(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      {artifactInfo.artifactName.length === 0 && artifactInfo.artifactInfo.length === 0 ? (
-        <MavenEmptyView />
-      ) : (
-        artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
-          return (
-            <ArtifactList
-              key={artifactsIndex}
-              artifactName={artifactInfo.artifactName}
-              artifacts={artifacts}
-              artifactsIndex={artifactsIndex}
-              currentTag={currentTag}
-              tagList={artifactInfo.tagList}
-            />
-          );
-        })
-      )}
+      <MavenEmptyView />
+      {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
+        return (
+          <ArtifactList
+            key={artifactsIndex}
+            artifactName={artifactInfo.artifactName}
+            artifacts={artifacts}
+            artifactsIndex={artifactsIndex}
+            currentTag={currentTag}
+            tagList={artifactInfo.tagList}
+          />
+        );
+      })}
     </List>
   );
 }

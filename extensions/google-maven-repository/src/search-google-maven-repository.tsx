@@ -22,24 +22,21 @@ export default function SearchGoogleMavenRepository() {
         </List.Dropdown>
       }
     >
-      {artifactInfo.artifactName.length === 0 ? (
-        <MavenEmptyView />
-      ) : (
-        artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
-          return (
-            (filter === artifactInfo.tagList[0].value || filter === artifactInfo.artifactName[artifactsIndex]) && (
-              <ArtifactList
-                key={artifactsIndex}
-                artifactName={artifactInfo.artifactName}
-                artifacts={artifacts}
-                artifactsIndex={artifactsIndex}
-                currentTag={"Artifacts"}
-                tagList={artifactInfo.tagList}
-              />
-            )
-          );
-        })
-      )}
+      <MavenEmptyView />
+      {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
+        return (
+          (filter === artifactInfo.tagList[0].value || filter === artifactInfo.artifactName[artifactsIndex]) && (
+            <ArtifactList
+              key={artifactsIndex}
+              artifactName={artifactInfo.artifactName}
+              artifacts={artifacts}
+              artifactsIndex={artifactsIndex}
+              currentTag={"Artifacts"}
+              tagList={artifactInfo.tagList}
+            />
+          )
+        );
+      })}
     </List>
   );
 }
