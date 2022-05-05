@@ -9,11 +9,21 @@ import { AbortError } from "node-fetch";
 export default function Command() {
   const { state, search } = useSearch();
 
+  const emptyViewText = (): string => {
+    if (state.isLoading) {
+      return "Searching...";
+    } else if (state.query === "") {
+      return "Start typing to search";
+    } else {
+      return "No results found";
+    }
+  };
+
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Enter two or more characters"
+      searchBarPlaceholder="Search"
       throttle
       actions={
         <ActionPanel>
@@ -21,15 +31,12 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {state.results.length === 0 ? (
-        <List.EmptyView icon={{ source: "../assets/wrike_logo_small.png" }} title="No tasks found" />
-      ) : (
-        <List.Section title="Results" subtitle={state.results.length + ""}>
-          {state.results.map((searchResult) => (
-            <SearchListItem key={searchResult.id} searchResult={searchResult} />
-          ))}
-        </List.Section>
-      )}
+      <List.EmptyView icon={{ source: "../assets/wrike_logo_small.png" }} title={emptyViewText()} />
+      <List.Section title="Results" subtitle={state.results.length + ""}>
+        {state.results.map((searchResult) => (
+          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -106,7 +113,7 @@ function SearchListItem({ searchResult }: { searchResult: WrikeTask }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [state, setState] = useState<SearchState>({ query: "", results: [], isLoading: true });
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
@@ -116,6 +123,7 @@ function useSearch() {
       setState((oldState) => ({
         ...oldState,
         isLoading: true,
+        query: searchText,
       }));
 
       try {

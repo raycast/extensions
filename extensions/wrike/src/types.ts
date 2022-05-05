@@ -8,6 +8,7 @@ export interface WrikeTask {
 }
 
 export interface SearchState {
+  query: string;
   results: WrikeTask[];
   isLoading: boolean;
 }
