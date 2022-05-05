@@ -117,7 +117,7 @@ export default function CreateGist(props: {
                         },
                       },
                       secondaryAction: {
-                        title: "Open in Browser",
+                        title: "Open in browser",
                         onAction: (toast) => {
                           open(String(response.data.html_url));
                           toast.hide();

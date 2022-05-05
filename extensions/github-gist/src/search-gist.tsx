@@ -4,6 +4,7 @@ import { githubGists } from "./util/gist-utils";
 import { getGistDetailContent, preference } from "./util/utils";
 import { getGistContent, showGists } from "./hooks/hooks";
 import { GistAction } from "./components/gist-action";
+import { GistEmptyView } from "./components/gist-empty-view";
 
 export default function main() {
   const [page, setPage] = useState<number>(1);
@@ -45,6 +46,7 @@ export default function main() {
         </List.Dropdown>
       }
     >
+      <GistEmptyView title={""} description={"No gists found"} />
       {gists.map((gist, gistIndex, gistArray) => {
         return (
           <List.Section
