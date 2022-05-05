@@ -109,7 +109,7 @@ export default function CreateGist(props: {
                       title: isEdit ? "Update gist success!" : "Create gist success!",
                       message: "Click to copy gist link.",
                       primaryAction: {
-                        title: "Copy gist Link",
+                        title: "Copy gist link",
                         onAction: (toast) => {
                           Clipboard.copy(String(response.data.html_url));
                           toast.title = "Link is copied to Clipboard.";
