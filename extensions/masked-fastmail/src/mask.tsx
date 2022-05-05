@@ -133,6 +133,12 @@ export default function Command() {
     }
 
     const auth = async () => {
+      const accessToken = (await LocalStorage.getItem("accessToken")) as AccessToken | undefined;
+
+      if (accessToken) {
+        setAccessToken(accessToken);
+      }
+
       const authenticateResponse = await authenticate(username, password);
 
       switch (authenticateResponse.type) {
@@ -168,6 +174,7 @@ export default function Command() {
         throw "Unable to authenticate";
       }
 
+      LocalStorage.setItem("accessToken", response.accessToken);
       setAccessToken(response.accessToken);
     };
 
@@ -184,7 +191,7 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        <Form.Description text="Reminder yourself what this email is for" />
+        <Form.Description text="Remind yourself what this email is for" />
         <Form.TextField id="label" title="Description" />
       </Form>
     );
