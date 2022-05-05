@@ -21,7 +21,7 @@ export default function ListDocBlocks({ resultsLoading, results, setQuery, query
           detail={
             <List.Item.Detail
               markdown={doc.blocks
-                .map((block) => block.type === 'code' ? "```\n" + block.content + "\n```" : block.content)
+                .map((block) => (block.type === "code" ? "```\n" + block.content + "\n```" : block.content))
                 .join("\n\n")}
             />
           }
@@ -32,9 +32,11 @@ export default function ListDocBlocks({ resultsLoading, results, setQuery, query
           }
         />
       ))}
-      {query.length > 0 && <List.Section title="Create new document">
+      {query.length > 0 && (
+        <List.Section title="Create new document">
           <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />
-      </List.Section>}
+        </List.Section>
+      )}
     </List>
   );
 }
