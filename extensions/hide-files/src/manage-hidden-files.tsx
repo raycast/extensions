@@ -40,94 +40,89 @@ export default function Command() {
         ) : null
       }
     >
-      {localHiddenDirectory.length === 0 ? (
-        <List.EmptyView
-          key={`empty-localDirectory`}
-          title={"No hidden files"}
-          icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
-          description={`You can hide files via "Hide Files" command`}
-        />
-      ) : (
-        <>
-          {localHiddenDirectory.map(
-            (value, index) =>
-              (tag === "All" || value.type === tag || value.path.includes(tag)) && (
-                <List.Item
-                  key={value.id}
-                  icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
-                  title={value.name}
-                  accessories={[{ text: parse(value.path).dir }]}
-                  actions={
-                    <ActionPanel>
-                      <Action.Open
-                        title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
-                        target={value.path}
-                      />
-                      <Action.ShowInFinder path={value.path} />
-                      <ActionPanel.Section>
-                        <Action
-                          icon={Icon.Eye}
-                          title={`Unhide File`}
-                          shortcut={{ modifiers: ["cmd"], key: "u" }}
-                          onAction={async () => {
-                            const _localDirectory = [...localHiddenDirectory];
-                            _localDirectory.splice(index, 1);
-                            await LocalStorage.setItem(
-                              LocalStorageKey.LOCAL_HIDE_DIRECTORY,
-                              JSON.stringify(_localDirectory)
-                            );
-                            setRefresh(refreshNumber());
-                            showHiddenFiles(value.path.replace(" ", `" "`));
+      <List.EmptyView
+        key={`empty-localDirectory`}
+        title={"No hidden files"}
+        icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
+        description={`You can hide files via "Hide Files" command`}
+      />
+      {localHiddenDirectory.map(
+        (value, index) =>
+          (tag === "All" || value.type === tag || value.path.includes(tag)) && (
+            <List.Item
+              key={value.id}
+              icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
+              title={value.name}
+              accessories={[{ text: parse(value.path).dir }]}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
+                    target={value.path}
+                  />
+                  <Action.ShowInFinder path={value.path} />
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.Eye}
+                      title={`Unhide File`}
+                      shortcut={{ modifiers: ["cmd"], key: "u" }}
+                      onAction={async () => {
+                        const _localDirectory = [...localHiddenDirectory];
+                        _localDirectory.splice(index, 1);
+                        await LocalStorage.setItem(
+                          LocalStorageKey.LOCAL_HIDE_DIRECTORY,
+                          JSON.stringify(_localDirectory)
+                        );
+                        setRefresh(refreshNumber());
+                        showHiddenFiles(value.path.replace(" ", `" "`));
 
-                            const options: Toast.Options = {
-                              style: Toast.Style.Success,
-                              title: `Success!`,
-                              message: `${value.name} has been unhidden.`,
-                              primaryAction: {
-                                title: "Open in Finder",
-                                onAction: (toast) => {
-                                  open(value.path);
-                                  toast.hide();
-                                },
-                              },
-                              secondaryAction: {
-                                title: "Show in Finder",
-                                onAction: (toast) => {
-                                  showInFinder(value.path);
-                                  toast.hide();
-                                },
-                              },
-                            };
-                            await showToast(options);
-                          }}
-                        />
-                        <Action
-                          icon={Icon.ExclamationMark}
-                          title={"Unhide All Files"}
-                          shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
-                          onAction={async () => {
-                            await alertDialog(
-                              Icon.ExclamationMark,
-                              "Warning",
-                              "Are you sure you want to unhide all files?",
-                              "Unhide All",
-                              async () => {
-                                const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
-                                showHiddenFiles(filePaths.join(" "));
-                                await LocalStorage.clear();
-                                setRefresh(refreshNumber());
-                                await showToast(Toast.Style.Success, "Success!", "All Files have been unhidden.");
-                              }
-                            );
-                          }}
-                        />
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  }
-                />
-              )
-          )}
-        </>
+                        const options: Toast.Options = {
+                          style: Toast.Style.Success,
+                          title: `Success!`,
+                          message: `${value.name} has been unhidden.`,
+                          primaryAction: {
+                            title: "Open in Finder",
+                            onAction: (toast) => {
+                              open(value.path);
+                              toast.hide();
+                            },
+                          },
+                          secondaryAction: {
+                            title: "Show in Finder",
+                            onAction: (toast) => {
+                              showInFinder(value.path);
+                              toast.hide();
+                            },
+                          },
+                        };
+                        await showToast(options);
+                      }}
+                    />
+                    <Action
+                      icon={Icon.ExclamationMark}
+                      title={"Unhide All Files"}
+                      shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
+                      onAction={async () => {
+                        await alertDialog(
+                          Icon.ExclamationMark,
+                          "Warning",
+                          "Are you sure you want to unhide all files?",
+                          "Unhide All",
+                          async () => {
+                            const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
+                            showHiddenFiles(filePaths.join(" "));
+                            await LocalStorage.clear();
+                            setRefresh(refreshNumber());
+                            await showToast(Toast.Style.Success, "Success!", "All Files have been unhidden.");
+                          }
+                        );
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          )
       )}
     </List>
   );
