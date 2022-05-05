@@ -1,17 +1,6 @@
 import { Action, Detail, environment, Icon } from "@raycast/api";
 import React from "react";
 
-export function ActionToPexels(props: { url: string }) {
-  const { url } = props;
-  return (
-    <Action.OpenInBrowser
-      title={"Go Maven Central Repository"}
-      shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
-      url={url}
-    />
-  );
-}
-
 export function ActionToAdvancedSearchOptions() {
   const icon = `advanced-search-options${environment.theme == "dark" ? "@dark" : ""}.png`;
   return (
