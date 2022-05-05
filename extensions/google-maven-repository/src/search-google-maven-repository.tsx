@@ -2,11 +2,22 @@ import { List } from "@raycast/api";
 import { useState } from "react";
 import { searchArtifacts } from "./hooks/hooks";
 import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
+import { isEmpty } from "./utils/common-utils";
 
 export default function SearchGoogleMavenRepository() {
   const [searchContent, setSearchContent] = useState<string>("");
   const [filter, setFilter] = useState<string>("All");
   const { artifactInfo, loading } = searchArtifacts(searchContent.trim());
+
+  const emptyViewTitle = () => {
+    if (loading) {
+      return "Loading...";
+    }
+    if (artifactInfo.artifactInfo.length === 0 && !isEmpty(searchContent)) {
+      return "No Artifacts";
+    }
+    return "Welcome to Google's Maven Repository";
+  };
 
   return (
     <List
@@ -22,7 +33,7 @@ export default function SearchGoogleMavenRepository() {
         </List.Dropdown>
       }
     >
-      <MavenEmptyView />
+      <MavenEmptyView title={emptyViewTitle()} />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
           (filter === artifactInfo.tagList[0].value || filter === artifactInfo.artifactName[artifactsIndex]) && (

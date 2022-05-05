@@ -40,10 +40,11 @@ export function ArtifactList(props: {
   );
 }
 
-export function MavenEmptyView() {
+export function MavenEmptyView(props: { title: string }) {
+  const { title } = props;
   return (
     <List.EmptyView
-      title={`Welcome to Google's Maven Repository`}
+      title={title}
       icon={"android-bot.svg"}
       actions={
         <ActionPanel>
