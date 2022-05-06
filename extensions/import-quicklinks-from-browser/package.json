@@ -25,6 +25,7 @@
       "default": "chrome",
       "name": "browser",
       "title": "Browser",
+      "required": true,
       "description": "Select the browser to import from",
       "data": [
         {
