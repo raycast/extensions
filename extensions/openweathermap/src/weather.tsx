@@ -1,8 +1,17 @@
 import { List } from "@raycast/api";
 import React, { ReactElement, useState } from "react";
-import { Daily, getDefaultQuery, getIconURL, useWeather, Weather } from "./lib/openweathermap";
+import {
+  Daily,
+  getDailyForecastCountPreference,
+  getDefaultQuery,
+  getHourlyForecastCountPreference,
+  getIconURL,
+  Hourly,
+  useWeather,
+  Weather,
+} from "./lib/openweathermap";
 import { getTemperatureUnit, getWindUnit } from "./lib/unit";
-import { getDay, getMonth, getWeekday, unixTimestampToDate } from "./lib/utils";
+import { getDay, getHour, getMonth, getWeekday, unixTimestampToDate } from "./lib/utils";
 
 function CurrentWeatherFragment(props: { weather: Weather | undefined }): ReactElement | null {
   const w = props.weather;
@@ -13,7 +22,7 @@ function CurrentWeatherFragment(props: { weather: Weather | undefined }): ReactE
   return (
     <List.Section title="Current">
       <List.Item
-        title={`${w.current.temp} ${getTemperatureUnit()}`}
+        title={`${Math.round(w.current.temp)} ${getTemperatureUnit()}`}
         subtitle={w.current.weather[0].description}
         icon={getIconURL(w.current.weather[0].icon)}
         accessories={[
@@ -69,9 +78,30 @@ function ForecastDailyListItem(props: { daily: Daily }): ReactElement {
   );
 }
 
+function ForecastHourlyListItem(props: { hourly: Hourly }): ReactElement {
+  const hourly = props.hourly;
+  const d = unixTimestampToDate(hourly.dt);
+  const title = `${getHour(d)}`;
+  return (
+    <List.Item
+      title={title}
+      subtitle={hourly.weather[0].description}
+      icon={getIconURL(hourly.weather[0].icon)}
+      accessories={[
+        { text: `${Math.round(hourly.humidity)} %`, icon: "💧", tooltip: `Humidity ${hourly.humidity}` },
+        { text: `${Math.round(hourly.wind_speed)} ${getWindUnit()}`, icon: "💨", tooltip: `Wind ${hourly.wind_speed}` },
+      ]}
+    />
+  );
+}
+
 export default function Root(): ReactElement {
   const [query, setQuery] = useState<string>(getDefaultQuery());
   const { weather, isLoading, error } = useWeather(query);
+  const now = new Date();
+  const futureHourly = weather?.hourly?.filter((h) => unixTimestampToDate(h.dt) > now);
+  const hourly = futureHourly?.slice(0, getHourlyForecastCountPreference());
+  const daily = weather?.daily?.slice(0, getDailyForecastCountPreference());
   return (
     <WeatherList
       throttle
@@ -85,8 +115,13 @@ export default function Root(): ReactElement {
       ) : (
         <React.Fragment>
           <CurrentWeatherFragment weather={weather} />
+          <List.Section title="Hourly Forecast">
+            {hourly?.map((h) => (
+              <ForecastHourlyListItem hourly={h} />
+            ))}
+          </List.Section>
           <List.Section title="Daily Forecast">
-            {weather?.daily.map((d) => (
+            {daily?.map((d) => (
               <ForecastDailyListItem daily={d} />
             ))}
           </List.Section>

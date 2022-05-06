@@ -37,6 +37,10 @@ export interface DailyFeelsLike {
   morn: number;
 }
 
+export interface Rain {
+  "1h": number;
+}
+
 export interface Daily {
   dt: number;
   sunrise: number;
@@ -59,6 +63,24 @@ export interface Daily {
   uvi: number;
 }
 
+export interface Hourly {
+  dt: number;
+  temp: number;
+  feels_like: number;
+  pressure: number;
+  humidity: number;
+  dew_point: number;
+  uvi: number;
+  clouds: number;
+  visibility: number;
+  wind_speed: number;
+  wind_deg: number;
+  wind_gust: number;
+  weather: WeatherPoint[];
+  pop: number;
+  rain: Rain;
+}
+
 export interface Current {
   dt: number;
   sunrise: number;
@@ -75,9 +97,7 @@ export interface Current {
   wind_deg: number;
   wind_gust: number;
   weather: WeatherPoint[];
-  //"rain": {
-  //    "1h": 0.37
-  //}
+  rain: Rain;
 }
 
 export interface Weather {
@@ -86,6 +106,7 @@ export interface Weather {
   timezone: string;
   timezone_offset: number;
   current: Current;
+  hourly: Hourly[];
   daily: Daily[];
 }
 
@@ -186,4 +207,40 @@ export function useWeather(query: string | undefined): {
     };
   }, [query]);
   return { weather, isLoading, error };
+}
+
+const defaultHourlyForecastCount = 3;
+
+export function getHourlyForecastCountPreference(): number {
+  const pref = getPreferenceValues();
+  const userValue = (pref.hourlyforecastcount as string) || "";
+  if (userValue === undefined || userValue.length <= 0) {
+    return defaultHourlyForecastCount;
+  }
+  let val = parseFloat(userValue);
+  if (Number.isNaN(val)) {
+    return defaultHourlyForecastCount;
+  }
+  if (val < 0) {
+    val = 0;
+  }
+  return val;
+}
+
+const defaultDailyForecastCount = 7;
+
+export function getDailyForecastCountPreference(): number {
+  const pref = getPreferenceValues();
+  const userValue = (pref.dailyforecastcount as string) || "";
+  if (userValue === undefined || userValue.length <= 0) {
+    return defaultDailyForecastCount;
+  }
+  let val = parseFloat(userValue);
+  if (Number.isNaN(val)) {
+    return defaultDailyForecastCount;
+  }
+  if (val < 0) {
+    val = 0;
+  }
+  return val;
 }

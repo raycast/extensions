@@ -20,3 +20,7 @@ export function getDay(date: Date): string {
 export function getMonth(date: Date): string {
   return date.toLocaleDateString("default", { month: "long" });
 }
+
+export function getHour(date: Date): string {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}

@@ -11,7 +11,7 @@
       "name": "weather",
       "title": "Weather",
       "subtitle": "OpenWeatherMap",
-      "description": "",
+      "description": "Get Current Weather + Daily and Hourly Forecast",
       "mode": "view"
     }
   ],
@@ -51,6 +51,24 @@
       "required": false,
       "default": "",
       "description": "Default query when search bar is empty. Same content as in the search bar."
+    },
+    {
+      "name": "hourlyforecastcount",
+      "type": "textfield",
+      "required": false,
+      "default": "3",
+      "title": "Number of Hourly Forecasts",
+      "description": "Number of shown hourly forecasts. 0 means no hourly forecasts.",
+      "placeholder": "3"
+    },
+    {
+      "name": "dailyforecastcount",
+      "type": "textfield",
+      "required": false,
+      "default": "7",
+      "title": "Number of Daily Forecasts",
+      "description": "Number of shown daily forecasts. 0 means no daily forecasts.",
+      "placeholder": "7"
     }
   ],
   "dependencies": {
