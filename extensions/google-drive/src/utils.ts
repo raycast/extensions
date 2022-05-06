@@ -7,7 +7,6 @@ import fs, {
   mkdirSync,
   PathLike,
   readdirSync,
-  readFile,
   readFileSync,
   rm,
   rmSync,
@@ -121,8 +120,8 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   if (!pathExists(TMP_FILE_PREVIEWS_PATH)) return;
 
   const sortedFiles = previewFiles.sort((a, b) => {
-    const aStats = statSync(join(TMP_FILE_PREVIEWS_PATH, a));
-    const bStats = statSync(join(TMP_FILE_PREVIEWS_PATH, b));
+    const aStats: fs.Stats = statSync(join(TMP_FILE_PREVIEWS_PATH, a));
+    const bStats: fs.Stats = statSync(join(TMP_FILE_PREVIEWS_PATH, b));
 
     return aStats.atimeMs - bStats.atimeMs;
   });
