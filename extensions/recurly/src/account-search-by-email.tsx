@@ -34,6 +34,6 @@ export default function accountSearchByEmail() {
     }
     onSearchTextChange={setText}
   >
-    {accounts.map((account, idx) => <AccountItem key={account.id || idx} account={account} />)}
+    {accounts.map((account, idx) => <AccountItem key={account.id || idx} tenant={tenant} account={account} />)}
   </List>
 }

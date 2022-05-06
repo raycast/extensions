@@ -22,11 +22,7 @@ ${formatBillingInfo(account)}
 
 ---
 
-${formatCustomFields(account)}
-
----
-
-${JSON.stringify(account)}`
+${formatCustomFields(account)}`
 
 const formatTitle = (account: Account) =>
   account.email || account.code || account.id
