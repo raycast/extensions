@@ -29,8 +29,8 @@
       "name": "password",
       "type": "password",
       "required": true,
-      "title": "App password",
-      "description": "A fastmail App password with JMAP Mail access"
+      "title": "Password",
+      "description": "Your Fastmail password"
     }
   ],
   "dependencies": {
