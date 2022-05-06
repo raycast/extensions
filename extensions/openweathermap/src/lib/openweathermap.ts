@@ -6,12 +6,17 @@ import { getErrorMessage } from "./utils";
 
 const endpoint = "https://api.openweathermap.org";
 
+export interface Coordinates {
+  lat: number;
+  lon: number;
+}
+
 interface Location {
   name: string;
   lat: number;
   lon: number;
   country: string;
-  state: string;
+  state: string | undefined;
 }
 
 export interface WeatherPoint {
@@ -149,13 +154,13 @@ export function getIconURL(code: string): string {
   return `https://openweathermap.org/img/wn/${code}@2x.png`;
 }
 
-export async function getWeather(location: Location): Promise<Weather> {
+export async function getWeather(coords: Coordinates): Promise<Weather> {
   const APIKey = getAPIKey();
   const us = getUnitSystem();
   const params = new URLSearchParams({
     appid: APIKey,
-    lat: location.lat.toString(),
-    lon: location.lon.toString(),
+    lat: coords.lat.toString(),
+    lon: coords.lon.toString(),
     units: us === UnitSystem.Imperial ? "imperial" : "metric",
   });
 
@@ -175,6 +180,20 @@ export async function getWeather(location: Location): Promise<Weather> {
   return w;
 }
 
+function queryToLatLong(query: string): Coordinates | undefined {
+  const splits = query.split(",");
+  if (splits.length === 2) {
+    const lat = parseFloat(splits[0]);
+    const lon = parseFloat(splits[1]);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+      return undefined;
+    } else {
+      return { lat, lon };
+    }
+  }
+  return undefined;
+}
+
 export function useWeather(query: string | undefined): {
   weatherRequest: WeatherRequest | undefined;
   isLoading: boolean;
@@ -187,27 +206,34 @@ export function useWeather(query: string | undefined): {
     let didUnmount = false;
     const fetchData = async () => {
       try {
-        if (error) {
-          setError(undefined);
-        }
-        if (!isLoading) {
-          setIsLoading(true);
-        }
         if (query && query.length > 0) {
-          const locations = await getGeocoding(query);
-          const loc = locations[0];
-          const w = await getWeather(loc);
-          setWeatherRequest({ weather: w, location: loc });
-        } else {
-          setError("Empty query");
+          setIsLoading(true);
+          const coords = queryToLatLong(query);
+          if (coords) {
+            const w = await getWeather(coords);
+            if (!didUnmount) {
+              setWeatherRequest({ weather: w, location: undefined });
+            }
+          } else {
+            const locations = await getGeocoding(query);
+            const loc = locations[0];
+            const w = await getWeather(loc);
+            if (!didUnmount) {
+              setWeatherRequest({ weather: w, location: loc });
+            }
+          }
         }
       } catch (error) {
         if (!didUnmount) {
           setError(getErrorMessage(error));
+          setIsLoading(false);
         }
       } finally {
         if (!didUnmount) {
           setIsLoading(false);
+          if (error) {
+            setError(undefined);
+          }
         }
       }
     };

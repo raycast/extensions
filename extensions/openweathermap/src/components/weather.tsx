@@ -22,7 +22,8 @@ function CurrentWeatherFragment(props: { weather: WeatherRequest | undefined }):
     return null;
   }
   const c = w.current;
-  const locText = loc ? `${loc.name}, ${loc.state}, ${loc.country}` : undefined;
+  const locParts = [loc?.name, loc?.state, loc?.country].filter((e) => e !== undefined && e.length > 0);
+  const locText = locParts.join(",");
   const coord = `${w.lat}, ${w.lon}`;
   const title = `Current (${locText ? locText : coord})`;
   return (
@@ -136,6 +137,33 @@ function ForecastHourlyListItem(props: { hourly: Hourly }): ReactElement {
   );
 }
 
+function ForecastFragment(props: { weatherRequest: WeatherRequest | undefined }): ReactElement | null {
+  const weatherRequest = props.weatherRequest;
+  if (weatherRequest === undefined) {
+    return null;
+  }
+  const weather = weatherRequest?.weather;
+  const now = new Date();
+  const futureHourly = weather?.hourly?.filter((h) => unixTimestampToDate(h.dt) > now);
+  const hourly = futureHourly?.slice(0, getHourlyForecastCountPreference());
+  const daily = weather?.daily?.slice(0, getDailyForecastCountPreference());
+  return (
+    <React.Fragment>
+      <CurrentWeatherFragment weather={weatherRequest} />
+      <List.Section title="Hourly Forecast">
+        {hourly?.map((h) => (
+          <ForecastHourlyListItem hourly={h} />
+        ))}
+      </List.Section>
+      <List.Section title="Daily Forecast">
+        {daily?.map((d) => (
+          <ForecastDailyListItem daily={d} />
+        ))}
+      </List.Section>
+    </React.Fragment>
+  );
+}
+
 export function WeatherList(): ReactElement {
   const defaultQuery = getDefaultQuery();
   const [query, setQuery] = useState<string>(defaultQuery);
@@ -144,35 +172,18 @@ export function WeatherList(): ReactElement {
     q = defaultQuery;
   }
   const { weatherRequest, isLoading, error } = useWeather(q);
-  const weather = weatherRequest?.weather;
-  const now = new Date();
-  const futureHourly = weather?.hourly?.filter((h) => unixTimestampToDate(h.dt) > now);
-  const hourly = futureHourly?.slice(0, getHourlyForecastCountPreference());
-  const daily = weather?.daily?.slice(0, getDailyForecastCountPreference());
   return (
     <WeatherListExtended
       throttle
       onSearchTextChange={setQuery}
       isLoading={isLoading}
-      searchBarPlaceholder="Search for other location (e.g. London)"
+      searchBarPlaceholder="Search by location (e.g. 'London') or by coordinates (e.g. '51.5174502,-0.1399655')"
       error={error}
     >
-      {q === undefined || q.length <= 0 ? (
-        <List.EmptyView title="You can define a default query in the preferences" icon="🚀" />
+      {q === undefined || q.length <= 0 || weatherRequest === undefined ? (
+        <List.EmptyView title="You can define a default query in the preferences" icon="💡" />
       ) : (
-        <React.Fragment>
-          <CurrentWeatherFragment weather={weatherRequest} />
-          <List.Section title="Hourly Forecast">
-            {hourly?.map((h) => (
-              <ForecastHourlyListItem hourly={h} />
-            ))}
-          </List.Section>
-          <List.Section title="Daily Forecast">
-            {daily?.map((d) => (
-              <ForecastDailyListItem daily={d} />
-            ))}
-          </List.Section>
-        </React.Fragment>
+        <ForecastFragment weatherRequest={weatherRequest} />
       )}
     </WeatherListExtended>
   );
