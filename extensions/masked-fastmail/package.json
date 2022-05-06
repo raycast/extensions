@@ -31,13 +31,6 @@
       "required": true,
       "title": "App password",
       "description": "A fastmail App password with JMAP Mail access"
-    },
-    {
-      "name": "hostname",
-      "description": "The JMAP API hostname",
-      "type": "textfield",
-      "required": false,
-      "default": "jmap.fastmail.com"
     }
   ],
   "dependencies": {
