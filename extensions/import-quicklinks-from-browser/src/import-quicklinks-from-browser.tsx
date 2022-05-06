@@ -1,9 +1,9 @@
-import { Action, ActionPanel, environment, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, environment, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 import path from "path";
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 
 const QUERY = "SELECT id, short_name, url, keyword, favicon_url, is_active FROM keywords";
 const BASE_SUPPORT_DIR = `${homedir()}/Library/Application Support`;
@@ -44,6 +44,14 @@ function DataBaseDropdown(props: { setDatabasePath: (profile: string) => void })
   const supportDir = SUPPORT_DIRS[browser as keyof typeof SUPPORT_DIRS];
 
   useEffect(() => {
+    if (!existsSync(supportDir)) {
+      showToast({
+        title: `${browser} is not installed`,
+        message: `Please install ${browser}, or update the browser preference`,
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
     const directories = readdirSync(supportDir);
     const profiles = directories.map((directory) => ({
       title: path.basename(directory),
@@ -61,22 +69,24 @@ function DataBaseDropdown(props: { setDatabasePath: (profile: string) => void })
   );
 }
 
-function CustomSearchEngineItem(props: {searchEngine : CustomSearchEngine}) {
-        const link = props.searchEngine.url.replace("searchTerms", "Query");
+function CustomSearchEngineItem(props: { searchEngine: CustomSearchEngine }) {
+  const link = props.searchEngine.url.replace("searchTerms", "Query");
 
-        return (
-          <List.Item
+  return (
+    <List.Item
+      icon={props.searchEngine.favicon_url}
+      title={props.searchEngine.short_name}
+      subtitle={link}
+      actions={
+        <ActionPanel>
+          <Action.CreateQuicklink
             icon={props.searchEngine.favicon_url}
-            title={props.searchEngine.short_name}
-            subtitle={link}
-            actions={
-              <ActionPanel>
-                <Action.CreateQuicklink icon={props.searchEngine.favicon_url} quicklink={{ link, name: props.searchEngine.short_name }} />
-              </ActionPanel>
-            }
+            quicklink={{ link, name: props.searchEngine.short_name }}
           />
-        );
-
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export default function ListSearchEngine() {
@@ -109,12 +119,20 @@ export default function ListSearchEngine() {
       isLoading={typeof searchEngines === "undefined"}
       searchBarAccessory={<DataBaseDropdown setDatabasePath={setDatabasePath} />}
     >
-        <List.Section title="Custom">
-            {searchEngines?.filter(se => se.is_active)?.map((se) => <CustomSearchEngineItem key={se.id} searchEngine={se} />)}
-        </List.Section>
-        <List.Section title="Automatic">
-            {searchEngines?.filter(se => !se.is_active)?.map((se) => <CustomSearchEngineItem key={se.id} searchEngine={se} />)}
-        </List.Section>
+      <List.Section title="Custom">
+        {searchEngines
+          ?.filter((se) => se.is_active)
+          ?.map((se) => (
+            <CustomSearchEngineItem key={se.id} searchEngine={se} />
+          ))}
+      </List.Section>
+      <List.Section title="Automatic">
+        {searchEngines
+          ?.filter((se) => !se.is_active)
+          ?.map((se) => (
+            <CustomSearchEngineItem key={se.id} searchEngine={se} />
+          ))}
+      </List.Section>
     </List>
   );
 }
