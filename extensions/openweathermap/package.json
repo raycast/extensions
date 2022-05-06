@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openweathermap",
   "title": "OpenWeatherMap",
-  "description": "",
+  "description": "Get Weather via https://openweathermap.com",
   "icon": "openweathermap.png",
   "author": "tonka3000",
   "license": "MIT",
