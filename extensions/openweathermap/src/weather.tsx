@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import React, { ReactElement, useState } from "react";
+import { getWindDirectionIcon } from "./lib/icons";
 import {
   Daily,
   getDailyForecastCountPreference,
@@ -31,7 +32,11 @@ function CurrentWeatherFragment(props: { weather: WeatherRequest | undefined }):
         icon={getIconURL(w.current.weather[0].icon)}
         accessories={[
           { text: `${Math.round(c.humidity)} %`, icon: "💧", tooltip: `Humidity ${c.humidity}` },
-          { text: `${Math.round(c.wind_speed)} ${getWindUnit()}`, icon: "💨", tooltip: `Wind ${c.wind_speed}` },
+          {
+            text: `${Math.round(c.wind_speed)} ${getWindUnit()} ${getWindDirectionIcon(c.wind_deg)}`,
+            icon: "💨",
+            tooltip: `Wind ${c.wind_speed}`,
+          },
         ]}
       />
     </List.Section>
@@ -74,7 +79,11 @@ function ForecastDailyListItem(props: { daily: Daily }): ReactElement {
       icon={getIconURL(daily.weather[0].icon)}
       accessories={[
         { text: `${Math.round(daily.humidity)} %`, icon: "💧", tooltip: `Humidity ${daily.humidity}` },
-        { text: `${Math.round(daily.wind_speed)} ${getWindUnit()}`, icon: "💨", tooltip: `Wind ${daily.wind_speed}` },
+        {
+          text: `${Math.round(daily.wind_speed)} ${getWindUnit()} ${getWindDirectionIcon(daily.wind_deg)}`,
+          icon: "💨",
+          tooltip: `Wind ${daily.wind_speed}`,
+        },
         { text: `${Math.round(daily.temp.min)}`, tooltip: `min ${daily.temp.min}`, icon: "⬇️" },
         { text: `${Math.round(daily.temp.max)}`, tooltip: `max ${daily.temp.max}`, icon: "⬆️" },
       ]}
@@ -93,7 +102,11 @@ function ForecastHourlyListItem(props: { hourly: Hourly }): ReactElement {
       icon={getIconURL(hourly.weather[0].icon)}
       accessories={[
         { text: `${Math.round(hourly.humidity)} %`, icon: "💧", tooltip: `Humidity ${hourly.humidity}` },
-        { text: `${Math.round(hourly.wind_speed)} ${getWindUnit()}`, icon: "💨", tooltip: `Wind ${hourly.wind_speed}` },
+        {
+          text: `${Math.round(hourly.wind_speed)} ${getWindUnit()} ${getWindDirectionIcon(hourly.wind_deg)}`,
+          icon: "💨",
+          tooltip: `Wind ${hourly.wind_speed}`,
+        },
       ]}
     />
   );
