@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "import-quicklinks-from-browser",
+  "title": "Import Quicklink from Browser",
+  "description": "Import Custom Search Engines from Browser as Quicklinks",
+  "icon": "command-icon.png",
+  "author": "pomdtr",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "import-quicklinks-from-browser",
+      "title": "Import Quicklink from Browser",
+      "description": "Import Custom Search Engine from Browser as Quicklink",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "default": "chrome",
+      "name": "browser",
+      "title": "Browser",
+      "description": "Select the browser to import from",
+      "data": [
+        {
+          "value": "chrome",
+          "title": "Google Chrome"
+        },
+        {
+          "value": "brave",
+          "title": "Brave"
+        },
+        {
+          "value": "chromium",
+          "title": "Chromium"
+        },
+        {
+          "value": "edge",
+          "title": "Microsoft Edge"
+        },
+        {
+          "value": "vivaldi",
+          "title": "Vivaldi"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
