@@ -16,12 +16,9 @@ import {
   clearAllFilePreviewsCache,
   formatBytes,
   fuzzyMatch,
-  getDirectories,
   getDriveRootPath,
-  getExcludePaths,
   isDotUnderscore,
   listFilesCommand,
-  saveFilesInDirectory,
   displayPath,
   getTotalFileCount,
 } from "./utils";
