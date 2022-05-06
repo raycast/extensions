@@ -1,0 +1,59 @@
+import { Action, ActionPanel, Clipboard, closeMainWindow, List, showHUD, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import gopass from "./gopass";
+
+async function copyPassword(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Copying password", style: Toast.Style.Animated });
+    await gopass.clip(entry);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("Password copied");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not copy password", style: Toast.Style.Failure });
+  }
+}
+
+async function pastePassword(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Pasting password", style: Toast.Style.Animated });
+    const password = await gopass.password(entry);
+    await Clipboard.paste(password);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("Password pasted");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not paste password", style: Toast.Style.Failure });
+  }
+}
+
+export default function (): JSX.Element {
+  const [entries, setEntries] = useState<string[]>();
+
+  useEffect((): void => {
+    gopass
+      .list()
+      .then(setEntries)
+      .catch(console.error)
+      .catch(async () => await showToast({ title: "Could not load passwords", style: Toast.Style.Failure }));
+  }, []);
+
+  return (
+    <List isLoading={entries === undefined}>
+      {entries?.map((entry, i) => (
+        <List.Item
+          key={i}
+          title={entry}
+          actions={
+            <ActionPanel>
+              <Action title="Copy Password to Clipboard" onAction={() => copyPassword(entry)} />
+              <Action title="Paste Password" onAction={() => pastePassword(entry)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
