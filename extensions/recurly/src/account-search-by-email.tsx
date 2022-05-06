@@ -24,12 +24,12 @@ export default function accountSearchByEmail() {
     isLoading={tenantsLoading || accountsLoading}
     throttle={true}
     isShowingDetail={true}
+    onSearchTextChange={setText}
     searchBarAccessory={
       <List.Dropdown tooltip="Select the tenant" onChange={onSelectTenant}>
         {tenants.map(tenant => <List.Dropdown.Item key={tenant.name} title={tenant.name} value={tenant.name}/>)}
       </List.Dropdown>
     }
-    onSearchTextChange={setText}
   >
     {accounts.map((account, idx) => <AccountItem key={account.id || idx} tenant={tenant} account={account}/>)}
   </List>
