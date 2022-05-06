@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import React, { ReactElement, useState } from "react";
 import { getWindDirectionIcon } from "../lib/icons";
 import {
@@ -13,6 +13,7 @@ import {
 } from "../lib/openweathermap";
 import { getTemperatureUnit, getWindUnit } from "../lib/unit";
 import { getDay, getHour, getMonth, getWeekday, unixTimestampToDate } from "../lib/utils";
+import { CurrentDetailList, DailyDetailList, HourlyDetailList } from "./single";
 
 function CurrentWeatherFragment(props: { weather: WeatherRequest | undefined }): ReactElement | null {
   const loc = props.weather?.location;
@@ -37,6 +38,19 @@ function CurrentWeatherFragment(props: { weather: WeatherRequest | undefined }):
             icon: "💨",
             tooltip: `Wind ${c.wind_speed}`,
           },
+        ]}
+        actions={
+          <ActionPanel>
+            <Action.Push title="Show Details" target={<CurrentDetailList weather={c} />} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Sun"
+        icon="🕥"
+        accessories={[
+          { text: `${getHour(unixTimestampToDate(c.sunrise))}`, icon: "🌅", tooltip: "Sunrise" },
+          { text: `${getHour(unixTimestampToDate(c.sunset))}`, icon: "🌇", tooltip: "Sunset" },
         ]}
       />
     </List.Section>
@@ -87,6 +101,11 @@ function ForecastDailyListItem(props: { daily: Daily }): ReactElement {
         { text: `${Math.round(daily.temp.min)}`, tooltip: `min ${daily.temp.min}`, icon: "⬇️" },
         { text: `${Math.round(daily.temp.max)}`, tooltip: `max ${daily.temp.max}`, icon: "⬆️" },
       ]}
+      actions={
+        <ActionPanel>
+          <Action.Push title="Show Details" target={<DailyDetailList daily={daily} />} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -108,6 +127,11 @@ function ForecastHourlyListItem(props: { hourly: Hourly }): ReactElement {
           tooltip: `Wind ${hourly.wind_speed}`,
         },
       ]}
+      actions={
+        <ActionPanel>
+          <Action.Push title="Show Details" target={<HourlyDetailList hourly={hourly} />} />
+        </ActionPanel>
+      }
     />
   );
 }
