@@ -13,7 +13,7 @@
     {
       "name": "mask",
       "title": "Create Masked Email",
-      "description": "",
+      "description": "Create a Fastmail masked email",
       "mode": "view"
     }
   ],
