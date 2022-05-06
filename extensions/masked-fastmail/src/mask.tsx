@@ -1,15 +1,7 @@
-import { getPreferenceValues, LocalStorage, Form, ActionPanel, Action } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, Form } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Authenticate, { Session } from "./auth";
-
-// const createMaskedEmail = async (description: string, accessToken: AccessToken): Promise<CreateMaskedEmailResponse> => {
-//   fetch("https://api.fastmail.com/jmap/api/", {
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer: ${accessToken}`,
-//     },
-//   });
-// };
+import MaskedEmailForm from "./masked_email_form";
 
 export default function Command() {
   const [isLoading, setLoading] = useState(true);
@@ -39,9 +31,6 @@ export default function Command() {
     })();
   }, [session]);
 
-  console.log("loading", isLoading);
-  console.log("session", session);
-
   if (isLoading) {
     return <Form isLoading={isLoading} />;
   }
@@ -50,21 +39,5 @@ export default function Command() {
     return <Authenticate username={username} password={password} didAuthenticate={saveSession} />;
   }
 
-  return (
-    <Form
-      navigationTitle="New masked email"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={(values: unknown) => {
-              console.log(values);
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Remind yourself what this email is for" />
-      <Form.TextField id="label" title="Description" />
-    </Form>
-  );
+  return <MaskedEmailForm session={session} />;
 }

@@ -9,11 +9,13 @@ const fetch = fetchCookie(nodeFetch, cookieJar);
 export interface Session {
   accessToken: string;
   loginId: string;
+  accountId: string;
 }
 
-interface PasswordAuthResponse {
+interface AuthResponse {
   accessToken?: string;
   methods?: [{ type: string }];
+  primaryAccounts?: { [key: string]: string };
 }
 
 const authenticateURL = "https://www.fastmail.com/jmap/authenticate/";
@@ -47,9 +49,14 @@ const authenticate = async (username: string, password: string): Promise<Authent
     }),
   });
 
-  const passwordJSON = (await passwordResponse.json()) as PasswordAuthResponse;
-  if (passwordJSON.accessToken) {
-    return { type: "session", value: { accessToken: passwordJSON.accessToken, loginId: loginId } };
+  const passwordJSON = (await passwordResponse.json()) as AuthResponse;
+  const accessToken = passwordJSON.accessToken;
+  const accountId = passwordJSON.primaryAccounts?.["urn.ietf.params.jmap.mail"];
+  if (accessToken && accountId) {
+    return {
+      type: "session",
+      value: { accountId, accessToken, loginId },
+    };
   }
 
   if (!passwordJSON.methods) {
@@ -116,9 +123,12 @@ export default function Authenticate({ username, password, didAuthenticate }: Au
         body: JSON.stringify({ loginId, remember: true, type: "totp", value: totp }),
       });
 
-      const response = (await totpResponse.json()) as { accessToken?: string };
+      const response = (await totpResponse.json()) as AuthResponse;
 
-      if (!response.accessToken) {
+      const accessToken = response.accessToken;
+      const accountId = response.primaryAccounts?.["urn:ietf:params:jmap:mail"];
+
+      if (!accessToken || !accountId) {
         setLoading(false);
         setSubmitTOTP(false);
         setTOTP("");
@@ -128,7 +138,7 @@ export default function Authenticate({ username, password, didAuthenticate }: Au
 
       setLoading(false);
       setSubmitTOTP(false);
-      didAuthenticate({ accessToken: response.accessToken, loginId });
+      didAuthenticate({ accountId, accessToken, loginId });
     })();
   }, [submitTOTP]);
 
