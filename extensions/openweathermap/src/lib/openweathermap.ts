@@ -110,6 +110,11 @@ export interface Weather {
   daily: Daily[];
 }
 
+export interface WeatherRequest {
+  weather: Weather;
+  location: Location | undefined;
+}
+
 function getAPIKey(): string {
   const pref = getPreferenceValues();
   return (pref.apikey as string) || "";
@@ -171,25 +176,30 @@ export async function getWeather(location: Location): Promise<Weather> {
 }
 
 export function useWeather(query: string | undefined): {
-  weather: Weather | undefined;
+  weatherRequest: WeatherRequest | undefined;
   isLoading: boolean;
   error: string | undefined;
 } {
-  const [weather, setWeather] = useState<Weather>();
+  const [weatherRequest, setWeatherRequest] = useState<WeatherRequest>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
     let didUnmount = false;
     const fetchData = async () => {
       try {
+        if (error) {
+          setError(undefined);
+        }
         if (!isLoading) {
           setIsLoading(true);
         }
-        if (query) {
+        if (query && query.length > 0) {
           const locations = await getGeocoding(query);
           const loc = locations[0];
           const w = await getWeather(loc);
-          setWeather(w);
+          setWeatherRequest({ weather: w, location: loc });
+        } else {
+          setError("Empty query");
         }
       } catch (error) {
         if (!didUnmount) {
@@ -206,7 +216,7 @@ export function useWeather(query: string | undefined): {
       didUnmount = true;
     };
   }, [query]);
-  return { weather, isLoading, error };
+  return { weatherRequest, isLoading, error };
 }
 
 const defaultHourlyForecastCount = 3;
