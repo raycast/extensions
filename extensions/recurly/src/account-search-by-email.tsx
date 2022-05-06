@@ -14,26 +14,23 @@ export default function accountSearchByEmail() {
   const recurly = useRecurly(tenant);
   const {accounts, loadingAccounts} = useRecurlyAccounts(recurly, text);
 
+  const onSelectTenant = (name: string) => {
+    const found = tenants.find(tenant => tenant.name === name);
+
+    if (found) setTenant(found);
+  }
+
   return <List
     isLoading={tenantsLoading || loadingAccounts}
     throttle={true}
     isShowingDetail={true}
     searchBarAccessory={
-      <List.Dropdown
-        tooltip="Select the tenant"
-        onChange={(name: string) => {
-          const found = tenants.find(tenant => tenant.name === name);
-
-          if (found) {
-            setTenant(found);
-          }
-        }}
-      >
+      <List.Dropdown tooltip="Select the tenant" onChange={onSelectTenant}>
         {tenants.map(tenant => <List.Dropdown.Item key={tenant.name} title={tenant.name} value={tenant.name}/>)}
       </List.Dropdown>
     }
     onSearchTextChange={setText}
   >
-    {accounts.map((account, idx) => <AccountItem key={account.id || idx} tenant={tenant} account={account} />)}
+    {accounts.map((account, idx) => <AccountItem key={account.id || idx} tenant={tenant} account={account}/>)}
   </List>
 }
