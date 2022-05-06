@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { ReactElement, useState } from "react";
 import { getWindDirectionIcon } from "../lib/icons";
 import {
@@ -41,7 +41,7 @@ function CurrentWeatherFragment(props: { weather: WeatherRequest | undefined }):
         ]}
         actions={
           <ActionPanel>
-            <Action.Push title="Show Details" target={<CurrentDetailList weather={c} />} />
+            <Action.Push title="Show Details" icon={Icon.Terminal} target={<CurrentDetailList weather={c} />} />
           </ActionPanel>
         }
       />
@@ -103,7 +103,7 @@ function ForecastDailyListItem(props: { daily: Daily }): ReactElement {
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<DailyDetailList daily={daily} />} />
+          <Action.Push title="Show Details" icon={Icon.Terminal} target={<DailyDetailList daily={daily} />} />
         </ActionPanel>
       }
     />
@@ -129,7 +129,7 @@ function ForecastHourlyListItem(props: { hourly: Hourly }): ReactElement {
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<HourlyDetailList hourly={hourly} />} />
+          <Action.Push title="Show Details" icon={Icon.Terminal} target={<HourlyDetailList hourly={hourly} />} />
         </ActionPanel>
       }
     />
