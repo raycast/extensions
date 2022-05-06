@@ -46,6 +46,13 @@
       "subtitle": "Amazon AWS",
       "description": "List All your CloudFormation Stacks",
       "mode": "view"
+    },
+    {
+      "name": "dynamodb",
+      "title": "DynamoDB Tables",
+      "subtitle": "Amazon AWS",
+      "description": "List All your DynamoDB Tables",
+      "mode": "view"
     }
   ],
   "preferences": [
