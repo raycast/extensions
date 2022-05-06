@@ -5,7 +5,7 @@ import initSqlJs, { Database } from "sql.js";
 import path from "path";
 import { readdirSync, readFileSync } from "fs";
 
-const QUERY = "SELECT id, short_name, url, keyword, favicon_url FROM keywords WHERE is_active = 1";
+const QUERY = "SELECT id, short_name, url, keyword, favicon_url, is_active FROM keywords";
 const BASE_SUPPORT_DIR = `${homedir()}/Library/Application Support`;
 
 const SUPPORT_DIRS = {
@@ -22,6 +22,7 @@ interface CustomSearchEngine {
   url: string;
   keyword: string;
   favicon_url: string;
+  is_active: boolean;
 }
 
 interface ChromeProfile {
@@ -60,7 +61,25 @@ function DataBaseDropdown(props: { setDatabasePath: (profile: string) => void })
   );
 }
 
-export default function ListQuickLinks() {
+function CustomSearchEngineItem(props: {searchEngine : CustomSearchEngine}) {
+        const link = props.searchEngine.url.replace("searchTerms", "Query");
+
+        return (
+          <List.Item
+            icon={props.searchEngine.favicon_url}
+            title={props.searchEngine.short_name}
+            subtitle={link}
+            actions={
+              <ActionPanel>
+                <Action.CreateQuicklink icon={props.searchEngine.favicon_url} quicklink={{ link, name: props.searchEngine.short_name }} />
+              </ActionPanel>
+            }
+          />
+        );
+
+}
+
+export default function ListSearchEngine() {
   const [searchEngines, setSearchEngines] = useState<CustomSearchEngine[]>();
   const [databasePath, setDatabasePath] = useState<string>();
 
@@ -71,13 +90,14 @@ export default function ListQuickLinks() {
     loadDb(databasePath).then((db) => {
       const res = db.exec(QUERY);
       const searchEngines = res[0].values.map((row) => {
-        const [id, short_name, url, keyword, favicon_url] = row;
+        const [id, short_name, url, keyword, favicon_url, is_active] = row;
         return {
           id: id as number,
           short_name: short_name as string,
           url: url as string,
           keyword: keyword as string,
           favicon_url: favicon_url as string,
+          is_active: is_active === 1,
         };
       });
       setSearchEngines(searchEngines);
@@ -89,23 +109,12 @@ export default function ListQuickLinks() {
       isLoading={typeof searchEngines === "undefined"}
       searchBarAccessory={<DataBaseDropdown setDatabasePath={setDatabasePath} />}
     >
-      {searchEngines?.map((se) => {
-        const link = se.url.replace("searchTerms", "Query");
-
-        return (
-          <List.Item
-            key={se.id}
-            icon={se.favicon_url}
-            title={se.short_name}
-            subtitle={link}
-            actions={
-              <ActionPanel>
-                <Action.CreateQuicklink icon={se.favicon_url} quicklink={{ link, name: se.short_name }} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+        <List.Section title="Custom">
+            {searchEngines?.filter(se => se.is_active)?.map((se) => <CustomSearchEngineItem key={se.id} searchEngine={se} />)}
+        </List.Section>
+        <List.Section title="Automatic">
+            {searchEngines?.filter(se => !se.is_active)?.map((se) => <CustomSearchEngineItem key={se.id} searchEngine={se} />)}
+        </List.Section>
     </List>
   );
 }
