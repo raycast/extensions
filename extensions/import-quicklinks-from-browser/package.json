@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "import-quicklinks-from-browser",
-  "title": "Import Quicklink from Browser",
+  "title": "Import Quicklink From Browser",
   "description": "Import Custom Search Engines from Browser as Quicklinks",
   "icon": "command-icon.png",
   "author": "pomdtr",
@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "import-quicklinks-from-browser",
-      "title": "Import Quicklink from Browser",
+      "title": "Import Quicklink From Browser",
       "description": "Import Custom Search Engine from Browser as Quicklink",
       "mode": "view"
     }
