@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Session } from "./auth";
 import fetch, { Response } from "node-fetch";
@@ -35,10 +35,27 @@ const MaskedEmailForm = ({ session }: { session: Session }) => {
     (async () => {
       const response = await createMaskedEmail(session, description);
 
-      console.log("create response", response.status);
+      const json = (await response.json()) as {
+        methodResponses: [
+          [
+            name: "MaskedEmail/set",
+            arguments?: { created?: { onepassword?: { email?: string } } },
+            methodCallId?: string
+          ]
+        ];
+      };
+      const email = json.methodResponses[0]?.[1]?.created?.onepassword?.email;
 
-      const json = await response.text();
-      console.log("json", json);
+      if (!email) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "There was a problem creating the masked email. Please try again.",
+        });
+        return;
+      }
+
+      Clipboard.copy(email);
+      showHUD(`"${email}" has been copied to your clipboard`);
     })();
   }, [submitForm]);
 
