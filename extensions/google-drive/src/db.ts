@@ -1,6 +1,7 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { spawn } from "child_process";
 import { existsSync, PathLike, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { basename, join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 
@@ -13,11 +14,16 @@ import {
 import { FileInfo, Preferences } from "./types";
 import {
   clearAllFilePreviewsCache,
+  formatBytes,
   fuzzyMatch,
   getDirectories,
   getDriveRootPath,
   getExcludePaths,
+  isDotUnderscore,
+  listFilesCommand,
   saveFilesInDirectory,
+  displayPath,
+  getTotalFileCount,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -51,7 +57,7 @@ const dbConnection = async () => {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
     db.close();
-    mandateFilesIndexInvalidation();
+    await mandateFilesIndexInvalidation();
   }
 
   try {
@@ -176,16 +182,57 @@ export const insertFile = (
   db.run(insertStatement);
 };
 
-export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
-  if (getExcludePaths().includes(path.toLocaleString())) return;
-  saveFilesInDirectory(path, db);
-  getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
+const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
+  const totalFiles = getTotalFileCount();
+
+  return new Promise<void>((resolve) => {
+    const child = spawn(listFilesCommand(true), { shell: true });
+    let filesIndexed = 0;
+
+    child.stdout.on("data", (data: Buffer) => {
+      data
+        .toString()
+        .split("\n")
+        .filter((entry) => entry.trim().length > 0)
+        .map((entry) => entry.split(" | ").map((entry) => entry.trim()))
+        .forEach((entry) => {
+          if (entry.length != 4) return;
+          const [createdAt, updatedAt, sizeInBytes, path] = entry;
+
+          if (path === "" || isDotUnderscore(path)) return;
+
+          filesIndexed += 1;
+
+          toast.message = `Progress: ${Math.round((filesIndexed / totalFiles) * 100)}% (${filesIndexed}/${totalFiles})`;
+
+          insertFile(db, {
+            name: basename(path),
+            path,
+            displayPath: displayPath(path),
+            fileSizeFormatted: formatBytes(sizeInBytes.length > 0 ? parseInt(sizeInBytes, 10) : 0),
+            createdAt: createdAt.length > 0 ? new Date(createdAt) : new Date(),
+            updatedAt: updatedAt.length > 0 ? new Date(updatedAt) : new Date(),
+            favorite: false,
+          });
+        });
+    });
+
+    child.on("close", (code) => {
+      if (code !== 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to index the files";
+      }
+
+      resolve();
+    });
+  });
 };
 
 type IndexFilesOptions = { force?: boolean };
 export const indexFiles = async (
   path: PathLike,
   db: Database,
+  toast: Toast,
   options: IndexFilesOptions = { force: false }
 ): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
@@ -201,7 +248,7 @@ export const indexFiles = async (
       clearAllFilePreviewsCache(false);
     }
 
-    walkRecursivelyAndSaveFiles(path, db);
+    await listFilesAndInsertIntoDb(db, toast);
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {

@@ -1,5 +1,6 @@
+import { environment } from "@raycast/api";
 import { homedir, tmpdir } from "os";
-import { join } from "path";
+import path, { join } from "path";
 
 export const IGNORED_DIRECTORIES = ["node_modules", "bower_components", ".git", "tmp"];
 export const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
@@ -28,3 +29,9 @@ export const MAX_TMP_FILE_PREVIEWS_LIMIT = 500; // Average size of a file previe
 export const DB_FILE_PATH = join(homedir(), ".raycast-google-drive-sqlite.db");
 export const TMP_FILE_PREVIEWS_PATH = join(tmpdir(), "raycast-google-drive-file-previews");
 export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";
+export const FD_PATH = path.join(environment.supportPath, "fd");
+export const FD_ARCHIVE_URL =
+  "https://github.com/sharkdp/fd/releases/download/v8.3.2/fd-v8.3.2-x86_64-apple-darwin.tar.gz";
+
+// Checksum generated using `shasum -a 256 archive.tar.gz`
+export const FD_ARCHIVE_CHECKSUM = "02ce0825231fb370b0711e30933b043761beee46bdcbf0132eba43c3f510db53";

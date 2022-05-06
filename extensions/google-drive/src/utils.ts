@@ -1,21 +1,37 @@
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import util from "util";
-import fs, { accessSync, existsSync, lstatSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
-import { basename, extname, join, resolve } from "path";
-import { homedir } from "os";
-import { Database } from "sql.js";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import fs, {
+  accessSync,
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  PathLike,
+  readdirSync,
+  readFile,
+  readFileSync,
+  rm,
+  rmSync,
+  statSync,
+} from "fs";
+import path, { basename, dirname, extname, join, resolve } from "path";
+import { homedir, tmpdir } from "os";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
+import download from "download";
+import tar from "tar";
 
 import {
+  FD_ARCHIVE_CHECKSUM,
+  FD_ARCHIVE_URL,
+  FD_PATH,
   FILE_SIZE_UNITS,
   IGNORED_DIRECTORIES,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
   NON_PREVIEWABLE_EXTENSIONS,
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
-import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
+import { createHash } from "crypto";
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
@@ -33,9 +49,7 @@ const isPathReadable = (path: PathLike): boolean => {
   }
 };
 const pathExists = (path: PathLike): boolean => isPathReadable(path) && existsSync(path);
-const isDotUnderscore = (path: PathLike) => basename(path.toLocaleString()).startsWith("._");
-const isDirectory = (path: PathLike) => !isDotUnderscore(path) && pathExists(path) && lstatSync(path).isDirectory();
-const isFile = (path: PathLike) => !isDotUnderscore(path) && pathExists(path) && lstatSync(path).isFile();
+export const isDotUnderscore = (path: PathLike) => basename(path.toLocaleString()).startsWith("._");
 export const displayPath = (path: PathLike): string => path.toLocaleString().replace(homedir(), "~");
 export const escapePath = (path: PathLike): string => path.toLocaleString().replace(/([^0-9a-z_\-.~/])/gi, "\\$1");
 export const getDriveRootPath = (): string => {
@@ -48,10 +62,11 @@ export const getExcludePaths = (): Array<string> => {
   return preferences.excludePaths
     .split(",")
     .map((p) => p.trim())
-    .map((p) => p.replace("~", homedir()))
+    .filter((p) => p.length > 0)
+    .map((p) => p.replace("~", homedir()).replace(`${getDriveRootPath()}/`, ""))
     .map((p) => resolve(p));
 };
-const formatBytes = (sizeInBytes: number): string => {
+export const formatBytes = (sizeInBytes: number): string => {
   let unitIndex = 0;
   while (sizeInBytes >= 1024) {
     sizeInBytes /= 1024;
@@ -59,35 +74,6 @@ const formatBytes = (sizeInBytes: number): string => {
   }
 
   return `${sizeInBytes.toFixed(1)} ${FILE_SIZE_UNITS[unitIndex]}`;
-};
-
-export const getDirectories = (path: PathLike): Array<PathLike> =>
-  readdirSync(path, "utf8")
-    .map((name) => join(path.toLocaleString(), name))
-    .filter(isDirectory)
-    .filter((dir) => !IGNORED_DIRECTORIES.includes(basename(dir)));
-
-export const saveFilesInDirectory = (path: PathLike, db: Database) => {
-  const preferences = getPreferenceValues<Preferences>();
-  const excludePaths = getExcludePaths();
-  readdirSync(path).forEach((file) => {
-    const filePath = join(path.toLocaleString(), file);
-
-    if (!preferences.shouldShowDirectories && !isFile(filePath)) return;
-    if (excludePaths.includes(filePath)) return;
-
-    const fileStats = statSync(filePath);
-
-    insertFile(db, {
-      name: basename(filePath),
-      path: filePath,
-      displayPath: displayPath(filePath),
-      fileSizeFormatted: formatBytes(fileStats.size),
-      createdAt: fileStats.birthtime,
-      updatedAt: fileStats.mtime,
-      favorite: false,
-    });
-  });
 };
 
 const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
@@ -148,7 +134,9 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   });
 };
 
-export const initialSetup = () => {
+export const initialSetup = async () => {
+  await ensureFdExecutableExists();
+
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
     if (previewFiles.length > MAX_TMP_FILE_PREVIEWS_LIMIT) {
@@ -186,10 +174,94 @@ ${file.fileSizeFormatted}
 ---
 
 **Created**\n
-${file.createdAt.toLocaleString()}
+${new Date(file.createdAt).toLocaleString()}
 
 ---
 
 **Updated**\n
-${file.updatedAt.toLocaleString()}`;
+${new Date(file.updatedAt).toLocaleString()}`;
+};
+
+const checksumFile = (filePath: PathLike): string => {
+  const fileContents = readFileSync(filePath);
+  return createHash("sha256").update(fileContents).digest("hex");
+};
+
+export const ensureFdExecutableExists = async () => {
+  if (environment.isDevelopment) console.log("fd executable path:", FD_PATH);
+
+  if (fs.existsSync(FD_PATH)) return;
+
+  const tmpDir = join(tmpdir(), "fd");
+  mkdirSync(tmpDir, { recursive: true });
+
+  if (!fs.existsSync(tmpDir)) {
+    throw new Error(`Could not create a tmp directory "${tmpDir}" to download and extract fd`);
+  }
+
+  try {
+    await download(FD_ARCHIVE_URL, tmpDir, { filename: "fd.tar.gz" });
+  } catch (e) {
+    console.error(e);
+    throw Error("Could not download the required fd binary archive");
+  }
+
+  const archive = path.join(tmpDir, "fd.tar.gz");
+
+  // verify checksum of the archive
+  const checksum = checksumFile(archive);
+  if (checksum !== FD_ARCHIVE_CHECKSUM) {
+    if (pathExists(tmpDir)) rmSync(tmpDir, { recursive: true, force: true });
+
+    throw Error("Checksum of the downloaded gd archive does not match");
+  }
+
+  try {
+    await tar.extract({
+      file: archive,
+      strip: 1,
+
+      filter: (p) => basename(p) === "fd",
+      cwd: dirname(FD_PATH),
+    });
+  } catch (e) {
+    console.error(e);
+    throw new Error("Could not extract tgz content of fd archive");
+  } finally {
+    if (pathExists(tmpDir)) rmSync(tmpDir, { recursive: true, force: true });
+  }
+
+  if (fs.existsSync(FD_PATH)) {
+    chmodSync(FD_PATH, "755");
+    console.log(execSync("fd --version").toString());
+  }
+};
+
+export const listFilesCommand = (includeStats = false): string => {
+  const preferences = getPreferenceValues<Preferences>();
+  const driveRootPath = getDriveRootPath();
+
+  let fileTypeOption = "";
+  if (!preferences.shouldShowDirectories) {
+    fileTypeOption = "--type file";
+  }
+
+  const excludPaths = getExcludePaths().concat(IGNORED_DIRECTORIES);
+  const excludePathsOptions = excludPaths.map((path) => `--exclude ${escapePath(path)}`);
+  const execOption = includeStats ? `-x stat -L -f "%SB | %Sm | %z | %N"` : "";
+  const command = `${escapePath(FD_PATH)} -L -H ${fileTypeOption} ${excludePathsOptions.join(" ")} . ${escapePath(
+    driveRootPath
+  )} ${execOption}`;
+
+  if (environment.isDevelopment) console.log(`listFilesCommand(includeStats: ${includeStats}):`, command);
+
+  return command;
+};
+
+export const getTotalFileCount = (): number => {
+  if (!pathExists(getDriveRootPath())) return 0;
+
+  const command = `${listFilesCommand(false)} | wc -l`;
+  const output = execSync(command);
+  return parseInt(output.toString(), 10);
 };
