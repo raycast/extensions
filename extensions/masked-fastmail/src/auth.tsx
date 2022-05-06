@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import nodeFetch from "node-fetch";
 import fetchCookie from "fetch-cookie";
@@ -52,7 +52,7 @@ const authenticate = async (username: string, password: string): Promise<Authent
   const passwordJSON = (await passwordResponse.json()) as AuthResponse;
   const accessToken = passwordJSON.accessToken;
   const accountId = passwordJSON.primaryAccounts?.["urn:ietf:params:jmap:mail"];
- 
+
   if (accessToken && accountId) {
     return {
       type: "session",
@@ -90,6 +90,8 @@ export default function Authenticate({ username, password, didAuthenticate }: Au
   const [isLoading, setLoading] = useState(true);
   const [totp, setTOTP] = useState<string>("");
   const [submitTOTP, setSubmitTOTP] = useState(false);
+
+  const isTOTPRequired = !!loginId;
 
   useEffect(() => {
     (async () => {
@@ -143,7 +145,7 @@ export default function Authenticate({ username, password, didAuthenticate }: Au
     })();
   }, [submitTOTP]);
 
-  return (
+  return isTOTPRequired ? (
     <Form
       isLoading={isLoading}
       navigationTitle="Two-step verification"
@@ -156,5 +158,7 @@ export default function Authenticate({ username, password, didAuthenticate }: Au
       <Form.Description text="Enter the 6-digit code from the authenticator app on your phone:" />
       <Form.TextField id="totp" value={totp} onChange={setTOTP} />
     </Form>
+  ) : (
+    <Detail isLoading={true} />
   );
 }
