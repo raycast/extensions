@@ -12,7 +12,7 @@ export default function accountSearchByEmail() {
   const {tenants, tenantsLoading} = useTenants();
   const [tenant, setTenant] = useState<TenantConfiguration>({name: '', subdomain: '', apiKey: ''});
   const recurly = useRecurly(tenant);
-  const {accounts, loadingAccounts} = useRecurlyAccounts(recurly, text);
+  const {accounts, accountsLoading} = useRecurlyAccounts(recurly, text);
 
   const onSelectTenant = (name: string) => {
     const found = tenants.find(tenant => tenant.name === name);
@@ -21,7 +21,7 @@ export default function accountSearchByEmail() {
   }
 
   return <List
-    isLoading={tenantsLoading || loadingAccounts}
+    isLoading={tenantsLoading || accountsLoading}
     throttle={true}
     isShowingDetail={true}
     searchBarAccessory={

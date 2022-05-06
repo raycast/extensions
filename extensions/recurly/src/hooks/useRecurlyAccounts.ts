@@ -5,20 +5,20 @@ import showError from "../showError";
 
 export type UseRecurlyAccounts = {
   accounts: Account[];
-  loadingAccounts: boolean;
+  accountsLoading: boolean;
 };
 
 export default function useRecurlyAccounts({recurly, recurlyValid}: UseRecurly, text: string) {
-  const [state, setState] = useState<UseRecurlyAccounts>({loadingAccounts: false, accounts: []});
+  const [state, setState] = useState<UseRecurlyAccounts>({accountsLoading: false, accounts: []});
 
   useEffect(() => {
     if (text.length === 0) return;
     if (!recurlyValid) return;
 
     text.length > 0 && Promise.resolve()
-      .then(() => setState(prev => ({...prev, loadingAccounts: true})))
+      .then(() => setState(prev => ({...prev, accountsLoading: true})))
       .then(() => iterateAccounts(recurly, text))
-      .then(accounts => setState({accounts, loadingAccounts: false}))
+      .then(accounts => setState({accounts, accountsLoading: false}))
       .catch(showError);
   }, [recurly, recurlyValid, text]);
 
