@@ -4,7 +4,6 @@ import { Session } from "./auth";
 import fetch, { Response } from "node-fetch";
 
 const createMaskedEmail = async (session: Session, description: string): Promise<Response> => {
-  console.log("access token", session);
   return fetch("https://api.fastmail.com/jmap/api/", {
     method: "POST",
     headers: {
