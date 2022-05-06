@@ -31,6 +31,16 @@ export default function accountSearchByEmail() {
       </List.Dropdown>
     }
   >
-    {accounts.map((account, idx) => <AccountItem key={account.id || idx} tenant={tenant} account={account}/>)}
+    {
+      accounts.map(
+        (account, idx) =>
+          <AccountItem
+            key={account.id || idx}
+            recurly={recurly}
+            tenant={tenant}
+            account={account}
+          />
+      )
+    }
   </List>
 }
