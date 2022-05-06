@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "mask",
-      "title": "mask",
+      "title": "Create Masked Email",
       "description": "",
       "mode": "view"
     }
