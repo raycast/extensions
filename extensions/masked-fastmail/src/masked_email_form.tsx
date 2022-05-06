@@ -68,7 +68,7 @@ const MaskedEmailForm = ({ session }: { session: Session }) => {
       }
     >
       <Form.Description text="Remind yourself what this email is for" />
-      <Form.TextField id="label" title="Description" onChange={setDescription} />
+      <Form.TextField autoFocus={true} id="label" title="Description" onChange={setDescription} />
     </Form>
   );
 };
