@@ -51,7 +51,8 @@ const authenticate = async (username: string, password: string): Promise<Authent
 
   const passwordJSON = (await passwordResponse.json()) as AuthResponse;
   const accessToken = passwordJSON.accessToken;
-  const accountId = passwordJSON.primaryAccounts?.["urn.ietf.params.jmap.mail"];
+  const accountId = passwordJSON.primaryAccounts?.["urn:ietf:params:jmap:mail"];
+ 
   if (accessToken && accountId) {
     return {
       type: "session",
