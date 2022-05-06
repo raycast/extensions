@@ -10,6 +10,9 @@ export default function SearchGoogleMavenRepository() {
   const { artifactInfo, loading } = searchArtifacts(searchContent.trim());
 
   const emptyViewTitle = () => {
+    if (searchContent.length < 4) {
+      return "Welcome to Google's Maven Repository";
+    }
     if (loading) {
       return "Loading...";
     }
@@ -22,18 +25,23 @@ export default function SearchGoogleMavenRepository() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={'Search artifacts, like "activity"'}
+      searchBarPlaceholder={'Search artifacts, like "androidx:viewpager2"'}
       onSearchTextChange={setSearchContent}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown tooltip="Group" onChange={setFilter}>
-          {artifactInfo.tagList.map((value) => {
-            return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
-          })}
+          {searchContent.length < 4
+            ? null
+            : artifactInfo.tagList.map((value) => {
+                return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+              })}
         </List.Dropdown>
       }
     >
-      <MavenEmptyView title={emptyViewTitle()} />
+      <MavenEmptyView
+        title={emptyViewTitle()}
+        description={searchContent.length < 4 ? "You must enter at least 4 characters when searching..." : " "}
+      />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
           (filter === artifactInfo.tagList[0].value || filter === artifactInfo.artifactName[artifactsIndex]) && (

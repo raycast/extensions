@@ -9,7 +9,7 @@ export default function ShowGoogleMavenRepository() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search groups"}>
-      <MavenEmptyView title={"No Groups"} />
+      <MavenEmptyView title={"No Groups"} description={""} />
       {allPackages.map((value, index) => {
         return (
           <List.Item

@@ -24,7 +24,7 @@ export default function ShowGoogleArtifacts(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      <MavenEmptyView title={"No Artifacts"} />
+      <MavenEmptyView title={"No Artifacts"} description={""} />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
           <ArtifactList
