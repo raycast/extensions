@@ -1,5 +1,10 @@
 # Google Drive Changelog
 
+## [Fast indexing with progress] - 2022-05-06
+
+- Added comparatively faster indexing mechanism using by fetching the nested paths (along with file stats) with the help of [`fd`](https://github.com/sharkdp/fd) utility.
+- Now it will show the indexing progress in percentage + processed/total format.
+
 ## [Toggle details] - 2022-05-03
 
 - Added a general action to toggle the right-side details view.
