@@ -6,6 +6,9 @@
   "subtitle": "npm",
   "icon": "command-icon.png",
   "author": "mrmartineau",
+  "contributors": [
+    "reloadedhead"
+  ],
   "license": "MIT",
   "categories": ["Developer Tools"],
   "commands": [

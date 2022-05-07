@@ -171,6 +171,10 @@ export const PackageListItem = ({
               title="Copy Package Name"
               content={pkg.name}
             />
+            <CopyToClipboardAction
+              title="Copy Package URL"
+              content={pkg.links.npm}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
