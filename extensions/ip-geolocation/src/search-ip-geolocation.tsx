@@ -37,7 +37,15 @@ export default function SearchIpGeolocation() {
           subtitle={value[1]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard icon={Icon.MagnifyingGlass} title={`Copy ${value[0]}`} content={value[1]} />
+              <Action.CopyToClipboard
+                icon={{ source: { light: listIcons[index].light, dark: listIcons[index].dark } }}
+                title={`Copy ${value[0]}`}
+                content={value[1]}
+              />
+              <Action.CopyToClipboard
+                title={`Copy All Info`}
+                content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
+              />
             </ActionPanel>
           }
         />

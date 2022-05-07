@@ -1,6 +1,21 @@
 # IP Geolocation
 
 Search geolocation information for any IP address or domain.
+View your own Ip information.
+
+**Preferences:**
+
+- Language: Language of location information display.
+  - English (default)
+  - Deutsch (German)
+  - Español (Spanish)
+  - Português - Brasil (Portuguese)
+  - Français (French)
+  - 日本語 (Japanese)
+  - 中国 (Chinese)
+  - Русский (Russian)
+
+------
 
 **IP Geolocation** Query Service from [ip-api.com](https://ip-api.com). The following notes are from the official website
 

@@ -36,8 +36,8 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
         } else {
           const ipGeolocationReadable: IPGeolocationReadable = {
             IP: ipGeolocation.query,
-            Location: `${ipGeolocation.country} ${ipGeolocation.regionName} ${ipGeolocation.city} ${ipGeolocation.district}`, //country  regionName city district
-            GeoCoordinates: `${ipGeolocation.lat} , ${ipGeolocation.lon}`, //(lat,lon)
+            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}, ${ipGeolocation.district}`, //country  regionName city district
+            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
             Timezone: ipGeolocation.timezone,
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
@@ -91,7 +91,7 @@ export const searchMyIpGeolocation = (language: string) => {
             "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
             "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
             Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}, ${ipGeolocation.district}`, //country  regionName city district
-            GeoCoordinates: `${ipGeolocation.lat} , ${ipGeolocation.lon}`, //(lat,lon)
+            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
