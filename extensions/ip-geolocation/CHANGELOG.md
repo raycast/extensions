@@ -2,4 +2,4 @@
 
 ## [Initial Version] - 2022-05-15
 
-- Search geolocation information for any IP address or domain.
+- Show local and public IP, search geolocation for any IP address or domain.

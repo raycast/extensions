@@ -36,8 +36,10 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
         } else {
           const ipGeolocationReadable: IPGeolocationReadable = {
             IP: ipGeolocation.query,
-            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}, ${ipGeolocation.district}`, //country  regionName city district
-            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
+            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
+              isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
+            }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
+            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
@@ -90,7 +92,9 @@ export const searchMyIpGeolocation = (language: string) => {
           const ipGeolocationReadable = {
             "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
             "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
-            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}, ${ipGeolocation.district}`, //country  regionName city district
+            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
+              isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
+            }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city district
             GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             ISP: ipGeolocation.isp,

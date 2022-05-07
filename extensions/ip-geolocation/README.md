@@ -1,7 +1,7 @@
 # IP Geolocation
 
-Search geolocation information for any IP address or domain.
-View your own Ip information.
+Show local and public IP.
+Search geolocation for any IP address or domain.
 
 **Preferences:**
 
