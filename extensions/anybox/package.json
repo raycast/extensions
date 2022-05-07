@@ -65,42 +65,42 @@
       "name": "toggleAnydock",
       "title": "Toggle Anydock",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Toggle Anydock’s visibility.",
       "mode": "no-view"
     },
     {
       "name": "toggleStashbox",
       "title": "Toggle Stash Box",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Toggle Stash Box’s visibility.",
       "mode": "no-view"
     },
     {
       "name": "emptyStashbox",
       "title": "Empty Stash Box",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Delete all items in Stash Box.",
       "mode": "no-view"
     },
     {
       "name": "switchAnydock",
       "title": "Switch Anydock Profile",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Switch Anydock Profile.",
       "mode": "view"
     },
     {
       "name": "openAnydock",
       "title": "Open All in Anydock Profile",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Open all items in specific Anydock Profile.",
       "mode": "view"
     },
     {
       "name": "showList",
       "title": "Show List",
       "subtitle": "Anybox",
-      "description": "",
+      "description": "Open Anybox’s main window and show list.",
       "mode": "view"
     }
   ],
