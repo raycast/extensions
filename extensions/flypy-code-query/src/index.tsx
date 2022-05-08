@@ -1,5 +1,5 @@
-import { Flypy} from "./flypy";
+import { Flypy } from "./flypy";
 
 export default function index() {
-  return <Flypy/>;
+  return <Flypy />;
 }
