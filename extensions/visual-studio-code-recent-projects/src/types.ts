@@ -50,3 +50,7 @@ export enum VSCodeBuild {
 export interface Preferences {
   build: VSCodeBuild;
 }
+
+export interface LegacyEntriesData {
+  entries: EntryLike[]
+}
