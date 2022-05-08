@@ -1,125 +1,220 @@
-import fetch from "node-fetch";
+import { stat, readFile, writeFile, copyFile } from "fs/promises";
 import { getPreferenceValues } from "@raycast/api";
-import { map } from "modern-async";
-import he from "he";
+import * as utils from "./utils";
+import Database from "better-sqlite3";
+
+const path = require('path');
 
 interface Preferences {
-  api_token: string;
-  user_id: string;
+  better_sqlite_path: string;
+  zotero_path: string;
 }
 
-export type QueryResultItem = {
-  id: string;
-  bib: string;
+export interface RefData {
+  id: Number;
+  added: Date;
+  modified: Date;
+  key: string;
+  library: Number;
+  type:string;
+  tags?: string[];
+  attachment?: Attachment;
+  [key: string]: any;
+}
+
+export interface Attachment {
+  key: string;
+  path: string;
   title: string;
-  subtitle: string;
   url: string;
-  pdf_url: string;
-  link: string;
-  raw_link: string;
-  accessoryTitle: string;
-  icon: string;
-};
-
-function removeTags(str: string) {
-  if (str === null || str === "") return false;
-  else str = he.decode(str.toString());
-  return str.replace(/(<([^>]+)>)/gi, "");
 }
 
-const parseQuery = (q: string) => {
-  const queryItems = q.split(" ");
-  const qs = queryItems.filter((c) => !c.startsWith("."));
-  const ts = queryItems.filter((c) => c.startsWith("."));
+const ITEMS_SQL = `
+SELECT  items.itemID AS id,
+        items.dateAdded AS added,
+        items.dateModified AS modified,
+        items.key AS key,
+        items.libraryID AS library,
+        itemTypes.typeName AS type
+    FROM items
+    LEFT JOIN itemTypes
+        ON items.itemTypeID = itemTypes.itemTypeID
+    LEFT JOIN deletedItems
+        ON items.itemID = deletedItems.itemID
+-- Ignore notes and attachments
+WHERE items.itemTypeID not IN (1, 2, 3, 6, 12, 13, 14, 27)
+AND deletedItems.dateDeleted IS NULL
+`;
 
-  let qss = "";
-  if (qs.length) {
-    qss = qs.join(" ");
+const TAGS_SQL = `
+SELECT tags.name AS name
+    FROM tags
+    LEFT JOIN itemTags
+        ON tags.tagID = itemTags.tagID
+WHERE itemTags.itemID = ?
+`;
+
+const METADATA_SQL = `
+SELECT  fields.fieldName AS name,
+        itemDataValues.value AS value
+    FROM itemData
+    LEFT JOIN fields
+        ON itemData.fieldID = fields.fieldID
+    LEFT JOIN itemDataValues
+        ON itemData.valueID = itemDataValues.valueID
+WHERE itemData.itemID = ?
+`;
+
+const ATTACHMENTS_SQL = `
+SELECT
+    items.key AS key,
+    itemAttachments.path AS path,
+    (SELECT  itemDataValues.value
+        FROM itemData
+        LEFT JOIN fields
+            ON itemData.fieldID = fields.fieldID
+        LEFT JOIN itemDataValues
+            ON itemData.valueID = itemDataValues.valueID
+    WHERE itemData.itemID = items.itemID AND fields.fieldName = 'title')
+    title,
+    (SELECT  itemDataValues.value
+        FROM itemData
+        LEFT JOIN fields
+            ON itemData.fieldID = fields.fieldID
+        LEFT JOIN itemDataValues
+            ON itemData.valueID = itemDataValues.valueID
+    WHERE itemData.itemID = items.itemID AND fields.fieldName = 'url')
+    url
+FROM itemAttachments
+    LEFT JOIN items
+        ON itemAttachments.itemID = items.itemID
+WHERE itemAttachments.parentItemID = ?
+AND itemAttachments.contentType = 'application/pdf'
+`
+const cachePath = utils.cachePath('zotero.json');
+
+function resolveHome(filepath: string) : string{
+  if (filepath[0] === '~') {
+      return path.join(process.env.HOME, filepath.slice(1));
   }
-
-  let tss = "";
-  if (ts.length) {
-    tss = ts.map((x) => encodeURIComponent(x.substring(1))).join("%20||%20");
-  }
-
-  return { qss, tss };
-};
-
-const parseResponse = (item) => {
-  let name = "";
-  if (item.data.publicationTitle) {
-    name = name + item.data.publicationTitle.split(":")[0];
-  }
-  const date = new Date(item.data.date);
-
-  return {
-    id: `${item.key}`,
-    bib: `${removeTags(item.bib)}`,
-    title: `${item.data.title.substring(0, 60)}`,
-    subtitle: `${item.meta.creatorSummary}`,
-    raw_link: `${item.links.alternate.href}`,
-    link: `${item.data.url}`,
-    url: `zotero://select/items/0_${item.key}`,
-    accessoryTitle: `${name} ${!isNaN(date.getFullYear()) ? date.getFullYear() : ""}`,
-    icon: `paper.png`,
-    pdf_url: ``,
-  };
-};
-
-function combine_results(val, index, arr) {
-  val["pdf_url"] = this[val.id] ? `zotero://open-pdf/library/items/${this[val.id]}` : ``;
-  return val;
+  return filepath;
 }
 
-async function get_pdf_key(key: string) {
+function getLatestModifyDate(): Date {
   const preferences: Preferences = getPreferenceValues();
-  const requestOptions = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${preferences.api_token}`,
-    },
-  };
-  const query = `https://api.zotero.org/users/${preferences.user_id}/items/${key}/children`;
-  const response = await fetch(query, requestOptions);
-  if (response.status !== 200) {
-    const data = (await response.json()) as { message?: unknown } | undefined;
-    throw new Error(`${data?.message || "Not OK"}`);
+  let f_path = resolveHome(preferences.zotero_path);
+  let new_fPath = f_path + '.raycast'
+  const db = new Database(new_fPath, { nativeBinding: preferences.better_sqlite_path});
+
+  const stmt = db.prepare(ITEMS_SQL);
+  let rows = stmt.all();
+  let latest = new Date(rows[0].modified);
+  for (const row of rows) {
+    let d = new Date(row.modified);
+    if (d > latest){
+      latest = d;
+    }
   }
-  const data = (await response.json()) as Array<any>;
-  const pdf_data = data.filter((d) => d.data.contentType === "application/pdf");
-  // NOTE: In case multiple pdf files are found, just first one is picked up to open.
-  // Its not clear to me what should be the correct logic to find the primary PDF
-  return pdf_data.length > 0 ? `${pdf_data[0].key}` : ``;
+
+  db.close();
+  return latest;
 }
 
-export const searchResources = async (q: string): Promise<QueryResultItem[]> => {
+function getData(): RefData[] {
   const preferences: Preferences = getPreferenceValues();
-  const requestOptions = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${preferences.api_token}`,
-    },
-  };
-  const { qss, tss } = parseQuery(q);
-  const query = `https://api.zotero.org/users/${preferences.user_id}/items?v=3&include=bib,data&q=${encodeURIComponent(
-    qss
-  )}&itemType=-attachment%20||%20note&sort=dateAdded&start=0&limit=20&tag=${tss}`;
+  let f_path = resolveHome(preferences.zotero_path);
+  let new_fPath = f_path + '.raycast'
+  const db = new Database(new_fPath, { nativeBinding: preferences.better_sqlite_path});
 
-  const response = await fetch(query, requestOptions);
-  if (response.status !== 200) {
-    const data = (await response.json()) as { message?: unknown } | undefined;
-    throw new Error(`${data?.message || "Not OK"}`);
+  const stmt = db.prepare(ITEMS_SQL);
+  let rows = stmt.all();
+  for (const row of rows) {
+    const st2 = db.prepare(TAGS_SQL);
+    var v = [];
+    for (const c of st2.iterate(row.id)) {
+      v.push(c.name)
+    }
+    row.tags = v;
+
+    const st3 = db.prepare(METADATA_SQL);
+    const mds = st3.all(row.id);
+    if(mds)
+    {
+      for (const md of mds) {
+        row[md.name] = md.value;
+      }
+    }
+
+    const st4 = db.prepare(ATTACHMENTS_SQL);
+    const at = st4.get(row.id);
+    if (at) {
+    row.attachment = at;
+    }
   }
-  const data = (await response.json()) as Array<any>;
-  const res = data.map(parseResponse);
+  db.close();
+  return rows;
+}
 
-  const item_keys = res.map((item) => item.id);
-  const pdf_key_map_list = await map(item_keys, async (v) => {
-    const pdf_key = await get_pdf_key(v);
-    return { key: v, value: pdf_key };
-  });
-  const pdf_key_map = pdf_key_map_list.reduce((obj, item) => ((obj[item.key] = item.value), obj), {});
-  return res.map(combine_results, pdf_key_map);
+export const searchResources = async (q: string): Promise<RefData[]> => {
+
+  const preferences: Preferences = getPreferenceValues();
+  let f_path = resolveHome(preferences.zotero_path);
+  let new_fPath = f_path + '.raycast'
+  await copyFile(f_path, new_fPath);
+
+  async function updateCache(): Promise<RefData[]> {
+    const data = getData();
+    try {
+      await writeFile(cachePath, JSON.stringify(data));
+    } catch (err) {
+      console.error("Failed to write installed cache:", err)
+    }
+    return data
+  }
+
+  async function mtime(path: string): Promise<Date> {
+    return (await stat(path)).mtime;
+  }
+
+  async function readCache(): Promise<RefData[]> {
+    const cacheTime = await mtime(cachePath);
+    var now = new Date();
+    const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
+
+    if (diffTime < 3600000){
+      const cacheBuffer = await readFile(cachePath);
+      const data = JSON.parse(cacheBuffer.toString());
+      return data
+    } else {
+      const latest =  getLatestModifyDate();
+      if (latest < cacheTime){
+        const cacheBuffer = await readFile(cachePath);
+        const data = JSON.parse(cacheBuffer.toString());
+        return data
+      }
+      else {
+        throw 'Invalid cache';
+      }
+    }
+  }
+
+  let ret;
+  try {
+    ret = await readCache();
+  } catch {
+    ret = await updateCache();
+  }
+
+  ret.sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
+
+  if (q) {
+    return ret.filter(function (e) {
+        return e.title.toLowerCase().includes(q.toLowerCase()) || e.tags?.includes(q);
+    })
+    .sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
+  }
+  else {
+      return ret;
+  }
+
 };
