@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unogs",
   "title": "Unogs",
-  "description": "",
+  "description": "A Raycast extension for Unogs",
   "icon": "command-icon.png",
   "author": "mohitkyadav",
   "version": "1.0.0",
