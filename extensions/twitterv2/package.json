@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitterv2",
+  "title": "Twitter V2",
+  "description": "Twitter clients using v2 Twitter API",
+  "icon": "twitter.png",
+  "author": "tonka3000",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mytweets",
+      "title": "My Recent Tweets",
+      "description": "Show My Tweets",
+      "subtitle": "Twitter v2",
+      "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "Send Tweet",
+      "subtitle": "Twitter v2",
+      "description": "Send a tweet",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "oauthclientid",
+      "type": "password",
+      "title": "Custom OAuth 2 ClientID",
+      "required": false,
+      "default": "",
+      "description": "Custom Twitter API OAuth clientID token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "node-fetch": "^3.2.4",
+    "twitter-api-v2": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
