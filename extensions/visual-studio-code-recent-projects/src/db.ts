@@ -1,9 +1,10 @@
 import { environment, getPreferenceValues } from "@raycast/api";
+import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 import initSqlJs from "sql.js";
-import { EntryLike, Preferences, VSCodeBuild } from "./types";
+import { EntryLike, LegacyEntriesData, Preferences, VSCodeBuild } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 export const build: VSCodeBuild = preferences.build;
@@ -26,9 +27,10 @@ type QueryResult = {
 
 export async function getRecentEntries(): Promise<EntryLike[]> {
   // VS Code version < 1.64.0
-  const json = JSON.parse(await readFile(LEGACY_STORAGE_PATH, "utf8"));
-  if (json.openedPathsList) {
-    return json.openedPathsList.entries;
+  const legacyEntries = await getLegacyEntries()
+
+  if (legacyEntries) {
+    return legacyEntries;
   }
 
   const db = await loadDB();
@@ -40,4 +42,25 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
   db.close();
 
   return res.length ? JSON.parse(res[0].values[0]).entries : [];
+}
+
+async function getLegacyEntries(): Promise<EntryLike[] | undefined> {
+  const legacyFileExists = existsSync(LEGACY_STORAGE_PATH);
+
+  if (!legacyFileExists) {
+    return undefined;
+  }
+
+  const json = await readFile(LEGACY_STORAGE_PATH, "utf8");
+
+  try {
+    const legacyVscodeData: LegacyEntriesData = JSON.parse(json);
+
+    if (legacyVscodeData?.entries) {
+      return legacyVscodeData.entries;
+    }
+  } catch (error) {
+    console.error("Failed to parse legacy vscode entries", error);
+    return undefined;
+  }
 }
