@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
-import { preference } from "../util/utils";
+import { preference, raySo } from "../util/utils";
 import { deleteGist, Gist, GITHUB_GISTS, starGist, unStarGist } from "../util/gist-utils";
 import CreateGist from "../create-gist";
 import { Dispatch, SetStateAction } from "react";
@@ -8,11 +8,12 @@ import { refreshNumber } from "../hooks/hooks";
 export function GistAction(props: {
   gistArray: Gist[];
   gistIndex: number;
+  gistFileName: string;
   gistFileContent: string;
   route: string;
   setRefresh: Dispatch<SetStateAction<number>>;
 }) {
-  const { gistArray, gistIndex, gistFileContent, route, setRefresh } = props;
+  const { gistArray, gistIndex, gistFileName, gistFileContent, route, setRefresh } = props;
   return (
     <>
       <Action
@@ -42,18 +43,26 @@ export function GistAction(props: {
         }}
       />
 
-      <Action.CopyToClipboard
-        title={"Copy Gist Link"}
-        icon={Icon.Link}
-        shortcut={{ modifiers: ["cmd"], key: "l" }}
-        content={gistArray[gistIndex].html_url}
-      />
-      <Action.OpenInBrowser
-        title={"Open in Browser"}
-        icon={Icon.Globe}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
-        url={gistArray[gistIndex].html_url}
-      />
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title={"Copy Gist Link"}
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          content={gistArray[gistIndex].html_url}
+        />
+        <Action.OpenInBrowser
+          title={"Open in Browser"}
+          icon={Icon.Globe}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          url={gistArray[gistIndex].html_url}
+        />
+        <Action.OpenInBrowser
+          title={"Open in Ray.so"}
+          icon={{ source: { light: "raycast.png", dark: "raycast@dark.png" } }}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          url={raySo(gistFileName, Buffer.from(gistFileContent, "utf-8").toString("base64"))}
+        />
+      </ActionPanel.Section>
 
       <ActionPanel.Section title={"Gist Actions"}>
         {(() => {

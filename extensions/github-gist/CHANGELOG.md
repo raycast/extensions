@@ -1,9 +1,10 @@
 # GitHub Gist Changelog
 
-## [Add "Load More"] - 2022-05-06
+## [Add "Load More"] - 2022-05-15
 
 - Update settings item: you can choose the number(30-100) of Gist loaded per page.
 - Add "Load More": When you select the last item in the list, the next page of Gist will be loaded automatically.
+- Add "Open in Ray.so" action: Create beautiful images of your gist code using ray.so.
 
 ## [Fix Markdown Preview bug] - 2022-04-18
 

@@ -49,11 +49,7 @@ export default function main() {
       <GistEmptyView title={""} description={"No gists found"} />
       {gists.map((gist, gistIndex, gistArray) => {
         return (
-          <List.Section
-            id={"gist" + gistIndex + gist.gist_id}
-            key={"gist" + gistIndex + gist.gist_id}
-            title={gist.description}
-          >
+          <List.Section key={"gist" + gistIndex + gist.gist_id} title={gist.description}>
             {gistArray[gistIndex].file.map((gistFile, gistFileIndex, gistFileArray) => {
               return (
                 <List.Item
@@ -78,6 +74,7 @@ export default function main() {
                       <GistAction
                         gistArray={gistArray}
                         gistIndex={gistIndex}
+                        gistFileName={gistFile.filename}
                         gistFileContent={gistFileContent}
                         route={route}
                         setRefresh={setRefresh}

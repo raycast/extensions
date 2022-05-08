@@ -31,3 +31,6 @@ export const getGistDetailContent = (gistFile: GistItem, gistFileContent: string
   }
   return "```\n" + gistFileContent + "\n```";
 };
+
+export const raySo = (title: string, content: string) =>
+  `https://ray.so/?colors=cnady&background=true&darkMode=false&padding=32&title=${title}&code=${content}&language=auto`;
