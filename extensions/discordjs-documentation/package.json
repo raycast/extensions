@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "discord.js-documentation",
+  "name": "discordjs-documentation",
   "title": "Discord.js Documentation",
   "description": "Quickly search through discord.js documentation.",
   "icon": "command-icon.png",
