@@ -8,8 +8,9 @@ This extension brings [Zotero](https://www.zotero.org/) search to raycast!
 
 ## Getting started
 
-Before using the command, you need to retrieve your Zotero API and user ID. This can be easily done
-by following [this guide](https://stavanger.instructure.com/courses/6342/pages/finding-zotero-user-id-and-zotero-api-key).
+This extension reads your local zotero sqlite database to enable searching of your references.
+In order to avoiding creating locks for the database, it creates a copy of your database with
+a suffix of `.raycast`.
 
 ## Features
 
@@ -28,10 +29,7 @@ This extension support a few sub commands:
 
 - link to the reference in your zotero app (default)
 - link to the PDF of your reference in zotero app or default PDF Reader
-- copy URL to copy the ORL of the reference
-- copy as reference to copy a text for citing this reference
 - open original link to open URL in default browser
-- open zotero link to open path to reference on online zotero account
 
 Please note that in case a reference has multiple PDF files associated with it, only the first PDF
 file returned by the API will be opened.
