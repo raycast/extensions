@@ -21,6 +21,7 @@ export interface IPGeolocationReadable {
   Location: string; //country  regionName city district
   GeoCoordinates: string; //(lat,lon)
   Timezone: string;
+  AS: string;
   ISP: string; //ispO
   Organization: string; //org
 }

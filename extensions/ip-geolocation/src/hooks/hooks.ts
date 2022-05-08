@@ -41,6 +41,7 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
             }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
             GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
+            AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
           };
@@ -97,6 +98,7 @@ export const searchMyIpGeolocation = (language: string) => {
             }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city district
             GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
+            AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
           };

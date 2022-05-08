@@ -11,7 +11,7 @@ export default function SearchIpGeolocation() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"My IP Geolocation"}>
-      <IpEmptyView title={"IP Geolocation"} />
+      <IpEmptyView title={"No Geolocation Info"} />
       {ipGeolocation.map((value, index) => (
         <List.Item
           key={index}
