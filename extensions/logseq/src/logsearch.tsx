@@ -36,6 +36,7 @@ export default function Command() {
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   //This is what happens when the item is clicked
+  // console.log(searchResult.url)
   return (
     <List.Item
       title={searchResult.name}
@@ -120,7 +121,6 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
         idField: "name",
       });
       miniSearch.addAll(finalInitialResult);
-
       //  assinging final result to the return value of the search
       const rawSearchResults = miniSearch.search(searchText);
 
