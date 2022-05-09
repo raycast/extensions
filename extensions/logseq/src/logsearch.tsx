@@ -13,8 +13,9 @@ import {
 } from "./utils";
 export default function Command() {
   const { state, search } = useSearch();
-  validateUserConfigGraphPath().catch(() => {
+  validateUserConfigGraphPath().catch((e) => {
     showGraphPathInvalidToast();
+    throw("Folder Does not Exist")
   });
 
   return (
