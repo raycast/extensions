@@ -206,7 +206,7 @@ const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<voi
       path,
       displayPath: displayPath(path),
       fileSizeFormatted: formatBytes(stats.size > 0 ? stats.size : 0),
-      createdAt: (stats.atime ? stats.atime : new Date()).toISOString(),
+      createdAt: (stats.birthtime ? stats.birthtime : new Date()).toISOString(),
       updatedAt: (stats.mtime ? stats.mtime : new Date()).toISOString(),
       favorite: false,
     });
