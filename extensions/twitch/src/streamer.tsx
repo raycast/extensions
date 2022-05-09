@@ -1,11 +1,5 @@
-import {
-  getPreferenceValues,
-  ImageMask,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useState, useEffect} from "react";
+import { getPreferenceValues, ImageMask, List, showToast, Toast } from "@raycast/api";
+import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Preferences } from "./interfaces/Preferences";
 import Item from "./interfaces/item";
