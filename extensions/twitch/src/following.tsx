@@ -57,10 +57,7 @@ export default function main() {
 
   return (
     <>
-      <List
-        isLoading={loading}
-        searchBarPlaceholder="Search for a streamer..."
-      >
+      <List isLoading={loading} searchBarPlaceholder="Search for a streamer...">
         {items.map((item: Item) => {
           return (
             <List.Item
