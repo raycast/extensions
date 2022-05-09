@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.34.0 – 2022-05-04
+
+### 💎 Improvements
+
+- OAuth: TokenSets are now included in the encrypted Raycast export (Raycast Preferences > Advanced > Export)
+- OAuth: The convenience method `TokenSet.isExpired()` now includes some buffer time to reduce the risk of performing requests with expired access tokens
+
+### 🐞 Fixes
+
+- Fixed an issue where updating the search bar accessory would result in the search bar text being selected
+- Forms: We’ve fixed some inconsistencies around form item properties and added new warnings (e.g. when `defaultValue` and `value` are set at the same time); this also fixes [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1104](https://github.com/raycast/extensions/issues/1104)
+- Forms: Fixed an issue where updating form items would lead to unwanted scrolling; fixed the `autoFocus` property not scrolling to the focused item
+- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it’s still mounted. https://github.com/raycast/extensions/issues/1495
+- Fixed an issue where `adjustContrast` would not be respected for colored TagPicker items.
+
 ## 1.33.0 – 2022-04-20
 
 ### ✨ New

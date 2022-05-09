@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, ImageLike, showToast, ToastStyle, ImageMask, KeyboardShortcut } from "@raycast/api";
+import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
 import {
   DatabaseProperty,
   DatabasePropertyOption,
@@ -14,8 +14,8 @@ export function ActionEditPageProperty(props: {
   pageId: string;
   pageProperty?: PagePropertyType;
   onForceRerender?: () => void;
-  shortcut?: KeyboardShortcut;
-  icon?: ImageLike;
+  shortcut?: Keyboard.Shortcut;
+  icon?: Image.ImageLike;
   customOptions?: DatabasePropertyOption[];
 }): JSX.Element | null {
   const { databaseProperty, pageId, pageProperty, shortcut, onForceRerender } = props;
@@ -25,10 +25,15 @@ export function ActionEditPageProperty(props: {
   const options = props.customOptions ? props.customOptions : databaseProperty.options || [];
 
   async function setPageProperty(patch: Parameters<typeof patchPage>[1]) {
-    showToast(ToastStyle.Animated, "Updating Property");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Updating Property",
+    });
     const updatedPage = await patchPage(pageId, patch);
     if (updatedPage && updatedPage.id) {
-      showToast(ToastStyle.Success, "Property Updated");
+      showToast({
+        title: "Property Updated",
+      });
       onForceRerender?.();
     }
   }
@@ -37,7 +42,7 @@ export function ActionEditPageProperty(props: {
     case "checkbox": {
       const value = !!pageProperty && "checkbox" in pageProperty && pageProperty.checkbox;
       return (
-        <ActionPanel.Item
+        <Action
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
           icon={"icon/" + databaseProperty.type + "_" + value + ".png"}
           shortcut={shortcut}
@@ -54,7 +59,7 @@ export function ActionEditPageProperty(props: {
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           {(options as DatabasePropertyOption[])?.map(function (opt) {
             return (
-              <ActionPanel.Item
+              <Action
                 key={`page-${pageId}-property-${databaseProperty.id}-select-option-${opt.id}`}
                 icon={
                   (opt.icon ? opt.icon : opt.id !== "_select_null_")
@@ -88,7 +93,7 @@ export function ActionEditPageProperty(props: {
             title={value?.start ? moment(value.start).fromNow() : "No Date"}
             icon={"icon/date_start.png"}
           >
-            <ActionPanel.Item
+            <Action
               key={`page-${pageId}-property-${databaseProperty.id}-date-start-picker`}
               title="Now"
               onAction={function () {
@@ -103,7 +108,7 @@ export function ActionEditPageProperty(props: {
             title={value?.end ? moment(value.end).fromNow() : "No Date"}
             icon={"icon/date_end.png"}
           >
-            <ActionPanel.Item
+            <Action
               key={`page-${pageId}-property-${databaseProperty.id}-date-end-picker`}
               title="Now"
               onAction={function () {
@@ -129,7 +134,7 @@ export function ActionEditPageProperty(props: {
               return null;
             }
             return (
-              <ActionPanel.Item
+              <Action
                 key={`page-${pageId}-property-${databaseProperty.id}-multi-select-option-${opt.id}`}
                 icon={{
                   source: opt.id && multiSelectIds.includes(opt.id) ? Icon.Checkmark : Icon.Circle,
@@ -171,11 +176,11 @@ export function ActionEditPageProperty(props: {
           <ActionPanel.Section key={`page-${pageId}-property-${databaseProperty.id}-people-selected`}>
             {value.map(function (user) {
               return (
-                <ActionPanel.Item
+                <Action
                   key={`page-${pageId}-property-${databaseProperty.id}-people-selected-${user.id}`}
                   icon={
                     "avatar_url" in user && user.avatar_url
-                      ? { source: user.avatar_url, mask: ImageMask.Circle }
+                      ? { source: user.avatar_url, mask: Image.Mask.Circle }
                       : undefined
                   }
                   title={("name" in user ? user.name : "Unknown") + "  ✓"}
@@ -196,9 +201,9 @@ export function ActionEditPageProperty(props: {
             {(options as User[])?.map(function (user) {
               if (!peopleIds.includes(user.id)) {
                 return (
-                  <ActionPanel.Item
+                  <Action
                     key={`page-${pageId}-property-${databaseProperty.id}-people-not-selected-${user.id}`}
-                    icon={user?.avatar_url ? { source: user.avatar_url, mask: ImageMask.Circle } : undefined}
+                    icon={user?.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : undefined}
                     title={user?.name ? user.name : "Unknown"}
                     onAction={async function () {
                       setPageProperty({

@@ -24,7 +24,7 @@ export default () => {
             // Return grouped XcodeSimulators by runtime
             return groupBy(xcodeSimulators, (xcodeSimulator) => xcodeSimulator.runtime);
           } else {
-            // Otherwise return undefined
+            // Otherwise, return undefined
             return undefined;
           }
         })
