@@ -6,6 +6,7 @@ import fetch, { AbortError } from "node-fetch";
 import { allPackagesURL } from "../utils/constans";
 import { MavenModel } from "../model/maven-model";
 import Style = Toast.Style;
+import { isEmpty } from "../utils/common-utils";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -25,6 +26,9 @@ export const searchArtifacts = (searchContent: string) => {
   });
 
   const fetchData = useCallback(async () => {
+    if (isEmpty(searchContent) || searchContent.length < 4) {
+      return;
+    }
     setLoading(true);
     try {
       setArtifactInfo(await fetchArtifacts(searchContent));
