@@ -62,15 +62,13 @@ const Command = () => {
           title: `The specified Google Drive root path "${drivePath}" does not exist.`,
         });
 
-        // TODO: make this an empty state?
-
         setIsFetching(false);
         return;
       }
 
       if (db) {
         try {
-          const isIndexed = await indexFiles(drivePath, db);
+          const isIndexed = await indexFiles(db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
@@ -127,7 +125,7 @@ const Command = () => {
     setFiles({ filtered: [], favorites: [], selected: null });
 
     try {
-      const isIndexed = await indexFiles(drivePath, db, { force: true });
+      const isIndexed = await indexFiles(db, { force: true });
 
       if (isIndexed) {
         setFilesIndexGeneratedAt(await filesLastIndexedAt());
@@ -143,7 +141,7 @@ const Command = () => {
     } finally {
       setIsFetching(false);
     }
-  }, [drivePath, db]);
+  }, [db]);
 
   const handleToggleFavorite = useCallback(
     (file: FileInfo) => {

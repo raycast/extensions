@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import fg, { Entry } from "fast-glob";
+import { Entry } from "fast-glob";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
@@ -18,9 +18,9 @@ import {
   formatBytes,
   fuzzyMatch,
   displayPath,
-  pathExists,
   getDriveRootPath,
   throttledUpdateToastMessage,
+  fileStream,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -179,34 +179,17 @@ export const insertFile = (
   db.run(insertStatement);
 };
 
-const listFilesAndInsertIntoDb = async (path: string, db: Database, toast: Toast): Promise<void> => {
+const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
   const updateToastMessage = throttledUpdateToastMessage({ toast, interval: TOAST_UPDATE_INTERVAL });
 
   let totalFiles = 0;
-
-  if (!pathExists(path)) {
-    // TODO: message that path does not exist
-    return;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for await (const _ of fg.stream([join(path, "**")], {
-    ignore: ["**/.Trashes", "**/.TemporaryItems", "**/node_modules", "**/.git", "**/tmp"],
-    dot: true,
-    suppressErrors: true,
-  })) {
+  for await (const _ of fileStream()) {
     totalFiles += 1;
     updateToastMessage(`Counting files: ${totalFiles}`);
   }
 
   let filesIndexed = 0;
-
-  for await (const file of fg.stream([join(path, "**")], {
-    ignore: ["**/.Trashes", "**/.TemporaryItems", "**/node_modules", "**/.git", "**/tmp"],
-    dot: true,
-    suppressErrors: true,
-    stats: true,
-  })) {
+  for await (const file of fileStream({ stats: true })) {
     const { name, path, stats } = file as unknown as Entry;
 
     if (stats === undefined) {
@@ -230,11 +213,7 @@ const listFilesAndInsertIntoDb = async (path: string, db: Database, toast: Toast
 };
 
 type IndexFilesOptions = { force?: boolean };
-export const indexFiles = async (
-  path: string,
-  db: Database,
-  options: IndexFilesOptions = { force: false }
-): Promise<boolean> => {
+export const indexFiles = async (db: Database, options: IndexFilesOptions = { force: false }): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
     const alreadyIndexed = !!(await filesLastIndexedAt());
     const toast = await showToast({
@@ -256,7 +235,7 @@ export const indexFiles = async (
       clearAllFilePreviewsCache(false);
     }
 
-    await listFilesAndInsertIntoDb(path, db, toast);
+    await listFilesAndInsertIntoDb(db, toast);
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {

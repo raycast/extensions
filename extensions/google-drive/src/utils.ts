@@ -1,18 +1,22 @@
 import { exec } from "child_process";
 import util from "util";
 import fs, { accessSync, existsSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
-import { basename, extname, join, resolve } from "path";
+import path, { basename, extname, join, resolve } from "path";
 import { homedir } from "os";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
+import fg from "fast-glob";
 
 import {
   FILE_SIZE_UNITS,
+  IGNORED_DIRECTORIES,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
   NON_PREVIEWABLE_EXTENSIONS,
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
+import { Transform } from "stream";
+import { Entry } from "fast-glob";
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
@@ -30,7 +34,6 @@ const isPathReadable = (path: PathLike): boolean => {
   }
 };
 export const pathExists = (path: PathLike): boolean => isPathReadable(path) && existsSync(path);
-export const isDotUnderscore = (path: PathLike) => basename(path.toLocaleString()).startsWith("._");
 export const displayPath = (path: PathLike): string => path.toLocaleString().replace(homedir(), "~");
 export const escapePath = (path: PathLike): string => path.toLocaleString().replace(/([^0-9a-z_\-.~/])/gi, "\\$1");
 export const getDriveRootPath = (): string => {
@@ -159,6 +162,33 @@ ${new Date(file.createdAt).toLocaleString()}
 
 **Updated**\n
 ${new Date(file.updatedAt).toLocaleString()}`;
+};
+
+export const fileStream = ({ stats = false }: { stats?: boolean } = {}) => {
+  const driveRootPath = getDriveRootPath();
+  const preferences = getPreferenceValues<Preferences>();
+
+  const filter = new Transform({
+    objectMode: true,
+    transform(chunk: Entry, encoding, callback) {
+      // Don't include directories if the preference is false
+      callback(null, chunk.dirent.isDirectory() && !preferences.shouldShowDirectories ? undefined : chunk);
+    },
+  });
+
+  const excludePaths = getExcludePaths()
+    .concat(IGNORED_DIRECTORIES)
+    .map((p) => path.join("**", p));
+
+  return fg
+    .stream([join(driveRootPath, "**")], {
+      ignore: excludePaths,
+      dot: true,
+      suppressErrors: true,
+      objectMode: true,
+      stats,
+    })
+    .pipe(filter);
 };
 
 export const throttledUpdateToastMessage = ({ toast, interval }: { toast: Toast; interval: number }) => {
