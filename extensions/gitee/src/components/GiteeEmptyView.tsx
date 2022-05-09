@@ -6,7 +6,7 @@ export function GiteeEmptyView(props: { title: string }) {
   const { title } = props;
   return (
     <List.EmptyView
-      icon={"empty-view-icon.png"}
+      icon={"empty-view-icon.svg"}
       title={title}
       actions={
         <ActionPanel>

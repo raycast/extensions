@@ -15,6 +15,8 @@ import { Repository } from "../types/repository";
 import { Issue } from "../types/issue";
 import { Readme } from "../types/readme";
 import { Notification, NotificationResponse } from "../types/notification";
+import { showToast, Toast } from "@raycast/api";
+import Style = Toast.Style;
 
 const accessToken = commonPreferences().accessToken;
 
@@ -41,6 +43,7 @@ export const getUserRepos = (page: number) => {
       .catch((reason) => {
         setLoading(false);
         console.error(String(reason));
+        showToast(Style.Failure, String(reason));
       });
   }, [page]);
 
@@ -53,15 +56,14 @@ export const getUserRepos = (page: number) => {
 
 export const searchRepos = (searchContent: string) => {
   const [userRepos, setUserRepos] = useState<Repository[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-
     if (isEmpty(searchContent)) {
       setLoading(false);
       return;
     }
+    setLoading(true);
 
     axios({
       method: "GET",
@@ -81,6 +83,7 @@ export const searchRepos = (searchContent: string) => {
       .catch((reason) => {
         setLoading(false);
         console.error(String(reason));
+        showToast(Style.Failure, String(reason));
       });
   }, [searchContent]);
 
@@ -133,6 +136,7 @@ export const myIssues = (filter: string) => {
       .catch((reason) => {
         setLoading(false);
         console.error(String(reason));
+        showToast(Style.Failure, String(reason));
       });
   }, [filter]);
 
@@ -164,6 +168,7 @@ export const getRepoREADME = (owner: string, repo: string) => {
       .catch((reason) => {
         setLoading(false);
         console.error(String(reason));
+        showToast(Style.Failure, String(reason));
       });
   }, [owner, repo]);
 
@@ -198,6 +203,7 @@ export const getNotifications = (filter: string, refresh: number) => {
       .catch((reason) => {
         setLoading(false);
         console.error(String(reason));
+        showToast(Style.Failure, String(reason));
       });
   }, [filter, refresh]);
 
