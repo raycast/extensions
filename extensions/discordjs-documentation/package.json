@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Docs",
-      "subtitle": "Discord.js Repo",
+      "title": "Search Documentation",
+      "subtitle": "Discord.js",
       "description": "Search the Discord.js Documentation.",
       "mode": "view"
     }

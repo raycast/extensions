@@ -67,7 +67,6 @@ export default function Command() {
   return (
     <List
       isLoading={(!state?.doc && !error) || loading}
-      navigationTitle={`Search ${docSource ?? "stable"} docs`}
       searchBarAccessory={<DocDropDown setDocType={setDocSource} docType={docSource} />}
       searchBarPlaceholder={"Search..."}
     >
@@ -79,7 +78,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title={`${item.props?.length ? "See methods and properties" : "See info"}`}
+                title={`${item.props?.length ? "See Methods and Properties" : "See Info"}`}
                 onAction={() => push(<DetailPanel item={item} />)}
               />
             </ActionPanel>
@@ -129,7 +128,7 @@ function DetailPanel(props: { item: DocElement }) {
             <List.Item
               actions={
                 <ActionPanel>
-                  <Action title={"See info"} onAction={() => push(<DetailPanel item={prop} />)} />
+                  <Action title={"See Info"} onAction={() => push(<DetailPanel item={prop} />)} />
                 </ActionPanel>
               }
               key={prop.formattedName}
