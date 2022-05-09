@@ -169,7 +169,6 @@ export const driveFileStream = ({ stats = false }: DriveFileStreamOptions = {}) 
   const preferences = getPreferenceValues<Preferences>();
 
   const excludePaths = getExcludePaths().concat(IGNORED_DIRECTORIES.map((p) => path.join("**", p)));
-  console.log(excludePaths);
   return fg.stream([join(driveRootPath, "**")], {
     ignore: excludePaths,
     dot: true,
