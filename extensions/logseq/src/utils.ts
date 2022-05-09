@@ -79,7 +79,8 @@ const createFileIfNotExist = (filePath: string) => {
 export const showGraphPathInvalidToast = () => {
   showToast({
     style: Toast.Style.Failure,
-    title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
+    title: "Logseq graph path is invalid",
+    message: "Update the path and try again.",
   });
 };
 
