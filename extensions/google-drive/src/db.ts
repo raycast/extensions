@@ -191,7 +191,7 @@ const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<voi
 
   let filesIndexed = 0;
   for await (const file of fileStream({ stats: true })) {
-    const { name, path, stats } = file as Entry;
+    const { name, path, stats } = file as unknown as Entry;
 
     if (stats === undefined) {
       continue;

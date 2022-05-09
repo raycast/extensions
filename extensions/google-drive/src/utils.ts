@@ -168,27 +168,19 @@ export const fileStream = ({ stats = false }: { stats?: boolean } = {}) => {
   const driveRootPath = getDriveRootPath();
   const preferences = getPreferenceValues<Preferences>();
 
-  const filter = new Transform({
-    objectMode: true,
-    transform(chunk: Entry, encoding, callback) {
-      // Don't include directories if the preference is false
-      callback(null, chunk.dirent.isDirectory() && !preferences.shouldShowDirectories ? undefined : chunk);
-    },
-  });
-
   const excludePaths = getExcludePaths()
     .concat(IGNORED_DIRECTORIES)
     .map((p) => path.join("**", p));
 
-  return fg
-    .stream([join(driveRootPath, "**")], {
-      ignore: excludePaths,
-      dot: true,
-      suppressErrors: true,
-      objectMode: true,
-      stats,
-    })
-    .pipe(filter);
+  return fg.stream([join(driveRootPath, "**")], {
+    ignore: excludePaths,
+    dot: true,
+    suppressErrors: true,
+    objectMode: true,
+    onlyFiles: !preferences.shouldShowDirectories,
+    markDirectories: false,
+    stats,
+  });
 };
 
 export const throttledUpdateToastMessage = ({ toast, interval }: { toast: Toast; interval: number }) => {
