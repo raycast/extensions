@@ -50,3 +50,28 @@ export enum VSCodeBuild {
 export interface Preferences {
   build: VSCodeBuild;
 }
+
+export const recentOpenedLabel = "Open &&Recent";
+export enum RecentOpenedItemId {
+  Folder = "openRecentFolder",
+  File = "openRecentFile",
+  Other = "useless",
+}
+
+interface RecentOpenItem {
+  id: RecentOpenedItemId.Folder | RecentOpenedItemId.File;
+  uri: {
+    path: string;
+    scheme: string;
+  };
+  enabled: boolean;
+  label: string;
+}
+
+export interface lastKnownMenubarItems {
+  id: string;
+  label: string;
+  submenu?: {
+    items: Array<RecentOpenItem>;
+  };
+}
