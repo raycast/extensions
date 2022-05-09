@@ -48,9 +48,7 @@ const Command = () => {
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
-  useEffect(() => {
-    initialSetup();
-  }, []);
+  useEffect(initialSetup, []);
 
   useEffect(() => {
     (async () => setFileDetailsMarkup(await fileMetadataMarkdown(files.selected)))();

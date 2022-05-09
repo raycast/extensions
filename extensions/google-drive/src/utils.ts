@@ -115,7 +115,7 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   });
 };
 
-export const initialSetup = async () => {
+export const initialSetup = () => {
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
     if (previewFiles.length > MAX_TMP_FILE_PREVIEWS_LIMIT) {
