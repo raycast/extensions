@@ -183,6 +183,7 @@ const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<voi
   const updateToastMessage = throttledUpdateToastMessage({ toast, interval: TOAST_UPDATE_INTERVAL });
 
   let totalFiles = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for await (const _ of fileStream()) {
     totalFiles += 1;
     updateToastMessage(`Counting files: ${totalFiles}`);
@@ -190,7 +191,7 @@ const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<voi
 
   let filesIndexed = 0;
   for await (const file of fileStream({ stats: true })) {
-    const { name, path, stats } = file as unknown as Entry;
+    const { name, path, stats } = file as Entry;
 
     if (stats === undefined) {
       continue;
