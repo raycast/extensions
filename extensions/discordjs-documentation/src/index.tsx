@@ -40,7 +40,9 @@ export default function Command() {
           return setDocSource(source as SourcesStringUnion);
         }
 
-        const doc = await Doc.fetch(docSource ? docSource : (source as SourcesStringUnion), { force: true });
+        const doc = await Doc.fetch(docSource ? docSource : (source as SourcesStringUnion) ?? "stable", {
+          force: true,
+        });
         setState({ doc });
         setList(getDocList(doc));
         setLoading(false);
