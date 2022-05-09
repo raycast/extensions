@@ -263,7 +263,8 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
   const [markdown, setMarkdown] = useState("## File Information");
 
   useEffect(() => {
-    if (file === selectedFile && isShowingDetail) {
+    console.log(file, selectedFile);
+    if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
       setMarkdown(fileMetadataMarkdown(file));
       const controller = new AbortController();
       filePreview(file, controller).then((previewImage) => {
