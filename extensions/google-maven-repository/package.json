@@ -15,7 +15,6 @@
       "name": "show-google-maven-repository",
       "title": "Show Google Maven Repository",
       "icon": "show-google-maven.png",
-      "subtitle": "Google Maven Repository",
       "description": "Show All artifacts in Google's Maven repository.",
       "mode": "view"
     },
@@ -23,7 +22,6 @@
       "name": "search-google-maven-repository",
       "title": "Search Google Maven Repository",
       "icon": "search-google-maven-repository.png",
-      "subtitle": "Google Maven Repository",
       "description": "Search for an artifact in Google's Maven repository.",
       "mode": "view"
     }

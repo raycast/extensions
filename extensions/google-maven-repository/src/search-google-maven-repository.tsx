@@ -40,7 +40,11 @@ export default function SearchGoogleMavenRepository() {
     >
       <MavenEmptyView
         title={emptyViewTitle()}
-        description={searchContent.length < 4 ? "You must enter at least 4 characters when searching..." : " "}
+        description={
+          searchContent.length < 4 && !isEmpty(searchContent)
+            ? "You must enter at least 4 characters when searching..."
+            : " "
+        }
       />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
         return (
