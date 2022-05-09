@@ -48,21 +48,27 @@ export default function SearchMavenCentralRepository() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.MagnifyingGlass}
-                title={"Search Artifact ID"}
-                onAction={() => {
-                  setSearchContent(`a:${value.a}`);
-                }}
-              />
-              <Action
-                icon={Icon.MagnifyingGlass}
-                title={"Search Group ID"}
-                onAction={() => {
-                  setSearchContent(`g:${value.g}`);
-                }}
-              />
-              <ActionToAdvancedSearchOptions />
+              {!searchContent.startsWith("a:") && (
+                <Action
+                  icon={Icon.MagnifyingGlass}
+                  title={"Search Artifact ID"}
+                  onAction={() => {
+                    setSearchContent(`a:${value.a}`);
+                  }}
+                />
+              )}
+              {!searchContent.startsWith("g:") && (
+                <Action
+                  icon={Icon.MagnifyingGlass}
+                  title={"Search Group ID"}
+                  onAction={() => {
+                    setSearchContent(`g:${value.g}`);
+                  }}
+                />
+              )}
+              <ActionPanel.Section>
+                <ActionToAdvancedSearchOptions />
+              </ActionPanel.Section>
               <ActionPanel.Section title={"Copy Dependency"}>
                 {dependencyTypes.map((dependenceType, index) => {
                   return (
