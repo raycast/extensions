@@ -12,7 +12,7 @@ const SnippetContent = ({ snippet, selectedFragment }: { snippet: Snippet; selec
     if (language == "markdown") {
       code = text;
     } else {
-      code =  `~~~${language}
+      code = `~~~${language}
 ${text}
 ~~~
       `;
