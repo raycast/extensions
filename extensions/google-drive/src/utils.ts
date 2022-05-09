@@ -47,8 +47,7 @@ export const getExcludePaths = (): Array<string> => {
     .split(",")
     .map((p) => p.trim())
     .filter((p) => p.length > 0)
-    .map((p) => p.replace("~", homedir()).replace(`${getDriveRootPath()}/`, ""))
-    .map((p) => resolve(p));
+    .map((p) => p.replace("~", homedir()));
 };
 export const formatBytes = (sizeInBytes: number): string => {
   let unitIndex = 0;
@@ -170,7 +169,7 @@ export const driveFileStream = ({ stats = false }: DriveFileStreamOptions = {}) 
   const preferences = getPreferenceValues<Preferences>();
 
   const excludePaths = getExcludePaths().concat(IGNORED_DIRECTORIES.map((p) => path.join("**", p)));
-
+  console.log(excludePaths);
   return fg.stream([join(driveRootPath, "**")], {
     ignore: excludePaths,
     dot: true,
