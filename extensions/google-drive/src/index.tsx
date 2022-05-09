@@ -22,6 +22,7 @@ type CommandContextType = {
   reindexFiles: () => void;
   selectedFile: FileInfo | null;
   toggleDetails: () => void;
+  isShowingDetail: boolean;
 };
 const CommandContext = createContext<CommandContextType | null>(null);
 const useCommandContext = () => {
@@ -163,7 +164,7 @@ const Command = () => {
 
   return (
     <CommandContext.Provider
-      value={{ handleToggleFavorite, reindexFiles, selectedFile: files.selected, toggleDetails }}
+      value={{ handleToggleFavorite, reindexFiles, selectedFile: files.selected, toggleDetails, isShowingDetail }}
     >
       <List
         isShowingDetail={isShowingDetail && files.filtered.length > 0}
@@ -257,12 +258,12 @@ type ListItemDetailProps = {
   file: FileInfo;
 };
 const ListItemDetail = ({ file }: ListItemDetailProps) => {
-  const { selectedFile } = useCommandContext();
+  const { selectedFile, isShowingDetail } = useCommandContext();
   const [previewImage, setPreviewImage] = useState("");
   const [markdown, setMarkdown] = useState("## File Information");
 
   useEffect(() => {
-    if (file === selectedFile) {
+    if (file === selectedFile && isShowingDetail) {
       setMarkdown(fileMetadataMarkdown(file));
       const controller = new AbortController();
       filePreview(file, controller).then((previewImage) => {
@@ -274,7 +275,7 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
         controller.abort();
       };
     }
-  }, [selectedFile]);
+  }, [selectedFile, isShowingDetail]);
 
   return <List.Item.Detail markdown={previewImage + markdown} />;
 };
