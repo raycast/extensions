@@ -20,7 +20,7 @@ import {
   displayPath,
   getDriveRootPath,
   throttledUpdateToastMessage,
-  fileStream,
+  driveFileStream,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -184,13 +184,13 @@ const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<voi
 
   let totalFiles = 0;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for await (const _ of fileStream()) {
+  for await (const _ of driveFileStream()) {
     totalFiles += 1;
     updateToastMessage(`Counting files: ${totalFiles}`);
   }
 
   let filesIndexed = 0;
-  for await (const file of fileStream({ stats: true })) {
+  for await (const file of driveFileStream({ stats: true })) {
     const { name, path, stats } = file as unknown as Entry;
 
     if (stats === undefined) {

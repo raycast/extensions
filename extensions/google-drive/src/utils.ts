@@ -164,7 +164,7 @@ ${new Date(file.createdAt).toLocaleString()}
 ${new Date(file.updatedAt).toLocaleString()}`;
 };
 
-export const fileStream = ({ stats = false }: { stats?: boolean } = {}) => {
+export const driveFileStream = ({ stats = false }: { stats?: boolean } = {}) => {
   const driveRootPath = getDriveRootPath();
   const preferences = getPreferenceValues<Preferences>();
 
