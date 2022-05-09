@@ -72,7 +72,7 @@ export default function CreateShortcut() {
             <Action
               icon={Icon.Trash}
               title={"Clear All"}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
               onAction={() => {
                 setNative("");
               }}
