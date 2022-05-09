@@ -15,14 +15,28 @@
     oauth_config:
       scopes:
         user:
-          # Command: Search
-          - channels:read
-          - groups:read
-          - mpim:read
+          # Command: Search & Unread Messages & Set Presence
           - users:read
 
+          # Command: Search & Unread Messages
+          - channels:read
+          - groups:read
+          - im:read
+          - mpim:read
+
+          # Command: Unread Messages
+          - channels:history
+          - groups:history
+          - im:history
+          - mpim:history
+
+          # Command: Unread Messages (optional - needed for marking conversations as read)
+          - channels:write
+          - groups:write
+          - im:write
+          - mpim:write
+
           # Command: Set Presence
-          - users.profile:read
           - users:write
 
           # Command: Set Snooze
@@ -38,3 +52,7 @@
 7. Press `Install to Workspace`
 8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).  
    Your personal access token will start with `xoxp-`.
+
+## Validate your Slack API Token after extension updates
+
+After extension updates in which new features were introduced you might be kindly asked for validating the permission scopes of your Slack API Token. If they differ from those scopes that are mentioned in this README your action is required: To get the extension running again you need to update the permission scopes of your existing Slack API Token or create a completely new Token by following the instructions above.

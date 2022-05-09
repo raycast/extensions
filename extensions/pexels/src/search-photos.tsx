@@ -1,42 +1,49 @@
-import { ActionPanel, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchPhotos } from "./hooks/hooks";
-import { ActionToPexels, PhotosListItem } from "./utils/ui-component";
+import { PhotosListItem } from "./components/photos-list-item";
+import { PexelsEmptyView } from "./components/pexels-empty-view";
+import { isEmpty } from "./utils/common-utils";
+import { SearchRequest } from "./utils/types";
 
 export default function SearchPhotos() {
-  const [startSearch, setStartSearch] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const { pexelsPhotos, loading } = searchPhotos(startSearch.trim(), page);
+  const [searchContent, setSearchContent] = useState<string>("");
+  const [searchRequest, setSearchRequest] = useState<SearchRequest>({ searchContent: searchContent, page: 1 });
+  const { pexelsPhotos, loading } = searchPhotos(searchRequest);
+
+  const emptyViewTitle = () => {
+    if (loading) {
+      return "Loading...";
+    }
+    if (pexelsPhotos?.photos.length === 0 && !isEmpty(searchContent)) {
+      return "No Photos";
+    }
+    return "Welcome to Pexels";
+  };
 
   return (
     <List
       isShowingDetail={pexelsPhotos?.photos.length !== 0}
       isLoading={loading}
       searchBarPlaceholder={"Search photos"}
-      onSearchTextChange={setStartSearch}
+      onSearchTextChange={(newValue) => {
+        setSearchRequest({ searchContent: newValue, page: 1 });
+        setSearchContent(newValue);
+      }}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined") {
           const _id = pexelsPhotos?.photos.length - 1 + "_" + pexelsPhotos?.photos[pexelsPhotos.photos.length - 1]?.id;
           if (id === _id) {
-            setPage(page + 1);
+            setSearchRequest({ searchContent: searchContent, page: searchRequest.page + 1 });
           }
         }
       }}
       throttle={true}
     >
-      {pexelsPhotos?.photos.length === 0 ? (
-        <List.EmptyView
-          title={"Welcome to Pexels"}
-          icon={"empty-view-icon.png"}
-          actions={
-            <ActionPanel>
-              <ActionToPexels />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        pexelsPhotos?.photos.map((value, index) => <PhotosListItem key={index} pexelsPhoto={value} index={index} />)
-      )}
+      <PexelsEmptyView title={emptyViewTitle()} />
+      {pexelsPhotos?.photos.map((value, index) => (
+        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
+      ))}
     </List>
   );
 }

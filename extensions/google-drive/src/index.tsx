@@ -20,6 +20,7 @@ type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
   reindexFiles: () => void;
   fileDetailsMarkup: string;
+  toggleDetails: () => void;
 };
 const CommandContext = createContext<CommandContextType | null>(null);
 const useCommandContext = () => {
@@ -43,6 +44,7 @@ const Command = () => {
     favorites: Array<FileInfo>;
     selected: FileInfo | null;
   }>({ filtered: [], favorites: [], selected: null });
+  const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
@@ -65,11 +67,22 @@ const Command = () => {
       }
 
       if (db) {
+        const alreadyIndexed = !!(await filesLastIndexedAt());
         try {
+          const toast = showToast({
+            style: Toast.Style.Animated,
+            title: `${alreadyIndexed ? "Updating" : "Indexing"} files cache index ${
+              alreadyIndexed ? "" : "for the first time"
+            }`,
+            message: "This may take some time, please wait...",
+          });
+
           const isIndexed = await indexFiles(drivePath, db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
+
+          (await toast).hide();
 
           if (files.filtered.length === 0) {
             setIsFetching(true);
@@ -122,7 +135,7 @@ const Command = () => {
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
 
-    showToast({ style: Toast.Style.Animated, title: "Rebuilding files index..." });
+    showToast({ style: Toast.Style.Animated, title: "Rebuilding files cache index..." });
     try {
       const isIndexed = await indexFiles(drivePath, db, { force: true });
 
@@ -162,10 +175,12 @@ const Command = () => {
     setFiles((prevFiles) => ({ ...prevFiles, selected: file }));
   }, 100);
 
+  const toggleDetails = () => setIsShowingDetail((prevIsShowingDetail) => !prevIsShowingDetail);
+
   return (
-    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup }}>
+    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup, toggleDetails }}>
       <List
-        isShowingDetail={files.filtered.length > 0}
+        isShowingDetail={isShowingDetail && files.filtered.length > 0}
         enableFiltering={false}
         onSearchTextChange={setSearchText}
         searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
@@ -197,16 +212,7 @@ const Command = () => {
         ) : (
           <List.EmptyView
             title={isFetching ? "Fetching files, please wait..." : "No files found"}
-            actions={
-              <ActionPanel>
-                {!isFetching && (
-                  <ActionPanel.Section title="General Actions">
-                    <ReindexFilesCacheAction />
-                    <ClearFilePreviewsCacheAction />
-                  </ActionPanel.Section>
-                )}
-              </ActionPanel>
-            }
+            actions={<ActionPanel>{!isFetching && <GeneralActions showToggleDetailsAction={false} />}</ActionPanel>}
           />
         )}
       </List>
@@ -226,7 +232,8 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       id={`${idPrefix}${file.displayPath}`}
       key={file.displayPath}
       icon={{ fileIcon: file.path }}
-      title={`${file.favorite ? "⭐ " : ""}${file.name}`}
+      title={file.name}
+      accessoryIcon={file.favorite ? "⭐" : undefined}
       detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
       actions={
         <ActionPanel>
@@ -251,36 +258,40 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="General Actions">
-            <ReindexFilesCacheAction />
-            <ClearFilePreviewsCacheAction />
-          </ActionPanel.Section>
+          <GeneralActions />
         </ActionPanel>
       }
     />
   );
 };
 
-const ReindexFilesCacheAction = () => {
-  const { reindexFiles } = useCommandContext();
+const GeneralActions = ({ showToggleDetailsAction = true }) => {
+  const { reindexFiles, toggleDetails } = useCommandContext();
 
   return (
-    <Action
-      title="Reindex Files Cache"
-      icon={Icon.Hammer}
-      onAction={reindexFiles}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-    />
+    <ActionPanel.Section title="General Actions">
+      {showToggleDetailsAction ? (
+        <Action
+          title="Toggle Details"
+          icon={Icon.Sidebar}
+          onAction={toggleDetails}
+          shortcut={{ modifiers: ["cmd"], key: "b" }}
+        />
+      ) : null}
+      <Action
+        title="Reindex Files Cache"
+        icon={Icon.Hammer}
+        onAction={reindexFiles}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      />
+      <Action
+        title="Clear File Previews Cache"
+        icon={Icon.Trash}
+        onAction={clearAllFilePreviewsCache}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+      />
+    </ActionPanel.Section>
   );
 };
-
-const ClearFilePreviewsCacheAction = () => (
-  <Action
-    title="Clear File Previews Cache"
-    icon={Icon.Trash}
-    onAction={clearAllFilePreviewsCache}
-    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-  />
-);
 
 export default Command;

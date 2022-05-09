@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openweathermap",
+  "title": "OpenWeatherMap",
+  "description": "Get Weather via https://openweathermap.com",
+  "icon": "openweathermap.png",
+  "author": "tonka3000",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "weather",
+      "title": "Weather",
+      "subtitle": "OpenWeatherMap",
+      "description": "Get Current Weather + Daily and Hourly Forecast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your API Key from https://openweathermap.org",
+      "link": "https://openweathermap.org/api",
+      "placeholder": "Enter your OpenWeatherMap API Key"
+    },
+    {
+      "name": "unitsystem",
+      "type": "dropdown",
+      "title": "Unit System",
+      "required": false,
+      "default": "metric",
+      "description": "Unit System",
+      "data": [
+        {
+          "title": "Metric System",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial Units",
+          "value": "imperial"
+        }
+      ]
+    },
+    {
+      "name": "defaultquery",
+      "type": "textfield",
+      "title": "Default query",
+      "placeholder": "Empty or location (e.g. London)",
+      "required": false,
+      "default": "",
+      "description": "Default query when search bar is empty. Same content as in the search bar."
+    },
+    {
+      "name": "hourlyforecastcount",
+      "type": "textfield",
+      "required": false,
+      "default": "3",
+      "title": "Number of Hourly Forecasts",
+      "description": "Number of shown hourly forecasts. 0 means no hourly forecasts.",
+      "placeholder": "3"
+    },
+    {
+      "name": "dailyforecastcount",
+      "type": "textfield",
+      "required": false,
+      "default": "7",
+      "title": "Number of Daily Forecasts",
+      "description": "Number of shown daily forecasts. 0 means no daily forecasts.",
+      "placeholder": "7"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "moment": "^2.29.3",
+    "node-fetch": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/moment": "^2.13.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
