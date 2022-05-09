@@ -57,7 +57,7 @@ export const formatBytes = (sizeInBytes: number): string => {
   return `${sizeInBytes.toFixed(1)} ${FILE_SIZE_UNITS[unitIndex]}`;
 };
 
-const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
+const filePreviewPath = async (file: FileInfo, controller: AbortController): Promise<null | string> => {
   mkdirSync(TMP_FILE_PREVIEWS_PATH, { recursive: true });
 
   if (!pathExists(TMP_FILE_PREVIEWS_PATH)) return null;
@@ -71,7 +71,7 @@ const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   if (!pathExists(filePreviewPath)) {
     try {
       await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${TMP_FILE_PREVIEWS_PATH}`, {
-        timeout: 500 /* milliseconds */,
+        signal: controller.signal,
         killSignal: "SIGKILL",
       });
     } catch (e) {
@@ -124,18 +124,24 @@ export const initialSetup = () => {
   }
 };
 
-export const fileMetadataMarkdown = async (file: FileInfo | null): Promise<string> => {
+export const filePreview = async (file: FileInfo | null, controller: AbortController): Promise<string> => {
   if (!file) {
     return "";
   }
 
-  const previewPath = await filePreviewPath(file);
+  const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
   const previewImage = previewExists ? `<img src="${previewPath}" alt="${file.name}" height="200" />` : "";
 
-  return `
-${previewImage}
+  return previewImage;
+};
 
+export const fileMetadataMarkdown = (file: FileInfo | null): string => {
+  if (!file) {
+    return "";
+  }
+
+  return `
 ## File Information
 **Name**\n
 ${file.name}

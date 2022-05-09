@@ -11,6 +11,7 @@ import {
   displayPath,
   escapePath,
   fileMetadataMarkdown,
+  filePreview,
   getDriveRootPath,
   initialSetup,
   isEmpty,
@@ -19,7 +20,7 @@ import {
 type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
   reindexFiles: () => void;
-  fileDetailsMarkup: string;
+  selectedFile: FileInfo | null;
   toggleDetails: () => void;
 };
 const CommandContext = createContext<CommandContextType | null>(null);
@@ -35,7 +36,6 @@ const useCommandContext = () => {
 
 const Command = () => {
   const drivePath = getDriveRootPath();
-  const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
@@ -49,10 +49,6 @@ const Command = () => {
   const db = useDb();
 
   useEffect(initialSetup, []);
-
-  useEffect(() => {
-    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(files.selected)))();
-  }, [files.selected]);
 
   useEffect(() => {
     (async () => {
@@ -166,7 +162,9 @@ const Command = () => {
   const toggleDetails = () => setIsShowingDetail((prevIsShowingDetail) => !prevIsShowingDetail);
 
   return (
-    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup, toggleDetails }}>
+    <CommandContext.Provider
+      value={{ handleToggleFavorite, reindexFiles, selectedFile: files.selected, toggleDetails }}
+    >
       <List
         isShowingDetail={isShowingDetail && files.filtered.length > 0}
         enableFiltering={false}
@@ -213,7 +211,7 @@ type ListItemProps = {
   idPrefix: "__fav__" | "";
 };
 const ListItem = ({ file, idPrefix }: ListItemProps) => {
-  const { handleToggleFavorite, fileDetailsMarkup } = useCommandContext();
+  const { handleToggleFavorite } = useCommandContext();
 
   return (
     <List.Item
@@ -222,7 +220,7 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       icon={{ fileIcon: file.path }}
       title={file.name}
       accessoryIcon={file.favorite ? "⭐" : undefined}
-      detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+      detail={<ListItemDetail file={file} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="File Actions">
@@ -251,6 +249,32 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       }
     />
   );
+};
+
+type ListItemDetailProps = {
+  file: FileInfo;
+};
+const ListItemDetail = ({ file }: ListItemDetailProps) => {
+  const { selectedFile } = useCommandContext();
+  const [previewImage, setPreviewImage] = useState("");
+  const [markdown, setMarkdown] = useState("## File Information");
+
+  useEffect(() => {
+    if (file === selectedFile) {
+      setMarkdown(fileMetadataMarkdown(file));
+      const controller = new AbortController();
+      filePreview(file, controller).then((previewImage) => {
+        if (!controller.signal.aborted) {
+          setPreviewImage(previewImage);
+        }
+      });
+      return () => {
+        controller.abort();
+      };
+    }
+  }, [selectedFile]);
+
+  return <List.Item.Detail markdown={previewImage + markdown} />;
 };
 
 const GeneralActions = ({ showToggleDetailsAction = true }) => {
