@@ -9,18 +9,17 @@ const SnippetContent = ({ snippet, selectedFragment }: { snippet: Snippet; selec
     const folder = snippet.folder?.name ?? "Inbox";
 
     let code;
-    if (language == "plain_text" || language == "markdown") {
+    if (language == "markdown") {
       code = text;
     } else {
-      code = `\`\`\`${language}
+      code =  `~~~${language}
 ${text}
-\`\`\`
+~~~
       `;
     }
 
     return `
 ## ${title} - ${folder} 
-
 
 ${code}
     `;
