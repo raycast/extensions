@@ -18,3 +18,4 @@ with all the options supported by rsync.
 #### Known Issues:
 
 - After first selecting `Source` or `Destination` for `SSH` in your commands, you can't simply swap to the other option without first selecting `None`. I can't figure out why this doesn't work since the state for where the fields should render is updating correctly. The view doesn't seem to agree with this somehow and refuses to change position of the fields. 
+h

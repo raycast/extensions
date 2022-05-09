@@ -4,9 +4,9 @@ import Sugar from "sugar"
 
 export type SshSelection = "none" | "source" | "destination"
 export type EntryOption = {
+  enabled: boolean
   value?: string
-  enabled?: boolean
-} & EntryOptionData
+} & Omit<EntryOptionData, "description">
 type Options = { [key: string]: EntryOption }
 
 export default class Entry {
@@ -17,12 +17,14 @@ export default class Entry {
   public destination: EntryLocation
   public options: Options
   public sshSelection: SshSelection
+  public preCommand: string
+  public postCommand: string
   public pinned: boolean
   public confirmed: boolean // If the user has confirmed that this entry looks good before running it.
   public runCount: number
   public createdAt: number
 
-  constructor(rawData?: EntryRaw) {
+  constructor(rawData?: EntryDTO) {
     if (rawData) {
       this.id = rawData.id
       this.name = rawData.name
@@ -31,6 +33,8 @@ export default class Entry {
       this.destination = new EntryLocation(rawData.destination)
       this.options = rawData.options
       this.sshSelection = rawData.sshSelection
+      this.preCommand = rawData.preCommand?.replace(/\\"/g, '"') ?? ""
+      this.postCommand = rawData.postCommand?.replace(/\\"/g, '"') ?? ""
       this.pinned = rawData.pinned
       this.confirmed = rawData.confirmed
       this.runCount = rawData.runCount
@@ -43,6 +47,8 @@ export default class Entry {
       this.destination = new EntryLocation()
       this.options = {}
       this.sshSelection = "none"
+      this.preCommand = ""
+      this.postCommand = ""
       this.pinned = false
       this.confirmed = false
       this.runCount = 0
@@ -83,7 +89,7 @@ export default class Entry {
     return cmd.join(" ")
   }
 
-  toRawData(): EntryRaw {
+  toRawData(): EntryDTO {
     return {
       id: this.id,
       name: this.name,
@@ -92,6 +98,8 @@ export default class Entry {
       destination: this.destination.toRawData(),
       options: this.options,
       sshSelection: this.sshSelection,
+      preCommand: this.preCommand.replace(/"/g, '\\"'),
+      postCommand: this.postCommand.replace(/"/g, '\\"'),
       pinned: this.pinned,
       confirmed: this.confirmed,
       runCount: this.runCount,
@@ -100,7 +108,7 @@ export default class Entry {
   }
 
   clone(): Entry {
-    return new Entry(Sugar.Object.clone(this.toRawData(), true) as EntryRaw)
+    return new Entry(Sugar.Object.clone(this.toRawData(), true) as EntryDTO)
   }
 
   /**
@@ -117,12 +125,13 @@ export default class Entry {
     return clone
   }
 
+  // noinspection JSUnusedGlobalSymbols
   equals(entry: Entry) {
     return JSON.stringify(entry.toRawData()) === JSON.stringify(this.toRawData())
   }
 }
 
-export type EntryRaw = {
+export type EntryDTO = {
   id: string | undefined
   name: string
   description: string
@@ -130,6 +139,8 @@ export type EntryRaw = {
   destination: EntryLocationRaw
   options: Options
   sshSelection: SshSelection
+  preCommand: string
+  postCommand: string
   pinned: boolean
   confirmed: boolean
   runCount: number
