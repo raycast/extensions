@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, createContext, useContext } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -219,7 +219,9 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       key={file.displayPath}
       icon={{ fileIcon: file.path }}
       title={file.name}
-      accessoryIcon={file.favorite ? "⭐" : undefined}
+      accessories={
+        file.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
       detail={<ListItemDetail file={file} />}
       actions={
         <ActionPanel>
