@@ -3,8 +3,8 @@ export type FileInfo = {
   path: string;
   displayPath: string;
   fileSizeFormatted: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   favorite: boolean;
   searchScore?: number;
 };

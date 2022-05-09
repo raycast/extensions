@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { spawn } from "child_process";
-import { existsSync, PathLike, readFileSync, writeFileSync } from "fs";
-import { basename, join } from "path";
+import fg, { Entry } from "fast-glob";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 
@@ -16,11 +16,10 @@ import {
   clearAllFilePreviewsCache,
   formatBytes,
   fuzzyMatch,
-  getDriveRootPath,
-  isDotUnderscore,
-  listFilesCommand,
   displayPath,
-  getTotalFileCount,
+  pathExists,
+  getDriveRootPath,
+  throttledUpdateToastMessage,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -172,68 +171,79 @@ export const insertFile = (
   const insertStatement = `
       INSERT
         INTO files (name, path, displayPath, fileSizeFormatted, createdAt, updatedAt)
-        VALUES ("${name}", "${path}", "${displayPath}", "${fileSizeFormatted}", "${createdAt.toISOString()}", "${updatedAt.toISOString()}")
+        VALUES ("${name}", "${path}", "${displayPath}", "${fileSizeFormatted}", "${createdAt}", "${updatedAt}")
         ON CONFLICT (path) DO
           UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
   db.run(insertStatement);
 };
 
-const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
-  const totalFiles = getTotalFileCount();
+const listFilesAndInsertIntoDb = async (path: string, db: Database, toast: Toast): Promise<void> => {
+  const updateToastMessage = throttledUpdateToastMessage(toast);
 
-  return new Promise<void>((resolve) => {
-    const child = spawn(listFilesCommand(true), { shell: true });
-    let filesIndexed = 0;
+  let totalFiles = 0;
 
-    child.stdout.on("data", (data: Buffer) => {
-      data
-        .toString()
-        .split("\n")
-        .filter((entry) => entry.trim().length > 0)
-        .map((entry) => entry.split(" | ").map((entry) => entry.trim()))
-        .forEach((entry) => {
-          if (entry.length != 4) return;
-          const [createdAt, updatedAt, sizeInBytes, path] = entry;
+  if (!pathExists(path)) {
+    // TODO: message that path does not exist
+    return;
+  }
 
-          if (path === "" || isDotUnderscore(path)) return;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _ of fg.stream([join(path, "**")], {
+    ignore: ["**/.Trashes", "**/.TemporaryItems", "**/node_modules", "**/.git", "**/tmp"],
+    dot: true,
+    suppressErrors: true,
+  })) {
+    totalFiles += 1;
+    updateToastMessage(`Counting files: ${totalFiles}`);
+  }
 
-          filesIndexed += 1;
+  let filesIndexed = 0;
 
-          toast.message = `Progress: ${Math.round((filesIndexed / totalFiles) * 100)}% (${filesIndexed}/${totalFiles})`;
+  for await (const file of fg.stream([join(path, "**")], {
+    ignore: ["**/.Trashes", "**/.TemporaryItems", "**/node_modules", "**/.git", "**/tmp"],
+    dot: true,
+    suppressErrors: true,
+    stats: true,
+  })) {
+    const { name, path, stats } = file as unknown as Entry;
 
-          insertFile(db, {
-            name: basename(path),
-            path,
-            displayPath: displayPath(path),
-            fileSizeFormatted: formatBytes(sizeInBytes.length > 0 ? parseInt(sizeInBytes, 10) : 0),
-            createdAt: createdAt.length > 0 ? new Date(createdAt) : new Date(),
-            updatedAt: updatedAt.length > 0 ? new Date(updatedAt) : new Date(),
-            favorite: false,
-          });
-        });
+    if (stats === undefined) {
+      continue;
+    }
+
+    filesIndexed += 1;
+
+    updateToastMessage(`Indexing: ${Math.round((filesIndexed / totalFiles) * 100)}% (${filesIndexed}/${totalFiles})`);
+
+    insertFile(db, {
+      name,
+      path,
+      displayPath: displayPath(path),
+      fileSizeFormatted: formatBytes(stats.size > 0 ? stats.size : 0),
+      createdAt: (stats.ctime ? stats.ctime : new Date()).toISOString(),
+      updatedAt: (stats.mtime ? stats.mtime : new Date()).toISOString(),
+      favorite: false,
     });
-
-    child.on("close", (code) => {
-      if (code !== 0) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to index the files";
-      }
-
-      resolve();
-    });
-  });
+  }
 };
 
 type IndexFilesOptions = { force?: boolean };
 export const indexFiles = async (
-  path: PathLike,
+  path: string,
   db: Database,
-  toast: Toast,
   options: IndexFilesOptions = { force: false }
 ): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
-    let favoriteFilePaths: Array<PathLike> = [];
+    const alreadyIndexed = !!(await filesLastIndexedAt());
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `${alreadyIndexed ? "Updating file index" : "Indexing files"} ${
+        alreadyIndexed ? "" : "for the first time"
+      }`,
+      message: "This may take some time, please wait...",
+    });
+    let favoriteFilePaths: Array<string> = [];
 
     if (options.force) {
       // Backup the favorite file paths before force indexing
@@ -245,7 +255,7 @@ export const indexFiles = async (
       clearAllFilePreviewsCache(false);
     }
 
-    await listFilesAndInsertIntoDb(db, toast);
+    await listFilesAndInsertIntoDb(path, db, toast);
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {
@@ -255,13 +265,14 @@ export const indexFiles = async (
     dumpDb(db);
     await setFilesIndexedAt();
 
+    toast.hide();
     return true;
   }
 
   return false;
 };
 
-export const toggleFavorite = (db: Database, path: PathLike, isFavorite: boolean) => {
+export const toggleFavorite = (db: Database, path: string, isFavorite: boolean) => {
   if (!db) return;
 
   const updateStatement = `

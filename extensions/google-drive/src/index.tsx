@@ -47,13 +47,9 @@ const Command = () => {
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
-  const [initialSetupFinished, setInitialSetupFinished] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      await initialSetup();
-      setInitialSetupFinished(true);
-    })();
+    initialSetup();
   }, []);
 
   useEffect(() => {
@@ -62,35 +58,24 @@ const Command = () => {
 
   useEffect(() => {
     (async () => {
-      if (!initialSetupFinished) return;
-
       if (!existsSync(drivePath)) {
         showToast({
           style: Toast.Style.Failure,
           title: `The specified Google Drive root path "${drivePath}" does not exist.`,
         });
 
+        // TODO: make this an empty state?
+
         setIsFetching(false);
         return;
       }
 
       if (db) {
-        const alreadyIndexed = !!(await filesLastIndexedAt());
         try {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: `${alreadyIndexed ? "Updating" : "Indexing"} files cache index ${
-              alreadyIndexed ? "" : "for the first time"
-            }`,
-            message: "This may take some time, please wait...",
-          });
-
-          const isIndexed = await indexFiles(drivePath, db, toast);
+          const isIndexed = await indexFiles(drivePath, db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
-
-          toast.hide();
 
           if (files.filtered.length === 0) {
             setIsFetching(true);
@@ -112,7 +97,7 @@ const Command = () => {
         }
       }
     })();
-  }, [drivePath, db, initialSetupFinished]);
+  }, [drivePath, db]);
 
   useEffect(() => {
     (async () => {
@@ -143,15 +128,13 @@ const Command = () => {
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Rebuilding files cache index..." });
     try {
-      const isIndexed = await indexFiles(drivePath, db, toast, { force: true });
+      const isIndexed = await indexFiles(drivePath, db, { force: true });
 
       if (isIndexed) {
         setFilesIndexGeneratedAt(await filesLastIndexedAt());
-        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
-        toast.hide();
         showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
+        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
       }
     } catch (e) {
       console.error(e);

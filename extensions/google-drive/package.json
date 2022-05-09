@@ -10,7 +10,8 @@
     "Productivity"
   ],
   "contributors": [
-    "nametake"
+    "nametake",
+    "daniel-stoneuk"
   ],
   "license": "MIT",
   "commands": [
@@ -60,20 +61,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.33.2",
-    "download": "^8.0.0",
+    "fast-glob": "^3.2.11",
     "fzf": "^0.5.1",
-    "sql.js": "^1.6.2",
-    "tar": "^6.1.11"
+    "sql.js": "^1.6.2"
   },
   "devDependencies": {
-    "@types/download": "^8.0.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/sql.js": "^1.4.3",
-    "@types/tar": "^6.1.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "electron": "^18.2.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
