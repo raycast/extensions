@@ -1,22 +1,9 @@
-import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
-import { PEXELS_URL } from "./costants";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { buildImageName, commonPreferences, deleteCache, downloadPhoto, setWallpaper } from "../utils/common-utils";
 import React from "react";
-import { buildImageName, commonPreferences, deleteCache, downloadPhoto, setWallpaper } from "./common-utils";
+import { ActionToPexels } from "./action-to-pexels";
 import { Photo } from "pexels";
-
-export function ActionToPexels() {
-  return (
-    <Action
-      icon={Icon.Globe}
-      title={"Go to Pexels"}
-      shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
-      onAction={async () => {
-        await open(PEXELS_URL);
-        await showHUD("View Pexels in Browser");
-      }}
-    />
-  );
-}
+import { PexelsPhoto } from "../utils/types";
 
 export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
   const { pexelsPhoto, index } = props;
@@ -27,10 +14,18 @@ export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
       key={index + "_" + pexelsPhoto.id}
       icon={{ source: pexelsPhoto.src.tiny }}
       title={pexelsPhoto.photographer}
+      accessories={[
+        {
+          icon: { source: "solid-circle.png", tintColor: (pexelsPhoto as PexelsPhoto).avg_color },
+          tooltip: `${(pexelsPhoto as PexelsPhoto).avg_color}`,
+        },
+      ]}
       detail={
         <List.Item.Detail
           isLoading={false}
-          markdown={`<img src="${pexelsPhoto.src.medium}" alt="${pexelsPhoto.photographer}" height="256" />\n`}
+          markdown={`<img src="${pexelsPhoto.src.medium}" alt="${pexelsPhoto.photographer}" height="256" />\n
+
+**${(pexelsPhoto as PexelsPhoto).alt.trim()}**`}
         />
       }
       actions={
@@ -86,6 +81,16 @@ export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
               title={"Copy Photo Link"}
               content={pexelsPhoto.url}
               shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+            />
+            <Action.CopyToClipboard
+              title={"Copy Photo Color"}
+              content={(pexelsPhoto as PexelsPhoto).avg_color}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+            />
+            <Action.CopyToClipboard
+              title={"Copy Photo Description"}
+              content={(pexelsPhoto as PexelsPhoto).alt}
+              shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
             />
             <ActionToPexels />
           </ActionPanel.Section>
