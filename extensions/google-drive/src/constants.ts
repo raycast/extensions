@@ -1,7 +1,18 @@
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 
-export const IGNORED_DIRECTORIES = ["node_modules", "bower_components", ".git", "tmp"];
+export const IGNORED_GLOBS = [
+  "**/node_modules",
+  "**/bower_components",
+  "**/.git",
+  "**/tmp",
+  "**/.DS_Store",
+  ".Trashes",
+  ".VolumeIcon.icns",
+  ".TemporaryItems",
+  ".shortcut-targets-by-id",
+  ".file-revisions-by-id",
+];
 export const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
 export const NON_PREVIEWABLE_EXTENSIONS = [
   "",
@@ -15,7 +26,6 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
   ".iso",
   ".dmg",
   ".exe",
-  ".DS_Store",
   ".app",
   ".gdoc",
   ".gsheet",

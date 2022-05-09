@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import util from "util";
 import fs, { accessSync, existsSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
-import path, { basename, extname, join, resolve } from "path";
+import { extname, join, resolve } from "path";
 import { homedir } from "os";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
@@ -9,14 +9,12 @@ import fg from "fast-glob";
 
 import {
   FILE_SIZE_UNITS,
-  IGNORED_DIRECTORIES,
+  IGNORED_GLOBS,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
   NON_PREVIEWABLE_EXTENSIONS,
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
-import { Transform } from "stream";
-import { Entry } from "fast-glob";
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
@@ -168,7 +166,7 @@ export const driveFileStream = ({ stats = false }: DriveFileStreamOptions = {}) 
   const driveRootPath = getDriveRootPath();
   const preferences = getPreferenceValues<Preferences>();
 
-  const excludePaths = getExcludePaths().concat(IGNORED_DIRECTORIES.map((p) => path.join("**", p)));
+  const excludePaths = getExcludePaths().concat(IGNORED_GLOBS);
   return fg.stream([join(driveRootPath, "**")], {
     ignore: excludePaths,
     dot: true,
