@@ -28,3 +28,4 @@ export const MAX_TMP_FILE_PREVIEWS_LIMIT = 500; // Average size of a file previe
 export const DB_FILE_PATH = join(homedir(), ".raycast-google-drive-sqlite.db");
 export const TMP_FILE_PREVIEWS_PATH = join(tmpdir(), "raycast-google-drive-file-previews");
 export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";
+export const TOAST_UPDATE_INTERVAL = 100;

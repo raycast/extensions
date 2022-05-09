@@ -10,6 +10,7 @@ import {
   FILES_LAST_INDEXED_AT_KEY,
   MAX_RESULTS_WITHOUT_SEARCH_TEXT,
   MAX_RESULTS_WITH_SEARCH_TEXT,
+  TOAST_UPDATE_INTERVAL,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
 import {
@@ -179,7 +180,7 @@ export const insertFile = (
 };
 
 const listFilesAndInsertIntoDb = async (path: string, db: Database, toast: Toast): Promise<void> => {
-  const updateToastMessage = throttledUpdateToastMessage({ toast, interval: 100 });
+  const updateToastMessage = throttledUpdateToastMessage({ toast, interval: TOAST_UPDATE_INTERVAL });
 
   let totalFiles = 0;
 
