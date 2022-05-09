@@ -13,7 +13,7 @@ export const refreshNumber = () => {
 };
 
 export const searchArtifacts = (searchContent: string) => {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [artifactInfo, setArtifactInfo] = useState<{
     tagList: ArtifactTag[];
     artifactName: string[];
