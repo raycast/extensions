@@ -179,7 +179,7 @@ export const insertFile = (
 };
 
 const listFilesAndInsertIntoDb = async (path: string, db: Database, toast: Toast): Promise<void> => {
-  const updateToastMessage = throttledUpdateToastMessage(toast);
+  const updateToastMessage = throttledUpdateToastMessage({ toast, interval: 100 });
 
   let totalFiles = 0;
 

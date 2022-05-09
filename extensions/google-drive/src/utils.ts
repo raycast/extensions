@@ -160,10 +160,8 @@ ${new Date(file.createdAt).toLocaleString()}
 **Updated**\n
 ${new Date(file.updatedAt).toLocaleString()}`;
 };
-// TODO: Check that the new Date() is not needed
 
-export const throttledUpdateToastMessage = (toast: Toast) => {
-  const interval = 100; // TODO: move to constants
+export const throttledUpdateToastMessage = ({ toast, interval }: { toast: Toast; interval: number }) => {
   let lastUpdate = Date.now() - interval;
 
   return (message: string) => {
