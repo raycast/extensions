@@ -172,11 +172,11 @@ export const insertFile = (
   const insertStatement = `
       INSERT
         INTO files (name, path, displayPath, fileSizeFormatted, createdAt, updatedAt)
-        VALUES ("${name}", "${path}", "${displayPath}", "${fileSizeFormatted}", "${createdAt}", "${updatedAt}")
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT (path) DO
           UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
-  db.run(insertStatement);
+  db.run(insertStatement, [name, path, displayPath, fileSizeFormatted, createdAt, updatedAt]);
 };
 
 const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
@@ -240,7 +240,7 @@ export const indexFiles = async (db: Database, options: IndexFilesOptions = { fo
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {
-      db.run(`UPDATE files SET favorite = 1 WHERE path = "${filePath}"`);
+      db.run(`UPDATE files SET favorite = 1 WHERE path = ?`, [filePath]);
     });
 
     dumpDb(db);
