@@ -1,5 +1,11 @@
 # massCode Changelog
 
+## [1.0.2] - 2022-05-09
+
+### Features
+
+- Add detail view to display the content of the snippet within raycast
+
 ## [1.0.1] - 2022-05-05
 
 ### Bug Fixes
