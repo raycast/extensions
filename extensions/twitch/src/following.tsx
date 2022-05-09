@@ -96,7 +96,7 @@ export default function main() {
               id={item.id}
               title={item.title}
               subtitle={item.user_name}
-              actions={<Action live={item.type == "live"} name={item.user_name} />}
+              actions={<Action live={item.type == "live"} name={item.user_login} />}
             />
           );
         })}
