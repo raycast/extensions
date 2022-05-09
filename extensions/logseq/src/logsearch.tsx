@@ -36,7 +36,7 @@ export default function Command() {
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   //This is what happens when the item is clicked
-  // console.log(searchResult.url)
+  console.log(searchResult.url)
   return (
     <List.Item
       title={searchResult.name}
@@ -110,7 +110,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
           finalInitialResult.push({
             name: formatResult(element).replace(".md", ""),
             description: formatResult(element),
-            url: formatFilePath(element).replace(".md", ""),
+            url: formatFilePath(element),
           });
         }
       });
@@ -127,7 +127,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
       for (const rawSearchResult in rawSearchResults) {
         finalSearchResults.push({
           name: rawSearchResults[rawSearchResult].name,
-          description: rawSearchResults[rawSearchResult].url,
+          description: rawSearchResults[rawSearchResult].name + ".md",
           url: rawSearchResults[rawSearchResult].url,
         });
       }
@@ -136,8 +136,8 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
         if (element.endsWith(".md") && element.toLowerCase().includes(searchText.toLowerCase())) {
           //Making sure only MD files are shown
           finalSearchResults.push({
-            name: formatResult(element),
-            description: element,
+            name: formatResult(element).replace(".md", ""),
+            description: formatResult(element),
             url: formatFilePath(element),
           });
         }
