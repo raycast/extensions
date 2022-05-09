@@ -23,7 +23,7 @@ export function IssueItem(props: { issue: Issue; icon: Icon; iconColor: Color })
       actions={
         <ActionPanel>
           <ActionPanel.Section title={issue.title}>
-            <Action.Push title={"Show Detail"} target={<IssueDetail issue={issue} />} />
+            <Action.Push title={"Show Detail"} icon={Icon.Sidebar} target={<IssueDetail issue={issue} />} />
             <Action.OpenInBrowser url={issue.html_url} />
           </ActionPanel.Section>
         </ActionPanel>
