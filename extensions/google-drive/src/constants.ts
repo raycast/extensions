@@ -7,11 +7,11 @@ export const IGNORED_GLOBS = [
   "**/.git",
   "**/tmp",
   "**/.DS_Store",
-  ".Trashes",
-  ".VolumeIcon.icns",
-  ".TemporaryItems",
-  ".shortcut-targets-by-id",
-  ".file-revisions-by-id",
+  "**/.Trashes",
+  "**/.VolumeIcon.icns",
+  "**/.TemporaryItems",
+  "**/.shortcut-targets-by-id",
+  "**/.file-revisions-by-id",
 ];
 export const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
 export const NON_PREVIEWABLE_EXTENSIONS = [
