@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getLargeCacheDirectory, useCache } from "./cache";
+import { cacheLog, getLargeCacheDirectory, useCache } from "./cache";
 import { gitlab } from "./common";
-import { hashString } from "./utils";
+import { daysInSeconds, hashString } from "./utils";
 import path from "path/posix";
 import * as fs from "fs/promises";
 
@@ -26,6 +26,7 @@ export enum GitLabIcons {
   wiki = "list.png",
   show_details = "sidebar-right-16",
   tag = "tag.png",
+  commit = "commit.png",
   status_success = "status_success.png",
   status_failed = "status_failed.png",
   status_running = "status_running.png",
@@ -41,7 +42,7 @@ async function getImageCacheDirectory(ensureDirectory = false): Promise<string> 
   const cacheDir = getLargeCacheDirectory();
   const imgDir = path.join(cacheDir, "img");
   if (ensureDirectory) {
-    console.log(`create img cache directoy '${imgDir}'`);
+    cacheLog(`create img cache directoy '${imgDir}'`);
     await fs.mkdir(imgDir, { recursive: true });
   }
   return imgDir;
@@ -58,11 +59,7 @@ export function useImage(
   const [localFilepath, setLocalFilepath] = useState<string | undefined>(defaultIcon);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {
-    data,
-    error: cacheError,
-    isLoading: cacheIsLoading,
-  } = useCache<string | undefined>(
+  const { data } = useCache<string | undefined>(
     "img_" + hashString(url || ""),
     async (): Promise<string | undefined> => {
       if (!url) {
@@ -72,7 +69,7 @@ export function useImage(
       const imgFilepath = path.join(imgDir, hashString(url)) + ".png"; // TODO get the extension correctly
       return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     },
-    { deps: [url], secondsToRefetch: 600 }
+    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) }
   );
 
   useEffect(() => {

@@ -15,4 +15,11 @@ export interface Preferences {
   groupProjectsByTag: boolean;
   terminalAppPath: string;
   gitClientAppPath: string;
+  build: VSCodeBuild;
+  hideProjectsWithoutTag: boolean;
+}
+
+export enum VSCodeBuild {
+  Code = "Code",
+  Insiders = "Code - Insiders",
 }

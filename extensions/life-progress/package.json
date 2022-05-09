@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "life-progress",
+  "title": "Life Progress",
+  "description": "View your life progress, get the word of the day",
+  "icon": "life-progress-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showDailyWord",
+      "type": "checkbox",
+      "required": true,
+      "title": "UI Preference",
+      "label": "Show Quote of the Day",
+      "description": "Show quote of the day.",
+      "default": true
+    },
+    {
+      "name": "timeLeftFirst",
+      "type": "checkbox",
+      "required": true,
+      "label": "Time Left First",
+      "description": "Show Time Left first.",
+      "default": true
+    },
+    {
+      "name": "birthday",
+      "type": "textfield",
+      "required": true,
+      "title": "Birthday",
+      "description": "For calculating life progress, the birthday's format is 1995-01-01.",
+      "placeholder": "1995-01-01",
+      "default": "1995-01-01"
+    },
+    {
+      "name": "weekStart",
+      "title": "Week Start",
+      "description": "The week starts on the day of the week.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "Monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "Sunday"
+        }
+      ],
+      "required": true,
+      "default": "Monday"
+    },
+    {
+      "name": "iconTheme",
+      "title": "Icon Theme",
+      "description": "Themes of date icons.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Random",
+          "value": "random"
+        },
+        {
+          "title": "Bird",
+          "value": "bird"
+        },
+        {
+          "title": "Pixel",
+          "value": "pixel"
+        },
+        {
+          "title": "Simple",
+          "value": "simple"
+        },
+        {
+          "title": "Rainbow",
+          "value": "rainbow"
+        }
+      ],
+      "required": true,
+      "default": "random"
+    }
+  ],
+  "commands": [
+    {
+      "name": "life-progress",
+      "title": "Life Progress",
+      "description": "View your life progress.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.1",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -38,11 +38,14 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
           title: "Error",
           message: "Could not load driver standings",
         });
-        await popToRoot({ clearSearchBar: true });
+        await popToRoot();
         setState((previous) => ({ ...previous, isLoading: false }));
       }
     }
     fetchDrivers();
+    return function cleanup() {
+      cancelRef.current?.abort();
+    };
   }, [cancelRef, season]);
 
   useEffect(() => {

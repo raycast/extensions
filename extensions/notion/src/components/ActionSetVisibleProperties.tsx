@@ -1,9 +1,9 @@
-import { ActionPanel, Color, ImageLike } from "@raycast/api";
+import { ActionPanel, Color, Action, Image } from "@raycast/api";
 import { DatabaseProperty } from "../utils/notion";
 
 export function ActionSetVisibleProperties(props: {
   title?: string;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
   databaseProperties: DatabaseProperty[];
   selectedPropertiesIds?: string[];
   onSelect: (propertyId: string) => void;
@@ -26,7 +26,7 @@ export function ActionSetVisibleProperties(props: {
           if (!property) return;
 
           return (
-            <ActionPanel.Item
+            <Action
               key={`selected-property-${property.id}`}
               icon={"./icon/" + property.type + ".png"}
               title={property.name + "  ✓"}
@@ -41,7 +41,7 @@ export function ActionSetVisibleProperties(props: {
         {databaseProperties?.map(function (dp: DatabaseProperty) {
           if (!selectedPropertiesIds.includes(dp.id)) {
             return (
-              <ActionPanel.Item
+              <Action
                 key={`unselected-property-${dp.id}`}
                 icon={{ source: "./icon/" + dp.type + "_secondary.png", tintColor: Color.SecondaryText }}
                 title={dp.name}

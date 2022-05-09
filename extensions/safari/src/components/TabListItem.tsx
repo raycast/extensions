@@ -36,9 +36,14 @@ const TabListItem = (props: { tab: Tab; refresh: () => void }) => {
   return (
     <List.Item
       title={getTitle(props.tab)}
-      accessoryTitle={domain}
       icon={getFaviconUrl(domain)}
       actions={<Actions tab={props.tab} refresh={props.refresh} />}
+      accessories={[
+        {
+          text: domain,
+          tooltip: props.tab.url,
+        },
+      ]}
     />
   );
 };
