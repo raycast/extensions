@@ -10,8 +10,8 @@ function getSortIndices(deviceNames: string[], deviceStatuses: boolean[]): numbe
     if (deviceStatuses[a] === deviceStatuses[b]) {
       return deviceNames[a].localeCompare(deviceNames[b]);
     }
-    return deviceStatuses[a] ? -1: 1
-  })
+    return deviceStatuses[a] ? -1 : 1;
+  });
 }
 
 interface Devices {
