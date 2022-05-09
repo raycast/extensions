@@ -12,7 +12,7 @@ function ListItemFragment(props: { data: any | undefined }): ReactElement | null
     <React.Fragment>
       <List.Section>
         {data.map((data: any) => (
-          <List.Item title={`${data[0]}`} subtitle={`${data[1]}`} />
+          <List.Item title={`${data[0]}`} subtitle={`${data[1]}`} key={`${data[7]}`}/>
         ))}
       </List.Section>
     </React.Fragment>

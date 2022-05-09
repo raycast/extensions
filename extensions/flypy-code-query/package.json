@@ -27,12 +27,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.33.0",
-    "node-fetch": "^2.6.5",
+    "node-fetch": "^3.0.0",
     "raycast": "^1.0.8",
     "ts-md5": "^1.2.11"
   },
   "devDependencies": {
-    "@types/node": "^14.0.0",
+    "@types/node": "^16.10.0",
     "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",

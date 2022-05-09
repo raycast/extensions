@@ -85,6 +85,9 @@ export class FlypyCoding {
 
     const codings = json.list_dz;
 
+    for (let index = 0; index < codings.length; index++) {
+      codings[index][7] = index;
+    }
     return codings;
   }
 }
