@@ -15,7 +15,7 @@ export default function Command() {
   const { state, search } = useSearch();
   validateUserConfigGraphPath().catch((e) => {
     showGraphPathInvalidToast();
-    throw("Folder Does not Exist")
+    throw "Folder Does not Exist";
   });
 
   return (
@@ -36,7 +36,7 @@ export default function Command() {
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   //This is what happens when the item is clicked
-  console.log(searchResult.url)
+  console.log(searchResult.url);
   return (
     <List.Item
       title={searchResult.name}
