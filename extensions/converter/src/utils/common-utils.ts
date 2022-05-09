@@ -5,6 +5,7 @@ export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     advanceView: preferencesMap.get("advanceView") as boolean,
+    advanceViewLocation: preferencesMap.get("advanceViewLocation") as string,
   };
 };
 

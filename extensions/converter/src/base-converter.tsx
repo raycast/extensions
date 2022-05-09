@@ -2,15 +2,19 @@ import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { baseToBase, buildBases } from "./utils/base-converter-utils";
+import { BaseConvertersAdvanceView } from "./components/base-converters-advance-view";
+import { BaseConvertersSimpleView } from "./components/base-converters-simple-view";
 
 export default function CreateShortcut() {
-  const { advanceView } = commonPreferences();
+  const { advanceView, advanceViewLocation } = commonPreferences();
   const [base10, setBase10] = useState<string>("0");
   const [base2, setBase2] = useState<string>("0");
   const [base4, setBase4] = useState<string>("0");
   const [base8, setBase8] = useState<string>("0");
   const [base16, setBase16] = useState<string>("0");
   const [base32, setBase32] = useState<string>("0");
+  const [baseString, setBaseString] = useState<string>("0");
+  const [baseRadix, setBaseRadix] = useState<number>(10);
 
   const [input, setInput] = useState<string>("0");
   const [output, setOutput] = useState<string>("0");
@@ -20,19 +24,25 @@ export default function CreateShortcut() {
 
   useEffect(() => {
     async function _fetch() {
-      setBase2(Number(base10).toString(2));
-      setBase4(Number(base10).toString(4));
-      setBase8(Number(base10).toString(8));
-      setBase16(Number(base10).toString(16));
-      setBase32(Number(base10).toString(32));
+      const baseNumber = parseInt(baseString, baseRadix);
+      if (isNaN(baseNumber) || isEmpty(baseString.trim())) return;
+      setBase10(baseNumber.toString(10));
+      setBase2(baseNumber.toString(2));
+      setBase4(baseNumber.toString(4));
+      setBase8(baseNumber.toString(8));
+      setBase16(baseNumber.toString(16));
+      setBase32(baseNumber.toString(32));
+      setInput(baseNumber.toString(baseRadix));
     }
 
     _fetch().then();
-  }, [base10]);
+  }, [baseString]);
 
   useEffect(() => {
     async function _fetch() {
       setOutput(baseToBase(input, fromBase, toBase));
+      setBaseString(input);
+      setBaseRadix(parseInt(fromBase));
     }
 
     _fetch().then();
@@ -71,85 +81,46 @@ export default function CreateShortcut() {
               title={"Clear All"}
               shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
               onAction={() => {
-                setBase10("0");
-                setInput("0");
+                setBaseString("0");
+                setBaseRadix(10);
               }}
             />
           </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id={"base10"}
-        title="10"
-        value={base10}
-        onChange={(newValue) => {
-          setBase10(Number(newValue).toString());
-        }}
+      {advanceView && advanceViewLocation === "Top" && (
+        <>
+          <BaseConvertersAdvanceView
+            bases={bases}
+            output={output}
+            inputUseState={[input, setInput]}
+            fromBaseUseState={[fromBase, setFromBase]}
+            toBaseUseState={[toBase, setToBase]}
+          />
+          <Form.Separator />
+        </>
+      )}
+      <BaseConvertersSimpleView
+        base10={base10}
+        base2={base2}
+        base4={base4}
+        base8={base8}
+        base16={base16}
+        base32={base32}
+        setBaseString={setBaseString}
+        setBaseRadix={setBaseRadix}
       />
-      <Form.TextField
-        id={"base2"}
-        title="2"
-        value={base2}
-        onChange={(newValue) => {
-          isEmpty(newValue.trim()) ? setBase10("0") : setBase10(parseInt(newValue.trim(), 2).toString());
-        }}
-      />
-      <Form.TextField
-        id={"base4"}
-        title="4"
-        value={base4}
-        onChange={(newValue) => {
-          isEmpty(newValue.trim()) ? setBase10("0") : setBase10(parseInt(newValue.trim(), 4).toString());
-        }}
-      />
-      <Form.TextField
-        id={"base8"}
-        title="8"
-        value={base8}
-        onChange={(newValue) => {
-          isEmpty(newValue.trim()) ? setBase10("0") : setBase10(parseInt(newValue.trim(), 8).toString());
-        }}
-      />
-      <Form.TextField
-        id={"base16"}
-        title="16"
-        value={base16}
-        onChange={(newValue) => {
-          isEmpty(newValue.trim()) ? setBase10("0") : setBase10(parseInt(newValue.trim(), 16).toString());
-        }}
-      />
-      <Form.TextField
-        id={"base32"}
-        title="32"
-        value={base32}
-        onChange={(newValue) => {
-          isEmpty(newValue.trim()) ? setBase10("0") : setBase10(parseInt(newValue.trim(), 32).toString());
-        }}
-      />
-      {advanceView && (
+      {advanceView && advanceViewLocation === "Bottom" && (
         <>
           <Form.Separator />
-          <Form.Dropdown id={"fromBase"} title={"From Base"} value={fromBase} onChange={setFromBase}>
-            {bases.map((value) => {
-              return <Form.DropdownItem key={"fromBase" + value.value} value={value.value} title={value.title} />;
-            })}
-          </Form.Dropdown>
-          <Form.Dropdown id={"toBase"} title={"To Base"} value={toBase} onChange={setToBase}>
-            {bases.map((value) => {
-              return <Form.DropdownItem key={"toBase" + value.value} value={value.value} title={value.title} />;
-            })}
-          </Form.Dropdown>
-          <Form.TextField
-            id={"input"}
-            title="Input"
-            value={input}
-            onChange={(newValue) => {
-              if (isEmpty(newValue)) return;
-              setInput(Number(newValue).toString());
-            }}
+          <BaseConvertersAdvanceView
+            bases={bases}
+            output={output}
+            inputUseState={[input, setInput]}
+            fromBaseUseState={[fromBase, setFromBase]}
+            toBaseUseState={[toBase, setToBase]}
           />
-          <Form.Description title="Output" text={output} />
         </>
       )}
     </Form>

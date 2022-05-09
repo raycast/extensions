@@ -25,6 +25,24 @@
           "label": "Advance View",
           "description": "In the advanced view, you can freely choose the bases of mutual conversion.",
           "default": true
+        },
+        {
+          "name": "advanceViewLocation",
+          "title": "Advance View Location",
+          "description": "Select the location of the advanced view: top or bottom.",
+          "type": "dropdown",
+          "default": "Bottom",
+          "data": [
+            {
+              "title": "Top",
+              "value": "Top"
+            },
+            {
+              "title": "Bottom",
+              "value": "Bottom"
+            }
+          ],
+          "required": false
         }
       ]
     },
