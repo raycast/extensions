@@ -1,10 +1,11 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useState } from "react";
 import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
+import { googleMavenRepository } from "./utils/constans";
 
 import { searchArtifacts } from "./hooks/hooks";
 
-export default function ShowGoogleArtifact(props: { packageName: string }) {
+export default function ShowGoogleArtifacts(props: { packageName: string }) {
   const packageName = props.packageName;
   const [currentTag, setCurrentTag] = useState<string>("");
   const { artifactInfo, loading } = searchArtifacts(packageName);
@@ -23,22 +24,19 @@ export default function ShowGoogleArtifact(props: { packageName: string }) {
         </List.Dropdown>
       }
     >
-      {artifactInfo.artifactName.length === 0 && artifactInfo.artifactInfo.length === 0 ? (
-        <MavenEmptyView />
-      ) : (
-        artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
-          return (
-            <ArtifactList
-              key={artifactsIndex}
-              artifactName={artifactInfo.artifactName}
-              artifacts={artifacts}
-              artifactsIndex={artifactsIndex}
-              currentTag={currentTag}
-              tagList={artifactInfo.tagList}
-            />
-          );
-        })
-      )}
+      <MavenEmptyView title={"No Artifacts"} description={""} />
+      {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {
+        return (
+          <ArtifactList
+            key={artifactsIndex}
+            artifactName={artifactInfo.artifactName}
+            artifacts={artifacts}
+            artifactsIndex={artifactsIndex}
+            currentTag={currentTag}
+            tagList={artifactInfo.tagList}
+          />
+        );
+      })}
     </List>
   );
 }
