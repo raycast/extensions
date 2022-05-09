@@ -1,7 +1,7 @@
 import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
-import { newURL, Sourcegraph } from "..";
+import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
+import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
   url: string;
@@ -44,13 +44,15 @@ export async function performSearch(
     return;
   }
 
+  const link = new LinkBuilder("search");
+
   const parameters = new URLSearchParams([
     ["q", query],
-    ["v", "V2"],
+    ["v", LATEST_VERSION],
     ["t", patternType],
     ["display", "1500"],
   ]);
-  const requestURL = newURL(src, "/.api/search/stream", parameters);
+  const requestURL = link.new(src, "/.api/search/stream", parameters);
   const stream = src.token
     ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
     : new EventSource(requestURL);
@@ -76,7 +78,7 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const matchURL = newURL(src, getMatchUrl(match));
+          const matchURL = link.new(src, getMatchUrl(match));
           // Do some pre-processing of results, since some of the API outputs are a bit
           // confusing, to make it easier later on.
           switch (match.type) {
@@ -90,7 +92,7 @@ export async function performSearch(
             case "symbol":
               match.symbols.forEach((s) => {
                 // Turn this into a full URL
-                s.url = newURL(src, s.url);
+                s.url = link.new(src, s.url);
               });
           }
           return { url: matchURL, match };

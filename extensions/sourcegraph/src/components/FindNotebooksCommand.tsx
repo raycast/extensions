@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 import { useQuery } from "@apollo/client";
 
-import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
+import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
 import { copyShortcut } from "./shortcuts";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 import ExpandableErrorToast from "./ExpandableErrorToast";
@@ -16,6 +16,8 @@ import {
   NotebooksOrderBy,
 } from "../sourcegraph/gql/schema";
 import { bold, codeBlock, inlineCode, italic, quoteBlock } from "../markdown";
+
+const link = new LinkBuilder("notebooks");
 
 /**
  * FindNotebooksCommand is the shared search notebooks command.
@@ -54,7 +56,7 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, `/notebooks/new`)} />
+                <Action.OpenInBrowser title="Create in Browser" url={link.new(src, `/notebooks/new`)} />
               </ActionPanel>
             }
           />
@@ -92,7 +94,7 @@ function NotebookResultItem({
   }
   const stars = notebook.stars?.totalCount || 0;
   const author = notebook.creator?.displayName || notebook.creator?.username || "";
-  const url = newURL(src, `/notebooks/${notebook.id}`);
+  const url = link.new(src, `/notebooks/${notebook.id}`);
   const accessories: List.Item.Accessory[] = [];
   if (stars) {
     accessories.push({
@@ -101,6 +103,7 @@ function NotebookResultItem({
         source: Icon.Star,
         tintColor: notebook.viewerHasStarred ? ColorEmphasis : undefined,
       },
+      tooltip: notebook.viewerHasStarred ? "Starred by you" : `${stars} stars`,
     });
   }
   return (
@@ -112,6 +115,7 @@ function NotebookResultItem({
       icon={{
         source: Icon.Document,
         tintColor: notebook.public ? ColorDefault : ColorPrivate,
+        tooltip: notebook.public ? "Public notebook" : "Private notebook",
       }}
       actions={
         <ActionPanel>
@@ -162,7 +166,7 @@ ${
     : ""
 }`;
 
-  const notebookURL = newURL(src, `/notebooks/${notebook.id}`);
+  const notebookURL = link.new(src, `/notebooks/${notebook.id}`);
   const namespaceIsCreator = notebook.namespace?.namespaceName == notebook.creator?.username;
   return (
     <Detail
@@ -170,12 +174,12 @@ ${
       navigationTitle={"Preview Search Notebook"}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Author" text={author} target={newURL(src, notebook.creator?.url || "")} />
+          <Detail.Metadata.Link title="Author" text={author} target={link.new(src, notebook.creator?.url || "")} />
           {notebook.namespace && !namespaceIsCreator ? (
             <Detail.Metadata.Link
               title="Owned by"
               text={notebook.namespace.namespaceName}
-              target={newURL(src, notebook.namespace.url)}
+              target={link.new(src, notebook.namespace.url)}
             />
           ) : (
             <Fragment />

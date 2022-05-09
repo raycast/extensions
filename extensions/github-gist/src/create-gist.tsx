@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import {
   checkGistFileContent,
@@ -11,10 +11,12 @@ import {
   updateGist,
 } from "./util/gist-utils";
 import { fetchItemInput, ItemSource } from "./util/input";
+import { refreshNumber } from "./hooks/hooks";
+import { GistFileForm } from "./components/gist-file-form";
 
 export default function CreateGist(props: {
   gist: Gist | undefined;
-  refreshUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>] | undefined;
+  setRefresh: Dispatch<SetStateAction<number>> | undefined;
 }) {
   const gist =
     typeof props.gist == "undefined"
@@ -25,8 +27,12 @@ export default function CreateGist(props: {
           file: [],
         }
       : props.gist;
-  const [refresh, setRefresh] =
-    typeof props.refreshUseState == "undefined" ? useState<number[]>([0]) : props.refreshUseState;
+  const setRefresh =
+    typeof props.setRefresh == "undefined"
+      ? () => {
+          return;
+        }
+      : props.setRefresh;
 
   const isEdit = typeof props.gist != "undefined";
   const [description, setDescription] = useState<string>("");
@@ -103,7 +109,7 @@ export default function CreateGist(props: {
                       title: isEdit ? "Update gist success!" : "Create gist success!",
                       message: "Click to copy gist link.",
                       primaryAction: {
-                        title: "Copy gist Link",
+                        title: "Copy gist link",
                         onAction: (toast) => {
                           Clipboard.copy(String(response.data.html_url));
                           toast.title = "Link is copied to Clipboard.";
@@ -111,7 +117,7 @@ export default function CreateGist(props: {
                         },
                       },
                       secondaryAction: {
-                        title: "Open in Browser",
+                        title: "Open in browser",
                         onAction: (toast) => {
                           open(String(response.data.html_url));
                           toast.hide();
@@ -120,9 +126,7 @@ export default function CreateGist(props: {
                       },
                     };
                     await showToast(options);
-                    const _refresh = [...refresh];
-                    _refresh[0]++;
-                    setRefresh(_refresh);
+                    setRefresh(refreshNumber());
                   } else {
                     await showToast(Toast.Style.Success, isEdit ? "Update gist failure." : "Create gist failure.");
                   }
@@ -146,7 +150,7 @@ export default function CreateGist(props: {
             <Action
               title="Remove File"
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 const _gistFiles = [...gistFiles];
                 _gistFiles.pop();
@@ -182,33 +186,12 @@ export default function CreateGist(props: {
       )}
       {gistFiles.map((gistFile, index, array) => {
         return (
-          <React.Fragment key={"file_fragment" + index}>
-            <Form.Separator />
-            <Form.TextField
-              id={"file_name" + index}
-              key={"file_name" + index}
-              title={" Filename  " + (index + 1)}
-              placeholder={"Filename include extension..."}
-              value={array[index].filename}
-              onChange={(newValue) => {
-                const _gistFiles = [...gistFiles];
-                _gistFiles[index].filename = newValue;
-                setGistFiles(_gistFiles);
-              }}
-            />
-            <Form.TextArea
-              id={"file_content" + index}
-              key={"file_content" + index}
-              value={array[index].content}
-              title={"Content"}
-              placeholder={"File content can't be empty..."}
-              onChange={(newValue) => {
-                const _gistFiles = [...gistFiles];
-                _gistFiles[index].content = newValue;
-                setGistFiles(_gistFiles);
-              }}
-            />
-          </React.Fragment>
+          <GistFileForm
+            key={"file_fragment" + index}
+            array={array}
+            index={index}
+            useState={[gistFiles, setGistFiles]}
+          />
         );
       })}
     </Form>

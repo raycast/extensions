@@ -5,15 +5,15 @@ Get and set Bing wallpapers within 15 days.
 **Commands**
 
 - **Set Bing Wallpaper**: Get and set Bing wallpapers within 15 days
-  - Set Desktop Wallpaper(↩︎): Set the current picture as desktop wallpaper
+  - Set Desktop Wallpaper: Set the current picture as desktop wallpaper
 
-  - Download Picture(⌘↩︎): Download Pictures, directory is `/Users/xxxx/Downloads`
+  - Download Picture: Download Pictures, directory is `/Users/xxxx/Downloads`
 
-  - Set Random Wallpaper(⌘R): Set random picture as desktop wallpaper
+  - Set Random Wallpaper: Set random picture as desktop wallpaper
 
-  - Search Picture(⇧⌘S): Search current picture with bing
+  - Search Picture: Search current picture with bing
 
-  - More Bing Wallpaper(⇧⌘M): Get more Bing wallpaper.
+  - More Bing Wallpaper: Get more Bing wallpaper.
 
 - **Random Bing Wallpaper**: Set random Bing wallpapers within 15 days to desktop
 
