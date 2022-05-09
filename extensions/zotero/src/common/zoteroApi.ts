@@ -1,12 +1,12 @@
 import { stat, readFile, writeFile, copyFile } from "fs/promises";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, environment} from "@raycast/api";
 import * as utils from "./utils";
-import Database from "better-sqlite3";
+import { readFileSync } from "fs";
+import initSqlJs from "sql.js";
 
 const path = require('path');
 
 interface Preferences {
-  better_sqlite_path: string;
   zotero_path: string;
 }
 
@@ -42,7 +42,7 @@ SELECT  items.itemID AS id,
     LEFT JOIN deletedItems
         ON items.itemID = deletedItems.itemID
 -- Ignore notes and attachments
-WHERE items.itemTypeID not IN (1, 2, 3, 6, 12, 13, 14, 27)
+WHERE items.itemTypeID not IN (1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 24, 25, 26, 27, 36, 37)
 AND deletedItems.dateDeleted IS NULL
 `;
 
@@ -51,7 +51,7 @@ SELECT tags.name AS name
     FROM tags
     LEFT JOIN itemTags
         ON tags.tagID = itemTags.tagID
-WHERE itemTags.itemID = ?
+WHERE itemTags.itemID = :id
 `;
 
 const METADATA_SQL = `
@@ -62,7 +62,7 @@ SELECT  fields.fieldName AS name,
         ON itemData.fieldID = fields.fieldID
     LEFT JOIN itemDataValues
         ON itemData.valueID = itemDataValues.valueID
-WHERE itemData.itemID = ?
+WHERE itemData.itemID = :id
 `;
 
 const ATTACHMENTS_SQL = `
@@ -88,7 +88,7 @@ SELECT
 FROM itemAttachments
     LEFT JOIN items
         ON itemAttachments.itemID = items.itemID
-WHERE itemAttachments.parentItemID = ?
+WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
 `
 const cachePath = utils.cachePath('zotero.json');
@@ -100,16 +100,29 @@ function resolveHome(filepath: string) : string{
   return filepath;
 }
 
-function getLatestModifyDate(): Date {
+async function openDb () {
   const preferences: Preferences = getPreferenceValues();
   let f_path = resolveHome(preferences.zotero_path);
   let new_fPath = f_path + '.raycast'
-  const db = new Database(new_fPath, { nativeBinding: preferences.better_sqlite_path});
 
-  const stmt = db.prepare(ITEMS_SQL);
-  let rows = stmt.all();
-  let latest = new Date(rows[0].modified);
-  for (const row of rows) {
+  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const db = readFileSync(new_fPath);
+  return new SQL.Database(db);
+}
+
+async function getLatestModifyDate(): Promise<Date> {
+  const db = await openDb();
+  let statement = db.prepare(ITEMS_SQL);
+
+  var results = [];
+  while (statement.step()) {
+    results.push(statement.getAsObject());
+  }
+
+  statement.free();
+
+  let latest = new Date(results[0].modified);
+  for (const row of results) {
     let d = new Date(row.modified);
     if (d > latest){
       latest = d;
@@ -120,24 +133,34 @@ function getLatestModifyDate(): Date {
   return latest;
 }
 
-function getData(): RefData[] {
-  const preferences: Preferences = getPreferenceValues();
-  let f_path = resolveHome(preferences.zotero_path);
-  let new_fPath = f_path + '.raycast'
-  const db = new Database(new_fPath, { nativeBinding: preferences.better_sqlite_path});
+async function getData(): Promise<RefData[]> {
+  const db = await openDb();
 
-  const stmt = db.prepare(ITEMS_SQL);
-  let rows = stmt.all();
-  for (const row of rows) {
+  let st1 = db.prepare(ITEMS_SQL);
+
+  var rows = [];
+  while (st1.step()) {
+    let row = st1.getAsObject();
     const st2 = db.prepare(TAGS_SQL);
+    st2.bind({":id": row.id});
+
     var v = [];
-    for (const c of st2.iterate(row.id)) {
-      v.push(c.name)
+    while (st2.step()) {
+      v.push(st2.getAsObject().name)
     }
+    st2.free();
     row.tags = v;
 
+
     const st3 = db.prepare(METADATA_SQL);
-    const mds = st3.all(row.id);
+    st3.bind({":id": row.id});
+
+    var mds = [];
+    while (st3.step()) {
+      mds.push(st3.getAsObject())
+    }
+    st3.free();
+
     if(mds)
     {
       for (const md of mds) {
@@ -146,12 +169,21 @@ function getData(): RefData[] {
     }
 
     const st4 = db.prepare(ATTACHMENTS_SQL);
-    const at = st4.get(row.id);
+    st4.bind({":id": row.id});
+
+    st4.step();
+    var at = st4.getAsObject();
+    st4.free();
+
     if (at) {
     row.attachment = at;
     }
+    rows.push(row);
   }
+
+  st1.free();
   db.close();
+
   return rows;
 }
 
@@ -163,7 +195,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   await copyFile(f_path, new_fPath);
 
   async function updateCache(): Promise<RefData[]> {
-    const data = getData();
+    const data = await getData();
     try {
       await writeFile(cachePath, JSON.stringify(data));
     } catch (err) {
@@ -186,7 +218,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       const data = JSON.parse(cacheBuffer.toString());
       return data
     } else {
-      const latest =  getLatestModifyDate();
+      const latest =  await getLatestModifyDate();
       if (latest < cacheTime){
         const cacheBuffer = await readFile(cachePath);
         const data = JSON.parse(cacheBuffer.toString());
@@ -209,7 +241,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   if (q) {
     return ret.filter(function (e) {
-        return e.title.toLowerCase().includes(q.toLowerCase()) || e.tags?.includes(q);
+        return e.title?.toLowerCase().includes(q.toLowerCase()) || e.tags?.includes(q);
     })
     .sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
   }

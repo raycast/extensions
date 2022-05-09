@@ -18,14 +18,6 @@
   ],
   "preferences": [
     {
-      "name": "better_sqlite_path",
-      "type": "textfield",
-      "required": true,
-      "title": "better sqlite node file path",
-      "description": "Path to better sqlite node file",
-      "placeholder": "Enter path to better sqlite node file"
-    },
-    {
       "name": "zotero_path",
       "type": "textfield",
       "required": false,
@@ -37,10 +29,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.34.1",
-    "better-sqlite3": "^7.5.1",
-    "he": "^1.2.0",
-    "modern-async": "^1.1.2",
-    "node-fetch": "^3.2.4"
+    "sql.js": "^1.6.2"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
@@ -48,11 +37,8 @@
     "@types/react": "^18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
-    "aws-sdk": "^2.1130.0",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
-    "mock-aws-s3": "^4.0.2",
-    "nock": "^13.2.4",
     "react-devtools": "^4.24.5",
     "typescript": "^4.6.4"
   },
