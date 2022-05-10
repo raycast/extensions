@@ -66,8 +66,7 @@ const CommandRunner: FC<ResultProps> = ({ command }) => {
       const doShowToast = async () => {
         await showToast({
           style: commandSucceeded ? Toast.Style.Success : Toast.Style.Failure,
-          title: commandSucceeded ? "Success" : "Error",
-          message: commandSucceeded ? successMessage : errorMessage,
+          title: commandSucceeded ? successMessage : errorMessage,
         })
       }
       if (processExit !== undefined) doShowToast()
