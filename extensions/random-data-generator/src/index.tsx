@@ -56,7 +56,10 @@ const buildItems = (path: string) => {
       }
 
       if (_.isFunction(func)) {
-        const getValue = (): string => func().toString();
+        const getValue = (): string => {
+          const value = func();
+          return value ? value.toString() : '';
+        };
         acc.push({ section: path, id: key, value: getValue(), getValue });
       } else if (_.isObject(func)) {
         acc.push(...buildItems(path ? `${path}.${key}` : key));
