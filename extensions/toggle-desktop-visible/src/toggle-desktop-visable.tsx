@@ -1,42 +1,21 @@
-import { exec } from "node:child_process";
+import { spawnSync } from "child_process";
 import { showHUD } from "@raycast/api";
 
-function checkDesktopState(): Promise<string> {
-  const desktopState = "defaults read com.apple.finder CreateDesktop";
-
-  return new Promise((res, rej) => {
-    exec(desktopState, (err, stdout, stderr) => {
-      const haveError = err || stderr;
-      if (haveError) {
-        rej && rej(haveError);
-        return;
-      }
-
-      res(stdout.trim());
-    });
-  });
-}
-
-function setDesktopState(state: string): Promise<string> {
-  const toggle = state === "true";
-  const toggleDesktopCmd = `defaults write com.apple.finder CreateDesktop ${!toggle}; killall Finder`;
-
-  return new Promise((res, rej) => {
-    exec(toggleDesktopCmd, (err, stdout, stderr) => {
-      const haveError = err || stderr;
-      if (haveError) {
-        rej && rej(haveError);
-        return;
-      }
-
-      res(toggle ? "Hidden Desktop 🙈" : "Show Desktop 🙉");
-    });
-  });
+function toggleDesktopState(isHidden: boolean): string {
+  if (isHidden) {
+    spawnSync("defaults", ["write", "com.apple.finder", "CreateDesktop", "true"]);
+    spawnSync("killall", ["Finder"]);
+    return "Desktop Visible 🙉";
+  }
+  spawnSync("defaults", ["write", "com.apple.finder", "CreateDesktop", "false"]);
+  spawnSync("killall", ["Finder"]);
+  return "Desktop Hidden 🙈";
 }
 
 export default async function () {
-  const state = await checkDesktopState();
-  const result = await setDesktopState(state);
+  const { stdout } = spawnSync("defaults", ["read", "com.apple.finder", "CreateDesktop"], {
+    encoding: "utf-8",
+  });
 
-  await showHUD(result);
+  await showHUD(toggleDesktopState(stdout.trim() === "false"));
 }
