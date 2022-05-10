@@ -1,79 +1,100 @@
-import { getPreferenceValues, showToast, Color, Form, Toast } from "@raycast/api";
+import { showToast, Color, Form, Toast, OAuth, getPreferenceValues } from "@raycast/api";
 import { Client, isNotionClientError } from "@notionhq/client";
 import fetch from "node-fetch";
 import moment from "moment";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
+import {
+  Page,
+  Database,
+  DatabaseProperty,
+  DatabasePropertyOption,
+  PageContent,
+  User,
+  PagePropertyType,
+  supportedPropTypes,
+} from "./types";
 
-const notion = new Client({
-  auth: getPreferenceValues().notion_token,
+const clientId = "c843219a-d93c-403c-8e4d-e8aa9a987494";
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "Notion",
+  providerIcon: "notion-logo.png",
+  providerId: "notion",
+  description: "Connect your Notion account",
 });
 
-export interface User {
-  id: string;
-  type: string;
-  name: string | null;
-  avatar_url: string | null;
+const preferenceToken = getPreferenceValues().notion_token;
+let notion = new Client({
+  auth: preferenceToken,
+});
+
+// Authorization
+
+let alreadyAuthorizing: Promise<void> | false = false;
+
+export async function authorize(): Promise<void> {
+  // we are authorized with a token in the preference
+  if (preferenceToken) {
+    return;
+  }
+
+  const tokenSet = await client.getTokens();
+  // we are already authorized with oauth
+  if (tokenSet?.accessToken) {
+    notion = new Client({
+      auth: tokenSet.accessToken,
+    });
+    return;
+  }
+
+  if (alreadyAuthorizing) {
+    await alreadyAuthorizing;
+    return;
+  }
+
+  // we aren't yet authorized so let's do so now
+  alreadyAuthorizing = new Promise((resolve, reject) => {
+    async function run() {
+      const authRequest = await client.authorizationRequest({
+        endpoint: "https://raycast-notion-pkce-proxy.herokuapp.com/authorize",
+        clientId: clientId,
+        scope: "",
+        extraParameters: { owner: "user" },
+      });
+      const { authorizationCode } = await client.authorize(authRequest);
+      const tokens = await fetchTokens(authRequest, authorizationCode);
+
+      await client.setTokens(tokens);
+
+      notion = new Client({
+        auth: (await client.getTokens())?.accessToken,
+      });
+    }
+
+    run().then(resolve, reject);
+  });
+
+  await alreadyAuthorizing;
 }
 
-export interface Database {
-  id: string;
-  last_edited_time: string;
-  title: string | null;
-  icon_emoji: string | null;
-  icon_file: string | null;
-  icon_external: string | null;
-}
-
-export interface DatabaseProperty {
-  id: string;
-  type: string;
-  name: string;
-  options: DatabasePropertyOption[] | User[];
-  relation_id?: string;
-}
-
-export interface DatabasePropertyOption {
-  id?: string;
-  name: string;
-  color?: string;
-  icon?: string;
-}
-
-export interface Page {
-  object: string;
-  id: string;
-  parent_page_id?: string;
-  parent_database_id?: string;
-  last_edited_time?: string;
-  title: string | null;
-  icon_emoji: string | null;
-  icon_file: string | null;
-  icon_external: string | null;
-  url?: string;
-  properties: Record<string, PagePropertyType>;
-}
-
-export interface PageContent {
-  markdown: string | undefined;
-}
-
-export interface DatabaseView {
-  properties?: Record<string, any>;
-  create_properties?: string[];
-  sort_by?: Record<string, any>;
-  type?: string;
-  name?: string | null;
-  kanban?: KabanView;
-}
-
-export interface KabanView {
-  property_id: string;
-  backlog_ids: string[];
-  not_started_ids: string[];
-  started_ids: string[];
-  completed_ids: string[];
-  canceled_ids: string[];
+export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string): Promise<OAuth.TokenResponse> {
+  const response = await fetch("https://raycast-notion-pkce-proxy.herokuapp.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: clientId,
+      code,
+      code_verifier: authRequest.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: authRequest.redirectURI,
+    }),
+  });
+  if (!response.ok) {
+    console.error("fetch tokens error:", await response.text());
+    throw new Error(response.statusText);
+  }
+  return (await response.json()) as OAuth.TokenResponse;
 }
 
 function isNotNullOrUndefined<T>(input: null | undefined | T): input is T {
@@ -83,6 +104,7 @@ function isNotNullOrUndefined<T>(input: null | undefined | T): input is T {
 // Fetch databases
 export async function fetchDatabases(): Promise<Database[]> {
   try {
+    await authorize();
     const databases = await notion.search({
       sort: {
         direction: "descending",
@@ -97,7 +119,7 @@ export async function fetchDatabases(): Promise<Database[]> {
         (x) =>
           ({
             id: x.id,
-            last_edited_time: x.last_edited_time,
+            last_edited_time: new Date(x.last_edited_time).getTime(),
             title: x.title[0]?.plain_text,
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
@@ -124,6 +146,7 @@ export async function fetchDatabases(): Promise<Database[]> {
 // Fetch database properties
 export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
   try {
+    await authorize();
     const database = await notion.databases.retrieve({ database_id: databaseId });
     const propertyNames = Object.keys(database.properties).reverse();
 
@@ -131,6 +154,10 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 
     propertyNames.forEach(function (name: string) {
       const property = database.properties[name];
+
+      if (supportedPropTypes.indexOf(property.type) === -1) {
+        return;
+      }
 
       const databaseProperty = {
         id: property.id,
@@ -181,33 +208,30 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 /**
  * Query a database
  */
-export async function queryDatabase(
-  databaseId: string,
-  query: { title: string | undefined } | undefined
-): Promise<Page[]> {
+export async function queryDatabase(databaseId: string, query: string | undefined): Promise<Page[]> {
   try {
+    await authorize();
     const database = await notion.databases.query({
       database_id: databaseId,
-      page_size: 100,
+      page_size: 20,
       sorts: [
         {
           direction: "descending",
           timestamp: "last_edited_time",
         },
       ],
-      filter:
-        query && query.title
-          ? {
-              and: [
-                {
-                  property: "title",
-                  title: {
-                    contains: query.title,
-                  },
+      filter: query
+        ? {
+            and: [
+              {
+                property: "title",
+                title: {
+                  contains: query,
                 },
-              ],
-            }
-          : undefined,
+              },
+            ],
+          }
+        : undefined,
     });
 
     return database.results.map(pageMapper);
@@ -231,6 +255,7 @@ export async function queryDatabase(
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
   try {
+    await authorize();
     const { database, content, ...props } = values;
 
     const arg: Parameters<typeof notion.pages.create>[0] = {
@@ -367,6 +392,7 @@ export async function patchPage(
   properties: Parameters<typeof notion.pages.update>[0]["properties"]
 ): Promise<Page | undefined> {
   try {
+    await authorize();
     const page = await notion.pages.update({
       page_id: pageId,
       properties,
@@ -391,14 +417,15 @@ export async function patchPage(
 }
 
 // Search pages
-export async function searchPages(query: string | undefined): Promise<Page[]> {
+export async function search(query: string | undefined): Promise<Page[]> {
   try {
+    await authorize();
     const database = await notion.search({
       sort: {
         direction: "descending",
         timestamp: "last_edited_time",
       },
-      filter: { property: "object", value: "page" },
+      page_size: 20,
       query,
     });
 
@@ -423,6 +450,7 @@ export async function searchPages(query: string | undefined): Promise<Page[]> {
 // Fetch page content
 export async function fetchPageContent(pageId: string): Promise<PageContent | undefined> {
   try {
+    await authorize();
     const { results } = await notion.blocks.children.list({
       block_id: pageId,
     });
@@ -452,6 +480,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent | un
 // Fetch users
 export async function fetchUsers(): Promise<User[]> {
   try {
+    await authorize();
     const users = await notion.users.list({});
     return users.results
       .map((x) => (x.object === "user" && x.type === "person" ? x : undefined))
@@ -482,40 +511,41 @@ export async function fetchUsers(): Promise<User[]> {
   }
 }
 
-// Fetch Extension README
-export async function fetchExtensionReadMe(): Promise<string | undefined> {
+export async function appendToPage(pageId: string, params: { content: string }): Promise<{ markdown: string }> {
   try {
-    const response = await fetch(
-      `https://raw.githubusercontent.com/raycast/extensions/main/extensions/notion/README.md`,
-      {
-        method: "get",
-      }
-    );
-    const text = (await response.text()) as string;
+    await authorize();
 
-    return text;
-  } catch (err) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to load Extension README",
-    });
+    const arg: Parameters<typeof notion.blocks.children.append>[0] = {
+      block_id: pageId,
+      children: markdownToBlocks(params.content),
+    };
+
+    const { results } = await notion.blocks.children.append(arg);
+
+    const n2m = new NotionToMarkdown({ notionClient: notion });
+
+    return {
+      markdown: results.length === 0 ? "" : "\n\n" + n2m.toMarkdownString(await n2m.blocksToMarkdown(results)),
+    };
+  } catch (err: unknown) {
+    console.error(err);
+    if (isNotionClientError(err)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to add content to the page",
+      });
+    }
+    return { markdown: "" };
   }
 }
-
-function getPropertiesTypes(page: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>) {
-  if (page.object === "page" && "properties" in page) {
-    return page.properties;
-  }
-  throw new Error("this function won't ever be called, it's only for typescript");
-}
-
-type UnwrapRecord<T> = T extends Record<string, infer U> ? U : T;
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
-
 type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-export type PagePropertyType = UnwrapRecord<ReturnType<typeof getPropertiesTypes>>;
 
 function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>): Page {
   const page: Page = {
@@ -526,7 +556,7 @@ function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion
     parent_page_id: "parent" in jsonPage && "page_id" in jsonPage.parent ? jsonPage.parent.page_id : undefined,
     parent_database_id:
       "parent" in jsonPage && "database_id" in jsonPage.parent ? jsonPage.parent.database_id : undefined,
-    last_edited_time: "last_edited_time" in jsonPage ? jsonPage.last_edited_time : undefined,
+    last_edited_time: "last_edited_time" in jsonPage ? new Date(jsonPage.last_edited_time).getTime() : undefined,
     icon_emoji: "icon" in jsonPage && jsonPage.icon?.type === "emoji" ? jsonPage.icon.emoji : null,
     icon_file: "icon" in jsonPage && jsonPage.icon?.type === "file" ? jsonPage.icon.file.url : null,
     icon_external: "icon" in jsonPage && jsonPage.icon?.type === "external" ? jsonPage.icon.external.url : null,

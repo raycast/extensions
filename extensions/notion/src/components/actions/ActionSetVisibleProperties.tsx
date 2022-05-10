@@ -1,6 +1,9 @@
 import { ActionPanel, Color, Action, Image } from "@raycast/api";
-import { DatabaseProperty } from "../utils/notion";
+import { DatabaseProperty } from "../../utils/types";
 
+/**
+ * An action to set the properties that are visible in a form/view
+ */
 export function ActionSetVisibleProperties(props: {
   title?: string;
   icon?: Image.ImageLike;
@@ -10,7 +13,7 @@ export function ActionSetVisibleProperties(props: {
   onUnselect: (propertyId: string) => void;
 }): JSX.Element {
   const title = props.title ? props.title : "Show / Hide Properties...";
-  const icon = props.icon ? props.icon : "./icon/shown.png";
+  const icon = props.icon ? props.icon : { source: "./icon/shown.png", tintColor: Color.PrimaryText };
   const selectedPropertiesIds = props.selectedPropertiesIds ? props.selectedPropertiesIds : [];
   const databaseProperties = props.databaseProperties;
   const onSelect = props.onSelect;
@@ -28,7 +31,7 @@ export function ActionSetVisibleProperties(props: {
           return (
             <Action
               key={`selected-property-${property.id}`}
-              icon={"./icon/" + property.type + ".png"}
+              icon={{ source: "./icon/" + property.type + ".png", tintColor: Color.PrimaryText }}
               title={property.name + "  ✓"}
               onAction={function () {
                 onUnselect(property.id);

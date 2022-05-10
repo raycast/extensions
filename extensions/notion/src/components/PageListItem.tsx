@@ -1,14 +1,14 @@
-import { ActionPanel, Icon, List, Action, Image } from "@raycast/api";
-import { DatabaseView, Page, DatabaseProperty, User, extractPropertyValue } from "../utils/notion";
-import {
-  ActionSetVisibleProperties,
-  ActionEditPageProperty,
-  CreateDatabaseForm,
-  DatabaseViewForm,
-  DatabaseList,
-  PageDetail,
-} from "./";
+import { ActionPanel, Icon, List, Action, Image, Color } from "@raycast/api";
+import { useSetAtom } from "jotai";
 import moment from "moment";
+import { extractPropertyValue } from "../utils/notion";
+import { DatabaseView, Page, DatabaseProperty, User } from "../utils/types";
+import { recentlyOpenedPagesAtom } from "../utils/state";
+import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
+import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { DatabaseList } from "./DatabaseList";
+import { PageDetail } from "./PageDetail";
+
 import { handleOnOpenPage } from "../utils/openPage";
 
 export function PageListItem(props: {
@@ -17,12 +17,14 @@ export function PageListItem(props: {
   databaseView?: DatabaseView;
   databaseProperties?: DatabaseProperty[];
   saveDatabaseView?: (newDatabaseView: DatabaseView) => void;
-  onForceRerender?: () => void;
+  onPageCreated: (page: Page) => void;
+  onPageUpdated: (page: Page) => void;
   users?: User[];
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
 }): JSX.Element {
-  const { page, customActions, databaseProperties, databaseView, saveDatabaseView, onForceRerender } = props;
+  const { page, customActions, databaseProperties, databaseView, saveDatabaseView, onPageCreated, onPageUpdated } =
+    props;
   const pageId = page.id;
   const icon = props.icon
     ? props.icon
@@ -37,21 +39,30 @@ export function PageListItem(props: {
       };
   const keywords: string[] = props.keywords ? props.keywords : [];
 
+  const storeRecentlyOpenedPage = useSetAtom(recentlyOpenedPagesAtom);
+
   let accessories: List.Item.Accessory[] = page.last_edited_time
-    ? [{ text: moment(parseInt(page.last_edited_time)).fromNow() }]
+    ? [
+        {
+          text: moment.unix(page.last_edited_time / 1000).fromNow(),
+          tooltip: moment.unix(page.last_edited_time / 1000).toLocaleString(),
+        },
+      ]
     : [];
 
   if (databaseView && databaseView.properties) {
     const visiblePropertiesIds = Object.keys(databaseView.properties);
     if (visiblePropertiesIds[0]) {
       const accessoryTitles: string[] = [];
-      visiblePropertiesIds.forEach(function (propId: string) {
-        const extractedProperty = extractPropertyValue(page.properties[propId]);
-        if (extractedProperty) {
-          keywords.push(extractedProperty);
-          accessoryTitles.push(extractedProperty);
-        }
-      });
+      visiblePropertiesIds
+        .map((propId) => Object.values(page.properties).find((x) => x.id == propId))
+        .forEach((prop: any | undefined) => {
+          const extractedProperty = prop ? extractPropertyValue(prop) : undefined;
+          if (extractedProperty) {
+            keywords.push(extractedProperty);
+            accessoryTitles.push(extractedProperty);
+          }
+        });
 
       accessories = accessoryTitles.map((x) => ({ text: x }));
     }
@@ -89,16 +100,14 @@ export function PageListItem(props: {
             <Action
               title="Open in Notion"
               icon={"notion-logo.png"}
-              onAction={function () {
-                handleOnOpenPage(page);
-              }}
+              onAction={() => handleOnOpenPage(page, storeRecentlyOpenedPage)}
             />
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
                 key={`page-${pageId}-action-edit-property`}
                 title="Edit Property"
-                icon={"icon/edit_page_property.png"}
+                icon={{ source: "icon/edit_page_property.png", tintColor: Color.PrimaryText }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               >
                 {quickEditProperties?.map(function (dp: DatabaseProperty) {
@@ -108,7 +117,7 @@ export function PageListItem(props: {
                       databaseProperty={dp}
                       pageId={page.id}
                       pageProperty={page.properties[dp.id]}
-                      onForceRerender={onForceRerender}
+                      onPageUpdated={onPageUpdated}
                     />
                   );
                 })}
@@ -117,12 +126,21 @@ export function PageListItem(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action.Push
-              title="Create New Page"
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreateDatabaseForm databaseId={page.parent_database_id} onForceRerender={onForceRerender} />}
-            />
+            {page.object === "page" ? (
+              <Action.Push
+                title="Append Content to Page"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                target={<AppendToPageForm page={page} />}
+              />
+            ) : (
+              <Action.Push
+                title="Create New Page"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                target={<CreateDatabaseForm databaseId={page.parent_database_id} onPageCreated={onPageCreated} />}
+              />
+            )}
           </ActionPanel.Section>
 
           {databaseProperties && saveDatabaseView ? (
@@ -130,7 +148,10 @@ export function PageListItem(props: {
               {page.parent_database_id ? (
                 <Action.Push
                   title="Set View Type..."
-                  icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
+                  icon={{
+                    source: databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png",
+                    tintColor: Color.PrimaryText,
+                  }}
                   target={
                     <DatabaseViewForm
                       isDefaultView
@@ -144,16 +165,20 @@ export function PageListItem(props: {
               <ActionSetVisibleProperties
                 databaseProperties={databaseProperties}
                 selectedPropertiesIds={visiblePropertiesIds}
-                onSelect={function (propertyId: string) {
-                  const databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView;
+                onSelect={(propertyId: string) => {
+                  const databaseViewCopy = (
+                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
+                  ) as DatabaseView;
                   if (!databaseViewCopy.properties) {
                     databaseViewCopy.properties = {};
                   }
                   databaseViewCopy.properties[propertyId] = {};
                   saveDatabaseView(databaseViewCopy);
                 }}
-                onUnselect={function (propertyId: string) {
-                  const databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView;
+                onUnselect={(propertyId: string) => {
+                  const databaseViewCopy = (
+                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
+                  ) as DatabaseView;
                   if (!databaseViewCopy.properties) {
                     databaseViewCopy.properties = {};
                   }

@@ -1,27 +1,31 @@
-import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
-import {
-  DatabaseProperty,
-  DatabasePropertyOption,
-  User,
-  notionColorToTintColor,
-  patchPage,
-  PagePropertyType,
-} from "../utils/notion";
+import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast, Color } from "@raycast/api";
 import moment from "moment";
+import { useAtom } from "jotai";
+import { notionColorToTintColor, patchPage, fetchUsers } from "../../utils/notion";
+import { DatabaseProperty, DatabasePropertyOption, PagePropertyType, Page } from "../../utils/types";
+import { usersAtom } from "../../utils/state";
+import { useEffect } from "react";
 
+/**
+ * An Action to update a property of a page
+ */
 export function ActionEditPageProperty(props: {
   databaseProperty: DatabaseProperty;
   pageId: string;
   pageProperty?: PagePropertyType;
-  onForceRerender?: () => void;
+  onPageUpdated: (page: Page) => void;
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
   customOptions?: DatabasePropertyOption[];
 }): JSX.Element | null {
-  const { databaseProperty, pageId, pageProperty, shortcut, onForceRerender } = props;
+  const { databaseProperty, pageId, pageProperty, shortcut, onPageUpdated } = props;
+
+  const [users, storeUsers] = useAtom(usersAtom);
 
   const title = "Set " + databaseProperty.name;
-  const icon = props.icon ? props.icon : "icon/" + databaseProperty.type + ".png";
+  const icon = props.icon
+    ? props.icon
+    : { source: "icon/" + databaseProperty.type + ".png", tintColor: Color.PrimaryText };
   const options = props.customOptions ? props.customOptions : databaseProperty.options || [];
 
   async function setPageProperty(patch: Parameters<typeof patchPage>[1]) {
@@ -34,9 +38,15 @@ export function ActionEditPageProperty(props: {
       showToast({
         title: "Property Updated",
       });
-      onForceRerender?.();
+      onPageUpdated?.(updatedPage);
     }
   }
+
+  useEffect(() => {
+    if (databaseProperty.type === "people") {
+      fetchUsers().then((fetchedUsers) => storeUsers(fetchedUsers));
+    }
+  }, [databaseProperty.type]);
 
   switch (databaseProperty.type) {
     case "checkbox": {
@@ -44,7 +54,7 @@ export function ActionEditPageProperty(props: {
       return (
         <Action
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
-          icon={"icon/" + databaseProperty.type + "_" + value + ".png"}
+          icon={{ source: "icon/" + databaseProperty.type + "_" + value + ".png", tintColor: Color.PrimaryText }}
           shortcut={shortcut}
           onAction={function () {
             setPageProperty({ [databaseProperty.id]: { checkbox: !value } });
@@ -60,7 +70,7 @@ export function ActionEditPageProperty(props: {
           {(options as DatabasePropertyOption[])?.map(function (opt) {
             return (
               <Action
-                key={`page-${pageId}-property-${databaseProperty.id}-select-option-${opt.id}`}
+                key={opt.id}
                 icon={
                   (opt.icon ? opt.icon : opt.id !== "_select_null_")
                     ? {
@@ -89,12 +99,10 @@ export function ActionEditPageProperty(props: {
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Submenu
-            key={`page-${pageId}-property-${databaseProperty.id}-date-start`}
             title={value?.start ? moment(value.start).fromNow() : "No Date"}
-            icon={"icon/date_start.png"}
+            icon={{ source: "icon/date_start.png", tintColor: Color.PrimaryText }}
           >
             <Action
-              key={`page-${pageId}-property-${databaseProperty.id}-date-start-picker`}
               title="Now"
               onAction={function () {
                 const date = value ? value : { start: new Date(Date.now()).toISOString() };
@@ -104,12 +112,10 @@ export function ActionEditPageProperty(props: {
             />
           </ActionPanel.Submenu>
           <ActionPanel.Submenu
-            key={`page-${pageId}-property-${databaseProperty.id}-date-end`}
             title={value?.end ? moment(value.end).fromNow() : "No Date"}
-            icon={"icon/date_end.png"}
+            icon={{ source: "icon/date_end.png", tintColor: Color.PrimaryText }}
           >
             <Action
-              key={`page-${pageId}-property-${databaseProperty.id}-date-end-picker`}
               title="Now"
               onAction={function () {
                 const date = value
@@ -135,7 +141,7 @@ export function ActionEditPageProperty(props: {
             }
             return (
               <Action
-                key={`page-${pageId}-property-${databaseProperty.id}-multi-select-option-${opt.id}`}
+                key={opt.id}
                 icon={{
                   source: opt.id && multiSelectIds.includes(opt.id) ? Icon.Checkmark : Icon.Circle,
                   tintColor: notionColorToTintColor(opt.color),
@@ -173,11 +179,11 @@ export function ActionEditPageProperty(props: {
       const peopleIds = value.map((user) => user.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          <ActionPanel.Section key={`page-${pageId}-property-${databaseProperty.id}-people-selected`}>
+          <ActionPanel.Section>
             {value.map(function (user) {
               return (
                 <Action
-                  key={`page-${pageId}-property-${databaseProperty.id}-people-selected-${user.id}`}
+                  key={user.id}
                   icon={
                     "avatar_url" in user && user.avatar_url
                       ? { source: user.avatar_url, mask: Image.Mask.Circle }
@@ -197,12 +203,12 @@ export function ActionEditPageProperty(props: {
               );
             })}
           </ActionPanel.Section>
-          <ActionPanel.Section key={`page-${pageId}-property-${databaseProperty.id}-people-not-selected`}>
-            {(options as User[])?.map(function (user) {
+          <ActionPanel.Section>
+            {users.map(function (user) {
               if (!peopleIds.includes(user.id)) {
                 return (
                   <Action
-                    key={`page-${pageId}-property-${databaseProperty.id}-people-not-selected-${user.id}`}
+                    key={user.id}
                     icon={user?.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : undefined}
                     title={user?.name ? user.name : "Unknown"}
                     onAction={async function () {

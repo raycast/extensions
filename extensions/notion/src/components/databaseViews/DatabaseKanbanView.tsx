@@ -1,12 +1,22 @@
-import { List, showToast, randomId, Image, Toast } from "@raycast/api";
-import { Page, DatabasePropertyOption, notionColorToTintColor } from "../../utils/notion";
-import { ActionEditPageProperty, PageListItem } from "..";
+import { List, showToast, Image, Toast, Color } from "@raycast/api";
+import { notionColorToTintColor } from "../../utils/notion";
+import { Page, DatabasePropertyOption } from "../../utils/types";
+import { ActionEditPageProperty } from "../actions";
+import { PageListItem } from "../PageListItem";
 import { DatabaseListView } from "./DatabaseListView";
 import { DatabaseViewProps } from "./types";
 
 export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null {
   // Get database page list info
-  const { databaseId, databasePages, databaseProperties, databaseView, onForceRerender, saveDatabaseView } = props;
+  const {
+    databaseId,
+    databasePages,
+    databaseProperties,
+    databaseView,
+    onPageCreated,
+    onPageUpdated,
+    saveDatabaseView,
+  } = props;
 
   // Get kanban view settings
   const kanbanView = databaseView?.kanban;
@@ -17,7 +27,25 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   const completedIds = kanbanView?.completed_ids ? kanbanView.completed_ids : [];
   const canceledIds = kanbanView?.canceled_ids ? kanbanView.canceled_ids : [];
 
-  if (!propertyId) return null;
+  if (!propertyId) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Kanban property missing",
+      message: "Please edit view configuration",
+    });
+    return (
+      <DatabaseListView
+        key={`database-${databaseId}-view-list`}
+        databaseId={databaseId}
+        databasePages={databasePages}
+        databaseProperties={databaseProperties}
+        databaseView={databaseView}
+        onPageCreated={onPageCreated}
+        onPageUpdated={onPageUpdated}
+        saveDatabaseView={saveDatabaseView}
+      />
+    );
+  }
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds);
@@ -26,9 +54,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   const actionEditIds = backlogIds.concat(notStartedIds).concat(startedIds).concat(completedIds).concat(canceledIds);
 
   // Get kanban status
-  const statusProperty = databaseProperties.find(function (dp) {
-    return dp.id === propertyId;
-  });
+  const statusProperty = databaseProperties.find((dp) => dp.id === propertyId);
 
   if (!statusProperty) {
     showToast({
@@ -43,7 +69,8 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
         databasePages={databasePages}
         databaseProperties={databaseProperties}
         databaseView={databaseView}
-        onForceRerender={onForceRerender}
+        onPageCreated={onPageCreated}
+        onPageUpdated={onPageUpdated}
         saveDatabaseView={saveDatabaseView}
       />
     );
@@ -86,7 +113,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   const tempSections: Record<string, Page[]> = {};
 
   databasePages.forEach(function (p) {
-    const prop = p.properties[propertyId];
+    const prop = Object.values(p.properties).find((x) => x.id === propertyId);
 
     const propId = prop && "select" in prop && prop.select?.id ? prop.select.id : "_select_null_";
     if (!tempSections[propId]) {
@@ -131,7 +158,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
     if (!tempSections[sectionId]) return;
 
     databaseSections.push({
-      id: randomId(),
+      id: sectionId,
       pages: tempSections[sectionId],
       name: optionsMap[sectionId]?.name,
       icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) },
@@ -161,15 +188,16 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
                   customOptions={customOptions}
                   pageId={p.id}
                   pageProperty={p.properties[propertyId]}
-                  icon={"./icon/kanban_status_started.png"}
+                  icon={{ source: "./icon/kanban_status_started.png", tintColor: Color.PrimaryText }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  onForceRerender={onForceRerender}
+                  onPageUpdated={onPageUpdated}
                 />,
               ]}
               databaseView={databaseView}
               databaseProperties={databaseProperties}
               saveDatabaseView={saveDatabaseView}
-              onForceRerender={onForceRerender}
+              onPageUpdated={onPageUpdated}
+              onPageCreated={onPageCreated}
             />
           );
         })}
