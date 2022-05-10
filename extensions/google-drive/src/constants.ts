@@ -1,7 +1,18 @@
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 
-export const IGNORED_DIRECTORIES = ["node_modules", "bower_components", ".git", "tmp"];
+export const IGNORED_GLOBS = [
+  "**/node_modules",
+  "**/bower_components",
+  "**/.git",
+  "**/tmp",
+  "**/.DS_Store",
+  "**/.Trashes",
+  "**/.VolumeIcon.icns",
+  "**/.TemporaryItems",
+  "**/.shortcut-targets-by-id",
+  "**/.file-revisions-by-id",
+];
 export const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
 export const NON_PREVIEWABLE_EXTENSIONS = [
   "",
@@ -15,7 +26,6 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
   ".iso",
   ".dmg",
   ".exe",
-  ".DS_Store",
   ".app",
   ".gdoc",
   ".gsheet",
@@ -28,3 +38,4 @@ export const MAX_TMP_FILE_PREVIEWS_LIMIT = 500; // Average size of a file previe
 export const DB_FILE_PATH = join(homedir(), ".raycast-google-drive-sqlite.db");
 export const TMP_FILE_PREVIEWS_PATH = join(tmpdir(), "raycast-google-drive-file-previews");
 export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";
+export const TOAST_UPDATE_INTERVAL = 100;

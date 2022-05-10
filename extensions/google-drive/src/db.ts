@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { existsSync, PathLike, readFileSync, writeFileSync } from "fs";
+import { Entry } from "fast-glob";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
@@ -9,15 +10,17 @@ import {
   FILES_LAST_INDEXED_AT_KEY,
   MAX_RESULTS_WITHOUT_SEARCH_TEXT,
   MAX_RESULTS_WITH_SEARCH_TEXT,
+  TOAST_UPDATE_INTERVAL,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
 import {
   clearAllFilePreviewsCache,
+  formatBytes,
   fuzzyMatch,
-  getDirectories,
+  displayPath,
   getDriveRootPath,
-  getExcludePaths,
-  saveFilesInDirectory,
+  throttledUpdateToastMessage,
+  driveFileStream,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -51,7 +54,7 @@ const dbConnection = async () => {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
     db.close();
-    mandateFilesIndexInvalidation();
+    await mandateFilesIndexInvalidation();
   }
 
   try {
@@ -169,27 +172,59 @@ export const insertFile = (
   const insertStatement = `
       INSERT
         INTO files (name, path, displayPath, fileSizeFormatted, createdAt, updatedAt)
-        VALUES ("${name}", "${path}", "${displayPath}", "${fileSizeFormatted}", "${createdAt.toISOString()}", "${updatedAt.toISOString()}")
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT (path) DO
           UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
-  db.run(insertStatement);
+  db.run(insertStatement, [name, path, displayPath, fileSizeFormatted, createdAt, updatedAt]);
 };
 
-export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
-  if (getExcludePaths().includes(path.toLocaleString())) return;
-  saveFilesInDirectory(path, db);
-  getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
+const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
+  const updateToastMessage = throttledUpdateToastMessage({ toast, interval: TOAST_UPDATE_INTERVAL });
+
+  let totalFiles = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _ of driveFileStream()) {
+    totalFiles += 1;
+    updateToastMessage(`Counting files: ${totalFiles}`);
+  }
+
+  let filesIndexed = 0;
+  for await (const file of driveFileStream({ stats: true })) {
+    const { name, path, stats } = file as unknown as Entry;
+
+    if (stats === undefined) {
+      continue;
+    }
+
+    filesIndexed += 1;
+
+    updateToastMessage(`Indexing: ${Math.round((filesIndexed / totalFiles) * 100)}% (${filesIndexed}/${totalFiles})`);
+
+    insertFile(db, {
+      name,
+      path,
+      displayPath: displayPath(path),
+      fileSizeFormatted: formatBytes(stats.size > 0 ? stats.size : 0),
+      createdAt: (stats.birthtime ? stats.birthtime : new Date()).toISOString(),
+      updatedAt: (stats.mtime ? stats.mtime : new Date()).toISOString(),
+      favorite: false,
+    });
+  }
 };
 
 type IndexFilesOptions = { force?: boolean };
-export const indexFiles = async (
-  path: PathLike,
-  db: Database,
-  options: IndexFilesOptions = { force: false }
-): Promise<boolean> => {
+export const indexFiles = async (db: Database, options: IndexFilesOptions = { force: false }): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
-    let favoriteFilePaths: Array<PathLike> = [];
+    const alreadyIndexed = !!(await filesLastIndexedAt());
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `${alreadyIndexed ? "Updating file index" : "Indexing files"} ${
+        alreadyIndexed ? "" : "for the first time"
+      }`,
+      message: "This may take some time, please wait...",
+    });
+    let favoriteFilePaths: Array<string> = [];
 
     if (options.force) {
       // Backup the favorite file paths before force indexing
@@ -201,23 +236,24 @@ export const indexFiles = async (
       clearAllFilePreviewsCache(false);
     }
 
-    walkRecursivelyAndSaveFiles(path, db);
+    await listFilesAndInsertIntoDb(db, toast);
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {
-      db.run(`UPDATE files SET favorite = 1 WHERE path = "${filePath}"`);
+      db.run(`UPDATE files SET favorite = 1 WHERE path = ?`, [filePath]);
     });
 
     dumpDb(db);
     await setFilesIndexedAt();
 
+    toast.hide();
     return true;
   }
 
   return false;
 };
 
-export const toggleFavorite = (db: Database, path: PathLike, isFavorite: boolean) => {
+export const toggleFavorite = (db: Database, path: string, isFavorite: boolean) => {
   if (!db) return;
 
   const updateStatement = `
