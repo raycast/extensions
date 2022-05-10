@@ -86,7 +86,9 @@ export default class Entry {
       ]
     )
 
-    return cmd.join(" ")
+    const rsyncCommand = cmd.join(" ")
+    const commands = [this.preCommand, rsyncCommand, this.postCommand].filter(Boolean)
+    return commands.join("\n")
   }
 
   toRawData(): EntryDTO {

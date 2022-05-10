@@ -20,8 +20,6 @@ const EntryOptionFormFields: FC<EntryOptionFormFieldsProps> = ({ option, descrip
           const enabled = option.enabled
           const hadValue = option.value
 
-          console.log("onChange value:", enable)
-
           if (!enable && !hadValue) {
             onChange(option.name, undefined)
           } else if (enabled !== enable) {

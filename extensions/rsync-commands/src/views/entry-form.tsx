@@ -168,7 +168,7 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
         info="Filter the list to find a specific option."
         onChange={setOptionFilter}
       />
-      {visibleOptions.map(option => (
+      {rsyncOptions.map(option => (
         <EntryOptionFormFields
           key={option.name}
           option={entry.options[option.name] ?? createEntryOption(option)}
