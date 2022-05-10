@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-drive",
+  "title": "Google Drive",
+  "description": "Fuzzy search files in the mounted Google Drive",
+  "icon": "command-icon.png",
+  "author": "vishaltelangre",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "contributors": [
+    "nametake",
+    "daniel-stoneuk"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "File Search",
+      "subtitle": "Google Drive",
+      "description": "Fuzzy search files in your locally mounted Google Drive folder",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "googleDriveRootPath",
+      "title": "Google Drive root path",
+      "description": "The absolute path to the root of your Google Drive folder",
+      "type": "textfield",
+      "default": "~/Google Drive",
+      "placeholder": "e.g. ~/Google Drive",
+      "required": true
+    },
+    {
+      "name": "shouldShowHiddenFiles",
+      "description": "Show hidden files in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show hidden files",
+      "required": false
+    },
+    {
+      "name": "shouldShowDirectories",
+      "description": "Show directories in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show directories",
+      "required": false
+    },
+    {
+      "name": "excludePaths",
+      "title": "Exclude Paths",
+      "description": "Comma-separated full paths to exclude from search",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "e.g. ~/Google Drive/My Drive/Share, ...",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.0",
+    "fast-glob": "^3.2.11",
+    "fzf": "^0.5.1",
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
+    "use-debounce": "^7.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

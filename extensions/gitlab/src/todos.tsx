@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { TodoList } from "./components/todo";
 
-render(<TodoList />);
+export default function MyTodosRoot(): JSX.Element {
+  return <TodoList />;
+}

@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, ImageLike, CopyToClipboardAction, PasteAction, PushAction } from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Image } from "@raycast/api";
 import { DatabaseView, Page, DatabaseProperty, User, extractPropertyValue } from "../utils/notion";
 import {
   ActionSetVisibleProperties,
@@ -19,12 +19,10 @@ export function PageListItem(props: {
   saveDatabaseView?: (newDatabaseView: DatabaseView) => void;
   onForceRerender?: () => void;
   users?: User[];
-  icon?: ImageLike;
-  accessoryIcon?: ImageLike;
+  icon?: Image.ImageLike;
   customActions?: JSX.Element[];
 }): JSX.Element {
-  const { page, accessoryIcon, customActions, databaseProperties, databaseView, saveDatabaseView, onForceRerender } =
-    props;
+  const { page, customActions, databaseProperties, databaseView, saveDatabaseView, onForceRerender } = props;
   const pageId = page.id;
   const icon = props.icon
     ? props.icon
@@ -39,13 +37,13 @@ export function PageListItem(props: {
       };
   const keywords: string[] = props.keywords ? props.keywords : [];
 
-  // Set database view properties
-  let accessoryTitle = moment(page.last_edited_time).fromNow();
+  let accessories: List.Item.Accessory[] = page.last_edited_time
+    ? [{ text: moment(parseInt(page.last_edited_time)).fromNow() }]
+    : [];
 
   if (databaseView && databaseView.properties) {
     const visiblePropertiesIds = Object.keys(databaseView.properties);
     if (visiblePropertiesIds[0]) {
-      accessoryTitle = "";
       const accessoryTitles: string[] = [];
       visiblePropertiesIds.forEach(function (propId: string) {
         const extractedProperty = extractPropertyValue(page.properties[propId]);
@@ -55,9 +53,7 @@ export function PageListItem(props: {
         }
       });
 
-      if (accessoryTitles[0]) {
-        accessoryTitle = accessoryTitles.join("  |  ");
-      }
+      accessories = accessoryTitles.map((x) => ({ text: x }));
     }
   }
 
@@ -77,22 +73,20 @@ export function PageListItem(props: {
       keywords={keywords}
       title={page.title ? page.title : "Untitled"}
       icon={icon}
-      accessoryIcon={accessoryIcon}
-      accessoryTitle={accessoryTitle}
       subtitle={page.object === "database" ? "Database" : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={page.title ? page.title : "Untitled"}>
             {page.object === "database" ? (
-              <PushAction
+              <Action.Push
                 title="Navigate to Database"
                 icon={Icon.ArrowRight}
                 target={<DatabaseList databasePage={page} />}
               />
             ) : (
-              <PushAction title="Preview Page" icon={Icon.TextDocument} target={<PageDetail page={page} />} />
+              <Action.Push title="Preview Page" icon={Icon.TextDocument} target={<PageDetail page={page} />} />
             )}
-            <ActionPanel.Item
+            <Action
               title="Open in Notion"
               icon={"notion-logo.png"}
               onAction={function () {
@@ -123,7 +117,7 @@ export function PageListItem(props: {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -134,7 +128,7 @@ export function PageListItem(props: {
           {databaseProperties && saveDatabaseView ? (
             <ActionPanel.Section title="View options">
               {page.parent_database_id ? (
-                <PushAction
+                <Action.Push
                   title="Set View Type..."
                   icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
                   target={
@@ -172,12 +166,12 @@ export function PageListItem(props: {
 
           {page.url ? (
             <ActionPanel.Section>
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title="Copy Page URL"
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
-              <PasteAction
+              <Action.Paste
                 title="Paste Page URL"
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
@@ -186,6 +180,7 @@ export function PageListItem(props: {
           ) : null}
         </ActionPanel>
       }
+      accessories={accessories}
     />
   );
 }

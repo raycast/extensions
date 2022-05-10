@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { ReviewList } from "./components/reviews";
 
-render(<ReviewList />);
+export default function MyReviewsRoot(): JSX.Element {
+  return <ReviewList />;
+}

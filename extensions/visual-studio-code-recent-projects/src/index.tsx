@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
-  getPreferenceValues,
   Icon,
   List,
   OpenAction,

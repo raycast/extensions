@@ -6,7 +6,7 @@
 
 A hook that lets you push and pop view components in the navigation stack.
 
-You most likely won't use this hook too often. To push a new component, use the [Push Action](./actions.md#push).
+You most likely won't use this hook too often. To push a new component, use the [Push Action](./actions.md#action.push).
 When a user presses `ESC`, we automatically pop to the previous component.
 
 #### Signature

@@ -10,91 +10,170 @@ import {
   Toast,
   Clipboard,
   Action,
+  LocalStorage,
 } from "@raycast/api";
-import { Item, VaultStatus } from "./types";
-import React, { useEffect, useMemo, useState } from "react";
-import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
-import { useBitwarden } from "./hooks";
-import { TroubleshootingGuide, UnlockForm } from "./components";
+import { Item } from "./types";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
+import { SESSION_KEY } from "./const";
+import { TroubleshootingGuide, UnlockForm } from "./components";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
-export default function Search(): JSX.Element {
-  try {
-    const bitwardenApi = new Bitwarden();
-    const [state, setSessionToken] = useBitwarden(bitwardenApi);
+function useSession() {
+  const [state, setState] = useState<{ isLoading: boolean; token?: string }>({ isLoading: true });
 
-    if (state.vaultStatus === "locked") {
-      return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
-    }
-    return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
-  } catch (error) {
+  useEffect(() => {
+    LocalStorage.getItem<string>(SESSION_KEY).then((token) => setState({ isLoading: false, token }));
+  }, []);
+
+  return {
+    token: state.token,
+    active: !state.isLoading,
+    setToken: async (token: string) => {
+      await LocalStorage.setItem(SESSION_KEY, token);
+      setState({ isLoading: false, token });
+    },
+    deleteToken: async () => {
+      await LocalStorage.removeItem(SESSION_KEY);
+      setState({ isLoading: false });
+    },
+  };
+}
+
+export default function Search() {
+  try {
+    const api = new Bitwarden();
+    return <ItemList api={api} />;
+  } catch (e) {
     return <TroubleshootingGuide />;
   }
 }
 
-function ItemList(props: {
-  bitwardenApi: Bitwarden;
-  sessionToken: string | undefined;
-  vaultStatus: VaultStatus | undefined;
-}) {
-  const { bitwardenApi, sessionToken, vaultStatus } = props;
-  const [items, setItems] = useState<Item[]>();
+export function ItemList(props: { api: Bitwarden }) {
+  const bitwardenApi = props.api;
+  const session = useSession();
+  const [state, setState] = useState<{ items: Item[]; isLocked: boolean; isLoading: boolean }>({
+    items: [],
+    isLocked: false,
+    isLoading: true,
+  });
 
   async function loadItems(sessionToken: string) {
     try {
-      const items = await bitwardenApi.listItems("items", sessionToken);
-      setItems(items);
+      const items = await bitwardenApi.listItems(sessionToken);
+      setState((previous) => ({ ...previous, isLoading: false, items }));
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to search vault");
+      setState((previous) => ({ ...previous, isLocked: true }));
     }
   }
 
-  async function copyTotp(sessionToken: string | undefined, id: string) {
-    if (sessionToken) {
-      const totp = await bitwardenApi.getTotp(id, sessionToken);
-      Clipboard.copy(totp);
-      closeMainWindow({ clearRootSearch: true });
+  async function copyTotp(id: string) {
+    if (session.token) {
+      const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
+      const totp = await bitwardenApi.getTotp(id, session.token);
+      await Clipboard.copy(totp);
+      await toast.hide();
+      await closeMainWindow({ clearRootSearch: true });
     } else {
       showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
   }
 
   useEffect(() => {
-    if (vaultStatus === "unlocked" && sessionToken) {
-      loadItems(sessionToken);
+    const token = session.token;
+    if (!session.active) {
+      return;
     }
-  }, [sessionToken]);
+    if (!token) {
+      setState((previous) => ({ ...previous, isLocked: true }));
+    } else {
+      loadItems(token);
+    }
+  }, [session.token, session.active]);
 
-  async function refreshItems() {
-    if (sessionToken) {
+  async function syncItems() {
+    if (session.token) {
       const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
-      await bitwardenApi.sync(sessionToken);
-      await loadItems(sessionToken);
-      await toast.hide();
+      try {
+        await bitwardenApi.sync(session.token);
+        await loadItems(session.token);
+        await toast.hide();
+      } catch (error) {
+        await bitwardenApi.logout();
+        await session.deleteToken();
+        toast.style = Toast.Style.Failure;
+        toast.message = "Failed to sync. Please try logging in again.";
+      }
     }
   }
 
+  async function lockVault() {
+    const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
+    await bitwardenApi.lock();
+    await session.deleteToken();
+    await toast.hide();
+  }
+
+  async function logoutVault() {
+    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
+    await bitwardenApi.logout();
+    await session.deleteToken();
+    await toast.hide();
+  }
+
+  if (state.isLocked) {
+    return (
+      <UnlockForm
+        bitwardenApi={bitwardenApi}
+        onUnlock={async (token) => {
+          await session.setToken(token);
+          setState((previous) => ({ ...previous, isLocked: false }));
+        }}
+      />
+    );
+  }
+
+  const vaultEmpty = state.items.length == 0;
+
   return (
-    <List isLoading={typeof items === "undefined"}>
-      {items
-        ? items
-            .sort((a, b) => {
-              if (a.favorite && b.favorite) return 0;
-              return a.favorite ? -1 : 1;
-            })
-            .map((item) => (
-              <ItemListItem
-                key={item.id}
-                item={item}
-                refreshItems={refreshItems}
-                sessionToken={sessionToken}
-                copyTotp={copyTotp}
-              />
-            ))
-        : null}
+    <List isLoading={state.isLoading}>
+      {state.items
+        .sort((a, b) => {
+          if (a.favorite && b.favorite) return 0;
+          return a.favorite ? -1 : 1;
+        })
+        .map((item) => (
+          <BitwardenItem
+            key={item.id}
+            item={item}
+            lockVault={lockVault}
+            logoutVault={logoutVault}
+            syncItems={syncItems}
+            copyTotp={copyTotp}
+          />
+        ))}
+      {state.isLoading ? (
+        <List.EmptyView icon={Icon.TwoArrowsClockwise} title="Loading..." description="Please wait." />
+      ) : (
+        <List.EmptyView
+          icon={{ source: "bitwarden-64.png" }}
+          title={vaultEmpty ? "Vault empty." : "No matching items found."}
+          description={
+            vaultEmpty
+              ? "Hit the sync button to sync your vault or try logging in again."
+              : "Hit the sync button to sync your vault."
+          }
+          actions={
+            !state.isLoading && (
+              <ActionPanel>
+                <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
+              </ActionPanel>
+            )
+          }
+        />
+      )}
     </List>
   );
 }
@@ -110,14 +189,15 @@ function getIcon(item: Item) {
   }[item.type];
 }
 
-function ItemListItem(props: {
+function BitwardenItem(props: {
   item: Item;
-  refreshItems?: () => void;
-  sessionToken: string | undefined;
-  copyTotp: (sessionToken: string | undefined, id: string) => void;
+  syncItems: () => void;
+  lockVault: () => void;
+  logoutVault: () => void;
+  copyTotp: (id: string) => void;
 }) {
-  const { item, refreshItems, sessionToken, copyTotp } = props;
-  const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
+  const { item, syncItems, lockVault, logoutVault, copyTotp } = props;
+  const { notes, identity, login, fields, card } = item;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
 
@@ -126,62 +206,61 @@ function ItemListItem(props: {
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
   );
 
-  const cleanItem = filterNullishPropertiesFromObject({
-    name,
-    notes,
-    identity: filterNullishPropertiesFromObject(identity),
-    login: filterNullishPropertiesFromObject(login),
-    card: filterNullishPropertiesFromObject(card),
-    secureNote,
-    fields,
-    passwordHistory,
-  });
-
-  const tree = treeify.asTree(cleanItem, true, false);
-
   return (
     <List.Item
       id={item.id}
       title={item.name}
       keywords={keywords}
-      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
+      accessories={
+        item.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
-          {item.login?.username ? <UsernameAction username={item.login.username} /> : null}
-          {item.login?.totp ? (
-            <ActionPanel.Item
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-              title="Copy TOTP"
-              icon={Icon.Clipboard}
-              onAction={() => copyTotp(sessionToken, item.id)}
-            />
-          ) : null}
-          {item.notes ? (
-            <Action.Push
-              title="Show Secure Note"
-              icon={Icon.TextDocument}
-              target={
-                <Detail
-                  markdown={codeBlock(item.notes)}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard title="Copy Secure Notes" content={item.notes} />
-                    </ActionPanel>
-                  }
+          {login ? (
+            <ActionPanel.Section>
+              {login.password ? <PasswordActions password={login.password} /> : null}
+              {login.totp ? (
+                <Action
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  title="Copy TOTP"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    await copyTotp(item.id);
+                  }}
                 />
-              }
-            />
+              ) : null}
+              {login.username ? (
+                <Action.CopyToClipboard
+                  title="Copy Username"
+                  content={login.username}
+                  icon={Icon.Person}
+                  shortcut={{ modifiers: ["cmd"], key: "u" }}
+                />
+              ) : null}
+            </ActionPanel.Section>
           ) : null}
-          <ActionPanel.Submenu
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            icon={Icon.Clipboard}
-            title="Copy Property"
-          >
+          <ActionPanel.Section>
+            {notes ? (
+              <Action.Push
+                title="Show Secure Note"
+                icon={Icon.TextDocument}
+                target={
+                  <Detail
+                    markdown={codeBlock(notes)}
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard title="Copy Secure Notes" content={notes} />
+                      </ActionPanel>
+                    }
+                  />
+                }
+              />
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             {Object.entries({
-              username: login?.username,
               notes,
               ...card,
               ...identity,
@@ -189,31 +268,17 @@ function ItemListItem(props: {
               ...uriMap,
             }).map(([title, content], index) =>
               content ? (
-                <Action.CopyToClipboard key={index} title={titleCase(title)} content={content as string | number} />
+                <Action.CopyToClipboard
+                  key={index}
+                  title={`Copy ${titleCase(title)}`}
+                  content={content as string | number}
+                />
               ) : null
             )}
-          </ActionPanel.Submenu>
-          <Action.Push
-            title={"Show Details"}
-            icon={Icon.Text}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            target={
-              <Detail
-                markdown={codeBlock(tree)}
-                actions={
-                  <ActionPanel>
-                    <Action.CopyToClipboard content={tree} />
-                  </ActionPanel>
-                }
-              />
-            }
-          />
-          <Action
-            title="Refresh Items"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            icon={Icon.ArrowClockwise}
-            onAction={refreshItems}
-          />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -224,19 +289,25 @@ function PasswordActions(props: { password: string }) {
   const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
   const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
 
-  return (
-    <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
-  );
+  return <Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</Fragment>;
 }
 
-function UsernameAction(props: { username: string }) {
+function VaultActions(props: { syncItems: () => void; lockVault: () => void; logoutVault: () => void }) {
   return (
-    <Action.CopyToClipboard
-      title="Copy Username"
-      content={props.username}
-      icon={Icon.Person}
-      shortcut={{ modifiers: ["cmd"], key: "u" }}
-      onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
-    />
+    <Fragment>
+      <Action
+        title="Sync Vault"
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        icon={Icon.ArrowClockwise}
+        onAction={props.syncItems}
+      />
+      <Action
+        icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
+        title="Lock Vault"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        onAction={props.lockVault}
+      />
+      <Action title="Logout" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
+    </Fragment>
   );
 }
