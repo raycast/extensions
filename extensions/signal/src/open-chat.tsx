@@ -133,7 +133,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
           <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Open in Signal"
-              icon="signal-outline.png"
+              icon={Icon.Message}
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
             />
