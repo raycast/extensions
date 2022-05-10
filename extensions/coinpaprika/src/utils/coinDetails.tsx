@@ -1,18 +1,23 @@
 import { Coin, CoinId } from "../types/coin";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getCoins } from "../api";
 import { DEFAULT_CURRENCY_CRYPTO, WEBSERVICE_URL } from "../enum";
 import { List, showToast, Toast } from "@raycast/api";
 import { FormatDate, FormatPrice } from "./index";
+import axios from "axios";
 
 export function FetchCoinDetails(props: CoinId) {
   const [markdown, setMarkdown] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isMounted = useRef(true);
+  const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     async function fetchCoinDetails() {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
       try {
-        const coin: Coin = await getCoins.getCoinDetails(props.coinId);
+        const coin: Coin = await getCoins.getCoinDetails(props.coinId, cancelRef.current.signal);
         const markdown = `
   ## ${coin.name} | ${coin.symbol.toUpperCase()}
  
@@ -52,18 +57,28 @@ export function FetchCoinDetails(props: CoinId) {
   [Coingecko -> ${coin.symbol}](${WEBSERVICE_URL + coin.id} )
 
       `;
-        setMarkdown(markdown);
+        if (isMounted.current) {
+          setMarkdown(markdown);
+        }
       } catch (e) {
+        if (axios.isCancel(e)) return;
+        console.log(e);
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch the coin details",
         });
+      } finally {
+        if (isMounted.current) {
+          setIsLoading(false);
+        }
       }
-
-      setIsLoading(false);
     }
-
     fetchCoinDetails();
+
+    return () => {
+      isMounted.current = false;
+      cancelRef.current?.abort();
+    };
   }, []);
 
   return <List.Item.Detail isLoading={isLoading} markdown={markdown} />;
