@@ -15,7 +15,7 @@
       "name": "index",
       "title": "Show Servers",
       "subtitle": "Transmit",
-      "description": "",
+      "description": "List and open Transmit servers",
       "mode": "view"
     }
   ],
