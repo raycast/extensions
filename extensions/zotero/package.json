@@ -25,10 +25,20 @@
       "title": "Zotero Path",
       "description": "Path to locate zotero sqlite file",
       "placeholder": "~/Zotero/zotero.sqlite"
+    },
+    {
+      "name": "use_bibtex",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use BibTex?",
+      "description": "Whether to use BibTex or not?"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.34.1",
+    "biblatex-csl-converter": "^2.0.4",
+    "fuse.js": "^6.6.1",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {

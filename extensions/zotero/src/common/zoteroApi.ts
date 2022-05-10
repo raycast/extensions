@@ -2,21 +2,27 @@ import { stat, readFile, writeFile, copyFile } from "fs/promises";
 import { getPreferenceValues, environment} from "@raycast/api";
 import * as utils from "./utils";
 import { readFileSync } from "fs";
+import Fuse from "fuse.js";
 import initSqlJs from "sql.js";
+
+
 
 const path = require('path');
 
-interface Preferences {
+export interface Preferences {
   zotero_path: string;
+  use_bibtex?: boolean;
+  bibtex_path?: string;
 }
 
 export interface RefData {
-  id: Number;
-  added: Date;
-  modified: Date;
-  key: string;
-  library: Number;
-  type:string;
+  id?: Number;
+  added?: Date;
+  modified?: Date;
+  key?: string;
+  library?: Number;
+  type?:string;
+  citekey?:string;
   tags?: string[];
   attachment?: Attachment;
   [key: string]: any;
@@ -28,6 +34,13 @@ export interface Attachment {
   title: string;
   url: string;
 }
+
+const INVALID_TYPES_SQL = `
+SELECT itemTypes.itemTypeID as tid,
+       itemTypes.typeName as name
+    FROM itemTypes
+WHERE itemTypes.typeName IN ('artwork', 'attachment', 'audioRecording', 'bill', 'computerProgram', 'dictionaryEntry', 'email', 'film', 'forumPost', 'hearing', 'instantMessage', 'interview', 'map', 'note', 'podcast', 'radioBroadcast', 'statute', 'tvBroadcast', 'videoRecording', 'annotation')
+`;
 
 const ITEMS_SQL = `
 SELECT  items.itemID AS id,
@@ -42,7 +55,7 @@ SELECT  items.itemID AS id,
     LEFT JOIN deletedItems
         ON items.itemID = deletedItems.itemID
 -- Ignore notes and attachments
-WHERE items.itemTypeID not IN (1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 24, 25, 26, 27, 36, 37)
+WHERE items.itemTypeID not IN ?
 AND deletedItems.dateDeleted IS NULL
 `;
 
@@ -52,6 +65,13 @@ SELECT tags.name AS name
     LEFT JOIN itemTags
         ON tags.tagID = itemTags.tagID
 WHERE itemTags.itemID = :id
+`;
+
+const BIBTEX_SQL = `
+SELECT citekeys.citekey AS citekey
+    FROM citekeys
+WHERE citekeys.itemKey = :key
+AND citekeys.libraryID = :lib
 `;
 
 const METADATA_SQL = `
@@ -91,6 +111,7 @@ FROM itemAttachments
 WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
 `
+
 const cachePath = utils.cachePath('zotero.json');
 
 function resolveHome(filepath: string) : string{
@@ -110,9 +131,45 @@ async function openDb () {
   return new SQL.Database(db);
 }
 
+async function getBibtexKey (key: string, library: string): Promise<string> {
+  const db = await openBibtexDb();
+  let st = db.prepare(BIBTEX_SQL);
+  st.bind({":key": key, ":lib": library});
+  st.step();
+  let res = st.getAsObject();
+  st.free();
+  db.close();
+
+  if (res) {
+    return res.citekey;
+  }
+  else {
+    return '';
+  }
+}
+
+async function openBibtexDb () {
+  const preferences: Preferences = getPreferenceValues();
+  let f_path = resolveHome(preferences.zotero_path);
+  let new_fPath = f_path.replace('zotero.sqlite', 'better-bibtex-search.sqlite')
+
+  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const db = readFileSync(new_fPath);
+  return new SQL.Database(db);
+}
+
 async function getLatestModifyDate(): Promise<Date> {
   const db = await openDb();
-  let statement = db.prepare(ITEMS_SQL);
+  let st = db.prepare(INVALID_TYPES_SQL);
+  var invalid_ids = [];
+  while (st.step()) {
+    let row = st.getAsObject();
+    invalid_ids.push(row.tid);
+  }
+  st.free();
+  let iids = '( ' + invalid_ids.join(', ') + ' )'
+
+  let statement = db.prepare(ITEMS_SQL.replace('?', iids));
 
   var results = [];
   while (statement.step()) {
@@ -136,7 +193,16 @@ async function getLatestModifyDate(): Promise<Date> {
 async function getData(): Promise<RefData[]> {
   const db = await openDb();
 
-  let st1 = db.prepare(ITEMS_SQL);
+  let st = db.prepare(INVALID_TYPES_SQL);
+  var invalid_ids = [];
+  while (st.step()) {
+    let row = st.getAsObject();
+    invalid_ids.push(row.tid);
+  }
+  st.free();
+  let iids = '( ' + invalid_ids.join(', ') + ' )'
+
+  let st1 = db.prepare(ITEMS_SQL.replace('?', iids));
 
   var rows = [];
   while (st1.step()) {
@@ -178,6 +244,7 @@ async function getData(): Promise<RefData[]> {
     if (at) {
     row.attachment = at;
     }
+    row.citekey = await getBibtexKey(row.key, row.library);
     rows.push(row);
   }
 
@@ -186,6 +253,24 @@ async function getData(): Promise<RefData[]> {
 
   return rows;
 }
+
+const parseQuery = (q: string) => {
+  const queryItems = q.split(" ");
+  const qs = queryItems.filter((c) => !c.startsWith("."));
+  const ts = queryItems.filter((c) => c.startsWith("."));
+
+  let qss = "";
+  if (qs.length) {
+    qss = qs.join(" ");
+  }
+
+  let tss = [];
+  if (ts.length) {
+    tss = ts.map((x) => x.substring(1));
+  }
+
+  return { qss, tss };
+};
 
 export const searchResources = async (q: string): Promise<RefData[]> => {
 
@@ -230,7 +315,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     }
   }
 
-  let ret;
+  var ret;
   try {
     ret = await readCache();
   } catch {
@@ -239,14 +324,56 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   ret.sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
 
-  if (q) {
-    return ret.filter(function (e) {
-        return e.title?.toLowerCase().includes(q.toLowerCase()) || e.tags?.includes(q);
-    })
-    .sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
+  const { qss, tss } = parseQuery(q);
+
+  var query: Fuse.Expression =
+  {
+    $or: [
+      { title: qss },
+      { abstractNote: qss }
+    ]
   }
-  else {
-      return ret;
+  // filter for ALL tags, ignoring case
+  if (tss.length > 0){
+    for (const c of tss){
+      ret = ret.filter((r)=>{return r.tags?.some(e => {
+        return e.toLowerCase() === c.toLowerCase();
+      })})
+    }
   }
+
+  if (!qss.trim()){
+    return ret;
+  }
+
+  const options = {
+    isCaseSensitive: false,
+    includeScore: false,
+    shouldSort: true,
+    includeMatches: false,
+    findAllMatches: true,
+    minMatchCharLength: 3,
+    threshold: 0.9,
+    ignoreLocation: true,
+    keys: [
+      {
+        name: 'title',
+        weight: 6
+      },
+      {
+        name: 'abstractNote',
+        weight: 4
+      }
+    ]
+  };
+
+  // Create the Fuse index
+  const myIndex = Fuse.createIndex(options.keys, ret);
+  // initialize Fuse with the index
+  const fuse = new Fuse(ret, options, myIndex);
+
+  let re = fuse.search(query);
+
+  return re.map(x => x.item);
 
 };

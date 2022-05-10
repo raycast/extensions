@@ -1,5 +1,5 @@
-import { ActionPanel, List, Icon, Action, Keyboard } from "@raycast/api";
-import type { RefData } from "./zoteroApi";
+import { ActionPanel, List, Icon, Action, Keyboard, getPreferenceValues} from "@raycast/api";
+import { RefData, Preferences } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
 };
 
 const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
+const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
+const copyBibCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
 
 function getItemDetail(item: RefData): string {
   let ret =`## ${item.title}
@@ -34,9 +36,9 @@ ${item.tags.length > 0 ? '**Tagged With:** ' + item.tags.join(', ') : ''}
   return ret;
 }
 
-
 export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange, throttle }: Props): JSX.Element => {
   const [urls, onOpen] = useVisitedUrls();
+  const preferences: Preferences = getPreferenceValues();
   return (
     <List isShowingDetail isLoading={isLoading} onSearchTextChange={onSearchTextChange} throttle={throttle}>
       {sectionNames.map((sectionName, sectionIndex) => (
@@ -70,6 +72,14 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                       onOpen={onOpen}
                       />
                     )
+                 }
+                 { preferences.use_bibtex && (
+                 <Action.CopyToClipboard
+                    title="Copy Bibtex Citation Key"
+                    content={item.citekey}
+                    shortcut={copyRefCommandShortcut}
+                  />
+                  )
                  }
                 </ActionPanel>
               }

@@ -2,8 +2,6 @@
 
 This extension brings [Zotero](https://www.zotero.org/) search to raycast!
 
-**Note: this extension is under active development and is subject to changes.**
-
 ![A screenshot of searching via raycast](./images/search.png)
 
 ## Getting started
