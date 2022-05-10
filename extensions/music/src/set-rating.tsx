@@ -16,7 +16,7 @@ export default function SetRating() {
   }, []);
 
   return (
-    <List navigationTitle={track ? track.name : "Loading current track"} isLoading={!track}>
+    <List isLoading={!track}>
       {ratings.map((rating) => (
         <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
       ))}
