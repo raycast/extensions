@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Coin } from "../types/coin";
 import { API_ENDPOINT, DEFAULT_CURRENCY_CRYPTO, DEFAULT_CURRENCY_FIAT } from "../enum";
 
@@ -10,11 +10,11 @@ const instance = axios.create({
 const responseBody = (response: AxiosResponse) => response.data;
 
 const requests = {
-  get: (url: string) => instance.get(url).then(responseBody),
+  get: (url: string, config: AxiosRequestConfig = {}) => instance.get(url, config).then(responseBody),
 };
 
 export const getCoins = {
   getAllCoins: (): Promise<Coin> => requests.get("coins"),
-  getCoinDetails: (id: string): Promise<Coin> =>
-    requests.get(`tickers/${id}?quotes=${DEFAULT_CURRENCY_FIAT},${DEFAULT_CURRENCY_CRYPTO}`),
+  getCoinDetails: (id: string, signal: AbortSignal): Promise<Coin> =>
+    requests.get(`tickers/${id}?quotes=${DEFAULT_CURRENCY_FIAT},${DEFAULT_CURRENCY_CRYPTO}`, { signal }),
 };
