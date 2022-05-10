@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { isEmpty } from "./utils/common-utils";
 import { buildUnicode, chineseUtf8ToNative, unicodesToNative } from "./utils/code-converter-utils";
 
-export default function CreateShortcut() {
+export default function CodeConverter() {
   const [native, setNative] = useState<string>("");
   const [unicode, setUnicode] = useState<string>("");
   const [ascii, setAscii] = useState<string>("");

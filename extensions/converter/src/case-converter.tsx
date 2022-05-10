@@ -1,20 +1,19 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { isEmpty } from "./utils/common-utils";
-import { buildUnicode, chineseUtf8ToNative, unicodesToNative } from "./utils/code-converter-utils";
 import {
   Case,
   getNativeCase,
   nativeToCamel,
-  nativeToTitle,
   nativeToKebab,
   nativeToLower,
   nativeToPascal,
   nativeToSnake,
+  nativeToTitle,
   nativeToUpper,
 } from "./utils/case-converter-utils";
+import { isEmpty } from "./utils/common-utils";
 
-export default function CreateShortcut() {
+export default function CaseConverter() {
   const [nativeString, setNativeString] = useState<{ str: string; case: Case }>({ str: "", case: Case.NATIVE });
   const [native, setNative] = useState<string>("");
   const [camel, setCamel] = useState<string>("");
@@ -28,10 +27,10 @@ export default function CreateShortcut() {
   useEffect(() => {
     async function _fetchDetail() {
       try {
-        if (isEmpty(nativeString.str)) return;
-
-        const _native = getNativeCase(nativeString);
-        console.debug("_native:", _native);
+        let _native = "";
+        if (!isEmpty(nativeString.str)) {
+          _native = getNativeCase(nativeString);
+        }
         setNative(_native);
         setCamel(nativeToCamel(_native));
         setPascal(nativeToPascal(_native));
@@ -54,24 +53,13 @@ export default function CreateShortcut() {
         <ActionPanel>
           <Action.CopyToClipboard title={"Copy Native"} content={native} shortcut={{ modifiers: ["cmd"], key: "1" }} />
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title={"Copy Unicode"}
-              content={camel}
-              shortcut={{ modifiers: ["cmd"], key: "2" }}
-            />
-            <Action.CopyToClipboard title={"Copy UTF-8"} content={snake} shortcut={{ modifiers: ["cmd"], key: "3" }} />
-            <Action.CopyToClipboard title={"Copy ASCII"} content={pascal} shortcut={{ modifiers: ["cmd"], key: "4" }} />
-            <Action.CopyToClipboard
-              title={"Copy &#xXXXX;"}
-              content={kebab}
-              shortcut={{ modifiers: ["cmd"], key: "5" }}
-            />
-            <Action.CopyToClipboard title={"Copy Base64"} content={upper} shortcut={{ modifiers: ["cmd"], key: "6" }} />
-            <Action.CopyToClipboard
-              title={"Copy Encoded URL"}
-              content={lower}
-              shortcut={{ modifiers: ["cmd"], key: "7" }}
-            />
+            <Action.CopyToClipboard title={"Copy Camel"} content={camel} shortcut={{ modifiers: ["cmd"], key: "2" }} />
+            <Action.CopyToClipboard title={"Copy Pascal"} content={snake} shortcut={{ modifiers: ["cmd"], key: "3" }} />
+            <Action.CopyToClipboard title={"Copy Snake"} content={pascal} shortcut={{ modifiers: ["cmd"], key: "4" }} />
+            <Action.CopyToClipboard title={"Copy Kebab"} content={kebab} shortcut={{ modifiers: ["cmd"], key: "5" }} />
+            <Action.CopyToClipboard title={"Copy Upper"} content={upper} shortcut={{ modifiers: ["cmd"], key: "6" }} />
+            <Action.CopyToClipboard title={"Copy Lower"} content={lower} shortcut={{ modifiers: ["cmd"], key: "7" }} />
+            <Action.CopyToClipboard title={"Copy Title"} content={title} shortcut={{ modifiers: ["cmd"], key: "8" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
@@ -92,7 +80,7 @@ export default function CreateShortcut() {
         value={native}
         placeholder={"Any case"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.NATIVE });
+          setNativeString({ str: newValue.trim(), case: Case.NATIVE });
         }}
       />
       <Form.TextField
@@ -101,7 +89,7 @@ export default function CreateShortcut() {
         value={camel}
         placeholder={"camelCase"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.CAMEL });
+          setNativeString({ str: newValue.trim(), case: Case.CAMEL });
         }}
       />
       <Form.TextField
@@ -110,7 +98,7 @@ export default function CreateShortcut() {
         value={pascal}
         placeholder={"PascalCase"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.PASCAL });
+          setNativeString({ str: newValue.trim(), case: Case.PASCAL });
         }}
       />
       <Form.TextField
@@ -119,7 +107,7 @@ export default function CreateShortcut() {
         value={snake}
         placeholder={"snake-case"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.SNAKE });
+          setNativeString({ str: newValue.trim(), case: Case.SNAKE });
         }}
       />
       <Form.TextField
@@ -128,7 +116,7 @@ export default function CreateShortcut() {
         value={kebab}
         placeholder={"kebab-case"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.KEBAB });
+          setNativeString({ str: newValue.trim(), case: Case.KEBAB });
         }}
       />
       <Form.TextField
@@ -137,7 +125,7 @@ export default function CreateShortcut() {
         value={upper}
         placeholder={"UPPER CASE"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.UPPER });
+          setNativeString({ str: newValue.trim(), case: Case.UPPER });
         }}
       />
       <Form.TextField
@@ -146,7 +134,7 @@ export default function CreateShortcut() {
         value={lower}
         placeholder={"lower case"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.LOWER });
+          setNativeString({ str: newValue.trim(), case: Case.LOWER });
         }}
       />
       <Form.TextField
@@ -155,7 +143,7 @@ export default function CreateShortcut() {
         value={title}
         placeholder={"Title"}
         onChange={(newValue) => {
-          setNativeString({ str: newValue, case: Case.TITLE });
+          setNativeString({ str: newValue.trim(), case: Case.TITLE });
         }}
       />
     </Form>

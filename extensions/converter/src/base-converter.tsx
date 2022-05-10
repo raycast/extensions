@@ -5,7 +5,7 @@ import { baseToBase, buildBases } from "./utils/base-converter-utils";
 import { BaseConvertersAdvanceView } from "./components/base-converters-advance-view";
 import { BaseConvertersSimpleView } from "./components/base-converters-simple-view";
 
-export default function CreateShortcut() {
+export default function BaseConverter() {
   const { advanceView, advanceViewLocation } = commonPreferences();
   const [base10, setBase10] = useState<string>("0");
   const [base2, setBase2] = useState<string>("0");

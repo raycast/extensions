@@ -11,6 +11,9 @@ export enum Case {
   TITLE = "Title",
 }
 export const getNativeCase = (input: { str: string; case: Case }) => {
+  if (isEmpty(input.str)) {
+    return "";
+  }
   switch (input.case) {
     case Case.NATIVE: {
       return input.str;
@@ -49,6 +52,9 @@ function isUpper(char: string) {
 }
 
 export const camelOrPascalToNative = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   let finalStr = input.replaceAll(" ", "");
   try {
     let outString = "";
@@ -67,10 +73,16 @@ export const camelOrPascalToNative = (input: string) => {
 };
 
 export const snakeOrKebabToNative = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   return input.replaceAll(" ", "").replaceAll("-", " ").replaceAll("_", " ");
 };
 
 export const nativeToCamel = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   const inputArray = input.toLowerCase().split(regexPunctuation);
   const outputArray = [];
   if (inputArray.length <= 1) {
@@ -88,6 +100,9 @@ export const nativeToCamel = (input: string) => {
 };
 
 export const nativeToPascal = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   const inputArray = input.toLowerCase().split(regexPunctuation);
   const outputArray = [];
   for (let i = 0; i < inputArray.length; i++) {
@@ -99,6 +114,9 @@ export const nativeToPascal = (input: string) => {
 };
 
 export const nativeToSnake = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   const inputArray = input.toLowerCase().split(regexPunctuation);
   const outputArray = [];
   for (let i = 0; i < inputArray.length; i++) {
@@ -110,6 +128,9 @@ export const nativeToSnake = (input: string) => {
 };
 
 export const nativeToKebab = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   const inputArray = input.toLowerCase().split(regexPunctuation);
   const outputArray = [];
   for (let i = 0; i < inputArray.length; i++) {
@@ -121,14 +142,17 @@ export const nativeToKebab = (input: string) => {
 };
 
 export const nativeToUpper = (input: string) => {
-  return input.toUpperCase();
+  return isEmpty(input) ? "" : input.toUpperCase();
 };
 
 export const nativeToLower = (input: string) => {
-  return input.toLowerCase();
+  return isEmpty(input) ? "" : input.toLowerCase();
 };
 
 export const nativeToTitle = (input: string) => {
+  if (isEmpty(input)) {
+    return input;
+  }
   const inputArray = input.toLowerCase().split(regexPunctuation);
   const outputArray = [];
   for (let i = 0; i < inputArray.length; i++) {
