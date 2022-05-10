@@ -161,7 +161,7 @@ async function openBibtexDb () {
 async function getLatestModifyDate(): Promise<Date> {
   const db = await openDb();
   const st = db.prepare(INVALID_TYPES_SQL);
-  let invalid_ids = [];
+  const invalid_ids = [];
   while (st.step()) {
     const row = st.getAsObject();
     invalid_ids.push(row.tid);
@@ -171,7 +171,7 @@ async function getLatestModifyDate(): Promise<Date> {
 
   const statement = db.prepare(ITEMS_SQL.replace('?', iids));
 
-  let results = [];
+  const results = [];
   while (statement.step()) {
     results.push(statement.getAsObject());
   }
@@ -194,7 +194,7 @@ async function getData(): Promise<RefData[]> {
   const db = await openDb();
 
   const st = db.prepare(INVALID_TYPES_SQL);
-  let invalid_ids = [];
+  const invalid_ids = [];
   while (st.step()) {
     const row = st.getAsObject();
     invalid_ids.push(row.tid);
@@ -204,13 +204,13 @@ async function getData(): Promise<RefData[]> {
 
   const st1 = db.prepare(ITEMS_SQL.replace('?', iids));
 
-  let rows = [];
+  const rows = [];
   while (st1.step()) {
     const row = st1.getAsObject();
     const st2 = db.prepare(TAGS_SQL);
     st2.bind({":id": row.id});
 
-    let v = [];
+    const v = [];
     while (st2.step()) {
       v.push(st2.getAsObject().name)
     }
@@ -221,7 +221,7 @@ async function getData(): Promise<RefData[]> {
     const st3 = db.prepare(METADATA_SQL);
     st3.bind({":id": row.id});
 
-    let mds = [];
+    const mds = [];
     while (st3.step()) {
       mds.push(st3.getAsObject())
     }
@@ -326,7 +326,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   const { qss, tss } = parseQuery(q);
 
-  let query: Fuse.Expression =
+  const query: Fuse.Expression =
   {
     $or: [
       { title: qss },
