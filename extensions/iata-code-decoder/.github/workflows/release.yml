@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: timrogers/release-raycast-extension@main
+        with:
+          extensions_fork: timrogers/extensions
+          github_access_token: ${{ secrets.gh_access_token }}
+          github_username: timrogers
+          extension_name: iata-code-decoder
