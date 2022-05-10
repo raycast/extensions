@@ -61,6 +61,34 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "autoDetect",
+      "type": "checkbox",
+      "required": false,
+      "label": "Auto Detect",
+      "description": "Automatically detects selected text or clipboard when opening commands.",
+      "default": true
+    },
+    {
+      "name": "priorityDetection",
+      "type": "dropdown",
+      "required": false,
+      "title": "Priority detection",
+      "description": "Priority detection of selected text or clipboard.",
+      "default": "selected",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard Text",
+          "value": "clipboard"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.34.1"
   },

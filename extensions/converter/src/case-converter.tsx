@@ -11,9 +11,12 @@ import {
   nativeToTitle,
   nativeToUpper,
 } from "./utils/case-converter-utils";
-import { isEmpty } from "./utils/common-utils";
+import { commonPreferences, isEmpty } from "./utils/common-utils";
+import { getInputItem } from "./hooks/get-input-item";
 
 export default function CaseConverter() {
+  const { autoDetect, priorityDetection } = commonPreferences();
+
   const [nativeString, setNativeString] = useState<{ str: string; case: Case }>({ str: "", case: Case.NATIVE });
   const [native, setNative] = useState<string>("");
   const [camel, setCamel] = useState<string>("");
@@ -23,6 +26,15 @@ export default function CaseConverter() {
   const [upper, setUpper] = useState<string>("");
   const [lower, setLower] = useState<string>("");
   const [title, setTitle] = useState<string>("");
+
+  const inputItem = getInputItem(autoDetect, priorityDetection);
+  useEffect(() => {
+    async function _fetch() {
+      setNativeString({ str: inputItem, case: Case.NATIVE });
+    }
+
+    _fetch().then();
+  }, [inputItem]);
 
   useEffect(() => {
     async function _fetchDetail() {
@@ -78,7 +90,7 @@ export default function CaseConverter() {
         id={"Native"}
         title="Native"
         value={native}
-        placeholder={"Any case"}
+        placeholder={"Native case"}
         onChange={(newValue) => {
           setNativeString({ str: newValue.trim(), case: Case.NATIVE });
         }}

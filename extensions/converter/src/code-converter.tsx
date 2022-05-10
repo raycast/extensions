@@ -1,9 +1,13 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { isEmpty } from "./utils/common-utils";
+import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { buildUnicode, chineseUtf8ToNative, unicodesToNative } from "./utils/code-converter-utils";
+import { getInputItem } from "./hooks/get-input-item";
+import { Case } from "./utils/case-converter-utils";
 
 export default function CodeConverter() {
+  const { autoDetect, priorityDetection } = commonPreferences();
+
   const [native, setNative] = useState<string>("");
   const [unicode, setUnicode] = useState<string>("");
   const [ascii, setAscii] = useState<string>("");
@@ -11,6 +15,15 @@ export default function CodeConverter() {
   const [chineseUtf8, setChineseUtf8] = useState<string>("");
   const [base64, setBase64] = useState<string>("");
   const [url, setUrl] = useState<string>("");
+
+  const inputItem = getInputItem(autoDetect, priorityDetection);
+  useEffect(() => {
+    async function _fetch() {
+      setNative(inputItem);
+    }
+
+    _fetch().then();
+  }, [inputItem]);
 
   useEffect(() => {
     async function _fetchDetail() {

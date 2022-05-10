@@ -4,9 +4,11 @@ import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { baseToBase, buildBases } from "./utils/base-converter-utils";
 import { BaseConvertersAdvanceView } from "./components/base-converters-advance-view";
 import { BaseConvertersSimpleView } from "./components/base-converters-simple-view";
+import { getInputItem } from "./hooks/get-input-item";
 
 export default function BaseConverter() {
-  const { advanceView, advanceViewLocation } = commonPreferences();
+  const { autoDetect, priorityDetection, advanceView, advanceViewLocation } = commonPreferences();
+
   const [base10, setBase10] = useState<string>("0");
   const [base2, setBase2] = useState<string>("0");
   const [base4, setBase4] = useState<string>("0");
@@ -21,6 +23,16 @@ export default function BaseConverter() {
   const [fromBase, setFromBase] = useState<string>("10");
   const [toBase, setToBase] = useState<string>("2");
   const bases = buildBases();
+
+  const inputItem = getInputItem(autoDetect, priorityDetection);
+  useEffect(() => {
+    async function _fetch() {
+      setBaseString(inputItem);
+      setBaseRadix(10);
+    }
+
+    _fetch().then();
+  }, [inputItem]);
 
   useEffect(() => {
     async function _fetch() {

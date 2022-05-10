@@ -4,6 +4,8 @@ import Values = LocalStorage.Values;
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
+    autoDetect: preferencesMap.get("autoDetect") as boolean,
+    priorityDetection: preferencesMap.get("priorityDetection") as string,
     advanceView: preferencesMap.get("advanceView") as boolean,
     advanceViewLocation: preferencesMap.get("advanceViewLocation") as string,
   };

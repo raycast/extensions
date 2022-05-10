@@ -7,6 +7,9 @@ export const buildBases = () => {
 };
 
 export const baseToBase = (input: string, fromBase: string, toBase: string) => {
-  const base10 = parseInt(input.trim(), parseInt(fromBase));
+  let base10 = parseInt(input.trim(), parseInt(fromBase));
+  if (isNaN(base10)) {
+    base10 = 0;
+  }
   return base10.toString(parseInt(toBase));
 };
