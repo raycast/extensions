@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "toggle-desktop-visible",
-  "title": "Toggle Desktop Visible",
+  "name": "toggle-desktop-visibility",
+  "title": "Toggle Desktop Visibility",
   "description": "Toggle Desktop file or folder visible and hidden",
   "icon": "logo.png",
   "author": "Haojen",
   "license": "MIT",
-  "categories": ["System", "Applications"],
+  "categories": [
+    "System",
+    "Applications"
+  ],
   "commands": [
     {
-      "name": "toggle-desktop-visable",
-      "title": "Toggle Desktop Visable",
+      "name": "toggle-desktop-visibility",
+      "title": "Toggle Visibility",
       "subtitle": "Desktop",
       "description": "Toggle Desktop file or folder visible and hidden",
       "mode": "no-view"
