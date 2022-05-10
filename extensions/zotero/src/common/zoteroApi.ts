@@ -1,10 +1,10 @@
 import { stat, readFile, writeFile, copyFile } from "fs/promises";
-import { getPreferenceValues, environment} from "@raycast/api";
+import { getPreferenceValues, environment } from "@raycast/api";
 import * as utils from "./utils";
 import { readFileSync } from "fs";
 import Fuse from "fuse.js";
 import initSqlJs from "sql.js";
-import path = require('path');
+import path = require("path");
 
 export interface Preferences {
   zotero_path: string;
@@ -18,8 +18,8 @@ export interface RefData {
   modified?: Date;
   key?: string;
   library?: number;
-  type?:string;
-  citekey?:string;
+  type?: string;
+  citekey?: string;
   tags?: string[];
   attachment?: Attachment;
   [key: string]: any;
@@ -107,31 +107,31 @@ FROM itemAttachments
         ON itemAttachments.itemID = items.itemID
 WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
-`
+`;
 
-const cachePath = utils.cachePath('zotero.json');
+const cachePath = utils.cachePath("zotero.json");
 
-function resolveHome(filepath: string) : string{
-  if (filepath[0] === '~') {
-      return path.join(process.env.HOME, filepath.slice(1));
+function resolveHome(filepath: string): string {
+  if (filepath[0] === "~") {
+    return path.join(process.env.HOME, filepath.slice(1));
   }
   return filepath;
 }
 
-async function openDb () {
+async function openDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + '.raycast'
+  const new_fPath = f_path + ".raycast";
 
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
   const db = readFileSync(new_fPath);
   return new SQL.Database(db);
 }
 
-async function getBibtexKey (key: string, library: string): Promise<string> {
+async function getBibtexKey(key: string, library: string): Promise<string> {
   const db = await openBibtexDb();
   const st = db.prepare(BIBTEX_SQL);
-  st.bind({":key": key, ":lib": library});
+  st.bind({ ":key": key, ":lib": library });
   st.step();
   const res = st.getAsObject();
   st.free();
@@ -139,16 +139,15 @@ async function getBibtexKey (key: string, library: string): Promise<string> {
 
   if (res) {
     return res.citekey;
-  }
-  else {
-    return '';
+  } else {
+    return "";
   }
 }
 
-async function openBibtexDb () {
+async function openBibtexDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path.replace('zotero.sqlite', 'better-bibtex-search.sqlite')
+  const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
 
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
   const db = readFileSync(new_fPath);
@@ -164,9 +163,9 @@ async function getLatestModifyDate(): Promise<Date> {
     invalid_ids.push(row.tid);
   }
   st.free();
-  const iids = '( ' + invalid_ids.join(', ') + ' )'
+  const iids = "( " + invalid_ids.join(", ") + " )";
 
-  const statement = db.prepare(ITEMS_SQL.replace('?', iids));
+  const statement = db.prepare(ITEMS_SQL.replace("?", iids));
 
   const results = [];
   while (statement.step()) {
@@ -178,7 +177,7 @@ async function getLatestModifyDate(): Promise<Date> {
   let latest = new Date(results[0].modified);
   for (const row of results) {
     const d = new Date(row.modified);
-    if (d > latest){
+    if (d > latest) {
       latest = d;
     }
   }
@@ -197,49 +196,47 @@ async function getData(): Promise<RefData[]> {
     invalid_ids.push(row.tid);
   }
   st.free();
-  const iids = '( ' + invalid_ids.join(', ') + ' )'
+  const iids = "( " + invalid_ids.join(", ") + " )";
 
-  const st1 = db.prepare(ITEMS_SQL.replace('?', iids));
+  const st1 = db.prepare(ITEMS_SQL.replace("?", iids));
 
   const rows = [];
   while (st1.step()) {
     const row = st1.getAsObject();
     const st2 = db.prepare(TAGS_SQL);
-    st2.bind({":id": row.id});
+    st2.bind({ ":id": row.id });
 
     const v = [];
     while (st2.step()) {
-      v.push(st2.getAsObject().name)
+      v.push(st2.getAsObject().name);
     }
     st2.free();
     row.tags = v;
 
-
     const st3 = db.prepare(METADATA_SQL);
-    st3.bind({":id": row.id});
+    st3.bind({ ":id": row.id });
 
     const mds = [];
     while (st3.step()) {
-      mds.push(st3.getAsObject())
+      mds.push(st3.getAsObject());
     }
     st3.free();
 
-    if(mds)
-    {
+    if (mds) {
       for (const md of mds) {
         row[md.name] = md.value;
       }
     }
 
     const st4 = db.prepare(ATTACHMENTS_SQL);
-    st4.bind({":id": row.id});
+    st4.bind({ ":id": row.id });
 
     st4.step();
     const at = st4.getAsObject();
     st4.free();
 
     if (at) {
-    row.attachment = at;
+      row.attachment = at;
     }
     row.citekey = await getBibtexKey(row.key, row.library);
     rows.push(row);
@@ -270,10 +267,9 @@ const parseQuery = (q: string) => {
 };
 
 export const searchResources = async (q: string): Promise<RefData[]> => {
-
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + '.raycast'
+  const new_fPath = f_path + ".raycast";
   await copyFile(f_path, new_fPath);
 
   async function updateCache(): Promise<RefData[]> {
@@ -281,9 +277,9 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     try {
       await writeFile(cachePath, JSON.stringify(data));
     } catch (err) {
-      console.error("Failed to write installed cache:", err)
+      console.error("Failed to write installed cache:", err);
     }
-    return data
+    return data;
   }
 
   async function mtime(path: string): Promise<Date> {
@@ -295,19 +291,18 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 3600000){
+    if (diffTime < 3600000) {
       const cacheBuffer = await readFile(cachePath);
       const data = JSON.parse(cacheBuffer.toString());
-      return data
+      return data;
     } else {
-      const latest =  await getLatestModifyDate();
-      if (latest < cacheTime){
+      const latest = await getLatestModifyDate();
+      if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
         const data = JSON.parse(cacheBuffer.toString());
-        return data
-      }
-      else {
-        throw 'Invalid cache';
+        return data;
+      } else {
+        throw "Invalid cache";
       }
     }
   }
@@ -319,27 +314,27 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     ret = await updateCache();
   }
 
-  ret.sort(function(a, b){return +new Date(b.added) - +new Date(a.added)});
+  ret.sort(function (a, b) {
+    return +new Date(b.added) - +new Date(a.added);
+  });
 
   const { qss, tss } = parseQuery(q);
 
-  const query: Fuse.Expression =
-  {
-    $or: [
-      { title: qss },
-      { abstractNote: qss }
-    ]
-  }
+  const query: Fuse.Expression = {
+    $or: [{ title: qss }, { abstractNote: qss }],
+  };
   // filter for ALL tags, ignoring case
-  if (tss.length > 0){
-    for (const c of tss){
-      ret = ret.filter((r)=>{return r.tags?.some(e => {
-        return e.toLowerCase() === c.toLowerCase();
-      })})
+  if (tss.length > 0) {
+    for (const c of tss) {
+      ret = ret.filter((r) => {
+        return r.tags?.some((e) => {
+          return e.toLowerCase() === c.toLowerCase();
+        });
+      });
     }
   }
 
-  if (!qss.trim()){
+  if (!qss.trim()) {
     return ret;
   }
 
@@ -354,14 +349,14 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     ignoreLocation: true,
     keys: [
       {
-        name: 'title',
-        weight: 6
+        name: "title",
+        weight: 6,
       },
       {
-        name: 'abstractNote',
-        weight: 4
-      }
-    ]
+        name: "abstractNote",
+        weight: 4,
+      },
+    ],
   };
 
   // Create the Fuse index
@@ -371,6 +366,5 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   const re = fuse.search(query);
 
-  return re.map(x => x.item);
-
+  return re.map((x) => x.item);
 };

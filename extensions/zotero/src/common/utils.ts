@@ -6,7 +6,7 @@ export const supportPath = (() => {
   try {
     mkdirSync(environment.supportPath, { recursive: true });
   } catch (err) {
-    console.log('Failed to create supportPath');
+    console.log("Failed to create supportPath");
   }
   return environment.supportPath;
 })();

@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action, Keyboard, getPreferenceValues} from "@raycast/api";
+import { ActionPanel, List, Icon, Action, Keyboard, getPreferenceValues } from "@raycast/api";
 import { RefData, Preferences } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 
@@ -17,19 +17,19 @@ const copyBibCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"],
 function getItemDetail(item: RefData): string {
   return `## ${item.title}
 
-${item.url ? '**URL:** [' + item.url + '](' + item.url +')': ''}
+${item.url ? "**URL:** [" + item.url + "](" + item.url + ")" : ""}
 
-${item.publicationTitle ? '**Publication:** ' + item.publicationTitle : ''}
+${item.publicationTitle ? "**Publication:** " + item.publicationTitle : ""}
 
-${item.publisher ? '**Publisher:** ' + item.publisher : ''}
+${item.publisher ? "**Publisher:** " + item.publisher : ""}
 
-${item.date ? '**Publication Date:** ' + item.date : ''}
+${item.date ? "**Publication Date:** " + item.date : ""}
 
-${item.DOI ? '**DOI:** [' + item.DOI + '](' + 'https://doi.org/' + item.DOI + ')': ''}
+${item.DOI ? "**DOI:** [" + item.DOI + "](" + "https://doi.org/" + item.DOI + ")" : ""}
 
-${item.abstractNote ? '**Abstract:** ' + item.abstractNote : ''}
+${item.abstractNote ? "**Abstract:** " + item.abstractNote : ""}
 
-${item.tags.length > 0 ? '**Tagged With:** ' + item.tags.join(', ') : ''}
+${item.tags.length > 0 ? "**Tagged With:** " + item.tags.join(", ") : ""}
 
 `;
 }
@@ -51,34 +51,39 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               key={item.key}
               id={`${item.id}`}
               title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-              icon={`${item.type.toLowerCase() === 'book' ? 'doc.png': 'paper.png'}`}
-              detail={
-                <List.Item.Detail markdown={getItemDetail(item)}/>
-              }
+              icon={`${item.type.toLowerCase() === "book" ? "doc.png" : "paper.png"}`}
+              detail={<List.Item.Detail markdown={getItemDetail(item)} />}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Zotero" url={`zotero://select/items/0_${item.key}`} onOpen={onOpen} />
+                  <Action.OpenInBrowser
+                    title="Open in Zotero"
+                    url={`zotero://select/items/0_${item.key}`}
+                    onOpen={onOpen}
+                  />
                   {item.attachment && item.attachment.key !== `` && (
-                    <Action.OpenInBrowser icon={Icon.Document} title="Open PDF" url={`zotero://open-pdf/library/items/${item.attachment.key}`} onOpen={onOpen} />
+                    <Action.OpenInBrowser
+                      icon={Icon.Document}
+                      title="Open PDF"
+                      url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                      onOpen={onOpen}
+                    />
                   )}
-                  { item.url && (
-                      <Action.OpenInBrowser
+                  {item.url && (
+                    <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open Original Link"
                       url={item.url}
                       shortcut={openExtLinkCommandShortcut}
                       onOpen={onOpen}
-                      />
-                    )
-                 }
-                 { preferences.use_bibtex && (
-                 <Action.CopyToClipboard
-                    title="Copy Bibtex Citation Key"
-                    content={item.citekey}
-                    shortcut={copyRefCommandShortcut}
-                  />
-                  )
-                 }
+                    />
+                  )}
+                  {preferences.use_bibtex && (
+                    <Action.CopyToClipboard
+                      title="Copy Bibtex Citation Key"
+                      content={item.citekey}
+                      shortcut={copyRefCommandShortcut}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
