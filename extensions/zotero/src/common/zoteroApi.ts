@@ -4,10 +4,7 @@ import * as utils from "./utils";
 import { readFileSync } from "fs";
 import Fuse from "fuse.js";
 import initSqlJs from "sql.js";
-
-
-
-const path = require('path');
+import path = require('path');
 
 export interface Preferences {
   zotero_path: string;
