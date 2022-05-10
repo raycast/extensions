@@ -2,4 +2,4 @@
 
 ## [Initial Version] - 2022-05-12
 
-- Arbitrary input, direct output. Includes Base converter, Case converter, Code converter, etc.
+- Arbitrary input, direct output. Includes Base converter, Case converter, Code converter, Color converter, etc.

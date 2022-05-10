@@ -31,7 +31,7 @@ export function BaseConvertersAdvanceView(props: {
         value={input}
         onChange={(newValue) => {
           if (isEmpty(newValue)) return;
-          setInput(parseInt(newValue).toString());
+          setInput(newValue.trim());
         }}
       />
       <Form.Description title="Output" text={output + "\n"} />
