@@ -1,6 +1,6 @@
-//single char
 import { isEmpty } from "./common-utils";
 
+//single char
 export const buildUnicode = (char: string) => {
   const _u = char.charCodeAt(0).toString(16);
   const affixLength = 4 - _u.length;

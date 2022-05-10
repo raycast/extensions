@@ -1,6 +1,6 @@
 # Converter
 
-Convert number from any base to any base or convert between different character encodings.
+Arbitrary input, direct output. Includes Base converter, Case converter, Code converter, etc.
 
 **Preferences:**
 

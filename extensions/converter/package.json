@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "converter",
   "title": "Converter",
-  "description": "Convert number from any base to any base or convert between different character encodings.",
+  "description": "Arbitrary input, direct output. Includes Base converter, Case converter, Code converter, etc.",
   "icon": "converter-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -51,6 +51,13 @@
       "title": "Code Converter",
       "icon": "code-converter-icon.png",
       "description": "Convert between different character encodings: Unicode, Base64, UTF-8, ASCII, &#xXXXX, URL.",
+      "mode": "view"
+    },
+    {
+      "name": "case-converter",
+      "title": "Case Converter",
+      "icon": "case-converter-icon.png",
+      "description": "Convert between different cases: camel, pascal, snake, kebab, upper, lower, title.",
       "mode": "view"
     }
   ],
