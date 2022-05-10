@@ -16,11 +16,11 @@ export interface Preferences {
 }
 
 export interface RefData {
-  id?: Number;
+  id?: number;
   added?: Date;
   modified?: Date;
   key?: string;
-  library?: Number;
+  library?: number;
   type?:string;
   citekey?:string;
   tags?: string[];
@@ -123,8 +123,8 @@ function resolveHome(filepath: string) : string{
 
 async function openDb () {
   const preferences: Preferences = getPreferenceValues();
-  let f_path = resolveHome(preferences.zotero_path);
-  let new_fPath = f_path + '.raycast'
+  const f_path = resolveHome(preferences.zotero_path);
+  const new_fPath = f_path + '.raycast'
 
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
   const db = readFileSync(new_fPath);
@@ -133,10 +133,10 @@ async function openDb () {
 
 async function getBibtexKey (key: string, library: string): Promise<string> {
   const db = await openBibtexDb();
-  let st = db.prepare(BIBTEX_SQL);
+  const st = db.prepare(BIBTEX_SQL);
   st.bind({":key": key, ":lib": library});
   st.step();
-  let res = st.getAsObject();
+  const res = st.getAsObject();
   st.free();
   db.close();
 
@@ -150,8 +150,8 @@ async function getBibtexKey (key: string, library: string): Promise<string> {
 
 async function openBibtexDb () {
   const preferences: Preferences = getPreferenceValues();
-  let f_path = resolveHome(preferences.zotero_path);
-  let new_fPath = f_path.replace('zotero.sqlite', 'better-bibtex-search.sqlite')
+  const f_path = resolveHome(preferences.zotero_path);
+  const new_fPath = f_path.replace('zotero.sqlite', 'better-bibtex-search.sqlite')
 
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
   const db = readFileSync(new_fPath);
@@ -160,18 +160,18 @@ async function openBibtexDb () {
 
 async function getLatestModifyDate(): Promise<Date> {
   const db = await openDb();
-  let st = db.prepare(INVALID_TYPES_SQL);
-  var invalid_ids = [];
+  const st = db.prepare(INVALID_TYPES_SQL);
+  let invalid_ids = [];
   while (st.step()) {
-    let row = st.getAsObject();
+    const row = st.getAsObject();
     invalid_ids.push(row.tid);
   }
   st.free();
-  let iids = '( ' + invalid_ids.join(', ') + ' )'
+  const iids = '( ' + invalid_ids.join(', ') + ' )'
 
-  let statement = db.prepare(ITEMS_SQL.replace('?', iids));
+  const statement = db.prepare(ITEMS_SQL.replace('?', iids));
 
-  var results = [];
+  let results = [];
   while (statement.step()) {
     results.push(statement.getAsObject());
   }
@@ -180,7 +180,7 @@ async function getLatestModifyDate(): Promise<Date> {
 
   let latest = new Date(results[0].modified);
   for (const row of results) {
-    let d = new Date(row.modified);
+    const d = new Date(row.modified);
     if (d > latest){
       latest = d;
     }
@@ -193,24 +193,24 @@ async function getLatestModifyDate(): Promise<Date> {
 async function getData(): Promise<RefData[]> {
   const db = await openDb();
 
-  let st = db.prepare(INVALID_TYPES_SQL);
-  var invalid_ids = [];
+  const st = db.prepare(INVALID_TYPES_SQL);
+  let invalid_ids = [];
   while (st.step()) {
-    let row = st.getAsObject();
+    const row = st.getAsObject();
     invalid_ids.push(row.tid);
   }
   st.free();
-  let iids = '( ' + invalid_ids.join(', ') + ' )'
+  const iids = '( ' + invalid_ids.join(', ') + ' )'
 
-  let st1 = db.prepare(ITEMS_SQL.replace('?', iids));
+  const st1 = db.prepare(ITEMS_SQL.replace('?', iids));
 
-  var rows = [];
+  let rows = [];
   while (st1.step()) {
-    let row = st1.getAsObject();
+    const row = st1.getAsObject();
     const st2 = db.prepare(TAGS_SQL);
     st2.bind({":id": row.id});
 
-    var v = [];
+    let v = [];
     while (st2.step()) {
       v.push(st2.getAsObject().name)
     }
@@ -221,7 +221,7 @@ async function getData(): Promise<RefData[]> {
     const st3 = db.prepare(METADATA_SQL);
     st3.bind({":id": row.id});
 
-    var mds = [];
+    let mds = [];
     while (st3.step()) {
       mds.push(st3.getAsObject())
     }
@@ -238,7 +238,7 @@ async function getData(): Promise<RefData[]> {
     st4.bind({":id": row.id});
 
     st4.step();
-    var at = st4.getAsObject();
+    const at = st4.getAsObject();
     st4.free();
 
     if (at) {
@@ -275,8 +275,8 @@ const parseQuery = (q: string) => {
 export const searchResources = async (q: string): Promise<RefData[]> => {
 
   const preferences: Preferences = getPreferenceValues();
-  let f_path = resolveHome(preferences.zotero_path);
-  let new_fPath = f_path + '.raycast'
+  const f_path = resolveHome(preferences.zotero_path);
+  const new_fPath = f_path + '.raycast'
   await copyFile(f_path, new_fPath);
 
   async function updateCache(): Promise<RefData[]> {
@@ -295,7 +295,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   async function readCache(): Promise<RefData[]> {
     const cacheTime = await mtime(cachePath);
-    var now = new Date();
+    const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
     if (diffTime < 3600000){
@@ -315,7 +315,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     }
   }
 
-  var ret;
+  let ret;
   try {
     ret = await readCache();
   } catch {
@@ -326,7 +326,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   const { qss, tss } = parseQuery(q);
 
-  var query: Fuse.Expression =
+  let query: Fuse.Expression =
   {
     $or: [
       { title: qss },
@@ -372,7 +372,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   // initialize Fuse with the index
   const fuse = new Fuse(ret, options, myIndex);
 
-  let re = fuse.search(query);
+  const re = fuse.search(query);
 
   return re.map(x => x.item);
 

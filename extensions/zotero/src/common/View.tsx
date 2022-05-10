@@ -15,7 +15,7 @@ const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"],
 const copyBibCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
 
 function getItemDetail(item: RefData): string {
-  let ret =`## ${item.title}
+  return `## ${item.title}
 
 ${item.url ? '**URL:** [' + item.url + '](' + item.url +')': ''}
 
@@ -32,8 +32,6 @@ ${item.abstractNote ? '**Abstract:** ' + item.abstractNote : ''}
 ${item.tags.length > 0 ? '**Tagged With:** ' + item.tags.join(', ') : ''}
 
 `;
-
-  return ret;
 }
 
 export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange, throttle }: Props): JSX.Element => {
