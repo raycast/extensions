@@ -79,9 +79,9 @@ const cases = [
   {
     info: {
       name: "camelCase to snake_case",
-      id: "user_1651306768124",
+      id: "build_in_1651306768124",
       icon: "pencil-16",
-      source: "User",
+      source: "Build-in",
       visibility: true,
       tag: ["Case"],
     },
@@ -95,9 +95,9 @@ const cases = [
   {
     info: {
       name: "camelCase to kebab-case",
-      id: "user_1651306783829",
+      id: "build_in_1651306783829",
       icon: "pencil-16",
-      source: "User",
+      source: "Build-in",
       visibility: true,
       tag: ["Case"],
     },
@@ -111,9 +111,9 @@ const cases = [
   {
     info: {
       name: "snake_case to camelCase",
-      id: "user_1651306867056",
+      id: "build_in_1651306867056",
       icon: "pencil-16",
-      source: "User",
+      source: "Build-in",
       visibility: true,
       tag: ["Case"],
     },
@@ -130,10 +130,10 @@ const cases = [
   },
   {
     info: {
-      name: "kabab-case to camelCase",
-      id: "user_1651306886878",
+      name: "kebab-case to camelCase",
+      id: "build_in_1651306886878",
       icon: "pencil-16",
-      source: "User",
+      source: "Build-in",
       visibility: true,
       tag: ["Case"],
     },

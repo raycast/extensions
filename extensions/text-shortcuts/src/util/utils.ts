@@ -3,7 +3,7 @@ import Values = Form.Values;
 
 export const regexPunctuation = /\p{Z}|\p{P}|\p{S}/gu;
 
-export const preferences = () => {
+export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     annotation: preferencesMap.get("annotation"),
@@ -13,7 +13,8 @@ export const preferences = () => {
     markdown: preferencesMap.get("markdown"),
     time: preferencesMap.get("time"),
     rememberTag: preferencesMap.get("remember-tag"),
-    detail: preferencesMap.get("detail"),
+    showDetail: preferencesMap.get("showDetail"),
+    showTag: preferencesMap.get("showTag"),
   };
 };
 export const isEmpty = (string: string | null | undefined) => {
@@ -69,7 +70,7 @@ export function buildRegexp(content: string) {
       return new RegExp(regSource, regModifier);
     }
   } catch (e) {
-    console.error(String(e));
+    console.error("[buildRegexp] " + String(e));
   }
   return content;
 }

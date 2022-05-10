@@ -29,11 +29,19 @@
           "default": true
         },
         {
-          "name": "detail",
+          "name": "showDetail",
           "type": "checkbox",
           "required": false,
           "label": "Show Shortcut Detail",
           "description": "Show Shortcut's text on the right.",
+          "default": true
+        },
+        {
+          "name": "showTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Shortcut Tag",
+          "description": "Show Shortcut's first tag on the right.",
           "default": true
         },
         {

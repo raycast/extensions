@@ -221,7 +221,7 @@ export function runShortcut(input: string, tactions: Taction[]) {
     });
     return output;
   } catch (e) {
-    console.error(String(e));
+    console.error("runShortcut " + String(e));
     return input;
   }
 }
@@ -318,7 +318,12 @@ function tactionCase(input: string, taction: Taction) {
       return input.toLowerCase();
     }
     case Cases.TITLE: {
-      return input.replace(input[0], input[0].toUpperCase());
+      const inputArray = input.toLowerCase().split(regexPunctuation);
+      const outputArray = [];
+      for (let i = 0; i < inputArray.length; i++) {
+        outputArray.push(inputArray[i].replace(inputArray[i][0], inputArray[i][0].toUpperCase()));
+      }
+      return outputArray.join(" ");
     }
     case Cases.CAMEL: {
       const inputArray = input.toLowerCase().split(regexPunctuation);
