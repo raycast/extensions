@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSearch from "./hooks/useSearch";
 import ListBlocks from "./components/ListBlocks";
 import useAppExists, { UseAppExists } from "./hooks/useAppExists";
 import useConfig, { UseConfig } from "./hooks/useConfig";
 import useDB, { UseDB } from "./hooks/useDB";
-import AppNotInstalled from "./components/AppNotInstalled";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
+import Style = Toast.Style;
 
 const { useDetailedView } = getPreferenceValues();
 
@@ -19,6 +19,13 @@ export default function search() {
 
   const [query, setQuery] = useState("");
   const params = { appExists, db, query, setQuery, config };
+
+  useEffect(() => {
+    if (appExists.appExistsLoading) return;
+    if (appExists.appExists) return;
+
+    showToast(Style.Failure, "Error", "Craft app is not installed");
+  }, [appExists.appExistsLoading]);
 
   return useDetailedView ? handleDetailedView(params) : handleListView(params);
 }
@@ -44,7 +51,7 @@ const handleListView = ({ appExists, db, query, setQuery, config }: ViewParams) 
     />
   );
 
-  const listOrInfo = appExists.appExists ? listBlocks : <AppNotInstalled />;
+  const listOrInfo = appExists.appExists ? listBlocks : <NoResults />;
 
   return appExists.appExistsLoading ? listBlocks : listOrInfo;
 };
@@ -62,7 +69,13 @@ const handleDetailedView = ({ appExists, db, query, setQuery, config }: ViewPara
     />
   );
 
-  const listOrInfo = appExists.appExists ? listDocuments : <AppNotInstalled />;
+  const listOrInfo = appExists.appExists ? listDocuments : <NoResults />;
 
   return appExists.appExistsLoading ? listDocuments : listOrInfo;
 };
+
+const NoResults = () => (
+  <List>
+    <List.EmptyView title="No results" icon={"command-icon.png"} />
+  </List>
+);
