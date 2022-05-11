@@ -6,15 +6,15 @@ Features:
 
 ### 1. Open projects in various IDEs
 
-![Choose at installation](./screenshots/ss_1.png)
+![Choose at installation](./metadata/screenshot-03.png)
 
 ### 2. Search Projects
 
-![Search Projects](./screenshots/ss_2.png)
+![Search Projects](./metadata/screenshot-01.png)
 
 ### 3. Pin frequently used projects at the top
 
-![Pin Projects](./metadata/sreenshot-03.png)
+![Pin Projects](./metadata/screenshot-02.png)
 
 ## Roadmap
 
