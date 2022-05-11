@@ -1,5 +1,5 @@
 import fetch, { FetchError } from "node-fetch";
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast, open, getApplications } from "@raycast/api";
 
 interface SidebarItemProp {
   id: string; // UUID
@@ -22,6 +22,30 @@ export interface AnydockProfile {
   icon: string; // SF Symbol Name
   documentCount: number; // Number of documents in the profile
   name: string;
+}
+
+async function isAnyboxInstalled() {
+  const applications = await getApplications();
+  return applications.some(({ bundleId }) => bundleId === "cc.anybox.Anybox");
+}
+
+export async function checkForAnyboxInstallation() {
+  if (!(await isAnyboxInstalled())) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Anybox is not installed.",
+      message: "You can install it from here!",
+      primaryAction: {
+        title: "Anybox on AppStore",
+        onAction: (toast) => {
+          open("https://apps.apple.com/dk/app/anybox-the-bookmark-manager/id1593408455");
+          toast.hide();
+        },
+      },
+    };
+
+    await showToast(options);
+  }
 }
 
 function request(path: string, method: string, body?: any, closeWindow = false) {
@@ -50,12 +74,23 @@ function request(path: string, method: string, body?: any, closeWindow = false) 
 }
 
 function handleError(error: FetchError) {
+  checkForAnyboxInstallation();
+
   if (error.code === "ECONNREFUSED") {
-    showToast({
+    const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Connection Failed",
       message: "It looks like Anybox is not running.",
-    });
+      primaryAction: {
+        title: "Open Anybox",
+        onAction: (toast) => {
+          open("open", "cc.anybox.Anybox");
+          toast.hide();
+        },
+      },
+    };
+
+    showToast(options);
   } else {
     showToast({
       style: Toast.Style.Failure,
