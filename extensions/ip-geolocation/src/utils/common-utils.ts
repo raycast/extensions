@@ -1,6 +1,10 @@
 import * as os from "os";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import Values = LocalStorage.Values;
+import axios from "axios";
+import { IP_GEOLOCATION_API } from "./constants";
+import { IPGeolocation } from "../types/ip-geolocation";
+import Style = Toast.Style;
 
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -46,4 +50,22 @@ export function getIPV6Address() {
     }
   }
   return null;
+}
+
+export function getIPGeolocation(ipv4 = "", language = "en") {
+  return axios({
+    method: "GET",
+    url: IP_GEOLOCATION_API + ipv4,
+    params: {
+      lang: language,
+      fields: "585727",
+    },
+  })
+    .then((response) => {
+      return response.data as IPGeolocation;
+    })
+    .catch((reason) => {
+      showToast(Style.Failure, String(reason)).then();
+      return { status: "fail" } as IPGeolocation;
+    });
 }
