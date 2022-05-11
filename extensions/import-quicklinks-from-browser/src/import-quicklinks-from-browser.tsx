@@ -30,6 +30,14 @@ interface ChromeProfile {
   database: string;
 }
 
+function deduplicate(items: CustomSearchEngine[]) {
+  const map = new Map<string, CustomSearchEngine>();
+  for (const item of items) {
+    map.set(item.url, item);
+  }
+  return Array.from(map.values());
+}
+
 const loadDb = async (dbPath: string): Promise<Database> => {
   const fileBuffer = readFileSync(dbPath);
   const SQL = await initSqlJs({
@@ -90,7 +98,7 @@ function CustomSearchEngineItem(props: { searchEngine: CustomSearchEngine }) {
 }
 
 export default function ListSearchEngine() {
-  const [searchEngines, setSearchEngines] = useState<CustomSearchEngine[]>();
+  let [searchEngines, setSearchEngines] = useState<CustomSearchEngine[]>();
   const [databasePath, setDatabasePath] = useState<string>();
 
   useEffect(() => {
@@ -114,6 +122,7 @@ export default function ListSearchEngine() {
     });
   }, [databasePath]);
 
+  searchEngines = searchEngines ? deduplicate(searchEngines) : searchEngines;
   return (
     <List
       isLoading={typeof searchEngines === "undefined"}
