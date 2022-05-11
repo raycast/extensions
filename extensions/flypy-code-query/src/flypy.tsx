@@ -33,8 +33,6 @@ export function Flypy() {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useSearch(query);
 
-  console.log(data, error, isLoading);
-
   return (
     <List
       isLoading={isLoading}
