@@ -1,6 +1,6 @@
 # Converter
 
-Arbitrary input, direct output. Includes Base converter, Code converter, Color converter, etc.
+Arbitrary input, direct output. Includes Base converter, Code converter, etc.
 
 **🌟🌟Tips:**
 
