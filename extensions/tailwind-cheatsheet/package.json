@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "tailwind-cheatsheet",
-  "title": "tailwind-cheatsheet",
+  "name": "Tailwind-cheatsheet",
+  "title": "Tailwind-cheatsheet",
   "description": "Tailwind-Cheatsheet",
   "icon": "tailwind-icon.png",
   "author": "cy-98",
@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "tailwind-cheatsheet",
+      "name": "Tailwind-cheatsheet",
       "title": "Tailwind-cheatsheet",
       "description": "Extension for showing cheatsheet of tailwind",
       "mode": "view"

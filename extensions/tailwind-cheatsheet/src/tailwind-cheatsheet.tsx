@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import cheatsheet from './cheatsheet'
+import cheatsheet from "./cheatsheet";
 
 export default function Command() {
   return (

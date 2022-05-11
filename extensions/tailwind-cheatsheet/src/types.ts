@@ -32,8 +32,7 @@ export enum Titles {
   Margin = "margin",
   SpaceBetween = "space between",
 
-  Opacity = 'opacity',
-
+  Opacity = "opacity",
 }
 
 export type TailwindConfig = Record<Titles, Record<string, { value: string; desc: string }>>;
