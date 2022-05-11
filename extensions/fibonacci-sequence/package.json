@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fibonacci-sequence",
-  "title": "Fibonacci sequence",
+  "title": "Fibonacci Sequence",
   "description": "Gives you the fibonacci sequence for using in story points on engineering tickets",
   "icon": "command-icon.png",
   "author": "adambutler",
@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Fibonacci",
-      "subtitle": "Get a fibonacci sequence",
+      "title": "Fibonacci Sequence",
       "description": "Gives you the fibonacci sequence for using in story points on engineering tickets",
       "mode": "view"
     }
