@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, Action, Detail } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action } from "@raycast/api";
 import React, { ReactElement, useEffect, useState } from "react";
 import { getErrorMessage } from "./utils";
 import { flypyCoding } from "./coding";
@@ -12,7 +12,17 @@ function ListItemFragment(props: { data: any | undefined }): ReactElement | null
     <React.Fragment>
       <List.Section>
         {data.map((data: any) => (
-          <List.Item title={`${data[0]}`} subtitle={`${data[1]}`} key={`${data[7]}`} />
+          <List.Item
+            title={data[0]}
+            subtitle={data[1]}
+            key={data[7]}
+            actions={
+              <ActionPanel title="Actions">
+                <Action.Paste content={data[1]} />
+                <Action.CopyToClipboard title="Copy to Clipboard" content={data[1]} />
+              </ActionPanel>
+            }
+          />
         ))}
       </List.Section>
     </React.Fragment>
@@ -22,8 +32,16 @@ function ListItemFragment(props: { data: any | undefined }): ReactElement | null
 export function Flypy() {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useSearch(query);
+
+  console.log(data, error, isLoading);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Type to Query Words..." onSearchTextChange={setQuery} throttle>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Type to query words... eg. 软盘"
+      onSearchTextChange={setQuery}
+      throttle
+    >
       {error ? (
         <List.EmptyView title="Could not fetch data" description={error} />
       ) : (
@@ -46,9 +64,9 @@ export function useSearch(query: string): {
   error?: string;
   isLoading: boolean;
 } {
-  const [data, setData] = useState<any>();
+  const [data, setData] = useState<any>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   let cancel = false;
 
@@ -60,7 +78,7 @@ export function useSearch(query: string): {
           query = dq;
         }
       }
-      if (query === null || cancel) {
+      if (query.length === 0 || cancel) {
         return;
       }
 
