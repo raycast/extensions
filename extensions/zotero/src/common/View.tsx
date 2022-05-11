@@ -12,12 +12,27 @@ type Props = {
 
 const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
 const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
-const copyBibCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
+
+function getURL(item: RefData): string {
+  const x = `${
+    item.url
+      ? item.url
+      : `${item.attachment.url ? item.attachment.url : `${item.DOI ? "https://doi.org/" + item.DOI : ""}`}`
+  }`;
+  console.log(x);
+  return x;
+}
 
 function getItemDetail(item: RefData): string {
   return `## ${item.title}
 
-${item.url ? "**URL:** [" + item.url + "](" + item.url + ")" : ""}
+${
+  item.url
+    ? "**URL:** [" + item.url + "](" + item.url + ")"
+    : item.attachment.url
+    ? "**URL:** [" + item.attachment.url + "](" + item.attachment.url + ")"
+    : ""
+}
 
 ${item.publicationTitle ? "**Publication:** " + item.publicationTitle : ""}
 
@@ -68,11 +83,11 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                       onOpen={onOpen}
                     />
                   )}
-                  {item.url && (
+                  {getURL(item) !== "" && (
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open Original Link"
-                      url={item.url}
+                      url={getURL(item)}
                       shortcut={openExtLinkCommandShortcut}
                       onOpen={onOpen}
                     />
