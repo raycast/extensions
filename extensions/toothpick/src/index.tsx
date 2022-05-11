@@ -4,13 +4,17 @@ import { getBluetoothDevices, openBluetoothPreferences, toggleBluetoothDevice } 
 
 export default function Index() {
   const [deviceNames, setDeviceNames] = useState<string[]>([]);
+  const [deviceAddresses, setDeviceAddresses] = useState<string[]>([]);
+  const [deviceBatteries, setDeviceBatteries] = useState<string[]>([]);
   const [deviceStatuses, setDeviceStatuses] = useState<boolean[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchDevices() {
-      const { deviceNames, deviceStatuses } = await getBluetoothDevices();
+      const { deviceNames, deviceAddresses, deviceStatuses, deviceBatteries } = await getBluetoothDevices();
       setDeviceNames(deviceNames);
+      setDeviceAddresses(deviceAddresses);
+      setDeviceBatteries(deviceBatteries);
       setDeviceStatuses(deviceStatuses);
       setIsLoading(false);
     }
@@ -49,6 +53,10 @@ export default function Index() {
             key={deviceName}
             title={deviceName}
             icon={{ source: deviceStatuses[i] ? "on.png" : "off.png" }}
+            subtitle={deviceAddresses[i]}
+            accessories={deviceBatteries[i] !== "" ? [
+              {text: deviceBatteries[i] + "%", icon: {source: "battery.png"}},
+            ] : []}
             actions={
               <ActionPanel>
                 <Action
