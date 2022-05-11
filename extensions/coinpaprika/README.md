@@ -4,4 +4,4 @@ A [Raycast](https://raycast.com/) extension that lets you easily check your favo
 
 Receive a list or search for the top 1500 Cryptocurrencies and get a quick overview of the current rates and statistics for each coin.
 
-![sowcase](./assets/showcase.png)
+![sowcase](./media/showcase.png)
