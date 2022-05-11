@@ -33,11 +33,11 @@ export async function getBluetoothDevices(): Promise<Devices> {
   const results = response.split(",");
   let deviceNames = results.slice(0, results.length / 3).map((deviceName) => deviceName.trim());
   let deviceStatuses = results
-    .slice(results.length / 3, results.length / 3 * 2)
+    .slice(results.length / 3, (results.length / 3) * 2)
     .map((deviceStatus) => deviceStatus.trim())
     .map((deviceStatus) => stringToBool(deviceStatus));
   let deviceAddresses = results
-    .slice(results.length / 3 * 2, results.length)
+    .slice((results.length / 3) * 2, results.length)
     .map((deviceStatus) => deviceStatus.trim());
   const indices = getSortIndices(deviceNames);
   deviceNames = indices.map((i) => deviceNames[i]);
@@ -46,25 +46,28 @@ export async function getBluetoothDevices(): Promise<Devices> {
 
   const batteryResponse: string = await runAppleScript(
     `do shell script "/usr/sbin/ioreg -c AppleDeviceManagementHIDEventService | grep -e BatteryPercent -e DeviceAddress"`
-  )
-  const addressBattery = batteryResponse.split('\r').filter(x => x.match("(DeviceAddress)|(BatteryPercent)")).map(x => {
-    const matches = /"([A-z]+)"[\s=]+(["\- A-z0-9]+)/.exec(x)
-    if (matches) {
-      // eslint-disable-next-line no-useless-escape
-      return [matches[1], matches[2].replace('"','').replace('\"','')]
-    } else {
-      return ["", ""]
-    }
-  })
-  const batteryMap: Record<string, string> = {}
+  );
+  const addressBattery = batteryResponse
+    .split("\r")
+    .filter((x) => x.match("(DeviceAddress)|(BatteryPercent)"))
+    .map((x) => {
+      const matches = /"([A-z]+)"[\s=]+(["\- A-z0-9]+)/.exec(x);
+      if (matches) {
+        // eslint-disable-next-line no-useless-escape
+        return [matches[1], matches[2].replace('"', "").replace('"', "")];
+      } else {
+        return ["", ""];
+      }
+    });
+  const batteryMap: Record<string, string> = {};
   for (let i = 0; i < addressBattery.length - 1; i++) {
     if (addressBattery[i][0] === "DeviceAddress" && addressBattery[i + 1][0] === "BatteryPercent") {
-      batteryMap[addressBattery[i][1]] = addressBattery[i + 1][1]
+      batteryMap[addressBattery[i][1]] = addressBattery[i + 1][1];
     }
   }
-  
-  const deviceBatteries = deviceAddresses.map(x => batteryMap[x] ?? "")
-  return { deviceNames, deviceAddresses, deviceStatuses, deviceBatteries};
+
+  const deviceBatteries = deviceAddresses.map((x) => batteryMap[x] ?? "");
+  return { deviceNames, deviceAddresses, deviceStatuses, deviceBatteries };
 }
 
 export async function toggleBluetoothDevice(deviceName: string): Promise<boolean> {

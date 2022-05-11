@@ -54,9 +54,9 @@ export default function Index() {
             title={deviceName}
             icon={{ source: deviceStatuses[i] ? "on.png" : "off.png" }}
             subtitle={deviceAddresses[i]}
-            accessories={deviceBatteries[i] !== "" ? [
-              {text: deviceBatteries[i] + "%", icon: {source: "battery.png"}},
-            ] : []}
+            accessories={
+              deviceBatteries[i] !== "" ? [{ text: deviceBatteries[i] + "%", icon: { source: "battery.png" } }] : []
+            }
             actions={
               <ActionPanel>
                 <Action
