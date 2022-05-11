@@ -14,13 +14,11 @@ const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shif
 const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
 
 function getURL(item: RefData): string {
-  const x = `${
+  return `${
     item.url
       ? item.url
       : `${item.attachment.url ? item.attachment.url : `${item.DOI ? "https://doi.org/" + item.DOI : ""}`}`
   }`;
-  console.log(x);
-  return x;
 }
 
 function getItemDetail(item: RefData): string {
