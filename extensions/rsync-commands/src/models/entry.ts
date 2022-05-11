@@ -60,11 +60,13 @@ export default class Entry {
     const cmd = ["rsync"]
 
     for (const [, option] of Object.entries(this.options)) {
-      const { name, param, value } = option
-      let optionCommand = `--${name}`
-      if (param && !value) throw `Option "${name}" does not have a value.`
-      if (value) optionCommand = `${optionCommand}=${value}`
-      cmd.push(optionCommand)
+      const { enabled, name, param, value } = option
+      if (enabled) {
+        let optionCommand = `--${name}`
+        if (param && !value) throw `Option "${name}" does not have a value.`
+        if (value) optionCommand = `${optionCommand}=${value}`
+        cmd.push(optionCommand)
+      }
     }
 
     if (this.sshSelection !== "none") {
