@@ -132,7 +132,7 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
       <Form.Dropdown
         id="sshSelection"
         title="SSH"
-        info="Specify if the source or destination will be using SSH."
+        info="Use SSH for source or destination."
         defaultValue={getValue("sshSelection")}
         onChange={value => setValue("sshSelection", value)}
       >
@@ -184,8 +184,6 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
         key="preCommand"
         id="preCommand"
         title="Pre Command"
-        // placeholder={'date=`date "+%y%m%d-%H%M"`'}
-        placeholder=""
         info="A command to run before the rsync command itself, maybe setup some variables for the rsync command."
         defaultValue={entry.preCommand}
         onChange={value => setValue("preCommand", value)}
@@ -194,9 +192,7 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
         key="postCommand"
         id="postCommand"
         title="Post Command"
-        // placeholder={"rm -f current\nln -s back-$date current"}
-        placeholder="A command to run after the rsync command itself, maybe do some cleanup."
-        info="A command to run after the rsync command itself."
+        info="A command to run after the rsync command itself, maybe do some cleanup."
         defaultValue={entry.postCommand}
         onChange={value => setValue("postCommand", value)}
       />
