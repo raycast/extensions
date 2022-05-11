@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "Tailwind-Cheatsheet",
-  "title": "Tailwind-Cheatsheet",
+  "name": "tailwind-cheatsheet",
+  "title": "tailwind-cheatsheet",
   "description": "Tailwind-Cheatsheet",
   "icon": "tailwind-icon.png",
   "author": "cy-98",
