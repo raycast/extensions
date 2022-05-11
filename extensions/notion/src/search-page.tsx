@@ -27,24 +27,20 @@ export default function SearchList(): JSX.Element {
   }, [searchText]);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search pages"
-      onSearchTextChange={setSearchText}
-      throttle={true}
-      enableFiltering
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search pages" onSearchTextChange={setSearchText} throttle={true}>
       <List.Section title="Recent">
-        {recentlyOpenedPages.map((p) => (
-          <PageListItem
-            key={`recently-open-page-${p.id}`}
-            page={p}
-            databaseView={undefined}
-            databaseProperties={undefined}
-            onPageCreated={(page) => setPages((state) => state.concat([page]))}
-            onPageUpdated={(page) => setPages((state) => state.map((x) => (x.id === page.id ? page : x)))}
-          />
-        ))}
+        {recentlyOpenedPages
+          .filter((p) => (p.title ? p.title : "Untitled").toLowerCase().includes(searchText.toLowerCase()))
+          .map((p) => (
+            <PageListItem
+              key={`recently-open-page-${p.id}`}
+              page={p}
+              databaseView={undefined}
+              databaseProperties={undefined}
+              onPageCreated={(page) => setPages((state) => state.concat([page]))}
+              onPageUpdated={(page) => setPages((state) => state.map((x) => (x.id === page.id ? page : x)))}
+            />
+          ))}
       </List.Section>
       <List.Section title="Search">
         {pages?.map((p) => (

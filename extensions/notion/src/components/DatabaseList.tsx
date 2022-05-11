@@ -90,7 +90,6 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
       searchBarPlaceholder="Filter pages"
       navigationTitle={" →  " + (viewTitle ? viewTitle : databaseName)}
       onSearchTextChange={setSearchText}
-      enableFiltering
       throttle
       actions={
         <ActionPanel>
