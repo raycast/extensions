@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "placeholder",
   "title": "Placeholder",
-  "description": "Just add your desired image size (width & height), and you'll get a placeholder image.",
+  "description": "Just add your desired image size (width & height), and you'll get a stylish placeholder.",
   "icon": "placeholder-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -15,7 +15,7 @@
     {
       "name": "random-placeholder-image",
       "title": "Random Placeholder Image",
-      "description": "Just add your desired image size (width & height), and you'll get a placeholder image.",
+      "description": "Just add your desired image size (width & height), and you'll get a stylish placeholder.",
       "mode": "view"
     }
   ],

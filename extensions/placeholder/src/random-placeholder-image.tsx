@@ -1,10 +1,9 @@
-import { Action, ActionPanel, Form, Icon, Image } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Picsum } from "picsum-photos/dist";
 import { ImageDetail } from "./components/image-detail";
 import { commonPreferences } from "./utils/common-utils";
 import { ImageAction } from "./components/image-action";
-import Mask = Image.Mask;
 
 export default function CreateShortcut() {
   const [width, setWidth] = useState<string>("300");
@@ -21,10 +20,17 @@ export default function CreateShortcut() {
 
   useEffect(() => {
     async function _fetch() {
+      let _blur = parseFloat(blur);
+      if (isNaN(_blur) || _blur < 0) {
+        _blur = 0;
+      }
+      if (_blur > 10) {
+        _blur = 10;
+      }
       let _imageURL = Picsum.url({
-        width: Number(width),
-        height: Number(height),
-        blur: Number(blur),
+        width: parseInt(width),
+        height: parseInt(height),
+        blur: _blur,
         cache: cache,
         grayscale: grayscale,
         jpg: jpg,
@@ -50,7 +56,7 @@ export default function CreateShortcut() {
           />
           <ActionPanel.Section>
             <Action.Push
-              icon={{ source: imageURL, mask: Mask.Circle }}
+              icon={Icon.Window}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               title={"Show in Raycast"}
               target={
@@ -106,17 +112,7 @@ export default function CreateShortcut() {
         placeholder={"0-10"}
         info={"Level of image blurriness form 0-10"}
         onChange={(newValue) => {
-          let _blur = parseInt(newValue);
-          if (_blur > 10) {
-            _blur = 10;
-          }
-          if (_blur < 0) {
-            _blur = 0;
-          }
-          if (isNaN(_blur)) {
-            _blur = 0;
-          }
-          setBlur(_blur + "");
+          setBlur(newValue);
         }}
       />
       <Form.Checkbox
