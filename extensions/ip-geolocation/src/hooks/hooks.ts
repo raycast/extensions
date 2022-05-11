@@ -67,49 +67,52 @@ export const searchMyIpGeolocation = (language: string) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    const myInternalIpv4 = getIPV4Address();
-    const myInternalIpv6 = getIPV6Address();
-    const myPublicIpv4 = await publicIp.v4({ onlyHttps: true });
-    const myPublicIpv6 = await publicIp.v6({ onlyHttps: true });
+    try {
+      const myInternalIpv4 = getIPV4Address();
+      const myInternalIpv6 = getIPV6Address();
+      const myPublicIpv4 = await publicIp.v4({ onlyHttps: true });
+      const myPublicIpv6 = await publicIp.v6({ onlyHttps: true });
 
-    axios({
-      method: "GET",
-      url: IP_GEOLOCATION_API + myPublicIpv4,
-      params: {
-        lang: language,
-        fields: "585727",
-      },
-    })
-      .then((response) => {
-        const ipGeolocation = response.data as IPGeolocation;
-        if (ipGeolocation.status === "fail") {
-          const ipGeolocationReadable = {
-            "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
-            "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
-          };
-          setIpGeolocation(Object.entries(ipGeolocationReadable));
-          setLoading(false);
-        } else {
-          const ipGeolocationReadable = {
-            "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
-            "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
-            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
-              isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
-            }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city district
-            GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
-            Timezone: ipGeolocation.timezone,
-            AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
-            ISP: ipGeolocation.isp,
-            Organization: ipGeolocation.org,
-          };
-          setIpGeolocation(Object.entries(ipGeolocationReadable));
-          setLoading(false);
-        }
+      axios({
+        method: "GET",
+        url: IP_GEOLOCATION_API + myPublicIpv4,
+        params: {
+          lang: language,
+          fields: "585727",
+        },
       })
-      .catch((reason) => {
-        setLoading(false);
-        showToast(Style.Failure, String(reason));
-      });
+        .then((response) => {
+          const ipGeolocation = response.data as IPGeolocation;
+          if (ipGeolocation.status === "fail") {
+            const ipGeolocationReadable = {
+              "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
+              "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
+            };
+            setIpGeolocation(Object.entries(ipGeolocationReadable));
+          } else {
+            const ipGeolocationReadable = {
+              "Local IP": `${myInternalIpv4} , ${myInternalIpv6}`,
+              "Public IP": `${myPublicIpv4} , ${myPublicIpv6}`,
+              Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
+                isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
+              }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city district
+              GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
+              Timezone: ipGeolocation.timezone,
+              AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
+              ISP: ipGeolocation.isp,
+              Organization: ipGeolocation.org,
+            };
+            setIpGeolocation(Object.entries(ipGeolocationReadable));
+          }
+        })
+        .catch((reason) => {
+          showToast(Style.Failure, String(reason));
+        });
+    } catch (e) {
+      console.error(String(e));
+      await showToast(Style.Failure, String(e));
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
