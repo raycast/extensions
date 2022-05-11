@@ -36,7 +36,7 @@ export function Flypy() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Type to query words... eg. 软盘"
+      searchBarPlaceholder="Type to query words... eg. 小鹤音形"
       onSearchTextChange={setQuery}
       throttle
     >
