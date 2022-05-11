@@ -14,7 +14,7 @@ Features:
 
 ### 3. Pin frequently used projects at the top
 
-![Pin Projects](./screenshots/ss_3.png)
+![Pin Projects](./metadata/sreenshot-03.png)
 
 ## Roadmap
 
