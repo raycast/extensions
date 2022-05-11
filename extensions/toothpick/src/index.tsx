@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getBluetoothDevices, openBluetoothPreferences, toggleBluetoothDevice } from "./utils";
 
@@ -53,7 +53,6 @@ export default function Index() {
             key={deviceName}
             title={deviceName}
             icon={{ source: deviceStatuses[i] ? "on.png" : "off.png" }}
-            subtitle={deviceAddresses[i]}
             accessories={
               deviceBatteries[i] !== "" ? [{ text: deviceBatteries[i] + "%", icon: { source: "battery.png" } }] : []
             }
@@ -65,6 +64,11 @@ export default function Index() {
                   onAction={async () => await toggleBluetooth(deviceName, i)}
                 />
                 <Action title="Open Bluetooth Preferences" icon={Icon.Gear} onAction={openBluetoothPreferences} />
+                <Action
+                  title={"Copy Address: " + deviceAddresses[i]}
+                  icon={Icon.Hammer}
+                  onAction={() => Clipboard.copy(deviceAddresses[i])}
+                />
               </ActionPanel>
             }
           />
