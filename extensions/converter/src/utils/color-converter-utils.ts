@@ -4,14 +4,7 @@ export const opacityToHex = (opacity: number) => {
   return hex.length < 2 ? "0" + hex : hex;
 };
 
-export interface AllColors {
-  color: string;
-  rgb: string;
-  hex: string;
-  hsl: string;
-}
-
-export interface AllOpacity {
-  opacity: string;
-  opacityHex: string;
-}
+export const colorTags = [
+  { title: "Color", value: "Color" },
+  { title: "Opacity", value: "Opacity" },
+];

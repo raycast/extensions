@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { buildUnicode, chineseUtf8ToNative, unicodesToNative } from "./utils/code-converter-utils";
 import { getInputItem } from "./hooks/get-input-item";
-import { Case } from "./utils/case-converter-utils";
 
 export default function CodeConverter() {
   const { autoDetect, priorityDetection } = commonPreferences();
