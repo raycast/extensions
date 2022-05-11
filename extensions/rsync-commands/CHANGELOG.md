@@ -1,6 +1,11 @@
 # Rsync Commands Changelog
 
-## [Initial Version] - 2022-05-05
+## [1.1.0] - 2020-05-11
+- Configure your desired identity file (private key) for SSH sync.
+- Configure custom commands to run before and after the rsync command itself.
+
+
+## [1.0.0] - 2022-05-05
 
 - Create, update, delete and duplicate pre-configured rsync commands.
 - Pin your most used commands.
