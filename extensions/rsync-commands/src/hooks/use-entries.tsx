@@ -51,8 +51,7 @@ const useEntries = (): UseEntriesOutput => {
     } catch (err: any) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Command Error",
-        message: err,
+        title: err,
       })
       return false
     }
