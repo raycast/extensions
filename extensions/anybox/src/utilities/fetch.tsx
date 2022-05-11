@@ -38,7 +38,7 @@ export async function checkForAnyboxInstallation() {
       primaryAction: {
         title: "Anybox on AppStore",
         onAction: (toast) => {
-          open("https://apps.apple.com/dk/app/anybox-the-bookmark-manager/id1593408455");
+          open("https://apps.apple.com/app/anybox-the-bookmark-manager/id1593408455");
           toast.hide();
         },
       },
