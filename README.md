@@ -1,22 +1,29 @@
-# Raycast Unogs
-## Unofficial raycast extension for Unogs.
-Search for netflix titles on [Unogs](https://unogs.com/). View the title's supported regions, audio and subtititle details.
+<p align="center">
+  <img src="images/store-logo.png" height="128">
+  <h1 align="center">Raycast Extensions</h1>
+</p>
 
-## Installation and Setup
-- Install the extenssion from Raycast store.
-- Go to [RapidAPI](https://rapidapi.com/unogs/api/unogs/) page, and click on "Subscribe to test".
-- You can select the free plan which gives you 100 free requests/day.
-- Copy your API key and add it in the extension.
+<p align="center">
+  <a aria-label="Follow Raycast on Twitter" href="https://twitter.com/raycastapp">
+    <img alt="" src="https://img.shields.io/badge/Follow%20@raycastapp-black.svg?style=for-the-badge&logo=Twitter">
+  </a>
+  <a aria-label="Join the community on Slack" href="https://raycast.com/community">
+    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Slack">
+  </a>
+</p>
 
-Note: You can still see the API key even without subscribing but it will not work in the extesion.
+[Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
 
-## Usage
-- Once you have added your API key, you can type a name of a Netflix movie or show and submit the first step.
-- On next step you will see the results, you can filter through the search results with name, year and even imdb_id.
-- You can open details by hitting enter.
-- You can also select "Open in browser" from action to open it on Netflix.
+![Header](images/header.png)
 
-## Demo
-![](assets/demo/1.png)
-![](assets/demo/2.png)
-![](assets/demo/3.png)
+## Getting Started
+
+Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
+
+## Feedback
+
+Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use GitHub issues for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://github.com/raycast/extensions/issues/new/choose) that should help you get started.
+
+## Community
+
+Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
