@@ -58,15 +58,27 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
     const recentOpenedMenu = lastKnownMenubarItems.find(({ label }) => label === recentOpenedLabel);
     const entries = recentOpenedMenu?.submenu?.items || [];
     return entries
-      .filter(({ id }) => [RecentOpenedItemId.File, RecentOpenedItemId.Folder].includes(id))
+      .filter(({ id }) =>
+        [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id),
+      )
       .map(({ id, uri }) => {
-        return id === RecentOpenedItemId.File
-          ? {
+        switch (id) {
+          case RecentOpenedItemId.Workspace:
+            return {
               fileUri: `${uri.scheme}://${uri.path}`,
-            }
-          : {
+            };
+
+          case RecentOpenedItemId.File:
+          default:
+            return {
+              fileUri: `${uri.scheme}://${uri.path}`,
+            };
+
+          case RecentOpenedItemId.Folder:
+            return {
               folderUri: `${uri.scheme}://${uri.path}`,
             };
+        }
       });
   }
 }
