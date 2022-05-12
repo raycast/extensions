@@ -17,7 +17,7 @@ This extension supports both quick search and tags. `tags` should be prefixed wi
 this example: "machine learning .python .ML resnet" -> This will search for "machine learning resnet"
 with tags of python OR resnet.
 
-Please not that currently only OR operation is supported for the tags.
+Please note that currently only OR operation is supported for the tags.
 
 Please see this guide for additional details about the query patterns.
 https://www.zotero.org/support/dev/web_api/v3/basics#search_syntax
