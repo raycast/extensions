@@ -12,7 +12,7 @@ const SUPPORT_DIRS = {
   chrome: `${BASE_SUPPORT_DIR}/Google/Chrome`,
   chromium: `${BASE_SUPPORT_DIR}/Chromium`,
   edge: `${BASE_SUPPORT_DIR}/Microsoft Edge`,
-  vivaldi: `${BASE_SUPPORT_DIR}/Microsoft Edge`,
+  vivaldi: `${BASE_SUPPORT_DIR}/Vivaldi`,
   brave: `${BASE_SUPPORT_DIR}/BraveSoftware/Brave-Browser`,
 };
 
@@ -46,31 +46,10 @@ const loadDb = async (dbPath: string): Promise<Database> => {
   return new SQL.Database(fileBuffer);
 };
 
-function DataBaseDropdown(props: { setDatabasePath: (profile: string) => void }) {
-  const [profiles, setProfiles] = useState<ChromeProfile[]>();
-  const { browser } = getPreferenceValues();
-  const supportDir = SUPPORT_DIRS[browser as keyof typeof SUPPORT_DIRS];
-
-  useEffect(() => {
-    if (!existsSync(supportDir)) {
-      showToast({
-        title: `${browser} is not installed`,
-        message: `Please install ${browser}, or update the browser preference`,
-        style: Toast.Style.Failure,
-      });
-      return;
-    }
-    const directories = readdirSync(supportDir);
-    const profiles = directories.map((directory) => ({
-      title: path.basename(directory),
-      database: path.join(supportDir, directory, "Web Data"),
-    }));
-    setProfiles(profiles.filter((profile) => profile.title === "Default" || profile.title.startsWith("Profile")));
-  }, []);
-
+function DataBaseDropdown(props: { profiles: ChromeProfile[]; setDatabasePath: (path: string) => void }) {
   return (
     <List.Dropdown tooltip="Filter by Profile" storeValue={true} onChange={props.setDatabasePath}>
-      {profiles?.map((profile) => (
+      {props.profiles?.map((profile) => (
         <List.Dropdown.Item key={profile.database} title={profile.title} value={profile.database} />
       ))}
     </List.Dropdown>
@@ -98,14 +77,50 @@ function CustomSearchEngineItem(props: { searchEngine: CustomSearchEngine }) {
 }
 
 export default function ListSearchEngine() {
-  let [searchEngines, setSearchEngines] = useState<CustomSearchEngine[]>();
-  const [databasePath, setDatabasePath] = useState<string>();
+  const { browser } = getPreferenceValues();
+  const supportDir = SUPPORT_DIRS[browser as keyof typeof SUPPORT_DIRS];
+  const [state, setState] = useState<{
+    databasePath: string;
+    profiles: ChromeProfile[];
+    searchEngines: CustomSearchEngine[];
+    isLoading: boolean;
+  }>({ databasePath: "", searchEngines: [], profiles: [], isLoading: true });
 
   useEffect(() => {
-    if (typeof databasePath === "undefined") {
+    if (!existsSync(supportDir)) {
+      showToast({
+        title: `${browser} is not installed`,
+        message: `Please install ${browser}, or update the browser preference`,
+        style: Toast.Style.Failure,
+      });
+      setState({ ...state, isLoading: false });
       return;
     }
-    loadDb(databasePath).then((db) => {
+
+    const profiles = readdirSync(supportDir)
+      .map((directory) => ({
+        title: path.basename(directory),
+        database: path.join(supportDir, directory, "Web Data"),
+      }))
+      .filter((profile) => profile.title === "Default" || profile.title.startsWith("Profile"));
+    if (profiles.length === 0) {
+      showToast({
+        title: `No profile found`,
+        message: `Please check your ${browser} installation, or update the browser preference`,
+        style: Toast.Style.Failure,
+      });
+      setState({ ...state, isLoading: false });
+      return;
+    }
+
+    setState({ ...state, profiles });
+  }, []);
+
+  useEffect(() => {
+    if (!state.databasePath) {
+      return;
+    }
+    loadDb(state.databasePath).then((db) => {
       const res = db.exec(QUERY);
       const searchEngines = res[0].values.map((row) => {
         const [id, short_name, url, keyword, favicon_url, is_active] = row;
@@ -118,25 +133,29 @@ export default function ListSearchEngine() {
           is_active: is_active === 1,
         };
       });
-      setSearchEngines(searchEngines);
+      setState({ ...state, isLoading: false, searchEngines: deduplicate(searchEngines) });
     });
-  }, [databasePath]);
+  }, [state.databasePath]);
 
-  searchEngines = searchEngines ? deduplicate(searchEngines) : searchEngines;
   return (
     <List
-      isLoading={typeof searchEngines === "undefined"}
-      searchBarAccessory={<DataBaseDropdown setDatabasePath={setDatabasePath} />}
+      isLoading={state.isLoading}
+      searchBarAccessory={
+        <DataBaseDropdown
+          profiles={state.profiles}
+          setDatabasePath={(databasePath) => setState({ ...state, databasePath })}
+        />
+      }
     >
       <List.Section title="Custom">
-        {searchEngines
+        {state.searchEngines
           ?.filter((se) => se.is_active)
           ?.map((se) => (
             <CustomSearchEngineItem key={se.id} searchEngine={se} />
           ))}
       </List.Section>
       <List.Section title="Automatic">
-        {searchEngines
+        {state.searchEngines
           ?.filter((se) => !se.is_active)
           ?.map((se) => (
             <CustomSearchEngineItem key={se.id} searchEngine={se} />
