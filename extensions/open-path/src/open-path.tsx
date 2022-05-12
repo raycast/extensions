@@ -1,10 +1,10 @@
-import { open, showHUD, showInFinder } from "@raycast/api";
+import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item";
-import { checkIsFile, commonPreferences, isEmpty, isUrl, searchUrlBuilder, urlBuilder } from "./utils/common-utils";
+import { checkIsFile, isEmpty, isUrl, Preference, searchUrlBuilder, urlBuilder } from "./utils/common-utils";
 import fse from "fs-extra";
 
 export default async () => {
-  const { priorityDetection, searchEngine } = commonPreferences();
+  const { priorityDetection, searchEngine } = getPreferenceValues<Preference>();
   try {
     let path: string;
     if (priorityDetection === "selected") {

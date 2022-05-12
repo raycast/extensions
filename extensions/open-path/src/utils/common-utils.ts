@@ -1,14 +1,11 @@
 import fse from "fs-extra";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import Values = LocalStorage.Values;
 
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    priorityDetection: preferencesMap.get("priorityDetection") as string,
-    searchEngine: preferencesMap.get("searchEngine") as string,
-  };
-};
+export interface Preference extends Values {
+  priorityDetection: string;
+  searchEngine: string;
+}
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -37,6 +34,7 @@ export function isIP(text: string): boolean {
 export const urlBuilder = (prefix: string, text: string) => {
   return /^https?:\/\//g.test(text) ? text : `${prefix}${encodeURIComponent(text)}`;
 };
+
 enum SearchEngine {
   GOOGLE = "Google",
   BING = "Bing",
