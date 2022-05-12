@@ -3,7 +3,7 @@
   "name": "flypy",
   "title": "Flypy Code Query",
   "version": "0.1.0",
-  "description": "Flypy Code Query",
+  "description": "Query Flypy(Xiaohe Double-Pin) Code",
   "icon": "flypy.png",
   "author": "absir1949",
   "license": "MIT",
@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Query Flypy Code",
-      "description": "Query Flypy Code",
+      "description": "Query Flypy(Xiaohe Double-Pin) Code",
       "mode": "view",
       "icon": "flypy.png"
     }
