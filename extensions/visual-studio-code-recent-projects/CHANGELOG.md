@@ -1,6 +1,6 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Updates] - 2022-05-11
+## [Updates] - 2022-05-12
 
 Fixed missing workspaces from previous update.
 
