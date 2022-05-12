@@ -11,7 +11,7 @@ import {
     detectIsUppercaseCopyOrLowerCaseCopy,
 } from "./shared.func"
 
-const delayTranslationInterval = 400  // 输入后延迟一会儿再翻译，时间太短了也不行，会报207错误
+const delayTranslationInterval = 400  // The translation will be delayed for a while after input. If the time is too short, 207 errors will be reported
 
 let fetchResultStateCode = "-1"
 let isUserChosenTargetLanguage = false
@@ -90,7 +90,7 @@ export default function () {
             [0 as number]: { sectionTitle: "Translate", dotColor: Color.Red },
             [1 as number]: { sectionTitle: "Detail", dotColor: Color.Blue },
             [2 as number]: { sectionTitle: "Web Translate", dotColor: Color.Yellow },
-            [3 as number]: { sectionTitle: "Ohter Result", dotColor: Color.Brown },
+            [3 as number]: { sectionTitle: "Other Results", dotColor: Color.Brown },
         }
         if (fetchResultStateCode === "0") {
             return (
