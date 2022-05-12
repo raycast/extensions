@@ -5,8 +5,10 @@ import {
   DeleteTweetAction,
   LikeTweetAction,
   OpenTweetInBrowerAction,
+  OpenUserProfileInBrowserAction,
   ReplyTweetAction,
   RetweetAction,
+  ShowAuthorTweetsAction,
   UnlikeTweetAction,
 } from "./actions";
 
@@ -51,6 +53,10 @@ export function TweetDetail(props: { tweet: Tweet }) {
             <LikeTweetAction tweet={t} />
             <UnlikeTweetAction tweet={t} />
             <RetweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Author">
+            <ShowAuthorTweetsAction tweet={t} />
+            <OpenUserProfileInBrowserAction user={t.user} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />

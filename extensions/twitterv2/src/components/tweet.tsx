@@ -7,8 +7,12 @@ import {
   LikeTweetAction,
   LogoutAction,
   OpenTweetInBrowerAction,
+  OpenUserProfileInBrowserAction,
+  RefreshExistingTweetsAction,
+  RefreshTweetsAction,
   ReplyTweetAction,
   RetweetAction,
+  ShowAuthorTweetsAction,
   ShowDetailV2Action,
   UnlikeTweetAction,
 } from "./actions";
@@ -93,8 +97,16 @@ export function TweetListItem(props: {
             <ReplyTweetAction tweet={t} />
             <RetweetAction tweet={t} />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ShowAuthorTweetsAction tweet={t} />
+            <OpenUserProfileInBrowserAction user={t.user} />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Update">
+            <RefreshExistingTweetsAction fetcher={fetcher} />
+            <RefreshTweetsAction fetcher={fetcher} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LogoutAction />

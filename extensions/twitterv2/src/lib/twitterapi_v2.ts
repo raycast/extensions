@@ -52,7 +52,12 @@ export class ClientV2 {
   async getMyTweets(): Promise<Tweet[]> {
     const api = await this.getAPI();
     const me = await api.v2.me();
-    const tweetsRaw = await api.v2.userTimeline(me.data.id, {
+    return await this.getTweetsFromAuthor(me.data.id);
+  }
+
+  async getTweetsFromAuthor(authorID: string): Promise<Tweet[]> {
+    const api = await this.getAPI();
+    const tweetsRaw = await api.v2.userTimeline(authorID, {
       max_results: 10,
       "tweet.fields": ["public_metrics", "author_id", "attachments", "created_at", "id", "entities"],
       "media.fields": ["url", "type", "media_key", "preview_image_url"],

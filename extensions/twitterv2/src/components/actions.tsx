@@ -1,11 +1,12 @@
 import { Action, Color, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
-import { Tweet } from "../lib/twitter";
+import { Tweet, User } from "../lib/twitter";
 import { resetOAuthTokens } from "../lib/oauth";
 import { TweetDetail } from "./detail";
 import { TweetSendForm } from "./send";
-import { clientV2 } from "../lib/twitterapi_v2";
+import { clientV2, Fetcher } from "../lib/twitterapi_v2";
 import { getErrorMessage } from "../lib/utils";
+import { AuthorTweetList } from "./author";
 
 export function LogoutAction(): ReactElement {
   const handle = async () => {
@@ -39,21 +40,42 @@ export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.likeTweet(props.tweet);
   };
-  return <Action title="Like" icon={{ source: "heart_full.png", tintColor: Color.Red }} onAction={handle} />;
+  return (
+    <Action
+      title="Like"
+      icon={{ source: "heart_full.png", tintColor: Color.Red }}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      onAction={handle}
+    />
+  );
 }
 
 export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.unlikeTweet(props.tweet);
   };
-  return <Action title="Unlike" icon={{ source: "heart_empty.png", tintColor: Color.PrimaryText }} onAction={handle} />;
+  return (
+    <Action
+      title="Unlike"
+      icon={{ source: "heart_empty.png", tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onAction={handle}
+    />
+  );
 }
 
 export function RetweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.retweet(props.tweet);
   };
-  return <Action title="Retweet" icon={{ source: "retweet.png", tintColor: Color.PrimaryText }} onAction={handle} />;
+  return (
+    <Action
+      title="Retweet"
+      icon={{ source: "retweet.png", tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      onAction={handle}
+    />
+  );
 }
 
 export function DeleteTweetAction(props: { tweet: Tweet }) {
@@ -90,4 +112,55 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
   } else {
     return null;
   }
+}
+
+export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
+  return (
+    <Action.Push
+      title={`Tweets from @${props.tweet.user.username}`}
+      target={<AuthorTweetList authorID={props.tweet.user.id} />}
+      icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+    />
+  );
+}
+
+export function OpenUserProfileInBrowserAction(props: { user: User }): ReactElement {
+  return <Action.OpenInBrowser title="Open Author Profile" url={`https://twitter.com/${props.user.username}`} />;
+}
+
+export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+  const f = props.fetcher;
+  if (!f) {
+    return null;
+  }
+  const handle = async () => {
+    await f.updateInline();
+  };
+  return (
+    <Action
+      title="Refresh Existing Tweets"
+      icon={Icon.Download}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={handle}
+    />
+  );
+}
+
+export function RefreshTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+  const f = props.fetcher;
+  if (!f) {
+    return null;
+  }
+  const handle = async () => {
+    await f.refresh();
+  };
+  return (
+    <Action
+      title="Refresh Tweets"
+      icon={Icon.Binoculars}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      onAction={handle}
+    />
+  );
 }
