@@ -11,7 +11,7 @@ import {
     detectIsUppercaseCopyOrLowerCaseCopy,
 } from "./shared.func"
 
-const delayTranslationInterval = 400  // The translation will be delayed for a while after input. If the time is too short, 207 errors will be reported
+const delayTranslationInterval = 400 // The translation will be delayed for a while after input. If the time is too short, 207 errors will be reported
 
 let fetchResultStateCode = "-1"
 let isUserChosenTargetLanguage = false
