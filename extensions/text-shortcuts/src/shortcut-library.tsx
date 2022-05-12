@@ -4,6 +4,7 @@ import {
   Clipboard,
   Color,
   confirmAlert,
+  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
@@ -15,7 +16,7 @@ import { useEffect, useState } from "react";
 import { fetchItemInput } from "./util/input";
 import { runShortcut, Shortcut, ShortcutSource, tags } from "./util/shortcut";
 import CreateShortcut from "./create-shortcut";
-import { commonPreferences } from "./util/utils";
+import { Preference } from "./util/utils";
 import { ANNOTATIONS_SHORTCUTS } from "./build-in/annotation";
 import { MARKDOWNS_SHORTCUTS } from "./build-in/markdown";
 import { CASES_SHORTCUTS } from "./build-in/case";
@@ -31,7 +32,8 @@ export default function ShortcutLibrary() {
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [selectId, setSelectId] = useState<number>(0);
   const { push } = useNavigation();
-  const { showDetail, showTag } = commonPreferences();
+  const { annotation, caser, coder, format, markdown, time, rememberTag, showDetail, showTag } =
+    getPreferenceValues<Preference>();
 
   useEffect(() => {
     async function _fetchBuildInShortcut() {
@@ -44,22 +46,22 @@ export default function ShortcutLibrary() {
       }
       //build-in
       let _buildInShortcuts: Shortcut[] = [];
-      if (commonPreferences().annotation) {
+      if (annotation) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(ANNOTATIONS_SHORTCUTS)];
       }
-      if (commonPreferences().case) {
+      if (caser) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(CASES_SHORTCUTS)];
       }
-      if (commonPreferences().coder) {
+      if (coder) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(CODERS_SHORTCUTS)];
       }
-      if (commonPreferences().format) {
+      if (format) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(FORMAT_SHORTCUTS)];
       }
-      if (commonPreferences().markdown) {
+      if (markdown) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(MARKDOWNS_SHORTCUTS)];
       }
-      if (commonPreferences().time) {
+      if (time) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(TIMES_SHORTCUTS)];
       }
       setAllShortcuts([..._userShortcuts.concat(_buildInShortcuts)]);
@@ -90,7 +92,7 @@ export default function ShortcutLibrary() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Shortcut Tags"
-          storeValue={commonPreferences().rememberTag}
+          storeValue={rememberTag}
           onChange={async (newValue) => {
             setTag(newValue);
           }}

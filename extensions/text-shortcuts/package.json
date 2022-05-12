@@ -20,7 +20,7 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "remember-tag",
+          "name": "rememberTag",
           "type": "checkbox",
           "required": false,
           "title": "Preferences",
@@ -54,7 +54,7 @@
           "default": true
         },
         {
-          "name": "case",
+          "name": "caser",
           "type": "checkbox",
           "required": false,
           "label": "Case",

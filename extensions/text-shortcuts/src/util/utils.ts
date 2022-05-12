@@ -1,22 +1,20 @@
-import { Form, getPreferenceValues } from "@raycast/api";
+import { Form } from "@raycast/api";
 import Values = Form.Values;
 
 export const regexPunctuation = /\p{Z}|\p{P}|\p{S}/gu;
 
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    annotation: preferencesMap.get("annotation"),
-    case: preferencesMap.get("case"),
-    coder: preferencesMap.get("coder"),
-    format: preferencesMap.get("format"),
-    markdown: preferencesMap.get("markdown"),
-    time: preferencesMap.get("time"),
-    rememberTag: preferencesMap.get("remember-tag"),
-    showDetail: preferencesMap.get("showDetail"),
-    showTag: preferencesMap.get("showTag"),
-  };
-};
+export interface Preference extends Values {
+  annotation: string;
+  caser: string;
+  coder: string;
+  format: string;
+  markdown: string;
+  time: string;
+  rememberTag: boolean;
+  showDetail: boolean;
+  showTag: boolean;
+}
+
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
