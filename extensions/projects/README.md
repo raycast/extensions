@@ -15,22 +15,22 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ### 1. Search by keywords
 
-![Normal Search](./metadata/screenshot-04.png)
+![Normal Search](./metadata/screenshot-01.png)
 
 #### **Advanced Search**
 
 - To search project types: use `type:<type>`. Supported types: `node`/`maven`/`gradle`/`xcode`
 - To search in a directory: use `dir:<part of directory>`.
 
-![Advanced Search](./metadata/screenshot-01.png)
+![Advanced Search](./metadata/screenshot-02.png)
 
 ### 2. Open projects in various IDEs
 
-![Choose at installation](./metadata/screenshot-01.png)
+![Choose at installation](./metadata/screenshot-03.png)
 
 ### 3. Pin frequently used projects at the top
 
-![Pin Projects](./metadata/screenshot-03.png)
+![Pin Projects](./metadata/screenshot-04.png)
 
 ### 4. Reveal project in Finder.
 
