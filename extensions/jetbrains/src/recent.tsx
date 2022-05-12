@@ -52,13 +52,27 @@ const globFromHistory = (history: History) => {
   );
 };
 
+const getReadHistoryFile = async(filePath:string) => {
+  try{
+    return JSON.parse(String(await readFile(filePath)))
+  }
+  catch(e){
+    return {}
+  }
+}
+
 const getHistory = async () => {
   const icons = await getIcons();
-  return await Promise.all(
+  return (await Promise.all(
     (
       await getFiles(HISTORY_GLOB)
     ).map(async (file) => {
-      const history: History = JSON.parse(String(await readFile(file.path))).history.pop() as History;
+      const historyFile = await getReadHistoryFile(file.path);
+      if (!historyFile.history?.length) {
+        return null
+      }
+
+      const history: History = historyFile.history.pop() as History;
       const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
       const tool = history.item.intellij_platform?.shell_script_name ?? false;
       const activation = history.item.activation?.hosts[0] ?? false;
@@ -69,8 +83,7 @@ const getHistory = async () => {
         icon,
         xmlFiles: await getRecent(globFromHistory(history), icon),
       } as AppHistory;
-    })
-  );
+    }))).filter((history) => history !== null ) as AppHistory[];
 };
 
 const getIcons = async () => {
