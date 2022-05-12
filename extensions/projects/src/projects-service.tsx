@@ -7,6 +7,7 @@ import fs from "fs";
 import { CacheType, Preferences, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { buildAllProjectsCache } from "./cache/all-projects-cache-builder";
+import { getRepoKey } from "./common-utils";
 
 export function resolvePath(filepath: string): string {
   if (filepath.length > 0 && filepath[0] === "~") {
@@ -74,38 +75,37 @@ export function useRepoCache(query: string | undefined): {
     let filteredAllRepos = repos;
     let filteredRecentRepos = recentlyAccessedCache.repos;
     let filteredPinnedRepos = pinnedCache.repos;
-    let allProjectsSectionTitle = `${repos.length} Project${repos.length != 1 ? "s" : ""}`;
-    const recentlyAccessedProjectsSectionTitle = `Recent Projects${
-      recentlyAccessedCache.repos?.length != 1 ? "s" : ""
-    }`;
 
     if (query && query.length > 0) {
       filteredAllRepos = filterRepos(filteredAllRepos, query);
       filteredRecentRepos = filterRepos(filteredRecentRepos, query);
       filteredPinnedRepos = filterRepos(filteredPinnedRepos, query);
-      allProjectsSectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""} Found`;
     }
-    const filteredRecentReposSet = new Set(filteredRecentRepos);
-    const allButRecentRepos = [...filteredAllRepos].filter((x) => !filteredRecentReposSet.has(x));
+
+    const allButRecentRepos = [...filteredAllRepos].filter(all => {
+      return !filteredRecentRepos.some(recent => {
+        return getRepoKey(all) === getRepoKey(recent);
+      });
+    });;
 
     setResponse({
       all: {
-        sectionTitle: allProjectsSectionTitle,
+        sectionTitle: `${filteredAllRepos.length} project${filteredAllRepos.length != 1 ? "s" : ""} Found`,
         repos: allButRecentRepos || [],
       },
       recent:
         filteredRecentRepos?.length > 0
           ? {
-              sectionTitle: recentlyAccessedProjectsSectionTitle,
-              repos: filteredRecentRepos || [],
-            }
+            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredRecentRepos || [],
+          }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-              sectionTitle: "Pinned Projects",
-              repos: filteredPinnedRepos || [],
-            }
+            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredPinnedRepos || [],
+          }
           : undefined,
     });
   }
