@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, open, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  open,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
-import { extensionPreferences, isImage } from "./utils/common-utils";
+import { isImage, Preference } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
@@ -8,8 +19,8 @@ import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
 
 export default function Command() {
+  const { folderFirst } = getPreferenceValues<Preference>();
   const [tag, setTag] = useState<string>("All");
-  const { folderFirst } = extensionPreferences();
   const [refresh, setRefresh] = useState<number>(0);
 
   const { localHiddenDirectory, loading } = getHiddenFiles(folderFirst, refresh);

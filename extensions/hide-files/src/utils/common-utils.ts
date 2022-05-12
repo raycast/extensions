@@ -1,16 +1,13 @@
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { imgExt, scriptFinderPath, scriptToggleFinderFileVisibility } from "./constants";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import Values = LocalStorage.Values;
 
-export const extensionPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    folderFirst: preferencesMap.get("folderFirst") as boolean,
-  };
-};
+export interface Preference extends Values {
+  folderFirst: boolean;
+}
 
 export const getLocalStorage = async (key: string) => {
   const localStorage = await LocalStorage.getItem<string>(key);
