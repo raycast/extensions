@@ -11,6 +11,8 @@ import {
     detectIsUppercaseCopyOrLowerCaseCopy,
 } from "./shared.func"
 
+const delayTranslationInterval = 400  // 输入后延迟一会儿再翻译，时间太短了也不行，会报207错误
+
 let fetchResultStateCode = "-1"
 let isUserChosenTargetLanguage = false
 let delayFetchTranslateAPITimer: NodeJS.Timeout
@@ -60,7 +62,7 @@ export default function () {
                 if (from === to) {
                     delayUpdateTargetLanguageTimer = setTimeout(() => {
                         updateTranslateTargetLanguage(from === preferences.lang2 ? defaultLanguage1 : defaultLanguage2)
-                    }, 900)
+                    }, delayTranslationInterval)
                     return
                 }
                 // X -> A
@@ -70,7 +72,7 @@ export default function () {
                 ) {
                     delayUpdateTargetLanguageTimer = setTimeout(() => {
                         updateTranslateTargetLanguage(defaultLanguage1)
-                    }, 900)
+                    }, delayTranslationInterval)
                     return
                 }
             }
