@@ -6,6 +6,7 @@
 - Supports Xcode projects
 - Open in finder & terminal
 - Better defaults for project types
+- Advanced search support - (type, dir)
 
 ## [Added node, maven & gradle projects support] - 2022-05-12
 
