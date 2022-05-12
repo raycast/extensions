@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wakatime",
+  "title": "Wakatime",
+  "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
+  "icon": "icon.png",
+  "author": "iammola",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summary",
+      "subtitle": "WakaTime",
+      "title": "Show Summary",
+      "description": "Show your WakaTime Summary",
+      "mode": "view"
+    },
+    {
+      "name": "leaderboard",
+      "subtitle": "WakaTime",
+      "title": "Show Public Leaderboard",
+      "description": "Show your rank in the public global leaderboard",
+      "mode": "view"
+    },
+    {
+      "name": "private-leaderboards",
+      "subtitle": "WakaTime",
+      "title": "Show Private Leaderboards",
+      "description": "Show your private leaderboards",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "required": true,
+      "title": "WakaTime API Key",
+      "type": "password",
+      "description": "Use your WakaTime API key to use your account",
+      "placeholder": "Enter your API key from https://wakatime.com/settings"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2",
+    "date-fns": "^2.28.0",
+    "node-fetch": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

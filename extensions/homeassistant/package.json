@@ -83,7 +83,7 @@
     },
     {
       "name": "attributes",
-      "title": "All Entities with Attributes",
+      "title": "All Entities With Attributes",
       "subtitle": "Home Assistant",
       "description": "Query Home Assistant entity attributes",
       "mode": "view"
@@ -150,6 +150,27 @@
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant Helpers",
       "mode": "view"
+    },
+    {
+      "name": "updates",
+      "title": "Updates",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity Updates",
+      "mode": "view"
+    },
+    {
+      "name": "doors",
+      "title": "Doors",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity with device class door",
+      "mode": "view"
+    },
+    {
+      "name": "weather",
+      "title": "Weather",
+      "subtitle": "Home Assistant",
+      "description": "Get Weather states of Home Assistant Entity Weather",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -202,14 +223,16 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.33.0",
     "home-assistant-js-websocket": "^5.11.1",
+    "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^16.4.3",
     "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",

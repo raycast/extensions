@@ -4,6 +4,9 @@
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -83,7 +86,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.31.0",
     "axios": "^0.23.0",
     "dayjs": "^1.10.7",
     "lodash": "^4.17.21",

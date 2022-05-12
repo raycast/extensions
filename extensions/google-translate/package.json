@@ -5,6 +5,10 @@
   "description": "Simple translation using Google Translate",
   "icon": "google-translate.png",
   "author": "gebeto",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
   "contributors": [
     "FezVrasta"
   ],
@@ -90,7 +94,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇨🇳 Chinese Traditional",
+          "title": "🇹🇼 Taiwanese Mandarin",
           "value": "zh-TW"
         },
         {

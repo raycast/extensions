@@ -1,9 +1,12 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlabgql } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { getIdFromGqlId } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 const GET_MILESTONES = gql`
   query GetProjectMilestones($fullPath: ID!) {
@@ -47,7 +50,7 @@ const GET_GROUP_MILESTONES = gql`
   }
 `;
 
-export function MilestoneListItem(props: { milestone: any }) {
+export function MilestoneListItem(props: { milestone: any }): JSX.Element {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
   let subtitle = "";
@@ -59,17 +62,17 @@ export function MilestoneListItem(props: { milestone: any }) {
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessoryTitle={issueCounter}
+      accessories={ensureCleanAccessories([{ text: issueCounter }])}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={milestone.webUrl} />
+          <GitLabOpenInBrowserAction url={milestone.webUrl} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function MilestoneList(props: { project?: Project; group?: Group }) {
+export function MilestoneList(props: { project?: Project; group?: Group }): JSX.Element {
   const isGroup = props.group ? true : false;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
@@ -77,7 +80,7 @@ export function MilestoneList(props: { project?: Project; group?: Group }) {
   }
   const { milestones, error, isLoading } = useSearch("", fullPath, isGroup);
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Milestones", error);
+    showToast(Toast.Style.Failure, "Cannot search Milestones", error);
   }
   return (
     <List isLoading={isLoading} navigationTitle="Milestones">
@@ -136,9 +139,9 @@ export function useSearch(
         if (!didUnmount) {
           setMilestones(glData);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

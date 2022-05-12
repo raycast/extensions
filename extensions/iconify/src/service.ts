@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-const client = axios.create({
+const githubClient = axios.create({
   baseURL: 'https://raw.githubusercontent.com/iconify/icon-sets/master',
+});
+
+const iconifyClient = axios.create({
+  baseURL: 'https://api.iconify.design',
 });
 
 type SetCategory =
@@ -39,11 +43,6 @@ interface Set {
 
 interface IconResponse {
   prefix: string;
-  info: {
-    name: string;
-    total: number;
-    category: string;
-  };
   icons: Record<
     string,
     {
@@ -55,16 +54,24 @@ interface IconResponse {
 }
 
 interface Icon {
-  setId: string;
+  set: {
+    id: string;
+    title: string;
+  };
   id: string;
   width: number;
   height: number;
   body: string;
 }
 
+interface QueryResponse {
+  icons: string[];
+  collections: Record<string, SetResponse>;
+}
+
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await client.get<Record<string, SetResponse>>(
+    const response = await githubClient.get<Record<string, SetResponse>>(
       '/collections.json',
     );
     const ids = Object.keys(response.data);
@@ -95,19 +102,82 @@ class Service {
       });
   }
 
-  async listIcons(set: string): Promise<Icon[]> {
-    const response = await client.get<IconResponse>(`/json/${set}.json`);
+  async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
+    const response = await githubClient.get<IconResponse>(
+      `/json/${setId}.json`,
+    );
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
       return {
-        setId: set,
+        set: {
+          id: setId,
+          title: setTitle,
+        },
         id,
         width: response.data.width,
         height: response.data.height,
         body: icon.body,
       };
     });
+  }
+
+  async getIcons(
+    setId: string,
+    setTitle: string,
+    ids: string[],
+  ): Promise<Icon[]> {
+    const response = await iconifyClient.get<IconResponse>(`${setId}.json`, {
+      params: {
+        icons: ids.join(','),
+      },
+    });
+    return ids.map((id) => {
+      const icon = response.data.icons[id];
+      return {
+        set: {
+          id: setId,
+          title: setTitle,
+        },
+        id,
+        width: response.data.width,
+        height: response.data.height,
+        body: icon.body,
+      };
+    });
+  }
+
+  async queryIcons(query: string): Promise<Icon[]> {
+    if (!query) {
+      return [];
+    }
+    // make a search query
+    const response = await iconifyClient.get<QueryResponse>(`/search`, {
+      params: {
+        query,
+        limit: 100,
+      },
+    });
+    // group by set
+    const setMap: Record<string, string[]> = {};
+    for (const icon of response.data.icons) {
+      const [setId, id] = icon.split(':');
+      if (!setMap[setId]) {
+        setMap[setId] = [];
+      }
+      setMap[setId].push(id);
+    }
+    // fetch icons of each set
+    const icons: Icon[] = [];
+    for (const setId in setMap) {
+      const ids = setMap[setId];
+      const set = response.data.collections[setId];
+      const setIcons = await this.getIcons(setId, set.name, ids);
+      for (const setIcon of setIcons) {
+        icons.push(setIcon);
+      }
+    }
+    return icons;
   }
 }
 

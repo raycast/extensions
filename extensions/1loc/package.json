@@ -8,6 +8,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": [
+    "sxn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -18,11 +21,21 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": false,
+      "title": "Personal Access Token",
+      "description": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "axios": "0.25.0",
     "change-case": "4.1.2",
-    "gray-matter": "4.0.3"
+    "gray-matter": "4.0.3",
+    "raycast-toolkit": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

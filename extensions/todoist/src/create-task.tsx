@@ -1,20 +1,25 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
-import { getAPIDate } from "./utils";
+import { getAPIDate } from "./helpers";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 
 export default function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   if (getProjectsError) {
     handleError({ error: getProjectsError, title: "Unable to get projects" });
+  }
+
+  if (getSectionsError) {
+    handleError({ error: getSectionsError, title: "Unable to get sections" });
   }
 
   if (getLabelsError) {
@@ -30,13 +35,24 @@ export default function CreateTask() {
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
   const [projectId, setProjectId] = useState<string>();
+  const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
+
+  const titleField = useRef<Form.TextField>(null);
 
   function clear() {
     setContent("");
     setDescription("");
     setDueDate(undefined);
     setPriority(String(lowestPriority.value));
+
+    if (projects) {
+      setProjectId(String(projects[0].id));
+    }
+
+    if (labelIds) {
+      setLabelIds([]);
+    }
   }
 
   async function submit() {
@@ -57,6 +73,10 @@ export default function CreateTask() {
 
     if (projectId) {
       body.projectId = parseInt(projectId);
+    }
+
+    if (sectionId) {
+      body.sectionId = parseInt(sectionId);
     }
 
     if (labelIds && labelIds.length > 0) {
@@ -81,21 +101,31 @@ export default function CreateTask() {
         onAction: () => open(url),
       };
       clear();
+      titleField.current.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
   }
+
+  const projectSections = sections?.filter((section) => String(section.projectId) === projectId);
 
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="content" title="Title" placeholder="Buy fruits" value={content} onChange={setContent} />
+      <Form.TextField
+        id="content"
+        title="Title"
+        placeholder="Buy fruits"
+        value={content}
+        onChange={setContent}
+        ref={titleField}
+      />
 
       <Form.TextArea
         id="description"
@@ -107,7 +137,13 @@ export default function CreateTask() {
 
       <Form.Separator />
 
-      <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
+      <Form.DatePicker
+        id="due_date"
+        title="Due date"
+        value={dueDate}
+        onChange={setDueDate}
+        type={Form.DatePicker.Type.Date}
+      />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
         {priorities.map(({ value, name }) => (
@@ -116,15 +152,24 @@ export default function CreateTask() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
+        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
         </Form.Dropdown>
       ) : null}
 
+      {projectSections && projectSections.length > 0 ? (
+        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
+          <Form.Dropdown.Item value="" title="No section" />
+          {projectSections.map(({ id, name }) => (
+            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds} storeValue>
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
           ))}

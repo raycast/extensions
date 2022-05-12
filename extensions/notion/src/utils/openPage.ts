@@ -1,7 +1,6 @@
-import { closeMainWindow, getPreferenceValues, getApplications } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, getApplications, open } from "@raycast/api";
 import { Page } from "./notion";
 import { storeRecentlyOpenedPage } from "./local-storage";
-import open from "open";
 
 export async function handleOnOpenPage(page: Page): Promise<void> {
   if (!page.url) {

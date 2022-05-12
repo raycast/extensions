@@ -1,27 +1,23 @@
-// This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-global.window = {};
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-global.window.requestAnimationFrame = setTimeout;
-
 import {
   Form,
-  FormValue,
   ActionPanel,
-  SubmitFormAction,
   showToast,
-  ToastStyle,
   Toast,
   showHUD,
   useNavigation,
+  Action,
+  Alert,
+  confirmAlert,
+  Icon,
+  LocalStorage,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+dayjs.extend(isToday);
 
 export default function Command({
   onSave = async () => {
@@ -32,28 +28,34 @@ export default function Command({
 }: {
   onSave: () => Promise<void>;
   entry?: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate?: Date;
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
-  const [projectId, setProjectId] = useState<string>();
+  const [projectId, setProjectId] = useState<string | undefined>(entry?.project.id.toString());
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
-  const [taskId, setTaskId] = useState<string>();
-  const [notes, setNotes] = useState<string>();
-  const [hours, setHours] = useState<string>();
-  const [spentDate, setSpentDate] = useState<Date>();
+  const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
+  const [notes, setNotes] = useState<string | undefined>(entry?.notes);
+  const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
+  const [spentDate, setSpentDate] = useState<Date>(viewDate);
+
+  // console.log(projectId);
 
   useEffect(() => {
     if (error) {
       if (error.isAxiosError && error.response?.status === 401) {
-        showToast(
-          ToastStyle.Failure,
-          "Invalid Token",
-          "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
-        );
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Token",
+          message: "Your API token or Account ID is invalid. Go to Raycast Preferences to update it.",
+        });
       } else {
-        showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Unknown Error",
+          message: "Could not get your company data",
+        });
       }
     }
   }, [error]);
@@ -74,65 +76,108 @@ export default function Command({
   }, [projects]);
 
   useEffect(() => {
-    if (!entry) return;
+    if (!entry) {
+      // no entry was passed, recall last submitted project/task
+      LocalStorage.getItem("lastProject").then((value) => {
+        console.log("restoring last used entry...", { value });
+        if (value) {
+          const { projectId, taskId } = JSON.parse(value.toString());
+          setProjectId(projectId);
+          setTaskId(taskId);
+          setTaskAssignments(projectId);
+        }
+      });
+    } else {
+      // setTaskAssignments();
+    }
 
-    setProjectId(entry.project.id.toString());
-    setTaskId(entry.task.id.toString());
-    setNotes(entry.notes);
-    setHours(entry.hours.toString());
-    setTaskAssignments();
-
-    // const myDate = dayjs(entry.spent_date);
-    console.log("new date", new Date(entry.spent_date ?? ""));
-    // setSpentDate(new Date(entry.spent_date));
+    return () => {
+      setProjectId(undefined);
+    };
   }, [entry]);
 
-  async function handleSubmit(values: Record<string, FormValue>) {
+  async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast(ToastStyle.Failure, "No Project Selected");
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "No Project Selected",
+      });
     }
     if (values.task_id === null) {
-      return showToast(ToastStyle.Failure, "No Task Selected");
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "No Task Selected",
+      });
     }
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
-    await toast.show();
 
     setTimeFormat(hours);
-
     const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
 
+    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
+      if (
+        !(await confirmAlert({
+          icon: Icon.ExclamationMark,
+          title: "Warning",
+          message:
+            "You are about to start a timer on a different day (not today). Maybe you meant to enter some time on that day instead?",
+          primaryAction: { title: "Start Timer", style: Alert.ActionStyle.Destructive },
+        }))
+      ) {
+        return; // user canceled
+      }
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Loading..." });
+    await toast.show();
+
     const data = _.omitBy(values, _.isEmpty);
-    const timeEntry = await newTimeEntry({
-      ...data,
-      project_id: parseInt(values.project_id.toString()),
-      task_id: parseInt(values.task_id.toString()),
-      spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
-    }).catch(async (error) => {
+    const timeEntry = await newTimeEntry(
+      {
+        ...data,
+        project_id: parseInt(values.project_id.toString()),
+        task_id: parseInt(values.task_id.toString()),
+        spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
+      },
+      entry?.id?.toString()
+    ).catch(async (error) => {
       console.error(error.response.data);
-      await showToast(ToastStyle.Failure, "Error", error.response.data.message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error.response.data.message,
+      });
     });
+
+    await LocalStorage.setItem("lastProject", JSON.stringify({ projectId: values.project_id, taskId: values.task_id }));
 
     if (timeEntry) {
       toast.hide();
       await onSave();
-      await showHUD(timeEntry.is_running ? "Timer Started" : "Time Entry Created");
+      await showHUD(entry?.id ? "Time Entry Updated" : timeEntry.is_running ? "Timer Started" : "Time Entry Created");
       pop();
     }
   }
 
-  function setTaskAssignments(projectId?: string) {
-    if (!projectId) return;
-
+  function setTaskAssignments(projectId: string) {
     const project = _.find(projects, (o) => {
       return o.project.id === parseInt(projectId);
     });
     if (typeof project === "object") {
       setTasks(project.task_assignments);
-      setTaskId(project.task_assignments[0].id.toString());
+
+      let defaultAssignment = project.task_assignments[0].task.id.toString();
+      if (taskId) {
+        // if there is already a taskId set, and it's a valid task for the selected project, leave it be
+        const assignment = _.find(project.task_assignments, (o) => o.task.id.toString() === taskId);
+        if (assignment) {
+          defaultAssignment = assignment.task.id.toString();
+        }
+      }
+      setTaskId(defaultAssignment);
     } else {
+      // no projects found
       setTasks([]);
-      setTaskId(undefined);
     }
+    console.log("finished setTaskAssignments. taskId:", taskId);
   }
 
   function setTimeFormat(value?: string) {
@@ -170,10 +215,13 @@ export default function Command({
 
   return (
     <Form
-      navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
+      navigationTitle={entry?.id ? "Edit Time Entry" : "New Time Entry"}
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            onSubmit={handleSubmit}
+            title={entry?.id ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
+          />
         </ActionPanel>
       }
     >
@@ -189,24 +237,24 @@ export default function Command({
         {groupedProjects?.map((groupedProject) => {
           const client = groupedProject[0].client;
           return (
-            <Form.DropdownSection title={client.name} key={client.id}>
+            <Form.Dropdown.Section title={client.name} key={client.id}>
               {groupedProject.map((project) => {
                 const code = project.project.code;
                 return (
-                  <Form.DropdownItem
+                  <Form.Dropdown.Item
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
                   />
                 );
               })}
-            </Form.DropdownSection>
+            </Form.Dropdown.Section>
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId} onChange={setTaskId}>
         {tasks?.map((task) => {
-          return <Form.DropdownItem value={task.task.id.toString()} title={task.task.name} key={task.id} />;
+          return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
       </Form.Dropdown>
 
@@ -228,7 +276,13 @@ export default function Command({
           onChange={setHours}
         />
       )}
-      <Form.DatePicker id="spent_date" title="Date" value={spentDate} onChange={setSpentDate} />
+      <Form.DatePicker
+        id="spent_date"
+        title="Date"
+        type={Form.DatePicker.Type.Date}
+        value={spentDate}
+        onChange={setSpentDate}
+      />
     </Form>
   );
 }
