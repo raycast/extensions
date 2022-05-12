@@ -84,18 +84,23 @@ export default function () {
 
     function ListDetail() {
         if (fetchResultStateCode === "-1") return null
+        const sectionInfoMap = {
+            0: { sectionTitle: "Translate", dotColor: Color.Red },
+            1: { sectionTitle: "Detail", dotColor: Color.Blue },
+            2: { sectionTitle: "Web Translate", dotColor: Color.Yellow },
+        }
 
         if (fetchResultStateCode === "0") {
             return (
                 <Fragment>
                     {translateResultState?.map((result, idx) => {
                         return (
-                            <List.Section key={idx} title={result.type}>
+                            <List.Section key={idx} title={sectionInfoMap[idx].sectionTitle}>
                                 {result.children?.map((item) => {
                                     return (
                                         <List.Item
                                             key={item.key}
-                                            icon={Icon.Text}
+                                            icon={{ source: Icon.Dot, tintColor: sectionInfoMap[idx].dotColor }}
                                             title={item.title}
                                             subtitle={item?.subtitle}
                                             accessoryTitle={item.phonetic}
