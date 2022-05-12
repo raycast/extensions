@@ -40,6 +40,7 @@ export interface IPreferences {
     appId: string
     appKey: string
     isAutomaticPaste: boolean
+    delayFetchTranslateAPITime: string
 }
 
 export interface IListItemActionPanelItem {
