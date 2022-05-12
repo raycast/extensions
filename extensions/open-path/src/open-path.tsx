@@ -2,35 +2,41 @@ import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item";
 import { checkIsFile, isEmpty, isUrl, Preference, searchUrlBuilder, urlBuilder } from "./utils/common-utils";
 import fse from "fs-extra";
+import { homedir } from "os";
 
 export default async () => {
   const { priorityDetection, searchEngine } = getPreferenceValues<Preference>();
   try {
-    let path: string;
+    let rawPath: string;
+    let newPath: string;
     if (priorityDetection === "selected") {
-      path = await fetchItemInputSelectedFirst();
+      rawPath = await fetchItemInputSelectedFirst();
     } else {
-      path = await fetchItemInputClipboardFirst();
+      rawPath = await fetchItemInputClipboardFirst();
     }
-    if (isEmpty(path)) {
+    if (isEmpty(rawPath)) {
       await showHUD("No path detected");
       return;
     }
-    if (!fse.existsSync(path)) {
-      if (isUrl(path)) {
-        await open(urlBuilder("https://", path));
-        await showHUD("Open URL: " + path);
+    newPath = rawPath;
+    if (rawPath.startsWith("~/")) {
+      newPath = rawPath.replace("~", homedir());
+    }
+    if (!fse.existsSync(newPath)) {
+      if (isUrl(rawPath)) {
+        await open(urlBuilder("https://", rawPath));
+        await showHUD("Open URL: " + rawPath);
       } else {
-        await open(searchUrlBuilder(searchEngine, path));
-        await showHUD("Search: " + path);
+        await open(searchUrlBuilder(searchEngine, rawPath));
+        await showHUD("Search: " + rawPath);
       }
     } else {
-      if (checkIsFile(path)) {
-        await showInFinder(path);
-        await showHUD("Show in Finder: " + path);
+      if (checkIsFile(newPath)) {
+        await showInFinder(newPath);
+        await showHUD("Show in Finder: " + newPath);
       } else {
-        await open(path);
-        await showHUD("Open Path: " + path);
+        await open(newPath);
+        await showHUD("Open Path: " + newPath);
       }
     }
   } catch (e) {
