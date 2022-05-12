@@ -12,11 +12,11 @@ export const SearchPage = () => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Search on Unogs" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" />
+      <Form.TextField id="title" title="Netflix title" placeholder="Name of your movie/show" />
     </Form>
   );
 };
