@@ -2,10 +2,19 @@ import { ActionPanel, Image, List } from "@raycast/api";
 import { Tweet } from "../lib/twitter";
 import { Fetcher } from "../lib/twitterapi_v2";
 import { compactNumberFormat, padStart } from "../lib/utils";
-import { LogoutAction, OpenTweetInBrowerV2Action, ShowDetailV2Action } from "./actions";
+import {
+  DeleteTweetAction as DeleteTweetAction,
+  LikeTweetAction,
+  LogoutAction,
+  OpenTweetInBrowerAction,
+  ReplyTweetAction,
+  RetweetAction,
+  ShowDetailV2Action,
+  UnlikeTweetAction,
+} from "./actions";
 import { getMarkdownFromTweet } from "./detail";
 
-export function TweetV2ListItem(props: {
+export function TweetListItem(props: {
   tweet: Tweet;
   fetcher?: Fetcher;
   maxRTDigits?: number;
@@ -76,7 +85,16 @@ export function TweetV2ListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <ShowDetailV2Action tweet={t} />
-            <OpenTweetInBrowerV2Action tweet={t} />
+            <OpenTweetInBrowerAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <LikeTweetAction tweet={t} />
+            <UnlikeTweetAction tweet={t} />
+            <ReplyTweetAction tweet={t} />
+            <RetweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Destructive">
+            <DeleteTweetAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LogoutAction />
@@ -87,7 +105,7 @@ export function TweetV2ListItem(props: {
   );
 }
 
-export function TweetV2List(props: {
+export function TweetList(props: {
   tweets: Tweet[] | undefined;
   isLoading?: boolean | undefined;
   fetcher?: Fetcher | undefined;
@@ -125,7 +143,7 @@ export function TweetV2List(props: {
   return (
     <List isLoading={props.isLoading} searchBarPlaceholder="Filter Tweets by name..." isShowingDetail>
       {tweets?.map((tweet) => (
-        <TweetV2ListItem
+        <TweetListItem
           key={tweet.id}
           tweet={tweet}
           fetcher={props.fetcher}

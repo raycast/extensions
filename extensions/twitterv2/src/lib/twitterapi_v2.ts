@@ -71,9 +71,7 @@ export class ClientV2 {
       let image_url: string | undefined = undefined;
       if (media && media.length > 0) {
         const m = media[0];
-        if (m.url) {
-          image_url = m.url;
-        }
+        image_url = m.preview_image_url;
       }
       if (!t.author_id) {
         continue;
@@ -99,6 +97,11 @@ export class ClientV2 {
     await api.v2.tweet(text);
   }
 
+  async sendThread(texts: string[]): Promise<void> {
+    const api = await this.getAPI();
+    await api.v2.tweetThread(texts);
+  }
+
   async replyTweetID(text: string, tweetID: string): Promise<void> {
     const api = await this.getAPI();
     await api.v2.reply(text, tweetID);
@@ -106,12 +109,31 @@ export class ClientV2 {
   async replyTweet(text: string, tweet: Tweet): Promise<void> {
     await this.replyTweetID(text, tweet.id);
   }
+
+  async retweet(tweet: Tweet): Promise<void> {
+    const api = await this.getAPI();
+    const me = await this.me();
+    await api.v2.retweet(me.id, tweet.id);
+  }
+
   async deleteTweetID(tweetID: string): Promise<void> {
     const api = await this.getAPI();
     await api.v2.deleteTweet(tweetID);
   }
   async deleteTweet(tweet: Tweet): Promise<void> {
     await this.deleteTweetID(tweet.id);
+  }
+
+  async likeTweet(tweet: Tweet): Promise<void> {
+    const api = await this.getAPI();
+    const me = await this.me();
+    api.v2.like(me.id, tweet.id);
+  }
+
+  async unlikeTweet(tweet: Tweet): Promise<void> {
+    const api = await this.getAPI();
+    const me = await this.me();
+    api.v2.unlike(me.id, tweet.id);
   }
 }
 

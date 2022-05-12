@@ -1,7 +1,14 @@
 import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { Tweet } from "../lib/twitter";
 import { useRefresher } from "../lib/twitterapi_v2";
-import { DeleteTweetV2Action, ReplyTweetV2Action } from "./actions";
+import {
+  DeleteTweetAction,
+  LikeTweetAction,
+  OpenTweetInBrowerAction,
+  ReplyTweetAction,
+  RetweetAction,
+  UnlikeTweetAction,
+} from "./actions";
 
 export function getMarkdownFromTweet(tweet: Tweet): string {
   const t = tweet;
@@ -16,7 +23,7 @@ export function getMarkdownFromTweet(tweet: Tweet): string {
   return md;
 }
 
-export function TweetDetailV2(props: { tweet: Tweet }) {
+export function TweetDetail(props: { tweet: Tweet }) {
   const tweet = props.tweet;
   const { data, error, isLoading, fetcher } = useRefresher<Tweet | undefined>(async (): Promise<Tweet | undefined> => {
     if (data === undefined) {
@@ -37,10 +44,16 @@ export function TweetDetailV2(props: { tweet: Tweet }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Tweet">
-            <ReplyTweetV2Action tweet={t} />
+            <ReplyTweetAction tweet={t} />
+            <OpenTweetInBrowerAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <LikeTweetAction tweet={t} />
+            <UnlikeTweetAction tweet={t} />
+            <RetweetAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
-            <DeleteTweetV2Action tweet={t} />
+            <DeleteTweetAction tweet={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }

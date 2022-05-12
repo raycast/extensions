@@ -2,7 +2,7 @@ import { Action, Color, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import { Tweet } from "../lib/twitter";
 import { resetOAuthTokens } from "../lib/oauth";
-import { TweetDetailV2 } from "./detail";
+import { TweetDetail } from "./detail";
 import { TweetSendForm } from "./send";
 import { clientV2 } from "../lib/twitterapi_v2";
 import { getErrorMessage } from "../lib/utils";
@@ -16,15 +16,15 @@ export function LogoutAction(): ReactElement {
 }
 
 export function ShowDetailV2Action(props: { tweet: Tweet }): ReactElement {
-  return <Action.Push title="Show Tweet" icon={Icon.List} target={<TweetDetailV2 tweet={props.tweet} />} />;
+  return <Action.Push title="Show Tweet" icon={Icon.List} target={<TweetDetail tweet={props.tweet} />} />;
 }
 
-export function OpenTweetInBrowerV2Action(props: { tweet: Tweet }): ReactElement {
+export function OpenTweetInBrowerAction(props: { tweet: Tweet }): ReactElement {
   const t = props.tweet;
   return <Action.OpenInBrowser url={`https://twitter.com/${t.user.username}/status/${t.id}`} />;
 }
 
-export function ReplyTweetV2Action(props: { tweet: Tweet }) {
+export function ReplyTweetAction(props: { tweet: Tweet }): ReactElement {
   return (
     <Action.Push
       title="Reply"
@@ -35,7 +35,28 @@ export function ReplyTweetV2Action(props: { tweet: Tweet }) {
   );
 }
 
-export function DeleteTweetV2Action(props: { tweet: Tweet }) {
+export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
+  const handle = async () => {
+    clientV2.likeTweet(props.tweet);
+  };
+  return <Action title="Like" icon={{ source: "heart_full.png", tintColor: Color.Red }} onAction={handle} />;
+}
+
+export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
+  const handle = async () => {
+    clientV2.unlikeTweet(props.tweet);
+  };
+  return <Action title="Unlike" icon={{ source: "heart_empty.png", tintColor: Color.PrimaryText }} onAction={handle} />;
+}
+
+export function RetweetAction(props: { tweet: Tweet }): ReactElement {
+  const handle = async () => {
+    clientV2.retweet(props.tweet);
+  };
+  return <Action title="Retweet" icon={{ source: "retweet.png", tintColor: Color.PrimaryText }} onAction={handle} />;
+}
+
+export function DeleteTweetAction(props: { tweet: Tweet }) {
   const [user, setUser] = useState<string | undefined>();
   useEffect(() => {
     async function fetch() {
