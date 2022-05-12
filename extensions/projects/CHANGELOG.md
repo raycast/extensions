@@ -1,5 +1,12 @@
 # Projects Changelog
 
+## [Added support for Xcode projects] - 2022-05-13
+
+- Faster search with mfind (instead of find)
+- Supports Xcode projects
+- Open in finder & terminal
+- Better defaults for project types
+
 ## [Added node, maven & gradle projects support] - 2022-05-12
 
 - Initial version

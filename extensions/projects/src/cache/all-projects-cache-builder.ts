@@ -10,8 +10,20 @@ export async function buildAllProjectsCache(paths: string[], maxDepth: number): 
   let foundRepos: SourceRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} \\( -name 'package.json' -o -name 'pom.xml' -o -name 'build.gradle' \\) -type f -not -path "*/node_modules/*"`;
-      const { stdout, stderr } = await execp(findCmd);
+      const spotlightSearchParameters = [
+        "kMDItemDisplayName == *.xcodeproj",
+        "kMDItemDisplayName == *.xcworkspace",
+        "kMDItemDisplayName == Package.swift",
+        "kMDItemDisplayName == *.playground",
+        "kMDItemDisplayName == build.gradle",
+        "kMDItemDisplayName == pom.xml",
+        "kMDItemDisplayName == package.json",
+      ];
+      // Execute command
+      const { stdout, stderr } = await execp(
+        `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules"`
+      );
+
       if (stderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
         console.error(`error: ${stderr}`);
@@ -67,6 +79,20 @@ function parseRepoPaths(repoPaths: string[]): SourceRepo[] {
         icon: "gradle.png",
         fullPath: fullPath,
         type: ProjectType.GRADLE,
+      };
+    } else if (
+      path.endsWith(".xcodeproj") ||
+      path.endsWith(".xcworkspace") ||
+      path.endsWith(".playground") ||
+      path.endsWith("Package.swift")
+    ) {
+      const fullPath = path.substring(0, path.lastIndexOf("/"));
+      const name = path.split("/").pop() ?? "unknown";
+      return {
+        name: name,
+        icon: "xcode.png",
+        fullPath: fullPath,
+        type: ProjectType.XCODE,
       };
     }
 
