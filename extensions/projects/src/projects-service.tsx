@@ -74,7 +74,7 @@ export function useRepoCache(query: string | undefined): {
     let filteredAllRepos = repos;
     let filteredRecentRepos = recentlyAccessedCache.repos;
     let filteredPinnedRepos = pinnedCache.repos;
-    let allProjectsSectionTitle = `${repos.length} Projects${repos.length != 1 ? "s" : ""}`;
+    let allProjectsSectionTitle = `${repos.length} Project${repos.length != 1 ? "s" : ""}`;
     const recentlyAccessedProjectsSectionTitle = `Recent Projects${
       recentlyAccessedCache.repos?.length != 1 ? "s" : ""
     }`;
