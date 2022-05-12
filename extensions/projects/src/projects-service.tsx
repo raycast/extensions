@@ -82,11 +82,11 @@ export function useRepoCache(query: string | undefined): {
       filteredPinnedRepos = filterRepos(filteredPinnedRepos, query);
     }
 
-    const allButRecentRepos = [...filteredAllRepos].filter(all => {
-      return !filteredRecentRepos.some(recent => {
+    const allButRecentRepos = [...filteredAllRepos].filter((all) => {
+      return !filteredRecentRepos.some((recent) => {
         return getRepoKey(all) === getRepoKey(recent);
       });
-    });;
+    });
 
     setResponse({
       all: {
@@ -96,16 +96,16 @@ export function useRepoCache(query: string | undefined): {
       recent:
         filteredRecentRepos?.length > 0
           ? {
-            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredRecentRepos || [],
-          }
+              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredRecentRepos || [],
+            }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredPinnedRepos || [],
-          }
+              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredPinnedRepos || [],
+            }
           : undefined,
     });
   }
