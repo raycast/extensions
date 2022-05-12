@@ -68,7 +68,26 @@ export function useRepoCache(query: string | undefined): {
   const repos = allProjectsCache.repos;
 
   function filterRepos(repos: SourceRepo[], query: string): SourceRepo[] {
-    return repos.filter((repo) => repo.name.toLocaleLowerCase().includes(query.toLowerCase()));
+    const queries = query.split(" ");
+    const dir = queries.filter((q) => q.startsWith("dir:") && q.split(":").length > 1)[0]?.split(":")[1];
+    const type = queries.filter((q) => q.startsWith("type:") && q.split(":").length > 1)[0]?.split(":")[1];
+    const name = queries.filter((q) => !q.includes(":"))[0];
+    let filteredRepos: SourceRepo[] = repos;
+    if (dir) {
+      filteredRepos = filteredRepos.filter((repo) =>
+        repo.fullPath.toLocaleLowerCase().includes(dir.trim().toLowerCase())
+      );
+    }
+
+    if (type) {
+      filteredRepos = filteredRepos.filter((repo) => repo.type.toLocaleLowerCase().includes(type.trim().toLowerCase()));
+    }
+
+    if (name) {
+      filteredRepos = filteredRepos.filter((repo) => repo.name.toLocaleLowerCase().includes(name.trim().toLowerCase()));
+    }
+
+    return filteredRepos;
   }
 
   function filterAndSetFullResponse(repos: SourceRepo[]) {

@@ -4,10 +4,10 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ## Supports:
 
-- Node projects
-- Maven projects
-- Gradle projects
-- Xcode projects
+- Node projects (node)
+- Maven projects (maven)
+- Gradle projects (gradle)
+- Xcode projects (xcode)
 
 ## Features:
 
@@ -23,9 +23,16 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ![Pin Projects](./metadata/screenshot-03.png)
 
-### 4. Reveal project in Finder.
+### 4. Advanced search by keywords
 
-### 5. Open Terminal at project folder.
+- To search project types: use `type:<type>`. Supported types: `node`/`maven`/`gradle`/`xcode`
+- To search in a directory: use `dir:<part of directory>`.
+- To search in just text: use simply text
+  ![Advanced Search](./metadata/screenshot-04.png)
+
+### 5. Reveal project in Finder.
+
+### 6. Open Terminal at project folder.
 
 ## Roadmap
 
