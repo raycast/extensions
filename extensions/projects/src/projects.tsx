@@ -6,7 +6,6 @@ import { Preferences } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
 
 export default function Main(): ReactElement {
-
   const searchBarPlaceholders = [
     "Search for a project",
     "Search projects by name",
@@ -26,7 +25,9 @@ export default function Main(): ReactElement {
   return (
     <List
       searchBarPlaceholder={searchBarPlaceholders[Math.floor(Math.random() * searchBarPlaceholders.length)]}
-      onSearchTextChange={setSearchText} isLoading={isLoading}>
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+    >
       <List.Section title={response?.pinned?.sectionTitle}>
         {response?.pinned?.repos?.map((repo) => (
           <List.Item
