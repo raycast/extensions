@@ -23,16 +23,22 @@ If you want to specify the language, you need to define them in `Command Configu
 ## Some enhancements
 
 * the content to translate supports with below order:
-  
+
   * Selection content in your most front window
-  
+
   * Clipboard content
-  
+
   * User input
 
 * show phonetic on translated content
 
-* Use `ctrl+Return` to pronounce the words
+* Use `ctrl+Return` to pronounce the original words
+* Use `shift+Return` to pronounce the translated words
+
+## About YouDao AppKey and AppSecret
+You can get Youdao Translate APP Key&Secret at https://ai.youdao.com/console/
+
+When you create your own youdao app, please ensure you subscribe two services: `文本翻译, 语音合成`
 
 ## Future plan
 

@@ -60,12 +60,12 @@ function Translate({
   return (
     <>
       {translate_result.translation ? (
-        <List.Section title={`Translate → ${searchText}`}>
+        <List.Section title={`Translate`}>
           {translate_result.translation.map((item: string, index: number) => (
             <List.Item
               key={index}
               title={item}
-              subtitle={translate_result.basic?.phonetic ? `/${translate_result.basic?.phonetic}/` : ""}
+              subtitle={translate_result.basic?.phonetic ? `${searchText} /${translate_result.basic?.phonetic}/` : ""}
               icon={{ source: Icon.Dot, tintColor: Color.Red }}
               actions={
                 <TranslateResultActionPanel
@@ -76,6 +76,7 @@ function Translate({
                     translate_result.webdict && translate_result.webdict.url ? translate_result.webdict.url : undefined
                   }
                   speak_url={translate_result.speakUrl}
+                  tspeak_url={translate_result.tSpeakUrl}
                 />
               }
             />
@@ -130,13 +131,38 @@ function TranslateResultActionPanel(props: {
   copy_content: string;
   url: string | undefined;
   speak_url?: string;
+  tspeak_url?: string;
   setState?: React.Dispatch<React.SetStateAction<TranslateState>>;
 }) {
-  const { text, copy_content, url, speak_url, setState } = props;
+  const { text, copy_content, url, speak_url, tspeak_url, setState } = props;
   return (
     <ActionPanel>
       <Action.CopyToClipboard content={copy_content} />
       {url ? <Action.OpenInBrowser url={url} /> : null}
+      <Action
+        icon={Icon.Message}
+        onAction={() => {
+          if (speak_url && setState) {
+            setState((oldState) => ({
+              ...oldState,
+              isLoading: true,
+            }));
+            //try speak url first, and if it does not return 200, turn to use defaut service
+            try {
+              pronunceIt(speak_url, text);
+            } catch (error) {
+              console.log(error);
+            } finally {
+              setState((oldState) => ({
+                ...oldState,
+                isLoading: false,
+              }));
+            }
+          }
+        }}
+        shortcut={{ modifiers: ["ctrl"], key: "return" }}
+        title={"Read Original"}
+      />
       {speak_url ? (
         <Action
           icon={Icon.Message}
@@ -146,12 +172,9 @@ function TranslateResultActionPanel(props: {
                 ...oldState,
                 isLoading: true,
               }));
+              //try speak url first, and if it does not return 200, turn to use defaut service
               try {
-                fetch(`http://dict.youdao.com/dictvoice?audio=${text}`).then((res) => {
-                  const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
-                  res?.body?.pipe(fileStream);
-                  sound.play("/tmp/tmp_raycast_simpleyd.mp3");
-                });
+                pronunceIt(tspeak_url, copy_content);
               } catch (error) {
                 console.log(error);
               } finally {
@@ -162,8 +185,8 @@ function TranslateResultActionPanel(props: {
               }
             }
           }}
-          shortcut={{ modifiers: ["ctrl"], key: "return" }}
-          title={"Read It"}
+          shortcut={{ modifiers: ["shift"], key: "return" }}
+          title={"Read Translated"}
         />
       ) : null}
     </ActionPanel>
@@ -289,6 +312,23 @@ function translateAPI(content: string, signal: AbortSignal): Promise<Response> {
   });
 }
 
+function pronunceIt(speak_url: string | undefined, speak_text: string | undefined): void {
+  if (speak_url == undefined || speak_url.length === 0) {
+    return;
+  }
+  fetch(speak_url).then((res) => {
+    if (res.status !== 200 && res.headers.get('Content-Type') === 'audio/mp3' && speak_text != undefined) {
+      return fetch(`http://dict.youdao.com/dictvoice?audio=${speak_text}`)
+    } else {
+      return res;
+    }
+  }).then((res) => {
+    const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
+    res?.body?.pipe(fileStream);
+    sound.play("/tmp/tmp_raycast_simpleyd.mp3");
+  })
+}
+
 interface TranslateState {
   translateResult?: TranslateResult;
   searchText?: string;
@@ -305,6 +345,7 @@ interface TranslateResult {
   web?: Array<TranslateWebResult>;
   webdict?: { url: string };
   speakUrl?: string;
+  tSpeakUrl?: string;
   errorCode: string;
 }
 
