@@ -108,7 +108,7 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
       }
 
       clear();
-      titleField.current.focus();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
