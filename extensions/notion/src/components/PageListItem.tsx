@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, List, Action, Image, Color } from "@raycast/api";
 import { useSetAtom } from "jotai";
 import moment from "moment";
-import { extractPropertyValue } from "../utils/notion";
+import { extractPropertyValue, pageIcon } from "../utils/notion";
 import { DatabaseView, Page, DatabaseProperty, User } from "../utils/types";
 import { recentlyOpenedPagesAtom } from "../utils/state";
 import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
@@ -26,17 +26,8 @@ export function PageListItem(props: {
   const { page, customActions, databaseProperties, databaseView, saveDatabaseView, onPageCreated, onPageUpdated } =
     props;
   const pageId = page.id;
-  const icon = props.icon
-    ? props.icon
-    : {
-        source: page.icon_emoji
-          ? page.icon_emoji
-          : page.icon_file
-          ? page.icon_file
-          : page.icon_external
-          ? page.icon_external
-          : Icon.TextDocument,
-      };
+  const icon = props.icon ? props.icon : pageIcon(page);
+
   const keywords: string[] = props.keywords ? props.keywords : [];
 
   const storeRecentlyOpenedPage = useSetAtom(recentlyOpenedPagesAtom);
@@ -91,7 +82,7 @@ export function PageListItem(props: {
             {page.object === "database" ? (
               <Action.Push
                 title="Navigate to Database"
-                icon={Icon.ArrowRight}
+                icon={Icon.List}
                 target={<DatabaseList databasePage={page} />}
               />
             ) : (

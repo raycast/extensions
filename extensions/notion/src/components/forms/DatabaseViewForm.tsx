@@ -137,7 +137,7 @@ export function DatabaseViewForm(props: {
                         ? d.icon_file
                         : d.icon_external
                         ? d.icon_external
-                        : Icon.TextDocument
+                        : Icon.List
                     }
                   />
                 );

@@ -5,7 +5,7 @@ import { fetchPageContent } from "../utils/notion";
 import { Page, PageContent } from "../utils/types";
 import { recentlyOpenedPagesAtom } from "../utils/state";
 import { handleOnOpenPage } from "../utils/openPage";
-import { AppendToPageForm, CreateDatabaseForm } from "./forms";
+import { AppendToPageForm } from "./forms";
 
 export function PageDetail(props: { page: Page }): JSX.Element {
   const page = props.page;

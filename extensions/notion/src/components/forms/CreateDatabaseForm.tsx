@@ -8,6 +8,7 @@ import {
   createDatabasePage,
   notionColorToTintColor,
   fetchUsers,
+  pageIcon,
 } from "../../utils/notion";
 import { DatabaseProperty, DatabasePropertyOption, DatabaseView, Page } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
@@ -206,7 +207,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
                         ? d.icon_file
                         : d.icon_external
                         ? d.icon_external
-                        : Icon.TextDocument
+                        : Icon.List
                     }
                   />
                 );
@@ -302,15 +303,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
                         key={"relation::" + rp.id}
                         value={rp.id}
                         title={rp.title ? rp.title : "Untitled"}
-                        icon={{
-                          source: rp.icon_emoji
-                            ? rp.icon_emoji
-                            : rp.icon_file
-                            ? rp.icon_file
-                            : rp.icon_external
-                            ? rp.icon_external
-                            : Icon.TextDocument,
-                        }}
+                        icon={pageIcon(rp)}
                       />
                     );
                   })}

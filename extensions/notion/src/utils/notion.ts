@@ -1,4 +1,4 @@
-import { showToast, Color, Form, Toast, OAuth, getPreferenceValues } from "@raycast/api";
+import { showToast, Color, Form, Toast, OAuth, getPreferenceValues, Image, Icon } from "@raycast/api";
 import { Client, isNotionClientError } from "@notionhq/client";
 import fetch from "node-fetch";
 import moment from "moment";
@@ -665,4 +665,16 @@ export function extractPropertyValue(
   }
 
   return null;
+}
+
+export function pageIcon(page: Page): Image.ImageLike {
+  return page.icon_emoji
+    ? page.icon_emoji
+    : page.icon_file
+    ? page.icon_file
+    : page.icon_external
+    ? page.icon_external
+    : page.object === "database"
+    ? Icon.List
+    : Icon.TextDocument;
 }
