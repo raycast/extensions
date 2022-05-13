@@ -3,7 +3,7 @@
   "name": "stock-lookup",
   "title": "Stock Lookup",
   "description": "Retrieves stock information from the alphavantage API. Get a free API Key from https://www.alphavantage.co/support/#api-key",
-  "icon": "money-emoji.webp",
+  "icon": "money-emoji.png",
   "author": "jones-sam",
   "categories": [
     "Data",
