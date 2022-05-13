@@ -6,8 +6,8 @@ import { displayDueDate } from "../helpers";
 import { priorities } from "../constants";
 import { SWRKeys } from "../types";
 import { todoist, handleError } from "../api";
-import TaskComments from "./TaskComments";
 import TaskCommentForm from "./TaskCommentForm";
+import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
   task: Task;
@@ -93,16 +93,9 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
         <ActionPanel>
           <Action.OpenInBrowser url={task.url} />
 
-          <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
+          <TaskActions task={task} />
 
-          {hasComments ? (
-            <Action.Push
-              title="Show Comments"
-              icon={Icon.Bubble}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              target={<TaskComments task={task} />}
-            />
-          ) : null}
+          <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
         </ActionPanel>
       }
     />
