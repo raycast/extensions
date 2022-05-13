@@ -4,7 +4,7 @@ description: This guide covers the prerequisites you need to start building exte
 
 # Getting Started
 
-### System requirements
+## System Requirements
 
 Before you can create your first extension, make sure you have the following prerequisites.
 
@@ -15,7 +15,7 @@ Before you can create your first extension, make sure you have the following pre
 
 ## Sign In
 
-![Opening the "Store" command in Raycast](../.gitbook/assets/store-welcome.png)
+![Opening the "Store" command in Raycast](../.gitbook/assets/welcome.png)
 
 You need to be signed in to use the following extension development commands.
 

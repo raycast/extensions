@@ -1,5 +1,5 @@
 import { XcodeSimulatorApplication } from "../../models/simulator/xcode-simulator-application.model";
-import { ActionPanel, Icon, ImageLike, ImageMask, List, Navigation, ShowInFinderAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, Navigation } from "@raycast/api";
 import { xcodeSimulatorApplicationDetail } from "./xcode-simulator-application-detail.user-interface";
 
 /**
@@ -17,15 +17,15 @@ export function xcodeSimulatorApplicationListItem(
       icon={icon(xcodeSimulatorApplication)}
       title={xcodeSimulatorApplication.name}
       subtitle={subtitle(xcodeSimulatorApplication)}
-      accessoryTitle={accessoryTitle(xcodeSimulatorApplication)}
+      accessories={[{ text: accessoryTitle(xcodeSimulatorApplication) }]}
       actions={
         <ActionPanel>
-          <ActionPanel.Item
+          <Action
             icon={Icon.Finder}
             title="View Directories"
             onAction={() => navigation.push(xcodeSimulatorApplicationDetail(xcodeSimulatorApplication, navigation))}
           />
-          <ShowInFinderAction
+          <Action.ShowInFinder
             title={"Open Documents directory"}
             path={xcodeSimulatorApplication.sandBoxDocumentsPath}
           />
@@ -47,11 +47,11 @@ function key(xcodeSimulatorApplication: XcodeSimulatorApplication): string {
  * Retrieve icon from XcodeSimulatorApplication
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
  */
-function icon(xcodeSimulatorApplication: XcodeSimulatorApplication): ImageLike {
+function icon(xcodeSimulatorApplication: XcodeSimulatorApplication): Image {
   // Use rounded appIconPath image otherwise use placeholder icon
   return {
     source: xcodeSimulatorApplication.appIconPath ?? "app-icon-placeholder.png",
-    mask: ImageMask.RoundedRectangle,
+    mask: Image.Mask.RoundedRectangle,
   };
 }
 

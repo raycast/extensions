@@ -40,7 +40,33 @@
           "value": "pocket-website"
         }
       ]
+    },
+    {
+      "name": "defaultFilter",
+      "title": "Default Filter",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "description": "Default filter for the list of bookmarks",
+      "data": [
+        {
+          "title": "All Bookmarks",
+          "value": "all"
+        },
+        {
+          "title": "Unread",
+          "value": "unread"
+        },
+        {
+          "title": "Archived",
+          "value": "archive"
+        }
+      ]
     }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
   ],
   "commands": [
     {
@@ -52,14 +78,28 @@
     },
     {
       "name": "random",
-      "title": "Random Bookmark",
+      "title": "Open Random Bookmark",
       "subtitle": "Pocket",
       "description": "Opens a random unread bookmark",
+      "mode": "no-view"
+    },
+    {
+      "name": "latest",
+      "title": "Open Latest Bookmark",
+      "subtitle": "Pocket",
+      "description": "Opens the latest added unread bookmark",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Create Bookmark from Clipboard",
+      "subtitle": "Pocket",
+      "description": "Create bookmark from clipboard contents",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

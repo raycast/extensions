@@ -15,8 +15,15 @@ import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { getRecentEntries } from "./db";
+import { build, getRecentEntries } from "./db";
 import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
+
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
+
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +45,7 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
       <List.Section title="Workspaces">
         {entries.filter(isWorkspaceEntry).map((entry) => (
-          <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
+          <LocalListItem key={entry.fileUri} uri={entry.fileUri} />
         ))}
       </List.Section>
 
@@ -75,7 +82,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Code" icon="action-icon.png" url={uri} />
+            <OpenInBrowserAction title={`Open in ${build}`} icon="action-icon.png" url={uri} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -98,12 +105,7 @@ function LocalListItem(props: { uri: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction
-              title="Open in Code"
-              icon="action-icon.png"
-              target={props.uri}
-              application="com.microsoft.VSCode"
-            />
+            <OpenAction title={`Open in ${build}`} icon="action-icon.png" target={props.uri} application={appKey} />
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>

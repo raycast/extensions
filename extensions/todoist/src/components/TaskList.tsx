@@ -11,23 +11,23 @@ interface TaskListProps {
 }
 
 function TaskList({ isLoading, sections, mode = ViewMode.date, projects }: TaskListProps): JSX.Element {
-  sections.forEach((section) => {
-    section.tasks.sort((a, b) => a.order - b.order);
-  });
-
   const placeholder = `Filter tasks by name${
     mode === ViewMode.date ? ", priority (e.g p1), or project name (e.g Work)" : " or priority (e.g p1)"
   }`;
 
   return (
     <List searchBarPlaceholder={placeholder} isLoading={isLoading}>
-      {sections.map((section, index) => (
-        <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>
-          {section.tasks.map((task) => (
-            <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
-          ))}
-        </List.Section>
-      ))}
+      {sections.map((section, index) => {
+        const subtitle = `${section.tasks.length} ${section.tasks.length === 1 ? "task" : "tasks"}`;
+
+        return (
+          <List.Section title={section.name} subtitle={subtitle} key={index}>
+            {section.tasks.map((task) => (
+              <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
+            ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }

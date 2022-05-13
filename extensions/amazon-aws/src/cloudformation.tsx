@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
 import { StackSummary } from "aws-sdk/clients/cloudformation";
+import setupAws from "./util/setupAws";
+
+setupAws();
 
 export default function ListStacks() {
   const preferences: Preferences = getPreferenceValues();
-  AWS.config.update({ region: preferences.region });
   const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{
@@ -21,24 +23,20 @@ export default function ListStacks() {
 
   useEffect(() => {
     if (!preferences.region) return;
-    async function fetch() {
-      cloudformation.listStacks({}, async (err, data) => {
-        if (err) {
-          setState({
-            hasError: true,
-            loaded: false,
-            stacks: [],
-          });
-        } else {
-          setState({
-            hasError: false,
-            loaded: true,
-            stacks: data.StackSummaries || [],
-          });
-        }
-      });
+    async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
+      const { NextToken, StackSummaries } = await cloudformation.listStacks({ NextToken: token }).promise();
+      const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
+
+      if (NextToken) {
+        return fetchStacks(NextToken, combinedStacks);
+      }
+
+      return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
     }
-    fetch();
+
+    fetchStacks()
+      .then((stacks) => setState({ hasError: false, loaded: true, stacks }))
+      .catch(() => setState({ hasError: true, loaded: false, stacks: [] }));
   }, []);
 
   if (state.hasError) {
@@ -50,7 +48,7 @@ export default function ListStacks() {
   return (
     <List isLoading={!state.loaded} searchBarPlaceholder="Filter stacks by name...">
       {state.stacks.map((s) => (
-        <CloudFormationStack key={s.StackName} stack={s} />
+        <CloudFormationStack key={s.StackId} stack={s} />
       ))}
     </List>
   );
@@ -62,7 +60,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
   return (
     <List.Item
       id={stack.StackName}
-      key={stack.StackName}
+      key={stack.StackId}
       title={stack.StackName}
       accessoryTitle={stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined}
       actions={

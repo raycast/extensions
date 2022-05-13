@@ -10,11 +10,10 @@ import {
   Toast,
 } from '@raycast/api';
 
-type IndentType = 'tab' | '2' | '4' | '8';
+import { getIndentation } from './utils';
 
 interface FormInput {
   input: string;
-  indent: IndentType;
 }
 
 export default function main() {
@@ -27,19 +26,14 @@ export default function main() {
       }
     >
       <Form.TextArea id="input" title="Input" placeholder="Paste JSON here…" />
-      <Form.Dropdown id="indent" title="Indentation" storeValue>
-        <Form.Dropdown.Item value="tab" title="Tabs" />
-        <Form.Dropdown.Item value="2" title="Spaces: 2" />
-        <Form.Dropdown.Item value="4" title="Spaces: 4" />
-        <Form.Dropdown.Item value="8" title="Spaces: 8" />
-      </Form.Dropdown>
     </Form>
   );
 }
 
 function FormatAction() {
   async function handleSubmit(values: FormInput) {
-    const { indent, input } = values;
+    const indent = getIndentation();
+    const { input } = values;
     if (input.length === 0) {
       showToast({
         style: Toast.Style.Failure,

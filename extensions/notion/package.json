@@ -1,10 +1,18 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
   "description": "Fastest way to search and create Notion page.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "license": "MIT",
+  "contributors": [
+    "mathieudutour"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "create-database-page",
@@ -51,15 +59,16 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^0.4.12",
-    "@raycast/api": "^1.25.0",
+    "@notionhq/client": "^1.0.4",
+    "@raycast/api": "^1.33.0",
+    "@tryfabric/martian": "^1.2.0",
     "moment": "^2.29.1",
-    "node-fetch": "^2.6.1",
-    "open": "^8.4.0"
+    "node-fetch": "^3.2.4",
+    "notion-to-md": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
+    "@types/node-fetch": "^2.6.1",
     "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",

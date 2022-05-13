@@ -9,6 +9,12 @@ Whenever possible, we provide tools to automate the migration to a newer version
 To run the codemods, run the following command in your extension directory:
 
 ```bash
+npx ray migrate
+```
+
+or
+
+```bash
 npx @raycast/migration .
 ```
 

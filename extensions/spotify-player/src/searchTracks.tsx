@@ -1,7 +1,7 @@
+import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { authorize, spotifyApi } from "./client/client";
 import { PlayAction } from "./client/actions";
-import { showToast, List, ActionPanel, Action, Toast, Image } from "@raycast/api";
+import { authorize, spotifyApi } from "./client/client";
 import { Response } from "./client/interfaces";
 
 export default function SpotifyList() {
@@ -30,15 +30,18 @@ export default function SpotifyList() {
 
 function TrackListItem(props: { track: SpotifyApi.TrackObjectFull }) {
   const track = props.track;
+  const image = track.album.images[track.album.images.length - 1].url;
   const icon: Image.ImageLike = {
-    source: track.album.images[track.album.images.length - 1].url,
+    source: image,
     mask: Image.Mask.Circle,
   };
-  const title = `${track.artists[0].name} – ${track.name}`;
+  const title = track.name;
+  const subtitle = `${track.artists.map((a) => a.name).join(", ")}`;
   return (
     <List.Item
       title={title}
-      accessoryTitle={msToHMS(track.duration_ms)}
+      subtitle={subtitle}
+      accessories={[{ text: msToHMS(track.duration_ms), tooltip: "duration of song" }]}
       icon={icon}
       actions={
         <ActionPanel title={title}>

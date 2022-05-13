@@ -12,7 +12,7 @@ import Fuse from 'fuse.js';
 
 import Service, { Coin } from './service';
 import { addFavorite, getFavorites, removeFavorite } from './storage';
-import { formatDate, formatPrice } from './utils';
+import { formatDate, formatPrice, getPreferredCurrency } from './utils';
 
 interface IdProps {
   id: string;
@@ -55,9 +55,17 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchList() {
-      const coins = await service.getCoinList();
-      setLoading(false);
-      setCoins(coins);
+      try {
+        const coins = await service.getCoinList();
+        setLoading(false);
+        setCoins(coins);
+      } catch (e) {
+        setLoading(false);
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Failed to fetch the coin list',
+        });
+      }
     }
 
     async function fetchFavorites() {
@@ -167,7 +175,8 @@ async function showPrice(id: string) {
     style: Toast.Style.Animated,
     title: 'Fetching price…',
   });
-  const price = await service.getPrice(id);
+  const currency = getPreferredCurrency();
+  const price = await service.getPrice(id, currency.id);
   if (!price) {
     showToast({
       style: Toast.Style.Failure,
@@ -175,7 +184,7 @@ async function showPrice(id: string) {
     });
     return;
   }
-  const priceString = formatPrice(price);
+  const priceString = formatPrice(price, currency.id);
   showToast({
     style: Toast.Style.Success,
     title: `Price: ${priceString}`,
@@ -185,6 +194,7 @@ async function showPrice(id: string) {
 function HistoricalPrice(props: IdProps) {
   const [markdown, setMarkdown] = useState<string>('');
   const [isLoading, setLoading] = useState<boolean>(true);
+  const currency = getPreferredCurrency();
 
   useEffect(() => {
     async function fetchList() {
@@ -194,7 +204,7 @@ function HistoricalPrice(props: IdProps) {
         .map(([timestamp, price]) => {
           const date = new Date(timestamp);
           const dateString = formatDate(date);
-          const priceString = formatPrice(price);
+          const priceString = formatPrice(price, currency.id);
           return `**${dateString}:** ${priceString}`;
         })
         .join('\n\n');
@@ -217,13 +227,21 @@ function Info(props: IdProps) {
         await service.getCoinInfo(props.id);
       setLoading(false);
       const markdown = `
-  **Name**: ${name}
+  ## Name
 
-  **Symbol**: ${symbol.toUpperCase()}
+  ${name}
 
-  **Market Cap Rank**: ${market_cap_rank}
+  ## Symbol
 
-  [Homepage](${links.homepage[0]})
+  ${symbol.toUpperCase()}
+
+  ## Market Cap Rank
+
+  ${market_cap_rank}
+
+  ## Homepage
+
+  [${links.homepage[0]}](${links.homepage[0]})
       `;
       setMarkdown(markdown);
     }

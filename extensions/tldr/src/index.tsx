@@ -1,18 +1,16 @@
 import {
+  Action,
   ActionPanel,
   closeMainWindow,
-  CopyToClipboardAction,
-  Detail,
   environment,
   Icon,
   List,
   popToRoot,
-  PushAction,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import degit from "degit";
-import fs, { existsSync } from "fs";
+import fs, { existsSync, readdirSync } from "fs";
 import { rm } from "fs/promises";
 import { globby } from "globby";
 import { parse, resolve } from "path";
@@ -22,12 +20,12 @@ const CACHE_DIR = resolve(environment.supportPath, "pages");
 
 async function refreshPages() {
   await rm(resolve(CACHE_DIR), { recursive: true, force: true });
-  await showToast(ToastStyle.Animated, "Fetching TLDR Pages...");
+  await showToast(Toast.Style.Animated, "Fetching TLDR Pages...");
   try {
     await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
-    await showToast(ToastStyle.Success, "TLDR pages fetched!");
+    await showToast(Toast.Style.Success, "TLDR pages fetched!");
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Download Failed!", "Please check your internet connexion.");
+    await showToast(Toast.Style.Failure, "Download Failed!", "Please check your internet connexion.");
   }
 }
 
@@ -46,48 +44,56 @@ async function readPages() {
 }
 
 export default function TLDRList(): JSX.Element {
-  const [platforms, setPlatforms] = useState<Platform[]>();
-  const [query, setQuery] = useState("");
-  useEffect(() => {
-    async function loadPages() {
-      if (!existsSync(CACHE_DIR)) {
-        await refreshPages();
-      }
+  const [platforms, setPlatforms] = useState<Record<string, Platform>>();
+  const [selectedPlatformName, setSelectedPlatformName] = useState<string>("osx");
 
-      setPlatforms(await readPages());
+  const selectedPlatforms = platforms ? [platforms[selectedPlatformName], platforms["common"]] : undefined;
+
+  async function loadPages(options?: { forceRefresh?: boolean }) {
+    if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
+      await refreshPages();
     }
+    const platforms = await readPages();
+    setPlatforms(Object.fromEntries(platforms.map((platform) => [platform.name, platform])));
+  }
+
+  useEffect(() => {
     loadPages();
   }, []);
 
   return (
     <List
-      searchBarPlaceholder="Search for command..."
-      onSearchTextChange={(query) => {
-        setQuery(query);
-      }}
+      isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown tooltip="Platform" storeValue onChange={setSelectedPlatformName}>
+          <List.Dropdown.Section>
+            {["osx", "linux", "windows", "sunos", "android"].map((platform) => (
+              <List.Dropdown.Item title={platform} value={platform} key={platform} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       isLoading={!platforms}
     >
-      {platforms?.map((platform) => (
+      {selectedPlatforms?.map((platform) => (
         <List.Section title={platform.name} key={platform.name}>
           {platform.pages
-            .filter((page) => page.title.startsWith(query))
-            .sort((a, b) => a.title.localeCompare(b.title))
+            .sort((a, b) => a.command.localeCompare(b.command))
             .map((page) => (
               <List.Item
-                title={page.title}
+                title={page.command}
+                detail={<List.Item.Detail markdown={page.markdown} />}
                 key={page.filename}
-                subtitle={page.subtitle}
-                accessoryTitle={page.filename}
                 actions={
                   <ActionPanel>
-                    <PushAction title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
-                    <PushAction title="Show Detail" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
-                    <ActionPanel.Item
+                    <Action.Push title="Browse Examples" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
+                    <OpenCommandWebsiteAction page={page} />
+                    <Action
                       title="Refresh Pages"
                       icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={async () => {
-                        await refreshPages();
-                        setPlatforms(await readPages());
+                        await loadPages({ forceRefresh: true });
                       }}
                     />
                   </ActionPanel>
@@ -100,10 +106,15 @@ export default function TLDRList(): JSX.Element {
   );
 }
 
+function OpenCommandWebsiteAction(props: { page: Page }) {
+  const page = props.page;
+  return page.url ? <Action.OpenInBrowser title="Open Command Website" url={page.url} /> : null;
+}
+
 function CommandList(props: { page: Page }) {
   const page = props.page;
   return (
-    <List navigationTitle={page.title}>
+    <List navigationTitle={page.command}>
       {page.items?.map((item) => (
         <List.Section key={item.description} title={item.description}>
           <List.Item
@@ -111,13 +122,14 @@ function CommandList(props: { page: Page }) {
             key={item.command}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   content={item.command}
                   onCopy={async () => {
                     await closeMainWindow();
                     await popToRoot();
                   }}
                 />
+                <OpenCommandWebsiteAction page={page} />
               </ActionPanel>
             }
           />
@@ -133,10 +145,11 @@ interface Platform {
 }
 
 interface Page {
-  title: string;
+  command: string;
   filename: string;
   subtitle: string;
   markdown: string;
+  url?: string;
   items: { description: string; command: string }[];
 }
 
@@ -154,11 +167,17 @@ async function parsePage(path: string): Promise<Page> {
     else if (line.startsWith("-")) descriptions.push(line.slice(2));
   }
 
+  const match = markdown.match(
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/
+  );
+  const url = match ? match[0] : undefined;
+
   return {
-    title: lines[0].slice(2),
+    command: lines[0].slice(2),
     filename: parse(path).name,
     subtitle: subtitle[0],
     markdown: markdown,
+    url,
     items: zip(commands, descriptions).map(([command, description]) => ({
       command: command as string,
       description: description as string,
