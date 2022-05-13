@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   DatabaseView,
@@ -145,7 +145,9 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
     setDatabaseView(newDatabaseView);
-    showToast(ToastStyle.Success, "View Updated");
+    showToast({
+      title: "View Updated",
+    });
     storeDatabaseView(databaseId, newDatabaseView);
   }
 

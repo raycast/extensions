@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List, showToast, Toast, open } from "@raycas
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
+import SnippetContent from "./components/snippet-content";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
@@ -9,8 +10,11 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
-        setState((previous) => ({ ...previous, snippets: res.data }));
+        const { data } = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
+
+        const snippets = data.filter((i) => !i.isDeleted);
+
+        setState((previous) => ({ ...previous, snippets }));
       } catch (err) {
         setState((previous) => ({
           ...previous,
@@ -41,7 +45,7 @@ export default function Command() {
   }
 
   return (
-    <List searchBarPlaceholder="Type to search snippets" isLoading={state.isLoading}>
+    <List searchBarPlaceholder="Type to search snippets" isLoading={state.isLoading} isShowingDetail>
       {state.snippets?.map((i) => {
         return (
           <List.Item
@@ -50,7 +54,7 @@ export default function Command() {
             keywords={[i.content[0].language]}
             subtitle={i.content[0].language}
             icon={Icon.Document}
-            accessories={[{ text: i.folder?.name ?? "Inbox" }]}
+            detail={<SnippetContent snippet={i} selectedFragment={0} />}
             actions={
               <ActionPanel title="Actions">
                 <ActionPanel.Section>

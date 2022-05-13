@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, trash } from "@raycast/api";
 import React, { useState } from "react";
 import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
-import { DirectoryInfo, FileInfo } from "./utils/directory-info";
+import { DirectoryInfo, FileInfo, FileType } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
 import {
   alertDialog,
   copyLatestFile,
-  getFileInfo,
+  getFileInfoAndPreview,
   getIsShowDetail,
   localDirectoryWithFiles,
   refreshNumber,
@@ -19,12 +19,18 @@ export default function Command() {
   const { primaryAction, rememberTag, autoCopyLatestFile } = commonPreferences();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const [filePath, setFilePath] = useState<string>("");
+  const [filePath, setFilePath] = useState<FileInfo>({
+    id: "",
+    name: "",
+    path: "",
+    type: FileType.FILE,
+    modifyTime: 0,
+  });
   const [refreshDetail, setRefreshDetail] = useState<number>(0);
 
   const showDetail = getIsShowDetail(refreshDetail);
   const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
-  const fileInfo = getFileInfo(filePath);
+  const fileInfo = getFileInfoAndPreview(filePath);
 
   //preference: copy the latest file
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
@@ -36,7 +42,7 @@ export default function Command() {
       searchBarPlaceholder={"Search files"}
       onSelectionChange={(id) => {
         if (typeof id === "string") {
-          setFilePath(id);
+          setFilePath(JSON.parse(id));
         }
       }}
       searchBarAccessory={
@@ -87,13 +93,13 @@ export default function Command() {
                 <List.Section
                   key={directory.directory.id}
                   title={directory.directory.name}
-                  subtitle={showDetail ? "" : parse(directory.directory.path).dir}
+                  subtitle={directory.files.length + (showDetail ? "" : "    " + parse(directory.directory.path).dir)}
                 >
                   {directory.files.map(
                     (fileValue) =>
                       (tag === fileValue.type || !tagDirectoryTypes.includes(tag)) && (
                         <List.Item
-                          id={fileValue.path}
+                          id={JSON.stringify(fileValue)}
                           key={fileValue.path}
                           icon={
                             isImage(parse(fileValue.path).ext)
@@ -269,17 +275,15 @@ export async function upRank(index: number, setRefresh: React.Dispatch<React.Set
   const moreHighRank = directories.filter((value) => {
     return value.path !== directories[index].path && value.rank >= directories[index].rank;
   });
-  if (moreHighRank.length == 0) {
-    return directories;
+  if (moreHighRank.length !== 0) {
+    let allRank = 0;
+    directories.forEach((value) => [(allRank = allRank + value.rank)]);
+    directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
   }
-  let allRank = 0;
-  directories.forEach((value) => [(allRank = allRank + value.rank)]);
-  directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
   directories.sort(function (a, b) {
     return b.rank - a.rank;
   });
-  await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(directories));
 
+  await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(directories));
   setRefresh(refreshNumber());
-  return directories;
 }

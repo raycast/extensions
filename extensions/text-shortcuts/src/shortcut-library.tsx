@@ -38,6 +38,7 @@ export default function ShortcutLibrary() {
       let _userShortcuts = [];
       if (typeof _localStorage == "string") {
         _userShortcuts = JSON.parse(_localStorage);
+        console.debug(JSON.stringify(_userShortcuts));
         setUserShortcuts(_userShortcuts);
       }
       //build-in
@@ -81,7 +82,7 @@ export default function ShortcutLibrary() {
     <List
       isShowingDetail={preferences().detail}
       isLoading={allShortcuts.length == 0}
-      searchBarPlaceholder={"Search shortcut"}
+      searchBarPlaceholder={"Search shortcuts"}
       onSelectionChange={async (id) => {
         setSelectId(Number(id));
       }}

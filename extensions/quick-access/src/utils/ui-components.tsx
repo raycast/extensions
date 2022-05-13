@@ -4,7 +4,6 @@ import { LocalStorageKey } from "./constants";
 import React from "react";
 import { FileInfo } from "./directory-info";
 import { copyFileByPath } from "./applescript-utils";
-import { isEmpty } from "./common-utils";
 import { upRank } from "../search-pinned-directories";
 
 export function ActionRemoveAllDirectories(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
@@ -45,12 +44,8 @@ export function PrimaryActionOnFile(props: {
           icon={Icon.Clipboard}
           title={"Copy"}
           onAction={async () => {
-            const copyResult = await copyFileByPath(fileInfo.path);
-            if (isEmpty(copyResult)) {
-              await showHUD(`${fileInfo.name} is copied to clipboard`);
-            } else {
-              await showHUD(copyResult);
-            }
+            await showHUD(`${fileInfo.name} is copied to clipboard`);
+            await copyFileByPath(fileInfo.path);
             await upRank(index, setRefresh);
           }}
         />
@@ -65,12 +60,8 @@ export function PrimaryActionOnFile(props: {
           icon={Icon.Clipboard}
           title={"Copy"}
           onAction={async () => {
-            const copyResult = await copyFileByPath(fileInfo.path);
-            if (isEmpty(copyResult)) {
-              await showHUD(`${fileInfo.name} is copied to clipboard`);
-            } else {
-              await showHUD(copyResult);
-            }
+            await showHUD(`${fileInfo.name} is copied to clipboard`);
+            await copyFileByPath(fileInfo.path);
             await upRank(index, setRefresh);
           }}
         />

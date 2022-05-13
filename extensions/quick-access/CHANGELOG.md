@@ -1,5 +1,15 @@
 # Quick Access Changelog
 
+## [Update file preview] - 2022-04-30
+
+- Update file preview
+
+## [Add files count display] - 2022-04-28
+
+- Add files count display
+- Fix Rank algorithm bugs
+- Optimize the speed of copying files
+
 ## [Add Open With] - 2022-04-25
 
 - Add Detail view

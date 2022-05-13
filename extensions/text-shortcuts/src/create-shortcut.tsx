@@ -120,7 +120,13 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"delete" + index}
               key={"delete" + index}
               title={TactionType.DELETE + " " + (index + 1)}
-              placeholder={"Delete word"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Delete all numbers: /\\d/g\n" +
+                "Delete all Blank characters: /\\s/g\n" +
+                "Delete all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
                 const _tactions = [...tactions];
@@ -139,7 +145,13 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"replace" + index}
               key={"replace" + index}
               title={TactionType.REPLACE + " " + (index + 1)}
-              placeholder={"Replace"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Replace all numbers: /\\d/g\n" +
+                "Replace all Blank characters: /\\s/g\n" +
+                "Replace all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
                 tactions[index].content[0] = newValue;
@@ -149,7 +161,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"replace_with" + index}
               key={"replace_with" + index}
               title={""}
-              placeholder={"with"}
+              placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
                 tactions[index].content[1] = newValue;

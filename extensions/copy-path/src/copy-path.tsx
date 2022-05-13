@@ -1,9 +1,10 @@
-import { getFocusFinderPath } from "./utils/common-utils";
+import { commonPreferences, getFocusFinderPath } from "./utils/common-utils";
 import { Clipboard, closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
 import { parse } from "path";
 
 export default async () => {
   try {
+    const { multiPathSeparator } = commonPreferences();
     await closeMainWindow();
     const fileSystemItems = await getSelectedFinderItems();
     if (fileSystemItems.length === 0) {
@@ -14,7 +15,8 @@ export default async () => {
         return parsedPath.dir + "/" + parsedPath.base;
       });
 
-      const output = filePaths.join("\n");
+      console.debug(multiPathSeparator);
+      const output = filePaths.join(multiPathSeparator);
       await Clipboard.copy(output);
       await showHUD("Copy: " + filePaths[0]);
     }
