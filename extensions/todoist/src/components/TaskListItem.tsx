@@ -7,7 +7,7 @@ import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
 import TaskActions from "./TaskActions";
-import TaskComments from "./TaskComments";
+import CreateTask from "../create-task";
 
 interface TaskListItemProps {
   task: Task;
@@ -74,6 +74,15 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
           <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
 
           <TaskActions task={task} />
+
+          {mode === ViewMode.project ? (
+            <Action.Push
+              title="Add New Task"
+              target={<CreateTask fromProjectId={task.projectId} />}
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

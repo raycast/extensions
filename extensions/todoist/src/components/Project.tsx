@@ -71,7 +71,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
         description="How about creating one?"
         actions={
           <ActionPanel>
-            <Action.Push title="Create Task" target={<CreateTask />} />
+            <Action.Push title="Create Task" target={<CreateTask fromProjectId={projectId} />} />
           </ActionPanel>
         }
       />
