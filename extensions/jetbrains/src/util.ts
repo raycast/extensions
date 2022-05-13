@@ -1,4 +1,4 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues, PreferenceValues, showToast, Toast } from "@raycast/api";
 import { lstat, readFile, stat } from "fs/promises";
 import fg from "fast-glob";
 import { basename, dirname } from "path";
@@ -7,14 +7,21 @@ import { homedir } from "os";
 
 export const JetBrainsIcon = "jb.png";
 
-export const preferredApp = String(preferences["app"].value || preferences["app"].default);
-export const bin = String(preferences["bin"].value || preferences["bin"].default).replace("~", homedir());
-export const toolsInstall = String(preferences["toolsInstall"].value || preferences["toolsInstall"].default).replace(
-  "~",
-  homedir()
-);
-export const useUrl = Boolean(preferences["fallback"].value || preferences["fallback"].default);
-export const historicProjects = Boolean(preferences["historic"].value || preferences["historic"].default);
+interface prefs {
+  app: PreferenceValues;
+  bin: PreferenceValues;
+  toolsInstall: PreferenceValues;
+  fallback: PreferenceValues;
+  historic: PreferenceValues;
+}
+
+const preferences = getPreferenceValues<prefs>();
+
+export const preferredApp = String(preferences["app"]);
+export const bin = String(preferences["bin"]).replace("~", homedir());
+export const toolsInstall = String(preferences["toolsInstall"]).replace("~", homedir());
+export const useUrl = Boolean(preferences["fallback"]);
+export const historicProjects = Boolean(preferences["historic"]);
 
 export interface file {
   title: string;
@@ -126,6 +133,10 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
         );
       })
     )
+    .catch((err) => {
+      showToast(Toast.Style.Failure, `Recent project lookup for "${app.title}" failed with error: \n\n ${err}`);
+      return [];
+    })
     .then(async (entries) => await Promise.all(entries));
 }
 

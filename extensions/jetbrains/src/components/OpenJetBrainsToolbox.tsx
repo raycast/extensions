@@ -1,4 +1,4 @@
-import { ActionPanel, Application, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Application, showToast, Toast } from "@raycast/api";
 import { JetBrainsIcon } from "../util";
 import { exec } from "child_process";
 import React from "react";
@@ -13,7 +13,7 @@ export function OpenJetBrainsToolbox({ app }: OpenJetBrainsToolboxProps): JSX.El
       icon={JetBrainsIcon}
       title="Launch JetBrains Toolbox"
       onAction={() => {
-        exec(`open -b "${app?.bundleId}"`, (err) => err && showToast(ToastStyle.Failure, err?.message));
+        exec(`open -b "${app?.bundleId}"`, (err) => err && showToast(Toast.Style.Failure, err?.message));
       }}
     />
   );

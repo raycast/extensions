@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   Application,
+  Action,
   CopyToClipboardAction,
   List,
   OpenWithAction,
@@ -9,7 +10,7 @@ import {
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
 import React from "react";
 import { AppHistory, recentEntry } from "../util";
-import { OpenInJetBrainsAppAction } from "./OpenInJetBrainsAppAction";
+import { OpenInJetBrainsApp } from "./OpenInJetBrainsApp";
 
 interface RecentProjectProps {
   app: AppHistory;
@@ -31,10 +32,10 @@ export function RecentProject({ app, recent, tools, toolbox }: RecentProjectProp
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInJetBrainsAppAction tool={app} recent={recent} />
-            <ShowInFinderAction path={recent.path} />
-            {recent.exists ? <OpenWithAction path={recent.path} /> : null}
-            <CopyToClipboardAction
+            <OpenInJetBrainsApp tool={app} recent={recent} />
+            <Action.ShowInFinder path={recent.path} />
+            {recent.exists ? <Action.OpenWith path={recent.path} /> : null}
+            <Action.CopyToClipboard
               title="Copy Path"
               content={recent.path}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
@@ -42,7 +43,7 @@ export function RecentProject({ app, recent, tools, toolbox }: RecentProjectProp
           </ActionPanel.Section>
           <ActionPanel.Section>
             {otherTools.map((tool) => (
-              <OpenInJetBrainsAppAction key={`${tool.title}-${recent.path}`} tool={tool} recent={recent} />
+              <OpenInJetBrainsApp key={`${tool.title}-${recent.path}`} tool={tool} recent={recent} />
             ))}
             <OpenJetBrainsToolbox app={toolbox} />
           </ActionPanel.Section>

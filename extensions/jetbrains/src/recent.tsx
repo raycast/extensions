@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Application, getApplications, List } from "@raycast/api";
+import { ActionPanel, Application, getApplications, List, showToast, Toast } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { dirname, resolve } from "path";
@@ -21,7 +21,8 @@ import History from "./.history.json";
 import { HelpTextDetail, tbUrl } from "./components/HelpTextDetail";
 import { OpenJetBrainsToolbox } from "./components/OpenJetBrainsToolbox";
 import { RecentProject } from "./components/RecentProject";
-import { OpenInJetBrainsAppAction } from "./components/OpenInJetBrainsAppAction";
+import { OpenInJetBrainsApp } from "./components/OpenInJetBrainsApp";
+import { AppDrop } from "./components/AppDrop";
 
 const ICON_GLOB = resolve(homedir(), "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns");
 const HISTORY_GLOB = resolve(toolsInstall, "apps/**/.history.json");
@@ -55,7 +56,10 @@ const globFromHistory = (history: History) => {
 const getReadHistoryFile = async (filePath: string) => {
   try {
     return JSON.parse(String(await readFile(filePath)));
-  } catch (e) {
+  } catch (err) {
+    showToast(Toast.Style.Failure, `History lookup for ${filePath} failed with error \n\n ${err}`).catch(() =>
+      console.log(err)
+    );
     return {};
   }
 };
@@ -85,7 +89,7 @@ const getHistory = async () => {
         } as AppHistory;
       })
     )
-  ).filter((history) => history !== null) as AppHistory[];
+  ).filter((entry): entry is AppHistory => Boolean(entry));
 };
 
 const getIcons = async () => {
@@ -121,6 +125,7 @@ interface state {
 }
 
 export default function ProjectList(): JSX.Element {
+  const [filter, setFilter] = useState<string>("");
   const [{ loading, toolboxApp, appHistory }, setState] = useState<state>({
     loading: true,
     toolboxApp: undefined,
@@ -170,29 +175,35 @@ export default function ProjectList(): JSX.Element {
   const defaultActions = (
     <>
       {appHistory.map((tool) => (
-        <OpenInJetBrainsAppAction key={tool.title} tool={tool} recent={null} />
+        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} />
       ))}
       <OpenJetBrainsToolbox app={toolboxApp} />
     </>
   );
 
   return (
-    <List searchBarPlaceholder={`Search recent projects…`} actions={<ActionPanel children={defaultActions} />}>
-      {appHistory.map((app) => (
-        <List.Section title={app.title} key={app.title}>
-          {(app.entries ?? []).map((recent: recentEntry) =>
-            recent?.path ? (
-              <RecentProject
-                key={`${app.title}-${recent.path}`}
-                app={app}
-                recent={recent}
-                tools={appHistory}
-                toolbox={toolboxApp}
-              />
-            ) : null
-          )}
-        </List.Section>
-      ))}
+    <List
+      searchBarPlaceholder={`Search recent projects…`}
+      actions={<ActionPanel children={defaultActions} />}
+      searchBarAccessory={<AppDrop onChange={setFilter} appHistories={appHistory} />}
+    >
+      {appHistory
+        .filter((app) => app.entries?.length && (filter === "" || filter === app.title))
+        .map((app) => (
+          <List.Section title={app.title} key={app.title}>
+            {(app.entries ?? []).map((recent: recentEntry) =>
+              recent?.path ? (
+                <RecentProject
+                  key={`${app.title}-${recent.path}`}
+                  app={app}
+                  recent={recent}
+                  tools={appHistory}
+                  toolbox={toolboxApp}
+                />
+              ) : null
+            )}
+          </List.Section>
+        ))}
     </List>
   );
 }
