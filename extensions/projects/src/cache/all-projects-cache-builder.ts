@@ -21,7 +21,7 @@ export async function buildAllProjectsCache(paths: string[], maxDepth: number): 
       ];
       // Execute command
       const { stdout, stderr } = await execp(
-        `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules"`
+        `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules\\|META-INF"`
       );
 
       if (stderr) {
