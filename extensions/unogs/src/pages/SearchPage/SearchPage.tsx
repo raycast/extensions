@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, Icon } from "@raycast/api";
 import { SearchResultsPage } from "..";
 
 export const SearchPage = () => {
@@ -12,7 +12,7 @@ export const SearchPage = () => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search on Unogs" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.MagnifyingGlass} title="Search on Unogs" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
