@@ -1,20 +1,19 @@
 import { exec } from "child_process";
 import util from "util";
-import fs, { accessSync, existsSync, lstatSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
-import { basename, extname, join, resolve } from "path";
+import fs, { accessSync, existsSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
+import { extname, join, resolve } from "path";
 import { homedir } from "os";
-import { Database } from "sql.js";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
+import fg from "fast-glob";
 
 import {
   FILE_SIZE_UNITS,
-  IGNORED_DIRECTORIES,
+  IGNORED_GLOBS,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
   NON_PREVIEWABLE_EXTENSIONS,
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
-import { insertFile } from "./db";
 import { FileInfo, Preferences } from "./types";
 
 export const fuzzyMatch = (source: string, target: string): number => {
@@ -32,10 +31,7 @@ const isPathReadable = (path: PathLike): boolean => {
     return false;
   }
 };
-const pathExists = (path: PathLike): boolean => isPathReadable(path) && existsSync(path);
-const isDotUnderscore = (path: PathLike) => basename(path.toLocaleString()).startsWith("._");
-const isDirectory = (path: PathLike) => !isDotUnderscore(path) && pathExists(path) && lstatSync(path).isDirectory();
-const isFile = (path: PathLike) => !isDotUnderscore(path) && pathExists(path) && lstatSync(path).isFile();
+export const pathExists = (path: PathLike): boolean => isPathReadable(path) && existsSync(path);
 export const displayPath = (path: PathLike): string => path.toLocaleString().replace(homedir(), "~");
 export const escapePath = (path: PathLike): string => path.toLocaleString().replace(/([^0-9a-z_\-.~/])/gi, "\\$1");
 export const getDriveRootPath = (): string => {
@@ -48,10 +44,10 @@ export const getExcludePaths = (): Array<string> => {
   return preferences.excludePaths
     .split(",")
     .map((p) => p.trim())
-    .map((p) => p.replace("~", homedir()))
-    .map((p) => resolve(p));
+    .filter((p) => p.length > 0)
+    .map((p) => p.replace("~", homedir()));
 };
-const formatBytes = (sizeInBytes: number): string => {
+export const formatBytes = (sizeInBytes: number): string => {
   let unitIndex = 0;
   while (sizeInBytes >= 1024) {
     sizeInBytes /= 1024;
@@ -61,36 +57,7 @@ const formatBytes = (sizeInBytes: number): string => {
   return `${sizeInBytes.toFixed(1)} ${FILE_SIZE_UNITS[unitIndex]}`;
 };
 
-export const getDirectories = (path: PathLike): Array<PathLike> =>
-  readdirSync(path, "utf8")
-    .map((name) => join(path.toLocaleString(), name))
-    .filter(isDirectory)
-    .filter((dir) => !IGNORED_DIRECTORIES.includes(basename(dir)));
-
-export const saveFilesInDirectory = (path: PathLike, db: Database) => {
-  const preferences = getPreferenceValues<Preferences>();
-  const excludePaths = getExcludePaths();
-  readdirSync(path).forEach((file) => {
-    const filePath = join(path.toLocaleString(), file);
-
-    if (!preferences.shouldShowDirectories && !isFile(filePath)) return;
-    if (excludePaths.includes(filePath)) return;
-
-    const fileStats = statSync(filePath);
-
-    insertFile(db, {
-      name: basename(filePath),
-      path: filePath,
-      displayPath: displayPath(filePath),
-      fileSizeFormatted: formatBytes(fileStats.size),
-      createdAt: fileStats.birthtime,
-      updatedAt: fileStats.mtime,
-      favorite: false,
-    });
-  });
-};
-
-const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
+const filePreviewPath = async (file: FileInfo, controller: AbortController): Promise<null | string> => {
   mkdirSync(TMP_FILE_PREVIEWS_PATH, { recursive: true });
 
   if (!pathExists(TMP_FILE_PREVIEWS_PATH)) return null;
@@ -104,7 +71,7 @@ const filePreviewPath = async (file: FileInfo): Promise<null | string> => {
   if (!pathExists(filePreviewPath)) {
     try {
       await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${TMP_FILE_PREVIEWS_PATH}`, {
-        timeout: 500 /* milliseconds */,
+        signal: controller.signal,
         killSignal: "SIGKILL",
       });
     } catch (e) {
@@ -135,8 +102,8 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   if (!pathExists(TMP_FILE_PREVIEWS_PATH)) return;
 
   const sortedFiles = previewFiles.sort((a, b) => {
-    const aStats = statSync(join(TMP_FILE_PREVIEWS_PATH, a));
-    const bStats = statSync(join(TMP_FILE_PREVIEWS_PATH, b));
+    const aStats: fs.Stats = statSync(join(TMP_FILE_PREVIEWS_PATH, a));
+    const bStats: fs.Stats = statSync(join(TMP_FILE_PREVIEWS_PATH, b));
 
     return aStats.atimeMs - bStats.atimeMs;
   });
@@ -157,18 +124,24 @@ export const initialSetup = () => {
   }
 };
 
-export const fileMetadataMarkdown = async (file: FileInfo | null): Promise<string> => {
+export const filePreview = async (file: FileInfo | null, controller: AbortController): Promise<string> => {
   if (!file) {
     return "";
   }
 
-  const previewPath = await filePreviewPath(file);
+  const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
   const previewImage = previewExists ? `<img src="${previewPath}" alt="${file.name}" height="200" />` : "";
 
-  return `
-${previewImage}
+  return previewImage;
+};
 
+export const fileMetadataMarkdown = (file: FileInfo | null): string => {
+  if (!file) {
+    return "";
+  }
+
+  return `
 ## File Information
 **Name**\n
 ${file.name}
@@ -186,10 +159,38 @@ ${file.fileSizeFormatted}
 ---
 
 **Created**\n
-${file.createdAt.toLocaleString()}
+${new Date(file.createdAt).toLocaleString()}
 
 ---
 
 **Updated**\n
-${file.updatedAt.toLocaleString()}`;
+${new Date(file.updatedAt).toLocaleString()}`;
+};
+
+type DriveFileStreamOptions = { stats?: boolean };
+export const driveFileStream = ({ stats = false }: DriveFileStreamOptions = {}) => {
+  const driveRootPath = getDriveRootPath();
+  const preferences = getPreferenceValues<Preferences>();
+
+  const excludePaths = getExcludePaths().concat(IGNORED_GLOBS);
+  return fg.stream([join(driveRootPath, "**")], {
+    ignore: excludePaths,
+    dot: true,
+    suppressErrors: true,
+    objectMode: true,
+    onlyFiles: !preferences.shouldShowDirectories,
+    markDirectories: false,
+    stats,
+  });
+};
+
+export const throttledUpdateToastMessage = ({ toast, interval }: { toast: Toast; interval: number }) => {
+  let lastUpdate = Date.now() - interval;
+
+  return (message: string) => {
+    if (lastUpdate + interval < Date.now()) {
+      toast.message = message;
+      lastUpdate = Date.now();
+    }
+  };
 };

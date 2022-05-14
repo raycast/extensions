@@ -9,7 +9,10 @@
     "Developer Tools",
     "Productivity"
   ],
-  "contributors": ["nametake"],
+  "contributors": [
+    "nametake",
+    "daniel-stoneuk"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -57,12 +60,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
+    "@raycast/api": "^1.34.0",
+    "fast-glob": "^3.2.11",
     "fzf": "^0.5.1",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "^16.11.0",
     "@types/react": "^17.0.28",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

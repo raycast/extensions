@@ -14,6 +14,7 @@ import { runAppleScript } from "run-applescript";
 import { Date } from "sugar";
 
 interface Note {
+  id: string;
   name: string;
   date: Date | null;
   folder: string;
@@ -42,6 +43,7 @@ export default function Command() {
     const lines = result.split("\n");
 
     const notes: Note[] = [];
+    const processedNotes: string[] = [];
     let lastAccount = "";
     let lastFolder = "";
     let lastNote: Note | null = null;
@@ -57,18 +59,26 @@ export default function Command() {
         case "folder":
           lastFolder = value;
           break;
-        case "note":
+        case "id":
           lastNote = {
-            name: value,
-            date: null,
+            id: value,
           } as Note;
+          break;
+        case "name":
+          if (lastNote) {
+            lastNote.name = value;
+          }
           break;
         case "date":
           if (lastNote) {
             lastNote.date = parseDateString(value);
             lastNote.folder = lastFolder;
             lastNote.account = lastAccount;
-            notes.push(lastNote);
+
+            if (!processedNotes.includes(lastNote.id)) {
+              notes.push(lastNote);
+              processedNotes.push(lastNote.id);
+            }
           }
           break;
       }
@@ -111,9 +121,11 @@ export default function Command() {
         "set theFolderName to the name of theFolder\n" +
         'set output to output & "folder: " & theFolderName & "\n"\n' +
         "repeat with theNote in every note in theFolder\n" +
+        "set theNoteID to the id of theNote\n" +
         "set theNoteName to the name of theNote\n" +
         "set theNoteDate to the modification date of theNote\n" +
-        'set output to output & "note: " & theNoteName & "\n"\n' +
+        'set output to output & "id: " & theNoteID & "\n"\n' +
+        'set output to output & "name: " & theNoteName & "\n"\n' +
         'set output to output & "date: " & theNoteDate & "\n"\n' +
         "end repeat\n" +
         "end repeat\n" +
