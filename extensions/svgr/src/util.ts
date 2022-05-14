@@ -1,22 +1,29 @@
+import { readFileSync } from "fs";
 import { Config, transform } from "@svgr/core";
 import jsx from "@svgr/plugin-jsx";
 import svgoPlugin from "@svgr/plugin-svgo";
 import { LocalStorage } from "@raycast/api";
-import { svgrDefaultSettings } from "./constants";
-import svgoConfig from "../.svgorc.json";
+import { svgoDefaultSettings, svgrDefaultSettings } from "./constants";
 
 import type { Props } from "./index";
 
-const getSettings = async () => {
+const getSettings = async (svgoConfigPath: string) => {
   const svgrJSON = await LocalStorage.getItem("svgr");
-  const svgrSettings: Config = svgrJSON && typeof svgrJSON === "string" ? JSON.parse(svgrJSON) : svgrDefaultSettings;
+  const svgrSettings: Config = typeof svgrJSON === "string" ? JSON.parse(svgrJSON) : svgrDefaultSettings;
+  const svgoJSON = readFileSync(svgoConfigPath);
+  const svgoConfig = typeof svgoJSON === "string" ? JSON.parse(svgoJSON) : svgoDefaultSettings;
   return {
     svgrSettings,
+    svgoConfig,
   };
 };
 
-export const getReactSVG = async ({ svg, componentName }: Props) => {
-  const { svgrSettings } = await getSettings();
+interface GetReactSvgProps extends Props {
+  svgoConfigPath: string;
+}
+
+export const getReactSVG = async ({ svg, componentName, svgoConfigPath }: GetReactSvgProps) => {
+  const { svgrSettings, svgoConfig } = await getSettings(svgoConfigPath);
   const plugins = [jsx];
   if (svgrSettings.svgo) {
     plugins.unshift(svgoPlugin);

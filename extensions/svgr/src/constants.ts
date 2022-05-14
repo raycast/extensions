@@ -13,4 +13,16 @@ export const svgrDefaultSettings: Config = {
   exportType: "named",
   jsxRuntime: "classic",
 };
-export const svgoDefaultSettings = {};
+
+export const svgoDefaultSettings = {
+  plugins: [
+    {
+      name: "preset-default",
+      params: {
+        overrides: {
+          removeTitle: false,
+        },
+      },
+    },
+  ],
+};
