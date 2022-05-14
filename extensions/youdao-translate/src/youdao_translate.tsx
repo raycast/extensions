@@ -264,6 +264,25 @@ function Translate(props: { content: string | undefined; from_language: string; 
             ))}
           </List.Section>
         ) : null}
+        {translate_result.basic && translate_result.basic.phonetic ? (
+          <List.Section title="Phonetic">
+            <List.Item
+            key="0"
+            title={`/ ${translate_result.basic.phonetic} /`}
+            icon={{ source: Icon.Dot, tintColor: Color.Green }}
+            actions={
+              <TranslateResultActionPanel
+              copy_content={translate_result.basic.phonetic}
+              url={
+                translate_result.webdict && translate_result.webdict.url
+                ? translate_result.webdict.url
+                : undefined
+              }
+              />
+            }
+            />
+          </List.Section>
+        ) : null}
         {translate_result.basic && translate_result.basic.explains && translate_result.basic.explains.length > 0 ? (
           <List.Section title="Detail">
             {translate_result.basic.explains.map((item: string, index: number) => (
