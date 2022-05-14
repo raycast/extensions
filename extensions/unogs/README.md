@@ -8,7 +8,7 @@ Search for netflix titles on [Unogs](https://unogs.com/). View the title's suppo
 - You can select the free plan which gives you 100 free requests/day.
 - Copy your API key and add it in the extension.
 
-Note: You can still see the API key even without subscribing but it will not work in the extesion.
+Note: You can still see the API key even without subscribing but it will not work in the extension.
 
 ## Usage
 - Once you have added your API key, you can type a name of a Netflix movie or show and submit the first step.
