@@ -3,15 +3,15 @@ import type { Snippet } from "../types";
 
 const getKey = function (snippet: Snippet) {
   const snippet_id = snippet.id;
-  return "LastUsed." + snippet_id;
+  return "LastCopied." + snippet_id;
 };
 
-const storeLastUsed = async function (snippet: Snippet) {
+const storeLastCopied = async function (snippet: Snippet) {
   const itemKey = getKey(snippet);
   await LocalStorage.setItem(itemKey, Date.now());
 };
 
-const getLastUsedMap = async function () {
+const getLastCopiedMap = async function () {
   return await LocalStorage.allItems();
 };
 
@@ -26,12 +26,24 @@ const clearUnusedSnippets = async function (snippets: Snippet[], lastUsedMap: { 
   );
 };
 
-const orderSnippets = function (snippets: Snippet[], orderMap: { [key: string]: number }) {
+const orderSnippets = function (
+  snippets: Snippet[],
+  orderMap: { [key: string]: number },
+  preferences: { [key: string]: string }
+) {
   if (!snippets) {
     return snippets;
   }
 
   if (!orderMap) {
+    return snippets;
+  }
+
+  if (!preferences || !preferences["sort_order"]) {
+    return snippets;
+  }
+
+  if (preferences["sort_order"] != "last_copied") {
     return snippets;
   }
 
@@ -44,4 +56,4 @@ const orderSnippets = function (snippets: Snippet[], orderMap: { [key: string]: 
   return snippets;
 };
 
-export { storeLastUsed, getLastUsedMap, clearUnusedSnippets, orderSnippets };
+export { storeLastCopied, getLastCopiedMap, clearUnusedSnippets, orderSnippets };

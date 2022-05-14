@@ -1,18 +1,19 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, open, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
 import SnippetContent from "./components/snippet-content";
-import { storeLastUsed, getLastUsedMap, clearUnusedSnippets, orderSnippets } from "./utils/localStorageHelper";
+import { storeLastCopied, getLastCopiedMap, clearUnusedSnippets, orderSnippets } from "./utils/localStorageHelper";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
 
   const handleAction = async function (snippet: Snippet) {
-    await storeLastUsed(snippet);
+    await storeLastCopied(snippet);
 
-    const orderMap = await getLastUsedMap();
-    const orderedSnippets = orderSnippets(state.snippets!, orderMap);
+    const preferences = await getPreferenceValues();
+    const orderMap = await getLastCopiedMap();
+    const orderedSnippets = orderSnippets(state.snippets!, orderMap, preferences);
 
     setState((previous) => ({ ...previous, snippets: orderedSnippets }));
   };
@@ -23,9 +24,10 @@ export default function Command() {
         const { data } = await axios.get<Snippet[]>("http://localhost:3033/snippets/embed-folder");
         const snippets = data.filter((i) => !i.isDeleted);
 
-        const lastUsedMap = await getLastUsedMap();
-        await clearUnusedSnippets(snippets, lastUsedMap);
-        const orderedSnippets = orderSnippets(snippets, lastUsedMap);
+        const preferences = await getPreferenceValues();
+        const lastCopiedMap = await getLastCopiedMap();
+        await clearUnusedSnippets(snippets, lastCopiedMap);
+        const orderedSnippets = orderSnippets(snippets, lastCopiedMap, preferences);
 
         setState((previous) => ({ ...previous, snippets: orderedSnippets }));
       } catch (err) {

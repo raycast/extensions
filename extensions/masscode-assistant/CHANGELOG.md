@@ -10,7 +10,7 @@
 
 ### Features
 
-- Order snippets by last used
+- Order snippets by last copied
 
 ## [1.1.0] - 2022-05-09
 
