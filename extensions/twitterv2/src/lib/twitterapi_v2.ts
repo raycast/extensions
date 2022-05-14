@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
-import { TwitterApi, TwitterV2IncludesHelper } from "twitter-api-v2";
+import {
+  TweetUserTimelineV2Paginator,
+  TwitterApi,
+  TwitterV2IncludesHelper,
+  UserV2,
+  UserV2Result,
+} from "twitter-api-v2";
 import { authorize, getOAuthTokens } from "./oauth";
 import { Tweet, User } from "./twitter";
 import { getErrorMessage } from "./utils";
+
+function twitterUserToUser(result: UserV2): User {
+  const u: User = {
+    id: result.id,
+    name: result.name,
+    username: result.username,
+    profile_image_url: result.profile_image_url,
+  };
+  return u;
+}
 
 export class ClientV2 {
   private userCache: Record<string, User> = {};
@@ -23,14 +39,26 @@ export class ClientV2 {
     const api = await this.getAPI();
     console.log("get user");
     const r = await api.v2.user(userId, { "user.fields": ["profile_image_url"] });
-    const u: User = {
-      id: r.data.id,
-      name: r.data.name,
-      username: r.data.username,
-      profile_image_url: r.data.profile_image_url,
-    };
+    const u = twitterUserToUser(r.data);
     this.userCache[userId] = u;
     return u;
+  }
+
+  async prefetchUserAccounts(tweetsRaw: TweetUserTimelineV2Paginator): Promise<void> {
+    const userIDs: string[] = [];
+    for (const t of tweetsRaw) {
+      if (t.author_id && !(t.author_id in this.userCache)) {
+        userIDs.push(t.author_id);
+      }
+    }
+    if (userIDs.length > 0) {
+      const api = await this.getAPI();
+      const usersRaw = await api.v2.users(userIDs, { "user.fields": ["profile_image_url"] });
+      for (const ru of usersRaw.data) {
+        const u = twitterUserToUser(ru);
+        this.userCache[u.id] = u;
+      }
+    }
   }
 
   async me(): Promise<User> {
@@ -58,27 +86,20 @@ export class ClientV2 {
   async getTweetsFromAuthor(authorID: string): Promise<Tweet[]> {
     const api = await this.getAPI();
     const tweetsRaw = await api.v2.userTimeline(authorID, {
-      max_results: 10,
-      "tweet.fields": [
-        "public_metrics",
-        "author_id",
-        "attachments",
-        "created_at",
-        "id",
-        "entities",
-        "conversation_id"
-      ],
+      max_results: 20,
+      "tweet.fields": ["public_metrics", "author_id", "attachments", "created_at", "id", "entities", "conversation_id"],
       "media.fields": ["url", "type", "media_key", "preview_image_url"],
       expansions: [
         "attachments.media_keys",
         "author_id",
         "in_reply_to_user_id",
         "entities.mentions.username",
-        "referenced_tweets.id"
+        "referenced_tweets.id",
       ],
     });
     const includes = new TwitterV2IncludesHelper(tweetsRaw);
     const tweets: Tweet[] = [];
+    await this.prefetchUserAccounts(tweetsRaw);
     for (const t of tweetsRaw) {
       const media = includes.medias(t);
       let image_url: string | undefined = undefined;
