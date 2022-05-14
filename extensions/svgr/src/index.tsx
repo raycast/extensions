@@ -43,7 +43,8 @@ export default function Command() {
 
   const handleClearLocalStorage = async () => {
     await LocalStorage.removeItem("svgr");
-    await showToast({ title: "Local Storage", message: "Success! Local storage cleared" });
+    await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
+    await showToast({ title: "Restore Default Settings", message: "Success! Default Settings Restored." });
   };
 
   return (

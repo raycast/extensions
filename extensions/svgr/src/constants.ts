@@ -1,4 +1,5 @@
-import { Config } from "@svgr/core";
+import type { Config } from "@svgr/core";
+
 export const svgrDefaultSettings: Config = {
   dimensions: true,
   icon: true,
