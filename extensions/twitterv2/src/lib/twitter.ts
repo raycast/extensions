@@ -11,6 +11,7 @@ export interface Tweet {
   text: string;
   source: string;
   created_at: string | undefined;
+  conversation_id: string | undefined;
   image_url?: string | undefined;
   user: User;
   quote_count?: number;

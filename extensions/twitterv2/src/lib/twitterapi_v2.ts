@@ -59,14 +59,22 @@ export class ClientV2 {
     const api = await this.getAPI();
     const tweetsRaw = await api.v2.userTimeline(authorID, {
       max_results: 10,
-      "tweet.fields": ["public_metrics", "author_id", "attachments", "created_at", "id", "entities"],
+      "tweet.fields": [
+        "public_metrics",
+        "author_id",
+        "attachments",
+        "created_at",
+        "id",
+        "entities",
+        "conversation_id"
+      ],
       "media.fields": ["url", "type", "media_key", "preview_image_url"],
       expansions: [
         "attachments.media_keys",
         "author_id",
         "in_reply_to_user_id",
         "entities.mentions.username",
-        "referenced_tweets.id",
+        "referenced_tweets.id"
       ],
     });
     const includes = new TwitterV2IncludesHelper(tweetsRaw);
@@ -89,6 +97,7 @@ export class ClientV2 {
         id: t.id,
         text: t.text,
         created_at: t.created_at,
+        conversation_id: t.conversation_id,
         source: t.source || "",
         image_url: image_url,
         user: await this.getUserAccount(t.author_id),
