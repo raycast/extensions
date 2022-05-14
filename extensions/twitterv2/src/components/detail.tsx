@@ -20,6 +20,9 @@ export function getMarkdownFromTweet(tweet: Tweet): string {
   if (t.image_url) {
     parts.push(`![${t.image_url}](${t.image_url})`);
   }
+  if (t.created_at) {
+    parts.push(`\`${new Date(t.created_at).toLocaleString()}\``);
+  }
   parts.push(states.join("   "));
   const md = parts.join("\n\n");
   return md;

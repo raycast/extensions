@@ -76,7 +76,11 @@ export class ClientV2 {
       let image_url: string | undefined = undefined;
       if (media && media.length > 0) {
         const m = media[0];
-        image_url = m.preview_image_url;
+        if (m.type === "animated_gif" || m.type === "video") {
+          image_url = m.preview_image_url;
+        } else {
+          image_url = m.url;
+        }
       }
       if (!t.author_id) {
         continue;
@@ -84,6 +88,7 @@ export class ClientV2 {
       const nt: Tweet = {
         id: t.id,
         text: t.text,
+        created_at: t.created_at,
         source: t.source || "",
         image_url: image_url,
         user: await this.getUserAccount(t.author_id),

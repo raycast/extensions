@@ -10,6 +10,7 @@ export interface Tweet {
   id: string;
   text: string;
   source: string;
+  created_at: string | undefined;
   image_url?: string | undefined;
   user: User;
   quote_count?: number;
