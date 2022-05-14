@@ -1,10 +1,17 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, useNavigation } from "@raycast/api";
 import type { Config } from "@svgr/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function Settings({ settings }: { settings: Config }) {
-  const [settingsState, setSettingsState] = useState(settings);
+export default function Settings() {
+  const [settingsState, setSettingsState] = useState<Config | Record<string, never>>({});
   const { pop } = useNavigation();
+
+  useEffect(() => {
+    (async () => {
+      const localSvgrSettings = await LocalStorage.getItem("svgr");
+      if (typeof localSvgrSettings === "string") setSettingsState(JSON.parse(localSvgrSettings));
+    })();
+  }, []);
 
   const handleSave = async () => {
     await LocalStorage.removeItem("svgr");
@@ -14,7 +21,7 @@ export default function Settings({ settings }: { settings: Config }) {
   };
 
   const handleCheck = (key: string, value: string | boolean) => {
-    setSettingsState((settingsState) => ({
+    setSettingsState((settingsState: Config) => ({
       ...settingsState,
       [key]: value,
     }));
@@ -31,15 +38,16 @@ export default function Settings({ settings }: { settings: Config }) {
       >
         <Form.Description text="SVGR Settings" />
         {Object.keys(settingsState).map((key) => {
-          const value = settings[key as keyof Config];
+          const value = settingsState[key as keyof Config];
           if (typeof value === "boolean") {
             return (
               <Form.Checkbox
                 key={key}
                 id={key}
+                title={`${value}`}
                 label={key}
                 onChange={(value) => handleCheck(key, value)}
-                defaultValue={value}
+                value={value}
               />
             );
           }
@@ -52,7 +60,7 @@ export default function Settings({ settings }: { settings: Config }) {
                     title={key}
                     id={key}
                     onChange={(value) => handleCheck(key, value)}
-                    defaultValue={value}
+                    value={value}
                   >
                     {["end", "start", "none"].map((item) => (
                       <Form.Dropdown.Item key={item} value={item} title={item} />
@@ -66,7 +74,7 @@ export default function Settings({ settings }: { settings: Config }) {
                     title={key}
                     id={key}
                     onChange={(value) => handleCheck(key, value)}
-                    defaultValue={value}
+                    value={value}
                   >
                     {["named", "export"].map((item) => (
                       <Form.Dropdown.Item key={item} value={item} title={item} />
@@ -80,7 +88,7 @@ export default function Settings({ settings }: { settings: Config }) {
                     title={key}
                     id={key}
                     onChange={(value) => handleCheck(key, value)}
-                    defaultValue={value}
+                    value={value}
                   >
                     {["classic", "classic-preact", "automatic"].map((item) => (
                       <Form.Dropdown.Item key={item} value={item} title={item} />

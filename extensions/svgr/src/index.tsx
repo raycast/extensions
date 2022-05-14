@@ -9,27 +9,23 @@ import {
   closeMainWindow,
   Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Settings from "./components/Settings";
 import { getReactSVG } from "./util";
 import { svgrDefaultSettings } from "./constants";
-import { Config } from "@svgr/core";
 
 export interface Props {
   componentName: string;
   svg: string;
-  svgo: boolean;
 }
 
 export default function Command() {
-  const [svgrSettings, setSvgrSettings] = useState<Config>(svgrDefaultSettings);
-
   useEffect(() => {
     (async () => {
       const localSvgrSettings = await LocalStorage.getItem("svgr");
-      if (localSvgrSettings && typeof localSvgrSettings === "string")
-        return setSvgrSettings(JSON.parse(localSvgrSettings));
-      await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
+      if (!localSvgrSettings) {
+        await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
+      }
     })();
   }, []);
 
@@ -56,7 +52,7 @@ export default function Command() {
         <ActionPanel title="SVGR Actions">
           <Action.SubmitForm icon={Icon.Clipboard} title="Copy to Clipboard" onSubmit={handleCopy} />
           <Action.SubmitForm icon={Icon.Clipboard} title="Paste in Active App" onSubmit={handlePaste} />
-          <Action.Push icon={Icon.Gear} title="Customize SVGR Settings" target={<Settings settings={svgrSettings} />} />
+          <Action.Push icon={Icon.Gear} title="Customize SVGR Settings" target={<Settings />} />
           <Action.SubmitForm icon={Icon.Trash} title="Restore Default Settings" onSubmit={handleClearLocalStorage} />
         </ActionPanel>
       }
