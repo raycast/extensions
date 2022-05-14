@@ -1,4 +1,5 @@
 export interface SourceRepo {
+  id: string;
   name: string;
   fullPath: string;
   icon: string;

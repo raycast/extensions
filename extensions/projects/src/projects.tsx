@@ -1,7 +1,6 @@
 import { getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, ReactElement } from "react";
 import { SearchProjectActionPanel } from "./action-panel";
-import { getRepoKey } from "./common-utils";
 import { Preferences } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
 
@@ -32,7 +31,7 @@ export default function Main(): ReactElement {
         {response?.pinned?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"pinned:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
@@ -47,7 +46,7 @@ export default function Main(): ReactElement {
         {response?.recent?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"recent:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
@@ -61,7 +60,7 @@ export default function Main(): ReactElement {
         {response?.all?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"all:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}

@@ -116,11 +116,13 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3"
+    "@raycast/api": "^1.30.3",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^16.10.0",
     "@types/react": "^17.0.15",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
