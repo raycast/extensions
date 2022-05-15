@@ -3,16 +3,16 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { Config, transform } from "@svgr/core";
 import jsx from "@svgr/plugin-jsx";
 import svgoPlugin from "@svgr/plugin-svgo";
-import { svgoDefaultSettings, svgrDefaultSettings } from "../constants";
+import { SVGO_DEFAULT, SVGR_DEFAULT } from "../constants";
 
 import type { OptimizeOptions } from "svgo";
 import type { SvgrProps } from "../index";
 
 const getSettings = async (svgoConfigPath: string) => {
   const svgrJSON = await LocalStorage.getItem("svgr");
-  const svgrSettings: Config = typeof svgrJSON === "string" ? JSON.parse(svgrJSON) : svgrDefaultSettings;
+  const svgrSettings: Config = typeof svgrJSON === "string" ? JSON.parse(svgrJSON) : SVGR_DEFAULT;
   const svgoJSON = readFileSync(svgoConfigPath);
-  const svgoConfig: OptimizeOptions = typeof svgoJSON === "string" ? JSON.parse(svgoJSON) : svgoDefaultSettings;
+  const svgoConfig: OptimizeOptions = typeof svgoJSON === "string" ? JSON.parse(svgoJSON) : SVGO_DEFAULT;
   return {
     svgrSettings,
     svgoConfig,

@@ -1,7 +1,7 @@
 import type { Config } from "@svgr/core";
 import type { OptimizeOptions } from "svgo";
 
-export const svgrDefaultSettings: Config = {
+export const SVGR_DEFAULT: Config = {
   dimensions: true,
   icon: true,
   memo: false,
@@ -15,7 +15,7 @@ export const svgrDefaultSettings: Config = {
   jsxRuntime: "classic",
 };
 
-export const svgoDefaultSettings: OptimizeOptions = {
+export const SVGO_DEFAULT: OptimizeOptions = {
   plugins: [
     {
       name: "preset-default",

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import Settings from "./components/Settings";
 import getReactSVG from "./functions/getReactSvg";
-import { svgrDefaultSettings, svgoDefaultSettings } from "./constants";
+import { SVGR_DEFAULT, SVGO_DEFAULT } from "./constants";
 import useInitSettings from "./hooks/useInitSettings";
 
 export interface SvgrProps {
@@ -50,7 +50,7 @@ export default function Command() {
       icon: Icon.Trash,
     });
     if (confirmed) {
-      writeFileSync(svgoConfigPath, JSON.stringify(svgoDefaultSettings));
+      writeFileSync(svgoConfigPath, JSON.stringify(SVGO_DEFAULT));
       await showToast({ title: "Restore Default SVGO Settings", message: "Success!" });
     }
   };
@@ -63,7 +63,7 @@ export default function Command() {
     });
     if (confirmed) {
       await LocalStorage.removeItem("svgr");
-      await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
+      await LocalStorage.setItem("svgr", JSON.stringify(SVGR_DEFAULT));
       await showToast({ title: "Restore Default SVGR Settings", message: "Success!" });
     }
   };
