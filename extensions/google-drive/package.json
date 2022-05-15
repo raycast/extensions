@@ -64,6 +64,7 @@
       "description": "The recurring interval to reindex the cached files in Google Drive folder",
       "type": "dropdown",
       "default": "604800000",
+      "required": false,
       "data": [
         {
           "title": "Every hour",
