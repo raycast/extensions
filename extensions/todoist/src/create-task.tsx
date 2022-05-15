@@ -102,7 +102,7 @@ export default withOAuth()(function CreateTask() {
         onAction: () => open(url),
       };
       clear();
-      titleField.current.focus();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
