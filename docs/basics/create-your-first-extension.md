@@ -24,7 +24,7 @@ Open your terminal, navigate to your extension directory and run `npm install &&
 
 ## Develop your extension
 
-To make changes to your extension, open the `./src/search-documentation.tsx` file in your extension directory, change the `markdown` text and save it. Then, open your command in Raycast again and see your changes.
+To make changes to your extension, open the `./src/index.tsx` file in your extension directory, change the `markdown` text and save it. Then, open your command in Raycast again and see your changes.
 
 {% hint style="info" %}
 `npm run dev` starts the extension in development mode with hot reloading, error reporting and [more](../information/cli.md#development).

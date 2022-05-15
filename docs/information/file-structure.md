@@ -18,7 +18,7 @@ extension
 ├── package-lock.json
 ├── package.json
 ├── src
-│   └── search-documentation.tsx
+│   └── index.tsx
 └── tsconfig.json
 ```
 
