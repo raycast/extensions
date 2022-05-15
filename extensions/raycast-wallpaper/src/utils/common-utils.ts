@@ -1,26 +1,33 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import fs, { existsSync } from "fs";
+import fse, { existsSync } from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import { RaycastWallpaper } from "./raycast-wallpaper-utils";
 import Values = LocalStorage.Values;
+import { homedir } from "os";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
+    picturesDirectory: preferencesMap.get("picturesDirectory") as string,
     applyTo: preferencesMap.get("applyTo") as string,
-    screenshotName: preferencesMap.get("screenshotName") as string,
-    screenshotFormat: preferencesMap.get("screenshotFormat") as string,
   };
 };
 export const cachePath = environment.supportPath;
 
-export const checkDirectoryExists = (filePath: string) => {
-  try {
-    fs.accessSync(filePath);
-    return true;
-  } catch (e) {
-    return false;
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
+export const getScreenshotsDirectory = () => {
+  const directoryPreference = preferences().picturesDirectory;
+  let actualDirectory = directoryPreference;
+  if (directoryPreference.startsWith("~")) {
+    actualDirectory = directoryPreference.replace("~", `${homedir()}`);
   }
+  if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
+    return homedir() + "/Downloads";
+  }
+  return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
 };
 
 export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
@@ -87,16 +94,16 @@ export const buildCachePath = (wallpaper: RaycastWallpaper) => {
 
 export const checkCache = (wallpaper: RaycastWallpaper) => {
   const fixedPathName = buildCachePath(wallpaper);
-  return checkDirectoryExists(fixedPathName);
+  return fse.pathExistsSync(fixedPathName);
 };
 
 export function deleteCache() {
   const pathName = environment.supportPath;
-  if (fs.existsSync(pathName)) {
-    const files = fs.readdirSync(pathName);
+  if (fse.existsSync(pathName)) {
+    const files = fse.readdirSync(pathName);
     files.forEach(function (file) {
       const curPath = pathName + "/" + file;
-      fs.unlinkSync(curPath);
+      fse.removeSync(curPath);
     });
   }
 }

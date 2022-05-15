@@ -1,5 +1,6 @@
 import { ActionPanel, PushAction, Color, Icon } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
+import { PullRequestsList } from "./pullRequestsList";
 
 export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
   return (
@@ -8,6 +9,17 @@ export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "p" }}
+    />
+  );
+}
+
+export function ShowPullRequestsActions(props: { repo: any }): JSX.Element {
+  return (
+    <PushAction
+      title="Show pull requests"
+      target={<PullRequestsList repo={props.repo} pageNumber={1} />}
+      icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
     />
   );
 }

@@ -15,6 +15,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [{
+    "name": "indent",
+    "title": "Indentation",
+    "description": "Output file indentation",
+    "type": "dropdown",
+    "required": false,
+    "data": [{
+      "title": "Tab",
+      "value": "tab"
+    }, {
+      "title": "Spaces: 2",
+      "value": "2"
+    }, {
+      "title": "Spaces: 4",
+      "value": "4"
+    }, {
+      "title": "Spaces: 8",
+      "value": "8"
+    }]
+  }],
   "dependencies": {
     "@raycast/api": "^1.28.0"
   },

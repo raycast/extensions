@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anybox",
+  "title": "Anybox",
+  "description": "Control Anybox with Raycast",
+  "icon": "anybox-icon.png",
+  "author": "francisfeng",
+  "keywords": [
+    "anybox",
+    "bookmarks"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quickSave",
+      "title": "Show Quick Save",
+      "subtitle": "Anybox",
+      "description": "Show Quick Save Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "saveCurrentTab",
+      "title": "Save Current Tab",
+      "subtitle": "Anybox",
+      "description": "Save Current Tab’s URL to Anybox.",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste",
+      "title": "Save Clipboard",
+      "subtitle": "Anybox",
+      "description": "Save Clipboard to Anybox",
+      "mode": "no-view"
+    },
+    {
+      "name": "saveNote",
+      "title": "Save Note",
+      "subtitle": "Anybox",
+      "description": "Save Note to Anybox with Optional Collections",
+      "preferences": [
+        {
+          "name": "autoFill",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Auto Fill with Clipboard Text",
+          "description": "If checked, the note field will be filled with clipboard text."
+        },
+        {
+          "name": "starred",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Starred",
+          "description": "If checked, the note will be starred by default."
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "toggleAnydock",
+      "title": "Toggle Anydock",
+      "subtitle": "Anybox",
+      "description": "Toggle Anydock’s visibility.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleStashbox",
+      "title": "Toggle Stash Box",
+      "subtitle": "Anybox",
+      "description": "Toggle Stash Box’s visibility.",
+      "mode": "no-view"
+    },
+    {
+      "name": "emptyStashbox",
+      "title": "Empty Stash Box",
+      "subtitle": "Anybox",
+      "description": "Delete all items in Stash Box.",
+      "mode": "no-view"
+    },
+    {
+      "name": "switchAnydock",
+      "title": "Switch Anydock Profile",
+      "subtitle": "Anybox",
+      "description": "Switch Anydock Profile.",
+      "mode": "view"
+    },
+    {
+      "name": "openAnydock",
+      "title": "Open All in Anydock Profile",
+      "subtitle": "Anybox",
+      "description": "Open all items in specific Anydock Profile.",
+      "mode": "view"
+    },
+    {
+      "name": "showList",
+      "title": "Show List",
+      "subtitle": "Anybox",
+      "description": "Open Anybox’s main window and show list.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.2",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

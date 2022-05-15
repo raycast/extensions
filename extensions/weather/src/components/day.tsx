@@ -49,9 +49,16 @@ export function DayList(props: { day: WeatherData; title: string }) {
             title={`${getTime(data.time)}`}
             subtitle={`${getTemp(data)} , ${getWeatherDesc(data)}`}
             icon={getIcon(data.weatherCode)}
-            accessoryTitle={`humidity: ${data.humidity}% | wind: ${getWind(data)} ${getWindDirectionIcon(
-              data.winddirDegree
-            )}`}
+            accessories={[
+              {
+                icon: "💧",
+                text: `${data.humidity}%`,
+              },
+              {
+                icon: "💨",
+                text: `${getWind(data)} ${getWindDirectionIcon(data.winddirDegree)}`,
+              },
+            ]}
           />
         ))}
       </List.Section>

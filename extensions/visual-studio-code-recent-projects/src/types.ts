@@ -7,7 +7,7 @@ export interface FileEntry {
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
   const { fileUri } = entry as FileEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri));
+  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") === -1;
 }
 
 export interface FolderEntry {
@@ -20,14 +20,12 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
 }
 
 export interface WorkspaceEntry {
-  workspace: {
-    configPath: string;
-  };
+  fileUri: string;
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  const { workspace } = entry as WorkspaceEntry;
-  return workspace !== undefined && workspace.configPath !== undefined && existsSync(new URL(workspace.configPath));
+  const { fileUri } = entry as WorkspaceEntry;
+  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") !== -1;
 }
 
 export interface RemoteEntry {
@@ -49,4 +47,30 @@ export enum VSCodeBuild {
 }
 export interface Preferences {
   build: VSCodeBuild;
+}
+
+export const recentOpenedLabel = "Open &&Recent";
+export enum RecentOpenedItemId {
+  Folder = "openRecentFolder",
+  File = "openRecentFile",
+  Workspace = "openRecentWorkspace",
+  Other = "useless",
+}
+
+interface RecentOpenItem {
+  id: RecentOpenedItemId.Folder | RecentOpenedItemId.File | RecentOpenedItemId.Workspace;
+  uri: {
+    path: string;
+    scheme: string;
+  };
+  enabled: boolean;
+  label: string;
+}
+
+export interface lastKnownMenubarItems {
+  id: string;
+  label: string;
+  submenu?: {
+    items: Array<RecentOpenItem>;
+  };
 }
