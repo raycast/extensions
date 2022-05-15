@@ -1,4 +1,5 @@
 import { closeMainWindow, open } from "@raycast/api";
+import formatDistance from "date-fns/formatDistance";
 
 // https://api.slack.com/reference/deep-linking
 const openChat = (workspaceId: string, userId: string) => {
@@ -9,6 +10,17 @@ const openChat = (workspaceId: string, userId: string) => {
 const openChannel = (workspaceId: string, channelId: string) => {
   open(`slack://channel?team=${workspaceId}&id=${channelId}`);
   closeMainWindow();
+};
+
+const timeDifference = (date: Date): string => {
+  const now = new Date();
+
+  const nowMs = now.getTime();
+  const dateMs = date.getTime();
+
+  const distance = formatDistance(nowMs, dateMs, { includeSeconds: true });
+
+  return dateMs <= nowMs ? `${distance} ago` : `in ${distance}`;
 };
 
 const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: string): string => {
@@ -37,4 +49,4 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
     end tell`;
 };
 
-export { openChat, openChannel, buildScriptEnsuringSlackIsRunning };
+export { openChat, openChannel, timeDifference, buildScriptEnsuringSlackIsRunning };

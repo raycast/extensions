@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { GroupList } from "./components/groups";
 
-render(<GroupList />);
+export default function MyGroupsRoot(): JSX.Element {
+  return <GroupList />;
+}

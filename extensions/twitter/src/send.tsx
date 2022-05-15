@@ -1,4 +1,6 @@
-import { render } from "@raycast/api";
-import { TweetSendForm } from "./components/send";
+import { ReactElement } from "react";
+import { TweetSendThreadForm } from "./components/send";
 
-render(<TweetSendForm />);
+export default function SendTweetRoot(): ReactElement {
+  return <TweetSendThreadForm />;
+}

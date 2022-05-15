@@ -10,11 +10,11 @@ The full source code of the example can be found [here](https://github.com/rayca
 
 In this example we use a form to collect inputs from a user. To make it interesting, we use [Doppler](http://share.doppler.com) which is a service to make it easy to securely share sensitive information such as API keys or passwords.
 
-![Example: Safely share secrets with Doppler](<../.gitbook/assets/example-doppler-share-secrets (1).png>)
+![Example: Safely share secrets with Doppler](../.gitbook/assets/example-doppler-share-secrets.png)
 
 The extension has one command. The command is a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
 
-### Add form items
+## Add form items
 
 First, we render the static form. For this we add all the mentioned form items:
 
@@ -55,7 +55,7 @@ export default function Command() {
 
 Both dropdowns set the `storeValue` to true. This restores the last selected value when the command is opened again. This option is handy when your users select the same options often. In this case, we assume that users want to keep the expiration settings persisted.
 
-### Submit form values
+## Submit form values
 
 Now that we have the form, we want to collect the inserted values, send them to Doppler and copy the URL that allows us to share the information securely. For this, we create a new action:
 
@@ -116,15 +116,15 @@ function ShareSecretAction() {
 
 Let's break this down:
 
-* The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#submitform).
-* The `handleSubmit()` gets called when the form is submitted with it's values.
-  * First we check if the user entered a secret. If not, we show a toast.
-  * Then we show a toast to hint that there is a network call in progress to share the secret.
-  * We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values
-    * If the network response succeds, we copy the authenticated URL to the clipboard and show a success toast.
-    * If the network response fails, we show a failure toast with additional information about the failure.
+- The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#action.submitform).
+- The `handleSubmit()` gets called when the form is submitted with it's values.
+  - First we check if the user entered a secret. If not, we show a toast.
+  - Then we show a toast to hint that there is a network call in progress to share the secret.
+  - We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values
+    - If the network response succeeds, we copy the authenticated URL to the clipboard and show a success toast.
+    - If the network response fails, we show a failure toast with additional information about the failure.
 
-### Wire it up
+## Wire it up
 
 The last step is to add the `<ShareSecretAction>` to the form:
 

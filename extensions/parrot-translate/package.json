@@ -264,6 +264,15 @@
             "default": "MIbu7DGsOPdbatL9KmgycGx0qDOzQWCM"
         },
         {
+            "title": "Delay Fetch Translate API Time",
+            "name": "delayFetchTranslateAPITime",
+            "type": "textfield",
+            "required": false,
+            "default": "400",
+            "description": "Delay fetch translate API",
+            "placeholder": "Range 50-600ms, default 400ms"
+        },
+        {
             "title": "Others",
             "name": "isAutomaticPaste",
             "type": "checkbox",

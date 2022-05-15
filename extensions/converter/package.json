@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "converter",
+  "title": "Converter",
+  "description": "Arbitrary input, direct output. Includes Base converter, Code converter, etc.",
+  "icon": "converter-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "base-converter",
+      "title": "Base Converter",
+      "icon": "base-converter-icon.png",
+      "description": "Convert number from any base to any base: decimal, binary, octal, hexadecimal, etc.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "advanceView",
+          "type": "checkbox",
+          "required": false,
+          "label": "Advance View",
+          "description": "In the advanced view, you can freely choose the bases of mutual conversion.",
+          "default": true
+        },
+        {
+          "name": "advanceViewLocation",
+          "title": "Advance View Location",
+          "description": "Select the location of the advanced view: top or bottom.",
+          "type": "dropdown",
+          "default": "Bottom",
+          "data": [
+            {
+              "title": "Top",
+              "value": "Top"
+            },
+            {
+              "title": "Bottom",
+              "value": "Bottom"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "code-converter",
+      "title": "Code Converter",
+      "icon": "code-converter-icon.png",
+      "description": "Convert between different character encodings: Unicode, Base64, UTF-8, ASCII, &#xXXXX, URL.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoDetect",
+      "type": "checkbox",
+      "required": false,
+      "label": "Auto Detect",
+      "description": "Automatically detects selected text or clipboard when opening commands.",
+      "default": true
+    },
+    {
+      "name": "priorityDetection",
+      "type": "dropdown",
+      "required": false,
+      "title": "Priority detection",
+      "description": "Priority detection of selected text or clipboard.",
+      "default": "selected",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard Text",
+          "value": "clipboard"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

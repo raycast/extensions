@@ -1,13 +1,4 @@
-import {
-  Form,
-  SubmitFormAction,
-  ActionPanel,
-  FormValues,
-  Icon,
-  showToast,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
+import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   Database,
@@ -36,7 +27,7 @@ export function DatabaseViewForm(props: {
 
   // On form submit function
   const { pop } = useNavigation();
-  async function handleSubmit(values: FormValues) {
+  async function handleSubmit(values: Form.Values) {
     const newDatabaseView = {
       properties: databaseView?.properties ? databaseView.properties : {},
       sort_by: databaseView?.sort_by ? databaseView.sort_by : {},
@@ -57,7 +48,9 @@ export function DatabaseViewForm(props: {
 
     saveDatabaseView(newDatabaseView);
 
-    showToast(ToastStyle.Success, "View Updated");
+    showToast({
+      title: "View Updated",
+    });
     pop();
   }
 
@@ -131,11 +124,11 @@ export function DatabaseViewForm(props: {
         switch (viewType) {
           case "kanban":
             if (!hasSelect) {
-              showToast(
-                ToastStyle.Failure,
-                "Select Property Required",
-                'Kanban view requires a "Select" type property.'
-              );
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Select Property Required",
+                message: 'Kanban view requires a "Select" type property.',
+              });
               setViewForm(undefined);
             }
 
@@ -164,7 +157,7 @@ export function DatabaseViewForm(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <SubmitFormAction title="Save View" icon={Icon.Plus} onSubmit={handleSubmit} />
+            <Action.SubmitForm title="Save View" icon={Icon.Plus} onSubmit={handleSubmit} />
           </ActionPanel.Section>
         </ActionPanel>
       }

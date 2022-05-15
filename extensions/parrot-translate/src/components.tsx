@@ -115,9 +115,9 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
                 <ActionPanel.Section title="Target Language">
                     {LANGUAGE_LIST.map((region) => {
                         const isCurrentFromLanguage = this.props.currentFromLanguage?.languageId === region.languageId
-                        const isCurrentTargetLanguage =
-                            this.props.currentTargetLanguage?.languageId === region.languageId
-                        if (isCurrentFromLanguage || isCurrentTargetLanguage) return null
+                        // const isCurrentTargetLanguage =
+                        //     this.props.currentTargetLanguage?.languageId === region.languageId
+                        if (isCurrentFromLanguage) return null
 
                         return (
                             <Action

@@ -1,10 +1,22 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  List,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { RaycastWallpaper, raycastWallpaperListURL } from "./utils/raycast-wallpaper-utils";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import * as fs from "fs";
 import { homedir } from "os";
-import { buildCachePath, checkCache, deleteCache, setWallpaper } from "./utils/common-utils";
+import { buildCachePath, checkCache, deleteCache, getScreenshotsDirectory, setWallpaper } from "./utils/common-utils";
 import fileUrl from "file-url";
 
 export default function CommonDirectory() {
@@ -15,10 +27,10 @@ export default function CommonDirectory() {
       //get wallpaper list
       try {
         fetch(raycastWallpaperListURL)
-          .then((first_res) => first_res.json())
-          .then((first_data) => {
+          .then((response) => response.json())
+          .then((data) => {
             //cache wallpaper list
-            const _raycastWallpaper = first_data as RaycastWallpaper[];
+            const _raycastWallpaper = data as RaycastWallpaper[];
             setRaycastWallpaper(_raycastWallpaper);
             _raycastWallpaper.forEach((value) => {
               if (!checkCache(value)) {
@@ -40,7 +52,7 @@ export default function CommonDirectory() {
   }, []);
 
   return (
-    <List isShowingDetail={true} isLoading={raycastWallpaper.length === 0} searchBarPlaceholder={"Search WallPaper"}>
+    <List isShowingDetail={true} isLoading={raycastWallpaper.length === 0} searchBarPlaceholder={"Search pictures"}>
       {raycastWallpaper.map((value, index) => {
         return (
           <List.Item
@@ -70,43 +82,45 @@ export default function CommonDirectory() {
                     await downloadPicture(value);
                   }}
                 />
-                <Action
-                  icon={Icon.TwoArrowsClockwise}
-                  title={"Set Random Wallpaper"}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => {
-                    const randomImage = raycastWallpaper[Math.floor(Math.random() * raycastWallpaper.length)];
-                    setWallpaper(randomImage).then(() => "");
-                  }}
-                />
-                <Action
-                  icon={Icon.Globe}
-                  title={"Go to Raycast Wallpaper"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "g" }}
-                  onAction={async () => {
-                    await open("https://www.raycast.com/wallpapers");
-                    await showHUD("Go to Raycast Wallpaper");
-                  }}
-                />
-                <Action
-                  icon={Icon.Trash}
-                  title={"Clear Wallpaper Cache"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
-                  onAction={async () => {
-                    const options: Alert.Options = {
-                      title: "Are you sure?",
-                      message: "The next time the command is used, the images will be re-cached.",
-                      primaryAction: {
-                        title: "Confirm",
-                        onAction: () => {
-                          deleteCache();
-                          showToast(Toast.Style.Success, "Clear cache success!");
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.TwoArrowsClockwise}
+                    title={"Set Random Wallpaper"}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => {
+                      const randomImage = raycastWallpaper[Math.floor(Math.random() * raycastWallpaper.length)];
+                      setWallpaper(randomImage).then(() => "");
+                    }}
+                  />
+                  <Action
+                    icon={Icon.Globe}
+                    title={"Go to Raycast Wallpaper"}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "g" }}
+                    onAction={async () => {
+                      await open("https://www.raycast.com/wallpapers");
+                      await showHUD("Go to Raycast Wallpaper");
+                    }}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title={"Clear Pictures Cache"}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                    onAction={async () => {
+                      const options: Alert.Options = {
+                        title: "Are you sure?",
+                        message: "Next time you enter the command, the pictures will be re-cached.",
+                        primaryAction: {
+                          title: "Confirm",
+                          onAction: () => {
+                            deleteCache();
+                            showToast(Toast.Style.Success, "Clear cache success!");
+                          },
                         },
-                      },
-                    };
-                    await confirmAlert(options);
-                  }}
-                />
+                      };
+                      await confirmAlert(options);
+                    }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -123,7 +137,7 @@ async function downloadPicture(wallpaper: { title: string; url: string }) {
       return res.arrayBuffer();
     })
     .then(function (buffer) {
-      const picturePath = `${homedir()}/Downloads/${wallpaper.title}.png`;
+      const picturePath = `${getScreenshotsDirectory()}/${wallpaper.title}.png`;
       fs.writeFile(picturePath, Buffer.from(buffer), async (error) => {
         if (error != null) {
           await showToast(Toast.Style.Failure, String(error));
@@ -131,7 +145,7 @@ async function downloadPicture(wallpaper: { title: string; url: string }) {
           const options: Toast.Options = {
             style: Toast.Style.Success,
             title: "Download picture success!",
-            message: "Click to open picture",
+            message: `${picturePath.replace(`${homedir()}`, "~")}`,
             primaryAction: {
               title: "Open picture",
               onAction: (toast) => {
@@ -140,9 +154,9 @@ async function downloadPicture(wallpaper: { title: string; url: string }) {
               },
             },
             secondaryAction: {
-              title: "Reveal in finder",
+              title: "Show in finder",
               onAction: (toast) => {
-                open(`${homedir()}/Downloads`);
+                showInFinder(picturePath);
                 toast.hide();
               },
             },

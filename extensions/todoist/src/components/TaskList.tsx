@@ -11,10 +11,6 @@ interface TaskListProps {
 }
 
 function TaskList({ isLoading, sections, mode = ViewMode.date, projects }: TaskListProps): JSX.Element {
-  sections.forEach((section) => {
-    section.tasks.sort((a, b) => a.order - b.order);
-  });
-
   const placeholder = `Filter tasks by name${
     mode === ViewMode.date ? ", priority (e.g p1), or project name (e.g Work)" : " or priority (e.g p1)"
   }`;

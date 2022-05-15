@@ -3,15 +3,17 @@ import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
 import { SWRKeys } from "../types";
-import { getAPIDate, getToday } from "../utils";
+import { getAPIDate, getToday } from "../helpers";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
+import TaskComments from "./TaskComments";
 
 const schedules = [
   { name: "Today", amount: 0 },
   { name: "Tomorrow", amount: 1 },
-  { name: "Next Week", amount: 7 },
+  { name: "In two days", amount: 2 },
+  { name: "In a week", amount: 7 },
 ];
 
 interface TaskActionsProps {
@@ -84,6 +86,8 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
               onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
             />
           ))}
+
+          <Action title="No due date" onAction={() => updateTask(task, { dueString: "no due date" })} />
         </ActionPanel.Submenu>
 
         <ActionPanel.Submenu
@@ -101,25 +105,32 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
             />
           ))}
         </ActionPanel.Submenu>
-      </ActionPanel.Section>
 
-      <ActionPanel.Section>
-        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-
-        <Action.CopyToClipboard
-          title="Copy Task URL"
-          content={task.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
         <Action
           id="deleteTask"
           title="Delete Task"
           icon={Icon.Trash}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={() => deleteTask(task)}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+
+        {task.commentCount > 0 ? (
+          <Action.Push
+            title="Show Comments"
+            target={<TaskComments task={task} />}
+            icon={Icon.Bubble}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+          />
+        ) : null}
+
+        <Action.CopyToClipboard
+          title="Copy Task URL"
+          content={task.url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
     </>

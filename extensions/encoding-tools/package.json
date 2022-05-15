@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "encoding-tools",
+  "title": "Encoding Tools",
+  "description": "A toolbox for encoding, decoding, and hashing data in the clipboard.",
+  "icon": "command-icon.png",
+  "author": "eth-p",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "md5",
+      "title": "Encode MD5",
+      "description": "Calculate MD5 hash from clipboard contents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sha1",
+      "title": "Encode SHA1",
+      "description": "Calculate SHA1 hash from clipboard contents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sha256",
+      "title": "Encode SHA256",
+      "description": "Calculate SHA256 hash from clipboard contents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sha512",
+      "title": "Encode SHA512",
+      "description": "Calculate SHA512 hash from clipboard contents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "base64-encode",
+      "title": "Encode Base64",
+      "description": "Encode Base64 hash from clipboard contents.",
+      "mode": "no-view"
+    },
+    {
+      "name": "base64-decode",
+      "title": "Decode Base64",
+      "description": "Decode Base64 hash from clipboard contents.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

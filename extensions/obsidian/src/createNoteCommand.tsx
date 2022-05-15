@@ -2,8 +2,8 @@ import { showToast, Toast } from "@raycast/api";
 
 import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
-import { Vault } from "./interfaces";
-import { parseVaults } from "./VaultUtils";
+import { Vault } from "./utils/interfaces";
+import { parseVaults } from "./utils/utils";
 
 export default function Command() {
   const vaults = parseVaults();
