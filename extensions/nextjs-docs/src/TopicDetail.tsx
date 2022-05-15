@@ -1,5 +1,5 @@
 import { Detail, Action, ActionPanel, showToast, Toast } from "@raycast/api";
-import Home from "./index";
+import Home from "./search-documentation";
 import { Topic } from "./types/GithubType";
 import YamlFront from "./yaml-front-matter";
 import { useEffect, useState } from "react";

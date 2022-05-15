@@ -13,8 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Next.js Documentation",
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "Next.js",
       "description": "Search the Next.js documentation",
       "mode": "view"
     }
