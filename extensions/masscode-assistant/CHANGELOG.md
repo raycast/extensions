@@ -1,5 +1,11 @@
 # massCode Changelog
 
+## [1.3.0] - 2022-05-14
+
+### Features
+
+- Add description to the detail view if available
+
 ## [1.1.0] - 2022-05-09
 
 ### Features
