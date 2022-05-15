@@ -7,20 +7,21 @@ export default function Settings() {
   const { pop } = useNavigation();
 
   useEffect(() => {
-    (async () => {
+    const setSvgrSettings = async () => {
       const localSvgrSettings = await LocalStorage.getItem("svgr");
       if (typeof localSvgrSettings === "string") setSettingsState(JSON.parse(localSvgrSettings));
-    })();
+    };
+    setSvgrSettings();
   }, []);
 
   const handleSave = async () => {
     await LocalStorage.removeItem("svgr");
     await LocalStorage.setItem("svgr", JSON.stringify(settingsState));
-    await showToast({ title: "Save Successful", message: "New settings successfully saved" });
+    await showToast({ title: "Save SVGR Settings", message: "Success" });
     pop();
   };
 
-  const handleCheck = (key: string, value: string | boolean) => {
+  const handleInput = (key: string, value: string | boolean) => {
     setSettingsState((settingsState: Config) => ({
       ...settingsState,
       [key]: value,
@@ -38,7 +39,7 @@ export default function Settings() {
       >
         <Form.Description text="SVGR Settings" />
         {Object.keys(settingsState).map((key) => {
-          const value = settingsState[key as keyof Config];
+          const value: boolean | string = settingsState[key as keyof Config];
           if (typeof value === "boolean") {
             return (
               <Form.Checkbox
@@ -46,7 +47,7 @@ export default function Settings() {
                 id={key}
                 title={`${value}`}
                 label={key}
-                onChange={(value) => handleCheck(key, value)}
+                onChange={(value) => handleInput(key, value)}
                 value={value}
               />
             );
@@ -59,7 +60,7 @@ export default function Settings() {
                     key={key}
                     title={key}
                     id={key}
-                    onChange={(value) => handleCheck(key, value)}
+                    onChange={(value) => handleInput(key, value)}
                     value={value}
                   >
                     {["end", "start", "none"].map((item) => (
@@ -73,7 +74,7 @@ export default function Settings() {
                     key={key}
                     title={key}
                     id={key}
-                    onChange={(value) => handleCheck(key, value)}
+                    onChange={(value) => handleInput(key, value)}
                     value={value}
                   >
                     {["named", "export"].map((item) => (
@@ -87,7 +88,7 @@ export default function Settings() {
                     key={key}
                     title={key}
                     id={key}
-                    onChange={(value) => handleCheck(key, value)}
+                    onChange={(value) => handleInput(key, value)}
                     value={value}
                   >
                     {["classic", "classic-preact", "automatic"].map((item) => (

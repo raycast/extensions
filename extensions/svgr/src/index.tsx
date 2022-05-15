@@ -1,5 +1,4 @@
-import { existsSync, writeFileSync } from "fs";
-import { useEffect } from "react";
+import { writeFileSync } from "fs";
 import {
   Action,
   ActionPanel,
@@ -14,10 +13,11 @@ import {
   showToast,
 } from "@raycast/api";
 import Settings from "./components/Settings";
-import { getReactSVG } from "./util";
+import getReactSVG from "./functions/getReactSvg";
 import { svgrDefaultSettings, svgoDefaultSettings } from "./constants";
+import useInitSettings from "./hooks/useInitSettings";
 
-export interface Props {
+export interface SvgrProps {
   componentName: string;
   svg: string;
 }
@@ -25,39 +25,21 @@ export interface Props {
 export default function Command() {
   const svgoConfigPath = `${environment.supportPath}/.svgorc.json`;
 
-  useEffect(() => {
-    (async () => {
-      const localSvgrSettings = await LocalStorage.getItem("svgr");
-      if (!localSvgrSettings) {
-        await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
-      }
-    })();
-    const svgoSettings = existsSync(svgoConfigPath);
-    if (!svgoSettings) writeFileSync(svgoConfigPath, JSON.stringify(svgoDefaultSettings));
-  }, []);
+  useInitSettings({ svgoConfigPath });
 
-  const handleCopy = async (props: Props) => {
+  const handleCopy = async (props: SvgrProps) => {
     const reactSVG = await getReactSVG({ ...props, svgoConfigPath });
-    await Clipboard.copy(reactSVG);
-    await showHUD("Copied to Clipboard");
+    if (reactSVG) {
+      await Clipboard.copy(reactSVG);
+      await showHUD("Copied to Clipboard");
+    }
   };
 
-  const handlePaste = async (props: Props) => {
+  const handlePaste = async (props: SvgrProps) => {
     const reactSVG = await getReactSVG({ ...props, svgoConfigPath });
-    await Clipboard.paste(reactSVG);
-    await closeMainWindow();
-  };
-
-  const handleRestoreSvgrSettings = async () => {
-    const confirmed = await confirmAlert({
-      title: "Restore Default SVGR Settings?",
-      message: "You cannot undo this action.",
-      icon: Icon.Trash,
-    });
-    if (confirmed) {
-      await LocalStorage.removeItem("svgr");
-      await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
-      await showToast({ title: "Restore Default Settings", message: "Success!" });
+    if (reactSVG) {
+      await Clipboard.paste(reactSVG);
+      await closeMainWindow();
     }
   };
 
@@ -69,7 +51,20 @@ export default function Command() {
     });
     if (confirmed) {
       writeFileSync(svgoConfigPath, JSON.stringify(svgoDefaultSettings));
-      await showToast({ title: "Restore Default Settings", message: "Success!" });
+      await showToast({ title: "Restore Default SVGO Settings", message: "Success!" });
+    }
+  };
+
+  const handleRestoreSvgrSettings = async () => {
+    const confirmed = await confirmAlert({
+      title: "Restore Default SVGR Settings?",
+      message: "You cannot undo this action.",
+      icon: Icon.Trash,
+    });
+    if (confirmed) {
+      await LocalStorage.removeItem("svgr");
+      await LocalStorage.setItem("svgr", JSON.stringify(svgrDefaultSettings));
+      await showToast({ title: "Restore Default SVGR Settings", message: "Success!" });
     }
   };
 
@@ -77,30 +72,25 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel title="SVGR Actions">
-          <Action.SubmitForm icon={Icon.Clipboard} title="Copy to Clipboard" onSubmit={handleCopy} />
-          <Action.SubmitForm icon={Icon.Clipboard} title="Paste in Active App" onSubmit={handlePaste} />
+          <Action.SubmitForm icon={Icon.Clipboard} onSubmit={handleCopy} title="Copy to Clipboard" />
+          <Action.SubmitForm icon={Icon.Clipboard} onSubmit={handlePaste} title="Paste in Active App" />
           <Action.Push icon={Icon.Gear} title="Customize SVGR Settings" target={<Settings />} />
           <Action.Open icon={Icon.Document} title="Open SVGO Settings" target={svgoConfigPath} />
           <Action.SubmitForm
             icon={Icon.TwoArrowsClockwise}
-            title="Restore Default SVGR Settings"
             onSubmit={handleRestoreSvgrSettings}
+            title="Restore Default SVGR Settings"
           />
           <Action.SubmitForm
             icon={Icon.TwoArrowsClockwise}
-            title="Restore Default SVGO Settings"
             onSubmit={handleRestoreSvgoSettings}
+            title="Restore Default SVGO Settings"
           />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="componentName"
-        title="Component Name"
-        placeholder="Name your Component"
-        defaultValue="SVGComponent"
-      />
-      <Form.TextArea id="svg" title="SVG Code" placeholder="Paste SVG Text" />
+      <Form.TextField defaultValue="SVGComponent" id="componentName" title="Component Name" />
+      <Form.TextArea id="svg" placeholder="Paste SVG Text" title="SVG Code" />
     </Form>
   );
 }
