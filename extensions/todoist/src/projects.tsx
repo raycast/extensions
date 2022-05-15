@@ -4,9 +4,10 @@ import useSWR, { mutate } from "swr";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
+import { withOAuth } from "./oauth";
 import { SWRKeys } from "./types";
 
-export default function Projects() {
+export default withOAuth()(function Projects() {
   const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {
@@ -104,4 +105,4 @@ export default function Projects() {
       ))}
     </List>
   );
-}
+});

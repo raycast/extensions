@@ -2,10 +2,11 @@ import { getPreferenceValues, List } from "@raycast/api";
 import useSWR from "swr";
 import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
 import { todoist, handleError } from "./api";
+import { withOAuth } from "./oauth";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 
-export default function Today() {
+export default withOAuth()(function Today() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
     todoist.getTasks({ filter: "today|overdue" })
   );
@@ -68,4 +69,4 @@ export default function Today() {
       projects={projects}
     />
   );
-}
+});

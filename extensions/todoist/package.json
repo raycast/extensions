@@ -5,6 +5,9 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
+  "contributors": [
+    "gebeto"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -54,14 +57,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Todoist Token",
-      "description": "Your Todoist Token. Find it in Todoist integration settings view.",
-      "placeholder": "Enter your Todoist token"
-    },
     {
       "name": "todayGroupBy",
       "type": "dropdown",

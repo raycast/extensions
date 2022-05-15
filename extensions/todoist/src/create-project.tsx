@@ -1,5 +1,6 @@
 import ProjectForm from "./components/ProjectForm";
+import { withOAuth } from "./oauth";
 
-export default function CreateProject() {
+export default withOAuth()(function CreateProject() {
   return <ProjectForm />;
-}
+});

@@ -5,8 +5,9 @@ import { Task } from "@doist/todoist-api-typescript";
 import { handleError, todoist } from "./api";
 import { SWRKeys, ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
+import { withOAuth } from "./oauth";
 
-export default function Search() {
+export default withOAuth()(function Search() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "all" }));
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
@@ -55,4 +56,4 @@ export default function Search() {
       ))}
     </List>
   );
-}
+});

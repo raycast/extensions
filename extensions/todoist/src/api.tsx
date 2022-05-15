@@ -1,9 +1,7 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { TodoistApi, TodoistRequestError } from "@doist/todoist-api-typescript";
 
-const preferences = getPreferenceValues();
-
-export const todoist = new TodoistApi(preferences.token);
+export const todoist = new TodoistApi("");
 
 interface HandleErrorArgs {
   error: TodoistRequestError | unknown;

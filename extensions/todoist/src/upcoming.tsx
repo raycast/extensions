@@ -3,8 +3,9 @@ import TaskList from "./components/TaskList";
 import { getSectionsWithDueDates } from "./helpers";
 import { handleError, todoist } from "./api";
 import { SWRKeys } from "./types";
+import { withOAuth } from "./oauth";
 
-export default function Upcoming() {
+export default withOAuth()(function Upcoming() {
   const { data, error } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "view all" }));
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
@@ -20,4 +21,4 @@ export default function Upcoming() {
   const sections = getSectionsWithDueDates(tasks);
 
   return <TaskList sections={sections} isLoading={!data && !error} projects={projects} />;
-}
+});

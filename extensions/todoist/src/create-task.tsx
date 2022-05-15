@@ -7,8 +7,9 @@ import { priorities } from "./constants";
 import { getAPIDate } from "./helpers";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
+import { withOAuth } from "./oauth";
 
-export default function CreateTask() {
+export default withOAuth()(function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
@@ -177,4 +178,4 @@ export default function CreateTask() {
       ) : null}
     </Form>
   );
-}
+});
