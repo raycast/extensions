@@ -5,6 +5,7 @@
   "description": "Efficiently search Next.js documentation",
   "icon": "command-icon.png",
   "author": "PrasadChinwal",
+  "contributors": ["PrasadChinwal", "vimtor"],
   "categories": [
     "Productivity",
     "Documentation",
@@ -17,6 +18,13 @@
       "title": "Search Documentation",
       "subtitle": "Next.js",
       "description": "Search the Next.js documentation",
+      "mode": "view"
+    },
+    {
+      "name": "search-examples",
+      "title": "Search Examples",
+      "subtitle": "Next.js",
+      "description": "Search examples provided by Next.js",
       "mode": "view"
     }
   ],

@@ -12,3 +12,8 @@ export interface Tree {
   type: string;
   sha: string;
 }
+
+export interface Example {
+  name: string;
+  url: string;
+}
