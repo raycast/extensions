@@ -33,7 +33,9 @@ export const shouldInvalidateFilesIndex = async () => {
 
   if (lastIndexedAt === null) return true;
 
-  return lastIndexedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
+  const { autoReindexingInterval } = getPreferenceValues<Preferences>();
+
+  return lastIndexedAt.getTime() < new Date().getTime() - parseInt(autoReindexingInterval);
 };
 
 const mandateFilesIndexInvalidation = async () => {
