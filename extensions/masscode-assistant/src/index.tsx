@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
 import SnippetContent from "./components/snippet-content";
+import { massCodeInstallationCheck } from "./components/checkInstall";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
@@ -29,19 +30,7 @@ export default function Command() {
   }, []);
 
   if (state.error) {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
-      title: "massCode is not running",
-      message: "Launch it or download from https://masscode.io",
-      primaryAction: {
-        title: "Download massCode",
-        onAction: (toast) => {
-          open("https://masscode.io");
-          toast.hide();
-        },
-      },
-    };
-    showToast(options);
+    massCodeInstallationCheck();
   }
 
   return (
