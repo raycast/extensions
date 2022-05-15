@@ -51,9 +51,19 @@ export default function Command() {
           toast.message = url.replace("https://", "");
         },
       };
-    } catch {
+    } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create paste";
+
+      toast.primaryAction = {
+        title: "Copy Error",
+        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+        onAction: () => {
+          if (error instanceof Error) {
+            Clipboard.copy(error.message);
+          }
+        },
+      };
 
       setCode(values.code);
       setName(values.name);
