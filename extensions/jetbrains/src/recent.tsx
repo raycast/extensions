@@ -1,122 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { ActionPanel, Application, getApplications, List, showToast, Toast } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { homedir } from "os";
-import { dirname, resolve } from "path";
-import which from "which";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActionPanel, Application, List } from "@raycast/api";
 import {
   AppHistory,
   bin,
-  createUniqueArray,
-  getFiles,
-  getRecentEntries,
-  historicProjects,
-  JetBrainsIcon,
+  getHistory,
+  getJetBrainsToolboxApp,
+  loadAppEntries,
   recentEntry,
-  sortApps,
   toolsInstall,
   useUrl,
 } from "./util";
-import History from "./.history.json";
 import { HelpTextDetail, tbUrl } from "./components/HelpTextDetail";
 import { OpenJetBrainsToolbox } from "./components/OpenJetBrainsToolbox";
 import { RecentProject } from "./components/RecentProject";
 import { OpenInJetBrainsApp } from "./components/OpenInJetBrainsApp";
 import { AppDrop } from "./components/AppDrop";
-
-const ICON_GLOB = resolve(homedir(), "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns");
-const HISTORY_GLOB = resolve(toolsInstall, "apps/**/.history.json");
-
-const getRecent = async (path: string | string[], icon: string) => {
-  return (await getFiles(path))
-    .map((file) => ({
-      ...file,
-      title: file.title,
-      icon: icon,
-    }))
-    .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-};
-
-const getJetBrainsToolboxApp = async (): Promise<Application | undefined> => {
-  return (await getApplications()).find((app) => app.name.match("JetBrains Toolbox"));
-};
-
-const globFromHistory = (history: History) => {
-  if (history.item.intellij_platform === undefined) {
-    return [];
-  }
-  const root = dirname(
-    history.item.intellij_platform.default_config_directories["idea.config.path"].replace("$HOME", homedir())
-  );
-  return history.item.intellij_platform.config.map(
-    (config) => `${root}/${config.directory}/options/${config.recent_projects_filename}`
-  );
-};
-
-const getReadHistoryFile = async (filePath: string) => {
-  try {
-    return JSON.parse(String(await readFile(filePath)));
-  } catch (err) {
-    showToast(Toast.Style.Failure, `History lookup for ${filePath} failed with error \n\n ${err}`).catch(() =>
-      console.log(err)
-    );
-    return {};
-  }
-};
-
-const getHistory = async () => {
-  const icons = await getIcons();
-  return (
-    await Promise.all(
-      (
-        await getFiles(HISTORY_GLOB)
-      ).map(async (file) => {
-        const historyFile = await getReadHistoryFile(file.path);
-        if (!historyFile.history?.length) {
-          return null;
-        }
-
-        const history: History = historyFile.history.pop() as History;
-        const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
-        const tool = history.item.intellij_platform?.shell_script_name ?? false;
-        const activation = history.item.activation?.hosts[0] ?? false;
-        return {
-          title: history.item.name,
-          url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
-          tool: tool ? await which(tool, { path: bin }).catch(() => false) : false,
-          icon,
-          xmlFiles: await getRecent(globFromHistory(history), icon),
-        } as AppHistory;
-      })
-    )
-  ).filter((entry): entry is AppHistory => Boolean(entry));
-};
-
-const getIcons = async () => {
-  return (await getFiles(ICON_GLOB)).map((icon) => {
-    return {
-      ...icon,
-      title: icon.path.split("/").find((path) => path.match(/.+\.app/)) || icon.title,
-      icon: icon.path,
-    };
-  });
-};
-
-const loadAppEntries = async (apps: AppHistory[]) => {
-  return await Promise.all(
-    apps.map(async (app) => {
-      const xmlFiles = app.xmlFiles ?? [];
-      for (const res of historicProjects ? xmlFiles : xmlFiles.slice(0, 1)) {
-        const entries = await getRecentEntries(res, app);
-        // sort before unique so we get the newest versions
-        app.entries = createUniqueArray<recentEntry>("path", [...(app.entries ?? []), ...entries]).sort(
-          (a, b) => b.opened - a.opened
-        );
-      }
-      return app;
-    })
-  );
-};
+import { useFavorites, usePreferences } from "raycast-hooks";
+import { sortTools } from "./sortTools";
 
 interface state {
   loading: boolean;
@@ -131,17 +31,45 @@ export default function ProjectList(): JSX.Element {
     toolboxApp: undefined,
     appHistory: [],
   });
+  const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
+  const [{ sortOrder }, prefActions] = usePreferences({ sortOrder: "" });
+
+  const myFavs = useMemo(() => {
+    const all = appHistory.reduce((all, appHistory) => [...all, ...(appHistory?.entries ?? [])], [] as recentEntry[]);
+    return favourites
+      .map((path) => all.find((entry) => path === entry.path))
+      .filter((entry): entry is recentEntry => Boolean(entry));
+  }, [favourites, appHistory, filter]);
+
+  useEffect(() => {
+    setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
+  }, [appHistory, filter]);
 
   useEffect(() => {
     const setHistory = async () => {
       setState({
         loading: false,
         toolboxApp: await getJetBrainsToolboxApp(),
-        appHistory: (await loadAppEntries(await getHistory())).sort(sortApps),
+        appHistory: (await loadAppEntries(await getHistory()))
+          .filter((app) => app.entries?.length)
+          .sort(sortTools(String(sortOrder).split(","))),
       });
     };
     setHistory().catch((err) => console.error(err));
-  }, []);
+  }, [sortOrder]);
+
+  useEffect(() => {
+    const setHistory = async () => {
+      setState({
+        loading: false,
+        toolboxApp: await getJetBrainsToolboxApp(),
+        appHistory: (await loadAppEntries(await getHistory()))
+          .filter((app) => app.entries?.length)
+          .sort(sortTools(String(sortOrder).split(","))),
+      });
+    };
+    setHistory().catch((err) => console.error(err));
+  }, [sortOrder]);
 
   if (loading) {
     return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
@@ -187,21 +115,46 @@ export default function ProjectList(): JSX.Element {
       actions={<ActionPanel children={defaultActions} />}
       searchBarAccessory={<AppDrop onChange={setFilter} appHistories={appHistory} />}
     >
+      {myFavs.length && filter === "" ? (
+        <List.Section title="Favourites" subtitle="⌘+F to remove from favorites">
+          {myFavs.map((fav) => (
+            <RecentProject
+              key={fav.path}
+              app={appHistory.find((history) => history.title === fav.app) || appHistory[0]}
+              recent={fav}
+              tools={appHistory}
+              toolbox={toolboxApp}
+              remFav={favActions.remove}
+              sortOrder={String(sortOrder)}
+              setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+            />
+          ))}
+        </List.Section>
+      ) : null}
       {appHistory
-        .filter((app) => app.entries?.length && (filter === "" || filter === app.title))
-        .map((app) => (
-          <List.Section title={app.title} key={app.title}>
-            {(app.entries ?? []).map((recent: recentEntry) =>
-              recent?.path ? (
-                <RecentProject
-                  key={`${app.title}-${recent.path}`}
-                  app={app}
-                  recent={recent}
-                  tools={appHistory}
-                  toolbox={toolboxApp}
-                />
-              ) : null
-            )}
+        .filter((app) => filter === "" || filter === app.title)
+        .map((app, id) => (
+          <List.Section
+            title={app.title}
+            key={app.title}
+            subtitle="⌘+F to add to favorites – ⌃+S to change application order"
+          >
+            {(app.entries ?? [])
+              .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
+              .map((recent: recentEntry) =>
+                recent?.path ? (
+                  <RecentProject
+                    key={`${app.title}-${recent.path}`}
+                    app={app}
+                    recent={recent}
+                    tools={appHistory}
+                    toolbox={toolboxApp}
+                    addFav={favActions.add}
+                    sortOrder={String(sortOrder)}
+                    setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+                  />
+                ) : null
+              )}
           </List.Section>
         ))}
     </List>

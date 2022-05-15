@@ -11,11 +11,9 @@ export function AppDrop({ onChange, appHistories }: AppDropProps) {
   return (
     <List.Dropdown tooltip="Select App" onChange={onChange}>
       <List.Dropdown.Item title="All Toolbox Apps" value="" icon={JetBrainsIcon} />
-      {appHistories
-        .filter((app) => app.entries?.length)
-        .map((app) => (
-          <List.Dropdown.Item key={app.title} title={app.title} value={app.title} icon={app.icon} />
-        ))}
+      {appHistories.map((app) => (
+        <List.Dropdown.Item key={app.title} title={app.title} value={app.title} icon={app.icon} />
+      ))}
     </List.Dropdown>
   );
 }
