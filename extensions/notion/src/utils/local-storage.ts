@@ -1,4 +1,4 @@
-import { setLocalStorageItem, getLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { Page, Database, DatabaseProperty, DatabaseView, User } from "./notion";
 
 export async function storeRecentlyOpenedPage(page: Page): Promise<void> {
@@ -27,31 +27,31 @@ export async function storeRecentlyOpenedPage(page: Page): Promise<void> {
   });
 
   const data = JSON.stringify(recentlyOpenPages.slice(0, 20));
-  await setLocalStorageItem("RECENTLY_OPENED_PAGES", data);
+  await LocalStorage.setItem("RECENTLY_OPENED_PAGES", data);
 }
 
 export async function loadRecentlyOpenedPages(): Promise<Page[]> {
-  const data: string | undefined = await getLocalStorageItem("RECENTLY_OPENED_PAGES");
+  const data: string | undefined = await LocalStorage.getItem("RECENTLY_OPENED_PAGES");
   return data !== undefined ? JSON.parse(data) || [] : [];
 }
 
 export async function storeDatabaseView(databaseId: string, databaseView: DatabaseView): Promise<void> {
   const data = JSON.stringify(databaseView);
-  await setLocalStorageItem("VIEW_DATABASE_" + databaseId, data);
+  await LocalStorage.setItem("VIEW_DATABASE_" + databaseId, data);
 }
 
 export async function loadDatabaseView(databaseId: string): Promise<DatabaseView | undefined> {
-  const data: string | undefined = await getLocalStorageItem("VIEW_DATABASE_" + databaseId);
+  const data: string | undefined = await LocalStorage.getItem("VIEW_DATABASE_" + databaseId);
   return data !== undefined ? JSON.parse(data) : undefined;
 }
 
 export async function storeDatabases(database: Database[]): Promise<void> {
   const data = JSON.stringify(database);
-  await setLocalStorageItem("DATABASES", data);
+  await LocalStorage.setItem("DATABASES", data);
 }
 
 export async function loadDatabases(): Promise<Database[]> {
-  const data: string | undefined = await getLocalStorageItem("DATABASES");
+  const data: string | undefined = await LocalStorage.getItem("DATABASES");
   return data !== undefined ? JSON.parse(data) || [] : [];
 }
 
@@ -60,30 +60,30 @@ export async function storeDatabaseProperties(
   databaseProperties: DatabaseProperty[]
 ): Promise<void> {
   const data = JSON.stringify(databaseProperties);
-  await setLocalStorageItem("DATABASE_PROPERTIES_" + databaseId, data);
+  await LocalStorage.setItem("DATABASE_PROPERTIES_" + databaseId, data);
 }
 
 export async function loadDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
-  const data: string | undefined = await getLocalStorageItem("DATABASE_PROPERTIES_" + databaseId);
+  const data: string | undefined = await LocalStorage.getItem("DATABASE_PROPERTIES_" + databaseId);
   return data !== undefined ? JSON.parse(data) || [] : [];
 }
 
 export async function storeDatabasePages(databaseId: string, pages: Page[]): Promise<void> {
   const data = JSON.stringify(pages);
-  await setLocalStorageItem("PAGES_DATABASE_" + databaseId, data);
+  await LocalStorage.setItem("PAGES_DATABASE_" + databaseId, data);
 }
 
 export async function loadDatabasePages(databaseId: string): Promise<Page[]> {
-  const data: string | undefined = await getLocalStorageItem("PAGES_DATABASE_" + databaseId);
+  const data: string | undefined = await LocalStorage.getItem("PAGES_DATABASE_" + databaseId);
   return data !== undefined ? JSON.parse(data) || [] : [];
 }
 
 export async function storeUsers(users: User[]): Promise<void> {
   const data = JSON.stringify(users);
-  await setLocalStorageItem("USERS", data);
+  await LocalStorage.setItem("USERS", data);
 }
 
 export async function loadUsers(): Promise<User[]> {
-  const data: string | undefined = await getLocalStorageItem("USERS");
+  const data: string | undefined = await LocalStorage.getItem("USERS");
   return data !== undefined ? JSON.parse(data) || [] : [];
 }

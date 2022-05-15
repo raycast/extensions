@@ -1,5 +1,23 @@
 # Todoist Changelog
 
+## [Edit your projects] - 2022-04-30
+
+- Added a new action on projects to edit them
+- Added a new action on projects to add/remove them to/from favorites
+- Added the project's color on the Search Projects command
+- Removed the custom ordering of the tasks since Todoist already performs them
+- Displayed the sub-tasks back in the project view
+
+## [Add support for comments] - 2022-04-23
+
+- Added support for comments on each task. It's now possible to add a new comment, edit it, delete it, or search through every comment's content.
+- Reset the form focus to the first field when creating a project or a task.
+
+## [New command for searching tasks] - 2022-04-13
+
+- Added a new command to search across all your tasks with the ability to filter by project
+- Added new scheduling options: "in two days" and "no due date"
+
 ## [More details and empty screens] - 2022-04-06
 
 - Added detailed view of a task with metadata: title, description, project, due date (with time if any), priority, labels

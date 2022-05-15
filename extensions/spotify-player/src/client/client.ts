@@ -1,7 +1,6 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import SpotifyWebApi from "spotify-web-api-node";
-import { Response } from "./interfaces";
-import { AuthResponseCredentials } from "./spoti";
+import { AuthResponseCredentials, Response } from "./interfaces";
 
 const debugMode = false;
 

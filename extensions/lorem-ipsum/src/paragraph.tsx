@@ -1,11 +1,11 @@
-import { copyTextToClipboard, showHUD } from "@raycast/api";
-import { generateParagraph } from "./utils";
+import { getPreferenceValues } from "@raycast/api";
+import { generateParagraph, preformAction } from "./utils";
 
 export default async function ParagraphCommand() {
-  const paragraph = generateParagraph();
+  const { action = "clipboard" } = getPreferenceValues();
+  const output = generateParagraph();
 
-  await copyTextToClipboard(paragraph);
-  await showHUD("Copied to clipboard!");
+  await preformAction(action, output);
 
   return null;
 }
