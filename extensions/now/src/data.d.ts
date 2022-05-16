@@ -1,3 +1,0 @@
-interface Preferences {
-  default: string;
-}
