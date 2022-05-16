@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../utils/directory-info";
 import { getOpenFinderWindowPath } from "../utils/common-utils";
-import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -79,6 +79,7 @@ export async function getDirectory(key: string, sortBy: string) {
 }
 
 export const alertDialog = async (
+  icon: Icon,
   title: string,
   message: string,
   confirmTitle: string,
@@ -86,6 +87,7 @@ export const alertDialog = async (
   cancelAction?: () => void
 ) => {
   const options: Alert.Options = {
+    icon: icon,
     title: title,
     message: message,
     primaryAction: {

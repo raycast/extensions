@@ -1,5 +1,13 @@
 # Amazon AWS Changelog
 
+## [DynamoDB tables command] - 2022-05-10
+
+- Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
+
+## [Improvement] - 2022-04-07
+
+- Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
+
 ## [Full list of resources] - 2022-04-06
 
 Started fetching resources using the paginated responses from AWS to get a full list of resources. ([#1146](https://github.com/raycast/extensions/pull/1146))

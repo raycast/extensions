@@ -1,15 +1,17 @@
 import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import { DirectoryInfo, DirectoryType } from "./directory-info";
+import { DirectoryInfo, DirectoryType, FileType } from "./directory-info";
 import { imgExt } from "./constants";
 import { parse } from "path";
-import Values = LocalStorage.Values;
 import { getFinderInsertLocation } from "./applescript-utils";
+import Values = LocalStorage.Values;
 
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     autoCopyLatestFile: preferencesMap.get("autoCopyLatestFile") as boolean,
+    rememberTag: preferencesMap.get("rememberTag") as boolean,
+    primaryAction: preferencesMap.get("primaryAction") as string,
     fileShowNumber: preferencesMap.get("fileShowNumber") as string,
     sortBy: preferencesMap.get("sortBy") as string,
   };
@@ -80,6 +82,26 @@ export const isDirectoryOrFile = (path: string) => {
   return DirectoryType.FILE;
 };
 
+export const isDirectoryOrFileForFile = (path: string) => {
+  try {
+    const stat = fse.lstatSync(path);
+    const parsedPath = parse(path);
+    if (stat.isDirectory()) {
+      return FileType.FOLDER;
+    }
+    if (stat.isFile()) {
+      if (imgExt.includes(parsedPath.ext)) {
+        return FileType.IMAGE;
+      }
+      return FileType.FILE;
+    }
+  } catch (e) {
+    console.error(String(e));
+    return FileType.FILE;
+  }
+  return FileType.FILE;
+};
+
 export const checkDuplicatePath = (path: string, localDirectory: DirectoryInfo[]) => {
   //check duplicate
   let duplicatePath = false;
@@ -119,7 +141,7 @@ export const getDirectoryFiles = (directory: string) => {
         id: "files_" + (timeStamp + index),
         name: parsedPath.base,
         path: parsedPath.dir + "/" + parsedPath.base,
-        type: isDirectoryOrFile(value),
+        type: isDirectoryOrFileForFile(value),
         modifyTime: getModifyTime(value),
       };
     });
@@ -163,11 +185,20 @@ export const getFileShowNumber = (fileShowNumber: string) => {
       return 3;
     case "5":
       return 5;
-    case "8":
-      return 8;
     case "10":
       return 10;
     default:
       return -1;
   }
 };
+
+export function formatBytes(sizeInBytes: number) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let unitIndex = 0;
+  while (sizeInBytes >= 1024) {
+    sizeInBytes /= 1024;
+    unitIndex++;
+  }
+
+  return `${sizeInBytes.toFixed(1)} ${units[unitIndex]}`;
+}

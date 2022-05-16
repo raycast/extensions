@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import MyTweetList from "./components/mytweets";
 
-render(<MyTweetList />);
+export default function MyTweetRoot() {
+  return <MyTweetList />;
+}

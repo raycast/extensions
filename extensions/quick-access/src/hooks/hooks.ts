@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryWithFileInfo } from "../utils/directory-info";
+import { DirectoryWithFileInfo, FileInfo } from "../utils/directory-info";
 import {
   checkDirectoryValid,
   commonPreferences,
@@ -9,19 +9,36 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
+import { getFileContent } from "../utils/get-file-preview";
 
 //for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
 };
 
+//get is show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>("isShowDetail");
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return showDetail;
+};
+
 //get local directory with files
 export const localDirectoryWithFiles = (refresh: number) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
-  const [allFilesNumber, setAllFilesNumber] = useState<number>(0);
+  const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = commonPreferences();
 
@@ -56,9 +73,10 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
       _allFilesNumber = _allFilesNumber + files.length;
     });
-    setDirectoryWithFiles(_pinnedDirectoryContent);
     setAllFilesNumber(_allFilesNumber);
+    setDirectoryWithFiles(_pinnedDirectoryContent);
     setLoading(false);
+
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
   }, [refresh]);
 
@@ -71,6 +89,23 @@ export const localDirectoryWithFiles = (refresh: number) => {
     allFilesNumber: allFilesNumber,
     loading: loading,
   };
+};
+
+//get file or folder info
+export const getFileInfoAndPreview = (fileInfo: FileInfo, updateDetail = 0) => {
+  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const fetchData = useCallback(async () => {
+    if (isEmpty(fileInfo.path)) {
+      return;
+    }
+    setDirectoryInfo(await getFileContent(fileInfo));
+  }, [updateDetail, fileInfo]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return directoryInfo;
 };
 
 //get local directory with files
@@ -100,13 +135,15 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
 };
 
 export const alertDialog = async (
+  icon: Icon,
   title: string,
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction: () => void
+  cancelAction?: () => void
 ) => {
   const options: Alert.Options = {
+    icon: icon,
     title: title,
     message: message,
     primaryAction: {

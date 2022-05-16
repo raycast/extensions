@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, CopyToClipboardAction, PasteAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Page, PageContent, fetchPageContent } from "../utils/notion";
 import { storeRecentlyOpenedPage } from "../utils/local-storage";
@@ -40,7 +40,7 @@ export function PageDetail(props: { page: Page }): JSX.Element {
         page.url ? (
           <ActionPanel>
             <ActionPanel.Section title={page.title ? page.title : "Untitled"}>
-              <ActionPanel.Item
+              <Action
                 title="Open in Notion"
                 icon={"notion-logo.png"}
                 onAction={function () {
@@ -49,12 +49,12 @@ export function PageDetail(props: { page: Page }): JSX.Element {
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title="Copy Page URL"
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
-              <PasteAction
+              <Action.Paste
                 title="Paste Page URL"
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
