@@ -3,8 +3,17 @@ import { exec, execFile } from "child_process"
 import { COPY_TYPE, LANGUAGE_LIST } from "./consts"
 import { reformatCopyTextArray, truncate } from "./shared.func"
 import { IActionCopyListSection, IListItemActionPanelItem, IPreferences } from "./types"
-import { Action, ActionPanel, Clipboard, environment, getPreferenceValues, Icon, Keyboard } from "@raycast/api"
-import fs from 'fs'
+import {
+    Action,
+    ActionPanel,
+    Clipboard,
+    getApplications,
+    getPreferenceValues,
+    Icon,
+    Keyboard,
+    showToast,
+    Toast,
+} from "@raycast/api"
 
 const preferences: IPreferences = getPreferenceValues()
 
@@ -93,17 +102,20 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
         return `https://translate.google.com/?sl=${from}&tl=${to}&text=${text}&op=translate`
     }
 
-    openInEudic = (queryText: string) => {
-        const eudicShellPath = `${environment.supportPath}/open-in-eudic.sh`
-        const shellContent =   `tell application id "com.eusoft.freeeudic"
-                                    activate
-                                    show dic with word "${queryText}"
-                                end tell`
-        fs.writeFile(eudicShellPath, shellContent, err => {
-            if (!err) {
-                 execFile(`osascript`, [eudicShellPath])
+    openInEudic = (queryText?: string) => {
+        getApplications().then((applications) => {
+            const isInstalledEudic = applications.find((app) => ((app.bundleId as string) || "").indexOf("eudic") != -1)
+            if (isInstalledEudic) {
+                // open in eudic and query
+                const url = `eudic://dict/${queryText}`
+                execFile(`open`, [url])
+            } else {
+                showToast({
+                    title: "Eudic is not installed.",
+                    style: Toast.Style.Failure,
+                })
             }
-        });
+        })
     }
 
     render() {
@@ -133,9 +145,8 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
                         title="Search Query Text in Eudic"
                         icon={Icon.MagnifyingGlass}
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        onAction={() => this.openInEudic(this.props.queryText as string)}
+                        onAction={() => this.openInEudic(this.props.queryText)}
                     />
-    
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Target Language">
