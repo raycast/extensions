@@ -1,10 +1,7 @@
 # Unogs Changelog
 
+## [1.0.0 Initial release] - 2022-05-16
 
-## [Unreleased]
-
-## [1.0.0] - 2022-05-08
-### Added
 - Initial setup.
 - Add support for RapidAPI.
 - Add title search.
