@@ -187,6 +187,7 @@ async function getLatestModifyDate(): Promise<Date> {
 
 async function getData(): Promise<RefData[]> {
   const db = await openDb();
+  const preferences: Preferences = getPreferenceValues();
 
   const st = db.prepare(INVALID_TYPES_SQL);
   const invalid_ids = [];
@@ -237,7 +238,10 @@ async function getData(): Promise<RefData[]> {
     if (at) {
       row.attachment = at;
     }
-    row.citekey = await getBibtexKey(row.key, row.library);
+    if (preferences.use_bibtex) {
+      row.citekey = await getBibtexKey(row.key, row.library);
+    }
+
     rows.push(row);
   }
 
