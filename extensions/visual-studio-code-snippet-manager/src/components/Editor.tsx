@@ -29,7 +29,7 @@ interface Preferences {
   vscode: boolean;
   vscodeInsiders: boolean;
 }
-const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insiders" }) => {
+const Editor = (props?: Item & { title?: string; type?: "Visual Studio Code" | "Visual Studio Code Insiders" }) => {
   const preferences: Preferences = getPreferenceValues();
 
   const { push } = useNavigation();
@@ -65,12 +65,7 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
       }
       fs.writeFileSync(path, JSON.stringify(obj));
     } else {
-      fs.writeFileSync(
-        path,
-        JSON.stringify({
-          [v.title]: data,
-        })
-      );
+      fs.writeFileSync(path, JSON.stringify({ [v.title]: data }));
     }
   };
 
@@ -86,6 +81,7 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
           actions={
             <ActionPanel>
               <Action.SubmitForm
+                title="Create Snippet"
                 icon={Icon.Plus}
                 onSubmit={async (v: Values) => {
                   if (v.title === "" || v.prefix === "" || v.body === "") {
@@ -129,11 +125,15 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
         >
           {preferences.vscode && preferences.vscodeInsiders && (
             <>
-              <Form.Checkbox label="vscode" id="vscode" defaultValue={props?.type === "vscode" && true} />
               <Form.Checkbox
-                label="vscodeInsiders"
+                id="vscode"
+                label="Visual Studio Code"
+                defaultValue={props?.type === "Visual Studio Code"}
+              />
+              <Form.Checkbox
                 id="vscodeInsiders"
-                defaultValue={props?.type === "vscode-insiders" && true}
+                label="Visual Studio Code Insiders"
+                defaultValue={props?.type === "Visual Studio Code Insiders"}
               />
             </>
           )}

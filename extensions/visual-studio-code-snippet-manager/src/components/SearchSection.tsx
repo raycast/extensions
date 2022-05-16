@@ -5,13 +5,13 @@ import fs from "fs";
 import { vsCodeInsidersPath, vsCodePath } from "../data";
 type Props = {
   items: Required<Item>[] | null;
-  title: "vscode" | "vscode-insiders";
+  title: "Visual Studio Code" | "Visual Studio Code Insiders";
 };
 const SearchSection = ({ items, title }: Props) => {
   const { push } = useNavigation();
   const deleteSnippet = (key: string) => {
     let path = "";
-    if (title === "vscode") {
+    if (title === "Visual Studio Code") {
       path = vsCodePath;
     } else {
       path = vsCodeInsidersPath;

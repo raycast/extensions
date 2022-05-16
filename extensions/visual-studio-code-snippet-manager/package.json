@@ -23,18 +23,18 @@
   "preferences": [
     {
       "name": "vscode",
-      "title": "Please select the vscode you are using",
-      "description": "Are you using vscode?",
+      "title": "Please select the VSCode you are using",
+      "description": "Are you using Visual Studio Code?",
       "type": "checkbox",
       "required": true,
-      "label": "vscode"
+      "label": "Visual Studio Code"
     },
     {
       "name": "vscodeInsiders",
-      "description": "Are you using vscode-insiders?",
+      "description": "Are you using Visual Studio Code Insiders?",
       "type": "checkbox",
       "required": true,
-      "label": "vscode-insiders"
+      "label": "Visual Studio Code Insiders"
     }
   ],
   "dependencies": {
