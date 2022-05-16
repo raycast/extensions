@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, List, popToRoot, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, popToRoot, useNavigation } from "@raycast/api";
 import Editor from "./Editor";
 import Search from "./Search";
 import fs from "fs";
@@ -40,18 +40,20 @@ const SearchSection = ({ items, title }: Props) => {
                   content={v.body}
                 ></Action.CopyToClipboard>
                 <Action.Push
-                  title={"edit snippet"}
+                  icon={Icon.Gear}
+                  title={"Edit Snippet"}
                   target={<Editor {...v} title={v.id} type="vscode-insiders" />}
                 ></Action.Push>
                 <Action
-                  title="delete snippet"
+                  icon={"Trash"}
+                  title="Delete Snippet"
                   onAction={async () => {
                     await confirmAlert({
-                      title: "delete snippet",
+                      title: "Delete Snippet",
                       message: `${v.id} is deleted. Are you sure?`,
                       primaryAction: {
                         style: Alert.ActionStyle.Destructive,
-                        title: "delete",
+                        title: "Delete",
                         onAction: () => {
                           deleteSnippet(v.id);
                           push(<Search />);
@@ -62,7 +64,8 @@ const SearchSection = ({ items, title }: Props) => {
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 ></Action>
                 <Action
-                  title="back"
+                  icon={Icon.ArrowClockwise}
+                  title="Back"
                   onAction={() => {
                     popToRoot();
                   }}

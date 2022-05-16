@@ -9,6 +9,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   Detail,
+  Icon,
 } from "@raycast/api";
 
 import fs from "fs";
@@ -85,10 +86,11 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
           actions={
             <ActionPanel>
               <Action.SubmitForm
+                icon={Icon.Plus}
                 onSubmit={async (v: Values) => {
                   if (v.title === "" || v.prefix === "" || v.body === "") {
                     showToast({
-                      title: "error",
+                      title: "Error",
                       message: "title, prefix and body are required",
                       style: Toast.Style.Failure,
                     });
@@ -115,7 +117,8 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
                 }}
               ></Action.SubmitForm>
               <Action
-                title="back"
+                icon={Icon.ArrowClockwise}
+                title="Back"
                 onAction={() => {
                   popToRoot();
                 }}
