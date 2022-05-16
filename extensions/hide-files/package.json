@@ -71,8 +71,8 @@
           "name": "folderFirst",
           "type": "checkbox",
           "required": true,
-          "title": "Advance Preferences",
-          "label": "Folder First",
+          "title": "Advanced Preferences",
+          "label": "Folders First",
           "description": "Show folders first.",
           "default": false
         }

@@ -55,7 +55,7 @@ export default function Command() {
         key={`empty-localDirectory`}
         title={"No hidden files"}
         icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
-        description={`You can hide files via "Hide Files" command`}
+        description={`You can hide files via the "Hide Files" command`}
       />
       {localHiddenDirectory.map(
         (value, index) =>

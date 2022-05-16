@@ -7,7 +7,7 @@ export default async () => {
   if (fileSystemItems.length === 0) {
     return;
   }
-  await showHUD("Hidden selected files");
+  await showHUD("Hiding selected files…");
   const hideDesktopFilesCommand = `chflags hidden ${hiddenFiles}`;
   spawn(hideDesktopFilesCommand, { shell: true });
 
