@@ -77,14 +77,6 @@
           "default": false
         }
       ]
-    },
-    {
-      "name": "toggle-system-files-visibility",
-      "title": "Toggle System Hidden Files",
-      "icon": "extension-icon.png",
-      "subtitle": "Hide Files",
-      "description": "Hide or show all system hidden files.",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
