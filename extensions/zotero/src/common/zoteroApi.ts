@@ -172,6 +172,11 @@ async function getLatestModifyDate(): Promise<Date> {
   }
 
   statement.free();
+  db.close();
+
+  if (results.length < 1) {
+    return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+  }
 
   let latest = new Date(results[0].modified);
   for (const row of results) {
@@ -181,7 +186,6 @@ async function getLatestModifyDate(): Promise<Date> {
     }
   }
 
-  db.close();
   return latest;
 }
 
