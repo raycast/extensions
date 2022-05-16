@@ -18,15 +18,19 @@ export function ActionEditPageProperty(props: {
   icon?: Image.ImageLike;
   customOptions?: DatabasePropertyOption[];
 }): JSX.Element | null {
-  const { databaseProperty, pageId, pageProperty, shortcut, onPageUpdated } = props;
+  const {
+    databaseProperty,
+    pageId,
+    pageProperty,
+    shortcut,
+    onPageUpdated,
+    icon = { source: "icon/" + databaseProperty.type + ".png", tintColor: Color.PrimaryText },
+    customOptions: options = databaseProperty.options || [],
+  } = props;
 
-  const [users, storeUsers] = useAtom(usersAtom);
+  const [{ value: users }, storeUsers] = useAtom(usersAtom);
 
   const title = "Set " + databaseProperty.name;
-  const icon = props.icon
-    ? props.icon
-    : { source: "icon/" + databaseProperty.type + ".png", tintColor: Color.PrimaryText };
-  const options = props.customOptions ? props.customOptions : databaseProperty.options || [];
 
   async function setPageProperty(patch: Parameters<typeof patchPage>[1]) {
     showToast({
@@ -56,9 +60,7 @@ export function ActionEditPageProperty(props: {
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
           icon={{ source: "icon/" + databaseProperty.type + "_" + value + ".png", tintColor: Color.PrimaryText }}
           shortcut={shortcut}
-          onAction={function () {
-            setPageProperty({ [databaseProperty.id]: { checkbox: !value } });
-          }}
+          onAction={() => setPageProperty({ [databaseProperty.id]: { checkbox: !value } })}
         />
       );
     }
@@ -67,29 +69,27 @@ export function ActionEditPageProperty(props: {
       const value = pageProperty && "select" in pageProperty ? pageProperty.select?.id : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map(function (opt) {
-            return (
-              <Action
-                key={opt.id}
-                icon={
-                  (opt.icon ? opt.icon : opt.id !== "_select_null_")
-                    ? {
-                        source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
-                        tintColor: notionColorToTintColor(opt.color),
-                      }
-                    : undefined
+          {(options as DatabasePropertyOption[])?.map((opt) => (
+            <Action
+              key={opt.id}
+              icon={
+                (opt.icon ? opt.icon : opt.id !== "_select_null_")
+                  ? {
+                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      tintColor: notionColorToTintColor(opt.color),
+                    }
+                  : undefined
+              }
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              onAction={() => {
+                if (opt.id && opt.id !== "_select_null_") {
+                  setPageProperty({ [databaseProperty.id]: { select: { id: opt.id } } });
+                } else {
+                  setPageProperty({ [databaseProperty.id]: { select: null } });
                 }
-                title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
-                onAction={function () {
-                  if (opt.id && opt.id !== "_select_null_") {
-                    setPageProperty({ [databaseProperty.id]: { select: { id: opt.id } } });
-                  } else {
-                    setPageProperty({ [databaseProperty.id]: { select: null } });
-                  }
-                }}
-              />
-            );
-          })}
+              }}
+            />
+          ))}
         </ActionPanel.Submenu>
       );
     }
@@ -104,7 +104,7 @@ export function ActionEditPageProperty(props: {
           >
             <Action
               title="Now"
-              onAction={function () {
+              onAction={() => {
                 const date = value ? value : { start: new Date(Date.now()).toISOString() };
                 date.start = new Date(Date.now()).toISOString();
                 setPageProperty({ [databaseProperty.id]: { date } });
@@ -117,7 +117,7 @@ export function ActionEditPageProperty(props: {
           >
             <Action
               title="Now"
-              onAction={function () {
+              onAction={() => {
                 const date = value
                   ? value
                   : { start: new Date(Date.now()).toISOString(), end: new Date(Date.now()).toISOString() };
@@ -135,7 +135,7 @@ export function ActionEditPageProperty(props: {
       const multiSelectIds = value.map((selection) => selection.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
-          {(options as DatabasePropertyOption[])?.map(function (opt) {
+          {(options as DatabasePropertyOption[])?.map((opt) => {
             if (!opt.id) {
               return null;
             }
@@ -147,16 +147,14 @@ export function ActionEditPageProperty(props: {
                   tintColor: notionColorToTintColor(opt.color),
                 }}
                 title={opt.name}
-                onAction={function () {
+                onAction={() => {
                   if (!opt.id) {
                     return null;
                   }
                   if (opt.id && multiSelectIds.includes(opt.id)) {
                     setPageProperty({
                       [databaseProperty.id]: {
-                        multi_select: value.filter(function (o) {
-                          return o.id !== opt.id;
-                        }),
+                        multi_select: value.filter((o) => o.id !== opt.id),
                       },
                     });
                   } else {
@@ -180,48 +178,42 @@ export function ActionEditPageProperty(props: {
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Section>
-            {value.map(function (user) {
-              return (
-                <Action
-                  key={user.id}
-                  icon={
-                    "avatar_url" in user && user.avatar_url
-                      ? { source: user.avatar_url, mask: Image.Mask.Circle }
-                      : undefined
-                  }
-                  title={("name" in user ? user.name : "Unknown") + "  ✓"}
-                  onAction={function () {
-                    setPageProperty({
-                      [databaseProperty.id]: {
-                        people: value.filter(function (o) {
-                          return o.id !== user.id;
-                        }),
-                      },
-                    });
-                  }}
-                />
-              );
-            })}
+            {value.map((user) => (
+              <Action
+                key={user.id}
+                icon={
+                  "avatar_url" in user && user.avatar_url
+                    ? { source: user.avatar_url, mask: Image.Mask.Circle }
+                    : undefined
+                }
+                title={("name" in user ? user.name : "Unknown") + "  ✓"}
+                onAction={() =>
+                  setPageProperty({
+                    [databaseProperty.id]: {
+                      people: value.filter((o) => o.id !== user.id),
+                    },
+                  })
+                }
+              />
+            ))}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {users.map(function (user) {
-              if (!peopleIds.includes(user.id)) {
-                return (
-                  <Action
-                    key={user.id}
-                    icon={user?.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : undefined}
-                    title={user?.name ? user.name : "Unknown"}
-                    onAction={async function () {
-                      setPageProperty({
-                        [databaseProperty.id]: {
-                          multi_select: [...value, { id: user.id }],
-                        },
-                      });
-                    }}
-                  />
-                );
-              }
-            })}
+            {users
+              .filter((user) => !peopleIds.includes(user.id))
+              .map((user) => (
+                <Action
+                  key={user.id}
+                  icon={user?.avatar_url ? { source: user.avatar_url, mask: Image.Mask.Circle } : undefined}
+                  title={user?.name ? user.name : "Unknown"}
+                  onAction={() =>
+                    setPageProperty({
+                      [databaseProperty.id]: {
+                        people: [...value, { id: user.id }],
+                      },
+                    })
+                  }
+                />
+              ))}
           </ActionPanel.Section>
         </ActionPanel.Submenu>
       );

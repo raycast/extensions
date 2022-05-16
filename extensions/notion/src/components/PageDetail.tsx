@@ -8,7 +8,7 @@ import { handleOnOpenPage } from "../utils/openPage";
 import { AppendToPageForm } from "./forms";
 
 export function PageDetail(props: { page: Page }): JSX.Element {
-  const page = props.page;
+  const { page } = props;
   const pageName = (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
 
   const [pageContent, setPageContent] = useState<PageContent>();

@@ -7,7 +7,7 @@ import { recentlyOpenedPagesAtom } from "./utils/state";
 import { PageListItem } from "./components";
 
 export default function SearchList(): JSX.Element {
-  const recentlyOpenedPages = useAtomValue(recentlyOpenedPagesAtom);
+  const { value: recentlyOpenedPages } = useAtomValue(recentlyOpenedPagesAtom);
   const [pages, setPages] = useState<Page[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,7 @@ export default function SearchList(): JSX.Element {
       setIsLoading(true);
 
       const searchedPages = await search(searchText);
-      if (searchedPages && searchedPages[0]) {
+      if (searchedPages.length) {
         setPages(searchedPages);
       }
       setIsLoading(false);

@@ -19,13 +19,14 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   } = props;
 
   // Get kanban view settings
-  const kanbanView = databaseView?.kanban;
-  const propertyId = kanbanView?.property_id;
-  const backlogIds = kanbanView?.backlog_ids ? kanbanView.backlog_ids : [];
-  const notStartedIds = kanbanView?.not_started_ids ? kanbanView.not_started_ids : [];
-  const startedIds = kanbanView?.started_ids ? kanbanView.started_ids : [];
-  const completedIds = kanbanView?.completed_ids ? kanbanView.completed_ids : [];
-  const canceledIds = kanbanView?.canceled_ids ? kanbanView.canceled_ids : [];
+  const {
+    property_id: propertyId,
+    backlog_ids: backlogIds = [],
+    not_started_ids: notStartedIds = [],
+    started_ids: startedIds = [],
+    completed_ids: completedIds = [],
+    canceled_ids: canceledIds = [],
+  } = databaseView?.kanban || {};
 
   if (!propertyId) {
     showToast({
@@ -112,7 +113,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   const databaseSections: { pages: Page[]; name: string; icon: Image.ImageLike; id: string }[] = [];
   const tempSections: Record<string, Page[]> = {};
 
-  databasePages.forEach(function (p) {
+  databasePages.forEach((p) => {
     const prop = Object.values(p.properties).find((x) => x.id === propertyId);
 
     const propId = prop && "select" in prop && prop.select?.id ? prop.select.id : "_select_null_";
@@ -126,8 +127,9 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
   const optionsMap: Record<string, DatabasePropertyOption> = {};
   const customOptions: DatabasePropertyOption[] = [];
 
-  (statusProperty.options as DatabasePropertyOption[])
-    ?.sort(function (dpa, dpb) {
+  statusProperty.options
+    ?.filter((x) => x.id)
+    .sort((dpa, dpb) => {
       const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
       const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;
 
@@ -141,7 +143,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
 
       return 0;
     })
-    .forEach(function (option) {
+    .forEach((option) => {
       if (!option.id) {
         return;
       }
@@ -154,7 +156,7 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
       });
     });
 
-  sectionIds.forEach(function (sectionId: string) {
+  sectionIds.forEach((sectionId) => {
     if (!tempSections[sectionId]) return;
 
     databaseSections.push({
@@ -167,40 +169,38 @@ export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null
 
   const SectionElement: JSX.Element[] = [];
 
-  databaseSections?.map(function (ds) {
+  databaseSections?.map((ds) => {
     SectionElement.push(
       <List.Section
         key={`kanban-section-${ds.id}`}
         title={ds.name}
         subtitle={ds?.pages?.length + (ds?.pages?.length > 1 ? " Items" : " Item")}
       >
-        {ds?.pages?.map(function (p) {
-          return (
-            <PageListItem
-              key={`kanban-section-${ds.id}-page-${p.id}`}
-              keywords={[ds.name]}
-              page={p}
-              icon={ds.icon}
-              customActions={[
-                <ActionEditPageProperty
-                  key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
-                  databaseProperty={statusProperty}
-                  customOptions={customOptions}
-                  pageId={p.id}
-                  pageProperty={p.properties[propertyId]}
-                  icon={{ source: "./icon/kanban_status_started.png", tintColor: Color.PrimaryText }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  onPageUpdated={onPageUpdated}
-                />,
-              ]}
-              databaseView={databaseView}
-              databaseProperties={databaseProperties}
-              saveDatabaseView={saveDatabaseView}
-              onPageUpdated={onPageUpdated}
-              onPageCreated={onPageCreated}
-            />
-          );
-        })}
+        {ds?.pages?.map((p) => (
+          <PageListItem
+            key={`kanban-section-${ds.id}-page-${p.id}`}
+            keywords={[ds.name]}
+            page={p}
+            icon={ds.icon}
+            customActions={[
+              <ActionEditPageProperty
+                key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`}
+                databaseProperty={statusProperty}
+                customOptions={customOptions}
+                pageId={p.id}
+                pageProperty={p.properties[propertyId]}
+                icon={{ source: "./icon/kanban_status_started.png", tintColor: Color.PrimaryText }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                onPageUpdated={onPageUpdated}
+              />,
+            ]}
+            databaseView={databaseView}
+            databaseProperties={databaseProperties}
+            saveDatabaseView={saveDatabaseView}
+            onPageUpdated={onPageUpdated}
+            onPageCreated={onPageCreated}
+          />
+        ))}
       </List.Section>
     );
   });

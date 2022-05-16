@@ -12,20 +12,20 @@ export function ActionSetVisibleProperties(props: {
   onSelect: (propertyId: string) => void;
   onUnselect: (propertyId: string) => void;
 }): JSX.Element {
-  const title = props.title ? props.title : "Show / Hide Properties...";
-  const icon = props.icon ? props.icon : { source: "./icon/shown.png", tintColor: Color.PrimaryText };
-  const selectedPropertiesIds = props.selectedPropertiesIds ? props.selectedPropertiesIds : [];
-  const databaseProperties = props.databaseProperties;
-  const onSelect = props.onSelect;
-  const onUnselect = props.onUnselect;
+  const {
+    databaseProperties,
+    onSelect,
+    onUnselect,
+    title = "Show / Hide Properties...",
+    icon = { source: "./icon/shown.png", tintColor: Color.PrimaryText },
+    selectedPropertiesIds = [],
+  } = props;
 
   return (
     <ActionPanel.Submenu title={title} icon={icon}>
       <ActionPanel.Section>
-        {selectedPropertiesIds?.map(function (propertyId) {
-          const property = databaseProperties.filter(function (dp) {
-            return dp.id === propertyId;
-          })[0];
+        {selectedPropertiesIds?.map((propertyId) => {
+          const property = databaseProperties.find((dp) => dp.id === propertyId);
           if (!property) return;
 
           return (
@@ -33,28 +33,22 @@ export function ActionSetVisibleProperties(props: {
               key={`selected-property-${property.id}`}
               icon={{ source: "./icon/" + property.type + ".png", tintColor: Color.PrimaryText }}
               title={property.name + "  ✓"}
-              onAction={function () {
-                onUnselect(property.id);
-              }}
+              onAction={() => onUnselect(property.id)}
             />
           );
         })}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {databaseProperties?.map(function (dp: DatabaseProperty) {
-          if (!selectedPropertiesIds.includes(dp.id)) {
-            return (
-              <Action
-                key={`unselected-property-${dp.id}`}
-                icon={{ source: "./icon/" + dp.type + "_secondary.png", tintColor: Color.SecondaryText }}
-                title={dp.name}
-                onAction={function () {
-                  onSelect(dp.id);
-                }}
-              />
-            );
-          }
-        })}
+        {databaseProperties
+          ?.filter((dp) => !selectedPropertiesIds.includes(dp.id))
+          .map((dp) => (
+            <Action
+              key={`unselected-property-${dp.id}`}
+              icon={{ source: "./icon/" + dp.type + "_secondary.png", tintColor: Color.SecondaryText }}
+              title={dp.name}
+              onAction={() => onSelect(dp.id)}
+            />
+          ))}
       </ActionPanel.Section>
     </ActionPanel.Submenu>
   );

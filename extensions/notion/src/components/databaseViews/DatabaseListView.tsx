@@ -16,19 +16,17 @@ export function DatabaseListView(props: DatabaseViewProps): JSX.Element {
 
   return (
     <List.Section key="database-view-list" title="Recent">
-      {databasePages?.map(function (p) {
-        return (
-          <PageListItem
-            key={`database-${databaseId}-page-${p.id}`}
-            page={p}
-            databaseView={databaseView}
-            databaseProperties={databaseProperties}
-            saveDatabaseView={saveDatabaseView}
-            onPageUpdated={onPageUpdated}
-            onPageCreated={onPageCreated}
-          />
-        );
-      })}
+      {databasePages?.map((p) => (
+        <PageListItem
+          key={`database-${databaseId}-page-${p.id}`}
+          page={p}
+          databaseView={databaseView}
+          databaseProperties={databaseProperties}
+          saveDatabaseView={saveDatabaseView}
+          onPageUpdated={onPageUpdated}
+          onPageCreated={onPageCreated}
+        />
+      ))}
     </List.Section>
   );
 }

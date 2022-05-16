@@ -22,14 +22,16 @@ import {
 } from "../../utils/state";
 
 export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?: (page: Page) => void }): JSX.Element {
-  const presetDatabaseId = props.databaseId;
+  const { databaseId: presetDatabaseId, onPageCreated } = props;
 
   const [databaseId, setDatabaseId] = useState<string | null>(presetDatabaseId ? presetDatabaseId : null);
-  const [databaseView, setDatabaseView] = useAtom(databaseViewsAtom(databaseId || "__no_id__"));
-  const [databaseProperties, setDatabaseProperties] = useAtom(databasePropertiesAtom(databaseId || "__no_id__"));
-  const [users, storeUsers] = useAtom(usersAtom);
-  const [databases, storeDatabases] = useAtom(databasesAtom);
-  const [recentlyOpenedPages, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
+  const [{ value: databaseView }, setDatabaseView] = useAtom(databaseViewsAtom(databaseId || "__no_id__"));
+  const [{ value: databaseProperties }, setDatabaseProperties] = useAtom(
+    databasePropertiesAtom(databaseId || "__no_id__")
+  );
+  const [{ value: users }, storeUsers] = useAtom(usersAtom);
+  const [{ value: databases }, storeDatabases] = useAtom(databasesAtom);
+  const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
   const [relationsPages, setRelationsPages] = useState<Record<string, Page[]>>(
     databaseProperties
       .filter((cdp) => cdp.type === "relation" && cdp.relation_id)
@@ -54,7 +56,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
     const page = await createDatabasePage(values);
     setIsLoading(false);
     if (page) {
-      props.onPageCreated?.(page);
+      onPageCreated?.(page);
 
       if (openPage) {
         handleOnOpenPage(page, storeRecentlyOpenedPage);
@@ -107,7 +109,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
     setIsLoading(true);
 
     // Fetch relation pages
-    databaseProperties.forEach(async function (cdp: DatabaseProperty) {
+    databaseProperties.forEach(async (cdp: DatabaseProperty) => {
       if (cdp.type === "relation" && cdp.relation_id) {
         const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined);
         if (fetchedRelationPages.length > 0) {
@@ -139,12 +141,8 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
   }
 
   // Get Title Property
-  const titleProperty = databaseProperties?.filter(function (dp) {
-    return dp.id === "title";
-  })[0];
-  const databasePropertiesButTitle = databaseProperties?.filter(function (dp) {
-    return dp.id !== "title";
-  });
+  const titleProperty = databaseProperties?.find((dp) => dp.id === "title");
+  const databasePropertiesButTitle = databaseProperties?.filter((dp) => dp.id !== "title");
   return (
     <Form
       isLoading={isLoading || isLoadingDatabases}
@@ -168,7 +166,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
               key="set-visible-inputs"
               databaseProperties={databasePropertiesButTitle || []}
               selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
-              onSelect={function (propertyId: string) {
+              onSelect={(propertyId) => {
                 const databaseViewCopy = (databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}) as DatabaseView;
                 if (!databaseViewCopy.create_properties) {
                   databaseViewCopy.create_properties = databaseProperties.map((x) => x.id);
@@ -176,7 +174,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
                 databaseViewCopy.create_properties.push(propertyId);
                 saveDatabaseView(databaseViewCopy);
               }}
-              onUnselect={function (propertyId: string) {
+              onUnselect={(propertyId) => {
                 const databaseViewCopy = (databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}) as DatabaseView;
                 if (!databaseViewCopy.create_properties) {
                   databaseViewCopy.create_properties = databaseProperties.map((x) => x.id);
@@ -222,14 +220,13 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
         placeholder="Title"
       />
       {databaseProperties
-        ?.filter(function (dp) {
-          return (
+        ?.filter(
+          (dp) =>
             dp.id !== "title" &&
             dp.type !== "title" &&
             (!databaseView?.create_properties || databaseView.create_properties.includes(dp.id))
-          );
-        })
-        .sort(function (dpa, dpb) {
+        )
+        .sort((dpa, dpb) => {
           if (!databaseView?.create_properties) {
             return 0;
           }
@@ -349,10 +346,8 @@ Per Notion limitations, these markdown attributes are not supported:
 
 function validateForm(values: Form.Values): boolean {
   const valueKeys = Object.keys(values) as string[];
-  const titleKey = valueKeys.filter(function (vk) {
-    return vk.includes("property::title");
-  })[0];
-  if (!values[titleKey]) {
+  const titleKey = valueKeys.find((vk) => vk.includes("property::title"));
+  if (!titleKey || !values[titleKey]) {
     showToast({
       style: Toast.Style.Failure,
       title: "Title Required",

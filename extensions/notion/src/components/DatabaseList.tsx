@@ -24,14 +24,18 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") +
     (databasePage.title ? databasePage.title : "Untitled");
 
-  const [recentlyOpenedPages, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
+  const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
   const [databasePages, setDatabasePages] = useState<Page[]>(
     recentlyOpenedPages.filter((page) => page.parent_database_id === databaseId)
   );
   const [searchText, setSearchText] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
-  const [databaseView, setDatabaseView] = useAtom(databaseViewsAtom(databaseId));
-  const [databaseProperties, setDatabaseProperties] = useAtom(databasePropertiesAtom(databaseId));
+  const [{ loading: isLoadingDatabaseView, value: databaseView }, setDatabaseView] = useAtom(
+    databaseViewsAtom(databaseId)
+  );
+  const [{ loading: isLoadingDatabaseProperties, value: databaseProperties }, setDatabaseProperties] = useAtom(
+    databasePropertiesAtom(databaseId)
+  );
 
   useEffect(() => {
     storeRecentlyOpenedPage(databasePage);
@@ -68,6 +72,10 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     showToast({
       title: "View Updated",
     });
+  }
+
+  if (isLoadingDatabaseProperties || isLoadingDatabaseView) {
+    return <List isLoading />;
   }
 
   const viewType = databaseView?.type ? databaseView.type : "list";

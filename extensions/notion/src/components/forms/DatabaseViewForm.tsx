@@ -14,10 +14,7 @@ export function DatabaseViewForm(props: {
   saveDatabaseView: (newDatabaseView: DatabaseView) => void;
   isDefaultView: boolean;
 }): JSX.Element {
-  const presetDatabaseId = props.databaseId;
-  const databaseView = props.databaseView;
-  const saveDatabaseView = props.saveDatabaseView;
-  const isDefaultView = props.isDefaultView;
+  const { databaseId: presetDatabaseId, databaseView, saveDatabaseView, isDefaultView } = props;
 
   const currentViewName = databaseView?.name ? databaseView.name : null;
 
@@ -50,9 +47,9 @@ export function DatabaseViewForm(props: {
     pop();
   }
 
-  const [databases, storeDatabases] = useAtom(databasesAtom);
+  const [{ value: databases }, storeDatabases] = useAtom(databasesAtom);
   const [databaseId, setDatabaseId] = useState(presetDatabaseId);
-  const [databaseProperties, setDatabaseProperties] = useAtom(databasePropertiesAtom(databaseId));
+  const [{ value: databaseProperties }, setDatabaseProperties] = useAtom(databasePropertiesAtom(databaseId));
   const [viewType, setViewType] = useState<"kanban" | "list">(databaseView?.type ? databaseView.type : "list");
   const [isLoadingDatabases, setIsLoadingDatadases] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,9 +92,7 @@ export function DatabaseViewForm(props: {
   // Set selected view form
   useEffect(() => {
     if (databaseProperties && viewType === "kanban") {
-      const hasSelect = databaseProperties.some(function (dp) {
-        return dp.type === "select";
-      });
+      const hasSelect = databaseProperties.some((dp) => dp.type === "select");
 
       if (!hasSelect) {
         showToast({
@@ -270,16 +265,14 @@ function KanbanViewFormItem(props: {
       value={statusPropertyId}
       onChange={updateStatusPropertyId}
     >
-      {selectProperties.map(function (dp) {
-        return (
-          <Form.Dropdown.Item
-            key={`kanban-status-property-${dp.id}`}
-            value={dp.id}
-            title={dp.name ? dp.name : "Untitled"}
-            icon={{ source: "./icon/select.png", tintColor: Color.PrimaryText }}
-          />
-        );
-      })}
+      {selectProperties.map((dp) => (
+        <Form.Dropdown.Item
+          key={`kanban-status-property-${dp.id}`}
+          value={dp.id}
+          title={dp.name ? dp.name : "Untitled"}
+          icon={{ source: "./icon/select.png", tintColor: Color.PrimaryText }}
+        />
+      ))}
     </Form.Dropdown>,
   ].concat(
     statusProperty

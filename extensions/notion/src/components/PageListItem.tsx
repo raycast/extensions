@@ -23,12 +23,17 @@ export function PageListItem(props: {
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
 }): JSX.Element {
-  const { page, customActions, databaseProperties, databaseView, saveDatabaseView, onPageCreated, onPageUpdated } =
-    props;
-  const pageId = page.id;
-  const icon = props.icon ? props.icon : pageIcon(page);
-
-  const keywords: string[] = props.keywords ? props.keywords : [];
+  const {
+    page,
+    customActions,
+    databaseProperties,
+    databaseView,
+    saveDatabaseView,
+    onPageCreated,
+    onPageUpdated,
+    icon = pageIcon(page),
+    keywords = [],
+  } = props;
 
   const storeRecentlyOpenedPage = useSetAtom(recentlyOpenedPagesAtom);
 
@@ -43,7 +48,7 @@ export function PageListItem(props: {
 
   if (databaseView && databaseView.properties) {
     const visiblePropertiesIds = Object.keys(databaseView.properties);
-    if (visiblePropertiesIds[0]) {
+    if (visiblePropertiesIds.length) {
       const accessoryTitles: string[] = [];
       visiblePropertiesIds
         .map((propId) => Object.values(page.properties).find((x) => x.id == propId))
@@ -59,14 +64,16 @@ export function PageListItem(props: {
     }
   }
 
-  const quickEditProperties = databaseProperties?.filter(function (property) {
-    return ["checkbox", "select", "multi_select", "people"].includes(property.type);
-  });
+  const quickEditProperties = databaseProperties?.filter((property) =>
+    ["checkbox", "select", "multi_select", "people"].includes(property.type)
+  );
 
   const visiblePropertiesIds: string[] = [];
   if (databaseView && databaseView.properties) {
-    databaseProperties?.forEach(function (dp: DatabaseProperty) {
-      if (databaseView?.properties && databaseView.properties[dp.id]) visiblePropertiesIds.push(dp.id);
+    databaseProperties?.forEach((dp: DatabaseProperty) => {
+      if (databaseView?.properties && databaseView.properties[dp.id]) {
+        visiblePropertiesIds.push(dp.id);
+      }
     });
   }
 
@@ -96,22 +103,19 @@ export function PageListItem(props: {
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
-                key={`page-${pageId}-action-edit-property`}
                 title="Edit Property"
                 icon={{ source: "icon/edit_page_property.png", tintColor: Color.PrimaryText }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               >
-                {quickEditProperties?.map(function (dp: DatabaseProperty) {
-                  return (
-                    <ActionEditPageProperty
-                      key={`page-${pageId}-action-edit-property-${dp.id}`}
-                      databaseProperty={dp}
-                      pageId={page.id}
-                      pageProperty={page.properties[dp.id]}
-                      onPageUpdated={onPageUpdated}
-                    />
-                  );
-                })}
+                {quickEditProperties?.map((dp: DatabaseProperty) => (
+                  <ActionEditPageProperty
+                    key={dp.id}
+                    databaseProperty={dp}
+                    pageId={page.id}
+                    pageProperty={page.properties[dp.id]}
+                    onPageUpdated={onPageUpdated}
+                  />
+                ))}
               </ActionPanel.Submenu>
             ) : null}
           </ActionPanel.Section>

@@ -152,7 +152,7 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 
     const databaseProperties: DatabaseProperty[] = [];
 
-    propertyNames.forEach(function (name: string) {
+    propertyNames.forEach((name) => {
       const property = database.properties[name];
 
       if (supportedPropTypes.indexOf(property.type) === -1) {
@@ -267,7 +267,7 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
       arg.children = markdownToBlocks(content);
     }
 
-    Object.keys(props).forEach(function (formId) {
+    Object.keys(props).forEach((formId) => {
       const type = formId.match(/(?<=property::).*(?=::)/g)?.[0];
       if (!type) {
         return;
@@ -343,23 +343,17 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
             break;
           case "multi_select":
             arg.properties[propId] = {
-              multi_select: value.map(function (multi_select_id: string) {
-                return { id: multi_select_id };
-              }),
+              multi_select: value.map((multi_select_id: string) => ({ id: multi_select_id })),
             };
             break;
           case "relation":
             arg.properties[propId] = {
-              relation: value.map(function (relation_page_id: string) {
-                return { id: relation_page_id };
-              }),
+              relation: value.map((relation_page_id: string) => ({ id: relation_page_id })),
             };
             break;
           case "people":
             arg.properties[propId] = {
-              people: value.map(function (user_id: string) {
-                return { id: user_id };
-              }),
+              people: value.map((user_id: string) => ({ id: user_id })),
             };
             break;
         }
@@ -565,7 +559,7 @@ function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion
 
   if (jsonPage.object === "page" && "properties" in jsonPage) {
     page.properties = jsonPage.properties;
-    Object.keys(jsonPage.properties).forEach(function (pk) {
+    Object.keys(jsonPage.properties).forEach((pk) => {
       const property = jsonPage.properties[pk];
 
       // Save page title
@@ -651,11 +645,7 @@ export function extractPropertyValue(
     case "select":
       return property.select?.name || null;
     case "multi_select":
-      return property.multi_select
-        .map(function (selection) {
-          return selection.name;
-        })
-        .join(", ");
+      return property.multi_select.map((selection) => selection.name).join(", ");
     case "string":
       return property.string;
     case "boolean":

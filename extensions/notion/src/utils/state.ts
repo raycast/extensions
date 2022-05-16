@@ -1,20 +1,14 @@
 import { atom } from "jotai";
 import { atomFamily } from "jotai/utils";
-import { LocalStorage } from "@raycast/api";
 import { Page, User, Database, DatabaseView, DatabaseProperty } from "./types";
+import { atomWithLocalStorage } from "./atomWithLocalStorage";
 
-const primitiveRecentlyOpenedPages = atom<Page[]>([]);
-primitiveRecentlyOpenedPages.onMount = (setAtom) => {
-  LocalStorage.getItem("RECENTLY_OPENED_PAGES").then((data) => {
-    const parsed = typeof data === "string" ? JSON.parse(data) || [] : [];
-    setAtom(Array.isArray(parsed) ? parsed : []);
-  });
-};
+const primitiveRecentlyOpenedPages = atomWithLocalStorage<Page[]>("RECENTLY_OPENED_PAGES", []);
 
 export const recentlyOpenedPagesAtom = atom(
   (get) => get(primitiveRecentlyOpenedPages),
-  async (get, set, page: Page) => {
-    let recentlyOpenPages = get(primitiveRecentlyOpenedPages);
+  (get, set, page: Page) => {
+    let { value: recentlyOpenPages } = get(primitiveRecentlyOpenedPages);
 
     const cachedPageIndex = recentlyOpenPages.findIndex((x) => x.id === page.id);
 
@@ -38,81 +32,48 @@ export const recentlyOpenedPagesAtom = atom(
 
     recentlyOpenPages = recentlyOpenPages.slice(0, 20);
 
-    set(primitiveRecentlyOpenedPages, recentlyOpenPages);
-
-    await LocalStorage.setItem("RECENTLY_OPENED_PAGES", JSON.stringify(recentlyOpenPages));
+    return set(primitiveRecentlyOpenedPages, recentlyOpenPages);
   }
 );
 
-const primitiveUsers = atom<User[]>([]);
-primitiveUsers.onMount = (setAtom) => {
-  LocalStorage.getItem("USERS").then((data) => {
-    const parsed = typeof data === "string" ? JSON.parse(data) || [] : [];
-    setAtom(Array.isArray(parsed) ? parsed : []);
-  });
-};
+export const usersAtom = atomWithLocalStorage<User[]>("USERS", []);
 
-export const usersAtom = atom(
-  (get) => get(primitiveUsers),
-  async (get, set, users: User[]) => {
-    set(primitiveUsers, users);
-    await LocalStorage.setItem("USERS", JSON.stringify(users));
-  }
+export const databasesAtom = atomWithLocalStorage<Database[]>("DATABASES", []);
+
+const primitiveDatabaseViews = atomWithLocalStorage<{ [databaseId: string]: DatabaseView | undefined }>(
+  "DATABASES_VIEWS",
+  {}
 );
-
-const primitiveDatabases = atom<Database[]>([]);
-primitiveDatabases.onMount = (setAtom) => {
-  LocalStorage.getItem("DATABASES").then((data) => {
-    const parsed = typeof data === "string" ? JSON.parse(data) || [] : [];
-    setAtom(Array.isArray(parsed) ? parsed : []);
-  });
-};
-
-export const databasesAtom = atom(
-  (get) => get(primitiveDatabases),
-  async (get, set, databases: Database[]) => {
-    set(primitiveDatabases, databases);
-    await LocalStorage.setItem("DATABASES", JSON.stringify(databases));
-  }
-);
-
-const primitiveDatabaseViews = atom<{ [databaseId: string]: DatabaseView | undefined }>({});
-primitiveDatabaseViews.onMount = (setAtom) => {
-  LocalStorage.getItem("DATABASES_VIEWS").then((data) => {
-    const parsed = typeof data === "string" ? JSON.parse(data) || [] : [];
-    setAtom(typeof parsed === "object" ? parsed : {});
-  });
-};
-
 export const databaseViewsAtom = atomFamily((databaseId: string) =>
   atom(
-    (get) => get(primitiveDatabaseViews)[databaseId],
-    async (get, set, databaseView: DatabaseView | undefined) => {
-      const newData = { ...get(primitiveDatabaseViews), [databaseId]: databaseView };
-      set(primitiveDatabaseViews, newData);
-      await LocalStorage.setItem("DATABASES_VIEWS", JSON.stringify(newData));
+    (get) => {
+      const { loading, value } = get(primitiveDatabaseViews);
+      return { loading, value: value[databaseId] };
+    },
+    (get, set, databaseView: DatabaseView | undefined) => {
+      const newData = { ...get(primitiveDatabaseViews).value, [databaseId]: databaseView };
+      return set(primitiveDatabaseViews, newData);
     }
   )
 );
 
-const primitiveDatabaseProperties = atom<{ [databaseId: string]: DatabaseProperty[] | undefined }>({});
-primitiveDatabaseProperties.onMount = (setAtom) => {
-  LocalStorage.getItem("DATABASE_PROPERTIES").then((data) => {
-    const parsed = typeof data === "string" ? JSON.parse(data) || [] : [];
-    setAtom(typeof parsed === "object" ? parsed : {});
-  });
-};
+const primitiveDatabaseProperties = atomWithLocalStorage<{ [databaseId: string]: DatabaseProperty[] | undefined }>(
+  "DATABASE_PROPERTIES",
+  {}
+);
 
 export const databasePropertiesAtom = atomFamily((databaseId: string) =>
   atom(
-    (get) => get(primitiveDatabaseProperties)[databaseId] || [],
-    async (get, set, databaseProperties: DatabaseProperty[]) => {
+    (get) => {
+      const { loading, value } = get(primitiveDatabaseProperties);
+      return { loading, value: value[databaseId] || [] };
+    },
+    (get, set, databaseProperties: DatabaseProperty[]) => {
       const newData = {
-        ...get(primitiveDatabaseProperties),
+        ...get(primitiveDatabaseProperties).value,
         [databaseId]: databaseProperties,
       };
-      set(primitiveDatabaseProperties, newData);
-      await LocalStorage.setItem("DATABASE_PROPERTIES", JSON.stringify(newData));
+      return set(primitiveDatabaseProperties, newData);
     }
   )
 );
