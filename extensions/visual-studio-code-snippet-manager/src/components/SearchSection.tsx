@@ -42,7 +42,7 @@ const SearchSection = ({ items, title }: Props) => {
                 <Action.Push
                   icon={Icon.Gear}
                   title={"Edit Snippet"}
-                  target={<Editor {...v} title={v.id} type="vscode-insiders" />}
+                  target={<Editor {...v} title={v.id} type="Visual Studio Code Insiders" />}
                 ></Action.Push>
                 <Action
                   icon={"Trash"}
