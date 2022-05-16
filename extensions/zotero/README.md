@@ -2,7 +2,7 @@
 
 This extension brings [Zotero](https://www.zotero.org/) search to raycast!
 
-![A screenshot of searching via raycast](./images/menu.png)
+![A screenshot of searching via raycast](./media/menu.png)
 
 ## Getting started
 
@@ -20,7 +20,7 @@ preferences:
 - **Whether to use Better BibTex Citation**: If you use the Better BibTex zotero extension, you can
   enable this flag to copy Better BibTex citation keys for any reference.
 
-![A screenshot of searching Zotero via Raycast](./images/preferences.png)
+![A screenshot of searching Zotero via Raycast](./media/preferences.png)
 
 ## Features
 
