@@ -10,7 +10,7 @@ Hide and unhide files in any Finder directory, including Desktop, Downloads, Doc
 - **Unhide Selected Files**: Unhide selected files in the current window of the Finder.
 - **Hide Files in Current Window**: Hide all files in the current window of the Finder.
 - **Unhide Files in Current Window**: Unhide all hidden files in the current window of the Finder.
-- **Toggle System Files Visibility**: Hide or Unhide all system hidden files.
+- **Toggle System Hidden Files**: Hide or Unhide all system hidden files.
 - **Manage Hidden Files**: Manage all the files you hide with this extension.
   - Open in Finder/Open with Default App
   - Reveal in Finder

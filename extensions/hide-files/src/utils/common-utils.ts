@@ -1,8 +1,7 @@
 import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
-import { imgExt, scriptFinderPath, scriptToggleFinderFileVisibility } from "./constants";
+import { imgExt } from "./constants";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import fse from "fs-extra";
-import { runAppleScript } from "run-applescript";
 import Values = LocalStorage.Values;
 
 export interface Preference extends Values {
@@ -16,24 +15,6 @@ export const getLocalStorage = async (key: string) => {
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
-};
-
-//with / at the end
-export const getFocusFinderPath = async () => {
-  try {
-    return await runAppleScript(scriptFinderPath);
-  } catch (e) {
-    return "Finder not running";
-  }
-};
-
-//with / at the end
-export const toggleFinderFilesVisibility = async (visibility: boolean) => {
-  try {
-    return await runAppleScript(scriptToggleFinderFileVisibility(visibility));
-  } catch (e) {
-    return "Finder not running";
-  }
 };
 
 export const fetchSelectedFileSystemItem = async () => {

@@ -1,11 +1,12 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { spawn } from "child_process";
-import { getFilesInDirectory, getFocusFinderPath } from "./utils/common-utils";
+import { getFilesInDirectory } from "./utils/common-utils";
 import { putFileOnHidePanel } from "./utils/hide-files-utils";
 import { homedir } from "os";
+import { getFocusFinderPath } from "./utils/applescript-utils";
 
 export default async () => {
-  closeMainWindow({ clearRootSearch: false });
+  await closeMainWindow({ clearRootSearch: false });
   const finderPath = await getFocusFinderPath();
   const desktopPath = `${homedir()}/Desktop/`;
   if (finderPath === desktopPath) {

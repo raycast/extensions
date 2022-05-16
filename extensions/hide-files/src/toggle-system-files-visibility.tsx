@@ -1,11 +1,14 @@
-import { LocalStorage, showHUD } from "@raycast/api";
-import { toggleFinderFilesVisibility } from "./utils/common-utils";
-import { LocalStorageKey } from "./utils/constants";
+import { closeMainWindow, showHUD } from "@raycast/api";
+import { readFinderFilesVisibility, toggleFinderFilesVisibility } from "./utils/applescript-utils";
 
 export default async () => {
-  const localStorage = await LocalStorage.getItem<boolean>(LocalStorageKey.LOCAL_HIDE_TOGGLE);
-  const currentState = typeof localStorage === "undefined" ? false : localStorage;
-  await showHUD(`${currentState ? "Hiding" : "Showing"} hidden files…`);
-  await toggleFinderFilesVisibility(!currentState);
-  await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_TOGGLE, !currentState);
+  await closeMainWindow({ clearRootSearch: false });
+  const finderFilesVisibility = await readFinderFilesVisibility();
+  if (finderFilesVisibility === "1") {
+    await toggleFinderFilesVisibility(false);
+    await showHUD(`Hiding hidden files…`);
+  } else if (finderFilesVisibility === "0") {
+    await toggleFinderFilesVisibility(true);
+    await showHUD(`Showing hidden files…`);
+  } else await showHUD(`Error: ${finderFilesVisibility}`);
 };
