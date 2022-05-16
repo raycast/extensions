@@ -14,7 +14,7 @@ export default async () => {
   } else {
     await showHUD("Hiding files in current window...");
   }
-  spawn("chflags", ["hidden", `${finderPath.replace(" ", `" "`)}*`], { shell: true });
+  spawn("chflags", ["hidden", `${finderPath.replaceAll(" ", `" "`)}*`], { shell: true });
 
   //add files to hide panel
   const fileSystemItems = getFilesInDirectory(finderPath);

@@ -62,7 +62,8 @@ export const getSelectedHiddenFiles = async () => {
     }
     fileSystemItems.forEach((value) => {
       const parsedPath = parse(value.path);
-      hiddenFiles = hiddenFiles + " " + parsedPath.dir.replace(" ", `" "`) + "/" + parsedPath.base.replace(" ", `" "`);
+      hiddenFiles =
+        hiddenFiles + " " + parsedPath.dir.replaceAll(" ", `" "`) + "/" + parsedPath.base.replaceAll(" ", `" "`);
     });
     return { fileSystemItems: fileSystemItems, hiddenFiles: hiddenFiles };
   } catch (e) {

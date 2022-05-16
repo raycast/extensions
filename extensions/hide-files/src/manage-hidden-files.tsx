@@ -85,7 +85,7 @@ export default function Command() {
                           JSON.stringify(_localDirectory)
                         );
                         setRefresh(refreshNumber());
-                        showHiddenFiles(value.path.replace(" ", `" "`));
+                        showHiddenFiles(value.path.replaceAll(" ", `" "`));
 
                         const options: Toast.Options = {
                           style: Toast.Style.Success,
@@ -120,7 +120,7 @@ export default function Command() {
                           "Are you sure you want to unhide all files?",
                           "Unhide All",
                           async () => {
-                            const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
+                            const filePaths = localHiddenDirectory.map((file) => file.path.replaceAll(" ", `" "`));
                             showHiddenFiles(filePaths.join(" "));
                             await LocalStorage.clear();
                             setRefresh(refreshNumber());

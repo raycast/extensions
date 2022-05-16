@@ -3,7 +3,7 @@
 Hide and unhide files in any Finder directory, including Desktop, Downloads, Documents, etc.
 
 **Tis:**
-- To use this extension, you need to give Raycast access to the Finder in **Security & Privacy**->**Automation**.
+- To use this extension, you need to give Raycast access to the Finder in **Security & Privacy**->**Automation** and **Accessibility**.
 
 **Command**
 

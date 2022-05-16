@@ -8,7 +8,7 @@ export default async () => {
     return;
   }
   await showHUD("Hiding selected files...");
-  spawn("chflags", ["hidden", `chflags hidden ${hiddenFiles}`], { shell: true });
+  spawn("chflags", ["hidden", hiddenFiles], { shell: true });
 
   //add files to hide panel
   const _fileSystemItems = fileSystemItems.map((value) => {

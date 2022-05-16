@@ -13,7 +13,7 @@ export default async () => {
   } else {
     await showHUD("Unhiding files in current window...");
   }
-  spawn("chflags", ["nohidden", `${finderPath.replace(" ", `" "`)}*`], { shell: true });
+  spawn("chflags", ["nohidden", `${finderPath.replaceAll(" ", `" "`)}*`], { shell: true });
 
   //remove files from hide panel
   await removeFilesFromPanel(finderPath);
