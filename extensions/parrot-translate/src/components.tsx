@@ -114,6 +114,7 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
                     <Action
                         title="Play Query Text Sound"
                         icon={Icon.Message}
+                        shortcut={{ modifiers: ["cmd"], key: "s" }}
                         onAction={() =>
                             this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.languageId)
                         }
@@ -131,6 +132,7 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
                     <Action
                         title="Search Query Text in Eudic"
                         icon={Icon.MagnifyingGlass}
+                        shortcut={{ modifiers: ["cmd"], key: "e" }}
                         onAction={() => this.openInEudic(this.props.queryText as string)}
                     />
     
