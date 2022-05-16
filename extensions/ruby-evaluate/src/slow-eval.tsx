@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { List } from "@raycast/api";
+import { List, ActionPanel, Detail, Action } from "@raycast/api";
 import { State } from "./types";
 import { doEval } from "./util";
 import { Actions } from "./actions";
 
-export function Eval() {
+export function SlowEval() {
   const [state, setState] = useState<State>({ query: "", result: "", markdownResult: "" });
 
   useEffect(() => {
@@ -22,12 +22,21 @@ export function Eval() {
     >
       {(state?.query?.length ?? 0) === 0 ? null : (
         <List.Item
-          title={state.result ?? "undefined"}
-          actions={<Actions state={state} />}
+        title={`Evaluate: ${state?.query}`}
+          accessoryTitle="⏎  to evaluate"
+          actions={
+            <ActionPanel title="Evaluation result">
+              <Action.Push title="Show Evaluation" icon="command-icon.png" target={<EvalResult state={state} />} />
+            </ActionPanel>
+          }
           icon="command-icon.png"
-          detail={<List.Item.Detail markdown={state.markdownResult ?? "undefined"} />}
         />
       )}
     </List>
   );
+}
+
+function EvalResult(props: { state: State }): JSX.Element {
+  const newState = doEval(props.state);
+  return <Detail markdown={newState.markdownResult} actions={<Actions state={newState} />} />;
 }

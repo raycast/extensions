@@ -1,3 +1,7 @@
-import { Eval } from "./eval";
+import { getPreferenceValues } from "@raycast/api";
+import { FastEval } from "./fast-eval";
+import { SlowEval } from "./slow-eval";
 
-export default () => <Eval />;
+const fastEvaluationEnabled = getPreferenceValues()?.fastEvaluation ?? false;
+
+export default () => (fastEvaluationEnabled ? <FastEval /> : <SlowEval />);

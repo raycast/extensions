@@ -23,7 +23,17 @@
       "mode": "view"
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "fastEvaluation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Evaluation Mode",
+      "label": "Use Fast Evaluation (⚠️)",
+      "default": false,
+      "description": "Evaluates code while typing. This consumes a lot more resources as it evaluates code with every keystroke."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.33.0"
   },
