@@ -1,9 +1,10 @@
 import { Component } from "react"
-import { exec } from "child_process"
+import { exec, execFile } from "child_process"
 import { COPY_TYPE, LANGUAGE_LIST } from "./consts"
 import { reformatCopyTextArray, truncate } from "./shared.func"
 import { IActionCopyListSection, IListItemActionPanelItem, IPreferences } from "./types"
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, Keyboard } from "@raycast/api"
+import { Action, ActionPanel, Clipboard, environment, getPreferenceValues, Icon, Keyboard } from "@raycast/api"
+import fs from 'fs'
 
 const preferences: IPreferences = getPreferenceValues()
 
@@ -92,6 +93,19 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
         return `https://translate.google.com/?sl=${from}&tl=${to}&text=${text}&op=translate`
     }
 
+    openInEudic = (queryText: string) => {
+        const eudicShellPath = `${environment.supportPath}/open-in-eudic.sh`
+        const shellContent =   `tell application id "com.eusoft.freeeudic"
+                                    activate
+                                    show dic with word "${queryText}"
+                                end tell`
+        fs.writeFile(eudicShellPath, shellContent, err => {
+            if (!err) {
+                 execFile(`osascript`, [eudicShellPath])
+            }
+        });
+    }
+
     render() {
         return (
             <ActionPanel>
@@ -112,11 +126,19 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
                         }
                     />
                 </ActionPanel.Section>
+
+                <ActionPanel.Section title="Open in">
+                    <Action
+                        title="Search Query Text in Eudic"
+                        icon={Icon.MagnifyingGlass}
+                        onAction={() => this.openInEudic(this.props.queryText as string)}
+                    />
+    
+                </ActionPanel.Section>
+
                 <ActionPanel.Section title="Target Language">
                     {LANGUAGE_LIST.map((region) => {
                         const isCurrentFromLanguage = this.props.currentFromLanguage?.languageId === region.languageId
-                        // const isCurrentTargetLanguage =
-                        //     this.props.currentTargetLanguage?.languageId === region.languageId
                         if (isCurrentFromLanguage) return null
 
                         return (
