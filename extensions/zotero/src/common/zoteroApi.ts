@@ -1,5 +1,5 @@
 import { stat, readFile, writeFile, copyFile } from "fs/promises";
-import { getPreferenceValues, environment } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import * as utils from "./utils";
 import { readFileSync } from "fs";
 import Fuse from "fuse.js";
@@ -314,11 +314,28 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     }
   }
 
-  let ret;
+  let ret = [];
   try {
     ret = await readCache();
   } catch {
-    ret = await updateCache();
+    try {
+      ret = await updateCache();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Corrupt sqlite db!",
+        message: "Referred sqlite db appears to be corrupt or not from Zotero!",
+      });
+    }
+  }
+
+  if (ret.length < 1) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No Data found in referred sqlite db!",
+      message: "Please update preferences or fill some references to your zotero app!",
+    });
+    return ret;
   }
 
   ret.sort(function (a, b) {
