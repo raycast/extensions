@@ -40,7 +40,6 @@ export default function Index() {
     <List
       enableFiltering={true}
       isLoading={isLoading}
-      navigationTitle="Connect/Disconnect Bluetooth Devices"
       searchBarPlaceholder="Search devices"
     >
       <List.Section title="Devices">
