@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, open, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
 import SnippetContent from "./components/snippet-content";
-import { storeLastCopied, getLastCopiedMap, clearUnusedSnippets, orderSnippets, massCodeInstallationCheck } from "./utils/localStorageHelper";
+import { massCodeInstallationCheck } from "./components/checkInstall";
+import { storeLastCopied, getLastCopiedMap, clearUnusedSnippets, orderSnippets } from "./utils/localStorageHelper";
 
 export default function Command() {
   const [state, setState] = useState<State>({ snippets: [], isLoading: true });
