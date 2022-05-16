@@ -41,7 +41,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
     } else if (projectType === ProjectType.XCODE) {
       return preferences.openXcodeWith;
     }
-    return preferences.openWith1;
+    return preferences.openNodeWith;
   }
 
   return (

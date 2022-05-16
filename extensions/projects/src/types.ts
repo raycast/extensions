@@ -20,7 +20,7 @@ export interface OpenWith {
 
 export interface Preferences {
   repoScanPath: string;
-  repoScanDepth?: number;
+  scanForProjectTypes: string;
   openNodeWith: OpenWith;
   openXcodeWith: OpenWith;
   openMavenWith: OpenWith;

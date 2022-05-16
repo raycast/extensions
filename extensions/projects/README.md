@@ -36,6 +36,11 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ### 5. Open Terminal at project folder.
 
+### 6. Include/exclude project from scanning.
+
+Currently supports ony node, maven, gradle or xcode.
+In extension configuration, you can choose which type of projects you want extension to scan.
+
 ---
 
 ## Roadmap
@@ -48,6 +53,7 @@ Quickly access your local projects and open them in your favorite editor or any 
 - [x] Pinned projects.
 - [x] Search Xcode projects.
 - [x] Advanced search for projects.
+- [x] Exclude project types from scanning.
 - [ ] Refresh view after pinned/clicked.
 - [ ] Hierarchy structure for mono repos/modules
 - [ ] Delete projects

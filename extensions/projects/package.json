@@ -25,39 +25,17 @@
       "description": "Path to scan for proejcts. ~/ is expanded. Use : to seperate multiple paths"
     },
     {
-      "name": "repoScanDepth",
-      "type": "dropdown",
-      "required": true,
-      "title": "Max scan depth",
-      "data": [
-        {
-          "title": "2",
-          "value": "2"
-        },
-        {
-          "title": "3",
-          "value": "3"
-        },
-        {
-          "title": "4",
-          "value": "4"
-        },
-        {
-          "title": "5",
-          "value": "5"
-        },
-        {
-          "title": "6",
-          "value": "6"
-        }
-      ],
-      "description": "Maximnum depth to scan for repos",
-      "default": "6"
+      "name": "scanForProjectTypes",
+      "type": "textfield",
+      "required": false,
+      "default": "node,maven,gradle,xcode",
+      "title": "Type of projects to scan for.",
+      "description": "Type of projects to scan for. Use , to seperate multiple paths. Supported: node,maven,gradle,xcode"
     },
     {
       "name": "openNodeWith",
       "type": "appPicker",
-      "required": true,
+      "required": false,
       "title": "Open NODE projects with (required), shortcut: ⏎",
       "description": "Open NODE projects with",
       "default": "Visual Studio Code"
@@ -65,7 +43,7 @@
     {
       "name": "openXcodeWith",
       "type": "appPicker",
-      "required": true,
+      "required": false,
       "title": "Open XCode projects with (required), shortcut: ⏎",
       "description": "Open XCode projects with",
       "default": "Xcode"
@@ -73,7 +51,7 @@
     {
       "name": "openMavenWith",
       "type": "appPicker",
-      "required": true,
+      "required": false,
       "title": "Open MAVEN projects with (required), shortcut: ⏎",
       "description": "Open MAVEN projects with",
       "default": "IntelliJ IDEA CE"
@@ -81,7 +59,7 @@
     {
       "name": "openGradleWith",
       "type": "appPicker",
-      "required": true,
+      "required": false,
       "title": "Open GRADLE projects with (required), shortcut: ⏎",
       "description": "Open GRADLE projects with",
       "default": "IntelliJ IDEA CE"
@@ -92,7 +70,7 @@
       "required": false,
       "title": "Open with (default), shortcut: ⌥⏎",
       "description": "Open with",
-      "default": ""
+      "default": "Visual Studio Code"
     },
     {
       "name": "openWith2",

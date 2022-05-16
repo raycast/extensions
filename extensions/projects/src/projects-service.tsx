@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs";
-import { CacheType, Preferences, RepoSearchResponse, SourceRepo } from "./types";
+import { CacheType, Preferences, ProjectType, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { buildAllProjectsCache } from "./cache/all-projects-cache-builder";
 import { getRepoKey } from "./common-utils";
@@ -146,7 +146,14 @@ export function useRepoCache(query: string | undefined): {
         if (unresolvedPaths.length > 0) {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
-        const repos = await buildAllProjectsCache(repoPaths, preferences.repoScanDepth ?? 3);
+
+        const scanForProjectTypes: ProjectType[] = preferences.scanForProjectTypes
+          .split(",")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((type) => type.trim().length > 0 && (ProjectType as any)[type.toUpperCase()])
+          .map((type) => type.trim() as ProjectType);
+
+        const repos = await buildAllProjectsCache(repoPaths, scanForProjectTypes);
 
         if (!cancel) {
           filterAndSetFullResponse(repos);

@@ -6,20 +6,35 @@ import { CacheType, ProjectType, SourceRepo } from "../types";
 import { v4 as uuidv4 } from "uuid";
 const execp = promisify(exec);
 
-export async function buildAllProjectsCache(paths: string[], maxDepth: number): Promise<SourceRepo[]> {
+export async function buildAllProjectsCache(paths: string[], projectTypes: ProjectType[]): Promise<SourceRepo[]> {
   const allProjectsCache = new ApplicationCache(CacheType.ALL_PROJECTS);
   let foundRepos: SourceRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const spotlightSearchParameters = [
-        "kMDItemDisplayName == *.xcodeproj",
-        "kMDItemDisplayName == *.xcworkspace",
-        "kMDItemDisplayName == Package.swift",
-        "kMDItemDisplayName == *.playground",
-        "kMDItemDisplayName == build.gradle",
-        "kMDItemDisplayName == pom.xml",
-        "kMDItemDisplayName == package.json",
-      ];
+      let spotlightSearchParameters: string[] = [];
+
+      if (projectTypes.length == 0 || projectTypes.includes(ProjectType.XCODE)) {
+        spotlightSearchParameters = [
+          ...spotlightSearchParameters,
+          "kMDItemDisplayName == *.xcodeproj",
+          "kMDItemDisplayName == *.xcworkspace",
+          "kMDItemDisplayName == Package.swift",
+          "kMDItemDisplayName == *.playground",
+        ];
+      }
+
+      if (projectTypes.length == 0 || projectTypes.includes(ProjectType.GRADLE)) {
+        spotlightSearchParameters = [...spotlightSearchParameters, "kMDItemDisplayName == build.gradle"];
+      }
+
+      if (projectTypes.length == 0 || projectTypes.includes(ProjectType.MAVEN)) {
+        spotlightSearchParameters = [...spotlightSearchParameters, "kMDItemDisplayName == pom.xml"];
+      }
+
+      if (projectTypes.length == 0 || projectTypes.includes(ProjectType.NODE)) {
+        spotlightSearchParameters = [...spotlightSearchParameters, "kMDItemDisplayName == package.json"];
+      }
+
       // Execute command
       const { stdout, stderr } = await execp(
         `mdfind -onlyin ${path} '${spotlightSearchParameters.join(" || ")}' | grep -v "node_modules\\|META-INF"`
