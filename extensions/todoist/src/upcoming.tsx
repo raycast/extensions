@@ -1,3 +1,4 @@
+import { List } from "@raycast/api";
 import useSWR from "swr";
 import TaskList from "./components/TaskList";
 import { getSectionsWithDueDates } from "./helpers";
@@ -5,7 +6,7 @@ import { handleError, todoist } from "./api";
 import { SWRKeys } from "./types";
 import { withOAuth } from "./oauth";
 
-export default withOAuth()(function Upcoming() {
+export default withOAuth({ fallback: List })(function Upcoming() {
   const { data, error } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "view all" }));
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 

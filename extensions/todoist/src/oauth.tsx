@@ -52,22 +52,28 @@ export async function getToken(): Promise<string> {
   return await getToken();
 }
 
-export const withOAuth = () => (Component: React.ComponentType) => {
-  return () => {
-    const [accessToken, setAccessToken] = React.useState<string>();
-
-    React.useEffect(() => {
-      getToken().then((token) => {
-        setAccessToken(token);
-      });
-    }, []);
-
-    if (!accessToken) {
-      return <List isLoading />;
-    }
-
-    todoist.authToken = accessToken;
-
-    return <Component />;
-  };
+type WithOauthParams = {
+  fallback?: React.ComponentType<{ isLoading?: boolean }>;
 };
+
+export const withOAuth =
+  ({ fallback = List }: WithOauthParams) =>
+  (Component: React.ComponentType) => {
+    return () => {
+      const [accessToken, setAccessToken] = React.useState<string>();
+
+      React.useEffect(() => {
+        getToken().then((token) => {
+          setAccessToken(token);
+        });
+      }, []);
+
+      if (!accessToken) {
+        return React.createElement(fallback, { isLoading: true });
+      }
+
+      todoist.authToken = accessToken;
+
+      return <Component />;
+    };
+  };

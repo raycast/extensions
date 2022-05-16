@@ -7,7 +7,7 @@ import { SWRKeys, ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
 import { withOAuth } from "./oauth";
 
-export default withOAuth()(function Search() {
+export default withOAuth({ fallback: List })(function Search() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "all" }));
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 

@@ -6,7 +6,7 @@ import { withOAuth } from "./oauth";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 
-export default withOAuth()(function Today() {
+export default withOAuth({ fallback: List })(function Today() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
     todoist.getTasks({ filter: "today|overdue" })
   );

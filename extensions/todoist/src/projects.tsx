@@ -7,7 +7,7 @@ import ProjectForm from "./components/ProjectForm";
 import { withOAuth } from "./oauth";
 import { SWRKeys } from "./types";
 
-export default withOAuth()(function Projects() {
+export default withOAuth({ fallback: List })(function Projects() {
   const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {

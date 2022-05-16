@@ -9,7 +9,7 @@ import Project from "./components/Project";
 import { SWRKeys } from "./types";
 import { withOAuth } from "./oauth";
 
-export default withOAuth()(function CreateTask() {
+export default withOAuth({ fallback: Form })(function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
