@@ -147,12 +147,12 @@ export default withOAuth({ fallback: Form })(function CreateTask() {
       />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
-        {priorities.map(({ value, name, color }) => (
+        {priorities.map(({ value, name, color, icon }) => (
           <Form.Dropdown.Item
             value={String(value)}
             title={name}
             key={value}
-            icon={color && { source: Icon.Dot, tintColor: color }}
+            icon={color && { source: icon ? icon : Icon.Dot, tintColor: color }}
           />
         ))}
       </Form.Dropdown>
