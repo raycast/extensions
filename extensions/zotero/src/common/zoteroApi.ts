@@ -9,7 +9,6 @@ import path = require("path");
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
-  bibtex_path?: string;
 }
 
 export interface RefData {
