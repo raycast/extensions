@@ -8,6 +8,7 @@ import {
   Icon,
   List,
   LocalStorage,
+  showHUD,
   showToast,
   Toast,
   useNavigation,
@@ -32,7 +33,7 @@ export default function ShortcutLibrary() {
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [selectId, setSelectId] = useState<number>(0);
   const { push } = useNavigation();
-  const { annotation, caser, coder, format, markdown, time, rememberTag, showDetail, showTag } =
+  const { closeMainWindow, annotation, caser, coder, format, markdown, time, rememberTag, showDetail, showTag } =
     getPreferenceValues<Preference>();
 
   useEffect(() => {
@@ -128,7 +129,11 @@ export default function ShortcutLibrary() {
                           const _inputItem = await fetchItemInput();
                           const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                           await Clipboard.paste(_runShortcut);
-                          await showToast(Toast.Style.Success, "Pasted result to active app!");
+                          if (closeMainWindow) {
+                            await showHUD("Pasted result to active app");
+                          } else {
+                            await showToast(Toast.Style.Success, "Pasted result to active app!");
+                          }
                         }}
                       />
                       <Action
@@ -154,7 +159,11 @@ export default function ShortcutLibrary() {
                             const _inputItem = await fetchItemInput();
                             const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                             await Clipboard.paste(_runShortcut);
-                            await showToast(Toast.Style.Success, "Pasted result to active app!");
+                            if (closeMainWindow) {
+                              await showHUD("Pasted result to active app");
+                            } else {
+                              await showToast(Toast.Style.Success, "Pasted result to active app!");
+                            }
                           }}
                         />
                         <Action

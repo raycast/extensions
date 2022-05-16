@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "case-word",
+  "name": "text-shortcuts",
   "title": "Text Shortcuts",
   "description": "Use Text Shortcuts to handle text from the selection or clipboard.",
   "icon": "extension-icon.png",
@@ -23,7 +23,7 @@
           "name": "rememberTag",
           "type": "checkbox",
           "required": false,
-          "title": "Preferences",
+          "title": "Advanced Preferences",
           "label": "Remember Filter Tag",
           "description": "Remember Shortcut Filter Tag.",
           "default": true
@@ -110,6 +110,17 @@
       "subtitle": "Text Shortcuts",
       "description": "Create text shortcut.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeMainWindow",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced Preferences",
+      "label": "Close Main Window",
+      "description": "Close the Raycast main window after running a shortcut.",
+      "default": true
     }
   ],
   "dependencies": {
