@@ -1,38 +1,47 @@
-import { ActionPanel, Icon, Detail, Form, showToast, useNavigation, Action, Image, Toast, open } from "@raycast/api";
+import { ActionPanel, Icon, Detail, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import {
-  Database,
-  DatabaseProperty,
-  DatabasePropertyOption,
-  DatabaseView,
-  User,
-  Page,
   fetchDatabases,
   fetchDatabaseProperties,
   queryDatabase,
   createDatabasePage,
-  fetchExtensionReadMe,
   notionColorToTintColor,
   fetchUsers,
-} from "../utils/notion";
-import { ActionSetVisibleProperties } from "./";
+  pageIcon,
+} from "../../utils/notion";
+import { DatabaseProperty, DatabasePropertyOption, DatabaseView, Page } from "../../utils/types";
+import { ActionSetVisibleProperties } from "../actions";
+import { handleOnOpenPage } from "../../utils/openPage";
 import {
-  storeDatabases,
-  loadDatabases,
-  storeDatabaseProperties,
-  loadDatabaseProperties,
-  storeDatabasePages,
-  loadDatabasePages,
-  storeUsers,
-  loadUsers,
-  storeDatabaseView,
-  loadDatabaseView,
-} from "../utils/local-storage";
-import { useForceRenderer } from "../utils/useForceRenderer";
-import { handleOnOpenPage } from "../utils/openPage";
+  usersAtom,
+  databasesAtom,
+  databaseViewsAtom,
+  databasePropertiesAtom,
+  recentlyOpenedPagesAtom,
+} from "../../utils/state";
 
-export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender?: () => void }): JSX.Element {
-  const presetDatabaseId = props.databaseId;
+export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?: (page: Page) => void }): JSX.Element {
+  const { databaseId: presetDatabaseId, onPageCreated } = props;
+
+  const [databaseId, setDatabaseId] = useState<string | null>(presetDatabaseId ? presetDatabaseId : null);
+  const [{ value: databaseView }, setDatabaseView] = useAtom(databaseViewsAtom(databaseId || "__no_id__"));
+  const [{ value: databaseProperties }, setDatabaseProperties] = useAtom(
+    databasePropertiesAtom(databaseId || "__no_id__")
+  );
+  const [{ value: users }, storeUsers] = useAtom(usersAtom);
+  const [{ value: databases }, storeDatabases] = useAtom(databasesAtom);
+  const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
+  const [relationsPages, setRelationsPages] = useState<Record<string, Page[]>>(
+    databaseProperties
+      .filter((cdp) => cdp.type === "relation" && cdp.relation_id)
+      .reduce((prev, cdp) => {
+        prev[cdp.id] = recentlyOpenedPages.filter((x) => x.parent_database_id === cdp.relation_id);
+        return prev;
+      }, {} as Record<string, Page[]>)
+  );
+  const [isLoadingDatabases, setIsLoadingDatabases] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // On form submit function
   const { pop } = useNavigation();
@@ -46,74 +55,31 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
     setIsLoading(true);
     const page = await createDatabasePage(values);
     setIsLoading(false);
-    if (!page) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't create database page",
-      });
-    } else {
-      showToast({
-        title: "Page created!",
-      });
-      props.onForceRerender?.();
+    if (page) {
+      onPageCreated?.(page);
 
       if (openPage) {
-        handleOnOpenPage(page);
+        handleOnOpenPage(page, storeRecentlyOpenedPage);
       } else {
         pop();
       }
     }
   }
 
-  // Setup useState objects
-  const [databases, setDatabases] = useState<Database[]>([]);
-  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>([]);
-  const [databaseId, setDatabaseId] = useState<string | null>(presetDatabaseId ? presetDatabaseId : null);
-  const [databaseView, setDatabaseView] = useState<DatabaseView>();
-  const [didRerender, forceRerender] = useForceRenderer();
-  const [markdown, setMarkdown] = useState<string>();
-  const [relationsPages, setRelationsPages] = useState<Record<string, Page[]>>({});
-  const [users, setUsers] = useState<User[]>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // Currently supported properties
-  const supportedPropTypes = [
-    "title",
-    "rich_text",
-    "number",
-    "url",
-    "email",
-    "phone_number",
-    "date",
-    "checkbox",
-    "select",
-    "multi_select",
-    "relation",
-    "people",
-  ];
-
   // Fetch databases
   useEffect(() => {
     const fetchData = async () => {
       if (presetDatabaseId) {
-        setDatabaseId(presetDatabaseId);
+        setIsLoadingDatabases(false);
         return;
-      }
-
-      const cachedDatabases = await loadDatabases();
-
-      if (cachedDatabases) {
-        setDatabases(cachedDatabases);
       }
 
       const fetchedDatabases = await fetchDatabases();
 
-      setIsLoading(false);
-
-      if (fetchedDatabases) {
-        setDatabases(fetchedDatabases);
-        storeDatabases(fetchedDatabases);
+      if (fetchedDatabases.length) {
+        await storeDatabases(fetchedDatabases);
       }
+      setIsLoadingDatabases(false);
     };
     fetchData();
   }, []);
@@ -124,97 +90,44 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
       if (databaseId) {
         setIsLoading(true);
 
-        // load from the cache first
-
-        const cachedDatabaseProperties = await loadDatabaseProperties(databaseId);
-        setDatabaseProperties(cachedDatabaseProperties);
-
-        cachedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
-          if (cdp.type === "relation" && cdp.relation_id && !relationsPages[cdp.relation_id]) {
-            const cachedRelationPages = await loadDatabasePages(databaseId);
-            setRelationsPages((relationsPages) => ({
-              ...relationsPages,
-              [cdp.relation_id!]: cachedRelationPages,
-            }));
-          }
-        });
-
-        let hasPeopleProperty = cachedDatabaseProperties.some((cdp) => cdp.type === "people");
-        if (hasPeopleProperty) {
-          const cachedUsers = await loadUsers();
-          setUsers(cachedUsers);
-        }
-
-        // then we fetch
-
         const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
-        const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property) {
-          return supportedPropTypes.includes(property.type);
-        });
-        setDatabaseProperties(supportedDatabaseProperties);
-
-        // Fetch relation pages
-        supportedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
-          if (cdp.type === "relation" && cdp.relation_id) {
-            const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined);
-            if (fetchedRelationPages.length > 0) {
-              setRelationsPages((relationsPages) => ({ ...relationsPages, [cdp.relation_id!]: fetchedRelationPages }));
-              storeDatabasePages(cdp.relation_id, fetchedRelationPages);
-            }
-          }
-        });
-
-        // Fetch users
-        hasPeopleProperty = supportedDatabaseProperties.some((cdp) => cdp.type === "people");
-        if (hasPeopleProperty) {
-          const fetchedUsers = await fetchUsers();
-          setUsers(fetchedUsers);
-          await storeUsers(fetchedUsers);
+        if (fetchedDatabaseProperties.length) {
+          await setDatabaseProperties(fetchedDatabaseProperties);
         }
-
-        await storeDatabaseProperties(databaseId, supportedDatabaseProperties);
 
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [databaseId, didRerender]);
+  }, [databaseId, databaseView]);
 
-  // Load database view
   useEffect(() => {
-    const getDatabaseView = async () => {
-      if (!databaseId) {
-        return;
-      }
+    if (!databaseId) {
+      return;
+    }
 
-      const loadedDatabaseView = await loadDatabaseView(databaseId);
+    setIsLoading(true);
 
-      if (loadedDatabaseView?.create_properties) {
-        setDatabaseView(loadedDatabaseView);
-      } else {
-        const dbView = { ...(loadedDatabaseView || {}), create_properties: [] as string[] };
-        databaseProperties?.forEach(function (dp) {
-          dbView.create_properties.push(dp.id);
-        });
-        setDatabaseView(dbView);
+    // Fetch relation pages
+    databaseProperties.forEach(async (cdp: DatabaseProperty) => {
+      if (cdp.type === "relation" && cdp.relation_id) {
+        const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined);
+        if (fetchedRelationPages.length > 0) {
+          setRelationsPages((relationsPages) => ({ ...relationsPages, [cdp.relation_id!]: fetchedRelationPages }));
+        }
       }
-    };
-    getDatabaseView();
+    });
+
+    // Fetch users
+    if (databaseProperties.some((cdp) => cdp.type === "people")) {
+      fetchUsers().then(storeUsers);
+    }
+
+    setIsLoading(false);
   }, [databaseProperties]);
 
-  // Fetch Notion Extension README
-  useEffect(() => {
-    const fetchREADME = async () => {
-      if (!markdown) {
-        const fetchedREADME = await fetchExtensionReadMe();
-        setMarkdown(fetchedREADME);
-      }
-    };
-    fetchREADME();
-  }, []);
-
-  if (databases && !databases[0]) {
-    return <Detail markdown={markdown} isLoading={!markdown} />;
+  if (!isLoading && !isLoadingDatabases && !databases.length) {
+    return <Detail markdown={`No databases`} />;
   }
 
   // Handle save new database view
@@ -222,23 +135,17 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
     if (!databaseId || !newDatabaseView) return;
 
     setDatabaseView(newDatabaseView);
-    forceRerender();
     showToast({
       title: "View Updated",
     });
-    storeDatabaseView(databaseId, newDatabaseView);
   }
 
   // Get Title Property
-  const titleProperty = databaseProperties?.filter(function (dp) {
-    return dp.id === "title";
-  })[0];
-  const databasePropertiesButTitle = databaseProperties?.filter(function (dp) {
-    return dp.id !== "title";
-  });
+  const titleProperty = databaseProperties?.find((dp) => dp.id === "title");
+  const databasePropertiesButTitle = databaseProperties?.filter((dp) => dp.id !== "title");
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDatabases}
       navigationTitle={presetDatabaseId ? " →  Create New Page" : "Create Database Page"}
       actions={
         <ActionPanel>
@@ -258,18 +165,23 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
             <ActionSetVisibleProperties
               key="set-visible-inputs"
               databaseProperties={databasePropertiesButTitle || []}
-              selectedPropertiesIds={databaseView?.create_properties}
-              onSelect={function (propertyId: string) {
-                const databaseViewCopy = databaseView ? JSON.parse(JSON.stringify(databaseView)) : {};
-                databaseViewCopy?.create_properties.push(propertyId);
+              selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
+              onSelect={(propertyId) => {
+                const databaseViewCopy = (databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}) as DatabaseView;
+                if (!databaseViewCopy.create_properties) {
+                  databaseViewCopy.create_properties = databaseProperties.map((x) => x.id);
+                }
+                databaseViewCopy.create_properties.push(propertyId);
                 saveDatabaseView(databaseViewCopy);
               }}
-              onUnselect={function (propertyId: string) {
-                const databaseViewCopy = databaseView ? JSON.parse(JSON.stringify(databaseView)) : {};
-                const newVisiblePropertiesIds = databaseViewCopy?.create_properties.filter(function (pid: string) {
-                  return pid !== propertyId;
-                });
-                databaseViewCopy.create_properties = newVisiblePropertiesIds ? newVisiblePropertiesIds : [];
+              onUnselect={(propertyId) => {
+                const databaseViewCopy = (databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}) as DatabaseView;
+                if (!databaseViewCopy.create_properties) {
+                  databaseViewCopy.create_properties = databaseProperties.map((x) => x.id);
+                }
+                databaseViewCopy.create_properties = databaseViewCopy.create_properties.filter(
+                  (pid) => pid !== propertyId
+                );
                 saveDatabaseView(databaseViewCopy);
               }}
             />
@@ -293,7 +205,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
                         ? d.icon_file
                         : d.icon_external
                         ? d.icon_external
-                        : Icon.TextDocument
+                        : Icon.List
                     }
                   />
                 );
@@ -308,21 +220,20 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
         placeholder="Title"
       />
       {databaseProperties
-        ?.filter(function (dp) {
-          return dp?.id !== "title" && databaseView?.create_properties?.includes(dp?.id);
-        })
-        .sort(function (dpa, dpb) {
-          const value_a = databaseView?.create_properties?.indexOf(dpa?.id);
-          const value_b = databaseView?.create_properties?.indexOf(dpb?.id);
-
-          if (!value_a || value_a === -1) return 1;
-
-          if (!value_b || value_b === -1) return -1;
-
+        ?.filter(
+          (dp) =>
+            dp.id !== "title" &&
+            dp.type !== "title" &&
+            (!databaseView?.create_properties || databaseView.create_properties.includes(dp.id))
+        )
+        .sort((dpa, dpb) => {
+          if (!databaseView?.create_properties) {
+            return 0;
+          }
+          const value_a = databaseView.create_properties.indexOf(dpa.id);
+          const value_b = databaseView.create_properties.indexOf(dpb.id);
           if (value_a > value_b) return 1;
-
           if (value_a < value_b) return -1;
-
           return 0;
         })
         .map((dp) => {
@@ -389,15 +300,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender
                         key={"relation::" + rp.id}
                         value={rp.id}
                         title={rp.title ? rp.title : "Untitled"}
-                        icon={{
-                          source: rp.icon_emoji
-                            ? rp.icon_emoji
-                            : rp.icon_file
-                            ? rp.icon_file
-                            : rp.icon_external
-                            ? rp.icon_external
-                            : Icon.TextDocument,
-                        }}
+                        icon={pageIcon(rp)}
                       />
                     );
                   })}
@@ -443,10 +346,8 @@ Per Notion limitations, these markdown attributes are not supported:
 
 function validateForm(values: Form.Values): boolean {
   const valueKeys = Object.keys(values) as string[];
-  const titleKey = valueKeys.filter(function (vk) {
-    return vk.includes("property::title");
-  })[0];
-  if (!values[titleKey]) {
+  const titleKey = valueKeys.find((vk) => vk.includes("property::title"));
+  if (!titleKey || !values[titleKey]) {
     showToast({
       style: Toast.Style.Failure,
       title: "Title Required",
