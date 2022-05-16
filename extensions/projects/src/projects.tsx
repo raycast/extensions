@@ -1,11 +1,18 @@
 import { getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, ReactElement } from "react";
 import { SearchProjectActionPanel } from "./action-panel";
-import { getRepoKey } from "./common-utils";
 import { Preferences } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
 
 export default function Main(): ReactElement {
+  const searchBarPlaceholders = [
+    "Search for a project",
+    "Search projects by name",
+    "Search projects by type. e.g. 'type: node'",
+    "Search projects in directory. e.g. 'dir: ajay'",
+    "Combine keywords to search. e.g. 'dir: ajay type: node'",
+  ];
+
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>();
   const { response, error, isLoading } = useRepoCache(searchText);
@@ -15,12 +22,16 @@ export default function Main(): ReactElement {
   }
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading}>
+    <List
+      searchBarPlaceholder={searchBarPlaceholders[Math.floor(Math.random() * searchBarPlaceholders.length)]}
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+    >
       <List.Section title={response?.pinned?.sectionTitle}>
         {response?.pinned?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"pinned:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
@@ -35,7 +46,7 @@ export default function Main(): ReactElement {
         {response?.recent?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"recent:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
@@ -49,7 +60,7 @@ export default function Main(): ReactElement {
         {response?.all?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={"all:" + getRepoKey(repo)}
+            id={repo.id}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}

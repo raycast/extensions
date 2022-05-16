@@ -38,9 +38,10 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
       return preferences.openMavenWith;
     } else if (projectType === ProjectType.GRADLE) {
       return preferences.openGradleWith;
+    } else if (projectType === ProjectType.XCODE) {
+      return preferences.openXcodeWith;
     }
-
-    return preferences.openWith1;
+    return preferences.openNodeWith;
   }
 
   return (
@@ -94,7 +95,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           <Action
             icon={Icon.Pin}
             title="Unpin Project"
-            shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             onAction={() => unpinRepo(props.repo)}
           />
         )}
@@ -103,11 +104,24 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           <Action
             icon={Icon.Pin}
             title="Pin Project"
-            shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             onAction={() => pinRepo(props.repo)}
           />
         )}
-
+        <Action.ShowInFinder
+          icon={Icon.Finder}
+          title="Reveal in Finder"
+          path={props.repo.fullPath}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        />
+        <Action.Open
+          title={`Open in Terminal`}
+          target={props.repo.fullPath}
+          icon={Icon.Terminal}
+          application={"com.apple.Terminal"}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          onOpen={() => addToRecentlyAccessedCache(props.repo)}
+        />
         <Action.OpenWith path={props.repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
       </ActionPanel.Section>
     </ActionPanel>
