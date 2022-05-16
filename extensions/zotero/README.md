@@ -17,7 +17,7 @@ preferences:
 
 - **Zotero Sqlite Path**: Location where your Zotero App sqlite files are kept. By default this is located at
   `$HOME/Zotero/zotero.sqlite`. If you are using an alternate location, you will need to update this.
-- **Whether to use Better BibTex Citation**: If you use the Better BibTex zotero extension, you can
+- **Whether to use Better BibTex Citation**: If you use the [Better BibTex zotero extension](https://retorque.re/zotero-better-bibtex/), you can
   enable this flag to copy Better BibTex citation keys for any reference.
 
 ![A screenshot of searching Zotero via Raycast](./media/preferences.png)
