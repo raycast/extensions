@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitrise-start-builds",
+  "title": "Bitrise Start Builds",
+  "description": "This extension makes it possible to start builds for Bitrise projects.\n\nIt is possible to select which project, branch and workflow to build with.\n\nHeavily inspired by https://www.raycast.com/ubuntudroid/bitrise",
+  "icon": "command-icon.png",
+  "author": "ChristianSteffensen",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Start build",
+      "subtitle": "Start Bitrise Build",
+      "description": "Starts a Bitrise Build",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Bitrise API key",
+      "description": "Get it on https://app.bitrise.io/me/profile#/security"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "node-fetch": "^3.2.4",
+    "react": "^18.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
