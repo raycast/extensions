@@ -24,6 +24,9 @@
       "description": "Create a token with repository access"
     }
   ],
+  "contributors": [
+    "immint023"
+  ],
   "categories": [
     "Developer Tools"
   ],
