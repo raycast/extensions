@@ -54,7 +54,7 @@ export default function Command() {
     >
       <List.EmptyView
         key={`empty-localDirectory`}
-        title={"No hidden files"}
+        title={"No Hidden Files"}
         icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
         description={`You can hide files via the "Hide Files" command`}
       />
