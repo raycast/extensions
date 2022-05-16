@@ -48,8 +48,7 @@ export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
  * @param path If there are multiple paths, please separate them with spaces
  */
 export const showHiddenFiles = (path: string) => {
-  const hideDesktopFilesCommand = `chflags nohidden ${path}`;
-  spawn(hideDesktopFilesCommand, { shell: true });
+  spawn("chflags", ["nohidden", path], { shell: true });
 };
 
 export const getSelectedHiddenFiles = async () => {

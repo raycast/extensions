@@ -7,9 +7,8 @@ export default async () => {
   if (fileSystemItems.length === 0) {
     return;
   }
-  await showHUD("Hiding selected files…");
-  const hideDesktopFilesCommand = `chflags hidden ${hiddenFiles}`;
-  spawn(hideDesktopFilesCommand, { shell: true });
+  await showHUD("Hiding selected files...");
+  spawn("chflags", ["hidden", `chflags hidden ${hiddenFiles}`], { shell: true });
 
   //add files to hide panel
   const _fileSystemItems = fileSystemItems.map((value) => {
