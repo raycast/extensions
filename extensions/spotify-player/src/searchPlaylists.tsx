@@ -3,14 +3,26 @@ import { useEffect, useState } from "react";
 import { PlayAction } from "./client/actions";
 import { authorize, spotifyApi } from "./client/client";
 import { Response } from "./client/interfaces";
+import { checkIfSpotifyExists } from "./client/spotify-applescript";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
+  const [spotifyExists, setSpotifyExists] = useState<boolean>(false);
   const response = usePlaylistSearch(searchText);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
+
+  useEffect(() => {
+    async function checkForSpotify() {
+      const doesSpotifyExist = await checkIfSpotifyExists();
+
+      setSpotifyExists(doesSpotifyExist);
+    }
+
+    checkForSpotify();
+  }, []);
 
   return (
     <List
@@ -20,13 +32,13 @@ export default function SpotifyList() {
       throttle
     >
       {response.result?.playlists.items.map((p) => (
-        <PlaylistItem key={p.id} playlist={p} />
+        <PlaylistItem key={p.id} playlist={p} spotify={spotifyExists} />
       ))}
     </List>
   );
 }
 
-function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified }) {
+function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; spotify: boolean }) {
   const playlist = props.playlist;
   const icon: Image.ImageLike = {
     source: playlist.images[playlist.images.length - 1].url,
@@ -46,11 +58,14 @@ function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified }) 
           <PlayAction itemURI={playlist.uri} />
           <Action.OpenInBrowser
             title={`Show Playlist (${playlist.name.trim()})`}
-            url={playlist.external_urls.spotify}
+            url={props.spotify ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
-          <Action.OpenInBrowser title="Show Artist" url={playlist.owner.external_urls.spotify} />
+          <Action.OpenInBrowser
+            title="Show Artist"
+            url={props.spotify ? `spotify:artist:${playlist.owner.id}` : playlist.owner.external_urls.spotify}
+          />
           <Action.CopyToClipboard
             title="Copy URL"
             content={playlist.external_urls.spotify}
