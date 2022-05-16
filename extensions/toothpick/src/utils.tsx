@@ -5,8 +5,13 @@ function stringToBool(s: string): boolean {
   return s === "true" ? true : false;
 }
 
-function getSortIndices(arr: string[]): number[] {
-  return Array.from(Array(arr.length).keys()).sort((a, b) => arr[a].localeCompare(arr[b]));
+function getSortIndices(deviceNames: string[], deviceStatuses: boolean[]): number[] {
+  return Array.from(Array(deviceNames.length).keys()).sort((a, b) => {
+    if (deviceStatuses[a] === deviceStatuses[b]) {
+      return deviceNames[a].localeCompare(deviceNames[b]);
+    }
+    return deviceStatuses[a] ? -1 : 1;
+  });
 }
 
 interface Devices {
@@ -31,7 +36,7 @@ export async function getBluetoothDevices(): Promise<Devices> {
     .slice(results.length / 2, results.length)
     .map((deviceStatus) => deviceStatus.trim())
     .map((deviceStatus) => stringToBool(deviceStatus));
-  const indices = getSortIndices(deviceNames);
+  const indices = getSortIndices(deviceNames, deviceStatuses);
   deviceNames = indices.map((i) => deviceNames[i]);
   deviceStatuses = indices.map((i) => deviceStatuses[i]);
   return { deviceNames, deviceStatuses };
