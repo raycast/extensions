@@ -2,11 +2,6 @@ import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { imgExt } from "./constants";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import fse from "fs-extra";
-import Values = LocalStorage.Values;
-
-export interface Preference extends Values {
-  folderFirst: boolean;
-}
 
 export const getLocalStorage = async (key: string) => {
   const localStorage = await LocalStorage.getItem<string>(key);

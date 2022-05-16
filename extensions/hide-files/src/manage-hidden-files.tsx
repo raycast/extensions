@@ -6,24 +6,25 @@ import {
   List,
   LocalStorage,
   open,
+  showHUD,
   showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useState } from "react";
-import { isImage, Preference } from "./utils/common-utils";
+import { isImage } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
+import { copyFileByPath } from "./utils/applescript-utils";
 
 export default function Command() {
-  const { folderFirst } = getPreferenceValues<Preference>();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
 
-  const { localHiddenDirectory, loading } = getHiddenFiles(folderFirst, refresh);
+  const { localHiddenDirectory, loading } = getHiddenFiles(refresh);
 
   return (
     <List
@@ -63,8 +64,13 @@ export default function Command() {
             <List.Item
               key={value.id}
               icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
-              title={value.name}
-              accessories={[{ text: parse(value.path).dir }]}
+              title={{
+                value: value.name,
+                tooltip: `Type: ${value.type === DirectoryType.FILE ? "File" : "Folder"}, hidden at ${new Date(
+                  value.date
+                ).toLocaleString()}`,
+              }}
+              accessories={[{ text: parse(value.path).dir, tooltip: value.path }]}
               actions={
                 <ActionPanel>
                   <Action.Open
@@ -128,6 +134,28 @@ export default function Command() {
                           }
                         );
                       }}
+                    />
+                  </ActionPanel.Section>
+
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.Clipboard}
+                      title={"Copy File"}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      onAction={async () => {
+                        await showHUD(`${value.name} is copied to clipboard`);
+                        await copyFileByPath(value.path);
+                      }}
+                    />
+                    <Action.CopyToClipboard
+                      title={"Copy File Name"}
+                      content={value.name}
+                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                    />
+                    <Action.CopyToClipboard
+                      title={"Copy File Path"}
+                      content={value.path}
+                      shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

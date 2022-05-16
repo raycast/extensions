@@ -9,7 +9,7 @@ export const refreshNumber = () => {
   return new Date().getTime();
 };
 
-export const getHiddenFiles = (folderFirst: boolean, refresh: number) => {
+export const getHiddenFiles = (refresh: number) => {
   const [localHiddenDirectory, setLocalHiddenDirectory] = useState<DirectoryInfo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -19,14 +19,9 @@ export const getHiddenFiles = (folderFirst: boolean, refresh: number) => {
     if (!isEmpty(_localstorage)) {
       localDirectory = JSON.parse(_localstorage) as DirectoryInfo[];
     }
-    const localDirectoryReverse = localDirectory;
-    const localFolder = localDirectoryReverse.filter((value) => value.type === DirectoryType.DIRECTORY);
-    const localFile = localDirectoryReverse.filter((value) => value.type === DirectoryType.FILE);
 
     //check invalid directory
-    const _validDirectory = checkDirectoryValid(
-      folderFirst ? [...localFolder, ...localFile] : [...localFile, ...localFolder]
-    );
+    const _validDirectory = checkDirectoryValid(localDirectory);
     setLocalHiddenDirectory(_validDirectory);
     setLoading(false);
     await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(_validDirectory));

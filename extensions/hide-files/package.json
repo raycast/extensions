@@ -65,18 +65,7 @@
       "icon": "manage-hidden-files.png",
       "subtitle": "Hide Files",
       "description": "Manage all the files you hide with this extension.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "folderFirst",
-          "type": "checkbox",
-          "required": true,
-          "title": "Advanced Preferences",
-          "label": "Folders First",
-          "description": "Show folders first.",
-          "default": false
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
