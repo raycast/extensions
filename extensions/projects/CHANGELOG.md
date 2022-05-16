@@ -1,6 +1,6 @@
 # Projects Changelog
 
-## [Added support for Xcode projects + Advanced Search] - 2022-05-13
+## [Added support for Xcode projects + Advanced Search] - 2022-05-16
 
 - Faster search with mfind (instead of find)
 - Supports Xcode projects
