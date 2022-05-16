@@ -14,4 +14,5 @@ export type Preferences = {
   shouldShowDirectories: boolean;
   excludePaths: string;
   googleDriveRootPath: string;
+  autoReindexingInterval: string;
 };

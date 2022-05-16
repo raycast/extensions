@@ -58,6 +58,7 @@
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner @mike182uk
 /extensions/coinmarketcap-crypto-crawler             @moojing
+/extensions/coinpaprika                              @gumbleliks
 /extensions/color-casket                             @slavarazum
 /extensions/commitlint                               @lardissone
 /extensions/common-directory                         @koinzhang
@@ -113,12 +114,14 @@
 /extensions/everhour                                 @farisaziz12
 /extensions/f1-standings                             @csigritz @sxn @qeude
 /extensions/facetime                                 @ron-myers
+/extensions/fibonacci-sequence                       @adambutler
 /extensions/figma-files                              @michaelwschultz
 /extensions/file-manager                             @es183923
 /extensions/finnish-dictionary                       @albertoxamin
 /extensions/flow                                     @vimtor
 /extensions/flutter-documentation-search             @MattisBrizard
 /extensions/flutter-pub-dev-search                   @prasadsunny1
+/extensions/flypy-code-query                         @absir1949
 /extensions/fork-repositories                        @sxn
 /extensions/format-graphql                           @tngranados
 /extensions/frankerfacez                             @davidchalifoux
@@ -129,7 +132,7 @@
 /extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
-/extensions/github-repository-search                 @thomaspaulmann
+/extensions/github-repository-search                 @thomaspaulmann @immint023
 /extensions/github-review-requests                   @resessh
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
@@ -160,6 +163,7 @@
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
 /extensions/hidden-icons                             @koinzhang
+/extensions/hide-files                               @koinzhang
 /extensions/hide-mail                                @Flatroy
 /extensions/holodex                                  @uetchy
 /extensions/homeassistant                            @tonka3000 @altrdev
@@ -173,7 +177,7 @@
 /extensions/ip-geolocation                           @koinzhang
 /extensions/iptv                                     @Aayush9029
 /extensions/itch-io                                  @Aayush9029
-/extensions/jetbrains                                @gdsmith @gdsmith
+/extensions/jetbrains                                @gdsmith @gdsmith @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand
 /extensions/jira-time-tracking                       @niallpaterson
@@ -239,6 +243,7 @@
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/ones                                     @k8scat
 /extensions/open-in-json-hero                        @ericallam
+/extensions/open-path                                @koinzhang
 /extensions/open-with-app                            @fturcheti
 /extensions/openweathermap                           @tonka3000
 /extensions/opsgenie                                 @ricoberger
@@ -254,6 +259,7 @@
 /extensions/pinboard                                 @fe9lix
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
+/extensions/placeholder                              @koinzhang
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pocket                                   @vimtor
 /extensions/podcasts                                 @ron-myers
@@ -263,6 +269,7 @@
 /extensions/premier-league                           @anhthang
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
+/extensions/projects                                 @ajaypremshankar
 /extensions/px-to-rem-converter                      @raulanatol
 /extensions/qq-music-controls                        @jwickers
 /extensions/qr-code-scanner                          @StevenRCE0
@@ -363,6 +370,7 @@
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta
 /extensions/unix-timestamp                           @Destiner
+/extensions/unogs                                    @mohitkyadav
 /extensions/unsplash                                 @eggsy
 /extensions/url-tools                                @joshauh46
 /extensions/uuid-generator                           @jmaeso
@@ -371,7 +379,7 @@
 /extensions/vercast                                  @gleich
 /extensions/vim-bro                                  @ajaypremshankar
 /extensions/visual-studio-code-project-manager       @MarkusLanger
-/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons
+/extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @macbookandrew
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola

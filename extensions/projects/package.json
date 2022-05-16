@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "projects",
+  "title": "Projects",
+  "description": "Quickly access your local projects and open them in your favorite editor or any app.",
+  "icon": "coding-folder.png",
+  "author": "ajaypremshankar",
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Projects",
+      "description": "Quickly access your local projects and open them in your favorite editor or any app.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repoScanPath",
+      "type": "textfield",
+      "required": true,
+      "default": "",
+      "title": "Path to scan for projects",
+      "description": "Path to scan for proejcts. ~/ is expanded. Use : to seperate multiple paths"
+    },
+    {
+      "name": "scanForProjectTypes",
+      "type": "textfield",
+      "required": false,
+      "default": "node,maven,gradle,xcode",
+      "title": "Type of projects to scan for.",
+      "description": "Type of projects to scan for. Use , to seperate multiple paths. Supported: node,maven,gradle,xcode"
+    },
+    {
+      "name": "openNodeWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open NODE projects with (required), shortcut: ⏎",
+      "description": "Open NODE projects with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openXcodeWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open XCode projects with (required), shortcut: ⏎",
+      "description": "Open XCode projects with",
+      "default": "Xcode"
+    },
+    {
+      "name": "openMavenWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open MAVEN projects with (required), shortcut: ⏎",
+      "description": "Open MAVEN projects with",
+      "default": "IntelliJ IDEA CE"
+    },
+    {
+      "name": "openGradleWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open GRADLE projects with (required), shortcut: ⏎",
+      "description": "Open GRADLE projects with",
+      "default": "IntelliJ IDEA CE"
+    },
+    {
+      "name": "openWith1",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open with (default), shortcut: ⌥⏎",
+      "description": "Open with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openWith2",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open with (optional), shortcut: ＾⏎",
+      "description": "Open with",
+      "default": ""
+    },
+    {
+      "name": "openWith3",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open with (optional), shortcut: ⇧⏎",
+      "description": "Open with",
+      "default": ""
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.0",
+    "@types/react": "^17.0.15",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
