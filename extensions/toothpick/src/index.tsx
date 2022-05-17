@@ -41,11 +41,7 @@ export default function Index() {
   };
 
   return (
-    <List
-      enableFiltering={true}
-      isLoading={isLoading}
-      searchBarPlaceholder="Search devices"
-    >
+    <List enableFiltering={true} isLoading={isLoading} searchBarPlaceholder="Search devices">
       <List.Section title="Devices">
         {deviceNames.map((deviceName, i) => (
           <List.Item
