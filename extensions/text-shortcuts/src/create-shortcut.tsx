@@ -380,7 +380,7 @@ export function TactionActions(props: {
         <Action
           title="Remove Last Action"
           icon={Icon.Trash}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             const _tactions = [...tactions];
             _tactions.pop();
@@ -390,7 +390,7 @@ export function TactionActions(props: {
         <Action
           title="Remove All Actions"
           icon={Icon.ExclamationMark}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
           onAction={async () => {
             setTactions([]);
           }}
