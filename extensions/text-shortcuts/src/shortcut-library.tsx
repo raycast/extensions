@@ -197,7 +197,7 @@ export default function ShortcutLibrary() {
                             ) {
                               const newShortCuts = [...userShortcuts];
                               newShortCuts.splice(index, 1);
-                              await showToast(Toast.Style.Success, "Remove shortcut success!");
+                              await showToast(Toast.Style.Success, "Successfully removed shortcut!");
                               await LocalStorage.setItem("shortcuts", JSON.stringify(newShortCuts));
                               const _updateList = [...updateList];
                               _updateList[0]++;
@@ -217,7 +217,7 @@ export default function ShortcutLibrary() {
                                 message: "Are you sure you want remove all custom shortcuts?",
                               })
                             ) {
-                              await showToast(Toast.Style.Success, "Remove all success!");
+                              await showToast(Toast.Style.Success, "Successfully removed all shortcuts!");
                               await LocalStorage.clear();
                               const _updateList = [...updateList];
                               _updateList[0]++;
