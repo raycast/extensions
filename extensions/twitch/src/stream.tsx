@@ -58,7 +58,6 @@ function streamUsingM3U8(streamlinkLocation, quality, user_name) {
 }
 
 export = {
-  startStream,
   startLowLatencyStream,
   streamUsingM3U8,
 };

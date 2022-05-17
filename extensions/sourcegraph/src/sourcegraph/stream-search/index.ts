@@ -11,7 +11,9 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  query?: string;
+  // query describes an entire query to replace the existing query with, or a partial
+  // addition.
+  query?: { addition: string } | string;
 }
 
 export interface Alert {
@@ -114,7 +116,7 @@ export async function performSearch(
             return {
               title: `Filter for '${f.label}'`,
               description: `${f.count} matches`,
-              query: f.value,
+              query: { addition: f.value },
             };
           }),
         false

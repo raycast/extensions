@@ -12,7 +12,6 @@ import {
 } from "./shared.func"
 
 let fetchResultStateCode = "-1"
-let isUserChosenTargetLanguage = false
 let delayFetchTranslateAPITimer: NodeJS.Timeout
 let delayUpdateTargetLanguageTimer: NodeJS.Timeout
 
@@ -23,6 +22,14 @@ export default function () {
     const preferences: IPreferences = getPreferenceValues()
     const defaultLanguage1 = getItemFromLanguageList(preferences.lang1)
     const defaultLanguage2 = getItemFromLanguageList(preferences.lang2)
+
+    let delayRequestTime = parseInt(preferences.delayFetchTranslateAPITime) || 400
+
+    if (delayRequestTime < 50) {
+        delayRequestTime = 50
+    } else if (delayRequestTime > 600) {
+        delayRequestTime = 600
+    }
 
     if (defaultLanguage1.languageId === defaultLanguage2.languageId) {
         return (
@@ -40,39 +47,35 @@ export default function () {
 
     const [currentFromLanguageState, updateCurrentFromLanguageState] = useState<ILanguageListItem>()
     const [translateTargetLanguage, updateTranslateTargetLanguage] = useState<ILanguageListItem>(defaultLanguage1)
+    const [currentTargetLanguage, setCurrentTargetLanguage] = useState<ILanguageListItem>(defaultLanguage1)
 
     const [copyModeState, updateCopyModeState] = useState<COPY_TYPE>(COPY_TYPE.Normal)
 
-    useEffect(() => {
-        if (!inputState) return // Prevent when first mounted run
-
-        updateLoadingState(true)
-        clearTimeout(delayUpdateTargetLanguageTimer)
-
-        // default is X -> A
-        requestYoudaoAPI(inputState, translateTargetLanguage.languageId).then((res) => {
+    function translate(fromLanguage: string, targetLanguage: string) {
+        requestYoudaoAPI(inputState!, fromLanguage, targetLanguage).then((res) => {
             const resData: ITranslateResult = res.data
 
-            const [from, to] = resData.l.split("2") // en2zh
+            const [from, to] = resData.l.split("2") // from2to
 
-            if (!isUserChosenTargetLanguage) {
-                // A -> B with B <- A
-                if (from === to) {
-                    delayUpdateTargetLanguageTimer = setTimeout(() => {
-                        updateTranslateTargetLanguage(from === preferences.lang2 ? defaultLanguage1 : defaultLanguage2)
-                    }, 900)
-                    return
+            if (from === to) {
+                let target: string
+                if (from === preferences.lang1) {
+                    target = defaultLanguage2.languageId
+                    setCurrentTargetLanguage(defaultLanguage2)
+                } else {
+                    target = defaultLanguage1.languageId
+                    setCurrentTargetLanguage(defaultLanguage1)
                 }
-                // X -> A
-                else if (
-                    from !== preferences.lang1 &&
-                    translateTargetLanguage.languageId !== defaultLanguage1.languageId
-                ) {
-                    delayUpdateTargetLanguageTimer = setTimeout(() => {
-                        updateTranslateTargetLanguage(defaultLanguage1)
-                    }, 900)
-                    return
-                }
+
+                translate(from, target)
+                return
+            }
+
+            if (res.data.errorCode === "207") {
+                delayUpdateTargetLanguageTimer = setTimeout(() => {
+                    translate(from, to)
+                }, delayRequestTime)
+                return
             }
 
             updateLoadingState(false)
@@ -80,7 +83,15 @@ export default function () {
             updateTranslateResultState(reformatTranslateResult(resData))
             updateCurrentFromLanguageState(getItemFromLanguageList(from))
         })
-    }, [inputState, translateTargetLanguage])
+    }
+
+    useEffect(() => {
+        if (!inputState) return // Prevent when first mounted run
+
+        updateLoadingState(true)
+        clearTimeout(delayUpdateTargetLanguageTimer)
+        translate("auto", translateTargetLanguage.languageId)
+    }, [inputState])
 
     function ListDetail() {
         if (fetchResultStateCode === "-1") return null
@@ -105,11 +116,12 @@ export default function () {
                                                     copyMode={copyModeState}
                                                     copyText={item?.subtitle || item.title}
                                                     currentFromLanguage={currentFromLanguageState}
+                                                    currentTargetLanguage={currentTargetLanguage}
                                                     onLanguageUpdate={(value) => {
-                                                        isUserChosenTargetLanguage = true
+                                                        setCurrentTargetLanguage(value)
                                                         updateTranslateTargetLanguage(value)
+                                                        translate("auto", value.languageId)
                                                     }}
-                                                    currentTargetLanguage={translateTargetLanguage}
                                                 />
                                             }
                                         />

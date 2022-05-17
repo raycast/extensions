@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "iainsimmons"
+    "iainsimmons",
+    "macbookandrew",
+    "cy-98"
   ],
   "license": "MIT",
   "commands": [
@@ -40,10 +42,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "lodash.get": "^4.4.2",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
+    "@types/lodash.get": "^4.4.7",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/sql.js": "^1.4.3",

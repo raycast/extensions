@@ -15,21 +15,19 @@
       "name": "show-google-maven-repository",
       "title": "Show Google Maven Repository",
       "icon": "show-google-maven.png",
-      "subtitle": "Google Maven Repository",
       "description": "Show All artifacts in Google's Maven repository.",
       "mode": "view"
     },
     {
-      "name": "search-google-artifact",
-      "title": "Search Google Artifacts",
-      "icon": "search-google-maven.png",
-      "subtitle": "Google Maven Repository",
+      "name": "search-google-maven-repository",
+      "title": "Search Google Maven Repository",
+      "icon": "search-google-maven-repository.png",
       "description": "Search for an artifact in Google's Maven repository.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
+    "@raycast/api": "^1.34.1",
     "node-fetch": "^3.2.3"
   },
   "devDependencies": {

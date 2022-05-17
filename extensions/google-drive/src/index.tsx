@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, createContext, useContext } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -11,6 +11,7 @@ import {
   displayPath,
   escapePath,
   fileMetadataMarkdown,
+  filePreview,
   getDriveRootPath,
   initialSetup,
   isEmpty,
@@ -19,8 +20,9 @@ import {
 type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
   reindexFiles: () => void;
-  fileDetailsMarkup: string;
+  selectedFile: FileInfo | null;
   toggleDetails: () => void;
+  isShowingDetail: boolean;
 };
 const CommandContext = createContext<CommandContextType | null>(null);
 const useCommandContext = () => {
@@ -35,7 +37,6 @@ const useCommandContext = () => {
 
 const Command = () => {
   const drivePath = getDriveRootPath();
-  const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
@@ -51,10 +52,6 @@ const Command = () => {
   useEffect(initialSetup, []);
 
   useEffect(() => {
-    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(files.selected)))();
-  }, [files.selected]);
-
-  useEffect(() => {
     (async () => {
       if (!existsSync(drivePath)) {
         showToast({
@@ -67,22 +64,11 @@ const Command = () => {
       }
 
       if (db) {
-        const alreadyIndexed = !!(await filesLastIndexedAt());
         try {
-          const toast = showToast({
-            style: Toast.Style.Animated,
-            title: `${alreadyIndexed ? "Updating" : "Indexing"} files cache index ${
-              alreadyIndexed ? "" : "for the first time"
-            }`,
-            message: "This may take some time, please wait...",
-          });
-
-          const isIndexed = await indexFiles(drivePath, db);
+          const isIndexed = await indexFiles(db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
-
-          (await toast).hide();
 
           if (files.filtered.length === 0) {
             setIsFetching(true);
@@ -135,14 +121,13 @@ const Command = () => {
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
 
-    showToast({ style: Toast.Style.Animated, title: "Rebuilding files cache index..." });
     try {
-      const isIndexed = await indexFiles(drivePath, db, { force: true });
+      const isIndexed = await indexFiles(db, { force: true });
 
       if (isIndexed) {
         setFilesIndexGeneratedAt(await filesLastIndexedAt());
-        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
         showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
+        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
       }
     } catch (e) {
       console.error(e);
@@ -153,7 +138,7 @@ const Command = () => {
     } finally {
       setIsFetching(false);
     }
-  }, [drivePath, db]);
+  }, [db]);
 
   const handleToggleFavorite = useCallback(
     (file: FileInfo) => {
@@ -178,7 +163,9 @@ const Command = () => {
   const toggleDetails = () => setIsShowingDetail((prevIsShowingDetail) => !prevIsShowingDetail);
 
   return (
-    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup, toggleDetails }}>
+    <CommandContext.Provider
+      value={{ handleToggleFavorite, reindexFiles, selectedFile: files.selected, toggleDetails, isShowingDetail }}
+    >
       <List
         isShowingDetail={isShowingDetail && files.filtered.length > 0}
         enableFiltering={false}
@@ -225,7 +212,7 @@ type ListItemProps = {
   idPrefix: "__fav__" | "";
 };
 const ListItem = ({ file, idPrefix }: ListItemProps) => {
-  const { handleToggleFavorite, fileDetailsMarkup } = useCommandContext();
+  const { handleToggleFavorite } = useCommandContext();
 
   return (
     <List.Item
@@ -233,8 +220,10 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       key={file.displayPath}
       icon={{ fileIcon: file.path }}
       title={file.name}
-      accessoryIcon={file.favorite ? "⭐" : undefined}
-      detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+      accessories={
+        file.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
+      detail={<ListItemDetail file={file} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="File Actions">
@@ -263,6 +252,32 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       }
     />
   );
+};
+
+type ListItemDetailProps = {
+  file: FileInfo;
+};
+const ListItemDetail = ({ file }: ListItemDetailProps) => {
+  const { selectedFile, isShowingDetail } = useCommandContext();
+  const [previewImage, setPreviewImage] = useState("");
+  const [markdown, setMarkdown] = useState("## File Information");
+
+  useEffect(() => {
+    if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
+      setMarkdown(fileMetadataMarkdown(file));
+      const controller = new AbortController();
+      filePreview(file, controller).then((previewImage) => {
+        if (!controller.signal.aborted) {
+          setPreviewImage(previewImage);
+        }
+      });
+      return () => {
+        controller.abort();
+      };
+    }
+  }, [selectedFile, isShowingDetail]);
+
+  return <List.Item.Detail markdown={previewImage + markdown} />;
 };
 
 const GeneralActions = ({ showToggleDetailsAction = true }) => {

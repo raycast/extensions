@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { QueryResultItem } from "./zoteroApi";
+import { RefData } from "./zoteroApi";
 
 export type Store = {
-  queryResults: QueryResultItem[][];
+  queryResults: RefData[][];
   queryIsLoading: boolean;
   clearResults: () => void;
   runQuery: (q?: string) => Promise<void>;
@@ -11,7 +11,7 @@ export type Store = {
 
 export const useStore = (
   sections: string[],
-  queryFunc: (section: string, q?: string) => Promise<QueryResultItem[]>,
+  queryFunc: (section: string, q?: string) => Promise<RefData[]>,
   initialLoading?: boolean
 ): Store => {
   const [store, setStore] = useState(() => ({

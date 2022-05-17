@@ -1,24 +1,57 @@
-import { ActionPanel, List, Icon, Action, Keyboard } from "@raycast/api";
-import type { QueryResultItem } from "./zoteroApi";
+import { ActionPanel, List, Icon, Action, Keyboard, getPreferenceValues } from "@raycast/api";
+import { RefData, Preferences } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 
 type Props = {
   sectionNames: string[];
-  queryResults: QueryResultItem[][];
+  queryResults: RefData[][];
   isLoading: boolean;
   onSearchTextChange?: (text: string) => void;
   throttle?: boolean;
 };
 
-const copyToClipboardShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
+const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
 const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
-const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
-const openZoteroLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
+
+function getURL(item: RefData): string {
+  return `${
+    item.url
+      ? item.url
+      : `${item.attachment.url ? item.attachment.url : `${item.DOI ? "https://doi.org/" + item.DOI : ""}`}`
+  }`;
+}
+
+function getItemDetail(item: RefData): string {
+  return `## ${item.title}
+
+${
+  item.url
+    ? "**URL:** [" + item.url + "](" + item.url + ")"
+    : item.attachment.url
+    ? "**URL:** [" + item.attachment.url + "](" + item.attachment.url + ")"
+    : ""
+}
+
+${item.publicationTitle ? "**Publication:** " + item.publicationTitle : ""}
+
+${item.publisher ? "**Publisher:** " + item.publisher : ""}
+
+${item.date ? "**Publication Date:** " + item.date : ""}
+
+${item.DOI ? "**DOI:** [" + item.DOI + "](" + "https://doi.org/" + item.DOI + ")" : ""}
+
+${item.abstractNote ? "**Abstract:** " + item.abstractNote : ""}
+
+${item.tags.length > 0 ? "**Tagged With:** " + item.tags.join(", ") : ""}
+
+`;
+}
 
 export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange, throttle }: Props): JSX.Element => {
   const [urls, onOpen] = useVisitedUrls();
+  const preferences: Preferences = getPreferenceValues();
   return (
-    <List isLoading={isLoading} onSearchTextChange={onSearchTextChange} throttle={throttle}>
+    <List isShowingDetail isLoading={isLoading} onSearchTextChange={onSearchTextChange} throttle={throttle}>
       {sectionNames.map((sectionName, sectionIndex) => (
         <List.Section
           key={sectionIndex}
@@ -28,38 +61,42 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
         >
           {queryResults[sectionIndex].map((item) => (
             <List.Item
-              key={item.id}
-              id={item.id}
+              key={item.key}
+              id={`${item.id}`}
               title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-              subtitle={item.subtitle}
-              icon={item.icon !== "" ? item.icon : Icon.Document}
-              accessoryTitle={item.accessoryTitle}
+              icon={`${item.type.toLowerCase() === "book" ? "doc.png" : "paper.png"}`}
+              detail={<List.Item.Detail markdown={getItemDetail(item)} />}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Zotero" url={item.url} onOpen={onOpen} />
-                  {item.pdf_url !== `` && (
-                    <Action.OpenInBrowser icon={Icon.Document} title="Open PDF" url={item.pdf_url} onOpen={onOpen} />
+                  <Action.OpenInBrowser
+                    title="Open in Zotero"
+                    url={`zotero://select/items/0_${item.key}`}
+                    onOpen={onOpen}
+                  />
+                  {item.attachment && item.attachment.key !== `` && (
+                    <Action.OpenInBrowser
+                      icon={Icon.Document}
+                      title="Open PDF"
+                      url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                      onOpen={onOpen}
+                    />
                   )}
-                  <Action.CopyToClipboard title="Copy URL" content={item.link} shortcut={copyToClipboardShortcut} />
-                  <Action.CopyToClipboard
-                    title="Copy As Reference"
-                    content={item.bib}
-                    shortcut={copyRefCommandShortcut}
-                  />
-                  <Action.OpenInBrowser
-                    icon={Icon.Link}
-                    title="Open Original Link"
-                    url={item.raw_link}
-                    shortcut={openExtLinkCommandShortcut}
-                    onOpen={onOpen}
-                  />
-                  <Action.OpenInBrowser
-                    icon={Icon.Globe}
-                    title="Open Zotero Link"
-                    url={item.link}
-                    shortcut={openZoteroLinkCommandShortcut}
-                    onOpen={onOpen}
-                  />
+                  {getURL(item) !== "" && (
+                    <Action.OpenInBrowser
+                      icon={Icon.Link}
+                      title="Open Original Link"
+                      url={getURL(item)}
+                      shortcut={openExtLinkCommandShortcut}
+                      onOpen={onOpen}
+                    />
+                  )}
+                  {preferences.use_bibtex && (
+                    <Action.CopyToClipboard
+                      title="Copy Bibtex Citation Key"
+                      content={item.citekey}
+                      shortcut={copyRefCommandShortcut}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
