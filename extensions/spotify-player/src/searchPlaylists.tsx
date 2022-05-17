@@ -32,14 +32,15 @@ export default function SpotifyList() {
       throttle
     >
       {response.result?.playlists.items.map((p) => (
-        <PlaylistItem key={p.id} playlist={p} spotify={spotifyInstalled} />
+        <PlaylistItem key={p.id} playlist={p} spotifyInstalled={spotifyInstalled} />
       ))}
     </List>
   );
 }
 
-function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; spotify: boolean }) {
+function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; spotifyInstalled: boolean }) {
   const playlist = props.playlist;
+  const spotifyInstalled = props.spotifyInstalled;
   const icon: Image.ImageLike = {
     source: playlist.images[playlist.images.length - 1].url,
     mask: Image.Mask.Circle,
@@ -58,13 +59,13 @@ function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; sp
           <PlayAction itemURI={playlist.uri} />
           <Action.OpenInBrowser
             title={`Show Playlist (${playlist.name.trim()})`}
-            url={props.spotify ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
+            url={spotifyInstalled ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
           <Action.OpenInBrowser
             title="Show Artist"
-            url={props.spotify ? `spotify:artist:${playlist.owner.id}` : playlist.owner.external_urls.spotify}
+            url={spotifyInstalled ? `spotify:artist:${playlist.owner.id}` : playlist.owner.external_urls.spotify}
           />
           <Action.CopyToClipboard
             title="Copy URL"

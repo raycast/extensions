@@ -34,14 +34,15 @@ export default function SpotifyList() {
       {response.result?.tracks.items
         .sort((t) => t.popularity)
         .map((t: SpotifyApi.TrackObjectFull) => (
-          <TrackListItem key={t.id} track={t} spotify={spotifyInstalled} />
+          <TrackListItem key={t.id} track={t} spotifyInstalled={spotifyInstalled} />
         ))}
     </List>
   );
 }
 
-function TrackListItem(props: { track: SpotifyApi.TrackObjectFull; spotify: boolean }) {
+function TrackListItem(props: { track: SpotifyApi.TrackObjectFull; spotifyInstalled: boolean }) {
   const track = props.track;
+  const spotifyInstalled = props.spotifyInstalled;
   const image = track.album.images[track.album.images.length - 1].url;
   const icon: Image.ImageLike = {
     source: image,
@@ -60,19 +61,19 @@ function TrackListItem(props: { track: SpotifyApi.TrackObjectFull; spotify: bool
           <PlayAction itemURI={track.uri} />
           <Action.OpenInBrowser
             title={`Show Track (${track.name.trim()})`}
-            url={props.spotify ? `spotify:track:${track.id}` : track.external_urls.spotify}
+            url={spotifyInstalled ? `spotify:track:${track.id}` : track.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
           <Action.OpenInBrowser
             title={`Show Album (${track.album.name.trim()})`}
-            url={props.spotify ? `spotify:album:${track.album.id}` : track.album.external_urls.spotify}
+            url={spotifyInstalled ? `spotify:album:${track.album.id}` : track.album.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
           <Action.OpenInBrowser
             title="Show Artist"
-            url={props.spotify ? `spotify:artist:${track.artists[0].id}` : track.artists[0].external_urls.spotify}
+            url={spotifyInstalled ? `spotify:artist:${track.artists[0].id}` : track.artists[0].external_urls.spotify}
           />
           <Action.CopyToClipboard
             title="Copy URL"
