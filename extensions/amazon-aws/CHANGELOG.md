@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [UX improvement for SQS command] - 2022-05-18
+
+- Loading indicators for queues attributes ([#1716](https://github.com/raycast/extensions/pull/1716))
+
 ## [DynamoDB tables command] - 2022-05-10
 
 - Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
