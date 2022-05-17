@@ -54,19 +54,24 @@ export default function StockLookup() {
       onSearchTextChange={handleStockSearch}
       throttle={true}
     >
-      <List.EmptyView title="No Stocks Found" icon={Icon.LevelMeter} />
       {isSearching ? (
-        <List.Section key="results" title="Results">
-          {stockSearchResults.map((result, i) => (
-            <StockResultListItem key={`${result.symbol}${i}`} stockResult={result} />
-          ))}
-        </List.Section>
+        <>
+          <List.EmptyView title="No Stocks Found" icon={Icon.LevelMeter} />
+          <List.Section key="results" title="Results">
+            {stockSearchResults.map((result, i) => (
+              <StockResultListItem key={`${result.symbol}${i}`} stockResult={result} />
+            ))}
+          </List.Section>
+        </>
       ) : (
-        <List.Section key="recent" title="Recently Viewed Stocks">
-          {recentStocks.map((stockResult, i) => (
-            <StockResultListItem key={`${stockResult.symbol}${i}`} stockResult={stockResult} />
-          ))}
-        </List.Section>
+        <>
+          <List.EmptyView title="Search for a stock" icon={Icon.Binoculars} />
+          <List.Section key="recent" title="Recently Viewed Stocks">
+            {recentStocks.map((stockResult, i) => (
+              <StockResultListItem key={`${stockResult.symbol}${i}`} stockResult={stockResult} />
+            ))}
+          </List.Section>
+        </>
       )}
     </List>
   );
