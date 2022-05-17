@@ -1,6 +1,6 @@
 import { searchResources } from "./common/zoteroApi";
 import { useStore } from "./common/store";
-import { View } from "./common/View";
+import { View } from "./common/view";
 
 export default function MyView() {
   const store = useStore(["results"], (_, q) => searchResources(q as string));

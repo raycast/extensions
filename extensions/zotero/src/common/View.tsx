@@ -51,58 +51,67 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
   const [urls, onOpen] = useVisitedUrls();
   const preferences: Preferences = getPreferenceValues();
   return (
-    <List isShowingDetail isLoading={isLoading} onSearchTextChange={onSearchTextChange} throttle={throttle}>
-      {sectionNames.map((sectionName, sectionIndex) => (
-        <List.Section
-          key={sectionIndex}
-          id={`${sectionIndex}`}
-          title={sectionName}
-          subtitle={`${queryResults[sectionIndex].length}`}
-        >
-          {queryResults[sectionIndex].map((item) => (
-            <List.Item
-              key={item.key}
-              id={`${item.id}`}
-              title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-              icon={`${item.type.toLowerCase() === "book" ? "doc.png" : "paper.png"}`}
-              detail={<List.Item.Detail markdown={getItemDetail(item)} />}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open in Zotero"
-                    url={`zotero://select/items/0_${item.key}`}
-                    onOpen={onOpen}
-                  />
-                  {item.attachment && item.attachment.key !== `` && (
+    <List
+      isShowingDetail={queryResults[0].length > 0}
+      isLoading={isLoading}
+      onSearchTextChange={onSearchTextChange}
+      throttle={throttle}
+    >
+      {queryResults[0].length < 1 ? (
+        <List.EmptyView icon={{ source: "command-icon.png" }} title="Type something to search Zotero Database!" />
+      ) : (
+        sectionNames.map((sectionName, sectionIndex) => (
+          <List.Section
+            key={sectionIndex}
+            id={`${sectionIndex}`}
+            title={sectionName}
+            subtitle={`${queryResults[sectionIndex].length}`}
+          >
+            {queryResults[sectionIndex].map((item) => (
+              <List.Item
+                key={item.key}
+                id={`${item.id}`}
+                title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
+                icon={`${item.type.toLowerCase() === "book" ? "doc.png" : "paper.png"}`}
+                detail={<List.Item.Detail markdown={getItemDetail(item)} />}
+                actions={
+                  <ActionPanel>
                     <Action.OpenInBrowser
-                      icon={Icon.Document}
-                      title="Open PDF"
-                      url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                      title="Open in Zotero"
+                      url={`zotero://select/items/0_${item.key}`}
                       onOpen={onOpen}
                     />
-                  )}
-                  {getURL(item) !== "" && (
-                    <Action.OpenInBrowser
-                      icon={Icon.Link}
-                      title="Open Original Link"
-                      url={getURL(item)}
-                      shortcut={openExtLinkCommandShortcut}
-                      onOpen={onOpen}
-                    />
-                  )}
-                  {preferences.use_bibtex && (
-                    <Action.CopyToClipboard
-                      title="Copy Bibtex Citation Key"
-                      content={item.citekey}
-                      shortcut={copyRefCommandShortcut}
-                    />
-                  )}
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+                    {item.attachment && item.attachment.key !== `` && (
+                      <Action.OpenInBrowser
+                        icon={Icon.Document}
+                        title="Open PDF"
+                        url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                        onOpen={onOpen}
+                      />
+                    )}
+                    {getURL(item) !== "" && (
+                      <Action.OpenInBrowser
+                        icon={Icon.Link}
+                        title="Open Original Link"
+                        url={getURL(item)}
+                        shortcut={openExtLinkCommandShortcut}
+                        onOpen={onOpen}
+                      />
+                    )}
+                    {preferences.use_bibtex && (
+                      <Action.CopyToClipboard
+                        title="Copy Bibtex Citation Key"
+                        content={item.citekey}
+                        shortcut={copyRefCommandShortcut}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
+      )}
     </List>
   );
 };

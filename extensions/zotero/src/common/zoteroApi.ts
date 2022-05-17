@@ -347,15 +347,16 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   const query: Fuse.Expression = {
     $or: [{ title: qss }, { abstractNote: qss }],
   };
+
   // filter for ALL tags, ignoring case
   if (tss.length > 0) {
-    for (const c of tss) {
-      ret = ret.filter((r) => {
-        return r.tags?.some((e) => {
-          return e.toLowerCase() === c.toLowerCase();
+    ret = ret.filter((r) => {
+      return r.tags?.some((e) => {
+        return tss.some((c) => {
+          return e.toLowerCase().includes(c.replaceAll("+", " ").toLowerCase());
         });
       });
-    }
+    });
   }
 
   if (!qss.trim()) {
@@ -374,11 +375,11 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     keys: [
       {
         name: "title",
-        weight: 6,
+        weight: 8,
       },
       {
         name: "abstractNote",
-        weight: 4,
+        weight: 2,
       },
     ],
   };
