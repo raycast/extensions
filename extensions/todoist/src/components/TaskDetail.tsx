@@ -91,8 +91,6 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={task.url} />
-
           <TaskActions task={task} />
 
           <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />

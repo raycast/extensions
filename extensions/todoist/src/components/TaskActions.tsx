@@ -61,6 +61,8 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
 
   return (
     <>
+      <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+
       <ActionPanel.Section>
         <Action.Push
           title="Edit Task"
@@ -73,7 +75,7 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
           id="completeTask"
           title="Complete Task"
           icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           onAction={() => completeTask(task)}
         />
 
@@ -116,8 +118,6 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-
         {task.commentCount > 0 ? (
           <Action.Push
             title="Show Comments"
@@ -131,6 +131,12 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
           title="Copy Task URL"
           content={task.url}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Task Title"
+          content={task.content}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
     </>
