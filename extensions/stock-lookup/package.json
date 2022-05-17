@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stock-lookup",
   "title": "Stock Lookup",
-  "description": "Retrieves stock information from the alphavantage API. Get a free API Key from https://www.alphavantage.co/support/#api-key",
+  "description": "Retrieves stock information from the alphavantage API. Get a free API Key from https://www.alphavantage.co/support/#api-key, or a paid one from https://www.alphavantage.co/premium/",
   "icon": "stock-emoji.png",
   "author": "jones-sam",
   "categories": [
@@ -17,6 +17,15 @@
       "subtitle": "Search and retrieve stock information",
       "description": "Retrieves stock information from the alphavantage API",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "API Key to fetch data from the Alphavantage API",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {

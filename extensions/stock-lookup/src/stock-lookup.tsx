@@ -124,14 +124,18 @@ export default function StockLookup() {
       />
       {isSearching ? (
         <List.Section key="results" title="Results">
-          {stockSearchResults.map((result) => (
-            <StockResultListItem key={result.symbol} stockResult={result} onChangeApiKey={onChangeApiKey} />
+          {stockSearchResults.map((result, i) => (
+            <StockResultListItem key={`${result.symbol}${i}`} stockResult={result} onChangeApiKey={onChangeApiKey} />
           ))}
         </List.Section>
       ) : (
         <List.Section key="recent" title="Recently Viewed Stocks">
-          {recentStocks.map((stockResult) => (
-            <StockResultListItem key={stockResult.symbol} stockResult={stockResult} onChangeApiKey={onChangeApiKey} />
+          {recentStocks.map((stockResult, i) => (
+            <StockResultListItem
+              key={`${stockResult.symbol}${i}`}
+              stockResult={stockResult}
+              onChangeApiKey={onChangeApiKey}
+            />
           ))}
         </List.Section>
       )}

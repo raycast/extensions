@@ -1,5 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import axios from "axios";
+import { randomUUID } from "crypto";
 
 const BASE_URL = "https://www.alphavantage.co/query?";
 
@@ -22,10 +23,16 @@ export interface StockInfoInterface {
   changePercent: string;
 }
 
-export async function searchStocks({ keywords }: { keywords: string }) {
-  const apiKey = await LocalStorage.getItem("apiKey");
+export interface Preferences {
+  apiKey?: string;
+}
 
-  const res = await axios.get(`${BASE_URL}function=SYMBOL_SEARCH&keywords=${keywords}&apikey=${apiKey}`);
+const getApiKey = () => {
+  return getPreferenceValues<Preferences>().apiKey || randomUUID();
+};
+
+export async function searchStocks({ keywords }: { keywords: string }) {
+  const res = await axios.get(`${BASE_URL}function=SYMBOL_SEARCH&keywords=${keywords}&apikey=${getApiKey()}`);
 
   if (!res.data.bestMatches) {
     throw Error("Api key Invalid");
@@ -45,9 +52,7 @@ export async function searchStocks({ keywords }: { keywords: string }) {
 }
 
 export async function getStockInfoBySymbol(symbol: string) {
-  const apiKey = await LocalStorage.getItem("apiKey");
-
-  const res = await axios.get(`${BASE_URL}function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`);
+  const res = await axios.get(`${BASE_URL}function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${getApiKey()}`);
 
   if (!res.data["Global Quote"] || (res.data["Global Quote"] && Object.keys(res.data["Global Quote"]).length === 0)) {
     throw Error("Could not retrieve stock info");
