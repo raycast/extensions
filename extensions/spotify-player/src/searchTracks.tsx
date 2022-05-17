@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { PlayAction } from "./client/actions";
 import { authorize, spotifyApi } from "./client/client";
 import { Response } from "./client/interfaces";
-import { checkIfSpotifyExists } from "./client/spotify-applescript";
+import { isSpotifyInstalled } from "./client/utils";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
-  const [spotifyExists, setSpotifyExists] = useState<boolean>(false);
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
   const response = useTrackSearch(searchText);
 
   if (response.error) {
@@ -16,9 +16,9 @@ export default function SpotifyList() {
 
   useEffect(() => {
     async function checkForSpotify() {
-      const doesSpotifyExist = await checkIfSpotifyExists();
+      const spotifyIsInstalled = await isSpotifyInstalled();
 
-      setSpotifyExists(doesSpotifyExist);
+      setSpotifyInstalled(spotifyIsInstalled);
     }
 
     checkForSpotify();
@@ -34,7 +34,7 @@ export default function SpotifyList() {
       {response.result?.tracks.items
         .sort((t) => t.popularity)
         .map((t: SpotifyApi.TrackObjectFull) => (
-          <TrackListItem key={t.id} track={t} spotify={spotifyExists} />
+          <TrackListItem key={t.id} track={t} spotify={spotifyInstalled} />
         ))}
     </List>
   );
