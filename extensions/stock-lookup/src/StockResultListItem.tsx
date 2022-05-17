@@ -1,14 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { SearchResult } from "./alphavantageApi";
-import { changeApiKeyAlert } from "./changeApiKeyAlert";
+
 import { StockInfo } from "./StockInfo";
 
 interface StockResultListItemProps {
   stockResult: SearchResult;
-  onChangeApiKey: () => void;
 }
 
-export const StockResultListItem = ({ stockResult, onChangeApiKey }: StockResultListItemProps) => {
+export const StockResultListItem = ({ stockResult }: StockResultListItemProps) => {
   return (
     <List.Item
       key={stockResult.symbol}
@@ -24,12 +23,6 @@ export const StockResultListItem = ({ stockResult, onChangeApiKey }: StockResult
             title={`View ${stockResult.symbol}`}
             target={<StockInfo stockSearchResult={stockResult} />}
             icon={Icon.Document}
-          />
-          <Action
-            title="Change API Key"
-            onAction={async () => {
-              changeApiKeyAlert(onChangeApiKey);
-            }}
           />
         </ActionPanel>
       }
