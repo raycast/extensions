@@ -1,9 +1,15 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { promisify } from "util";
-import { exec as cExec } from "child_process";
-import { checkErrors } from "./utilities/common";
-
-const exec = promisify(cExec);
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  closeMainWindow,
+  popToRoot,
+  getPreferenceValues,
+} from "@raycast/api";
+import { spawn } from "child_process";
+import { checkErrors, checkOpenFortiVpn } from "./utilities/common";
 
 interface CommandForm {
   otp: string;
@@ -11,16 +17,23 @@ interface CommandForm {
 
 export default function Command() {
   async function handleSubmit(values: CommandForm) {
-    const cmd = `/usr/bin/sudo /opt/homebrew/bin/openfortivpn${values.otp ? " -o " + values.otp : ""}`;
-    try {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Connecting",
-      });
-      await exec(cmd);
-    } catch (e) {
-      if (e instanceof Error) {
-        await checkErrors(e);
+    if (await checkOpenFortiVpn()) {
+      const useSudo: boolean = getPreferenceValues().sudo ?? false;
+      const cmd = `${useSudo ? "/usr/bin/sudo /opt/homebrew/bin/openfortivpn" : "openfortivpn"} ${
+        values.otp ? " -o " + values.otp : ""
+      }`;
+      try {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Connecting",
+        });
+        spawn("/bin/sh", ["-c", cmd], {});
+        closeMainWindow();
+        popToRoot();
+      } catch (e) {
+        if (e instanceof Error) {
+          await checkErrors(e.message);
+        }
       }
     }
   }

@@ -1,7 +1,29 @@
 import { Alert, confirmAlert, open, showHUD } from "@raycast/api";
+import { existsSync } from "fs";
 
-export async function checkErrors(stderr: Error) {
-  if (stderr.message.includes("sudo: a terminal is required to read the password")) {
+export async function checkOpenFortiVpn() {
+  const alertOptions: Alert.Options = {
+    title: "Missing openfortivpn",
+    message: "You have to install openfortivpn first",
+    primaryAction: {
+      title: "How to install",
+    },
+    dismissAction: {
+      title: "Close",
+    },
+  };
+  if (existsSync("/opt/homebrew/bin/openfortivpn")) {
+    return true;
+  } else {
+    if (await confirmAlert(alertOptions)) {
+      await open("https://github.com/raycast/extensions/tree/main/extensions/openfortivpn#how-to-install");
+    }
+    return false;
+  }
+}
+
+export async function checkErrors(stderr: string) {
+  if (stderr.includes("Operation not permitted")) {
     const alertOptions: Alert.Options = {
       title: "Can't Use Sudo",
       message:
@@ -10,14 +32,13 @@ export async function checkErrors(stderr: Error) {
         title: "Learn More",
       },
       dismissAction: {
-        title: "Close Raycast",
+        title: "Close",
       },
     };
     if (await confirmAlert(alertOptions)) {
-      await open("https://github.com/raycast/extensions/tree/main/extensions/openfortivpn#readme");
+      await open("https://github.com/raycast/extensions/tree/main/extensions/openfortivpn#use-sudo");
     }
   } else {
-    console.log(stderr.message);
     await showHUD("Connection problem");
   }
 }

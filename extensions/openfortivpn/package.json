@@ -23,6 +23,17 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "sudo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Sudo",
+      "description": "See https://github.com/raycast/extensions/tree/main/extensions/openfortivpn#use-sudo",
+      "default": false,
+      "label": "Run openfortivpn and pkill commands as sudo"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.32.1"
   },

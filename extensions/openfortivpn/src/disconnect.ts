@@ -1,25 +1,23 @@
-import { closeMainWindow, popToRoot, showHUD } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
 import { promisify } from "util";
 import { exec as cExec } from "child_process";
-import { checkErrors } from "./utilities/common";
+import { checkErrors, checkOpenFortiVpn } from "./utilities/common";
 const exec = promisify(cExec);
 
 export default async () => {
-  const stateCmd = 'ps aux | grep "/bin/[o]penfortivpn"';
-  try {
-    await exec(stateCmd);
-    const cmd = `/usr/bin/sudo /usr/bin/pkill openfortivpn || true`;
+  if (await checkOpenFortiVpn()) {
+    const stateCmd = 'ps aux | grep "/bin/[o]penfortivpn"';
     try {
-      await exec(cmd);
+      await exec(stateCmd);
+      const useSudo: boolean = getPreferenceValues().sudo ?? false;
+      const cmd = `${useSudo ? "/usr/bin/sudo /usr/bin/pkill" : "pkill"} openfortivpn || true`;
+      const result = await exec(cmd);
+      await checkErrors(result.stderr);
       await showHUD("Disconnected from openfortivpn");
     } catch (e) {
-      if (e instanceof Error) {
-        await checkErrors(e);
-      }
+      await showHUD("There are no active connections");
     }
-  } catch (e) {
-    await showHUD("There are no active connections");
+    closeMainWindow();
+    popToRoot();
   }
-  closeMainWindow();
-  popToRoot();
 };
