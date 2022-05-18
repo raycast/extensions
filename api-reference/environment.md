@@ -31,15 +31,15 @@ console.log(`Theme: ${environment.theme}`);
 
 #### Properties
 
-| Name           | Type                 | Description                                                                                                                       |
-| :------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| assetsPath     | <code>string</code>  | The absolute path to the assets directory of the extension.                                                                       |
-| commandName    | <code>string</code>  | The name of the launched command, as specified in package.json                                                                    |
-| extensionName  | <code>string</code>  | The name of the extension, as specified in package.json                                                                           |
-| isDevelopment  | <code>boolean</code> | Indicates whether the command is a development command (vs. an installed command from the Store).                                 |
-| raycastVersion | <code>string</code>  | The version of the main Raycast app                                                                                               |
-| supportPath    | <code>string</code>  | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
-| theme    | <code>"light" \| "dark"</code>  | The theme used by Raycast. |
+| Property | Description | Type |
+| :--- | :--- | :--- | :--- |
+| assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
+| commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
+| extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
+| isDevelopment<mark style="color:red;">*</mark> | Indicates whether the command is a development command (vs. an installed command from the Store). | <code>boolean</code> |
+| raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
+| supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
+| theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
 
 ### getSelectedFinderItems
 
@@ -118,6 +118,6 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 
 #### Properties
 
-| Name | Type                | Description          |
-| :--- | :------------------ | :------------------- |
-| path | <code>string</code> | The path to the item |
+| Property | Description | Type |
+| :--- | :--- | :--- | :--- |
+| path<mark style="color:red;">*</mark> | The path to the item | <code>string</code> |
