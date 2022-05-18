@@ -15,7 +15,7 @@ import { CustomTimer, Timer } from "./types";
 
 export default function Command() {
   const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
-  const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer> | undefined>(undefined);
+  const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer>>({});
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function Command() {
         />
       </List.Section>
       <List.Section title="Custom Timers">
-        {Object.keys(customTimers || {})
+        {Object.keys(customTimers)
           ?.sort((a, b) => {
             return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
           })
