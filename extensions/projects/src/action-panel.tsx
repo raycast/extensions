@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { ReactElement } from "react";
 import { CacheType, OpenWith, Preferences, ProjectType, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
+import { getOpenWith } from "./common-utils";
 
 interface SearchProjectActionPanelProps {
   repo: SourceRepo;
@@ -31,19 +32,6 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
     showToast(Toast.Style.Success, "", "Repo un-pinned.");
   }
 
-  function getOpenWith(projectType: ProjectType, preferences: Preferences): OpenWith {
-    if (projectType === ProjectType.NODE) {
-      return preferences.openNodeWith;
-    } else if (projectType === ProjectType.MAVEN) {
-      return preferences.openMavenWith;
-    } else if (projectType === ProjectType.GRADLE) {
-      return preferences.openGradleWith;
-    } else if (projectType === ProjectType.XCODE) {
-      return preferences.openXcodeWith;
-    }
-    return preferences.openNodeWith;
-  }
-
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -57,16 +45,14 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
         />
 
-        {props.preferences.openWith1 && (
-          <Action.Open
-            title={`Open in ${props.preferences.openWith1.name}`}
-            icon={{ fileIcon: props.preferences.openWith1.path }}
-            target={props.repo.fullPath}
-            application={props.preferences.openWith1.bundleId}
-            shortcut={{ modifiers: ["opt"], key: "return" }}
-            onOpen={() => addToRecentlyAccessedCache(props.repo)}
-          />
-        )}
+        <Action.Open
+          title={`Open in ${props.preferences.openDefaultWith.name}`}
+          icon={{ fileIcon: props.preferences.openDefaultWith.path }}
+          target={props.repo.fullPath}
+          application={props.preferences.openDefaultWith.bundleId}
+          shortcut={{ modifiers: ["opt"], key: "return" }}
+          onOpen={() => addToRecentlyAccessedCache(props.repo)}
+        />
 
         {props.preferences.openWith2 && (
           <Action.Open

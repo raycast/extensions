@@ -2,13 +2,14 @@ import { showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { ApplicationCache } from "./application-cache";
-import { CacheType, ProjectConfig, ProjectType, SourceRepo } from "../types";
+import { CacheType, Preferences, ProjectConfig, ProjectType, SourceRepo } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import myData from "./../project-types-data.json";
+import { isProjectTypeEnabled } from "../common-utils";
 
 const execp = promisify(exec);
 
-export async function buildAllProjectsCache(paths: string[], projectTypes: string[]): Promise<SourceRepo[]> {
+export async function buildAllProjectsCache(paths: string[], preferences: Preferences): Promise<SourceRepo[]> {
   const allProjectsCache = new ApplicationCache(CacheType.ALL_PROJECTS);
   let foundRepos: SourceRepo[] = [];
 
@@ -19,7 +20,7 @@ export async function buildAllProjectsCache(paths: string[], projectTypes: strin
       let spotlightSearchParameters: string[] = [];
 
       projectConfig.forEach((project) => {
-        if (projectTypes.length == 0 || projectTypes.includes(project.type)) {
+        if (isProjectTypeEnabled(project.type, preferences)) {
           spotlightSearchParameters = [...spotlightSearchParameters, ...project.spotlightQuery];
         }
       });

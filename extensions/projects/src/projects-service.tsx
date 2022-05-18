@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs";
-import { CacheType, Preferences, ProjectType, RepoSearchResponse, SourceRepo } from "./types";
+import { CacheType, Preferences, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { buildAllProjectsCache } from "./cache/all-projects-cache-builder-v2";
 import { getRepoKey } from "./common-utils";
@@ -115,16 +115,16 @@ export function useRepoCache(query: string | undefined): {
       recent:
         filteredRecentRepos?.length > 0
           ? {
-            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredRecentRepos || [],
-          }
+              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredRecentRepos || [],
+            }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredPinnedRepos || [],
-          }
+              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredPinnedRepos || [],
+            }
           : undefined,
     });
   }
@@ -147,10 +147,7 @@ export function useRepoCache(query: string | undefined): {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
 
-        const repos = await buildAllProjectsCache(repoPaths,
-          preferences.scanForProjectTypes.split(",")
-            .filter((type) => type.trim().length > 0)
-            .map((t) => t.trim()));
+        const repos = await buildAllProjectsCache(repoPaths, preferences);
 
         if (!cancel) {
           filterAndSetFullResponse(repos);

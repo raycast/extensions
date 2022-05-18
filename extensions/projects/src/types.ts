@@ -20,14 +20,13 @@ export interface OpenWith {
 
 export interface Preferences {
   repoScanPath: string;
-  scanForProjectTypes: string;
-  openNodeWith: OpenWith;
-  openXcodeWith: OpenWith;
-  openMavenWith: OpenWith;
-  openGradleWith: OpenWith;
-  openWailsWith: OpenWith;
-  openTauriWith: OpenWith;
-  openWith1: OpenWith;
+  openDefaultWith: OpenWith;
+  openNodeWith?: OpenWith;
+  openXcodeWith?: OpenWith;
+  openMavenWith?: OpenWith;
+  openGradleWith?: OpenWith;
+  openWailsWith?: OpenWith;
+  openTauriWith?: OpenWith;
   openWith2?: OpenWith;
   openWith3?: OpenWith;
 }

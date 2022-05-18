@@ -32,20 +32,21 @@ export default function Main(): ReactElement {
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
             keywords={[repo.name]}
-            accessoryIcon={isPinned ? Icon.Pin : ''}
+            accessoryIcon={isPinned ? Icon.Pin : ""}
             subtitle={repo.type}
             actions={<SearchProjectActionPanel repo={repo} preferences={preferences} pinned={isPinned} />}
           />
         ))}
       </List.Section>
     );
-  }
+  };
 
   return (
     <List
       searchBarPlaceholder={searchBarPlaceholders[Math.floor(Math.random() * searchBarPlaceholders.length)]}
       onSearchTextChange={setSearchText}
-      isLoading={isLoading}>
+      isLoading={isLoading}
+    >
       {response?.pinned && getListSection(response?.pinned, true)}
       {response?.recent && getListSection(response?.recent, false)}
       {response?.all && getListSection(response?.all, false)}
