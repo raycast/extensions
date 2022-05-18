@@ -154,7 +154,9 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               }
               value={array[index].content[0]}
               onChange={(newValue) => {
-                tactions[index].content[0] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[0] = newValue;
+                setTactions(_tactions);
               }}
             />
             <Form.TextField
@@ -164,7 +166,9 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
-                tactions[index].content[1] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[1] = newValue;
+                setTactions(_tactions);
               }}
             />
           </React.Fragment>
