@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, createContext, useContext } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -307,6 +307,12 @@ const GeneralActions = ({ showToggleDetailsAction = true }) => {
           shortcut={{ modifiers: ["cmd"], key: "b" }}
         />
       ) : null}
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+      />
       <Action
         title="Reindex Files Cache"
         icon={Icon.Hammer}
