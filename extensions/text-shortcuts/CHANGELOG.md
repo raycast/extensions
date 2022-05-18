@@ -4,6 +4,7 @@
 
 - Release of Text Shortcuts version 1.3
 - Fix the bug that "Replace" action cannot be input
+- Add action "Open Extension Preferences"
 
 ## [Update UI Display] - 2022-05-18
 

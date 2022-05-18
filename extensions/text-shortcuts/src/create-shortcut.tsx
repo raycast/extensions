@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LocalStorage,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import {
   cases,
   checkAffix,
@@ -317,6 +327,15 @@ function CreateShortcutActions(props: {
         }}
       />
       <TactionActions tactions={tactions} setTactions={setTactions} />
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Gear}
+          title="Open Extension Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openExtensionPreferences}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
