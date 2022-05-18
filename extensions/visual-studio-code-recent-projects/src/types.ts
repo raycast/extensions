@@ -49,7 +49,7 @@ export interface Preferences {
   build: VSCodeBuild;
 }
 
-export const recentOpenedLabel = "Open &&Recent";
+export const RecentOpenedId = "submenuitem.35";
 export enum RecentOpenedItemId {
   Folder = "openRecentFolder",
   File = "openRecentFile",
