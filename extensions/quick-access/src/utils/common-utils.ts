@@ -1,21 +1,9 @@
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import { DirectoryInfo, DirectoryType, FileType } from "./directory-info";
+import { DirectoryInfo, DirectoryType, FileType } from "../types/types";
 import { imgExt } from "./constants";
 import { parse } from "path";
 import { getFinderInsertLocation } from "./applescript-utils";
-import Values = LocalStorage.Values;
-
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    autoCopyLatestFile: preferencesMap.get("autoCopyLatestFile") as boolean,
-    rememberTag: preferencesMap.get("rememberTag") as boolean,
-    primaryAction: preferencesMap.get("primaryAction") as string,
-    fileShowNumber: preferencesMap.get("fileShowNumber") as string,
-    sortBy: preferencesMap.get("sortBy") as string,
-  };
-};
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);

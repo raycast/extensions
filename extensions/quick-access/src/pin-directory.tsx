@@ -1,6 +1,6 @@
 import { LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { checkDuplicatePath, fetchDirectoryPath, getLocalStorage, isDirectory, isEmpty } from "./utils/common-utils";
-import { DirectoryInfo, DirectoryType } from "./utils/directory-info";
+import { DirectoryInfo, DirectoryType } from "./types/types";
 import { parse } from "path";
 import { LocalStorageKey } from "./utils/constants";
 

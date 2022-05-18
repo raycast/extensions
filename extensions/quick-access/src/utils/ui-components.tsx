@@ -2,7 +2,7 @@ import { Action, Icon, LocalStorage, showHUD, showToast, Toast } from "@raycast/
 import { alertDialog, refreshNumber } from "../hooks/hooks";
 import { LocalStorageKey } from "./constants";
 import React from "react";
-import { FileInfo } from "./directory-info";
+import { FileInfo } from "../types/types";
 import { copyFileByPath } from "./applescript-utils";
 import { upRank } from "../search-pinned-directories";
 
