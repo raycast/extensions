@@ -5,7 +5,10 @@ import { Values } from "./types";
 export default function CustomTimerView() {
   const handleSubmit = async (values: Values) => {
     await ensureCTFileExists();
-    if (isNaN(Number(values.hours))) {
+    if (values.hours === "" && values.minutes === "" && values.seconds === "") {
+      const toast = new Toast({ style: Toast.Style.Failure, title: "No values set for timer length!" });
+      await toast.show();
+    } else if (isNaN(Number(values.hours))) {
       const toast = new Toast({ style: Toast.Style.Failure, title: "Hours must be a number!" });
       await toast.show();
     } else if (isNaN(Number(values.minutes))) {
@@ -16,7 +19,6 @@ export default function CustomTimerView() {
       await toast.show();
     } else {
       await closeMainWindow();
-      await popToRoot();
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
       await startTimer(timeInSeconds, timerName);
@@ -26,6 +28,7 @@ export default function CustomTimerView() {
           values.seconds ? values.seconds : 0
         }s! 🎉`
       );
+      await popToRoot();
     }
   };
 

@@ -56,6 +56,9 @@ async function getTimers() {
       setOfTimers.push(timer);
     }
   });
+  setOfTimers.sort((a, b) => {
+    return a.timeLeft - b.timeLeft;
+  });
   return setOfTimers;
 }
 

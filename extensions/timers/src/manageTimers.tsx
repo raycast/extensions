@@ -14,8 +14,8 @@ import {
 import { CustomTimer, Timer } from "./types";
 
 export default function Command() {
-  const [timers, setTimers] = useState<Timer[] | null>([]);
-  const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer>>({});
+  const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
+  const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer> | undefined>(undefined);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -27,11 +27,7 @@ export default function Command() {
   const refreshTimers = async () => {
     await ensureCTFileExists();
     const setOfTimers: Timer[] = await getTimers();
-    if (setOfTimers.length == 0) {
-      setTimers(null);
-    } else {
-      setTimers(setOfTimers);
-    }
+    setTimers(setOfTimers);
     const setOfCustomTimers: Record<string, CustomTimer> = await readCustomTimers();
     setCustomTimers(setOfCustomTimers);
   };
@@ -67,79 +63,80 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={timers?.length == 0 || Object.keys(customTimers).length == 0}>
+    <List isLoading={timers === undefined || customTimers === undefined}>
       <List.Section title="Currently Running">
-        {timers != null ? (
-          timers.map((timer, index) => (
-            <List.Item
-              key={index}
-              icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
-              title={timer.name}
-              subtitle={formatTime(timer.timeLeft) + " left"}
-              accessoryTitle={formatTime(timer.secondsSet) + " originally"}
-              actions={
-                <ActionPanel>
-                  <Action title="Stop Timer" onAction={() => handleTimerStop(timer)} />
-                  <Action
-                    title="Rename Timer"
-                    onAction={() =>
-                      push(<RenameView currentName={timer.name} timerFile={timer.originalFile} ctID={null} />)
-                    }
-                  />
-                  <Action
-                    title="Save Timer as Preset"
-                    shortcut={{
-                      modifiers: ["cmd", "shift"],
-                      key: "enter",
-                    }}
-                    onAction={() => handleCreateCustom(timer)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))
-        ) : (
+        {timers?.map((timer, index) => (
           <List.Item
-            key={0}
-            icon={Icon.Clock}
-            title={"No running timers!"}
-            subtitle={"Press Enter to start a timer"}
+            key={index}
+            icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+            title={timer.name}
+            subtitle={formatTime(timer.timeLeft) + " left"}
+            accessoryTitle={formatTime(timer.secondsSet) + " originally"}
             actions={
               <ActionPanel>
-                <Action title="Start Timer" onAction={() => push(<CustomTimerView />)} />
-              </ActionPanel>
-            }
-          />
-        )}
-      </List.Section>
-      <List.Section title="Custom Timers">
-        {Object.keys(customTimers)?.map((ctID) => (
-          <List.Item
-            key={ctID}
-            icon={Icon.Clock}
-            title={customTimers[ctID].name}
-            subtitle={formatTime(customTimers[ctID].timeInSeconds)}
-            actions={
-              <ActionPanel>
-                <Action title="Start Timer" onAction={() => handleTimerStart(customTimers[ctID])} />
+                <Action title="Stop Timer" onAction={() => handleTimerStop(timer)} />
                 <Action
                   title="Rename Timer"
                   onAction={() =>
-                    push(<RenameView currentName={customTimers[ctID].name} timerFile={"customTimer"} ctID={ctID} />)
+                    push(<RenameView currentName={timer.name} timerFile={timer.originalFile} ctID={null} />)
                   }
                 />
                 <Action
-                  title="Delete Custom Timer"
+                  title="Save Timer as Preset"
                   shortcut={{
-                    modifiers: ["ctrl"],
-                    key: "x",
+                    modifiers: ["cmd", "shift"],
+                    key: "enter",
                   }}
-                  onAction={() => handleDeleteCustom(ctID)}
+                  onAction={() => handleCreateCustom(timer)}
                 />
               </ActionPanel>
             }
           />
         ))}
+        <List.Item
+          key={0}
+          icon={Icon.Clock}
+          title={"Create a new timer"}
+          subtitle={"Press Enter to start a timer"}
+          actions={
+            <ActionPanel>
+              <Action title="Start Timer" onAction={() => push(<CustomTimerView />)} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      <List.Section title="Custom Timers">
+        {Object.keys(customTimers || {})
+          ?.sort((a, b) => {
+            return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
+          })
+          .map((ctID) => (
+            <List.Item
+              key={ctID}
+              icon={Icon.Clock}
+              title={customTimers[ctID].name}
+              subtitle={formatTime(customTimers[ctID].timeInSeconds)}
+              actions={
+                <ActionPanel>
+                  <Action title="Start Timer" onAction={() => handleTimerStart(customTimers[ctID])} />
+                  <Action
+                    title="Rename Timer"
+                    onAction={() =>
+                      push(<RenameView currentName={customTimers[ctID].name} timerFile={"customTimer"} ctID={ctID} />)
+                    }
+                  />
+                  <Action
+                    title="Delete Custom Timer"
+                    shortcut={{
+                      modifiers: ["ctrl"],
+                      key: "x",
+                    }}
+                    onAction={() => handleDeleteCustom(ctID)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );
