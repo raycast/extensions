@@ -9,7 +9,7 @@
 
 When an asynchronous operation is happening or when an error is thrown, it's usually a good idea to keep the user informed about it. Toasts are made for that.
 
-Additionaly, Toasts can have some actions associated to the action they are about. For example, you could provide a way to cancel an asynchronous operation, undo an action, or copy the stack trace of an error.
+Additionally, Toasts can have some actions associated to the action they are about. For example, you could provide a way to cancel an asynchronous operation, undo an action, or copy the stack trace of an error.
 
 ![](../../.gitbook/assets/toast.png)
 
@@ -91,13 +91,13 @@ Use [showToast](#showtoast) to create and show a Toast.
 
 #### Properties
 
-| Name            | Type                                                                               | Description                                                                                                        |
-| :-------------- | :--------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
-| title           | <code>string</code>                                                                | The title of a Toast. Displayed on the top.                                                                        |
-| message         | <code>undefined</code> or <code>string</code>                                      | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. |
-| style           | <code>[Toast.Style](#toast.style)</code>                                           | The style of a Toast.                                                                                              |
-| primaryAction   | <code>undefined</code> or <code>[Toast.ActionOptions](#toast.actionoptions)</code> | The primary Action the user can take when hovering on the Toast.                                                   |
-| secondaryAction | <code>undefined</code> or <code>[Toast.ActionOptions](#toast.actionoptions)</code> | The secondary Action the user can take when hovering on the Toast.                                                 |
+| Property | Description | Type |
+| :--- | :--- | :--- | :--- |
+| message<mark style="color:red;">*</mark> | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. | <code>string</code> |
+| primaryAction<mark style="color:red;">*</mark> | The primary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
+| secondaryAction<mark style="color:red;">*</mark> | The secondary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
+| style<mark style="color:red;">*</mark> | The style of a Toast. | <code>Toast.Style</code> |
+| title<mark style="color:red;">*</mark> | The title of a Toast. Displayed on the top. | <code>string</code> |
 
 #### Methods
 
@@ -134,13 +134,13 @@ export default async () => {
 
 #### Properties
 
-| Name            | Type                                                     | Required | Description                                                                                                        |
-| :-------------- | :------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
-| title           | <code>string</code>                                      | Yes      | The title of a Toast. Displayed on the top.                                                                        |
-| style           | <code>[Toast.Style](#toast.style)</code>                 | No       | The style of a Toast. Defaults to `Toast.Style.Success`                                                            |
-| message         | <code>string</code>                                      | No       | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. |
-| primaryAction   | <code>[Toast.ActionOptions](#toast.actionoptions)</code> | No       | The primary Action the user can take when hovering on the Toast.                                                   |
-| secondaryAction | <code>[Toast.ActionOptions](#toast.actionoptions)</code> | No       | The secondary Action the user can take when hovering on the Toast.                                                 |
+| Property | Description | Type |
+| :--- | :--- | :--- | :--- |
+| title<mark style="color:red;">*</mark> | The title of a Toast. Displayed on the top. | <code>string</code> |
+| message | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. | <code>string</code> |
+| primaryAction | The primary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
+| secondaryAction | The secondary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
+| style | The style of a Toast. | <code>Toast.Style</code> |
 
 ### Toast.Style
 
@@ -164,8 +164,8 @@ The options to create a [Toast](#toast) Action.
 
 #### Properties
 
-| Name     | Type                                                     | Required | Description                                                                                    |
-| :------- | :------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------- |
-| title    | <code>string</code>                                      | Yes      | The title of the action.                                                                       |
-| onAction | <code>(toast: Toast) => void</code>                      | Yes      | A callback called when the action is triggered. It receives the current Toast as its argument. |
-| shortcut | <code>[KeyboardShortcut](../keyboard.md#shortcut)</code> | No       | The keyboard shortcut for the action.                                                          |
+| Property | Description | Type |
+| :--- | :--- | :--- | :--- |
+| title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
+| onAction<mark style="color:red;">*</mark> | A callback called when the action is triggered. | <code>(toast: Toast) => void</code> |
+| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> |

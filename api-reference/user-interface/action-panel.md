@@ -49,10 +49,10 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                       | Required | Default | Description                                                                                                        |
-| :------- | :--------------------------------------------------------- | :------- | :------ | :----------------------------------------------------------------------------------------------------------------- |
-| children | <code>[ActionPanel.Children](#actionpanel.children)</code> | No       | -       | Sections or Actions. If [Action](./actions.md) elements are specified, a default section is automatically created. |
-| title    | <code>string</code>                                        | No       | -       | The title displayed at the top of the panel                                                                        |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children | Sections or Actions. If [Action](actions.md#action) elements are specified, a default section is automatically created. | [ActionPanel.Children](action-panel.md#actionpanel.children) | - |
+| title | The title displayed at the top of the panel | <code>string</code> | - |
 
 ### ActionPanel.Section
 
@@ -104,10 +104,10 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :-------------------------------- |
-| children | <code>[ActionPanel.Section.Children](#actionpanel.section.children)</code> | No       | -       | The item elements of the Section. |
-| title    | <code>string</code>                                                        | No       | -       | Title displayed above the section |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children | The item elements of the section. | [ActionPanel.Section.Children](action-panel.md#actionpanel.section.children) | - |
+| title | Title displayed above the section | <code>string</code> | - |
 
 ### ActionPanel.Submenu
 
@@ -155,13 +155,12 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                                                                                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :------------------------------------------------------------------------------------------------ |
-| children | <code>[ActionPanel.Submenu.Children](#actionpanel.submenu.children)</code> | No       | -       | Items of the submenu.                                                                             |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                  | No       | -       | The icon displayed for the submenu.                                                               |
-| id       | <code>string</code>                                                        | No       | -       | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code>                  | No       | -       | The keyboard shortcut for the submenu.                                                            |
-| title    | <code>string</code>                                                        | Yes      | -       | The title displayed for submenu.                                                                  |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| title<mark style="color:red;">*</mark> | The title displayed for submenu. | <code>string</code> | - |
+| children | Items of the submenu. | [ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children) | - |
+| icon | The icon displayed for the submenu. | <code>Image.ImageLike</code> | - |
+| shortcut | The keyboard shortcut for the submenu. | <code>Keyboard.Shortcut</code> | - |
 
 ## Types
 

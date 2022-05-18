@@ -13,7 +13,7 @@
 
 ### Detail
 
-Renders a markdown ([CommonMark](https://commonmark.org)) string.
+Renders a markdown ([CommonMark](https://commonmark.org)) string with an optional metadata panel.
 
 Typically used as a standalone view or when navigating from a [List](list.md).
 
@@ -29,13 +29,13 @@ export default function Command() {
 
 #### Props
 
-| Prop            | Type                                                                           | Required | Default       | Description                                                                    |
-| :-------------- | :----------------------------------------------------------------------------- | :------- | :------------ | :----------------------------------------------------------------------------- |
-| markdown        | <code>null</code> or <code>string</code>                                       | No       | -             | The CommonMark string to be rendered.                                          |
-| actions         | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -             | A reference to an [ActionPanel](./action-panel.md#actionpanel).                |
-| isLoading       | <code>boolean</code>                                                           | No       | false         | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | <code>string</code>                                                            | No       | Command title | The main title for that view displayed in Raycast                              |
-| metadata        | <code>null</code> or <code>[Detail.Metadata](#detail.metadata)</code>          | No       | -             | The `Detail.Metadata` to be rendered in the right side area                    |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
+| isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
+| markdown | The CommonMark string to be rendered. | <code>string</code> | - |
+| metadata | The `Detail.Metadata` to be rendered in the right side area | <code>React.ReactNode</code> | - |
+| navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
 
 ### Detail.Metadata
 
@@ -85,9 +85,9 @@ export default function Main() {
 
 #### Props
 
-| Prop     | Type                                                                                                               | Required | Default | Description                                             |
-| :------- | :----------------------------------------------------------------------------------------------------------------- | :------- | :------ | :------------------------------------------------------ |
-| children | `null` or `ReactElement<Detail.Metadata.ItemProps, string>` or `ReactElement<Detail.Metadata.ItemProps, string>[]` | No       | -       | The Detail.Metadata.Item elements of the Metadata view. |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children<mark style="color:red;">*</mark> | The Detail.Metadata.Item elements of the Metadata view. | <code>React.ReactNode</code> | - |
 
 ### Detail.Metadata.Label
 
@@ -121,11 +121,11 @@ export default function Main() {
 
 #### Props
 
-| Prop  | Type                                         | Required | Default | Description                                  |
-| :---- | :------------------------------------------- | :------- | :------ | :------------------------------------------- |
-| title | `string`                                     | Yes      | -       | The title shown above the item.              |
-| text  | `string`                                     | No       | -       | The text value of the item.                  |
-| icon  | [`ImageLike`](icons-and-images.md#imagelike) | No       | -       | An icon to illustrate the value of the item. |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
+| icon | An icon to illustrate the value of the item. | <code>Image.ImageLike</code> | - |
+| text | The text value of the item. | <code>string</code> | - |
 
 ### Detail.Metadata.Link
 
@@ -159,11 +159,11 @@ export default function Main() {
 
 #### Props
 
-| Prop   | Type     | Required | Default | Description                     |
-| :----- | :------- | :------- | :------ | :------------------------------ |
-| title  | `string` | Yes      | -       | The title shown above the item. |
-| text   | `string` | Yes      | -       | The text value of the item.     |
-| target | `string` | Yes      | -       | The target of the link.         |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| target<mark style="color:red;">*</mark> | The target of the link. | <code>string</code> | - |
+| text<mark style="color:red;">*</mark> | The text value of the item. | <code>string</code> | - |
+| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
 
 ### Detail.Metadata.TagList
 
@@ -195,10 +195,10 @@ export default function Main() {
 
 #### Props
 
-| Prop     | Type                                                                                                                                                               | Required | Default | Description                        |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ | :--------------------------------- |
-| title    | `string`                                                                                                                                                           | Yes      | -       | The title shown above the item.    |
-| children | `null` or [`Detail.Metadata.TagList.Item`](detail.md#detail.metadata.taglist.item) or [`Detail.Metadata.TagList.Item`](detail.md#detail.metadata.taglist.item)`[]` | No       | -       | The tags contained in the TagList. |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children<mark style="color:red;">*</mark> | The tags contained in the TagList. | <code>React.ReactNode</code> | - |
+| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
 
 ### Detail.Metadata.TagList.Item
 
@@ -206,11 +206,11 @@ A Tag in a `Detail.Metadata.TagList`.
 
 #### Props
 
-| Prop  | Type                                         | Required | Default | Description                                                                                         |
-| :---- | :------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------- |
-| text  | `string`                                     | Yes      | -       | The text of the tag.                                                                                |
-| icon  | [`ImageLike`](icons-and-images.md#imagelike) | No       | -       | An icon in front of the text of the tag.                                                            |
-| color | [`ColorLike`](colors.md#colorlike)           | No       | -       | Changes the text color to the provided color and sets a transparent background with the same color. |
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| text<mark style="color:red;">*</mark> | The text of the tag. | <code>string</code> | - |
+| color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>Color.ColorLike</code> | - |
+| icon | An optional icon in front of the text of the tag. | <code>Image.ImageLike</code> | - |
 
 ### Detail.Metadata.Separator
 
