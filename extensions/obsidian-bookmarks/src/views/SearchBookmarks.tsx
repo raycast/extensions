@@ -25,7 +25,7 @@ export default function SearchBookmarks() {
     const ranked = allTags.reduce(
       (memo, tag) => ({
         ...memo,
-        [tag]: memo[tag] ?? 1,
+        [tag]: (memo[tag] ?? 0) + 1,
       }),
       {} as Record<string, number>
     );
