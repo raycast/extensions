@@ -27,34 +27,32 @@ export const getFileContent = async (fileInfo: FileInfo) => {
       if (parsePath.ext === APP_EXT) {
         preview = `<img src="${fileUrl(environment.assetsPath + "/AppIcon.icns")}" alt="${
           fileInfo.name
-        }" height="156" />\n`;
+        }" height="156" />`;
       } else if (fileStat.isDirectory()) {
         const files = fse.readdirSync(fileInfo.path);
         const isNormalFile = files.filter((value) => !value.startsWith("."));
-        preview = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${fileInfo.name}" height="156" />\n`;
+        preview = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${fileInfo.name}" height="156" />`;
         sizeTitle = "Sub-files";
         size = isNormalFile.length + "";
       } else {
         if (imgExt.includes(parsePath.ext)) {
-          preview = `<img src="${fileUrl(fileInfo.path)}" alt="${fileInfo.name}" height="156" />\n`;
+          preview = `<img src="${fileUrl(fileInfo.path)}" alt="${fileInfo.name}" height="156" />`;
         } else if (ZIP_EXT.includes(parsePath.ext)) {
           preview = `<img src="${fileUrl(environment.assetsPath + "/ArchiveUtility.icns")}" alt="${
             fileInfo.name
-          }" height="156" />\n`;
+          }" height="156" />`;
         } else if (parsePath.ext === DMG_EXT) {
           preview = `<img src="${fileUrl(environment.assetsPath + "/DmgIcon.icns")}" alt="${
             fileInfo.name
-          }" height="156" />\n`;
+          }" height="156" />`;
         } else if (NO_PREVIEW_EXTENSIONS.includes(parsePath.ext)) {
-          preview = `<img src="${fileUrl(assetPath + "/" + "file-icon.png")}" alt="${fileInfo.name}" height="156" />\n`;
+          preview = `<img src="${fileUrl(assetPath + "/" + "file-icon.png")}" alt="${fileInfo.name}" height="156" />`;
         } else {
           const previewPath = await fileMetadataMarkdown(fileInfo);
           if (isEmpty(previewPath)) {
-            preview = `<img src="${fileUrl(assetPath + "/" + "file-icon.png")}" alt="${
-              fileInfo.name
-            }" height="156" />\n`;
+            preview = `<img src="${fileUrl(assetPath + "/" + "file-icon.png")}" alt="${fileInfo.name}" height="156" />`;
           } else {
-            preview = `<img src="${previewPath}" alt="${fileInfo.name}" height="156" />\n`;
+            preview = `<img src="${previewPath}" alt="${fileInfo.name}" height="156" />`;
           }
         }
         size = formatBytes(fileStat.size);

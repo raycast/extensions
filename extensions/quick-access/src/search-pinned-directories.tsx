@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   LocalStorage,
+  openExtensionPreferences,
   showToast,
   Toast,
   trash,
@@ -265,7 +266,7 @@ function ActionsOnFile(props: {
       <ActionPanel.Section>
         <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
         <Action.ShowInFinder
-          shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
           path={fileInfo.path}
           onShow={async () => await upRank(index, setRefresh)}
         />
@@ -302,6 +303,14 @@ function ActionsOnFile(props: {
               }
             );
           }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Gear}
+          title="Open Extension Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openExtensionPreferences}
         />
       </ActionPanel.Section>
     </>
