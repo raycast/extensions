@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import { CacheType, Preferences, ProjectType, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
-import { buildAllProjectsCache } from "./cache/all-projects-cache-builder";
+import { buildAllProjectsCache } from "./cache/all-projects-cache-builder-v2";
 import { getRepoKey } from "./common-utils";
 
 export function resolvePath(filepath: string): string {
@@ -115,16 +115,16 @@ export function useRepoCache(query: string | undefined): {
       recent:
         filteredRecentRepos?.length > 0
           ? {
-              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-              repos: filteredRecentRepos || [],
-            }
+            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredRecentRepos || [],
+          }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-              repos: filteredPinnedRepos || [],
-            }
+            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredPinnedRepos || [],
+          }
           : undefined,
     });
   }
@@ -147,13 +147,10 @@ export function useRepoCache(query: string | undefined): {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
 
-        const scanForProjectTypes: ProjectType[] = preferences.scanForProjectTypes
-          .split(",")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((type) => type.trim().length > 0 && (ProjectType as any)[type.toUpperCase()])
-          .map((type) => type.trim() as ProjectType);
-
-        const repos = await buildAllProjectsCache(repoPaths, scanForProjectTypes);
+        const repos = await buildAllProjectsCache(repoPaths,
+          preferences.scanForProjectTypes.split(",")
+            .filter((type) => type.trim().length > 0)
+            .map((t) => t.trim()));
 
         if (!cancel) {
           filterAndSetFullResponse(repos);

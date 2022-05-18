@@ -4,10 +4,12 @@ Quickly access your local projects and open them in your favorite editor or any 
 
 ## Supports:
 
-- Node projects (node)
+- Node (or any `package.json` based, including react/vue etc) projects (node)
 - Maven projects (maven)
 - Gradle projects (gradle)
 - Xcode projects (xcode)
+- Wails projects (wails)
+- Tauri projects (tauri)
 
 ---
 

@@ -25,6 +25,8 @@ export interface Preferences {
   openXcodeWith: OpenWith;
   openMavenWith: OpenWith;
   openGradleWith: OpenWith;
+  openWailsWith: OpenWith;
+  openTauriWith: OpenWith;
   openWith1: OpenWith;
   openWith2?: OpenWith;
   openWith3?: OpenWith;
@@ -35,6 +37,8 @@ export enum ProjectType {
   MAVEN = "maven",
   GRADLE = "gradle",
   XCODE = "xcode",
+  TAURI = "tauri",
+  WAILS = "wails",
   UNKNOWN = "unknown",
 }
 
@@ -43,3 +47,11 @@ export enum CacheType {
   RECENT_PROJECTS = "recent-projects",
   PINNED_PROJECTS = "pinned-projects",
 }
+
+export type ProjectConfig = {
+  type: string;
+  finder: string;
+  finderType: string;
+  icon: string;
+  spotlightQuery: string[];
+};

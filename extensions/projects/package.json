@@ -28,7 +28,7 @@
       "name": "scanForProjectTypes",
       "type": "textfield",
       "required": false,
-      "default": "node,maven,gradle,xcode",
+      "default": "node,maven,gradle,xcode,wails,tauri",
       "title": "Type of projects to scan for.",
       "description": "Type of projects to scan for. Use , to seperate multiple paths. Supported: node,maven,gradle,xcode"
     },
@@ -36,7 +36,7 @@
       "name": "openNodeWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open NODE projects with (required), shortcut: ⏎",
+      "title": "Open NODE projects with , shortcut: ⏎",
       "description": "Open NODE projects with",
       "default": "Visual Studio Code"
     },
@@ -44,7 +44,7 @@
       "name": "openXcodeWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open XCode projects with (required), shortcut: ⏎",
+      "title": "Open XCode projects with , shortcut: ⏎",
       "description": "Open XCode projects with",
       "default": "Xcode"
     },
@@ -52,7 +52,7 @@
       "name": "openMavenWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open MAVEN projects with (required), shortcut: ⏎",
+      "title": "Open MAVEN projects with , shortcut: ⏎",
       "description": "Open MAVEN projects with",
       "default": "IntelliJ IDEA CE"
     },
@@ -60,9 +60,25 @@
       "name": "openGradleWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open GRADLE projects with (required), shortcut: ⏎",
+      "title": "Open GRADLE projects with , shortcut: ⏎",
       "description": "Open GRADLE projects with",
       "default": "IntelliJ IDEA CE"
+    },
+    {
+      "name": "openTauriWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open Tauri projects with, shortcut: ⏎",
+      "description": "Open Tauri projects with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openWailsWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open Wails projects with , shortcut: ⏎",
+      "description": "Open Wails projects with",
+      "default": "Visual Studio Code"
     },
     {
       "name": "openWith1",
