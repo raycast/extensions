@@ -10,7 +10,6 @@ import {
   clearAllFilePreviewsCache,
   displayPath,
   escapePath,
-  fileMetadataMarkdown,
   filePreview,
   getDriveRootPath,
   initialSetup,
@@ -260,11 +259,9 @@ type ListItemDetailProps = {
 const ListItemDetail = ({ file }: ListItemDetailProps) => {
   const { selectedFile, isShowingDetail } = useCommandContext();
   const [previewImage, setPreviewImage] = useState("");
-  const [markdown, setMarkdown] = useState("## File Information");
 
   useEffect(() => {
     if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
-      setMarkdown(fileMetadataMarkdown(file));
       const controller = new AbortController();
       filePreview(file, controller).then((previewImage) => {
         if (!controller.signal.aborted) {
@@ -277,7 +274,24 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
     }
   }, [selectedFile, isShowingDetail]);
 
-  return <List.Item.Detail markdown={previewImage + markdown} />;
+  return (
+    <List.Item.Detail
+      markdown={`## File Information\n${previewImage}`}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Name" text={file.name} icon={{ fileIcon: file.path }} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Where" text={file.displayPath} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Size" text={file.fileSizeFormatted} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Created" text={new Date(file.createdAt).toLocaleString()} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Updated" text={new Date(file.updatedAt).toLocaleString()} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 };
 
 const GeneralActions = ({ showToggleDetailsAction = true }) => {

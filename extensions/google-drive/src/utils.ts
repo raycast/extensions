@@ -131,40 +131,11 @@ export const filePreview = async (file: FileInfo | null, controller: AbortContro
 
   const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
-  const previewImage = previewExists ? `<img src="${previewPath}" alt="${file.name}" height="200" />` : "";
+  const previewImage = previewExists
+    ? `<img src="${previewPath}" alt="${file.name}" />`
+    : `<img alt="svgImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIKdmlld0JveD0iMCAwIDgwIDgwIgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMy41IDc0LjVMMTMuNSAzLjUgNTAuNzkzIDMuNSA2OC41IDIxLjIwNyA2OC41IDc0LjV6Ij48L3BhdGg+PHBhdGggZmlsbD0iIzc4OGI5YyIgZD0iTTUwLjU4Niw0TDY4LDIxLjQxNFY3NEgxNFY0SDUwLjU4NiBNNTEsM0gxM3Y3Mmg1NlYyMUw1MSwzTDUxLDN6Ij48L3BhdGg+PGc+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUwLjUgMjEuNUw1MC41IDMuNSA1MC43OTMgMy41IDY4LjUgMjEuMjA3IDY4LjUgMjEuNXoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzg4YjljIiBkPSJNNTEsNC40MTRMNjcuNTg2LDIxSDUxVjQuNDE0IE01MSwzaC0xdjE5aDE5di0xTDUxLDNMNTEsM3oiPjwvcGF0aD48L2c+PC9zdmc+"/>`;
 
   return previewImage;
-};
-
-export const fileMetadataMarkdown = (file: FileInfo | null): string => {
-  if (!file) {
-    return "";
-  }
-
-  return `
-## File Information
-**Name**\n
-${file.name}
-
----
-
-**Path**\n
-\`${file.displayPath}\`
-
----
-
-**Size**\n
-${file.fileSizeFormatted}
-
----
-
-**Created**\n
-${new Date(file.createdAt).toLocaleString()}
-
----
-
-**Updated**\n
-${new Date(file.updatedAt).toLocaleString()}`;
 };
 
 type DriveFileStreamOptions = { stats?: boolean };
