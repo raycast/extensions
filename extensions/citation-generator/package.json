@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "citation-generator",
   "title": "Citation Generator",
-  "description": "Generates MLA style citation",
+  "description": "Generates MLA style citation provided by formatically.com",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
   "categories": [

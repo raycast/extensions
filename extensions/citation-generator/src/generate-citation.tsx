@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action, Clipboard, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Form, Action, Clipboard, Toast, showToast, open } from "@raycast/api";
 import Axios from "axios";
 
 export default () => {
@@ -107,8 +107,6 @@ export default () => {
               try {
                 const citation = await fetchCitation(url);
 
-                if (citation.length === 0) throw new Error("Citation could not be generated");
-
                 await Clipboard.copy(citation!);
 
                 toast.style = Toast.Style.Success;
@@ -117,14 +115,23 @@ export default () => {
               } catch (e) {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Citation generation failed";
-                toast.message = String(e);
+                toast.message = "Try the online version here";
+                toast.primaryAction = {
+                  title: "Open online version",
+                  onAction: (toast) => {
+                    open("https://formatically.com");
+                    toast.hide();
+                  },
+                };
+
+                console.log(e);
               }
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="url" defaultValue="https://www.linktoarticle.com" title="url" />
+      <Form.TextArea id="url" placeholder="https://www.linktoarticle.com" title="URL" />
     </Form>
   );
 };
