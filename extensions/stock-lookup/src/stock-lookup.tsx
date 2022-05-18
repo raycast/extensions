@@ -14,6 +14,7 @@ export default function StockLookup() {
   };
 
   const getRecentlyViewedStocks = useCallback(async () => {
+    // LocalStorage.setItem("recentStocks", "[]");
     const recentStocks = await LocalStorage.getItem<string>("recentStocks");
     const recentStocksArr = recentStocks ? JSON.parse(recentStocks) : [];
     setRecentStocks(recentStocksArr);
@@ -31,8 +32,8 @@ export default function StockLookup() {
   }, [isSearching]);
 
   const handleStockSearch = async (text: string) => {
+    setIsLoading(true);
     if (text.length > 0) {
-      setIsLoading(true);
       setIsSearching(true);
       try {
         const results = await searchStocks({ keywords: text });
@@ -47,6 +48,13 @@ export default function StockLookup() {
     setIsLoading(false);
   };
 
+  function EmptyView() {
+    const icon = isSearching ? Icon.LevelMeter : Icon.Binoculars;
+    const title = isLoading ? "Searching..." : isSearching ? "No Stocks Found" : "Search for a stock";
+
+    return <List.EmptyView title={title} icon={icon} />;
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -54,10 +62,13 @@ export default function StockLookup() {
       onSearchTextChange={handleStockSearch}
       throttle={true}
     >
+      <EmptyView />
       {isSearching ? (
         <>
-          <List.EmptyView title="No Stocks Found" icon={Icon.LevelMeter} />
-          <List.Section key="results" title="Results">
+          <List.Section
+            key="results"
+            title={`${stockSearchResults.length} Stock${stockSearchResults.length > 1 ? "s" : ""} Found`}
+          >
             {stockSearchResults.map((result, i) => (
               <StockResultListItem key={`${result.symbol}${i}`} stockResult={result} />
             ))}
@@ -65,8 +76,10 @@ export default function StockLookup() {
         </>
       ) : (
         <>
-          <List.EmptyView title="Search for a stock" icon={Icon.Binoculars} />
-          <List.Section key="recent" title="Recently Viewed Stocks">
+          <List.Section
+            key="recent"
+            title={`Recently Viewed Stocks (${recentStocks.length} Result${recentStocks.length > 1 ? "s" : ""})`}
+          >
             {recentStocks.map((stockResult, i) => (
               <StockResultListItem key={`${stockResult.symbol}${i}`} stockResult={stockResult} />
             ))}
