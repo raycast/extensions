@@ -48,6 +48,7 @@
 /extensions/cheatsheets                              @Destiner
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/circle-ci                                @qeude @kudrykv
+/extensions/citation-generator                       @AbhinavPalacharla
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
 /extensions/clear-clipboard                          @d3caf
@@ -132,7 +133,7 @@
 /extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
-/extensions/github-repository-search                 @thomaspaulmann
+/extensions/github-repository-search                 @thomaspaulmann @immint023
 /extensions/github-review-requests                   @resessh
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
@@ -163,6 +164,7 @@
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
 /extensions/hidden-icons                             @koinzhang
+/extensions/hide-files                               @koinzhang
 /extensions/hide-mail                                @Flatroy
 /extensions/holodex                                  @uetchy
 /extensions/homeassistant                            @tonka3000 @altrdev
@@ -176,7 +178,7 @@
 /extensions/ip-geolocation                           @koinzhang
 /extensions/iptv                                     @Aayush9029
 /extensions/itch-io                                  @Aayush9029
-/extensions/jetbrains                                @gdsmith @gdsmith
+/extensions/jetbrains                                @gdsmith @gdsmith @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand
 /extensions/jira-time-tracking                       @niallpaterson
@@ -242,6 +244,7 @@
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/ones                                     @k8scat
 /extensions/open-in-json-hero                        @ericallam
+/extensions/open-path                                @koinzhang
 /extensions/open-with-app                            @fturcheti
 /extensions/openweathermap                           @tonka3000
 /extensions/opsgenie                                 @ricoberger
@@ -354,6 +357,7 @@
 /extensions/toothpick                                @briankosw
 /extensions/tower                                    @tdwesten
 /extensions/transmission                             @FezVrasta
+/extensions/transmit                                 @kennonb
 /extensions/trello                                   @ChrisChinchilla
 /extensions/tunnelblick                              @SamuelNitsche
 /extensions/tuple                                    @inxilpro
@@ -368,6 +372,7 @@
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta
 /extensions/unix-timestamp                           @Destiner
+/extensions/unogs                                    @mohitkyadav
 /extensions/unsplash                                 @eggsy
 /extensions/url-tools                                @joshauh46
 /extensions/uuid-generator                           @jmaeso

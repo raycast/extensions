@@ -24,15 +24,7 @@ console.log(`Theme: ${environment.theme}`);
 
 #### Properties
 
-| Name           | Type                 | Description                                                                                                                       |
-| :------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| assetsPath     | <code>string</code>  | The absolute path to the assets directory of the extension.                                                                       |
-| commandName    | <code>string</code>  | The name of the launched command, as specified in package.json                                                                    |
-| extensionName  | <code>string</code>  | The name of the extension, as specified in package.json                                                                           |
-| isDevelopment  | <code>boolean</code> | Indicates whether the command is a development command (vs. an installed command from the Store).                                 |
-| raycastVersion | <code>string</code>  | The version of the main Raycast app                                                                                               |
-| supportPath    | <code>string</code>  | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
-| theme    | <code>"light" \| "dark"</code>  | The theme used by Raycast. |
+<InterfaceTableFromJSDoc name="Environment" />
 
 ### getSelectedFinderItems
 
@@ -111,6 +103,4 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 
 #### Properties
 
-| Name | Type                | Description          |
-| :--- | :------------------ | :------------------- |
-| path | <code>string</code> | The path to the item |
+<InterfaceTableFromJSDoc name="FileSystemItem" />

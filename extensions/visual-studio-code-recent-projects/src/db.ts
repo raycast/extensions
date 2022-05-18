@@ -8,7 +8,7 @@ import get from "lodash.get";
 import {
   EntryLike,
   Preferences,
-  recentOpenedLabel,
+  RecentOpenedId,
   VSCodeBuild,
   lastKnownMenubarItems,
   RecentOpenedItemId,
@@ -55,7 +55,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
 
     const json = JSON.parse(await readFile(STORAGE_PATH, "utf8"));
     const lastKnownMenubarItems = get(json, "lastKnownMenubarData.menus.File.items", []) as lastKnownMenubarItems[];
-    const recentOpenedMenu = lastKnownMenubarItems.find(({ label }) => label === recentOpenedLabel);
+    const recentOpenedMenu = lastKnownMenubarItems.find(({ id }) => id === RecentOpenedId);
     const entries = recentOpenedMenu?.submenu?.items || [];
     return entries
       .filter(({ id }) =>

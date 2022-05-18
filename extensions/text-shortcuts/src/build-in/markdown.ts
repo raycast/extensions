@@ -151,7 +151,7 @@ const markdowns = [
       visibility: true,
       tag: ["Markdown"],
     },
-    tactions: [{ type: "Live Template", content: ["![]($TEXT$)", "$TEXT$"] }],
+    tactions: [{ type: "Live Template", content: ["![$TEXT$]()", "$TEXT$"] }],
   },
   {
     info: {
@@ -184,7 +184,7 @@ const markdowns = [
       visibility: true,
       tag: ["Markdown"],
     },
-    tactions: [{ type: "Live Template", content: ["[]($TEXT$)", "$TEXT$"] }],
+    tactions: [{ type: "Live Template", content: ["[$TEXT$]()", "$TEXT$"] }],
   },
   {
     info: {

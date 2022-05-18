@@ -1,6 +1,14 @@
 # Text Shortcuts Changelog
 
-## [Added Text Shortcuts] - 2022-05-05
+## [Update UI Display] - 2022-05-18
+
+- Release of Text Shortcuts version 1.2
+- Add display of shortcuts tag
+- Add the color display of custom shortcuts
+- Add Preference: Close Main Window
+- Update shortcut keys for delete actions
+
+## [Update Delete, Replace, Case Actions] - 2022-05-05
 
 - Release of Text Shortcuts version 1.1
 - Update: Delete and Replace actions support regular expressions

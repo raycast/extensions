@@ -8,7 +8,7 @@ import { Track } from "../models";
 
 export const love = tell("Music", "set loved of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
-export const addToLibrary = tell("Music", 'duplicate current track to source "Library"');
+export const addToLibrary = tell("Music", 'duplicate current track to library playlist "Library"');
 
 export const setCurrentTrackRating: RTE.ReaderTaskEither<number, Error, string> = pipe(
   R.ask<number>(),
