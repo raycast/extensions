@@ -14,7 +14,6 @@ export default function StockLookup() {
   };
 
   const getRecentlyViewedStocks = useCallback(async () => {
-    // LocalStorage.setItem("recentStocks", "[]");
     const recentStocks = await LocalStorage.getItem<string>("recentStocks");
     const recentStocksArr = recentStocks ? JSON.parse(recentStocks) : [];
     setRecentStocks(recentStocksArr);
