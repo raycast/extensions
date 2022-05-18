@@ -3,7 +3,8 @@ export interface SourceRepo {
   name: string;
   fullPath: string;
   icon: string;
-  type: ProjectType;
+  type: string;
+  openWithKey: string;
 }
 
 export interface RepoSearchResponse {
@@ -31,16 +32,6 @@ export interface Preferences {
   openWith3?: OpenWith;
 }
 
-export enum ProjectType {
-  NODE = "node",
-  MAVEN = "maven",
-  GRADLE = "gradle",
-  XCODE = "xcode",
-  TAURI = "tauri",
-  WAILS = "wails",
-  UNKNOWN = "unknown",
-}
-
 export enum CacheType {
   ALL_PROJECTS = "all-projects",
   RECENT_PROJECTS = "recent-projects",
@@ -53,4 +44,5 @@ export type ProjectConfig = {
   finderType: string;
   icon: string;
   spotlightQuery: string[];
+  openWithKey: string;
 };

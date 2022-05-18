@@ -2,9 +2,9 @@ import { showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { ApplicationCache } from "./application-cache";
-import { CacheType, Preferences, ProjectConfig, ProjectType, SourceRepo } from "../types";
+import { CacheType, Preferences, ProjectConfig, SourceRepo } from "../types";
 import { v4 as uuidv4 } from "uuid";
-import myData from "./../project-types-data.json";
+import applicationConfig from "./../application-config.json";
 import { isProjectTypeEnabled } from "../common-utils";
 
 const execp = promisify(exec);
@@ -13,14 +13,14 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
   const allProjectsCache = new ApplicationCache(CacheType.ALL_PROJECTS);
   let foundRepos: SourceRepo[] = [];
 
-  const projectConfig: ProjectConfig[] = myData as ProjectConfig[];
+  const projectConfig: ProjectConfig[] = applicationConfig.projectTypes as ProjectConfig[];
 
   await Promise.allSettled(
     paths.map(async (path) => {
       let spotlightSearchParameters: string[] = [];
 
       projectConfig.forEach((project) => {
-        if (isProjectTypeEnabled(project.type, preferences)) {
+        if (isProjectTypeEnabled(project.openWithKey, preferences)) {
           spotlightSearchParameters = [...spotlightSearchParameters, ...project.spotlightQuery];
         }
       });
@@ -82,7 +82,8 @@ const handleFileBasedProject = (path: string, projectConfig: ProjectConfig): Sou
     name: name,
     icon: projectConfig.icon,
     fullPath: fullPath,
-    type: projectConfig.type as ProjectType,
+    type: projectConfig.type,
+    openWithKey: projectConfig.openWithKey,
   };
 };
 
@@ -95,6 +96,7 @@ const handleExtensionBasedProject = (path: string, projectConfig: ProjectConfig)
     name: name,
     icon: projectConfig.icon,
     fullPath: fullPath,
-    type: projectConfig.type as ProjectType,
+    type: projectConfig.type,
+    openWithKey: projectConfig.openWithKey,
   };
 };

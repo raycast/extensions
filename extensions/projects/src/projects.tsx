@@ -3,15 +3,10 @@ import { useState, ReactElement } from "react";
 import { SearchProjectActionPanel } from "./action-panel";
 import { Preferences, SourceRepo } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
+import applicationConfig from "./application-config.json";
 
 export default function Main(): ReactElement {
-  const searchBarPlaceholders = [
-    "Search for a project",
-    "Search projects by name",
-    "Search projects by type. e.g. 'type: node'",
-    "Search projects in directory. e.g. 'dir: ajay'",
-    "Combine keywords to search. e.g. 'dir: ajay type: node'",
-  ];
+  const searchPlaceholders = applicationConfig.searchPlaceholders;
 
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>();
@@ -43,7 +38,7 @@ export default function Main(): ReactElement {
 
   return (
     <List
-      searchBarPlaceholder={searchBarPlaceholders[Math.floor(Math.random() * searchBarPlaceholders.length)]}
+      searchBarPlaceholder={searchPlaceholders[Math.floor(Math.random() * searchPlaceholders.length)]}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
     >

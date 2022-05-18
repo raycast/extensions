@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { ReactElement } from "react";
-import { CacheType, OpenWith, Preferences, ProjectType, SourceRepo } from "./types";
+import { CacheType, Preferences, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { getOpenWith } from "./common-utils";
 
@@ -36,12 +36,12 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Open
-          title={`Open in ${getOpenWith(props.repo.type, props.preferences).name}`}
+          title={`Open in ${getOpenWith(props.repo.openWithKey, props.preferences).name}`}
           icon={{
-            fileIcon: getOpenWith(props.repo.type, props.preferences).path,
+            fileIcon: getOpenWith(props.repo.openWithKey, props.preferences).path,
           }}
           target={props.repo.fullPath}
-          application={getOpenWith(props.repo.type, props.preferences).bundleId}
+          application={getOpenWith(props.repo.openWithKey, props.preferences).bundleId}
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
         />
 
