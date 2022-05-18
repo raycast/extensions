@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "svgr",
   "title": "SVGR",
-  "description": "Paste in SVG code. Get a react component. A raycast plugin for SVGR.",
+  "description": "Paste in SVG code. Get a react component.",
   "icon": "command-icon.png",
   "author": "rickMcGavin",
   "categories": [
