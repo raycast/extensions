@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { run } from "@jxa/run";
 import { runAppleScript } from "run-applescript";
@@ -33,7 +33,20 @@ export default function Command() {
   }, []);
 
   if (error) {
-    showToast({ title: "Failed to load servers", message: error, style: Toast.Style.Failure });
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Failed to load servers",
+      message: "Download from https://panic.com/transmit/",
+      primaryAction: {
+        title: "Download Transmit",
+        onAction: (toast) => {
+          open("https://panic.com/transmit/");
+          toast.hide();
+        },
+      },
+    };
+
+    showToast(options);
   }
 
   return (
