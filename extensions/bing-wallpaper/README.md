@@ -1,6 +1,6 @@
 ## Bing Wallpaper
 
-Get, set, auto-download Bing wallpapers within 15 days.
+Get, set, auto-download Bing wallpapers to explore the world.
 
 **🌟🌟Tips:**
 

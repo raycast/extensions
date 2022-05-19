@@ -1,9 +1,10 @@
 # Bing Wallpaper Changelog
 
-## [Add downloaded wallpaper list] - 2022-05-20
+## [Add downloaded wallpaper list] - 2022-05-24
 
 - Add downloaded wallpapers list in Set Bing Wallpaper command, support png, jpg, heic
 - Random Bing Wallpaper will randomize to the downloaded wallpapers
+- Update extension icons
 
 ## [Fix text errors] - 2022-04-26
 
