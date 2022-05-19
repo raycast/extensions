@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, useNavigation } from "@raycast/api";
 import type { Config } from "@svgr/core";
 import { useState, useEffect } from "react";
+import { SVGR_META, SvgrMetaKeys, DropdownKeys, DROPDOWN_KEYS } from "../../constants";
 
 export default function Settings() {
   const [settingsState, setSettingsState] = useState<Config | Record<string, never>>({});
@@ -45,16 +46,17 @@ export default function Settings() {
               <Form.Checkbox
                 key={key}
                 id={key}
-                title={`${value}`}
-                label={key}
+                title={key}
+                label={SVGR_META[key as SvgrMetaKeys].label}
                 onChange={(value) => handleInput(key, value)}
                 value={value}
               />
             );
           }
           if (typeof value === "string") {
-            switch (key) {
-              case "expandProps":
+            const isDropdown = DROPDOWN_KEYS.includes(key);
+            switch (isDropdown) {
+              case true:
                 return (
                   <Form.Dropdown
                     key={key}
@@ -62,36 +64,9 @@ export default function Settings() {
                     id={key}
                     onChange={(value) => handleInput(key, value)}
                     value={value}
+                    info={SVGR_META[key as SvgrMetaKeys].label}
                   >
-                    {["end", "start", "none"].map((item) => (
-                      <Form.Dropdown.Item key={item} value={item} title={item} />
-                    ))}
-                  </Form.Dropdown>
-                );
-              case "exportType":
-                return (
-                  <Form.Dropdown
-                    key={key}
-                    title={key}
-                    id={key}
-                    onChange={(value) => handleInput(key, value)}
-                    value={value}
-                  >
-                    {["named", "export"].map((item) => (
-                      <Form.Dropdown.Item key={item} value={item} title={item} />
-                    ))}
-                  </Form.Dropdown>
-                );
-              case "jsxRuntime":
-                return (
-                  <Form.Dropdown
-                    key={key}
-                    title={key}
-                    id={key}
-                    onChange={(value) => handleInput(key, value)}
-                    value={value}
-                  >
-                    {["classic", "classic-preact", "automatic"].map((item) => (
+                    {SVGR_META[key as DropdownKeys].options.map((item) => (
                       <Form.Dropdown.Item key={item} value={item} title={item} />
                     ))}
                   </Form.Dropdown>
