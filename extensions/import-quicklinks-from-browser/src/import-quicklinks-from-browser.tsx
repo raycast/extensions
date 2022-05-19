@@ -5,7 +5,7 @@ import initSqlJs, { Database } from "sql.js";
 import path from "path";
 import { existsSync, readdirSync, readFileSync } from "fs";
 
-const QUERY = "SELECT id, short_name, url, keyword, favicon_url, is_active FROM keywords";
+const QUERY = "SELECT id, short_name, url, favicon_url FROM keywords WHERE is_active = 1";
 const BASE_SUPPORT_DIR = `${homedir()}/Library/Application Support`;
 
 const SUPPORT_DIRS = {
@@ -20,9 +20,7 @@ interface CustomSearchEngine {
   id: number;
   short_name: string;
   url: string;
-  keyword: string;
   favicon_url: string;
-  is_active: boolean;
 }
 
 interface ChromeProfile {
@@ -123,14 +121,12 @@ export default function ListSearchEngine() {
     loadDb(state.databasePath).then((db) => {
       const res = db.exec(QUERY);
       const searchEngines = res[0].values.map((row) => {
-        const [id, short_name, url, keyword, favicon_url, is_active] = row;
+        const [id, short_name, url, favicon_url] = row;
         return {
           id: id as number,
           short_name: short_name as string,
           url: url as string,
-          keyword: keyword as string,
           favicon_url: favicon_url as string,
-          is_active: is_active === 1,
         };
       });
       setState({ ...state, isLoading: false, searchEngines: deduplicate(searchEngines) });
@@ -147,20 +143,10 @@ export default function ListSearchEngine() {
         />
       }
     >
-      <List.Section title="Custom">
-        {state.searchEngines
-          ?.filter((se) => se.is_active)
-          ?.map((se) => (
-            <CustomSearchEngineItem key={se.id} searchEngine={se} />
-          ))}
-      </List.Section>
-      <List.Section title="Automatic">
-        {state.searchEngines
-          ?.filter((se) => !se.is_active)
-          ?.map((se) => (
-            <CustomSearchEngineItem key={se.id} searchEngine={se} />
-          ))}
-      </List.Section>
+      {state.searchEngines
+        ?.map((se) => (
+          <CustomSearchEngineItem key={se.id} searchEngine={se} />
+        ))}
     </List>
   );
 }
