@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [New Metadata] - 2022-05-$9
+- Adds a new icon
+- Adds metadata to list items
+
 ## [Added new action] - 2022-04-25
 - Adds a new action to copy as Markdown
 
