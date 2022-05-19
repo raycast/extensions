@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [📊 Update race sessions styling] - (2022-05-19)
+
+- Updates styling for the race dates detail view
+
 ## [📆 Add to Apple Calendar] - (2022-04-25)
 
 - Add a new action to add all events related to a race week to a given calendar thought the Apple Calendar app.
