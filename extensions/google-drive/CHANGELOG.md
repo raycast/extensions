@@ -1,5 +1,11 @@
 # Google Drive Changelog
 
+## [Use new List.Item.Detail metadata prop] - 2022-05-18
+
+- Revamped the `List.Item.Detail` component to use the new `metadata` prop.
+- Added an "Open Extension Preferences" general action.
+- Updated file preview logic to fetch a fallback file icon using `Cocoa`'s `NSWorkspace.icon(forFile:)` API when the file preview fails to generate.
+
 ## [Minor update to the database schema] - 2022-05-16
 
 - Added a unique index on the `files.displayPath` column since we use it to look up files in the database. This should _slightly_ speed up the search.

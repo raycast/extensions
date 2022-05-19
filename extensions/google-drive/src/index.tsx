@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, createContext, useContext } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -10,12 +10,13 @@ import {
   clearAllFilePreviewsCache,
   displayPath,
   escapePath,
-  fileMetadataMarkdown,
   filePreview,
   getDriveRootPath,
   initialSetup,
   isEmpty,
+  log,
 } from "./utils";
+import { SPINNER_GIF_PATH } from "./constants";
 
 type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
@@ -79,7 +80,7 @@ const Command = () => {
             }));
           }
         } catch (e) {
-          console.error(e);
+          log("error", e);
           showToast({
             style: Toast.Style.Failure,
             title: "Error! Is Google Drive app running and accessible?",
@@ -130,7 +131,7 @@ const Command = () => {
         setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
       }
     } catch (e) {
-      console.error(e);
+      log("error", e);
       showToast({
         style: Toast.Style.Failure,
         title: "💥 Could not rebuild files index!",
@@ -259,16 +260,14 @@ type ListItemDetailProps = {
 };
 const ListItemDetail = ({ file }: ListItemDetailProps) => {
   const { selectedFile, isShowingDetail } = useCommandContext();
-  const [previewImage, setPreviewImage] = useState("");
-  const [markdown, setMarkdown] = useState("## File Information");
+  const [previewImage, setPreviewImage] = useState(`<img src="file://${SPINNER_GIF_PATH}" />`);
 
   useEffect(() => {
     if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
-      setMarkdown(fileMetadataMarkdown(file));
       const controller = new AbortController();
-      filePreview(file, controller).then((previewImage) => {
+      filePreview(file, controller).then((image) => {
         if (!controller.signal.aborted) {
-          setPreviewImage(previewImage);
+          setPreviewImage(image);
         }
       });
       return () => {
@@ -277,7 +276,24 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
     }
   }, [selectedFile, isShowingDetail]);
 
-  return <List.Item.Detail markdown={previewImage + markdown} />;
+  return (
+    <List.Item.Detail
+      markdown={previewImage}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Name" text={file.name} icon={{ fileIcon: file.path }} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Where" text={file.displayPath} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Size" text={file.fileSizeFormatted} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Created" text={new Date(file.createdAt).toLocaleString()} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Updated" text={new Date(file.updatedAt).toLocaleString()} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 };
 
 const GeneralActions = ({ showToggleDetailsAction = true }) => {
@@ -293,6 +309,12 @@ const GeneralActions = ({ showToggleDetailsAction = true }) => {
           shortcut={{ modifiers: ["cmd"], key: "b" }}
         />
       ) : null}
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+      />
       <Action
         title="Reindex Files Cache"
         icon={Icon.Hammer}
