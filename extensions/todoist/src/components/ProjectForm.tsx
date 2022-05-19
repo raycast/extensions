@@ -92,7 +92,7 @@ export default function ProjectForm({ project }: ProjectFormProps) {
         onAction: () => open(url),
       };
       clear();
-      titleField.current.focus();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create project" });
     }

@@ -101,7 +101,7 @@ export default function CreateTask() {
         onAction: () => open(url),
       };
       clear();
-      titleField.current.focus();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
@@ -151,7 +151,7 @@ export default function CreateTask() {
             value={String(value)}
             title={name}
             key={value}
-            icon={color && { source: icon ? icon : Icon.Dot, tintColor: color }}
+            icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
           />
         ))}
       </Form.Dropdown>
