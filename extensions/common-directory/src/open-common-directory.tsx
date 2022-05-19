@@ -13,7 +13,7 @@ import {
   getIsShowDetail,
   refreshNumber,
 } from "./hooks/hooks";
-import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { ActionCopyFile } from "./components/action-copy-file";
 import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
@@ -290,7 +290,7 @@ function DirectoryItem(props: {
               }}
             />
           </ActionPanel.Section>
-          <ActionOpenExtensionPreferences />
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     />

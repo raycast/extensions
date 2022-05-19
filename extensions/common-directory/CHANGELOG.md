@@ -1,9 +1,9 @@
 # Common Directory Changelog
 
-## [Update directory preview] - 2022-05-27
+## [Update directory preview] - 2022-05-20
 
 - Update directory preview
-- Add action "Open Extension Preferences"
+- Add action "Open Command Preferences"
 
 ## [Added Common Directory] - 2022-04-30
 

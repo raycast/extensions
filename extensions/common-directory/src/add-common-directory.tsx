@@ -11,7 +11,7 @@ import {
 import { refreshNumber } from "./hooks/hooks";
 import path from "path";
 import fse from "fs-extra";
-import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -72,7 +72,7 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
               }}
             />
           </ActionPanel.Section>
-          <ActionOpenExtensionPreferences />
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >
