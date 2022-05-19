@@ -1,12 +1,8 @@
 import fetch from "node-fetch";
-import {
-  BingResponseData,
-  buildBingImageURL,
-  buildBingWallpapersURL,
-  getPictureName,
-} from "./utils/bing-wallpaper-utils";
-import { setWallpaper } from "./utils/common-utils";
+import { buildBingImageURL, buildBingWallpapersURL, getPictureName } from "./utils/bing-wallpaper-utils";
+import { getDownloadedBingWallpapers, setDownloadedWallpaper, setWallpaper } from "./utils/common-utils";
 import { showToast, Toast } from "@raycast/api";
+import { BingResponseData } from "./types/types";
 
 export default async () => {
   const firstResponse = await fetch(buildBingWallpapersURL(0, 8));
@@ -15,12 +11,19 @@ export default async () => {
   const secondResponseDataImages = ((await secondResponse.json()) as BingResponseData).images;
   secondResponseDataImages.shift();
   const bingWallpaperHD = firstResponseDataImages.concat(secondResponseDataImages);
-  if (bingWallpaperHD.length != 0) {
-    const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
-    await setWallpaper(
-      getPictureName(randomImage.url) + "-" + randomImage.startdate,
-      buildBingImageURL(randomImage.url, "raw")
-    );
+  const downloadedBingWallpaper = getDownloadedBingWallpapers();
+  if (bingWallpaperHD.length + downloadedBingWallpaper.length != 0) {
+    const randomImageIndex = Math.floor(Math.random() * (bingWallpaperHD.length + downloadedBingWallpaper.length));
+    if (randomImageIndex < bingWallpaperHD.length) {
+      const randomImage = bingWallpaperHD[randomImageIndex];
+      await setWallpaper(
+        getPictureName(randomImage.url) + "-" + randomImage.startdate,
+        buildBingImageURL(randomImage.url, "raw")
+      );
+    } else {
+      const randomImage = downloadedBingWallpaper[randomImageIndex - bingWallpaperHD.length];
+      await setDownloadedWallpaper(randomImage.path);
+    }
   } else {
     await showToast(Toast.Style.Failure, "No wallpaper found.");
   }
