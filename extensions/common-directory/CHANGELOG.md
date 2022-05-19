@@ -1,6 +1,6 @@
 # Common Directory Changelog
 
-## [Update directory preview] - 2022-05-20
+## [Update directory preview] - 2022-05-19
 
 - Update directory preview
 - Add action "Open Command Preferences"
