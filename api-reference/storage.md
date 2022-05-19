@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/storage.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Storage
 
 The storage APIs can be used to store non-sensitive data that is persisted across command launches.
