@@ -28,6 +28,10 @@ export const getFileContent = async (fileInfo: FileInfo) => {
         preview = `<img src="${fileUrl(environment.assetsPath + "/AppIcon.icns")}" alt="${
           fileInfo.name
         }" height="156" />`;
+        const files = fse.readdirSync(fileInfo.path);
+        const isNormalFile = files.filter((value) => !value.startsWith("."));
+        sizeTitle = "Sub-files";
+        size = isNormalFile.length + "";
       } else if (fileStat.isDirectory()) {
         const files = fse.readdirSync(fileInfo.path);
         const isNormalFile = files.filter((value) => !value.startsWith("."));

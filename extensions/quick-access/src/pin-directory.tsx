@@ -18,11 +18,11 @@ export const pinDirectory = async (closeMainWindow = true) => {
     const newDirectory: DirectoryInfo[] = [];
     directorPath.forEach((value, index) => {
       const parsedPath = parse(value);
-      if (!checkDuplicatePath(parsedPath.dir + "/" + parsedPath.base, localDirectory) && isDirectory(value)) {
+      if (!checkDuplicatePath(value, localDirectory) && isDirectory(value)) {
         newDirectory.push({
           id: "directory_" + (timeStamp + index),
           name: parsedPath.base,
-          path: parsedPath.dir + "/" + parsedPath.base,
+          path: value,
           type: DirectoryType.DIRECTORY,
           valid: true,
           rank: 1,

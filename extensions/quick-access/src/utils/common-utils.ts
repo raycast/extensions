@@ -29,9 +29,8 @@ export const fetchDirectoryPath = async () => {
     const selectedDirectory = await fetchFileSystemItem();
     if (selectedDirectory.length > 0) {
       selectedDirectory.forEach((value) => {
-        const parsedPath = parse(value.path);
         if (isDirectory(value.path)) {
-          directoryPath.push(parsedPath.dir + "/" + parsedPath.base);
+          directoryPath.push(value.path);
         }
       });
     } else {
