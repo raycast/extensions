@@ -64,45 +64,47 @@ export default function Command() {
 
   return (
     <List isLoading={timers === undefined || customTimers === undefined}>
-      {timers?.map((timer, index) => (
+      <List.Section title={timers?.length !== 0 && timers != null ? "Currently Running" : "No Timers Running"}>
+        {timers?.map((timer, index) => (
+          <List.Item
+            key={index}
+            icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+            title={timer.name}
+            subtitle={formatTime(timer.timeLeft) + " left"}
+            accessoryTitle={formatTime(timer.secondsSet) + " originally"}
+            actions={
+              <ActionPanel>
+                <Action title="Stop Timer" onAction={() => handleTimerStop(timer)} />
+                <Action
+                  title="Rename Timer"
+                  onAction={() =>
+                    push(<RenameView currentName={timer.name} timerFile={timer.originalFile} ctID={null} />)
+                  }
+                />
+                <Action
+                  title="Save Timer as Preset"
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: "enter",
+                  }}
+                  onAction={() => handleCreateCustom(timer)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
         <List.Item
-          key={index}
-          icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
-          title={timer.name}
-          subtitle={formatTime(timer.timeLeft) + " left"}
-          accessoryTitle={formatTime(timer.secondsSet) + " originally"}
+          key={0}
+          icon={Icon.Clock}
+          title={"Create a new timer"}
+          subtitle={"Press Enter to start a timer"}
           actions={
             <ActionPanel>
-              <Action title="Stop Timer" onAction={() => handleTimerStop(timer)} />
-              <Action
-                title="Rename Timer"
-                onAction={() =>
-                  push(<RenameView currentName={timer.name} timerFile={timer.originalFile} ctID={null} />)
-                }
-              />
-              <Action
-                title="Save Timer as Preset"
-                shortcut={{
-                  modifiers: ["cmd", "shift"],
-                  key: "enter",
-                }}
-                onAction={() => handleCreateCustom(timer)}
-              />
+              <Action title="Start Timer" onAction={() => push(<CustomTimerView />)} />
             </ActionPanel>
           }
         />
-      ))}
-      <List.Item
-        key={0}
-        icon={Icon.Clock}
-        title={"Create a new timer"}
-        subtitle={"Press Enter to start a timer"}
-        actions={
-          <ActionPanel>
-            <Action title="Start Timer" onAction={() => push(<CustomTimerView />)} />
-          </ActionPanel>
-        }
-      />
+      </List.Section>
       <List.Section title="Custom Timers">
         {Object.keys(customTimers)
           ?.sort((a, b) => {
