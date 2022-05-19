@@ -35,7 +35,7 @@
       "description": "The directory of wallpaper to download. Path format: /Users/Username/Downloads or ~/Downloads.",
       "type": "textfield",
       "required": true,
-      "placeholder": "~/Downloads",
+      "placeholder": "~/Pictures/BingWallpaper",
       "default": "~/Downloads"
     },
     {

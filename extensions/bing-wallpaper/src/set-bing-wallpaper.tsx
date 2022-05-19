@@ -1,5 +1,5 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { buildBingImageURL, getCopyright, getPictureName } from "./utils/bing-wallpaper-utils";
+import { buildBingImageURL, getPictureName } from "./utils/bing-wallpaper-utils";
 import React, { useState } from "react";
 import { Preferences } from "./types/preferences";
 import { ActionsOnlineBingWallpaper } from "./components/actions-online-bing-wallpaper";
@@ -30,7 +30,7 @@ export default function CommonDirectory() {
         ) : null
       }
     >
-      {(wallpaperTag === WallpaperTag.ALL || wallpaperTag === WallpaperTag.ONLINE) && (
+      {(wallpaperTag === WallpaperTag.ALL || wallpaperTag === WallpaperTag.ONLINE || wallpaperTag === "") && (
         <List.Section title={"Online Wallpapers"}>
           {bingWallpaperHD.map((bingImage, index) => {
             return (
@@ -43,8 +43,10 @@ export default function CommonDirectory() {
                   <List.Item.Detail
                     isLoading={false}
                     markdown={`![](${buildBingImageURL(bingImage.url, "icon", 960, 540)})
-## ${getCopyright(bingImage.copyright).story}
-${getCopyright(bingImage.copyright).copyright}`}
+                    
+## ${bingImage.title}
+
+${bingImage.copyright}`}
                   />
                 }
                 actions={

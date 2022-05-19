@@ -32,15 +32,6 @@ export const buildCopyrightURL = (urlSuffix: string) => {
   return "https://www.bing.com" + urlSuffix;
 };
 
-export const getCopyright = (copyright: string) => {
-  const firstBrackets = copyright.indexOf("(");
-  const lastBrackets = copyright.indexOf(")");
-  return {
-    story: copyright.substring(0, firstBrackets),
-    copyright: copyright.substring(firstBrackets + 1, lastBrackets),
-  };
-};
-
 export const getPictureName = (url: string) => {
   const firstBrackets = 11;
   const lastBrackets = url.indexOf("_");
