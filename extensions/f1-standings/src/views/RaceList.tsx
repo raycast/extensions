@@ -73,7 +73,14 @@ function RaceList() {
                 icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
                 title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
                 subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
-                detail={raceDates.length ? <RaceSessionDetails raceDates={raceDates} /> : undefined}
+                detail={
+                  raceDates.length ? (
+                    <RaceSessionDetails
+                      title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
+                      raceDates={raceDates}
+                    />
+                  ) : undefined
+                }
                 actions={
                   <ActionPanel title={race.raceName}>
                     <Action.Push
@@ -118,7 +125,14 @@ function RaceList() {
                 icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
                 title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
                 subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
-                detail={raceDates.length ? <RaceSessionDetails raceDates={raceDates} /> : undefined}
+                detail={
+                  raceDates.length ? (
+                    <RaceSessionDetails
+                      title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
+                      raceDates={raceDates}
+                    />
+                  ) : undefined
+                }
                 actions={
                   <ActionPanel title={race.raceName}>
                     {raceDates.length ? (
