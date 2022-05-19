@@ -14,6 +14,7 @@ import {
   getDriveRootPath,
   initialSetup,
   isEmpty,
+  log,
 } from "./utils";
 import { SPINNER_GIF_PATH } from "./constants";
 
@@ -79,7 +80,7 @@ const Command = () => {
             }));
           }
         } catch (e) {
-          console.error(e);
+          log("error", e);
           showToast({
             style: Toast.Style.Failure,
             title: "Error! Is Google Drive app running and accessible?",
@@ -130,7 +131,7 @@ const Command = () => {
         setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
       }
     } catch (e) {
-      console.error(e);
+      log("error", e);
       showToast({
         style: Toast.Style.Failure,
         title: "💥 Could not rebuild files index!",

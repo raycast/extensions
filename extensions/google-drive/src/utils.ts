@@ -3,7 +3,7 @@ import util from "util";
 import fs, { accessSync, existsSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
 import { extname, join, resolve } from "path";
 import { homedir } from "os";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
 import fg from "fast-glob";
 
@@ -17,6 +17,10 @@ import {
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
+
+export const log = (type: "debug" | "error", ...args: unknown[]) => {
+  if (environment.isDevelopment) type === "error" ? console.error(...args) : console.log(...args);
+};
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
@@ -186,7 +190,7 @@ export const filePreview = async (file: FileInfo | null, controller: AbortContro
       });
       iconPNGData = stdout.trim();
     } catch (e) {
-      console.error(e);
+      log("error", e);
     }
 
     return iconPNGData !== ""
