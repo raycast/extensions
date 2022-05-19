@@ -1,18 +1,25 @@
-import { Action, ActionPanel, environment, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  environment,
+  getPreferenceValues,
+  List,
+  openCommandPreferences,
+  Icon,
+} from "@raycast/api";
 import { homedir } from "os";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 import path from "path";
 import { existsSync, readdirSync, readFileSync } from "fs";
 
-const QUERY = "SELECT id, short_name, url, favicon_url FROM keywords WHERE is_active = 1";
+const QUERY = "SELECT id, short_name, url, favicon_url, is_active FROM keywords";
 const BASE_SUPPORT_DIR = `${homedir()}/Library/Application Support`;
 
 const SUPPORT_DIRS = {
   chrome: `${BASE_SUPPORT_DIR}/Google/Chrome`,
   chromium: `${BASE_SUPPORT_DIR}/Chromium`,
   edge: `${BASE_SUPPORT_DIR}/Microsoft Edge`,
-  vivaldi: `${BASE_SUPPORT_DIR}/Vivaldi`,
   brave: `${BASE_SUPPORT_DIR}/BraveSoftware/Brave-Browser`,
 };
 
@@ -21,6 +28,7 @@ interface CustomSearchEngine {
   short_name: string;
   url: string;
   favicon_url: string;
+  is_active: boolean;
 }
 
 interface ChromeProfile {
@@ -31,6 +39,14 @@ interface ChromeProfile {
 function deduplicate(items: CustomSearchEngine[]) {
   const map = new Map<string, CustomSearchEngine>();
   for (const item of items) {
+    // Google use custom variables in the URL, so we can't use it in the extension
+    if (item.short_name == "Google" && item.is_active === false) {
+      continue;
+    }
+    // Chrome prefixed url can't be opened from the outside
+    if (item.url.startsWith("chrome://")) {
+      continue;
+    }
     map.set(item.url, item);
   }
   return Array.from(map.values());
@@ -86,11 +102,6 @@ export default function ListSearchEngine() {
 
   useEffect(() => {
     if (!existsSync(supportDir)) {
-      showToast({
-        title: `${browser} is not installed`,
-        message: `Please install ${browser}, or update the browser preference`,
-        style: Toast.Style.Failure,
-      });
       setState({ ...state, isLoading: false });
       return;
     }
@@ -102,11 +113,6 @@ export default function ListSearchEngine() {
       }))
       .filter((profile) => profile.title === "Default" || profile.title.startsWith("Profile"));
     if (profiles.length === 0) {
-      showToast({
-        title: `No profile found`,
-        message: `Please check your ${browser} installation, or update the browser preference`,
-        style: Toast.Style.Failure,
-      });
       setState({ ...state, isLoading: false });
       return;
     }
@@ -119,14 +125,19 @@ export default function ListSearchEngine() {
       return;
     }
     loadDb(state.databasePath).then((db) => {
-      const res = db.exec(QUERY);
-      const searchEngines = res[0].values.map((row) => {
-        const [id, short_name, url, favicon_url] = row;
+      const rows = db.exec(QUERY);
+      if (rows.length === 0) {
+        setState({ ...state, isLoading: false });
+        return;
+      }
+      const searchEngines = rows[0].values.map((row) => {
+        const [id, short_name, url, favicon_url, is_active] = row;
         return {
           id: id as number,
           short_name: short_name as string,
           url: url as string,
           favicon_url: favicon_url as string,
+          is_active: is_active === 1,
         };
       });
       setState({ ...state, isLoading: false, searchEngines: deduplicate(searchEngines) });
@@ -143,10 +154,23 @@ export default function ListSearchEngine() {
         />
       }
     >
-      {state.searchEngines
-        ?.map((se) => (
-          <CustomSearchEngineItem key={se.id} searchEngine={se} />
-        ))}
+      <List.EmptyView icon={Icon.MagnifyingGlass} description="No custom search engine found." actions={<ActionPanel>
+        <Action title="Open Preferences" onAction={openCommandPreferences}/>
+      </ActionPanel>}/>
+      <List.Section title="Custom">
+        {state.searchEngines
+          ?.filter((se) => se.is_active)
+          ?.map((se) => (
+            <CustomSearchEngineItem key={se.id} searchEngine={se} />
+          ))}
+      </List.Section>
+      <List.Section title="Automatic">
+        {state.searchEngines
+          ?.filter((se) => !se.is_active)
+          ?.map((se) => (
+            <CustomSearchEngineItem key={se.id} searchEngine={se} />
+          ))}
+      </List.Section>
     </List>
   );
 }

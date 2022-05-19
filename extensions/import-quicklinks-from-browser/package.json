@@ -43,16 +43,12 @@
         {
           "value": "edge",
           "title": "Microsoft Edge"
-        },
-        {
-          "value": "vivaldi",
-          "title": "Vivaldi"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
+    "@raycast/api": "^1.35.0",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {
