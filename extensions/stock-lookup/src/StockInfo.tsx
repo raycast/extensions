@@ -104,8 +104,6 @@ As of the latest trading day on ${stockInfo?.lastTradingDay}:
       markdown={md}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Links" icon={Icon.Link} />
-
           <Detail.Metadata.Link target={googleFinanceUrl} text="Google Finance" title="Google" />
           <Detail.Metadata.Link target={yahooFinanceUrl} text="Yahoo Finance" title="Yahoo" />
           <Detail.Metadata.Link target={tradingViewUrl} text="Trading View" title="Trading View" />
