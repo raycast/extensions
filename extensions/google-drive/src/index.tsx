@@ -15,6 +15,7 @@ import {
   initialSetup,
   isEmpty,
 } from "./utils";
+import { SPINNER_GIF_PATH } from "./constants";
 
 type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
@@ -258,16 +259,12 @@ type ListItemDetailProps = {
 };
 const ListItemDetail = ({ file }: ListItemDetailProps) => {
   const { selectedFile, isShowingDetail } = useCommandContext();
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState(`<img src="file://${SPINNER_GIF_PATH}" />`);
 
   useEffect(() => {
     if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
       const controller = new AbortController();
-      filePreview(file, controller).then((previewImage) => {
-        if (!controller.signal.aborted) {
-          setPreviewImage(previewImage);
-        }
-      });
+      filePreview(file, controller).then(setPreviewImage);
       return () => {
         controller.abort();
       };
@@ -276,7 +273,7 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
 
   return (
     <List.Item.Detail
-      markdown={`## File Information\n${previewImage}`}
+      markdown={previewImage}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Name" text={file.name} icon={{ fileIcon: file.path }} />

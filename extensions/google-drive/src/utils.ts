@@ -8,6 +8,8 @@ import { Fzf } from "fzf";
 import fg from "fast-glob";
 
 import {
+  DEFAULT_FILE_PREVIEW_IMAGE_PATH,
+  FILE_ICON_SCRIPT_PATH,
   FILE_SIZE_UNITS,
   IGNORED_GLOBS,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
@@ -72,6 +74,7 @@ const filePreviewPath = async (file: FileInfo, controller: AbortController): Pro
     try {
       await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${TMP_FILE_PREVIEWS_PATH}`, {
         signal: controller.signal,
+        timeout: 2000 /* milliseconds */,
         killSignal: "SIGKILL",
       });
     } catch (e) {
@@ -115,6 +118,42 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   });
 };
 
+const installFileIconScript = () => {
+  fs.writeFileSync(
+    FILE_ICON_SCRIPT_PATH,
+    `#!/usr/bin/env xcrun swift
+
+import Cocoa
+
+public func UIImagePNGRepresentation(_ image: NSImage) -> Data? {
+  var rect = CGRect(origin: .zero, size: CGSize(width: 192, height: 192))
+  guard let cgImage = image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+    else { return nil }
+  let imageRep = NSBitmapImageRep(cgImage: cgImage)
+  imageRep.size = image.size
+  return imageRep.representation(using: .png, properties: [:])
+}
+
+
+let myWorkspace = NSWorkspace.shared
+let path = CommandLine.arguments[1]
+
+if !FileManager.default.fileExists(atPath: path) {
+    exit(1)
+}
+
+let image = myWorkspace.icon(forFile: path)
+
+if let pngData = UIImagePNGRepresentation(image)?.base64EncodedString() {
+  print(pngData)
+} else {
+  print("")
+}`,
+    "utf8"
+  );
+  fs.chmodSync(FILE_ICON_SCRIPT_PATH, 0o755);
+};
+
 export const initialSetup = () => {
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
@@ -122,6 +161,8 @@ export const initialSetup = () => {
       clearLeastAccessedFilePreviewsCache(previewFiles);
     }
   }
+
+  installFileIconScript();
 };
 
 export const filePreview = async (file: FileInfo | null, controller: AbortController): Promise<string> => {
@@ -131,11 +172,27 @@ export const filePreview = async (file: FileInfo | null, controller: AbortContro
 
   const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
-  const previewImage = previewExists
-    ? `<img src="${previewPath}" alt="${file.name}" />`
-    : `<img alt="${file.name}" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIKdmlld0JveD0iMCAwIDgwIDgwIgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMy41IDc0LjVMMTMuNSAzLjUgNTAuNzkzIDMuNSA2OC41IDIxLjIwNyA2OC41IDc0LjV6Ij48L3BhdGg+PHBhdGggZmlsbD0iIzc4OGI5YyIgZD0iTTUwLjU4Niw0TDY4LDIxLjQxNFY3NEgxNFY0SDUwLjU4NiBNNTEsM0gxM3Y3Mmg1NlYyMUw1MSwzTDUxLDN6Ij48L3BhdGg+PGc+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUwLjUgMjEuNUw1MC41IDMuNSA1MC43OTMgMy41IDY4LjUgMjEuMjA3IDY4LjUgMjEuNXoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzg4YjljIiBkPSJNNTEsNC40MTRMNjcuNTg2LDIxSDUxVjQuNDE0IE01MSwzaC0xdjE5aDE5di0xTDUxLDNMNTEsM3oiPjwvcGF0aD48L2c+PC9zdmc+"/>`;
 
-  return previewImage;
+  if (previewExists) {
+    return `<img src="${previewPath}" alt="${file.name}" />`;
+  } else {
+    // Fallback to the file icon
+    let iconPNGData = "";
+    try {
+      const { stdout } = await execAsync(`${escapePath(FILE_ICON_SCRIPT_PATH)} ${escapePath(file.path)}`, {
+        signal: controller.signal,
+        timeout: 2000 /* milliseconds */,
+        killSignal: "SIGKILL",
+      });
+      iconPNGData = stdout.trim();
+    } catch (e) {
+      console.error(e);
+    }
+
+    return iconPNGData !== ""
+      ? `<img src="data:image/png;base64,${iconPNGData}" alt="${file.name}" width="192" height="192" />`
+      : `<img src="file://${DEFAULT_FILE_PREVIEW_IMAGE_PATH}" alt="${file.name}" width="192" height="192" />`;
+  }
 };
 
 type DriveFileStreamOptions = { stats?: boolean };
