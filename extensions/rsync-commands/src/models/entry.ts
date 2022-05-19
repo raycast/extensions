@@ -64,14 +64,9 @@ export default class Entry {
 
   getCommand(): string {
     const sshLocation: EntryLocation | undefined = this.sshSelection !== "none" ? this[this.sshSelection] : undefined
-    const { port, identityFile: sshIdentityFile, password } = sshLocation ?? {}
+    const { port, identityFile: sshIdentityFile } = sshLocation ?? {}
     const sshPort = port === "22" ? undefined : port
-
-    const cmd = ["rsync"]
-    // if (sshLocation && sshPassword) {
-    //   cmd.push(`export RSYNC_PASSWORD="${sshPassword}";`)
-    // }
-    cmd.push("rsync")
+    const rsyncCommand = ["rsync"]
 
     for (const [, option] of Object.entries(this.options)) {
       const { enabled, name, param, value } = option
@@ -79,7 +74,7 @@ export default class Entry {
         let optionCommand = `--${name}`
         if (param && !value) throw `Option "${name}" does not have a value.`
         if (value) optionCommand = `${optionCommand}=${value}`
-        cmd.push(optionCommand)
+        rsyncCommand.push(optionCommand)
       }
     }
 
@@ -93,18 +88,17 @@ export default class Entry {
       } else {
         eOption.push("ssh")
       }
-      cmd.push(eOption.join(" "))
+      rsyncCommand.push(eOption.join(" "))
     }
 
-    cmd.push(
+    rsyncCommand.push(
       ...[
         this.source.getCommandPart("source", this.sshSelection === "source"),
         this.destination.getCommandPart("source", this.sshSelection === "destination"),
       ]
     )
 
-    const rsyncCommand = cmd.join(" ")
-    const commands = [this.preCommand, rsyncCommand, this.postCommand].filter(Boolean)
+    const commands = [this.preCommand, rsyncCommand.join(" "), this.postCommand].filter(Boolean)
     return commands.join("\n")
   }
 

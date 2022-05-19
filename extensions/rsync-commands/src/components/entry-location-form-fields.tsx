@@ -11,7 +11,6 @@ type EntryLocationFormFieldsProps = {
 }
 
 const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier, location, sshEnabled, onChange }) => {
-
   const formFieldChange = (propPath: string, value: string) => {
     if (Sugar.Object.get<string>(location, propPath) === value) return
     let clone = location.toRawData()
@@ -62,13 +61,6 @@ const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier,
             defaultValue={location.identityFile}
             onChange={value => formFieldChange("identityFile", value)}
           />
-          {/*<Form.TextField*/}
-          {/*  id={`${identifier}Password`}*/}
-          {/*  info="Password for the private key."*/}
-          {/*  title="Password"*/}
-          {/*  defaultValue={location.password}*/}
-          {/*  onChange={value => formFieldChange("password", value)}*/}
-          {/*/>*/}
         </>
       )}
     </>
