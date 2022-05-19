@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./types/directory-info";
 import React, { useState } from "react";
-import { getChooseFolder, isEmpty } from "./utils/common-utils";
+import { isEmpty } from "./utils/common-utils";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
 import { resetRank } from "./open-common-directory";
 import fse from "fs-extra";
@@ -20,6 +20,7 @@ import { ActionOpenCommandPreferences } from "./components/action-open-command-p
 import { ActionCopyFile } from "./components/action-copy-file";
 import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
+import { getChooseFolder } from "./utils/applescript-utils";
 
 export default function CommonDirectory() {
   const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
