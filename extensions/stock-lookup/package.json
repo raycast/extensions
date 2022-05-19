@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stock-lookup",
+  "title": "Stock Lookup",
+  "description": "Retrieves stock information from the alphavantage API. Get a free API Key from https://www.alphavantage.co/support/#api-key, or a paid one from https://www.alphavantage.co/premium/",
+  "icon": "stock-emoji.png",
+  "author": "jones-sam",
+  "categories": [
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "stock-lookup",
+      "title": "Stock Lookup",
+      "subtitle": "Alpha Vantage",
+      "description": "Retrieves stock information from the alphavantage API",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "API Key to fetch data from the Alphavantage API",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.0",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
