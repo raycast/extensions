@@ -1,10 +1,10 @@
 # Quick Access Changelog
 
-## [Update file preview] - 2022-05-25
+## [Update file preview] - 2022-05-19
 
 - Update file preview
 - Update "Show in Finder" action shortcuts
-- Add action "Open Extension Preferences"
+- Add action "Open Command Preferences"
 
 ## [Update file preview] - 2022-04-30
 

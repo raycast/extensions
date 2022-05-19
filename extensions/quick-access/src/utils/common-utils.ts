@@ -103,13 +103,13 @@ export const checkDuplicatePath = (path: string, localDirectory: DirectoryInfo[]
 };
 
 export const checkDirectoryValid = (localDirectory: DirectoryInfo[]) => {
-  localDirectory.forEach((value, index) => {
-    if (!fse.existsSync(value.path)) {
-      console.debug(value.name);
-      localDirectory.splice(index, 1);
+  const validDirectory: DirectoryInfo[] = [];
+  localDirectory.forEach((value) => {
+    if (fse.existsSync(value.path)) {
+      validDirectory.push(value);
     }
   });
-  return localDirectory;
+  return validDirectory;
 };
 
 export const isImage = (ext: string) => {

@@ -16,7 +16,7 @@ import { Preferences } from "../types/preferences";
 
 //for refresh useState
 export const refreshNumber = () => {
-  return new Date().getTime();
+  return Date.now();
 };
 
 //get is show detail

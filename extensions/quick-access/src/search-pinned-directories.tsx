@@ -5,7 +5,6 @@ import {
   Icon,
   List,
   LocalStorage,
-  openExtensionPreferences,
   showToast,
   Toast,
   trash,
@@ -24,8 +23,9 @@ import {
   localDirectoryWithFiles,
   refreshNumber,
 } from "./hooks/hooks";
-import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
+import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./components/ui-components";
 import { Preferences } from "./types/preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
   const { primaryAction, rememberTag, autoCopyLatestFile } = getPreferenceValues<Preferences>();
@@ -238,6 +238,8 @@ export default function Command() {
                                   }}
                                 />
                               </ActionPanel.Section>
+
+                              <ActionOpenCommandPreferences />
                             </ActionPanel>
                           }
                         />
@@ -303,14 +305,6 @@ function ActionsOnFile(props: {
               }
             );
           }}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Gear}
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={openExtensionPreferences}
         />
       </ActionPanel.Section>
     </>
