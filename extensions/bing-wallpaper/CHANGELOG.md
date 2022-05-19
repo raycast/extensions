@@ -2,7 +2,7 @@
 
 ## [Add downloaded wallpaper list] - 2022-05-20
 
-- Add downloaded wallpaper list in Set Bing Wallpaper command
+- Add downloaded wallpapers list in Set Bing Wallpaper command, support png, jpg, heic
 - Random Bing Wallpaper will randomize to the downloaded wallpapers
 
 ## [Fix text errors] - 2022-04-26

@@ -5,7 +5,7 @@ Get, set, auto-download Bing wallpapers within 15 days.
 **🌟🌟Tips:**
 
 - You can choose the folder where you want to save your Bing wallpapers in _Download Directory_ Preferences, and when you check _Auto Download Wallpapers_, the latest wallpapers will be saved automatically every time you enter the **Set Bing Wallpaper** command.
-- You can place PNG(.png) or JPG(.jpg) images in the folder where Bing wallpapers are downloaded, and you can quickly find and set these images as wallpapers by **Set Bing Wallpaper** or **Random Bing Wallpaper** command
+- You can place PNG(.png), JPG(.jpg) or HEIC(.heic) images in the folder where Bing wallpapers are downloaded, and you can quickly find and set these images as wallpapers by **Set Bing Wallpaper** or **Random Bing Wallpaper** command
 
 **Preferences**
 

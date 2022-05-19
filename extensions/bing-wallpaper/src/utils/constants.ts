@@ -4,3 +4,5 @@ export enum WallpaperTag {
   DOWNLOADED = "Downloaded",
 }
 export const wallpaperTags = Object.entries(WallpaperTag);
+
+export const wallpaperImageExtension = [".png", ".jpg", ".heic"];

@@ -6,6 +6,8 @@ import { Preferences } from "../types/preferences";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import fetch from "node-fetch";
 import { buildBingImageURL, getPictureName } from "./bing-wallpaper-utils";
+import { wallpaperImageExtension } from "./constants";
+import { parse } from "path";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -149,9 +151,7 @@ export async function downloadPicture(downSize: string, bingImage: BingImage) {
       return res.arrayBuffer();
     })
     .then(function (buffer) {
-      const picturePath = `${getPicturesDirectory()}/${getPictureName(bingImage.url)}-${
-        bingImage.startdate
-      }-${downSize}.png`;
+      const picturePath = `${getPicturesDirectory()}/${getPictureName(bingImage.url)}-${bingImage.startdate}.png`;
       fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
         if (error != null) {
           await showToast(Toast.Style.Failure, String(error));
@@ -183,7 +183,7 @@ export async function downloadPicture(downSize: string, bingImage: BingImage) {
 
 export async function autoDownloadPictures(downSize: string, bingImages: BingImage[]) {
   bingImages.forEach((value) => {
-    const picturePath = `${getPicturesDirectory()}/${getPictureName(value.url)}-${value.startdate}-${downSize}.png`;
+    const picturePath = `${getPicturesDirectory()}/${getPictureName(value.url)}-${value.startdate}.png`;
     if (!fse.existsSync(picturePath)) {
       fetch(buildBingImageURL(value.url, downSize))
         .then(function (res) {
@@ -205,8 +205,8 @@ export function getDownloadedBingWallpapers() {
   const files = fse.readdirSync(imageFolderPath);
   const downloadedWallpapers: DownloadedBingImage[] = [];
   files.forEach((value) => {
-    if ((value.endsWith(".png") || value.endsWith(".jpg")) && !value.startsWith(".")) {
-      downloadedWallpapers.push({ name: value, path: imageFolderPath + "/" + value });
+    if (wallpaperImageExtension.includes(parse(value).ext) && !value.startsWith(".")) {
+      downloadedWallpapers.push({ name: parse(value).name, path: imageFolderPath + "/" + value });
     }
   });
   return downloadedWallpapers;

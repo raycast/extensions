@@ -69,7 +69,7 @@ ${bingImage.copyright}`}
                 id={index + bingImage.name}
                 key={index + bingImage.name}
                 icon={{ source: bingImage.path }}
-                title={bingImage.name.substring(0, bingImage.name.indexOf("-"))}
+                title={bingImage.name}
                 detail={
                   <List.Item.Detail
                     isLoading={false}
