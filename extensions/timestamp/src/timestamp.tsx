@@ -15,6 +15,8 @@ export default function Command() {
       } else {
         setTime(dayjs(cleanInput));
       }
+    } else {
+      setTime(dayjs());
     }
 
     setResults([
