@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./types/directory-info";
 import React, { useState } from "react";
-import { commonPreferences, getChooseFolder, isEmpty } from "./utils/common-utils";
+import { isEmpty } from "./utils/common-utils";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
 import { resetRank } from "./open-common-directory";
 import fse from "fs-extra";
@@ -16,10 +16,15 @@ import {
   getIsShowDetail,
   refreshNumber,
 } from "./hooks/hooks";
-import { CopyFileActions } from "./utils/ui-component";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { ActionCopyFile } from "./components/action-copy-file";
+import { Preferences } from "./types/preferences";
+import { FileContentInfo } from "./types/file-content-info";
+import { getChooseFolder } from "./utils/applescript-utils";
+import { DirectoryDetailMetadata } from "./components/directory-detail-metadata";
 
 export default function CommonDirectory() {
-  const { sortBy, showOpenDirectory } = commonPreferences();
+  const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
   const [searchValue, setSearchValue] = useState<string>("");
   const [directoryPath, setDirectoryPath] = useState<string>("");
 
@@ -35,7 +40,7 @@ export default function CommonDirectory() {
     showOpenDirectory,
     LocalDirectoryKey.SEND_COMMON_DIRECTORY
   );
-  const directoryInfo = getDirectoryInfo(directoryPath, updateDetail);
+  const { directoryInfo, isDetailLoading } = getDirectoryInfo(directoryPath, updateDetail);
 
   return (
     <List
@@ -95,7 +100,8 @@ export default function CommonDirectory() {
                       directory={directory}
                       index={index}
                       commonDirectory={commonDirectory}
-                      directoryContent={directoryInfo}
+                      directoryInfo={directoryInfo}
+                      isDetailLoading={isDetailLoading}
                       showDetail={showDetail}
                       setRefresh={setRefresh}
                       setRefreshDetail={setRefreshDetail}
@@ -114,7 +120,8 @@ export default function CommonDirectory() {
                       directory={directory}
                       index={index}
                       commonDirectory={openDirectory}
-                      directoryContent={directoryInfo}
+                      directoryInfo={directoryInfo}
+                      isDetailLoading={isDetailLoading}
                       showDetail={showDetail}
                       setRefresh={setRefresh}
                       setRefreshDetail={setRefreshDetail}
@@ -133,7 +140,8 @@ function SendToDirectoryItem(props: {
   directory: DirectoryInfo;
   index: number;
   commonDirectory: DirectoryInfo[];
-  directoryContent: string;
+  directoryInfo: FileContentInfo;
+  isDetailLoading: boolean;
   showDetail: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   setRefreshDetail: React.Dispatch<React.SetStateAction<number>>;
@@ -147,9 +155,10 @@ function SendToDirectoryItem(props: {
     setUpdateDetail,
     index,
     commonDirectory,
-    directoryContent,
+    directoryInfo,
+    isDetailLoading,
   } = props;
-  const { primaryAction } = commonPreferences();
+  const primaryAction = getPreferenceValues<Preferences>().primaryAction as ActionType;
   return (
     <List.Item
       id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
@@ -161,7 +170,13 @@ function SendToDirectoryItem(props: {
           ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }, directory.valid ? {} : { icon: "⚠️" }]
           : [{ text: path.parse(directory.path).dir }, directory.valid ? {} : { icon: "⚠️" }]
       }
-      detail={<List.Item.Detail markdown={directoryContent} />}
+      detail={
+        <List.Item.Detail
+          isLoading={isDetailLoading}
+          markdown={directoryInfo.fileContent}
+          metadata={!isDetailLoading && <DirectoryDetailMetadata directoryInfo={directoryInfo} />}
+        />
+      }
       actions={
         <ActionPanel>
           <Action
@@ -184,7 +199,7 @@ function SendToDirectoryItem(props: {
               setUpdateDetail(refreshNumber());
             }}
           />
-          <ActionPanel.Section title={"Advanced Action"}>
+          <ActionPanel.Section title={"Advanced Actions"}>
             <Action
               title={
                 primaryAction === ActionType.COPY ? "Copy to Folder Chosen Manually" : "Move to Folder Chosen Manually"
@@ -213,9 +228,9 @@ function SendToDirectoryItem(props: {
             />
           </ActionPanel.Section>
 
-          <CopyFileActions directory={directory} />
+          <ActionCopyFile directory={directory} />
 
-          <ActionPanel.Section title={"Directory Actions"}>
+          <ActionPanel.Section title={"Directory Action"}>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
@@ -268,7 +283,7 @@ function SendToDirectoryItem(props: {
                       Icon.ExclamationMark,
                       "Remove all directories",
                       "Are you sure you want to remove all directories?",
-                      "Remove all",
+                      "Remove All",
                       async () => {
                         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
@@ -311,6 +326,8 @@ function SendToDirectoryItem(props: {
               }}
             />
           </ActionPanel.Section>
+
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     />
@@ -337,7 +354,7 @@ async function actionMoveOrCopy(
         isMoved = await getItemAndSend(directory.path, action);
       }
       _commonDirectory[index].valid = true;
-      if (isMoved && commonPreferences().sortBy === SortBy.Rank) {
+      if (isMoved && getPreferenceValues<Preferences>().sortBy === SortBy.Rank) {
         _commonDirectory = await upRankSendFile(_commonDirectory, index);
       }
     } else {

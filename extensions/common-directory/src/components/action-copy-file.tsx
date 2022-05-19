@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
-import { copyFileByPath, isEmpty } from "./common-utils";
 import React from "react";
-import { DirectoryInfo } from "./directory-info";
+import { isEmpty } from "../utils/common-utils";
+import { DirectoryInfo } from "../types/directory-info";
+import { copyFileByPath } from "../utils/applescript-utils";
 
-export function CopyFileActions(props: { directory: DirectoryInfo }) {
+export function ActionCopyFile(props: { directory: DirectoryInfo }) {
   const { directory } = props;
   return (
     <ActionPanel.Section>
