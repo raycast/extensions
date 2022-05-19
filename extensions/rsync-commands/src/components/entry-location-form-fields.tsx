@@ -11,6 +11,7 @@ type EntryLocationFormFieldsProps = {
 }
 
 const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier, location, sshEnabled, onChange }) => {
+
   const formFieldChange = (propPath: string, value: string) => {
     if (Sugar.Object.get<string>(location, propPath) === value) return
     let clone = location.toRawData()

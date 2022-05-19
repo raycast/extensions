@@ -5,7 +5,7 @@
 - Configure custom commands to run before and after the rsync command itself.
 
 
-## [1.0.0] - 2022-05-05
+## [Initial Version] - 2022-05-05
 
 - Create, update, delete and duplicate pre-configured rsync commands.
 - Pin your most used commands.
