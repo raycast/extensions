@@ -11,7 +11,6 @@ type EntryLocationFormFieldsProps = {
 }
 
 const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier, location, sshEnabled, onChange }) => {
-  // const [showSshFields, setShowSshFields] = useState<boolean>(sshEnabled)
 
   const formFieldChange = (propPath: string, value: string) => {
     if (Sugar.Object.get<string>(location, propPath) === value) return
@@ -19,13 +18,6 @@ const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier,
     clone = Sugar.Object.set(clone, propPath, value) as EntryLocationRaw
     onChange(new EntryLocation(clone))
   }
-
-  // useEffect(
-  //   function () {
-  //     setShowSshFields(sshEnabled)
-  //   },
-  //   [sshEnabled]
-  // )
 
   return (
     <>
