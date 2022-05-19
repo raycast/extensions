@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Fix the bug that // exists in the path] - 2022-05-19
+
+- Fix the bug that // exists in the path.
+
 ## [Add Preference: Multi-path separator] - 2022-05-15
 
 - Add Preference _Multi-path separator_: The separator between paths when copying multiple file paths.
