@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "svgr",
-      "description": "Opens SVGR form",
+      "title": "SVGR",
+      "description": "SVGR lets you transform SVG's into React components everywhere. ",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
+    "@raycast/api": "^1.35.0",
     "@types/svgo": "^2.6.3"
   },
   "devDependencies": {
