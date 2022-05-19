@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./types/directory-info";
 import React, { useState } from "react";
-import { commonPreferences, getChooseFolder, isEmpty } from "./utils/common-utils";
+import { getChooseFolder, isEmpty } from "./utils/common-utils";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
 import { resetRank } from "./open-common-directory";
 import fse from "fs-extra";
@@ -16,10 +16,13 @@ import {
   getIsShowDetail,
   refreshNumber,
 } from "./hooks/hooks";
-import { CopyFileActions } from "./utils/ui-component";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { ActionCopyFile } from "./components/action-copy-file";
+import { Preferences } from "./types/preferences";
+import { FileContentInfo } from "./types/file-content-info";
 
 export default function CommonDirectory() {
-  const { sortBy, showOpenDirectory } = commonPreferences();
+  const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
   const [searchValue, setSearchValue] = useState<string>("");
   const [directoryPath, setDirectoryPath] = useState<string>("");
 
@@ -35,7 +38,7 @@ export default function CommonDirectory() {
     showOpenDirectory,
     LocalDirectoryKey.SEND_COMMON_DIRECTORY
   );
-  const directoryInfo = getDirectoryInfo(directoryPath, updateDetail);
+  const { directoryInfo, isDetailLoading } = getDirectoryInfo(directoryPath, updateDetail);
 
   return (
     <List
@@ -59,8 +62,8 @@ export default function CommonDirectory() {
       {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
       (commonDirectory.length === 0 && !showOpenDirectory) ? (
         <List.EmptyView
-          title={"No directories found"}
-          description={"You can always add directories directly from the Action Panel"}
+          title={"No directory. Please add first"}
+          description={"You can add directories from the Action Panel"}
           actions={
             <ActionPanel>
               <Action.Push
@@ -95,7 +98,8 @@ export default function CommonDirectory() {
                       directory={directory}
                       index={index}
                       commonDirectory={commonDirectory}
-                      directoryContent={directoryInfo}
+                      directoryInfo={directoryInfo}
+                      isDetailLoading={isDetailLoading}
                       showDetail={showDetail}
                       setRefresh={setRefresh}
                       setRefreshDetail={setRefreshDetail}
@@ -114,7 +118,8 @@ export default function CommonDirectory() {
                       directory={directory}
                       index={index}
                       commonDirectory={openDirectory}
-                      directoryContent={directoryInfo}
+                      directoryInfo={directoryInfo}
+                      isDetailLoading={isDetailLoading}
                       showDetail={showDetail}
                       setRefresh={setRefresh}
                       setRefreshDetail={setRefreshDetail}
@@ -133,7 +138,8 @@ function SendToDirectoryItem(props: {
   directory: DirectoryInfo;
   index: number;
   commonDirectory: DirectoryInfo[];
-  directoryContent: string;
+  directoryInfo: FileContentInfo;
+  isDetailLoading: boolean;
   showDetail: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   setRefreshDetail: React.Dispatch<React.SetStateAction<number>>;
@@ -147,9 +153,10 @@ function SendToDirectoryItem(props: {
     setUpdateDetail,
     index,
     commonDirectory,
-    directoryContent,
+    directoryInfo,
+    isDetailLoading,
   } = props;
-  const { primaryAction } = commonPreferences();
+  const primaryAction = getPreferenceValues<Preferences>().primaryAction as ActionType;
   return (
     <List.Item
       id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
@@ -161,7 +168,29 @@ function SendToDirectoryItem(props: {
           ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }, directory.valid ? {} : { icon: "⚠️" }]
           : [{ text: path.parse(directory.path).dir }, directory.valid ? {} : { icon: "⚠️" }]
       }
-      detail={<List.Item.Detail markdown={directoryContent} />}
+      detail={
+        <List.Item.Detail
+          isLoading={isDetailLoading}
+          markdown={directoryInfo.fileContent}
+          metadata={
+            !isDetailLoading && (
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Name" text={directoryInfo.name} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Where" text={directoryInfo.where} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title={directoryInfo.sizeTitle} text={directoryInfo.size} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Created" text={directoryInfo.created} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Modified" text={directoryInfo.modified} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Last opened" text={directoryInfo.lastOpened} />
+              </List.Item.Detail.Metadata>
+            )
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <Action
@@ -213,9 +242,9 @@ function SendToDirectoryItem(props: {
             />
           </ActionPanel.Section>
 
-          <CopyFileActions directory={directory} />
+          <ActionCopyFile directory={directory} />
 
-          <ActionPanel.Section title={"Directory Actions"}>
+          <ActionPanel.Section title={"Directory Action"}>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
@@ -231,7 +260,7 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.Trash,
-                      "Remove directory",
+                      "Remove Directory",
                       `Are you sure you want to remove ${directory.name}?`,
                       "Remove",
                       async () => {
@@ -254,7 +283,7 @@ function SendToDirectoryItem(props: {
                           LocalDirectoryKey.OPEN_COMMON_DIRECTORY,
                           JSON.stringify(__openCommonDirectory)
                         );
-                        await showToast(Toast.Style.Success, "Successfully removed directory!");
+                        await showToast(Toast.Style.Success, "Removed successfully!");
                       }
                     );
                   }}
@@ -266,31 +295,31 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.ExclamationMark,
-                      "Remove all directories",
+                      "Remove All Directory",
                       "Are you sure you want to remove all directories?",
-                      "Remove all",
+                      "Remove All",
                       async () => {
                         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
                         setRefresh(refreshNumber);
-                        await showToast(Toast.Style.Success, "Successfully removed all directories!");
+                        await showToast(Toast.Style.Success, "Removed All successfully!");
                       }
                     );
                   }}
                 />
                 <Action
-                  title={"Reset All Ranks"}
+                  title={"Rest All Rank"}
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                   onAction={async () => {
                     await alertDialog(
                       Icon.ArrowClockwise,
-                      "Reset all ranks",
-                      "Are you sure you want to reset all ranks?",
-                      "Reset all ranks",
+                      "Rest All Rank",
+                      "Are you sure you want to reset all rank?",
+                      "Reset All Rank",
                       async () => {
                         resetRank(commonDirectory, setRefresh).then(async () => {
-                          await showToast(Toast.Style.Success, "Successfully reset ranks!");
+                          await showToast(Toast.Style.Success, "Reset successfully!");
                         });
                       }
                     );
@@ -311,6 +340,8 @@ function SendToDirectoryItem(props: {
               }}
             />
           </ActionPanel.Section>
+
+          <ActionOpenExtensionPreferences />
         </ActionPanel>
       }
     />
@@ -337,7 +368,7 @@ async function actionMoveOrCopy(
         isMoved = await getItemAndSend(directory.path, action);
       }
       _commonDirectory[index].valid = true;
-      if (isMoved && commonPreferences().sortBy === SortBy.Rank) {
+      if (isMoved && getPreferenceValues<Preferences>().sortBy === SortBy.Rank) {
         _commonDirectory = await upRankSendFile(_commonDirectory, index);
       }
     } else {

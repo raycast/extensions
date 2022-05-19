@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
-import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../utils/directory-info";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
 import { getOpenFinderWindowPath } from "../utils/common-utils";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
+import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -51,16 +52,19 @@ export const getCommonDirectory = (
 };
 
 export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
-  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const [directoryInfo, setDirectoryInfo] = useState<FileContentInfo>(fileContentInfoInit);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
+    setIsDetailLoading(true);
     setDirectoryInfo(getDirectoryContent(directoryPath));
+    setIsDetailLoading(false);
   }, [updateDetail, directoryPath]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return directoryInfo;
+  return { directoryInfo: directoryInfo, isDetailLoading: isDetailLoading };
 };
 
 export async function getDirectory(key: string, sortBy: string) {

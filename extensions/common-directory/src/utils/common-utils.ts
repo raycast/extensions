@@ -1,20 +1,8 @@
 import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
-import { DirectoryInfo, DirectoryType } from "./directory-info";
-import Values = LocalStorage.Values;
+import { getSelectedFinderItems } from "@raycast/api";
+import { DirectoryInfo, DirectoryType } from "../types/directory-info";
 import path from "path";
-
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    sortBy: preferencesMap.get("SortBy"),
-    showOpenDirectory: preferencesMap.get("showOpenDirectory"),
-    primaryAction: preferencesMap.get("primaryAction"),
-    openDestDirectory: preferencesMap.get("openDestDirectory"),
-    deleteEmptyDirectory: preferencesMap.get("deleteEmptyDirectory"),
-  };
-};
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
