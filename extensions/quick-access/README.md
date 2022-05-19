@@ -23,6 +23,7 @@ You can use "Search Pinned Directories" command to quickly copy or open the imag
   - Remove All Directory
   - Reset Directory Rank
   - Toggle Detail
+  - Open Command Preferences
 
 **Preference**
 
