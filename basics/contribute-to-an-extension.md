@@ -20,4 +20,4 @@ After you've cloned the repository, open the Terminal and navigate to the extens
 
 ![Open imported extension](../.gitbook/assets/basics-open-command.png) ![Icon list command](../.gitbook/assets/basics-icon-list.png)
 
-You should see your imported extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties) and then submit a pull request to [publish your changes to the store](publish-an-extension.md).
+You should see your imported extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties), and then submit a pull request to [publish your changes to the store](publish-an-extension.md).
