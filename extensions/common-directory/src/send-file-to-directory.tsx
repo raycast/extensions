@@ -62,8 +62,8 @@ export default function CommonDirectory() {
       {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
       (commonDirectory.length === 0 && !showOpenDirectory) ? (
         <List.EmptyView
-          title={"No directory. Please add first"}
-          description={"You can add directories from the Action Panel"}
+          title={"No directories found"}
+          description={"You can always add directories directly from the Action Panel"}
           actions={
             <ActionPanel>
               <Action.Push
@@ -213,7 +213,7 @@ function SendToDirectoryItem(props: {
               setUpdateDetail(refreshNumber());
             }}
           />
-          <ActionPanel.Section title={"Advanced Action"}>
+          <ActionPanel.Section title={"Advanced Actions"}>
             <Action
               title={
                 primaryAction === ActionType.COPY ? "Copy to Folder Chosen Manually" : "Move to Folder Chosen Manually"
@@ -260,7 +260,7 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.Trash,
-                      "Remove Directory",
+                      "Remove directory",
                       `Are you sure you want to remove ${directory.name}?`,
                       "Remove",
                       async () => {
@@ -283,7 +283,7 @@ function SendToDirectoryItem(props: {
                           LocalDirectoryKey.OPEN_COMMON_DIRECTORY,
                           JSON.stringify(__openCommonDirectory)
                         );
-                        await showToast(Toast.Style.Success, "Removed successfully!");
+                        await showToast(Toast.Style.Success, "Successfully removed directory!");
                       }
                     );
                   }}
@@ -295,31 +295,31 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     await alertDialog(
                       Icon.ExclamationMark,
-                      "Remove All Directory",
+                      "Remove all directories",
                       "Are you sure you want to remove all directories?",
                       "Remove All",
                       async () => {
                         await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                         await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
                         setRefresh(refreshNumber);
-                        await showToast(Toast.Style.Success, "Removed All successfully!");
+                        await showToast(Toast.Style.Success, "Successfully removed all directories!");
                       }
                     );
                   }}
                 />
                 <Action
-                  title={"Rest All Rank"}
+                  title={"Reset All Ranks"}
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                   onAction={async () => {
                     await alertDialog(
                       Icon.ArrowClockwise,
-                      "Rest All Rank",
-                      "Are you sure you want to reset all rank?",
-                      "Reset All Rank",
+                      "Reset all ranks",
+                      "Are you sure you want to reset all ranks?",
+                      "Reset all ranks",
                       async () => {
                         resetRank(commonDirectory, setRefresh).then(async () => {
-                          await showToast(Toast.Style.Success, "Reset successfully!");
+                          await showToast(Toast.Style.Success, "Successfully reset ranks!");
                         });
                       }
                     );
