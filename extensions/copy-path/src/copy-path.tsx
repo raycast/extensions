@@ -26,6 +26,7 @@ export default async () => {
 
 const copyFinderPath = async () => {
   const finderPath = await getFocusFinderPath();
-  await Clipboard.copy(finderPath);
-  await showHUD("Copy: " + finderPath);
+  const finalPath = finderPath.endsWith("/") && finderPath.length !== 1 ? finderPath.slice(0, -1) : finderPath;
+  await Clipboard.copy(finalPath);
+  await showHUD("Copy: " + finalPath);
 };
