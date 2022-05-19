@@ -1,6 +1,6 @@
 # Rsync Commands Changelog
 
-## [Initial Version] - 2022-05-05
+## [Initial Version] - 2022-05-19
 
 - Create, update, delete and duplicate pre-configured rsync commands.
 - Pin your most used commands.
