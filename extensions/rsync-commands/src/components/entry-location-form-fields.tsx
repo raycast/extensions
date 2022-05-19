@@ -20,11 +20,20 @@ const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier,
 
   return (
     <>
+      <Form.TextField
+        id={`${identifier}Path`}
+        title={sshEnabled ? "Remote Path*" : "Path*"}
+        placeholder={"/path/to/source/file/or/folder"}
+        defaultValue={location.path}
+        onChange={value => formFieldChange("path", value)}
+      />
+
       {sshEnabled && (
         <>
           <Form.TextField
             id={`${identifier}Username`}
             title="Username"
+            info="Remote machine username."
             placeholder="admin"
             defaultValue={location.userName}
             onChange={value => formFieldChange("userName", value)}
@@ -32,6 +41,7 @@ const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier,
           <Form.TextField
             id={`${identifier}Hostname`}
             title="Hostname"
+            info="Remote machine hostname."
             placeholder="site.dev"
             defaultValue={location.hostName}
             onChange={value => formFieldChange("hostName", value)}
@@ -39,19 +49,20 @@ const EntryLocationFormFields: FC<EntryLocationFormFieldsProps> = ({ identifier,
           <Form.TextField
             id={`${identifier}Port`}
             placeholder="22"
+            info="Remote machine SSH port."
             title="Port"
             defaultValue={location.port}
             onChange={value => formFieldChange("port", value)}
           />
+          <Form.TextField
+            id={`${identifier}IdentityFile`}
+            info="SSH private key file path, will use the default key if not specified."
+            title="Identity File"
+            defaultValue={location.identityFile}
+            onChange={value => formFieldChange("identityFile", value)}
+          />
         </>
       )}
-      <Form.TextField
-        id={`${identifier}Path`}
-        title="Path*"
-        placeholder={"/path/to/source/file/or/folder"}
-        defaultValue={location.path}
-        onChange={value => formFieldChange("path", value)}
-      />
     </>
   )
 }

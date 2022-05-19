@@ -3,6 +3,7 @@ export default class EntryLocation {
   public hostName: string
   public port: string
   public path: string
+  public identityFile: string
 
   constructor(rawData?: EntryLocationRaw) {
     if (rawData) {
@@ -10,11 +11,13 @@ export default class EntryLocation {
       this.hostName = rawData.hostName
       this.port = rawData.port
       this.path = rawData.path
+      this.identityFile = rawData.identityFile ?? ""
     } else {
       this.userName = ""
       this.hostName = ""
       this.port = "22"
       this.path = ""
+      this.identityFile = ""
     }
   }
 
@@ -44,6 +47,7 @@ export default class EntryLocation {
       hostName: this.hostName,
       port: this.port,
       path: this.path,
+      identityFile: this.identityFile,
     } as EntryLocationRaw
   }
 }
@@ -53,4 +57,5 @@ export type EntryLocationRaw = {
   hostName: string
   port: string
   path: string
+  identityFile: string
 }
