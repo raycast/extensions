@@ -264,7 +264,11 @@ const ListItemDetail = ({ file }: ListItemDetailProps) => {
   useEffect(() => {
     if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
       const controller = new AbortController();
-      filePreview(file, controller).then(setPreviewImage);
+      filePreview(file, controller).then((image) => {
+        if (!controller.signal.aborted) {
+          setPreviewImage(image);
+        }
+      });
       return () => {
         controller.abort();
       };
