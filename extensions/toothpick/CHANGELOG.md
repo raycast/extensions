@@ -1,6 +1,6 @@
 # Toothpick Changelog
 
-## [Add battery level indicator and device address] - 2022-05-16
+## [Add battery level indicator and device address] - 2022-05-19
 
 - Add battery level indicator for each connected Bluetooth device
 - Add Bluetooth device address in menu
