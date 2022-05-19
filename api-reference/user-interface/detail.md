@@ -117,7 +117,7 @@ export default function Main() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
-| icon | An icon to illustrate the value of the item. | <code>Image.ImageLike</code> | - |
+| icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | text | The text value of the item. | <code>string</code> | - |
 
 ### Detail.Metadata.Link
@@ -202,8 +202,8 @@ A Tag in a `Detail.Metadata.TagList`.
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | text<mark style="color:red;">*</mark> | The text of the tag. | <code>string</code> | - |
-| color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>Color.ColorLike</code> | - |
-| icon | An optional icon in front of the text of the tag. | <code>Image.ImageLike</code> | - |
+| color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> | - |
+| icon | An optional icon in front of the text of the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### Detail.Metadata.Separator
 

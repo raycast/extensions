@@ -45,8 +45,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the item. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the item. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | onAction | Callback that is triggered when the item is selected. | <code>() => void</code> | - |
 
 ### Action.CopyToClipboard
@@ -82,8 +82,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | content<mark style="color:red;">*</mark> | The contents that will be written to the clipboard as string. | <code>string</code> or <code>number</code> | - |
-| icon | A optional icon displayed for the item. | <code>Image.ImageLike</code> | [Icon.Clipboard](icons-and-images.md#icon) |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Copy to Clipboard"` |
 | onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number) => void</code> | - |
 
@@ -119,9 +119,9 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> | - |
 | title<mark style="color:red;">*</mark> | The title for the action. | <code>string</code> | - |
-| application | The application name to use for opening the file. | <code>string</code> or <code>Application</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | [Icon.Finder](icons-and-images.md#icon) |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| application | The application name to use for opening the file. | <code>string</code> or <code>[Application](../utilities.md#application)</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Finder](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | onOpen | Callback when the file or folder was opened. | <code>(target: string) => void</code> | - |
 
 ### Action.OpenInBrowser
@@ -154,8 +154,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | url<mark style="color:red;">*</mark> | The URL to open. | <code>string</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | [Icon.Globe](icons-and-images.md#icon) |
-| shortcut | The optional keyboard shortcut for the menu item | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Globe](icons-and-images.md#icon) |
+| shortcut | The optional keyboard shortcut for the menu item | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Open in Browser"` |
 | onOpen | Callback when the URL was opened in the browser. | <code>(url: string) => void</code> | - |
 
@@ -193,8 +193,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | path<mark style="color:red;">*</mark> | The path to open. | <code>string</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | [Icon.Upload](icons-and-images.md#icon) |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Upload](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | The title for the action. | <code>string</code> | `"Open With"` |
 | onOpen | Callback when the file or folder was opened. | <code>(path: string) => void</code> | - |
 
@@ -228,8 +228,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | content<mark style="color:red;">*</mark> | The contents that will be written to the clipboard as string. | <code>string</code> or <code>number</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | [Icon.Clipboard](icons-and-images.md#icon) |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Paste in Active app"` |
 | onPaste | Callback when the content was pasted into the front-most application. | <code>(content: string \| number) => void</code> | - |
 
@@ -270,8 +270,8 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | target<mark style="color:red;">*</mark> | The target view that will be pushed to the navigation stack. | <code>React.ReactNode</code> | - |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | onPush | Callback when the target view was pushed. | <code>() => void</code> | - |
 
 ### Action.ShowInFinder
@@ -307,8 +307,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | path<mark style="color:red;">*</mark> | The path to open. | <code>[PathLike](../utilities.md#pathlike)</code> | - |
-| icon | A optional icon displayed for the item. | <code>Image.ImageLike</code> | [Icon.Finder](icons-and-images.md#icon) |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Finder](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Show in Finder"` |
 | onShow | Callback when the file or folder was shown in the Finder. | <code>(path: [PathLike](../utilities.md#pathlike)) => void</code> | - |
 
@@ -343,10 +343,10 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| icon | The icon displayed for the action. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | The title displayed for the item. | <code>string</code> | `"Submit Form"` |
-| onSubmit | Callback that is triggered when the submit was submitted. Use the handler to perform custom validation logic and call other Raycast API methods. The handler receives a the values object containing the user input. | <code>(input: Form.Values) => void</code> | - |
+| onSubmit | Callback that is triggered when the submit was submitted. Use the handler to perform custom validation logic and call other Raycast API methods. The handler receives a the values object containing the user input. | <code>(input: [Form.Values](form.md#form.values)) => void</code> | - |
 
 ### Action.Trash
 
@@ -379,8 +379,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | paths<mark style="color:red;">*</mark> | The item or items to move to the trash. | <code>[PathLike](../utilities.md#pathlike)</code> or <code>[PathLike](../utilities.md#pathlike)[]</code> | - |
-| icon | A optional icon displayed for the action. | <code>Image.ImageLike</code> | [Icon.Trash](icons-and-images.md#icon) |
-| shortcut | The optional keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| icon | A optional icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Trash](icons-and-images.md#icon) |
+| shortcut | The optional keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Move to Trash"` |
 | onTrash | Callback when all items were moved to the trash. | <code>(paths: [PathLike](../utilities.md#pathlike) \| [PathLike](../utilities.md#pathlike)[]) => void</code> | - |
 
@@ -411,9 +411,9 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| snippet<mark style="color:red;">*</mark> |  | <code>Snippet</code> | - |
-| icon | A optional icon displayed for the item. See [Image.ImageLike](icons-and-images.md#image.imagelike) for the supported formats and types. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| snippet<mark style="color:red;">*</mark> |  | <code>[Snippet](actions.md#snippet)</code> | - |
+| icon | A optional icon displayed for the item. See [Image.ImageLike](icons-and-images.md#image.imagelike) for the supported formats and types. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | - |
 
 ### Action.CreateQuicklink
@@ -445,9 +445,9 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| quicklink<mark style="color:red;">*</mark> | The [Quicklink](actions.md#quicklink) to create. | <code>Quicklink</code> | - |
-| icon | A optional icon displayed for the item. See [Image.ImageLike](icons-and-images.md#image.imagelike) for the supported formats and types. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> | - |
+| quicklink<mark style="color:red;">*</mark> | The [Quicklink](actions.md#quicklink) to create. | <code>[Quicklink](actions.md#quicklink)</code> | - |
+| icon | A optional icon displayed for the item. See [Image.ImageLike](icons-and-images.md#image.imagelike) for the supported formats and types. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | - |
 
 ## Types
@@ -469,5 +469,5 @@ export default function Command() {
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | link<mark style="color:red;">*</mark> | The URL or file path, optionally including placeholders such as in "https://google.com/search?q=\{Query\}" | <code>string</code> |
-| application | The application that the quicklink should be opened in. | <code>string</code> or <code>Application</code> |
+| application | The application that the quicklink should be opened in. | <code>string</code> or <code>[Application](../utilities.md#application)</code> |
 | name | The quicklink name | <code>string</code> |

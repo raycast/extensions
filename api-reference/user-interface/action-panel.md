@@ -44,7 +44,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| children | Sections or Actions. If [Action](actions.md#action) elements are specified, a default section is automatically created. | [ActionPanel.Children](action-panel.md#actionpanel.children) | - |
+| children | Sections or Actions. If [Action](actions.md#action) elements are specified, a default section is automatically created. | <code>[ActionPanel.Children](action-panel.md#actionpanel.children)</code> | - |
 | title | The title displayed at the top of the panel | <code>string</code> | - |
 
 ### ActionPanel.Section
@@ -99,7 +99,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| children | The item elements of the section. | [ActionPanel.Section.Children](action-panel.md#actionpanel.section.children) | - |
+| children | The item elements of the section. | <code>[ActionPanel.Section.Children](action-panel.md#actionpanel.section.children)</code> | - |
 | title | Title displayed above the section | <code>string</code> | - |
 
 ### ActionPanel.Submenu
@@ -151,9 +151,9 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for submenu. | <code>string</code> | - |
-| children | Items of the submenu. | [ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children) | - |
-| icon | The icon displayed for the submenu. | <code>Image.ImageLike</code> | - |
-| shortcut | The keyboard shortcut for the submenu. | <code>Keyboard.Shortcut</code> | - |
+| children | Items of the submenu. | <code>[ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children)</code> | - |
+| icon | The icon displayed for the submenu. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| shortcut | The keyboard shortcut for the submenu. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 
 ## Types
 

@@ -451,7 +451,7 @@ export default function Command() {
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
-| type | Indicates what types of date components can be picked | <code>DatePickerType</code> | - |
+| type | Indicates what types of date components can be picked | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |
 | value | The current value of the item. | <code>Date</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date) => void</code> | - |
 
@@ -602,7 +602,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
 | value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
-| icon | A optional icon displayed for the item. | <code>Image.ImageLike</code> | - |
+| icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### Form.Dropdown.Section
 
@@ -804,7 +804,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The display title of the tag. | <code>string</code> | - |
 | value<mark style="color:red;">*</mark> | Value of the tag. Make sure to assign unique value for each item. | <code>string</code> | - |
-| icon | An icon to show in the tag. | <code>Image.ImageLike</code> | - |
+| icon | An icon to show in the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### Form.Separator
 

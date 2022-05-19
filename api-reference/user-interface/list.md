@@ -303,7 +303,7 @@ export default function Command() {
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| searchBarAccessory | [List.Dropdown](list.md#list.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;DropdownProps_2, string></code> | - |
+| searchBarAccessory | [List.Dropdown](list.md#list.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search value..."` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
@@ -414,7 +414,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
 | value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
-| icon | An optional icon displayed for the item. | <code>Image.ImageLike</code> | - |
+| icon | An optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### List.Dropdown.Section
 
@@ -503,7 +503,7 @@ export default function CommandWithCustomEmptyView() {
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
 | description | An optional description for why the empty view is shown. | <code>string</code> | - |
-| icon | An icon displayed in the center of the EmptyView. | <code>Image.ImageLike</code> | - |
+| icon | An icon displayed in the center of the EmptyView. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | title | The main title displayed for the Empty View. | <code>string</code> | - |
 
 ### List.Item
@@ -538,10 +538,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
-| accessories | An optional array of [List.Item.Accessory](list.md#list.item.accessory) items displayed on the right side in a List.Item. | <code>ItemAccessory[]</code> | - |
+| accessories | An optional array of [List.Item.Accessory](list.md#list.item.accessory) items displayed on the right side in a List.Item. | <code>[List.Item.Accessory](list.md#list.item.accessory)[]</code> | - |
 | actions | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected list item. | <code>React.ReactNode</code> | - |
 | detail | The `List.Item.Detail` to be rendered in the right side area when the parent List is showing details and the item is selected. | <code>React.ReactNode</code> | - |
-| icon | An optional icon displayed for the list item. | <code>Image.ImageLike</code> or <code>{ tooltip: string; value: Image.ImageLike }</code> | - |
+| icon | An optional icon displayed for the list item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike) }</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the [List](list.md#list) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
 | subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
@@ -755,7 +755,7 @@ export default function Metadata() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
-| icon | An icon to illustrate the value of the item. | <code>Image.ImageLike</code> | - |
+| icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | text | The text value of the item. | <code>string</code> | - |
 
 ### List.Item.Detail.Metadata.Separator
@@ -845,7 +845,7 @@ An interface describing an accessory view in a `List.Item`.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>Image.ImageLike</code> |
+| icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> |
 | text | An optional text that will be used as the label. | <code>string</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> |
 

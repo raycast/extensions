@@ -72,10 +72,10 @@ export default async () => {
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of an alert. Displayed below the icon. | <code>string</code> |
-| dismissAction | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action. | <code>Alert.ActionOptions</code> |
-| icon | The icon of an alert to illustrate the action. Displayed on the top. | <code>Image.ImageLike</code> |
+| dismissAction | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action. | <code>[Alert.ActionOptions](alert.md#alert.actionoptions)</code> |
+| icon | The icon of an alert to illustrate the action. Displayed on the top. | <code>[Image.ImageLike](../user-interface/icons-and-images.md#image.imagelike)</code> |
 | message | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. | <code>string</code> |
-| primaryAction | The primary Action the user can take. | <code>Alert.ActionOptions</code> |
+| primaryAction | The primary Action the user can take. | <code>[Alert.ActionOptions](alert.md#alert.actionoptions)</code> |
 
 ### Alert.ActionOptions
 
@@ -86,7 +86,7 @@ The options to create an Alert Action.
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
-| style | The style of the action. | <code>Alert.ActionStyle</code> |
+| style | The style of the action. | <code>[Alert.ActionStyle](alert.md#alert.actionstyle)</code> |
 | onAction | A callback called when the action is triggered. | <code>() => void</code> |
 
 ### Alert.ActionStyle

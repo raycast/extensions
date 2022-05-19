@@ -52,8 +52,8 @@ export default function Command() {
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| key<mark style="color:red;">*</mark> | The key of the keyboard shortcut. | <code>Keyboard.KeyEquivalent</code> |
-| modifiers<mark style="color:red;">*</mark> | The modifier keys of the keyboard shortcut. | <code>Keyboard.KeyModifier[]</code> |
+| key<mark style="color:red;">*</mark> | The key of the keyboard shortcut. | <code>[Keyboard.KeyEquivalent](keyboard.md#keyboard.keyequivalent)</code> |
+| modifiers<mark style="color:red;">*</mark> | The modifier keys of the keyboard shortcut. | <code>[Keyboard.KeyModifier](keyboard.md#keyboard.keymodifier)[]</code> |
 
 ### Keyboard.KeyEquivalent
 

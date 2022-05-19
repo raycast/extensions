@@ -135,10 +135,10 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" } };
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| source<mark style="color:red;">*</mark> | The [Image.Source](icons-and-images.md#image.source) of the image. | <code>Image.Source</code> |
-| fallback | [Image.Fallback](icons-and-images.md#image.fallback) image, in case `source` can't be loaded. | <code>Image.Fallback</code> |
-| mask | A [Image.Mask](icons-and-images.md#image.mask) to apply to the image. | <code>Image.Mask</code> |
-| tintColor | A [Color.ColorLike](colors.md#color.colorlike) to tint all the non-transparent pixels of the image. | <code>Color.ColorLike</code> |
+| source<mark style="color:red;">*</mark> | The [Image.Source](icons-and-images.md#image.source) of the image. | <code>[Image.Source](icons-and-images.md#image.source)</code> |
+| fallback | [Image.Fallback](icons-and-images.md#image.fallback) image, in case `source` can't be loaded. | <code>[Image.Fallback](icons-and-images.md#image.fallback)</code> |
+| mask | A [Image.Mask](icons-and-images.md#image.mask) to apply to the image. | <code>[Image.Mask](icons-and-images.md#image.mask)</code> |
+| tintColor | A [Color.ColorLike](colors.md#color.colorlike) to tint all the non-transparent pixels of the image. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> |
 
 ### FileIcon
 
