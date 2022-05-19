@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/feedback/toast.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Toast
 
 When an asynchronous operation is happening or when an error is thrown, it's usually a good idea to keep the user informed about it. Toasts are made for that.
@@ -92,7 +85,7 @@ Use [showToast](#showtoast) to create and show a Toast.
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | message<mark style="color:red;">*</mark> | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. | <code>string</code> |
 | primaryAction<mark style="color:red;">*</mark> | The primary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
 | secondaryAction<mark style="color:red;">*</mark> | The secondary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
@@ -135,7 +128,7 @@ export default async () => {
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of a Toast. Displayed on the top. | <code>string</code> |
 | message | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. | <code>string</code> |
 | primaryAction | The primary Action the user can take when hovering on the Toast. | <code>Toast.ActionOptions</code> |
@@ -165,7 +158,7 @@ The options to create a [Toast](#toast) Action.
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | onAction<mark style="color:red;">*</mark> | A callback called when the action is triggered. | <code>(toast: Toast) => void</code> |
 | shortcut | The keyboard shortcut for the action. | <code>Keyboard.Shortcut</code> |

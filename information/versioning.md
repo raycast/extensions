@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/information/versioning.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Versioning
 
 Versioning your extensions is straightforward since we've designed the system in a way that **frees you from having to deal with versioning schemes and compatibility**. The model is similar to that of app stores where there's only one implicit _latest_ version that will be updated when the extension is published in the store. Extensions are automatically updated for end users.

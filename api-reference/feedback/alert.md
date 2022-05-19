@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/feedback/alert.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Alert
 
 When the user takes an important action (for example when irreversibly deleting something), you can ask for confirmation by using `confirmAlert`.
@@ -77,7 +70,7 @@ export default async () => {
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of an alert. Displayed below the icon. | <code>string</code> |
 | dismissAction | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action. | <code>Alert.ActionOptions</code> |
 | icon | The icon of an alert to illustrate the action. Displayed on the top. | <code>Image.ImageLike</code> |
@@ -91,7 +84,7 @@ The options to create an Alert Action.
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the action. | <code>string</code> |
 | style | The style of the action. | <code>Alert.ActionStyle</code> |
 | onAction | A callback called when the action is triggered. | <code>() => void</code> |

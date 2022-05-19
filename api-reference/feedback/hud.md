@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/feedback/hud.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # HUD
 
 When the user takes an action that has the side effect of closing Raycast (for example when copying something in the [Clipboard](../clipboard.md)), you can use a HUD to confirm that the action worked properly.

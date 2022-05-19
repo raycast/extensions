@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/user-interface/list.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 ---
 description: >-
   The de-facto user interface in Raycast. Ideal to present similar data such as
@@ -851,7 +844,7 @@ An interface describing an accessory view in a `List.Item`.
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>Image.ImageLike</code> |
 | text | An optional text that will be used as the label. | <code>string</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> |

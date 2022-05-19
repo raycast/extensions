@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/user-interface/icons-and-images.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Icons & Images
 
 ## API Reference
@@ -141,7 +134,7 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" } };
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | source<mark style="color:red;">*</mark> | The [Image.Source](icons-and-images.md#image.source) of the image. | <code>Image.Source</code> |
 | fallback | [Image.Fallback](icons-and-images.md#image.fallback) image, in case `source` can't be loaded. | <code>Image.Fallback</code> |
 | mask | A [Image.Mask](icons-and-images.md#image.mask) to apply to the image. | <code>Image.Mask</code> |
@@ -168,7 +161,7 @@ export default function Command() {
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | fileIcon<mark style="color:red;">*</mark> | The path to a file or folder to get its icon from. | <code>string</code> |
 
 ### Image.ImageLike

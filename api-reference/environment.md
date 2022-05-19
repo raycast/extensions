@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/environment.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Environment
 
 The Environment APIs are useful to get context about the setup in which your command runs. You can get information about the extension and command itself as well as Raycast. Furthermore, a few paths are injected and are helpful to construct file paths that are related to the command's assets.
@@ -32,7 +25,7 @@ console.log(`Theme: ${environment.theme}`);
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
 | commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
 | extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
@@ -119,5 +112,5 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | path<mark style="color:red;">*</mark> | The path to the item | <code>string</code> |

@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/keyboard.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Keyboard
 
 The Keyboard APIs are useful to make your actions accessible via the keyboard shortcuts. Shortcuts help users to use your command without touching the mouse.
@@ -58,7 +51,7 @@ export default function Command() {
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | key<mark style="color:red;">*</mark> | The key of the keyboard shortcut. | <code>Keyboard.KeyEquivalent</code> |
 | modifiers<mark style="color:red;">*</mark> | The modifier keys of the keyboard shortcut. | <code>Keyboard.KeyModifier[]</code> |
 

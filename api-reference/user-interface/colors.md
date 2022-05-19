@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/user-interface/colors.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Colors
 
 Anywhere you can pass a color in a component prop, you can pass either:
@@ -171,7 +164,7 @@ export default function Command() {
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | dark<mark style="color:red;">*</mark> | The color which is used in dark theme. | <code>string</code> |
 | light<mark style="color:red;">*</mark> | The color which is used in light theme. | <code>string</code> |
 | adjustContrast | Enables dynamic contrast adjustment for light and dark theme color. | <code>boolean</code> |

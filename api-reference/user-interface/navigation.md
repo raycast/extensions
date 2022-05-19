@@ -1,10 +1,3 @@
-<!-----------------------------------
- ⚠️⚠️⚠️
- DO NOT UPDATE THIS FILE.
- THIS MARKDOWN FILE HAS BEEN GENERATED FROM https://github.com/raycast/extensions/blob/main/docs/api-reference/user-interface/navigation.md.
- PLEASE UPDATE THAT ONE INSTEAD.
- ⚠️⚠️⚠️
------------------------------------->
 # Navigation
 
 ## API Reference
@@ -76,6 +69,6 @@ Return type of the [useNavigation](#usenavigation) hook to perform push and pop 
 #### Properties
 
 | Property | Description | Type |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | pop<mark style="color:red;">*</mark> | Pop current view component from the navigation stack. | <code>() => void</code> |
 | push<mark style="color:red;">*</mark> | Push a new view component to the navigation stack. | <code>(component: React.ReactNode) => void</code> |

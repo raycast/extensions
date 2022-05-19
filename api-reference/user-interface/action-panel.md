@@ -152,7 +152,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for submenu. | <code>string</code> | - |
 | children | Items of the submenu. | [ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children) | - |
-| icon | The icon displayed for the submenu. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| icon | The icon displayed for the submenu. | <code>Image.ImageLike</code> | - |
 | shortcut | The keyboard shortcut for the submenu. | <code>Keyboard.Shortcut</code> | - |
 
 ## Types
