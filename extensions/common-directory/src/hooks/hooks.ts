@@ -3,7 +3,7 @@ import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from ".
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
 import { checkDirectoryValid } from "../utils/common-utils";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
-import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
+import { FileContentInfo } from "../types/file-content-info";
 import { getOpenFinderWindowPath } from "../utils/applescript-utils";
 
 //for refresh useState
@@ -37,13 +37,12 @@ export const getCommonDirectory = (
   const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
 
   const fetchData = useCallback(async () => {
-    const _localDirectory = await getDirectory(localDirectoryKey, sortBy);
-    const validDirectory = checkDirectoryValid(_localDirectory);
-    setCommonDirectory(validDirectory);
-
     if (showOpenDirectory) {
       setOpenDirectory(await getOpenFinderWindowPath());
     }
+    const _localDirectory = await getDirectory(localDirectoryKey, sortBy);
+    const validDirectory = checkDirectoryValid(_localDirectory);
+    setCommonDirectory(validDirectory);
 
     setLoading(false);
 
@@ -58,7 +57,7 @@ export const getCommonDirectory = (
 };
 
 export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
-  const [directoryInfo, setDirectoryInfo] = useState<FileContentInfo>(fileContentInfoInit);
+  const [directoryInfo, setDirectoryInfo] = useState<FileContentInfo>({} as FileContentInfo);
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
     setIsDetailLoading(true);

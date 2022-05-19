@@ -8,13 +8,3 @@ export interface FileContentInfo {
   modified: string;
   lastOpened: string;
 }
-export const fileContentInfoInit = {
-  fileContent: "",
-  name: "",
-  where: "",
-  sizeTitle: "",
-  size: "",
-  created: "",
-  modified: "",
-  lastOpened: "",
-};
