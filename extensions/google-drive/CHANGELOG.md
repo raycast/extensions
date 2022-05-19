@@ -4,6 +4,7 @@
 
 - Revamped the `List.Item.Detail` component to use the new `metadata` prop.
 - Added an "Open Extension Preferences" general action.
+- Updated file preview logic to fetch a fallback file icon using `Cocoa`'s `NSWorkspace.icon(forFile:)` API when the file preview fails to generate.
 
 ## [Minor update to the database schema] - 2022-05-16
 
