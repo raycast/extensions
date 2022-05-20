@@ -1,20 +1,20 @@
-import { Action, ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Form, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
 import { getSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
-import { SpecifyIdImageConfig, specifyIdImageConfigInit } from "./types/types";
+import { SpecifyIdImageConfig } from "./types/types";
 import { Preferences } from "./types/preferences";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { RevealImageAction } from "./components/reveal-image-action";
 
-export default function StylizePlaceholderImage(props: { id: string }) {
-  const { id } = props;
+export default function StylizePlaceholderImage(props: { id: string; width: number; height: number }) {
+  const { id, width, height } = props;
   const { primaryAction } = getPreferenceValues<Preferences>();
 
   const [picsumConfig, setPicsumConfig] = useState<SpecifyIdImageConfig>({
     id: id,
-    width: "300",
-    height: "300",
+    width: width + "",
+    height: height + "",
     blur: "0",
     jpg: false,
     cache: false,
@@ -24,7 +24,8 @@ export default function StylizePlaceholderImage(props: { id: string }) {
   const { imageURL } = getSpecifyIdPlaceholderImageURL(picsumConfig);
 
   return (
-    <Form navigationTitle={"Stylize Image"}
+    <Form
+      navigationTitle={"Stylize Image"}
       actions={
         <ActionPanel>
           <PicsumImageAction

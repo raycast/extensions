@@ -4,7 +4,6 @@ import { getPlaceholderImages } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
-import { downloadImage } from "./utils/common-utils";
 import StylizePlaceholderImage from "./stylize-placeholder-image";
 import { PicsumImageAction } from "./components/picsum-image-action";
 
@@ -46,10 +45,13 @@ export default function SearchPlaceholderImage() {
               <ActionPanel>
                 <Action.Push
                   icon={{
-                    source: { light: "stylize-placeholder-icon.png", dark: "stylize-placeholder-icon@dark.png" },
+                    source: {
+                      light: "stylize-placeholder-icon.png",
+                      dark: "stylize-placeholder-icon@dark.png",
+                    },
                   }}
                   title={"Stylize Image"}
-                  target={<StylizePlaceholderImage id={value.id} />}
+                  target={<StylizePlaceholderImage id={value.id} width={value.width} height={value.height} />}
                 />
                 <ActionPanel.Section>
                   <Action
