@@ -3,7 +3,7 @@ import { buildBingWallpapersURL } from "../utils/bing-wallpaper-utils";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { BingImage, BingResponseData, DownloadedBingImage } from "../types/types";
-import { autoDownloadPictures, deleteCache, getDownloadedBingWallpapers } from "../utils/common-utils";
+import { autoDownloadPictures, getDownloadedBingWallpapers } from "../utils/common-utils";
 import { Preferences } from "../types/preferences";
 
 export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
@@ -50,8 +50,6 @@ export const autoDownloadWallpapers = (bingWallpapers: BingImage[]) => {
   const { autoDownload, downloadSize } = getPreferenceValues<Preferences>();
   const fetchData = useCallback(async () => {
     try {
-      //delete wallpaper Cache
-      deleteCache();
       //auto download wallpaper
       if (autoDownload) {
         await autoDownloadPictures(downloadSize, bingWallpapers);

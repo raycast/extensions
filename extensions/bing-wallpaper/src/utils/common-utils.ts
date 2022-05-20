@@ -71,8 +71,9 @@ export const setWallpaper = async (title: string, url: string) => {
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (toast) {
       toast.style = Toast.Style.Success;
-      toast.title = "Set wallpaper success!";
+      toast.title = "Set wallpaper successfully!";
     }
+    fse.removeSync(actualPath);
   } catch (err) {
     console.error(err);
 
@@ -120,7 +121,7 @@ export const setDownloadedWallpaper = async (path: string) => {
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (toast) {
       toast.style = Toast.Style.Success;
-      toast.title = "Set wallpaper success!";
+      toast.title = "Set wallpaper successfully!";
     }
   } catch (err) {
     console.error(err);
@@ -132,17 +133,6 @@ export const setDownloadedWallpaper = async (path: string) => {
     }
   }
 };
-
-export function deleteCache() {
-  const pathName = environment.supportPath;
-  if (fse.existsSync(pathName)) {
-    const files = fse.readdirSync(pathName);
-    files.forEach(function (file) {
-      const curPath = pathName + "/" + file;
-      fse.unlinkSync(curPath);
-    });
-  }
-}
 
 export async function downloadPicture(downSize: string, bingImage: BingImage) {
   await showToast(Toast.Style.Animated, "Downloading...");
