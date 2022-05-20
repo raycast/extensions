@@ -6,9 +6,10 @@ import { homedir } from "os";
 import { URL } from "url";
 
 export default async () => {
-  const { isShowHud, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
+  const { trimText, isShowHud, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
 
-  const path = (await getPath(priorityDetection)).trimStart();
+  const _getText = await getPath(priorityDetection);
+  const path = trimText ? _getText.trim() : _getText;
 
   if (isEmpty(path)) {
     await showHud(isShowHud, "No path detected");

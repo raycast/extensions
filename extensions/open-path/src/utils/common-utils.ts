@@ -3,6 +3,7 @@ import { LocalStorage } from "@raycast/api";
 import Values = LocalStorage.Values;
 
 export interface Preference extends Values {
+  trimText: boolean;
   isShowHud: boolean;
   priorityDetection: string;
   searchEngine: string;

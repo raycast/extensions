@@ -21,11 +21,19 @@
   ],
   "preferences": [
     {
+      "name": "trimText",
+      "type": "checkbox",
+      "description": "Automatically remove spaces at both ends of text.",
+      "required": false,
+      "title": "Advanced Preferences",
+      "default": true,
+      "label": "Trim Text"
+    },
+    {
       "name": "isShowHud",
       "type": "checkbox",
       "description": "After open the path, display the HUD pop-up prompt.",
       "required": false,
-      "title": "Advanced Preferences",
       "default": true,
       "label": "Show HUD"
     },
@@ -33,7 +41,7 @@
       "name": "priorityDetection",
       "type": "dropdown",
       "required": false,
-      "title": "Priority detection",
+      "title": "Priority Detection",
       "description": "Priority detection of selected text or clipboard.",
       "default": "selected",
       "data": [
