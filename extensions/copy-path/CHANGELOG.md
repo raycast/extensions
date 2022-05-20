@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Update extension icons] - 2022-05-20
+
+- Update extension icons.
+
 ## [Fix the bug that // exists in the path] - 2022-05-19
 
 - Fix the bug that // exists in the path.
