@@ -1,8 +1,13 @@
 # Open Path
 
-Open path or URL from selection or clipboard.
+Open path or URL from selection or clipboard, support directory, url, url scheme, mailto, etc.
 
-If no path or URL is detected, the text will be searched in the browser.
+**The following are supported, try it:**
+
+- Directory: `/Users/Username/Desktop`, `~/Desktop`
+- URL: `https://www.raycast.com`, `www.raycast.com`, `raycast.com`
+- URL Scheme: `raycast://confetti`
+- mailto: `mailto:hello@raycast.com`
 
 **Preference:**
 

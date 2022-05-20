@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-path",
   "title": "Open Path",
-  "description": "Open path or URL from selection or clipboard.\nIf no path or URL is detected, the text will be searched in the browser.",
+  "description": "Open path from selection or clipboard.\nSupport directory, url, url scheme, mailto.",
   "icon": "open-path.png",
   "author": "koinzhang",
   "categories": [
@@ -15,11 +15,20 @@
     {
       "name": "open-path",
       "title": "Open Path",
-      "description": "Open path or URL from selection or clipboard.\nIf no path or URL is detected, the text will be searched in the browser.",
+      "description": "Open path from selection or clipboard.\nSupport directory, url, url scheme, mailto.",
       "mode": "no-view"
     }
   ],
   "preferences": [
+    {
+      "name": "isShowHud",
+      "type": "checkbox",
+      "description": "After open the path, display the HUD pop-up prompt.",
+      "required": false,
+      "title": "Advanced Preferences",
+      "default": true,
+      "label": "Show HUD"
+    },
     {
       "name": "priorityDetection",
       "type": "dropdown",

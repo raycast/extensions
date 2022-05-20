@@ -3,6 +3,7 @@ import { LocalStorage } from "@raycast/api";
 import Values = LocalStorage.Values;
 
 export interface Preference extends Values {
+  isShowHud: boolean;
   priorityDetection: string;
   searchEngine: string;
 }
@@ -21,7 +22,7 @@ export const checkIsFile = (path: string) => {
 };
 
 export function isUrl(text: string): boolean {
-  const regex = /^((http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z0-9]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
+  const regex = /^((http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z\d]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
   return regex.test(text) || isIP(text);
 }
 
