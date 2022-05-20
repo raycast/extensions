@@ -19,7 +19,11 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
   const { raycastWallpapers } = props;
 
   return (
-    <List isShowingDetail={true} isLoading={raycastWallpapers.length === 0} searchBarPlaceholder={"Search pictures"}>
+    <List
+      isShowingDetail={raycastWallpapers.length !== 0}
+      isLoading={raycastWallpapers.length === 0}
+      searchBarPlaceholder={"Search pictures"}
+    >
       <RaycastWallpaperEmptyView />
       {raycastWallpapers.map((value, index, array) => {
         return (

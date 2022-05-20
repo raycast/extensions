@@ -108,7 +108,7 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (toast) {
       toast.style = Toast.Style.Success;
-      toast.title = "Set wallpaper success!";
+      toast.title = "Set wallpaper successfully!";
     }
   } catch (err) {
     console.error(err);
