@@ -38,7 +38,7 @@ export enum CacheType {
   PINNED_PROJECTS = "pinned-projects",
 }
 
-export type ProjectConfig = {
+export type ProjectTypeConfig = {
   type: string;
   finder: string;
   finderType: string;

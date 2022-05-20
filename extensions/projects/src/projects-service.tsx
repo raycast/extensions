@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs";
-import { CacheType, Preferences, RepoSearchResponse, SourceRepo } from "./types";
+import { CacheType, Preferences, ProjectTypeConfig, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { buildAllProjectsCache } from "./cache/all-projects-cache-builder-v2";
-import { getRepoKey } from "./common-utils";
+import { getRepoKey, isProjectTypeEnabled } from "./common-utils";
+import applicationConfig from "./application-config.json";
 
 export function resolvePath(filepath: string): string {
   if (filepath.length > 0 && filepath[0] === "~") {
@@ -66,6 +67,7 @@ export function useRepoCache(query: string | undefined): {
 
   let cancel = false;
   const repos = allProjectsCache.repos;
+  let enabledProjectTypes: string[] = [];
 
   function filterRepos(repos: SourceRepo[], query: string): SourceRepo[] {
     const queries = query.split(" ");
@@ -90,10 +92,17 @@ export function useRepoCache(query: string | undefined): {
     return filteredRepos;
   }
 
-  function filterAndSetFullResponse(repos: SourceRepo[]) {
+  function filterAndSetFullResponse(repos: SourceRepo[]): void {
+
     let filteredAllRepos = repos;
     let filteredRecentRepos = recentlyAccessedCache.repos;
     let filteredPinnedRepos = pinnedCache.repos;
+
+    if (enabledProjectTypes?.length > 0) {
+      filteredAllRepos = filteredAllRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+      filteredRecentRepos = filteredRecentRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+      filteredPinnedRepos = filteredPinnedRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+    }
 
     if (query && query.length > 0) {
       filteredAllRepos = filterRepos(filteredAllRepos, query);
@@ -115,16 +124,16 @@ export function useRepoCache(query: string | undefined): {
       recent:
         filteredRecentRepos?.length > 0
           ? {
-              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-              repos: filteredRecentRepos || [],
-            }
+            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredRecentRepos || [],
+          }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-              repos: filteredPinnedRepos || [],
-            }
+            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+            repos: filteredPinnedRepos || [],
+          }
           : undefined,
     });
   }
@@ -148,6 +157,10 @@ export function useRepoCache(query: string | undefined): {
         }
 
         const repos = await buildAllProjectsCache(repoPaths, preferences);
+
+        enabledProjectTypes = (applicationConfig.projectTypes as ProjectTypeConfig[]).filter(
+          (project) => isProjectTypeEnabled(project.openWithKey, preferences)
+        ).map((project) => project.type);
 
         if (!cancel) {
           filterAndSetFullResponse(repos);

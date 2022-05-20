@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { ApplicationCache } from "./application-cache";
-import { CacheType, Preferences, ProjectConfig, SourceRepo } from "../types";
+import { CacheType, Preferences, ProjectTypeConfig, SourceRepo } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import applicationConfig from "./../application-config.json";
 import { isProjectTypeEnabled } from "../common-utils";
@@ -13,16 +13,16 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
   const allProjectsCache = new ApplicationCache(CacheType.ALL_PROJECTS);
   let foundRepos: SourceRepo[] = [];
 
-  const projectConfig: ProjectConfig[] = applicationConfig.projectTypes as ProjectConfig[];
+  const enabledProjectTypesConfig: ProjectTypeConfig[] = (applicationConfig.projectTypes as ProjectTypeConfig[]).filter(
+    (project) => isProjectTypeEnabled(project.openWithKey, preferences)
+  );
 
   await Promise.allSettled(
     paths.map(async (path) => {
       let spotlightSearchParameters: string[] = [];
 
-      projectConfig.forEach((project) => {
-        if (isProjectTypeEnabled(project.openWithKey, preferences)) {
-          spotlightSearchParameters = [...spotlightSearchParameters, ...project.spotlightQuery];
-        }
+      enabledProjectTypesConfig.forEach((project) => {
+        spotlightSearchParameters = [...spotlightSearchParameters, ...project.spotlightQuery];
       });
 
       // Execute command
@@ -36,7 +36,7 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
         return [];
       }
       const repoPaths = stdout.split("\n").filter((e) => e);
-      const repos = parseRepoPaths(repoPaths, projectConfig);
+      const repos = parseRepoPaths(repoPaths, enabledProjectTypesConfig);
       foundRepos = foundRepos.concat(repos);
     })
   );
@@ -57,10 +57,10 @@ export async function buildAllProjectsCache(paths: string[], preferences: Prefer
   return foundRepos;
 }
 
-function parseRepoPaths(repoPaths: string[], projectConfig: ProjectConfig[]): SourceRepo[] {
+function parseRepoPaths(repoPaths: string[], projectTypeConfig: ProjectTypeConfig[]): SourceRepo[] {
   const repos: SourceRepo[] = [];
   repoPaths.forEach((path) => {
-    projectConfig.forEach((project) => {
+    projectTypeConfig.forEach((project) => {
       if (path.endsWith(project.finder)) {
         if (project.finderType === "file") {
           repos.push(handleFileBasedProject(path, project));
@@ -73,7 +73,7 @@ function parseRepoPaths(repoPaths: string[], projectConfig: ProjectConfig[]): So
   return repos;
 }
 
-const handleFileBasedProject = (path: string, projectConfig: ProjectConfig): SourceRepo => {
+const handleFileBasedProject = (path: string, projectConfig: ProjectTypeConfig): SourceRepo => {
   const uuid = uuidv4();
   const fullPath = getFullPath(path, projectConfig);
   const name = fullPath.split("/").pop() ?? "unknown";
@@ -87,7 +87,7 @@ const handleFileBasedProject = (path: string, projectConfig: ProjectConfig): Sou
   };
 };
 
-const handleExtensionBasedProject = (path: string, projectConfig: ProjectConfig): SourceRepo => {
+const handleExtensionBasedProject = (path: string, projectConfig: ProjectTypeConfig): SourceRepo => {
   const uuid = uuidv4();
   const fullPath = getFullPath(path, projectConfig);
   const name = path.split("/").pop() ?? "unknown";
@@ -101,6 +101,6 @@ const handleExtensionBasedProject = (path: string, projectConfig: ProjectConfig)
   };
 };
 
-const getFullPath = (path: string, projectConfig: ProjectConfig): string => {
+const getFullPath = (path: string, projectConfig: ProjectTypeConfig): string => {
   return projectConfig.singleFileProject ? path : path.replace(`/${projectConfig.finder}`, "");
 };
