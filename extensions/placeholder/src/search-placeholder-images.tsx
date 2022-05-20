@@ -6,16 +6,21 @@ import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import StylizePlaceholderImage from "./stylize-placeholder-image";
 import { PicsumImageAction } from "./components/picsum-image-action";
+import { setWallpaper } from "./utils/common-utils";
 
-export default function SearchPlaceholderImage() {
-  const { primaryAction } = getPreferenceValues<Preferences>();
+export default function SearchPlaceholderImages() {
+  const { primaryAction, perPage } = getPreferenceValues<Preferences>();
 
   const [page, setPage] = useState<number>(1);
 
-  const { picsumImages, isLoading } = getPlaceholderImages(page);
+  const { picsumImages, isLoading } = getPlaceholderImages(page, parseInt(perPage));
 
   return (
-    <List isLoading={isLoading} isShowingDetail={true} searchBarPlaceholder={"Search images"}>
+    <List
+      isShowingDetail={picsumImages.length !== 0 && !isLoading}
+      isLoading={isLoading}
+      searchBarPlaceholder={"Search images"}
+    >
       <PlaceholderEmptyView />
 
       {picsumImages.map((value) => {
@@ -53,6 +58,13 @@ export default function SearchPlaceholderImage() {
                   title={"Stylize Image"}
                   target={<StylizePlaceholderImage id={value.id} width={value.width} height={value.height} />}
                 />
+                <Action
+                  icon={Icon.Desktop}
+                  title={"Set Desktop Wallpaper"}
+                  onAction={() => {
+                    setWallpaper(value.download_url, "wallpaper-" + Date.now()).then();
+                  }}
+                />
                 <ActionPanel.Section>
                   <Action
                     icon={Icon.ChevronUp}
@@ -85,8 +97,6 @@ export default function SearchPlaceholderImage() {
                     shortcut={{ modifiers: ["cmd"], key: "u" }}
                     url={value.url}
                   />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
                   <Action.CopyToClipboard
                     shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
                     title={"Copy Unsplash URL"}

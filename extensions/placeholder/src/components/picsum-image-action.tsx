@@ -22,7 +22,7 @@ export function PicsumImageAction(props: {
     <>
       <Action
         icon={Icon.Clipboard}
-        title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image"}
+        title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image File"}
         shortcut={{
           modifiers: primaryAction === "Copy Image URL" ? ["shift", "cmd"] : ["cmd"],
           key: primaryAction === "Copy Image URL" ? "," : ".",
@@ -42,7 +42,7 @@ export function PicsumImageAction(props: {
       />
       <Action
         icon={Icon.Clipboard}
-        title={primaryAction === "Copy Image URL" ? "Copy Image" : "Copy Image URL"}
+        title={primaryAction === "Copy Image URL" ? "Copy Image File" : "Copy Image URL"}
         shortcut={{
           modifiers: primaryAction === "Copy Image URL" ? ["cmd"] : ["shift", "cmd"],
           key: primaryAction === "Copy Image URL" ? "." : ",",

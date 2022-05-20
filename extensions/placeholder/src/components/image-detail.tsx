@@ -13,7 +13,7 @@ export function ImageDetail(props: {
   const { imageURL, size, primaryAction, autoRefresh, setRefresh } = props;
   return (
     <Detail
-      navigationTitle={"Image Preview"}
+      navigationTitle={"Image Preview " + size}
       markdown={`<img src="${imageURL}" alt="" height="400" />`}
       actions={
         <ActionPanel>

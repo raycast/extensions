@@ -35,13 +35,13 @@ export const getRandomPlaceholderImageURL = (randomImageConfig: RandomImageConfi
   return { imageURL: imageURL };
 };
 
-export const getPlaceholderImages = (page: number) => {
+export const getPlaceholderImages = (page: number, perPage: number) => {
   const [picsumImages, setPicsumImages] = useState<PicsumImage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const _picsumImages = await axiosGetPicsumImages(page);
+    const _picsumImages = await axiosGetPicsumImages(page, perPage);
     setPicsumImages(_picsumImages);
     setIsLoading(false);
   }, [page]);
