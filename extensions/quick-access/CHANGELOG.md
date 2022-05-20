@@ -1,5 +1,9 @@
 # Quick Access Changelog
 
+## [Update empty view] - 2022-05-20
+
+- Update empty view
+
 ## [Update file preview] - 2022-05-19
 
 - Update file preview

@@ -37,7 +37,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Remember Filter Tag",
-          "description": "Remember Gist Filter Tag.",
+          "description": "Remember filter tag.",
           "default": true
         },
         {
