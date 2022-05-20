@@ -93,7 +93,6 @@ export function useRepoCache(query: string | undefined): {
   }
 
   function filterAndSetFullResponse(repos: SourceRepo[]): void {
-
     let filteredAllRepos = repos;
     let filteredRecentRepos = recentlyAccessedCache.repos;
     let filteredPinnedRepos = pinnedCache.repos;
@@ -124,16 +123,16 @@ export function useRepoCache(query: string | undefined): {
       recent:
         filteredRecentRepos?.length > 0
           ? {
-            sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredRecentRepos || [],
-          }
+              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredRecentRepos || [],
+            }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-            sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
-            repos: filteredPinnedRepos || [],
-          }
+              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
+              repos: filteredPinnedRepos || [],
+            }
           : undefined,
     });
   }
@@ -158,9 +157,9 @@ export function useRepoCache(query: string | undefined): {
 
         const repos = await buildAllProjectsCache(repoPaths, preferences);
 
-        enabledProjectTypes = (applicationConfig.projectTypes as ProjectTypeConfig[]).filter(
-          (project) => isProjectTypeEnabled(project.openWithKey, preferences)
-        ).map((project) => project.type);
+        enabledProjectTypes = (applicationConfig.projectTypes as ProjectTypeConfig[])
+          .filter((project) => isProjectTypeEnabled(project.openWithKey, preferences))
+          .map((project) => project.type);
 
         if (!cancel) {
           filterAndSetFullResponse(repos);

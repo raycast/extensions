@@ -73,34 +73,34 @@ function parseRepoPaths(repoPaths: string[], projectTypeConfig: ProjectTypeConfi
   return repos;
 }
 
-const handleFileBasedProject = (path: string, projectConfig: ProjectTypeConfig): SourceRepo => {
+const handleFileBasedProject = (path: string, projectTypeConfig: ProjectTypeConfig): SourceRepo => {
   const uuid = uuidv4();
-  const fullPath = getFullPath(path, projectConfig);
+  const fullPath = getFullPath(path, projectTypeConfig);
   const name = fullPath.split("/").pop() ?? "unknown";
   return {
     id: uuid,
     name: name,
-    icon: projectConfig.icon,
+    icon: projectTypeConfig.icon,
     fullPath: fullPath,
-    type: projectConfig.type,
-    openWithKey: projectConfig.openWithKey,
+    type: projectTypeConfig.type,
+    openWithKey: projectTypeConfig.openWithKey,
   };
 };
 
-const handleExtensionBasedProject = (path: string, projectConfig: ProjectTypeConfig): SourceRepo => {
+const handleExtensionBasedProject = (path: string, projectTypeConfig: ProjectTypeConfig): SourceRepo => {
   const uuid = uuidv4();
-  const fullPath = getFullPath(path, projectConfig);
+  const fullPath = getFullPath(path, projectTypeConfig);
   const name = path.split("/").pop() ?? "unknown";
   return {
     id: uuid,
     name: name,
-    icon: projectConfig.icon,
+    icon: projectTypeConfig.icon,
     fullPath: fullPath,
-    type: projectConfig.type,
-    openWithKey: projectConfig.openWithKey,
+    type: projectTypeConfig.type,
+    openWithKey: projectTypeConfig.openWithKey,
   };
 };
 
-const getFullPath = (path: string, projectConfig: ProjectTypeConfig): string => {
-  return projectConfig.singleFileProject ? path : path.replace(`/${projectConfig.finder}`, "");
+const getFullPath = (path: string, projectTypeConfig: ProjectTypeConfig): string => {
+  return projectTypeConfig.singleFileProject ? path : path.replace(`/${projectTypeConfig.finder}`, "");
 };
