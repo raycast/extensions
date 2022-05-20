@@ -1,7 +1,7 @@
 import { getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, ReactElement } from "react";
 import { SearchProjectActionPanel } from "./action-panel";
-import { Preferences, SourceRepo } from "./types";
+import { ListType, Preferences, SourceRepo } from "./types";
 import { tildifyPath, useRepoCache } from "./projects-service";
 import applicationConfig from "./application-config.json";
 
@@ -16,20 +16,19 @@ export default function Main(): ReactElement {
     showToast(Toast.Style.Failure, "", error);
   }
 
-  const getListSection = (section: { sectionTitle: string; repos: SourceRepo[] }, isPinned: boolean) => {
+  const getListSection = (listType: ListType, section: { sectionTitle: string; repos: SourceRepo[] }) => {
     return (
       <List.Section title={section?.sectionTitle}>
         {section?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={repo.id}
+            id={`${listType}:${repo.id}`}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
             keywords={[repo.name]}
-            accessoryIcon={isPinned ? Icon.Pin : ""}
-            subtitle={repo.type}
-            actions={<SearchProjectActionPanel repo={repo} preferences={preferences} pinned={isPinned} />}
+            accessoryIcon={listType == "pinned" ? Icon.Pin : ""}
+            actions={<SearchProjectActionPanel repo={repo} preferences={preferences} listType={listType} />}
           />
         ))}
       </List.Section>
@@ -42,9 +41,9 @@ export default function Main(): ReactElement {
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
     >
-      {response?.pinned && getListSection(response?.pinned, true)}
-      {response?.recent && getListSection(response?.recent, false)}
-      {response?.all && getListSection(response?.all, false)}
+      {response?.pinned && getListSection("pinned", response?.pinned)}
+      {response?.recent && getListSection("recent", response?.recent)}
+      {response?.all && getListSection("all", response?.all)}
     </List>
   );
 }

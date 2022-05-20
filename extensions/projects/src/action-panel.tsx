@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { ReactElement } from "react";
-import { CacheType, Preferences, SourceRepo } from "./types";
+import { CacheType, ListType, Preferences, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
 import { getOpenWith } from "./common-utils";
 
 interface SearchProjectActionPanelProps {
   repo: SourceRepo;
   preferences: Preferences;
-  pinned?: boolean;
+  listType: ListType;
   recent?: boolean;
 }
 
@@ -77,7 +77,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
             />
           )}
 
-        {props.pinned && (
+        {props.listType == "pinned" && (
           <Action
             icon={Icon.Pin}
             title="Unpin Project"
@@ -86,7 +86,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           />
         )}
 
-        {!props.pinned && (
+        {props.listType !== "pinned" && (
           <Action
             icon={Icon.Pin}
             title="Pin Project"

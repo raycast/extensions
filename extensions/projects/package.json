@@ -20,7 +20,7 @@
       "name": "repoScanPath",
       "type": "textfield",
       "required": true,
-      "default": "~",
+      "default": "~/",
       "title": "Path to scan for projects",
       "description": "Path to scan for proejcts. ~/ is expanded. Use : to seperate multiple paths"
     },

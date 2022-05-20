@@ -45,4 +45,7 @@ export type ProjectConfig = {
   icon: string;
   spotlightQuery: string[];
   openWithKey: string;
+  singleFileProject?: boolean;
 };
+
+export type ListType = "pinned" | "recent" | "all";

@@ -75,7 +75,7 @@ function parseRepoPaths(repoPaths: string[], projectConfig: ProjectConfig[]): So
 
 const handleFileBasedProject = (path: string, projectConfig: ProjectConfig): SourceRepo => {
   const uuid = uuidv4();
-  const fullPath = path.replace(`/${projectConfig.finder}`, "");
+  const fullPath = getFullPath(path, projectConfig);
   const name = fullPath.split("/").pop() ?? "unknown";
   return {
     id: uuid,
@@ -89,7 +89,7 @@ const handleFileBasedProject = (path: string, projectConfig: ProjectConfig): Sou
 
 const handleExtensionBasedProject = (path: string, projectConfig: ProjectConfig): SourceRepo => {
   const uuid = uuidv4();
-  const fullPath = path.substring(0, path.lastIndexOf("/"));
+  const fullPath = getFullPath(path, projectConfig);
   const name = path.split("/").pop() ?? "unknown";
   return {
     id: uuid,
@@ -99,4 +99,8 @@ const handleExtensionBasedProject = (path: string, projectConfig: ProjectConfig)
     type: projectConfig.type,
     openWithKey: projectConfig.openWithKey,
   };
+};
+
+const getFullPath = (path: string, projectConfig: ProjectConfig): string => {
+  return projectConfig.singleFileProject ? path : path.replace(`/${projectConfig.finder}`, "");
 };

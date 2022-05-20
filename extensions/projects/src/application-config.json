@@ -62,7 +62,8 @@
       "finderType": "extension",
       "icon": "xcode.png",
       "spotlightQuery": ["kMDItemDisplayName == *.playground"],
-      "openWithKey": "openXcodeWith"
+      "openWithKey": "openXcodeWith",
+      "singleFileProject": true
     },
     {
       "type": "tauri",
