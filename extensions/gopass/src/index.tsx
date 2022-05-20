@@ -31,17 +31,21 @@ async function pastePassword(entry: string): Promise<void> {
 
 export default function (): JSX.Element {
   const [entries, setEntries] = useState<string[]>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect((): void => {
     gopass
       .list()
       .then(setEntries)
-      .catch(console.error)
-      .catch(async () => await showToast({ title: "Could not load passwords", style: Toast.Style.Failure }));
+      .catch(async (error) => {
+        console.error(error);
+        await showToast({ title: "Could not load passwords", style: Toast.Style.Failure });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <List isLoading={entries === undefined}>
+    <List isLoading={loading}>
       {entries?.map((entry, i) => (
         <List.Item
           key={i}
