@@ -76,6 +76,6 @@ const handleDetailedView = ({ appExists, db, query, setQuery, config }: ViewPara
 
 const NoResults = () => (
   <List>
-    <List.EmptyView title="No results" icon={"command-icon.png"} />
+    <List.EmptyView title="No results" icon={"command-icon-small.png"} />
   </List>
 );
