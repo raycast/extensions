@@ -1,41 +1,52 @@
-import fetch from "node-fetch";
 import fse from "fs-extra";
-import { environment, getPreferenceValues, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { environment, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "./applescript-utils";
-import Style = Toast.Style;
-import Values = LocalStorage.Values;
 import { homedir } from "os";
+import { axiosGetImageArrayBuffer } from "./axios-utils";
+import Style = Toast.Style;
 
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    primaryAction: preferencesMap.get("primaryAction") as string,
-    autoRefresh: preferencesMap.get("autoRefresh") as boolean,
-  };
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
 };
 
 export async function downloadAndCopyImage(url: string) {
   const toast = await showToast(Style.Animated, "Downloading and Copying...");
   const selectedPath = environment.supportPath;
   const filePath = selectedPath.endsWith("/") ? `${selectedPath}Placeholder.jpg` : `${selectedPath}/Placeholder.jpg`;
-  const res = await fetch(url);
-  const data = await res.arrayBuffer();
-  fse.writeFileSync(filePath, Buffer.from(data));
+
+  fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
   await copyFileByPath(filePath);
   await toast.hide();
   await showHUD("Image copied to clipboard");
 }
 
-export async function downloadImage(url: string) {
-  const toast = await showToast(Style.Animated, "Downloading...");
+export async function downloadImage(url: string, size: string, name = "") {
+  await showToast(Style.Animated, "Downloading...");
   const selectedPath = homedir() + "/Downloads/";
-  const fileName = buildFileName(selectedPath, "Placeholder", "jpg");
+  const fileName = buildFileName(selectedPath, (isEmpty(name) ? "Placeholder" : name) + "-" + size, "jpg");
   const filePath = `${selectedPath}/${fileName}`;
-  const res = await fetch(url);
-  const data = await res.arrayBuffer();
-  fse.writeFileSync(filePath, Buffer.from(data));
-  await toast.hide();
-  await showHUD("Image downloaded to Downloads");
+
+  fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
+  const options: Toast.Options = {
+    style: Toast.Style.Success,
+    title: "Success!",
+    message: `Image is saved to Downloads`,
+    primaryAction: {
+      title: "Open image",
+      onAction: (toast) => {
+        open(filePath);
+        toast.hide();
+      },
+    },
+    secondaryAction: {
+      title: "Show in finder",
+      onAction: (toast) => {
+        showInFinder(filePath);
+        toast.hide();
+      },
+    },
+  };
+  await showToast(options);
 }
 
 export function buildFileName(path: string, name: string, extension: string) {
@@ -45,7 +56,7 @@ export function buildFileName(path: string, name: string, extension: string) {
   } else {
     let index = 2;
     while (directoryExists) {
-      const newName = name + " " + index + "." + extension;
+      const newName = name + "-" + index + "." + extension;
       const directoryExists = fse.existsSync(path + newName);
       if (!directoryExists) {
         return newName;
