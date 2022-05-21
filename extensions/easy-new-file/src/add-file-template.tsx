@@ -1,9 +1,10 @@
-import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
 import { refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -53,9 +54,10 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
             <Action
               title={"Choose File Path"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
               onAction={() => {
                 getChooseFile().then((path) => {
+                  open("raycast://").then();
                   setPath(path);
                   setName(parse(path).name);
                 });
