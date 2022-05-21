@@ -7,6 +7,7 @@ import { ActionsDownloadedBingWallpaper } from "./components/actions-downloaded-
 import fileUrl from "file-url";
 import { autoDownloadWallpapers, getBingWallpapers } from "./hooks/hooks";
 import { WallpaperTag, wallpaperTags } from "./utils/constants";
+import { ListEmptyView } from "./components/list-empty-view";
 
 export default function CommonDirectory() {
   const { downloadSize, showDownloadedWallpapers } = getPreferenceValues<Preferences>();
@@ -17,7 +18,7 @@ export default function CommonDirectory() {
 
   return (
     <List
-      isShowingDetail={true}
+      isShowingDetail={bingWallpaperHD.length !== 0 && !isLoading}
       isLoading={isLoading}
       searchBarPlaceholder={"Search wallpapers"}
       searchBarAccessory={
@@ -30,6 +31,7 @@ export default function CommonDirectory() {
         ) : null
       }
     >
+      <ListEmptyView />
       {(wallpaperTag === WallpaperTag.ALL || wallpaperTag === WallpaperTag.ONLINE || wallpaperTag === "") && (
         <List.Section title={"Online Wallpapers"}>
           {bingWallpaperHD.map((bingImage, index) => {
