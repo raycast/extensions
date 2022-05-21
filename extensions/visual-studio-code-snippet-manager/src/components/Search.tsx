@@ -41,8 +41,8 @@ export default function Search() {
 
   return (
     <List isShowingDetail>
-      <SearchSection title={"vscode"} items={vsCodeItems} />
-      <SearchSection title={"vscode-insiders"} items={vsCodeInsidersItems} />
+      <SearchSection title={"Visual Studio Code"} items={vsCodeItems} />
+      <SearchSection title={"Visual Studio Code Insiders"} items={vsCodeInsidersItems} />
     </List>
   );
 }

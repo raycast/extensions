@@ -5,13 +5,13 @@ import fs from "fs";
 import { vsCodeInsidersPath, vsCodePath } from "../data";
 type Props = {
   items: Required<Item>[] | null;
-  title: "vscode" | "vscode-insiders";
+  title: "Visual Studio Code" | "Visual Studio Code Insiders";
 };
 const SearchSection = ({ items, title }: Props) => {
   const { push } = useNavigation();
   const deleteSnippet = (key: string) => {
     let path = "";
-    if (title === "vscode") {
+    if (title === "Visual Studio Code") {
       path = vsCodePath;
     } else {
       path = vsCodeInsidersPath;
@@ -42,7 +42,7 @@ const SearchSection = ({ items, title }: Props) => {
                 <Action.Push
                   icon={Icon.Gear}
                   title={"Edit Snippet"}
-                  target={<Editor {...v} title={v.id} type="vscode-insiders" />}
+                  target={<Editor {...v} title={v.id} type="Visual Studio Code Insiders" />}
                 ></Action.Push>
                 <Action
                   icon={"Trash"}
