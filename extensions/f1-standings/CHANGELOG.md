@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🏎️ Open on Formula1.com and Wikipedia] - 2022-05-21
+
+- Add Wikipedia and formula1.com links to action panels in Race Schedule
+
 ## [📊 Update race sessions styling] - 2022-05-19
 
 - Updates styling for the race dates detail view
