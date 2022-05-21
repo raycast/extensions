@@ -5,14 +5,14 @@ import { useState, useEffect } from "react";
 import { getBoardAndUser } from "./lib/api";
 import {
   getCachedUser,
-  getCachedBoard,
-  cacheBoard,
+  getCachedQuickAddBoard,
+  cacheQuickAddBoard,
   cacheUser,
 } from "./lib/persistence";
 import AddItem from "./addItem";
 import { ErrorView } from "./lib/helpers";
 
-export default function AddItemToDefaultBoard() {
+export default function QuickAddItem() {
   const [state, setState] = useState<{
     isLoading: boolean;
     board?: Board;
@@ -23,13 +23,13 @@ export default function AddItemToDefaultBoard() {
     async function fetch() {
       // Fetch from cache first
       const [cachedBoard, cachedUser] = await Promise.all([
-        getCachedBoard(),
+        getCachedQuickAddBoard(),
         getCachedUser(),
       ]);
       if (
         cachedBoard &&
         cachedUser &&
-        cachedBoard.id === getPreferenceValues().addToBoardId
+        cachedBoard.id === getPreferenceValues().quickAddBoardId
       ) {
         setState((oldState) => ({
           ...oldState,
@@ -40,10 +40,11 @@ export default function AddItemToDefaultBoard() {
 
       try {
         // In any case, fetch remote and re-fill cache and state
-        const response = await getBoardAndUser();
+        const boardId = getPreferenceValues().quickAddBoardId.toString();
+        const response = await getBoardAndUser(boardId);
         await Promise.all([
           cacheUser(response.me),
-          cacheBoard(response.boards[0]),
+          cacheQuickAddBoard(response.boards[0]),
         ]);
 
         setState((oldState) => ({
@@ -64,13 +65,14 @@ export default function AddItemToDefaultBoard() {
 
   const board = state.board;
   if (state.error) {
-    console.log("error view");
-    return <ErrorView error={state.error} />;
+    return (
+      <ErrorView
+        error={`Sorry but we failed accessing the defined board. Inner error: ${state.error}`}
+      />
+    );
   } else if (board) {
-    console.log("theres a board");
     return <AddItem board={board} />;
   } else {
-    console.log("theres no board");
     return <Form isLoading={true}></Form>;
   }
 }

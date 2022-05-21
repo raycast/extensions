@@ -86,7 +86,9 @@ export async function getUser(): Promise<Me> {
   return (result as Record<string, unknown>).me as Me;
 }
 
-export async function getBoardAndUser(): Promise<BoardsResponse> {
+export async function getBoardAndUser(
+  boardId: number
+): Promise<BoardsResponse> {
   return (await runGraphQLQuery(`
     {
       me {
@@ -98,7 +100,7 @@ export async function getBoardAndUser(): Promise<BoardsResponse> {
         }
       }
 
-      boards(ids: ${getPreferenceValues().addToBoardId.toString()}){
+      boards(ids: ${boardId}){
         id
         name
         updated_at

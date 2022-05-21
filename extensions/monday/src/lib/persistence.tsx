@@ -19,11 +19,11 @@ export async function cacheBoards(boards: Board[]): Promise<void> {
   return await store(BoardsCacheKey, boards);
 }
 
-export async function getCachedBoard(): Promise<Board | undefined> {
+export async function getCachedQuickAddBoard(): Promise<Board | undefined> {
   return await retrieve<Board>(BoardCacheKey);
 }
 
-export async function cacheBoard(boards: Board): Promise<void> {
+export async function cacheQuickAddBoard(boards: Board): Promise<void> {
   return await store(BoardCacheKey, boards);
 }
 

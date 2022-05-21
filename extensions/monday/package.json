@@ -34,8 +34,8 @@
       ]
     },
     {
-      "name": "addItemToDefaultBoard",
-      "title": "Add an Item",
+      "name": "quickAddItem",
+      "title": "Quick-add an Item",
       "subtitle": "monday.com",
       "description": "Adds an item to a pre-defined board",
       "mode": "view",
@@ -45,11 +45,11 @@
       ],
       "preferences": [
         {
-          "name": "addToBoardId",
+          "name": "quickAddBoardId",
           "type": "textfield",
           "required": true,
           "title": "Board ID",
-          "description": "ID of the board to use for adding items"
+          "description": "ID of the board to quick-add items to"
         }
       ]
     }
