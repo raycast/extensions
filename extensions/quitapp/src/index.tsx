@@ -1,6 +1,6 @@
 import { ActionPanel, clearSearchBar, Icon, List, showHUD, Action } from "@raycast/api";
 import { exec } from "child_process";
-import { promisify } from 'util';
+import { promisify } from "util";
 import { useEffect, useState } from "react";
 
 export default function ProcessList() {
@@ -12,7 +12,7 @@ export default function ProcessList() {
   const cmd = `osascript -e 'tell application "System Events" to get properties of (processes where background only is false)'`;
 
   const nameRegex = /, displayed name:(.*?),/g;
-  const idRegex = new RegExp(', unix id:(.*?)(,|$)', 'g');
+  const idRegex = new RegExp(", unix id:(.*?)(,|$)", "g");
   const fileRegex = /, file:(.*?),/g;
 
   const fetchProcesses = async () => {
@@ -31,15 +31,14 @@ export default function ProcessList() {
     const idMatches = properties.matchAll(idRegex);
     const fileMatches = properties.matchAll(fileRegex);
 
-    const names = Array.from(nameMatches, m => m[1]);
-    const ids = Array.from(idMatches, m => m[1]);
-    const files = Array.from(fileMatches, m => m[1])
-      .map((file) => {
-        file = file.replace(/.*?:/, "");
-        file = file.replaceAll(':', '/');
-        file = file.substring(0, file.length - 1);
-        return file;
-      });
+    const names = Array.from(nameMatches, (m) => m[1]);
+    const ids = Array.from(idMatches, (m) => m[1]);
+    const files = Array.from(fileMatches, (m) => m[1]).map((file) => {
+      file = file.replace(/.*?:/, "");
+      file = file.replaceAll(":", "/");
+      file = file.substring(0, file.length - 1);
+      return file;
+    });
 
     // Create the Processes
     const processes = names
@@ -47,12 +46,12 @@ export default function ProcessList() {
         return {
           name: name,
           id: ids[index],
-          iconPath: files[index]
+          iconPath: files[index],
         } as Process;
       })
       // don't show finder in the menu
       .filter((process) => {
-        return process.name !== 'Finder';
+        return process.name !== "Finder";
       });
 
     setState(processes);
@@ -96,9 +95,7 @@ export default function ProcessList() {
               icon={fileIcon(process)}
               actions={
                 <ActionPanel>
-                  <Action title="Kill"
-                    icon={Icon.XmarkCircle}
-                    onAction={() => killProcess(process)} />
+                  <Action title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />
                 </ActionPanel>
               }
             />
