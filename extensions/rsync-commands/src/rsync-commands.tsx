@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api"
 import EntryForm from "./views/entry-form"
-import Entry, { EntryRaw } from "./models/entry"
+import Entry, { EntryDTO } from "./models/entry"
 import useEntries from "./hooks/use-entries"
 import { useEffect, useState } from "react"
 import { useEntryStore, useNavigationStore } from "./store"
@@ -48,7 +48,7 @@ const RsyncCommands = () => {
     function () {
       const loadEntries = async () => {
         const entries = await LocalStorage.getItem<string>("entries")
-        const rsyncEntries = entries ? JSON.parse(entries).map((e: EntryRaw) => new Entry(e)) : []
+        const rsyncEntries = entries ? JSON.parse(entries).map((e: EntryDTO) => new Entry(e)) : []
         setEntries(rsyncEntries)
       }
 

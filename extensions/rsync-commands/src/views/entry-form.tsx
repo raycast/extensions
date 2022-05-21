@@ -8,6 +8,14 @@ import EntryOptionFormFields from "../components/entry-option-form-fields"
 import EntryLocationFormFields from "../components/entry-location-form-fields"
 import EntryLocation from "../models/entry-location"
 
+const createEntryOption = (source: EntryOptionData): EntryOption => {
+  return {
+    name: source.name,
+    param: source.param,
+    enabled: false,
+  } as EntryOption
+}
+
 type EntryFormProps = {
   source?: Entry
 }
@@ -39,32 +47,33 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
 
   const getValue = useCallback(
     (propPath: string): string => {
-      return Sugar.Object.get<boolean & string & EntryOption & undefined>(entry, propPath)
+      return Sugar.Object.get<boolean & string & EntryOption & undefined>(entry, propPath) ?? ""
     },
     [entry]
   )
 
   const setValue = (propPath: string, value: boolean | string | EntryOption | EntryLocation | undefined) => {
     const oldValue = getValue(propPath)
+
     if (oldValue !== value) {
       setEntry(prev => Sugar.Object.set(prev.clone(), propPath, value) as Entry)
     }
   }
 
-  const onOptionChange = (optionSource: EntryOptionData, option: EntryOption | undefined) => {
+  const onOptionChange = useCallback((optionName: string, update: EntryOption | undefined) => {
     setEntry(prev => {
-      if (prev.options[optionSource.name] !== option) {
+      if (prev.options[optionName] !== update) {
         const clone = prev.clone()
-        if (!option) {
-          delete clone.options[optionSource.name]
+        if (!update) {
+          delete clone.options[optionName]
         } else {
-          clone.options[optionSource.name] = option
+          clone.options[optionName] = update
         }
         return clone
       }
       return prev
     })
-  }
+  }, [])
 
   useEffect(
     function () {
@@ -123,7 +132,7 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
       <Form.Dropdown
         id="sshSelection"
         title="SSH"
-        info="Specify if the source or destination will be using SSH."
+        info="Use SSH for source or destination."
         defaultValue={getValue("sshSelection")}
         onChange={value => setValue("sshSelection", value)}
       >
@@ -162,13 +171,31 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
       {visibleOptions.map(option => (
         <EntryOptionFormFields
           key={option.name}
-          option={entry.options[option.name]}
-          optionSource={option}
-          onChange={value => {
-            onOptionChange(option, value)
-          }}
+          option={entry.options[option.name] ?? createEntryOption(option)}
+          description={option.description}
+          onChange={onOptionChange}
         />
       ))}
+
+      <Form.Separator />
+      <Form.Description text="Additional Commands" />
+
+      <Form.TextArea
+        key="preCommand"
+        id="preCommand"
+        title="Pre Command"
+        info="A command to run before the rsync command itself, maybe setup some variables for the rsync command."
+        defaultValue={entry.preCommand}
+        onChange={value => setValue("preCommand", value)}
+      />
+      <Form.TextArea
+        key="postCommand"
+        id="postCommand"
+        title="Post Command"
+        info="A command to run after the rsync command itself, maybe do some cleanup."
+        defaultValue={entry.postCommand}
+        onChange={value => setValue("postCommand", value)}
+      />
     </Form>
   )
 }
