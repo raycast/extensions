@@ -110,7 +110,7 @@ function RaceList() {
         </List.Section>
       )}
       {season && (
-        <List.Section title="Upcoming races">
+        <List.Section title="Upcoming Races">
           {Object.values(upcomingRaces).map((race) => {
             const raceDates = getRaceDates(race);
             const accessories = [];
