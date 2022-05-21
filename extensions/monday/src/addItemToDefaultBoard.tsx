@@ -1,16 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
+import {  
   Form,
-  getPreferenceValues,
-  Icon
+  getPreferenceValues
 } from "@raycast/api";
 
 import { Board, Me } from "./lib/models";
 import { useState, useEffect } from "react";
 import { getBoardAndUser } from "./lib/api";
-import { getCachedUser, getCachedBoard, cacheBoard, resetAllCaches, cacheUser} from "./lib/persistence";
+import { getCachedUser, getCachedBoard, cacheBoard, cacheUser} from "./lib/persistence";
 import AddItem from "./addItem";
 import { ErrorView } from "./lib/helpers";
 
