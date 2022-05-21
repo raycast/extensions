@@ -64,7 +64,6 @@ export default function AddItemToDefaultBoard() {
 
   const board = state.board;
   if (state.error) {
-    console.log("error view");
     return <ErrorView error={state.error} />;
   } else if (board) {
     console.log("theres a board");
