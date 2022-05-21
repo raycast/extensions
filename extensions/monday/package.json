@@ -35,7 +35,7 @@
     },
     {
       "name": "addItemToDefaultBoard",
-      "title": "Add an item",
+      "title": "Add an Item",
       "subtitle": "monday.com",
       "description": "Adds an item to a pre-defined board",
       "mode": "view",
