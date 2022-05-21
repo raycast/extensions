@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show NS discounts",
-      "subtitle": "Nintendo Switch discounts",
+      "title": "Show NS Discounts",
+      "subtitle": "Nintendo Switch Discounts",
       "description": "Show the latest discounts of games on Nintendo Switch",
       "mode": "view"
     }
