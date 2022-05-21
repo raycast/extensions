@@ -17,9 +17,14 @@ export default class Config {
   constructor() {
     const pwd = indexPath.replace("~", homedir());
 
-    this.spaces = readdirSync(pwd)
-      .filter((str) => str.match(/sqlite$/))
-      .map((str) => this.makeSpaceFromStr(pwd, str));
+    try {
+      this.spaces = readdirSync(pwd)
+        .filter((str) => str.match(/sqlite$/))
+        .map((str) => this.makeSpaceFromStr(pwd, str));
+    } catch (e) {
+      console.debug(`failed getting files: ${e}`);
+      this.spaces = [];
+    }
 
     console.debug("constructed config object");
   }
