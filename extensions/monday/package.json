@@ -32,6 +32,26 @@
         "slug",
         "account"
       ]
+    },
+    {
+      "name": "addItemToDefaultBoard",
+      "title": "Add an item",
+      "subtitle": "monday.com",
+      "description": "Adds an item to a pre-defined board",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "item"
+      ],
+      "preferences": [
+        {
+          "name": "addToBoardId",
+          "type": "textfield",
+          "required": true,
+          "title": "Board ID",
+          "description": "ID of the board to use for adding items"
+        }
+      ]
     }
   ],
   "preferences": [
