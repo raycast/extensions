@@ -46,7 +46,7 @@
       "description": "Select your default mode of travel.",
       "type": "dropdown",
       "required": true,
-      "default": "transit",
+      "default": "r",
       "data": [
         {
           "title": "🚗 Driving",
