@@ -1,15 +1,16 @@
-import {  
-  Form,
-  getPreferenceValues
-} from "@raycast/api";
+import { Form, getPreferenceValues } from "@raycast/api";
 
 import { Board, Me } from "./lib/models";
 import { useState, useEffect } from "react";
 import { getBoardAndUser } from "./lib/api";
-import { getCachedUser, getCachedBoard, cacheBoard, cacheUser} from "./lib/persistence";
+import {
+  getCachedUser,
+  getCachedBoard,
+  cacheBoard,
+  cacheUser,
+} from "./lib/persistence";
 import AddItem from "./addItem";
 import { ErrorView } from "./lib/helpers";
-
 
 export default function AddItemToDefaultBoard() {
   const [state, setState] = useState<{
@@ -25,7 +26,11 @@ export default function AddItemToDefaultBoard() {
         getCachedBoard(),
         getCachedUser(),
       ]);
-      if (cachedBoard && cachedUser && cachedBoard.id === getPreferenceValues().addToBoardId) {
+      if (
+        cachedBoard &&
+        cachedUser &&
+        cachedBoard.id === getPreferenceValues().addToBoardId
+      ) {
         setState((oldState) => ({
           ...oldState,
           board: cachedBoard,
@@ -56,7 +61,7 @@ export default function AddItemToDefaultBoard() {
     }
     fetch();
   }, []);
-  
+
   const board = state.board;
   if (state.error) {
     console.log("error view");

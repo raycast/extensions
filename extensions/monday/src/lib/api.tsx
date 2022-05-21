@@ -122,7 +122,7 @@ export async function getBoardAndUser(): Promise<BoardsResponse> {
         }
       }
     }
-    `)) as BoardsResponse;  
+    `)) as BoardsResponse;
 }
 
 export async function getGroups(boardId: number): Promise<Group[]> {
