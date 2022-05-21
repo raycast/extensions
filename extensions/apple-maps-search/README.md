@@ -13,3 +13,7 @@ Use the extension's search fields as you would use the ones on Apple Maps. They 
 ## Privacy
 
 This extension only stores your address locally to pass it to the Apple Maps API. This extension does nothing else with your info.
+
+## Acknowledgements
+
+This extension is based on a fork of the [Google Maps Search extension](https://www.raycast.com/ratoru/google-maps-search).
