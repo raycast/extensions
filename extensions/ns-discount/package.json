@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ns-discount",
+  "title": "NS Discount",
+  "description": "Show the latest discount of the games on Nintendo Switch",
+  "icon": "command-icon.png",
+  "author": "donaldxdonald",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show NS discounts",
+      "subtitle": "Nintendo Switch discounts",
+      "description": "Show the latest discounts of games on Nintendo Switch",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "node-fetch": "^3.2.4"
+  },
+  "devDependencies": {
+    "@dndxdnd/eslint-config": "^0.0.5",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "eslint": "^8.15.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
