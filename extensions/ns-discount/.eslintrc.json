@@ -4,5 +4,6 @@
     "es2020": true,
     "node": true
   },
+  "plugins": ["eslint-plugin-promise"],
   "extends": ["@dndxdnd"]
 }

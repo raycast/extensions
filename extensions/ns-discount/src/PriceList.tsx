@@ -1,18 +1,16 @@
 import { List } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import { fetchGameDetail } from './api'
-import { IGame, IGameInfo, IPrice } from './model'
+import { IGame, IPrice } from './model'
 import { calcCutoff } from './utils'
 
 export default function PriceList({ game }: {game: IGame}) {
   const [prices, setPrices] = useState<IPrice[]>([])
-  const [gameInfo, setGameInfo] = useState<IGameInfo>()
   const [showPrices, setShowPrices] = useState<IPrice[]>([])
 
   useEffect(() => {
     try {
       prices.length === 0 && fetchGameDetail(game.appid).then(res => {
-        setGameInfo(res.game)
         setPrices(res.prices)
         setShowPrices(res.prices)
       })

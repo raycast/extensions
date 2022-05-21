@@ -2,7 +2,6 @@ import fetch from 'node-fetch'
 import { IGame, IGameInfo, IPrice } from './model'
 
 const discountBaseURL = 'https://switch.jumpvg.com'
-const newsBaseURL = 'https://www.ninten.cn'
 
 type CustomResult<T> = {
   result: {
