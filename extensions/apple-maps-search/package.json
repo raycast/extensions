@@ -49,19 +49,19 @@
       "default": "transit",
       "data": [
         {
-          "title": "🚗 Car",
+          "title": "🚗 Driving",
           "value": "d"
         },
         {
-          "title": "🚆 Public Transport",
-          "value": "r"
-        },
-        {
-          "title": "🚶‍♀️ Walk",
+          "title": "🚶‍♀️ Walking",
           "value": "w"
         },
         {
-          "title": "🚲 Bike",
+          "title": "🚆 Transit",
+          "value": "r"
+        },
+        {
+          "title": "🚲 Cycling",
           "value": "c"
         }
       ]

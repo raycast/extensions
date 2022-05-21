@@ -4,8 +4,8 @@
 export enum TravelMode {
   Driving = "d",
   Walking = "w",
-  Bicycling = "c",
   Transit = "r",
+  Cycling = "c",
 }
 
 /**

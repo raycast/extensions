@@ -79,10 +79,10 @@ export default function Command() {
         />
       )}
       <Form.Dropdown id="travelmode" title="Travel Mode" value={mode} onChange={setMode}>
-        <Form.DropdownItem value={TravelMode.Driving} title="Car" icon="🚗" />
-        <Form.DropdownItem value={TravelMode.Transit} title="Public Transport" icon="🚆" />
-        <Form.DropdownItem value={TravelMode.Walking} title="Walk" icon="🚶‍♀️" />
-        <Form.DropdownItem value={TravelMode.Bicycling} title="Bike" icon="🚲" />
+        <Form.DropdownItem value={TravelMode.Driving} title="Driving" icon="🚗" />
+        <Form.DropdownItem value={TravelMode.Walking} title="Walking" icon="🚶‍♀️" />
+        <Form.DropdownItem value={TravelMode.Transit} title="Transit" icon="🚆" />
+        <Form.DropdownItem value={TravelMode.Cycling} title="Cycling" icon="🚲" />
       </Form.Dropdown>
     </Form>
   );
