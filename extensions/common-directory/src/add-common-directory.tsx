@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LocalStorage,
+  open,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { DirectoryInfo, DirectoryType, LocalDirectoryKey } from "./types/directory-info";
 import React, { useEffect, useState } from "react";
 import { getDirectoryName, getSelectedDirectory, isDirectoryOrFile } from "./utils/common-utils";
@@ -58,16 +69,16 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
             />
             <Action
               title={"Choose Directory"}
-              icon={Icon.Desktop}
+              icon={Icon.Sidebar}
               shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
               onAction={() => {
                 getChooseFolder().then((path) => {
+                  open("raycast://").then();
                   setPath(path);
                 });
               }}
             />
           </ActionPanel.Section>
-          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >

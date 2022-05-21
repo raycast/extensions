@@ -75,7 +75,8 @@ return POSIX path of (choose folder)
 export const getChooseFolder = async () => {
   let finderPath = "";
   try {
-    finderPath = (await runAppleScript(scriptChooseFolder)).slice(0, -1);
+    const chosenPath = await runAppleScript(scriptChooseFolder);
+    finderPath = isEmpty(chosenPath) ? "" : chosenPath.slice(0, -1);
     return finderPath;
   } catch (e) {
     return finderPath;
