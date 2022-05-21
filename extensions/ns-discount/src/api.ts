@@ -28,22 +28,21 @@ export async function fetchDiscountList(offset = 0) {
   }
 
   const res = await fetch(`${discountBaseURL}/switch/gameDlc/list?${queryString(payload, true)}`)
-  const data = await res.json() as CustomResult<{games: IGame[]; hits: number}>
+  const data = (await res.json()) as CustomResult<{ games: IGame[]; hits: number }>
   return data.data
 }
 
 export async function fetchGameDetail(gameId: string) {
   const res = await fetch(`${discountBaseURL}/switch/gameInfo?appid=${gameId}`)
-  const data = await res.json() as CustomResult<{game: IGameInfo; prices: IPrice[]}>
+  const data = (await res.json()) as CustomResult<{ game: IGameInfo; prices: IPrice[] }>
 
   return data.data
 }
 
 function queryString(param: any, encode = true) {
   return Object.keys(param)
-    .map(key => {
-      let value
-        = typeof param[key] === 'object' ? JSON.stringify(param[key]) : param[key]
+    .map((key) => {
+      let value = typeof param[key] === 'object' ? JSON.stringify(param[key]) : param[key]
       if (encode) {
         value = encodeURIComponent(value)
       }

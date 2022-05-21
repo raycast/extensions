@@ -4,6 +4,7 @@
     "es2020": true,
     "node": true
   },
-  "plugins": ["eslint-plugin-promise"],
-  "extends": ["@dndxdnd"]
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
 }

@@ -1,4 +1,3 @@
-
 export function calcCutoff(cutoff: number) {
   let zhDiscount = ''
   if (cutoff) {

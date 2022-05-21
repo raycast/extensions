@@ -23,11 +23,14 @@
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {
-    "@dndxdnd/eslint-config": "^0.0.5",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-promise": "^6.0.0",
+    "prettier": "^2.6.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

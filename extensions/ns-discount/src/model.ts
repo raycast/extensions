@@ -1,5 +1,4 @@
 export interface IGame {
-
   // 游戏唯一id
   appid: string
 
