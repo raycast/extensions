@@ -21,7 +21,7 @@ export default function Command() {
 
   // Used to handle what the Form displays.
   const [origin, setOrigin] = useState<string>("");
-  // Used to handle what is submitted to the Google Maps API.
+  // Used to handle what is submitted to the Apple Maps API.
   const [originAddress, setOriginAddress] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [mode, setMode] = useState<string>(preferences.preferredMode);

@@ -1,31 +1,33 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "google-maps-search",
-  "title": "Google Maps Search",
-  "description": "Quickly open Google Maps directions, for example from your current location to your home.",
-  "icon": "google-maps-icon.png",
-  "author": "ratoru",
+  "name": "apple-maps-search",
+  "title": "Apple Maps Search",
+  "description": "Quickly open Apple Maps directions, for example from your current location to your home.",
+  "icon": "apple-maps-icon.png",
+  "author": "djpowers",
+  "contributors": ["ratoru"],
+  "categories": ["Other"],
   "license": "MIT",
   "commands": [
     {
       "name": "travelHome",
       "title": "Travel Home",
-      "subtitle": "Google Maps",
-      "description": "Open Google Maps with directions from your current location to your home.",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions from your current location to your home.",
       "mode": "no-view"
     },
     {
       "name": "travelTo",
       "title": "Travel To",
-      "subtitle": "Google Maps",
-      "description": "Open Google Maps with directions to a destination.",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions to a destination.",
       "mode": "view"
     },
     {
       "name": "find",
       "title": "Find Place",
-      "subtitle": "Google Maps",
-      "description": "Find a specific place or category on Google Maps.",
+      "subtitle": "Apple Maps",
+      "description": "Find a specific place or category on Apple Maps.",
       "mode": "view"
     }
   ],
@@ -33,7 +35,7 @@
     {
       "name": "homeAddress",
       "title": "Home Address",
-      "description": "Enter your home address as you would enter it into Google Maps.",
+      "description": "Enter your home address as you would enter it into Apple Maps.",
       "type": "textfield",
       "required": true,
       "placeholder": "Street Address, City, State, ZIP Code"
@@ -48,19 +50,19 @@
       "data": [
         {
           "title": "🚗 Car",
-          "value": "driving"
+          "value": "d"
         },
         {
           "title": "🚆 Public Transport",
-          "value": "transit"
+          "value": "r"
         },
         {
           "title": "🚶‍♀️ Walk",
-          "value": "walking"
+          "value": "w"
         },
         {
           "title": "🚲 Bike",
-          "value": "bicycling"
+          "value": "c"
         }
       ]
     }
