@@ -1,5 +1,7 @@
-export const vsCodePath = `${process.env.HOME}/Library/Application Support/Code/user/snippets/raycast.code-snippets`;
-export const vsCodeInsidersPath = `${process.env.HOME}/Library/Application Support/Code - Insiders/user/snippets/raycast.code-snippets`;
+export const vsCodeSnippetsDirPath = `${process.env.HOME}/Library/Application Support/Code/user/snippets`;
+export const vsCodeInsidersSnippetsDirPath = `${process.env.HOME}/Library/Application Support/Code - Insiders/user/snippets`;
+export const vsCodePath = `${vsCodeSnippetsDirPath}/raycast.code-snippets`;
+export const vsCodeInsidersPath = `${vsCodeInsidersSnippetsDirPath}/raycast.code-snippets`;
 export const languages = [
   "abap",
   "bat",

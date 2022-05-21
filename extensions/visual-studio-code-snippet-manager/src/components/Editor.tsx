@@ -13,7 +13,13 @@ import {
 } from "@raycast/api";
 
 import fs from "fs";
-import { languages, vsCodePath, vsCodeInsidersPath } from "../data";
+import {
+  vsCodeSnippetsDirPath,
+  languages,
+  vsCodePath,
+  vsCodeInsidersPath,
+  vsCodeInsidersSnippetsDirPath,
+} from "../data";
 import Search from "./Search";
 
 interface Values {
@@ -43,6 +49,15 @@ const Editor = (props?: Item & { title?: string; type?: "vscode" | "vscode-insid
       description: v.description,
       scope: v.language.join(),
     };
+    if (path === vsCodePath) {
+      if (!fs.existsSync(vsCodeSnippetsDirPath)) {
+        fs.mkdirSync(vsCodeSnippetsDirPath, { recursive: true });
+      }
+    } else {
+      if (!fs.existsSync(vsCodeInsidersSnippetsDirPath)) {
+        fs.mkdirSync(vsCodeInsidersSnippetsDirPath, { recursive: true });
+      }
+    }
     if (fs.existsSync(path)) {
       const obj = JSON.parse(fs.readFileSync(path).toString());
       if (props && props.title) {
