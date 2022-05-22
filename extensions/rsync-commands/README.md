@@ -4,8 +4,8 @@ Save your frequently used rsync commands and run them with ease.
 
 #### Features:
 
-1. Create and manage a list of your frequently used rsync commands.
-2. Simple configuration of all rsync options and SSH details.
+1. Create and manage a list of frequently used rsync commands.
+2. Supports all rsync options and SSH configuration details.
 3. Add custom shell commands to run before and after the rsync command itself.
 5. Run one of your commands directly from Raycast or copy it to the clipboard.
 
