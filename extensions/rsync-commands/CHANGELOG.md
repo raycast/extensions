@@ -4,7 +4,7 @@
 - Added preview to entries (cmd+shift+p)
 - Fixed a bug where the extension crashed if entry contained errors when copying to clipboard.
 
-## [1.1.0] - 2020-05-19
+## [1.1.0] - 2020-05-21
 - Configure your desired identity file (private key) for SSH sync.
 - Configure custom commands to run before and after the rsync command itself.
 
