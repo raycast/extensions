@@ -5,8 +5,12 @@
   "description": "Quickly open Apple Maps directions, for example from your current location to your home.",
   "icon": "apple-maps-icon.png",
   "author": "djpowers",
-  "contributors": ["ratoru"],
-  "categories": ["Other"],
+  "contributors": [
+    "ratoru"
+  ],
+  "categories": [
+    "Other"
+  ],
   "license": "MIT",
   "commands": [
     {

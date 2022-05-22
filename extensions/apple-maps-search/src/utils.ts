@@ -28,13 +28,7 @@ export interface Preferences {
 export function makeDirectionsURL(origin: string, destination: string, travelmode: string): string {
   const mapsBase = "http://maps.apple.com";
   return (
-    mapsBase +
-    "?saddr=" +
-    encodeURI(origin) +
-    "&daddr=" +
-    encodeURI(destination) +
-    "&dirflg=" +
-    encodeURI(travelmode)
+    mapsBase + "?saddr=" + encodeURI(origin) + "&daddr=" + encodeURI(destination) + "&dirflg=" + encodeURI(travelmode)
   );
 }
 
