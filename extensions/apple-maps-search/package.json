@@ -11,6 +11,10 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "directions",
+    "navigation"
+  ],
   "license": "MIT",
   "commands": [
     {
