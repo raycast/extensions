@@ -9,6 +9,13 @@ import path = require("path");
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
+  bibtex_path?: string;
+  csl_style?: CSLData;
+}
+
+interface CSLData {
+  title: string;
+  value: string;
 }
 
 export interface RefData {
@@ -110,7 +117,7 @@ AND itemAttachments.contentType = 'application/pdf'
 
 const cachePath = utils.cachePath("zotero.json");
 
-function resolveHome(filepath: string): string {
+export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
     return path.join(process.env.HOME, filepath.slice(1));
   }
