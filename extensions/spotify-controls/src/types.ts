@@ -1,3 +1,3 @@
 export interface Preferences {
-	secondsToSkip: number;
+  secondsToSkip: number;
 }
