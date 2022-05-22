@@ -28,7 +28,7 @@ const DisplayView = (display: KubectlGet) => {
     showHUD(`Failed, no ${display.command} available for ${display.resource.type} 😔`);
   }
 
-  let optional = display.command == "describe" ? display.resource.type : "";
+  const optional = display.command == "describe" ? display.resource.type : "";
 
   /**
    * get list of all resources from kubectl to stdout
