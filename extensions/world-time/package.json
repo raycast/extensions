@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "world-time",
+  "title": "World Time",
+  "description": "Look the current time of a region, ip or domain.",
+  "icon": "world-time.png",
+  "author": "koinzhang",
+  "categories": [
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "look-ip-time",
+      "title": "Look IP Time",
+      "icon": "look-ip-time.png",
+      "description": "Look the current time based on IP or domain.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "look-world-time",
+      "title": "Look World Time",
+      "icon": "look-world-time.png",
+      "description": "Look the current time for a timezone with region.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
