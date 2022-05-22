@@ -25,7 +25,7 @@ export async function generateReference(key: string): Promise<string> {
     return "";
   }
 
-  let cite = new Cite(JSON.stringify(js));
+  const cite = new Cite(JSON.stringify(js));
 
   return cite.format("bibliography", {
     template: templateName,
@@ -49,7 +49,7 @@ export async function generateBibtexReference(key: string): Promise<string> {
     return "";
   }
 
-  let cite = new Cite(JSON.stringify(js));
+  const cite = new Cite(JSON.stringify(js));
 
   return cite.format("bibtex");
 }
