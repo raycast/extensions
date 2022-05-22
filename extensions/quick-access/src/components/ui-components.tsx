@@ -1,9 +1,9 @@
 import { Action, Icon, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { alertDialog, refreshNumber } from "../hooks/hooks";
-import { LocalStorageKey } from "./constants";
+import { LocalStorageKey } from "../utils/constants";
 import React from "react";
-import { FileInfo } from "./directory-info";
-import { copyFileByPath } from "./applescript-utils";
+import { FileInfo } from "../types/types";
+import { copyFileByPath } from "../utils/applescript-utils";
 import { upRank } from "../search-pinned-directories";
 
 export function ActionRemoveAllDirectories(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {

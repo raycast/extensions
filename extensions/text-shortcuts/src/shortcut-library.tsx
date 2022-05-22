@@ -8,6 +8,7 @@ import {
   Icon,
   List,
   LocalStorage,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
@@ -146,6 +147,14 @@ export default function ShortcutLibrary() {
                           );
                         }}
                       />
+                      <ActionPanel.Section>
+                        <Action
+                          icon={Icon.Gear}
+                          title="Open Extension Preferences"
+                          shortcut={{ modifiers: ["cmd"], key: "," }}
+                          onAction={openExtensionPreferences}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   );
                 } else {
@@ -225,6 +234,14 @@ export default function ShortcutLibrary() {
                             }
                           }}
                         />
+                        <ActionPanel.Section>
+                          <Action
+                            icon={Icon.Gear}
+                            title="Open Extension Preferences"
+                            shortcut={{ modifiers: ["cmd"], key: "," }}
+                            onAction={openExtensionPreferences}
+                          />
+                        </ActionPanel.Section>
                       </ActionPanel>
                     </>
                   );
