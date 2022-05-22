@@ -283,8 +283,13 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
+    const fData = {
+      zotero_path: preferences.zotero_path,
+      use_bibtex: preferences.use_bibtex,
+      data: data,
+    };
     try {
-      await writeFile(cachePath, JSON.stringify(data));
+      await writeFile(cachePath, JSON.stringify(fData));
     } catch (err) {
       console.error("Failed to write installed cache:", err);
     }
@@ -302,14 +307,18 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
     if (diffTime < 3600000) {
       const cacheBuffer = await readFile(cachePath);
-      const data = JSON.parse(cacheBuffer.toString());
-      return data;
+      const fData = JSON.parse(cacheBuffer.toString());
+      return fData.data;
     } else {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
-        const data = JSON.parse(cacheBuffer.toString());
-        return data;
+        const fData = JSON.parse(cacheBuffer.toString());
+        if (fData.zotero_path === preferences.zotero_path && fData.use_bibtex === preferences.use_bibtex) {
+          return fData.data;
+        } else {
+          throw "Invalid cache";
+        }
       } else {
         throw "Invalid cache";
       }
