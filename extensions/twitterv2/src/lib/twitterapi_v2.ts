@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
+  TweetHomeTimelineV2Paginator,
   TweetUserTimelineV2Paginator,
   TwitterApi,
   TwitterV2IncludesHelper,
   UserV2,
-  UserV2Result,
 } from "twitter-api-v2";
 import { authorize, getOAuthTokens } from "./oauth";
 import { Tweet, User } from "./twitter";
@@ -44,7 +44,7 @@ export class ClientV2 {
     return u;
   }
 
-  async prefetchUserAccounts(tweetsRaw: TweetUserTimelineV2Paginator): Promise<void> {
+  async prefetchUserAccounts(tweetsRaw: TweetUserTimelineV2Paginator | TweetHomeTimelineV2Paginator): Promise<void> {
     const userIDs: string[] = [];
     for (const t of tweetsRaw) {
       if (t.author_id && !(t.author_id in this.userCache)) {
@@ -174,6 +174,56 @@ export class ClientV2 {
     const api = await this.getAPI();
     const me = await this.me();
     api.v2.unlike(me.id, tweet.id);
+  }
+
+  async homeTimeline(): Promise<Tweet[] | undefined> {
+    const api = await this.getAPI();
+    const tweetsRaw = await api.v2.homeTimeline({
+      exclude: "replies",
+      max_results: 20,
+      "tweet.fields": ["public_metrics", "author_id", "attachments", "created_at", "id", "entities", "conversation_id"],
+      "media.fields": ["url", "type", "media_key", "preview_image_url"],
+      expansions: [
+        "attachments.media_keys",
+        "author_id",
+        "in_reply_to_user_id",
+        "entities.mentions.username",
+        "referenced_tweets.id",
+      ],
+    });
+    const includes = new TwitterV2IncludesHelper(tweetsRaw);
+    const tweets: Tweet[] = [];
+    await this.prefetchUserAccounts(tweetsRaw);
+    for (const t of tweetsRaw) {
+      const media = includes.medias(t);
+      let image_url: string | undefined = undefined;
+      if (media && media.length > 0) {
+        const m = media[0];
+        if (m.type === "animated_gif" || m.type === "video") {
+          image_url = m.preview_image_url;
+        } else {
+          image_url = m.url;
+        }
+      }
+      if (!t.author_id) {
+        continue;
+      }
+      const nt: Tweet = {
+        id: t.id,
+        text: t.text,
+        created_at: t.created_at,
+        conversation_id: t.conversation_id,
+        source: t.source || "",
+        image_url: image_url,
+        user: await this.getUserAccount(t.author_id),
+        quote_count: t.public_metrics?.quote_count || 0,
+        reply_count: t.public_metrics?.reply_count || 0,
+        retweet_count: t.public_metrics?.retweet_count || 0,
+        like_count: t.public_metrics?.like_count || 0,
+      };
+      tweets.push(nt);
+    }
+    return tweets;
   }
 }
 

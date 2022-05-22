@@ -8,6 +8,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "timeline",
+      "title": "Recent Tweets",
+      "subtitle": "Twitter v2",
+      "description": "Show your Twitter Timeline",
+      "mode": "view"
+    },
+    {
       "name": "mytweets",
       "title": "My Recent Tweets",
       "description": "Show My Tweets",
@@ -35,7 +42,7 @@
   "dependencies": {
     "@raycast/api": "^1.34.1",
     "node-fetch": "^3.2.4",
-    "twitter-api-v2": "^1.12.0"
+    "twitter-api-v2": "^1.12.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
