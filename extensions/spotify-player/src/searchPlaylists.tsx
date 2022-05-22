@@ -1,8 +1,7 @@
-import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { PlayAction } from "./client/actions";
-import { authorize, spotifyApi } from "./client/client";
-import { Response } from "./client/interfaces";
+import { PlayAction } from "./actions";
+import { usePlaylistSearch } from "./client/client";
 import { isSpotifyInstalled } from "./client/utils";
 
 export default function SpotifyList() {
@@ -40,9 +39,11 @@ export default function SpotifyList() {
 
 function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; spotifyInstalled: boolean }) {
   const playlist = props.playlist;
+
   const spotifyInstalled = props.spotifyInstalled;
+  const imageURL = playlist.images[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {
-    source: playlist.images[playlist.images.length - 1].url,
+    source: imageURL ?? Icon.TextDocument,
     mask: Image.Mask.Circle,
   };
 
@@ -76,55 +77,4 @@ function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; sp
       }
     />
   );
-}
-
-function usePlaylistSearch(query: string | undefined): Response<SpotifyApi.PlaylistSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    authorize();
-
-    async function fetchData() {
-      if (cancel) {
-        return;
-      }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .searchPlaylists(query, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.PlaylistSearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: error.toString() }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: e.toString() }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return response;
 }
