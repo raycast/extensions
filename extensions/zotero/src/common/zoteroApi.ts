@@ -10,12 +10,7 @@ export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
   bibtex_path?: string;
-  csl_style?: CSLData;
-}
-
-interface CSLData {
-  title: string;
-  value: string;
+  csl_style?: string;
 }
 
 export interface RefData {
