@@ -12,12 +12,12 @@ type Props = {
 };
 
 const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
-const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
 
-const copyRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
-const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
-const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
-const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
+const copyRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
+const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
+const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
+const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
+const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
 function getURL(item: RefData): string {
   return `${
