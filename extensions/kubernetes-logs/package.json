@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kubernetes-logs",
-  "title": "Kubernetes logs",
+  "title": "Kubernetes Logs",
   "description": "kubectl logs or descriptions for Kubernetes resources",
   "icon": "k8s.png",
   "author": "m-wrzr",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [{
     "name": "logs",
-    "title": "kubelogs",
+    "title": "Kubelogs",
     "subtitle": "kubectl logs or descriptions for Kubernetes resources",
     "description": "Get logs or description for a Kubernetes resources",
     "mode": "view"
