@@ -48,6 +48,7 @@
 /extensions/cheatsheets                              @Destiner
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/circle-ci                                @qeude @kudrykv
+/extensions/citation-generator                       @AbhinavPalacharla
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
 /extensions/clear-clipboard                          @d3caf
@@ -137,7 +138,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
-/extensions/gitlab                                   @tonka3000 @Loskir @immint023
+/extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss
 /extensions/gitmoji                                  @ricoberger
 /extensions/go-package-search                        @bstncartwright
 /extensions/google-books                             @Ali-Parandeh
@@ -302,6 +303,7 @@
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman
+/extensions/rsync-commands                           @maxfahl
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann
 /extensions/script-commands                          @unnamedd
@@ -332,9 +334,11 @@
 /extensions/spotify-player                           @mattisssa @dillionverma
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
+/extensions/stock-lookup                             @jones-sam
 /extensions/stripe                                   @pradeepb28
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/surge                                    @ysj151215
+/extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-monitor                           @hossammourad
@@ -346,6 +350,7 @@
 /extensions/text-shortcuts                           @koinzhang
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
+/extensions/timers                                   @ThatNerdSquared
 /extensions/timeular                                 @kudrykv
 /extensions/tldr                                     @pomdtr
 /extensions/todo-list                                @maggie-j-liu
@@ -356,6 +361,7 @@
 /extensions/toothpick                                @briankosw
 /extensions/tower                                    @tdwesten
 /extensions/transmission                             @FezVrasta
+/extensions/transmit                                 @kennonb
 /extensions/trello                                   @ChrisChinchilla
 /extensions/tunnelblick                              @SamuelNitsche
 /extensions/tuple                                    @inxilpro

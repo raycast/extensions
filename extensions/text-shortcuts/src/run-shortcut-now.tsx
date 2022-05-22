@@ -6,6 +6,7 @@ import {
   Form,
   getPreferenceValues,
   Icon,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
@@ -54,6 +55,15 @@ function RunShortcutActions(props: {
       />
 
       <TactionActions tactions={tactions} setTactions={setTactions} />
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Gear}
+          title="Open Extension Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openExtensionPreferences}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

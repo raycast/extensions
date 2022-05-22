@@ -2,6 +2,10 @@
 
 ## [Updates] - 2022-05-12
 
+Fixed the filter rules
+
+## [Updates] - 2022-05-12
+
 Fixed missing workspaces from previous update.
 
 ## [Updates] - 2022-05-09

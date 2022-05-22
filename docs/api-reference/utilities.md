@@ -179,11 +179,7 @@ It can be used to open files or folders in a specific application. Use [getAppli
 
 #### Properties
 
-| Name     | Type                | Required | Description                                                                    |
-| :------- | :------------------ | :------- | :----------------------------------------------------------------------------- |
-| bundleId | <code>string</code> | No       | The bundle identifier of the application, e.g. `com.raycast.macos`.            |
-| name     | <code>string</code> | Yes      | The display name of the application.                                           |
-| path     | <code>string</code> | Yes      | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
+<InterfaceTableFromJSDoc name="Application" />
 
 ### PathLike
 

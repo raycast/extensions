@@ -1,16 +1,12 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { DirectoryInfo, DirectoryType, LocalDirectoryKey } from "./utils/directory-info";
+import { DirectoryInfo, DirectoryType, LocalDirectoryKey } from "./types/directory-info";
 import React, { useEffect, useState } from "react";
-import {
-  getChooseFolder,
-  getDirectoryName,
-  getFinderInsertLocation,
-  getSelectedDirectory,
-  isDirectoryOrFile,
-} from "./utils/common-utils";
+import { getDirectoryName, getSelectedDirectory, isDirectoryOrFile } from "./utils/common-utils";
 import { refreshNumber } from "./hooks/hooks";
 import path from "path";
 import fse from "fs-extra";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { getChooseFolder, getFinderInsertLocation } from "./utils/applescript-utils";
 
 export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -71,6 +67,7 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
               }}
             />
           </ActionPanel.Section>
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >

@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, trash } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  trash,
+} from "@raycast/api";
 import React, { useState } from "react";
-import { commonPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
-import { DirectoryInfo, FileInfo, FileType } from "./utils/directory-info";
+import { getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
+import { DirectoryInfo, FileInfo, FileType } from "./types/types";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
@@ -13,10 +23,12 @@ import {
   localDirectoryWithFiles,
   refreshNumber,
 } from "./hooks/hooks";
-import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./utils/ui-components";
+import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./components/ui-components";
+import { Preferences } from "./types/preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
-  const { primaryAction, rememberTag, autoCopyLatestFile } = commonPreferences();
+  const { primaryAction, rememberTag, autoCopyLatestFile } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
   const [filePath, setFilePath] = useState<FileInfo>({
@@ -30,7 +42,7 @@ export default function Command() {
 
   const showDetail = getIsShowDetail(refreshDetail);
   const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
-  const fileInfo = getFileInfoAndPreview(filePath);
+  const { fileContentInfo, isDetailLoading } = getFileInfoAndPreview(filePath);
 
   //preference: copy the latest file
   copyLatestFile(autoCopyLatestFile, directoryWithFiles);
@@ -107,7 +119,35 @@ export default function Command() {
                               : { fileIcon: fileValue.path }
                           }
                           title={fileValue.name}
-                          detail={<List.Item.Detail markdown={fileInfo} />}
+                          detail={
+                            <List.Item.Detail
+                              isLoading={isDetailLoading}
+                              markdown={fileContentInfo.fileContent}
+                              metadata={
+                                !isDetailLoading && (
+                                  <List.Item.Detail.Metadata>
+                                    <List.Item.Detail.Metadata.Label title="Name" text={fileContentInfo.name} />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label title="Where" text={fileContentInfo.where} />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label
+                                      title={fileContentInfo.sizeTitle}
+                                      text={fileContentInfo.size}
+                                    />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label title="Created" text={fileContentInfo.created} />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label title="Modified" text={fileContentInfo.modified} />
+                                    <List.Item.Detail.Metadata.Separator />
+                                    <List.Item.Detail.Metadata.Label
+                                      title="Last opened"
+                                      text={fileContentInfo.lastOpened}
+                                    />
+                                  </List.Item.Detail.Metadata>
+                                )
+                              }
+                            />
+                          }
                           actions={
                             <ActionPanel>
                               <ActionsOnFile
@@ -198,6 +238,8 @@ export default function Command() {
                                   }}
                                 />
                               </ActionPanel.Section>
+
+                              <ActionOpenCommandPreferences />
                             </ActionPanel>
                           }
                         />
@@ -226,7 +268,7 @@ function ActionsOnFile(props: {
       <ActionPanel.Section>
         <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
         <Action.ShowInFinder
-          shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
           path={fileInfo.path}
           onShow={async () => await upRank(index, setRefresh)}
         />

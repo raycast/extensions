@@ -61,7 +61,6 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
       links: [giphyResp.source && { title: "Source", text: giphyResp.source_tld, target: giphyResp.source }],
       tags: giphyResp.tags,
     },
-    attribution:
-      environment.theme === "light" ? "Poweredby_100px-White_VertLogo.png" : "Poweredby_100px-Black_VertLogo.png",
+    attribution: "giphy-logo-square-180.png",
   };
 }
