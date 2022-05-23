@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Start build",
+      "title": "Start Build",
       "subtitle": "Bitrise",
       "description": "Starts a Bitrise Build",
       "mode": "view"
