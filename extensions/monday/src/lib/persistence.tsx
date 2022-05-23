@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { Board, Me, User } from "./models";
 
 const BoardsCacheKey = "boards";
+const BoardCacheKey = "board";
 const UserCacheKey = "user";
 const TeamCacheKey = "team";
 
@@ -16,6 +17,14 @@ export async function getCachedBoards(): Promise<Board[] | undefined> {
 
 export async function cacheBoards(boards: Board[]): Promise<void> {
   return await store(BoardsCacheKey, boards);
+}
+
+export async function getCachedQuickAddBoard(): Promise<Board | undefined> {
+  return await retrieve<Board>(BoardCacheKey);
+}
+
+export async function cacheQuickAddBoard(boards: Board): Promise<void> {
+  return await store(BoardCacheKey, boards);
 }
 
 // User

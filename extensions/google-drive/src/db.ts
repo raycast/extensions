@@ -21,6 +21,7 @@ import {
   getDriveRootPath,
   throttledUpdateToastMessage,
   driveFileStream,
+  log,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -100,7 +101,7 @@ const dbConnection = async () => {
 
     return db;
   } catch (e) {
-    console.error(e);
+    log("error", e);
     showToast({ style: Toast.Style.Failure, title: `Unable to open the database file at ${DB_FILE_PATH}` });
     return null;
   }
