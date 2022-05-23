@@ -1,4 +1,4 @@
-# World Time
+# World Clock
 
 Look the current time of a region, ip or domain.
 
@@ -12,6 +12,7 @@ Look the current time of a region, ip or domain.
 > While the data we return should be accurate, no guarantees can be made. We don't manage the infrastructure or network, so cannot be 100% certain about accuracy. We update the time details at the last possible moment in our application before returning the data to you, and we find that responses are generated in just a few ms, but anything sub-second should realistically be ignored.
 > Please note that there is a fair-use policy in place; any attempt to make many requests in a short timeframe will find the requests are forbidden.
 > Therefore, this API should not be used:
+>
 > - in "real-time" situations where absolutely accurate timing data is required
 > - as an alternative to ntp
 > - as an alternative to calculating local time changes (eg. making a request every second)

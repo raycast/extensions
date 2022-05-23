@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "world-time",
-  "title": "World Time",
+  "name": "world-clock",
+  "title": "World Clock",
   "description": "Look the current time of a region, ip or domain.",
-  "icon": "world-time.png",
+  "icon": "world-clock.png",
   "author": "koinzhang",
   "categories": [
     "Data",
@@ -15,23 +15,15 @@
       "name": "look-ip-time",
       "title": "Look IP Time",
       "icon": "look-ip-time.png",
+      "subtitle": "World Clock",
       "description": "Look the current time based on IP or domain.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "rememberTag",
-          "type": "checkbox",
-          "required": false,
-          "label": "Remember Filter Tag",
-          "description": "Remember filter tag.",
-          "default": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "look-world-time",
       "title": "Look World Time",
       "icon": "look-world-time.png",
+      "subtitle": "World Clock",
       "description": "Look the current time for a timezone with region.",
       "mode": "view",
       "preferences": [

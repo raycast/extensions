@@ -31,7 +31,6 @@ export function TimeZoneListItem(props: {
               if (!starTimezones.includes(timezone)) {
                 const _starTimezones = [...starTimezones];
                 _starTimezones.push(timezone);
-                console.debug(_starTimezones);
                 await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(_starTimezones)).then(() => {
                   setRefresh(Date.now());
                 });

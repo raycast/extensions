@@ -16,13 +16,13 @@ export default function PopularArticles() {
     if (timeInfo.length === 0 && !isEmpty(searchContent)) {
       return "Invalid Query";
     }
-    return "World Time";
+    return "World Clock";
   };
 
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Look world time via IP or domain"}
+      searchBarPlaceholder={"Look current time via IP or domain"}
       onSearchTextChange={(text) => {
         if (typeof text !== "undefined" && !isEmpty(text.replaceAll(" ", "")))
           setSearchContent(text.replaceAll(" ", ""));
