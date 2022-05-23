@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-clock",
   "title": "World Clock",
-  "description": "Look the current time of a region, ip or domain.",
+  "description": "Lookup the current time of a region, ip or domain.",
   "icon": "world-clock.png",
   "author": "koinzhang",
   "categories": [
@@ -12,19 +12,19 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "look-ip-time",
-      "title": "Look IP Time",
-      "icon": "look-ip-time.png",
+      "name": "lookup-ip-time",
+      "title": "Lookup IP Time",
+      "icon": "lookup-ip-time.png",
       "subtitle": "World Clock",
-      "description": "Look the current time based on IP or domain.",
+      "description": "Lookup the current time based on IP or domain.",
       "mode": "view"
     },
     {
-      "name": "look-world-time",
-      "title": "Look World Time",
-      "icon": "look-world-time.png",
+      "name": "lookup-world-time",
+      "title": "Lookup World Time",
+      "icon": "lookup-world-time.png",
       "subtitle": "World Clock",
-      "description": "Look the current time for a timezone with region.",
+      "description": "Lookup the current time for a timezone with region.",
       "mode": "view",
       "preferences": [
         {
