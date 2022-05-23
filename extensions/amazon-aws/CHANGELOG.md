@@ -1,8 +1,9 @@
 # Amazon AWS Changelog
 
-## [Bug fix for EC2 Instances] - 2022-05-23
+## [Bug fix for EC2 Instances & UX improvement for SQS command] - 2022-05-23
 
 - Manage the case where there is no public ip in EC2 ([#1715](https://github.com/raycast/extensions/pull/1715))
+- Loading indicators for queues attributes ([#1716](https://github.com/raycast/extensions/pull/1716))
 
 ## [DynamoDB tables command] - 2022-05-10
 
