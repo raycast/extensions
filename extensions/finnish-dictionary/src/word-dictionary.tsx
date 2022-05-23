@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { resToDetail } from "./common";
@@ -11,6 +11,7 @@ interface Suggestion {
 
 export default function WordDictionary(props: { from: string; to: string }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [recentSearches, setRecentSearches] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -30,17 +31,38 @@ export default function WordDictionary(props: { from: string; to: string }) {
     setIsLoading(false);
   }
 
+  useEffect(() => {
+    (async () => {
+      const historyJson = await LocalStorage.getItem(`recent-searches-${props.from}-${props.to}`);
+      if (historyJson) {
+        setRecentSearches(JSON.parse(historyJson));
+      }
+    })();
+  }, []);
+
   return (
     <List
       isLoading={isLoading}
       throttle
       searchBarPlaceholder="Search..."
       onSearchTextChange={search}
-      isShowingDetail={suggestions.length > 0}
+      isShowingDetail={suggestions.length > 0 || recentSearches.length > 0}
       navigationTitle={`Define ${props.from} word in ${props.to}`}
     >
-      {(searchQuery === "" || isLoading) && suggestions.length === 0 ? (
+      {(searchQuery === "" || isLoading) && suggestions.length === 0 && recentSearches.length == 0 ? (
         <List.EmptyView icon={Icon.Text} title="Type a word to define" />
+      ) : searchQuery === "" && recentSearches.length > 0 ? (
+        <List.Section title="Recent searches">
+          {recentSearches.map((result, i) => (
+            <List.Item
+              id={result.title + i}
+              key={result.title}
+              title={result.title}
+              accessories={[{ icon: Icon.Clock }]}
+              detail={<List.Item.Detail markdown={result.detail} />}
+            />
+          ))}
+        </List.Section>
       ) : (
         suggestions.map((result) => (
           <List.Item
@@ -85,7 +107,21 @@ const ResultDetail = ({ res, from, to }: ResultDetailProps) => {
           encodeURI(`https://api.redfoxsanakirja.fi/redfox-api/api/basic/query/${from}/${to}/${res.title}`)
         );
         if (isMounted.current) {
-          setState({ isLoading: false, content: resToDetail(res.title, from, to, translation.data) });
+          const detail = resToDetail(res.title, from, to, translation.data);
+          const historyJson: string = await LocalStorage.getItem(`recent-searches-${from}-${to}`);
+          let recent = historyJson ? JSON.parse(historyJson) : [];
+          recent = [
+            {
+              title: res.title,
+              from: from,
+              to: to,
+              detail: detail,
+            },
+            ...recent,
+          ].splice(0, 5);
+          await LocalStorage.setItem(`recent-searches-${from}-${to}`, JSON.stringify(recent));
+
+          setState({ isLoading: false, content: detail });
         }
       } catch (_e) {
         if (isMounted.current) {
