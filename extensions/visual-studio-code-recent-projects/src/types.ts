@@ -1,6 +1,3 @@
-import { existsSync } from "fs";
-import { URL } from "url";
-
 export interface FileEntry {
   id: string;
   fileUri: string;
