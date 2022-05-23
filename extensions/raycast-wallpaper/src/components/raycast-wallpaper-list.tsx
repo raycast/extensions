@@ -12,7 +12,7 @@ import fileUrl from "file-url";
 import { RAYCAST_WALLPAPER } from "../utils/constants";
 import React from "react";
 import { RaycastWallpaper } from "../types/types";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { ActionOpenPreferences } from "./action-open-preferences";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 
 export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpaper[] }) {
@@ -91,7 +91,7 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
                   />
                 </ActionPanel.Section>
 
-                <ActionOpenCommandPreferences />
+                <ActionOpenPreferences />
               </ActionPanel>
             }
           />
