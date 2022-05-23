@@ -22,7 +22,7 @@
       "name": "restore-dock-state",
       "title": "Restore Dock State",
       "subtitle": "Dock",
-      "description": "Restore Dock state from the last backup.",
+      "description": "Restore Dock state from the last backups.",
       "mode": "no-view"
     },
     {
@@ -47,6 +47,13 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-auto-hide-delay",
+      "title": "Toggle Auto Hide Delay",
+      "subtitle": "Dock",
+      "description": "Disable Dock auto-hide time delay.",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle-dock-orientation",
       "title": "Toggle Dock Orientation",
       "subtitle": "Dock",
@@ -58,6 +65,13 @@
       "title": "Toggle Minimal Effect",
       "subtitle": "Dock",
       "description": "Set the effects when the application is minimized, including Suck, Genie, Scale.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-scroll-to-open",
+      "title": "Toggle Scroll to Open",
+      "subtitle": "Dock",
+      "description": "Allows you to use the scroll up gesture to open the stack or use the same gesture on a running application to display all windows associated with that application (also known as Exposé).",
       "mode": "no-view"
     },
     {

@@ -11,8 +11,10 @@ Backup, restore and reset Dock state.
 
 - Add Spacer to Dock: Add movable spacing between icons on the Dock.
 - Toggle Auto Hide: The dock will automatically show and hide.
+- Toggle Auto Hide Delay: Disable Dock auto-hide time delay.
 - Toggle Dock Orientation: Set the orientation of the Dock, including Left, Bottom, Right
 - Toggle Minimal Effect: Set the effects when the application is minimized, including Suck, Genie, Scale.
+- Toggle scroll to open: Allows you to use the scroll up gesture to open the stack or use the same gesture on a running application to display all windows associated with that application (also known as Exposé).
 - Toggle Show Hidden: The icon of apps with hidden window on the Dock will be dimmed.
 - Toggle Single App: When you click on an app on the Dock, the window of that app will be displayed at the top and all other apps will be hidden at the same time.
 - Toggle Static Only: The Dock will only show the icon of the currently running application.
