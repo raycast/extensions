@@ -4,8 +4,9 @@ import { searchIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";
 import { listIcons } from "./utils/constants";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
-export default function SearchIpGeolocation() {
+export default function LookupIpGeolocation() {
   const { language } = commonPreferences();
   const [searchContent, setSearchContent] = useState<string>("");
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
@@ -23,7 +24,7 @@ export default function SearchIpGeolocation() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search any IP address/domain"}
+      searchBarPlaceholder={"Lookup any IP address/domain"}
       searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
@@ -46,6 +47,7 @@ export default function SearchIpGeolocation() {
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
               />
+              <ActionOpenExtensionPreferences />
             </ActionPanel>
           }
         />

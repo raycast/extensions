@@ -4,6 +4,7 @@ import { searchMyIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";
 import { myIpListIcons } from "./utils/constants";
 import { commonPreferences } from "./utils/common-utils";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
 export default function SearchIpGeolocation() {
   const { language } = commonPreferences();
@@ -29,6 +30,7 @@ export default function SearchIpGeolocation() {
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
               />
+              <ActionOpenExtensionPreferences />
             </ActionPanel>
           }
         />
