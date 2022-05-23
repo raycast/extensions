@@ -1,6 +1,6 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Fix] - 2022-05-16
+## [Fix] - 2022-05-23
 
 Adds back the support for remote workspaces that got broken in an earlier fix
 
