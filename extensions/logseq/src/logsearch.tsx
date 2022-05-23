@@ -13,7 +13,7 @@ import {
 } from "./utils";
 export default function Command() {
   const { state, search } = useSearch();
-  React.useEffect(() => {
+  useEffect(() => {
     validateUserConfigGraphPath().catch((e) => {
       showGraphPathInvalidToast();
       throw "Folder Does not Exist";
