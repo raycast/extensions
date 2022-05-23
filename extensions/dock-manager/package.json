@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock-manager",
+  "title": "Dock Manager",
+  "description": "Custom advanced preferences of Dock.\nBackup, restore and reset Dock state.",
+  "icon": "dock-manager.png",
+  "author": "koinzhang",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-spacer-to-dock",
+      "title": "Add Spacer to Dock",
+      "subtitle": "System",
+      "description": "Add movable spacing between icons on the Dock.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-dock-state",
+      "title": "Restore Dock State",
+      "subtitle": "System",
+      "description": "Restore Dock state from the last backup.",
+      "mode": "no-view"
+    },
+    {
+      "name": "backup-dock-state",
+      "title": "Backup Dock State",
+      "subtitle": "System",
+      "description": "Backup Dock state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset-dock-state",
+      "title": "Reset Dock State",
+      "subtitle": "System",
+      "description": "Reset Dock state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-hide",
+      "title": "Toggle Auto Hide",
+      "subtitle": "System",
+      "description": "The Dock will automatically show and hide.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-dock-orientation",
+      "title": "Toggle Dock Orientation",
+      "subtitle": "System",
+      "description": "Set the orientation of the Dock, including Left, Bottom, Right",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-minimal-effect",
+      "title": "Toggle Minimal Effect",
+      "subtitle": "System",
+      "description": "Set the effects when the application is minimized, including Suck, Genie, Scale.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-show-hidden",
+      "title": "Toggle Show Hidden",
+      "subtitle": "System",
+      "description": "The icon of the hidden app on the Dock will be dimmed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-single-app",
+      "title": "Toggle Single App",
+      "subtitle": "System",
+      "description": "When you click on an app on the Dock, the window of that app will be displayed at the top and all other apps will be hidden at the same time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-static-only",
+      "title": "Toggle Static Only",
+      "subtitle": "System",
+      "description": "The Dock will only show the icon of the currently running application.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
