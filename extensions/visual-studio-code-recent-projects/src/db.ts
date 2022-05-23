@@ -43,7 +43,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
     }
     const db = await loadDB();
     const res = db.exec(
-      "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
+      "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
     ) as unknown as QueryResult;
 
     // Filtering is handled by Raycast, so the DB can be closed immediately
@@ -59,7 +59,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
     const entries = recentOpenedMenu?.submenu?.items || [];
     return entries
       .filter(({ id }) =>
-        [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id),
+        [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id)
       )
       .map(({ id, uri, label }) => {
         switch (id) {
@@ -81,12 +81,8 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
           case RecentOpenedItemId.Folder:
             return {
               id: id,
-              label: 'vscode-remote' === uri.scheme
-                ? label
-                : basename(uri.path),
-              folderUri: 'vscode-remote' === uri.scheme
-                ? uri.external
-                : `${uri.scheme}://${uri.path}`,
+              label: "vscode-remote" === uri.scheme ? label : basename(uri.path),
+              folderUri: "vscode-remote" === uri.scheme ? uri.external : `${uri.scheme}://${uri.path}`,
               scheme: uri.scheme,
             };
         }
