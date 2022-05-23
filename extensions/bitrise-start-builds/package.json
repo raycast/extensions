@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Start build",
-      "subtitle": "Start Bitrise Build",
+      "title": "Start Build",
+      "subtitle": "Bitrise",
       "description": "Starts a Bitrise Build",
       "mode": "view"
     }
@@ -29,8 +29,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.34.1",
-    "node-fetch": "^3.2.4",
-    "react": "^18.1.0"
+    "node-fetch": "^3.2.4"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
