@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { getSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
 import { SpecifyIdImageConfig } from "./types/types";
 import { Preferences } from "./types/preferences";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { RevealImageAction } from "./components/reveal-image-action";
 
@@ -40,7 +40,7 @@ export default function StylizePlaceholderImage(props: { id: string; width: numb
               primaryAction={primaryAction}
             />
           </ActionPanel.Section>
-          <ActionOpenCommandPreferences />
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     >

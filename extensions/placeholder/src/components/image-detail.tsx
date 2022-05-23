@@ -1,7 +1,7 @@
 import { ActionPanel, Detail } from "@raycast/api";
 import { PicsumImageAction } from "./picsum-image-action";
 import React from "react";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { ActionOpenPreferences } from "./action-open-preferences";
 
 export function ImageDetail(props: {
   imageURL: string;
@@ -25,7 +25,7 @@ export function ImageDetail(props: {
             setRefresh={setRefresh}
           />
 
-          <ActionOpenCommandPreferences />
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     ></Detail>

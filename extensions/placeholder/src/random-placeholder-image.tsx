@@ -5,7 +5,7 @@ import { PicsumImageAction } from "./components/picsum-image-action";
 import { getRandomPlaceholderImageURL } from "./hooks/hooks";
 import { RandomImageConfig, randomImageConfigInit } from "./types/types";
 import { Preferences } from "./types/preferences";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateShortcut() {
   const { primaryAction, autoRefresh } = getPreferenceValues<Preferences>();
@@ -55,7 +55,7 @@ export default function CreateShortcut() {
               />
             )}
           </ActionPanel.Section>
-          <ActionOpenCommandPreferences />
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     >

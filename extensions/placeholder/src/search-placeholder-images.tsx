@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { getPlaceholderImages } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 import StylizePlaceholderImage from "./stylize-placeholder-image";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { setWallpaper } from "./utils/common-utils";
@@ -103,7 +103,7 @@ export default function SearchPlaceholderImages() {
                     content={value.url}
                   />
                 </ActionPanel.Section>
-                <ActionOpenCommandPreferences />
+                <ActionOpenPreferences />
               </ActionPanel>
             }
           />

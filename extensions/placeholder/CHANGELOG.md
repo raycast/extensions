@@ -1,6 +1,6 @@
 # Placeholder Changelog
 
-## [Add Search Placeholder Image command] - 2022-05-27
+## [Add Search Placeholder Image command] - 2022-05-23
 
 - Add Search Placeholder Image command
 - Update extension icons
