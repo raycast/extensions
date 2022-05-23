@@ -33,7 +33,7 @@ export default function WordDictionary(props: { from: string; to: string }) {
 
   useEffect(() => {
     (async () => {
-      const historyJson = await LocalStorage.getItem(`recent-searches-${props.from}-${props.to}`);
+      const historyJson = (await LocalStorage.getItem(`recent-searches-${props.from}-${props.to}`)) as string;
       if (historyJson) {
         setRecentSearches(JSON.parse(historyJson));
       }
@@ -108,7 +108,7 @@ const ResultDetail = ({ res, from, to }: ResultDetailProps) => {
         );
         if (isMounted.current) {
           const detail = resToDetail(res.title, from, to, translation.data);
-          const historyJson: string = await LocalStorage.getItem(`recent-searches-${from}-${to}`);
+          const historyJson = (await LocalStorage.getItem(`recent-searches-${from}-${to}`)) as string;
           let recent = historyJson ? JSON.parse(historyJson) : [];
           recent = [
             {
