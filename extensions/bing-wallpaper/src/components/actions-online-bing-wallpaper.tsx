@@ -3,7 +3,7 @@ import { downloadPicture, setWallpaper } from "../utils/common-utils";
 import { buildBingImageURL, buildCopyrightURL, getPictureName } from "../utils/bing-wallpaper-utils";
 import React from "react";
 import { BingImage } from "../types/types";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
 
 export function ActionsOnlineBingWallpaper(props: {
   bingImage: BingImage;
@@ -62,7 +62,7 @@ export function ActionsOnlineBingWallpaper(props: {
           }}
         />
       </ActionPanel.Section>
-      <ActionOpenCommandPreferences />
+      <ActionOpenExtensionPreferences />
     </ActionPanel>
   );
 }

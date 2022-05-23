@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
 import React from "react";
 import { DownloadedBingImage } from "../types/types";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
 import { setDownloadedWallpaper } from "../utils/common-utils";
 
 export function ActionsDownloadedBingWallpaper(props: {
@@ -39,7 +39,7 @@ export function ActionsDownloadedBingWallpaper(props: {
           }}
         />
       </ActionPanel.Section>
-      <ActionOpenCommandPreferences />
+      <ActionOpenExtensionPreferences />
     </ActionPanel>
   );
 }

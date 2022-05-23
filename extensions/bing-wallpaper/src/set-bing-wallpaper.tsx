@@ -10,10 +10,10 @@ import { WallpaperTag, wallpaperTags } from "./utils/constants";
 import { ListEmptyView } from "./components/list-empty-view";
 
 export default function CommonDirectory() {
-  const { downloadSize, showDownloadedWallpapers } = getPreferenceValues<Preferences>();
+  const { downloadSize, includeDownloadedWallpapers } = getPreferenceValues<Preferences>();
   const [wallpaperTag, setWallpaperTag] = useState<string>("");
 
-  const { bingWallpaperHD, downloadedBingWallpapers, isLoading } = getBingWallpapers(showDownloadedWallpapers);
+  const { bingWallpaperHD, downloadedBingWallpapers, isLoading } = getBingWallpapers(includeDownloadedWallpapers);
   autoDownloadWallpapers(bingWallpaperHD);
 
   return (
@@ -22,7 +22,7 @@ export default function CommonDirectory() {
       isLoading={isLoading}
       searchBarPlaceholder={"Search wallpapers"}
       searchBarAccessory={
-        showDownloadedWallpapers ? (
+        includeDownloadedWallpapers ? (
           <List.Dropdown onChange={setWallpaperTag} tooltip={"Wallpaper type"} storeValue={true}>
             {wallpaperTags.map((value, index) => {
               return <List.Dropdown.Item key={index + "_" + value[0]} title={value[1]} value={value[1]} />;
@@ -63,7 +63,7 @@ ${bingImage.copyright}`}
           })}
         </List.Section>
       )}
-      {showDownloadedWallpapers && (wallpaperTag === WallpaperTag.ALL || wallpaperTag === WallpaperTag.DOWNLOADED) && (
+      {includeDownloadedWallpapers && (wallpaperTag === WallpaperTag.ALL || wallpaperTag === WallpaperTag.DOWNLOADED) && (
         <List.Section title={"Downloaded Wallpapers"}>
           {downloadedBingWallpapers?.map((bingImage, index) => {
             return (

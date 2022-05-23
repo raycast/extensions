@@ -3,5 +3,5 @@ export interface Preferences {
   downloadSize: string;
   downloadDirectory: string;
   autoDownload: boolean;
-  showDownloadedWallpapers: boolean;
+  includeDownloadedWallpapers: boolean;
 }

@@ -1,6 +1,6 @@
 import { ActionPanel, List } from "@raycast/api";
 import React from "react";
-import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
 
 export function ListEmptyView() {
   return (
@@ -10,7 +10,7 @@ export function ListEmptyView() {
       description={""}
       actions={
         <ActionPanel>
-          <ActionOpenCommandPreferences />
+          <ActionOpenExtensionPreferences />
         </ActionPanel>
       }
     />

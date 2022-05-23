@@ -74,9 +74,9 @@
       "default": true
     },
     {
-      "name": "showDownloadedWallpapers",
-      "label": "Show Downloaded Wallpapers",
-      "description": "Show downloaded wallpapers in the Set Bing Wallpaper command.",
+      "name": "includeDownloadedWallpapers",
+      "label": "Include Downloaded Wallpapers",
+      "description": "Include downloaded wallpapers in the Set Bing Wallpaper and Random Bing Wallpaper command.",
       "type": "checkbox",
       "required": true,
       "default": true
