@@ -4,5 +4,5 @@ import { toggleDockVisibility } from "./utils/applescript-utils";
 export default async () => {
   await closeMainWindow({ clearRootSearch: false });
   await toggleDockVisibility();
-  await showHUD("Toggle dock visibility");
+  await showHUD("Toggle Dock auto-hide");
 };

@@ -9,5 +9,5 @@ export default async () => {
       shell: true,
     }
   );
-  await showHUD("Add spacer to dock");
+  await showHUD("Add spacer to Dock");
 };

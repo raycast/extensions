@@ -8,7 +8,7 @@ export default async () => {
   const oldIndex = orientations.indexOf(dockOrientation);
   const newIndex = oldIndex + 1 >= orientations.length ? 0 : oldIndex + 1;
   spawnSync(`defaults write com.apple.dock orientation ${orientations[newIndex]} && killall Dock`, { shell: true });
-  await showHUD("Current dock orientation: " + orientationsTitle[newIndex]);
+  await showHUD("Current Dock orientation: " + orientationsTitle[newIndex]);
 };
 
 const orientations = ["left", "bottom", "right"];
