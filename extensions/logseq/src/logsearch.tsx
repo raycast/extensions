@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import MiniSearch from "minisearch";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -13,10 +13,12 @@ import {
 } from "./utils";
 export default function Command() {
   const { state, search } = useSearch();
-  validateUserConfigGraphPath().catch((e) => {
-    showGraphPathInvalidToast();
-    throw "Folder Does not Exist";
-  });
+  React.useEffect(() => {
+    validateUserConfigGraphPath().catch((e) => {
+      showGraphPathInvalidToast();
+      throw "Folder Does not Exist";
+    });
+  }, [search]);
 
   return (
     <List
