@@ -1,59 +1,44 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
-import { useState } from "react";
-import { ImageDetail } from "./components/image-detail";
-import { PicsumImageAction } from "./components/picsum-image-action";
-import { getRandomPlaceholderImageURL } from "./hooks/hooks";
-import { RandomImageConfig, randomImageConfigInit } from "./types/types";
+import { ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import React, { useState } from "react";
+import { getSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
+import { SpecifyIdImageConfig } from "./types/types";
 import { Preferences } from "./types/preferences";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { PicsumImageAction } from "./components/picsum-image-action";
+import { RevealImageAction } from "./components/reveal-image-action";
 
-export default function CreateShortcut() {
-  const { primaryAction, autoRefresh } = getPreferenceValues<Preferences>();
+export default function StylizePlaceholderImage(props: { id: string; width: number; height: number }) {
+  const { id, width, height } = props;
+  const { primaryAction } = getPreferenceValues<Preferences>();
 
-  const [picsumConfig, setPicsumConfig] = useState<RandomImageConfig>(randomImageConfigInit);
-  const [refresh, setRefresh] = useState<number>(0);
+  const [picsumConfig, setPicsumConfig] = useState<SpecifyIdImageConfig>({
+    id: id,
+    width: width + "",
+    height: height + "",
+    blur: "0",
+    jpg: false,
+    cache: false,
+    grayscale: false,
+  });
 
-  const { imageURL } = getRandomPlaceholderImageURL(picsumConfig, refresh);
+  const { imageURL } = getSpecifyIdPlaceholderImageURL(picsumConfig);
 
   return (
     <Form
+      navigationTitle={"Stylize Image"}
       actions={
         <ActionPanel>
           <PicsumImageAction
             imageURL={imageURL}
             size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
             primaryAction={primaryAction}
-            autoRefresh={autoRefresh}
-            setRefresh={setRefresh}
           />
           <ActionPanel.Section>
-            <Action.Push
-              icon={Icon.Window}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              title={"Show in Raycast"}
-              target={
-                <ImageDetail
-                  imageURL={imageURL}
-                  size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-                  primaryAction={primaryAction}
-                  autoRefresh={autoRefresh}
-                  setRefresh={setRefresh}
-                />
-              }
+            <RevealImageAction
+              imageURL={imageURL}
+              size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
+              primaryAction={primaryAction}
             />
-            <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={imageURL} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {picsumConfig.staticRandom && (
-              <Action
-                icon={Icon.TwoArrowsClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                title={"Refresh Image URL"}
-                onAction={() => {
-                  setRefresh(Date.now);
-                }}
-              />
-            )}
           </ActionPanel.Section>
           <ActionOpenPreferences />
         </ActionPanel>
@@ -125,17 +110,6 @@ export default function CreateShortcut() {
         onChange={(newValue) => {
           const _randomImageConfig = { ...picsumConfig };
           _randomImageConfig.cache = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Checkbox
-        id={"Static Random"}
-        label={"Static Random"}
-        value={picsumConfig.staticRandom}
-        info={"Get the same random image every time based on a seed"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.staticRandom = newValue;
           setPicsumConfig(_randomImageConfig);
         }}
       />

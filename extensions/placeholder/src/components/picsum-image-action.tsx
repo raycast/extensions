@@ -2,18 +2,31 @@ import { Action, Clipboard, Icon, showHUD } from "@raycast/api";
 import { downloadAndCopyImage, downloadImage } from "../utils/common-utils";
 import React from "react";
 
-export function ImageAction(props: {
+export function PicsumImageAction(props: {
   imageURL: string;
+  size: string;
   primaryAction: string;
-  autoRefresh: boolean;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  autoRefresh?: boolean;
+  setRefresh?: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { imageURL, primaryAction, autoRefresh, setRefresh } = props;
+  const { imageURL, size, primaryAction } = props;
+  const autoRefresh = typeof props.autoRefresh === "undefined" ? false : props.autoRefresh;
+  const setRefresh =
+    typeof props.setRefresh === "undefined"
+      ? () => {
+          return;
+        }
+      : props.setRefresh;
+
   return (
     <>
       <Action
         icon={Icon.Clipboard}
-        title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image"}
+        title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image File"}
+        shortcut={{
+          modifiers: primaryAction === "Copy Image URL" ? ["shift", "cmd"] : ["cmd"],
+          key: primaryAction === "Copy Image URL" ? "," : ".",
+        }}
         onAction={() => {
           if (primaryAction === "Copy Image URL") {
             Clipboard.copy(imageURL).then(() => {
@@ -29,7 +42,11 @@ export function ImageAction(props: {
       />
       <Action
         icon={Icon.Clipboard}
-        title={primaryAction === "Copy Image URL" ? "Copy Image" : "Copy Image URL"}
+        title={primaryAction === "Copy Image URL" ? "Copy Image File" : "Copy Image URL"}
+        shortcut={{
+          modifiers: primaryAction === "Copy Image URL" ? ["cmd"] : ["shift", "cmd"],
+          key: primaryAction === "Copy Image URL" ? "." : ",",
+        }}
         onAction={() => {
           if (primaryAction === "Copy Image URL") {
             downloadAndCopyImage(imageURL).then();
@@ -48,7 +65,7 @@ export function ImageAction(props: {
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         title={"Download Image"}
         onAction={() => {
-          downloadImage(imageURL).then();
+          downloadImage(imageURL, size).then();
           if (autoRefresh) {
             setRefresh(Date.now());
           }
