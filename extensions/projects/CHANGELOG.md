@@ -1,5 +1,11 @@
 # Projects Changelog
 
+## [Support for tauri & wails projects] - 2022-05-20
+
+- Better way to exclude project types
+- Supports tauri & wails projects
+- Code refactoring: Now integrating new project type would be much faster.
+
 ## [Added support for Xcode projects + Advanced Search] - 2022-05-16
 
 - Faster search with mfind (instead of find)

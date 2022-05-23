@@ -20,63 +20,71 @@
       "name": "repoScanPath",
       "type": "textfield",
       "required": true,
-      "default": "",
+      "default": "~/",
       "title": "Path to scan for projects",
       "description": "Path to scan for proejcts. ~/ is expanded. Use : to seperate multiple paths"
     },
     {
-      "name": "scanForProjectTypes",
-      "type": "textfield",
-      "required": false,
-      "default": "node,maven,gradle,xcode",
-      "title": "Type of projects to scan for.",
-      "description": "Type of projects to scan for. Use , to seperate multiple paths. Supported: node,maven,gradle,xcode"
+      "name": "openDefaultWith",
+      "type": "appPicker",
+      "required": true,
+      "title": "Default IDE (required)",
+      "description": "You can set specific editors for each project in preferences.",
+      "default": "Visual Studio Code"
     },
     {
       "name": "openNodeWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open NODE projects with (required), shortcut: ⏎",
-      "description": "Open NODE projects with",
+      "title": "Open NODE projects with, shortcut: ⏎",
+      "description": "Open NODE projects with (to exclude select -)",
       "default": "Visual Studio Code"
     },
     {
       "name": "openXcodeWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open XCode projects with (required), shortcut: ⏎",
-      "description": "Open XCode projects with",
+      "title": "Open XCode projects with, shortcut: ⏎",
+      "description": "Open XCode projects with (to exclude select -)",
       "default": "Xcode"
     },
     {
       "name": "openMavenWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open MAVEN projects with (required), shortcut: ⏎",
-      "description": "Open MAVEN projects with",
+      "title": "Open MAVEN projects with , shortcut: ⏎",
+      "description": "Open MAVEN projects with (to exclude select -)",
       "default": "IntelliJ IDEA CE"
     },
     {
       "name": "openGradleWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open GRADLE projects with (required), shortcut: ⏎",
-      "description": "Open GRADLE projects with",
+      "title": "Open GRADLE projects with, shortcut: ⏎",
+      "description": "Open GRADLE projects with (to exclude select -)",
       "default": "IntelliJ IDEA CE"
     },
     {
-      "name": "openWith1",
+      "name": "openTauriWith",
       "type": "appPicker",
       "required": false,
-      "title": "Open with (default), shortcut: ⌥⏎",
-      "description": "Open with",
+      "title": "Open Tauri projects with, shortcut: ⏎",
+      "description": "Open Tauri projects with (to exclude select -)",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openWailsWith",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open Wails projects with, shortcut: ⏎",
+      "description": "Open Wails projects with (to exclude select -)",
       "default": "Visual Studio Code"
     },
     {
       "name": "openWith2",
       "type": "appPicker",
       "required": false,
-      "title": "Open with (optional), shortcut: ＾⏎",
+      "title": "Open with, shortcut: ＾⏎",
       "description": "Open with",
       "default": ""
     },
@@ -84,7 +92,7 @@
       "name": "openWith3",
       "type": "appPicker",
       "required": false,
-      "title": "Open with (optional), shortcut: ⇧⏎",
+      "title": "Open with, shortcut: ⇧⏎",
       "description": "Open with",
       "default": ""
     }
