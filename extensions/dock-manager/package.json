@@ -15,7 +15,7 @@
       "name": "add-spacer-to-dock",
       "title": "Add Spacer to Dock",
       "subtitle": "Dock",
-      "description": "Add movable spacing between icons on the Dock.",
+      "description": "Add a movable spacer tile between icons on the Dock.",
       "mode": "no-view"
     },
     {
@@ -29,14 +29,14 @@
       "name": "backup-dock-state",
       "title": "Backup Dock State",
       "subtitle": "Dock",
-      "description": "Backup Dock state.",
+      "description": "Backup current Dock state.",
       "mode": "no-view"
     },
     {
       "name": "reset-dock-state",
       "title": "Reset Dock State",
       "subtitle": "Dock",
-      "description": "Reset Dock state.",
+      "description": "Reset Dock to initial state.",
       "mode": "no-view"
     },
     {
@@ -64,7 +64,7 @@
       "name": "toggle-show-hidden",
       "title": "Toggle Show Hidden",
       "subtitle": "Dock",
-      "description": "The icon of the hidden app on the Dock will be dimmed.",
+      "description": "The icon of apps with hidden window on the Dock will be dimmed.",
       "mode": "no-view"
     },
     {
