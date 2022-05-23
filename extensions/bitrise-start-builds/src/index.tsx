@@ -19,7 +19,7 @@ import fetch from "node-fetch";
 import { BranchesList } from "./branches";
 
 export default function AppList() {
-  const [state, setState] = useState<{ apps: App[] }>({ apps: [] });
+  const [state, setState] = useState<{ apps: App[], isLoading: boolean, didFetch: boolean }>({ apps: [], isLoading: true, didFetch: false });
 
   useEffect(() => {
     async function fetch() {
@@ -27,16 +27,18 @@ export default function AppList() {
       setState((oldState) => ({
         ...oldState,
         apps: apps,
+        isLoading: apps.length == 0,
+        didFetch: true,
       }));
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={state.apps.length === 0} searchBarPlaceholder="Filter apps by name...">
+    <List isLoading={!state.didFetch && state.isLoading} searchBarPlaceholder="Filter apps by name...">
       {state.apps.map((app) => (
         <AppListItem key={app.slug} app={app} />
-      ))}
+      ))}  
     </List>
   );
 }
@@ -69,11 +71,21 @@ async function fetchApps(): Promise<App[]> {
         Authorization: apiKey,
       },
     });
-    const json = await response.json();
-    return (json as Record<string, unknown>).data as App[];
+    
+    if (response.ok) {
+      const json = await response.json();
+      return (json as Record<string, unknown>).data as App[];  
+    } else {
+      if (response.status == 401) {
+        throw new Error(`Could not load apps due to invalid API token`)  
+      } else {
+        throw new Error(`Could not load apps! ${response.status} ${response.statusText}`)  
+      }  
+    }
+    
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, `Could not load apps due to ${error}`);
+    showToast(ToastStyle.Failure, `${error}`);
     return Promise.resolve([]);
   }
 }
