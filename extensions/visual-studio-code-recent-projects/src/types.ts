@@ -8,7 +8,7 @@ export interface FileEntry {
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
   const { id } = entry as FileEntry;
-  return id === 'openRecentFile'
+  return id === "openRecentFile";
 }
 
 export interface FolderEntry {
@@ -19,7 +19,7 @@ export interface FolderEntry {
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
   const { id, scheme } = entry as FolderEntry;
-  return id === 'openRecentFolder' && scheme !== 'vscode-remote';
+  return id === "openRecentFolder" && scheme !== "vscode-remote";
 }
 
 export interface WorkspaceEntry {
@@ -29,7 +29,7 @@ export interface WorkspaceEntry {
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   const { id } = entry as WorkspaceEntry;
-  return id === 'openRecentWorkspace';
+  return id === "openRecentWorkspace";
 }
 
 export interface RemoteEntry {
@@ -41,7 +41,7 @@ export interface RemoteEntry {
 
 export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
   const { id, scheme } = entry as RemoteEntry;
-  return id === 'openRecentFolder' && scheme === 'vscode-remote';
+  return id === "openRecentFolder" && scheme === "vscode-remote";
 }
 
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;

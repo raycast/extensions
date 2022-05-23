@@ -81,12 +81,8 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
           case RecentOpenedItemId.Folder:
             return {
               id: id,
-              label: 'vscode-remote' === uri.scheme
-                ? label
-                : basename(uri.path),
-              folderUri: 'vscode-remote' === uri.scheme
-                ? uri.external
-                : `${uri.scheme}://${uri.path}`,
+              label: "vscode-remote" === uri.scheme ? label : basename(uri.path),
+              folderUri: "vscode-remote" === uri.scheme ? uri.external : `${uri.scheme}://${uri.path}`,
               scheme: uri.scheme,
             };
         }
