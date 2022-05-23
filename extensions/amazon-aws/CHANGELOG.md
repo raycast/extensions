@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Bug fix for EC2 Instances] - 2022-05-17
+## [Bug fix for EC2 Instances] - 2022-05-23
 
 - Manage the case where there is no public ip in EC2 ([#1715](https://github.com/raycast/extensions/pull/1715))
 
