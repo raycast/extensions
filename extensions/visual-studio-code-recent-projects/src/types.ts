@@ -1,42 +1,44 @@
-import { existsSync } from "fs";
-import { URL } from "url";
-
 export interface FileEntry {
+  id: string;
   fileUri: string;
 }
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
-  const { fileUri } = entry as FileEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") === -1;
+  const { id } = entry as FileEntry;
+  return id === "openRecentFile";
 }
 
 export interface FolderEntry {
+  id: string;
   folderUri: string;
+  scheme: string;
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
-  const { folderUri } = entry as FolderEntry;
-  return folderUri !== undefined && existsSync(new URL(folderUri));
+  const { id, scheme } = entry as FolderEntry;
+  return id === "openRecentFolder" && scheme !== "vscode-remote";
 }
 
 export interface WorkspaceEntry {
+  id: string;
   fileUri: string;
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  const { fileUri } = entry as WorkspaceEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") !== -1;
+  const { id } = entry as WorkspaceEntry;
+  return id === "openRecentWorkspace";
 }
 
 export interface RemoteEntry {
+  id: string;
   folderUri: string;
-  remoteAuthority: string;
+  scheme: string;
   label: string;
 }
 
 export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
-  const { folderUri, remoteAuthority } = entry as RemoteEntry;
-  return folderUri !== undefined && remoteAuthority !== undefined;
+  const { id, scheme } = entry as RemoteEntry;
+  return id === "openRecentFolder" && scheme === "vscode-remote";
 }
 
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
@@ -62,6 +64,7 @@ interface RecentOpenItem {
   uri: {
     path: string;
     scheme: string;
+    external: string;
   };
   enabled: boolean;
   label: string;
