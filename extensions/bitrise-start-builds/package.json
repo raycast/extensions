@@ -13,8 +13,8 @@
     {
       "name": "index",
       "title": "Start build",
-      "subtitle": "Start Build",
-      "description": "Bitrise",
+      "subtitle": "Bitrise",
+      "description": "Starts a Bitrise Build",
       "mode": "view"
     }
   ],
