@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Update extension icons] - 2022-05-26
+## [Update extension icons] - 2022-05-23
 
 - Update extension icons.
 - Support open **URL scheme**, **IP address**, **mailto:**, **email address**.
