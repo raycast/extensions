@@ -3,14 +3,13 @@ import { runAppleScript } from "run-applescript";
 
 export default async () => {
   try {
-    const phase = await runAppleScript(`
-    tell application "VLC"
+    await runAppleScript(`
+    tell application "Quicktime Player"
         stop 
     end tell
     `);
-    console.log(phase);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
   await closeMainWindow();
 };

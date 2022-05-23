@@ -3,7 +3,7 @@ import { exec } from "child_process";
 
 function startStream(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const command = `open -a "VLC" "https://stream.radiofrance.fr/fip/fip_hifi.m3u8"`;
+    const command = `open -a "Quicktime Player" "https://stream.radiofrance.fr/fip/fip_hifi.m3u8"`;
 
     exec(command, (error, _, stderr) => {
       if (error) {
