@@ -1,8 +1,15 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-05-24
+
+- Added OAuth Support
+- Introduce new command "Like Curent Song"
+- Introduce new command "Search Artists"
+- Redesign for existing commands, add feature to preview albums
+
 ## [Feature] - 2022-05-23
 
-- Add the ability to open via the Spotify app instead of always using Spotify Web for everything
+- Added the ability to open via the Spotify app instead of always using Spotify Web for everything
 
 ## [Feature] - 2022-04-26
 
