@@ -3,9 +3,11 @@ import { runAppleScript } from "run-applescript";
 
 export default async () => {
   try {
-    await runAppleScript(`
-    tell application "Quicktime Player"
-        stop 
+    const phrase = await runAppleScript(`
+    tell application "QuickTime Player"
+      tell document 1 to if exists then
+         close
+      end if
     end tell
     `);
   } catch (e) {
