@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Bug fix for EC2 Instances] - 2022-05-23
+
+- Manage the case where there is no public ip in EC2 ([#1715](https://github.com/raycast/extensions/pull/1715))
+
 ## [DynamoDB tables command] - 2022-05-10
 
 - Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
