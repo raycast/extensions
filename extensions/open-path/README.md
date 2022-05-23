@@ -1,13 +1,16 @@
 # Open Path
 
-Open path or URL from selection or clipboard, support directory, url, url scheme, mailto, etc.
+Open path from selection or clipboard.
+Support directory, URL, IP address, URL scheme, mailto, email address, etc.
 
 **The following are supported, try it:**
 
 - Directory: `/Users/Username/Desktop`, `~/Desktop`
 - URL: `https://www.raycast.com`, `www.raycast.com`, `raycast.com`
 - URL Scheme: `raycast://confetti`
+- IP address: `76.76.21.21`
 - mailto: `mailto:hello@raycast.com`
+- Email address: `hello@raycast.com`
 
 **Preference:**
 

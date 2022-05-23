@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-path",
   "title": "Open Path",
-  "description": "Open path from selection or clipboard.\nSupport directory, url, url scheme, mailto.",
+  "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
   "icon": "open-path.png",
   "author": "koinzhang",
   "categories": [
@@ -15,7 +15,7 @@
     {
       "name": "open-path",
       "title": "Open Path",
-      "description": "Open path from selection or clipboard.\nSupport directory, url, url scheme, mailto.",
+      "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
       "mode": "no-view"
     }
   ],
