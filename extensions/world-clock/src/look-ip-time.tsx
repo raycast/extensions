@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import React, { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
 import { ListEmptyView } from "./components/list-empty-view";
@@ -29,8 +29,7 @@ export default function PopularArticles() {
       }}
       throttle={true}
     >
-      <ListEmptyView title={emptyViewTitle()} />
-
+      <List.EmptyView title={emptyViewTitle()} icon={Icon.Clock} />
       {timeInfo.map((value, index) => {
         return (
           <List.Item
@@ -45,7 +44,6 @@ export default function PopularArticles() {
                   title={`Copy All Info`}
                   content={JSON.stringify(Object.fromEntries(timeInfo), null, 1)}
                 />
-                <ActionOpenCommandPreferences />
               </ActionPanel>
             }
           />
