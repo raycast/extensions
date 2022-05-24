@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, getPreferenceValues, Icon } from "@raycast/api";
 
 import { bankGetAccounts, bankGetAccountTransactions, BankType } from "./api/bank";
 import { systemGetAccountDetails } from "./api/system";
@@ -78,6 +78,7 @@ export default function Command() {
                       {!!details && (
                         <Action.Push
                           title="Account Details"
+                          icon={Icon.List}
                           target={<AccountDetail transactions={details} url={url} />}
                         />
                       )}
