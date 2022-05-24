@@ -32,7 +32,6 @@ export function useAsyncData<T = any, I extends string | Array<string | number> 
         .then((value) => {
           LocalStorage.setItem(key, JSON.stringify(value));
           setData(value);
-          return value;
         })
         .catch((err) => setError(err))
         .finally(() => setLoading(false)),

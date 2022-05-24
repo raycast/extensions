@@ -54,7 +54,7 @@ export default function Command() {
   const error = accounts.error || transactions.error;
 
   return (
-    <List isLoading={domain.loading || accounts.loading || transactions.loading}>
+    <List isLoading={!error && (domain.loading || accounts.loading || transactions.loading)}>
       <List.EmptyView
         icon={{ source: "icon-64px.png" }}
         title={error ? "Error Loading Accounts" : "No Accounts to Display"}
