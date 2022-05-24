@@ -34,37 +34,42 @@ const bankTypeNames: Record<BankType, string> = {
 export default function Command() {
   const { accountNumber } = getPreferenceValues();
 
-  const { data: domain, loading: loadingDomain } = useAsyncData(accountNumber && "slug", () =>
+  const domain = useAsyncData(accountNumber && "slug", () =>
     systemGetAccountDetails(accountNumber, ["ClientDomain"]).then((r) => r.ClientDomain)
   );
 
-  const { data: accounts = [], loading: loadingAccounts } = useAsyncData(accountNumber && "accounts", () =>
-    bankGetAccounts()
+  const accounts = useAsyncData(accountNumber && "accounts", () => bankGetAccounts(), []);
+
+  const bankCodes = accounts.data.map((a) => a.NominalCode);
+  const transactions = useAsyncData(
+    bankCodes,
+    (codes) => Promise.all(codes.map((code) => bankGetAccountTransactions(code, { number: 20 }))),
+    []
   );
 
-  const bankCodes = accounts.map((a) => a.NominalCode);
-  const { data: transactions = [], loading: loadingTransactions } = useAsyncData(bankCodes, (codes) =>
-    Promise.all(codes.map((code) => bankGetAccountTransactions(code, { number: 20 })))
-  );
-
-  const accountTypes = unique(accounts.map((a) => a.BankType)).sort(
+  const accountTypes = unique(accounts.data.map((a) => a.BankType)).sort(
     (a, b) => (bankTypePriority[b] || 0) - (bankTypePriority[a] || 0)
   );
 
+  const error = accounts.error || transactions.error;
+
   return (
-    <List isLoading={loadingDomain || loadingAccounts || loadingTransactions}>
-      <List.EmptyView icon={{ source: "icon-64px.png" }} title="No Accounts to Display" />
+    <List isLoading={domain.loading || accounts.loading || transactions.loading}>
+      <List.EmptyView
+        icon={{ source: "icon-64px.png" }}
+        title={error ? "Error Loading Accounts" : "No Accounts to Display"}
+      />
       {accountTypes.map((type) => (
         <List.Section title={bankTypeNames[type] || type} key={type}>
-          {accounts
+          {accounts.data
             .filter((a) => a.BankType === type)
             .map((account) => {
               const needsReconsent = !!account.OpenBankingConsents?.every(
                 (c) => new Date(c.ExpiryDate).valueOf() < new Date().setHours(24 * 7)
               );
-              const details = transactions.find((t) => t.NominalCode === account.NominalCode);
+              const details = transactions.data.find((t) => t.NominalCode === account.NominalCode);
               const balance = formatCurrency(details?.MetaData.CurrentBalance, details?.MetaData.Currency);
-              const url = accountPath(domain, account.BankId);
+              const url = accountPath(domain.data, account.BankId);
               return (
                 <List.Item
                   icon={iconPath(account.LogoPath, "doc-plaintext-16")}

@@ -1,11 +1,21 @@
 import { showToast, Toast, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-export const useAsyncData = <T = any, I extends string | Array<string | number> = string>(
+export function useAsyncData<T = any, I extends string | Array<string | number> = string>(
   source: I,
   fetcher: (source: I) => Promise<T>
-) => {
-  const [data, setData] = useState<T>();
+): { data: T | undefined; error: any; loading: boolean };
+export function useAsyncData<T = any, I extends string | Array<string | number> = string>(
+  source: I,
+  fetcher: (source: I) => Promise<T>,
+  initialValue: T
+): { data: T; error: any; loading: boolean };
+export function useAsyncData<T = any, I extends string | Array<string | number> = string>(
+  source: I,
+  fetcher: (source: I) => Promise<T>,
+  initialValue?: T
+) {
+  const [data, setData] = useState<T>(initialValue as T);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>();
 
@@ -40,4 +50,4 @@ export const useAsyncData = <T = any, I extends string | Array<string | number> 
   }, [error]);
 
   return { data, error, loading };
-};
+}
