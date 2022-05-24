@@ -1,5 +1,11 @@
 # Common Directory Changelog
 
+## [Update directory preview] - 2022-05-24
+
+- Optimize _Choose File Path_ action
+- Add empty view for commands
+- Update extension icons
+
 ## [Update directory preview] - 2022-05-19
 
 - Update directory preview

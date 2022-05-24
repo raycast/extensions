@@ -1,4 +1,14 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./types/directory-info";
 import React, { useState } from "react";
 import { isEmpty } from "./utils/common-utils";
@@ -22,6 +32,7 @@ import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
 import { getChooseFolder } from "./utils/applescript-utils";
 import { DirectoryDetailMetadata } from "./components/directory-detail-metadata";
+import { ListEmptyView } from "./components/list-empty-view";
 
 export default function CommonDirectory() {
   const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
@@ -56,82 +67,55 @@ export default function CommonDirectory() {
         if (typeof id === "string") {
           const idContent = JSON.parse(id);
           setDirectoryPath(idContent.path);
-        } else {
-          setDirectoryPath("");
         }
       }}
     >
-      {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
-      (commonDirectory.length === 0 && !showOpenDirectory) ? (
-        <List.EmptyView
-          title={"No directories found"}
-          description={"You can always add directories directly from the Action Panel"}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title={"Add Directory"}
-                icon={Icon.Plus}
-                target={<AddCommonDirectory setRefresh={setRefresh} />}
-              />
-              <Action
-                title={"Toggle Details"}
-                icon={Icon.Sidebar}
-                shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
-                onAction={() => {
-                  setShowDetailLocalStorage(ShowDetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
-                  setRefreshDetail(refreshDetail);
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <>
-          <List.Section title={"Common Directories"}>
-            {!loading &&
-              commonDirectory.map((directory, index) => {
-                if (
-                  directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
-                  directory.name.toLowerCase().includes(searchValue.toLowerCase())
-                )
-                  return (
-                    <SendToDirectoryItem
-                      key={directory.id}
-                      directory={directory}
-                      index={index}
-                      commonDirectory={commonDirectory}
-                      directoryInfo={directoryInfo}
-                      isDetailLoading={isDetailLoading}
-                      showDetail={showDetail}
-                      setRefresh={setRefresh}
-                      setRefreshDetail={setRefreshDetail}
-                      setUpdateDetail={setUpdateDetail}
-                    />
-                  );
-              })}
-          </List.Section>
-          <List.Section title={"Open Directories"}>
-            {!loading &&
-              openDirectory.map((directory, index) => {
-                if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
-                  return (
-                    <SendToDirectoryItem
-                      key={directory.id}
-                      directory={directory}
-                      index={index}
-                      commonDirectory={openDirectory}
-                      directoryInfo={directoryInfo}
-                      isDetailLoading={isDetailLoading}
-                      showDetail={showDetail}
-                      setRefresh={setRefresh}
-                      setRefreshDetail={setRefreshDetail}
-                      setUpdateDetail={setUpdateDetail}
-                    />
-                  );
-              })}
-          </List.Section>
-        </>
-      )}
+      <ListEmptyView setRefresh={setRefresh} />
+
+      <List.Section title={"Common Directories"}>
+        {!loading &&
+          commonDirectory.map((directory, index) => {
+            if (
+              directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+              directory.name.toLowerCase().includes(searchValue.toLowerCase())
+            )
+              return (
+                <SendToDirectoryItem
+                  key={directory.id}
+                  directory={directory}
+                  index={index}
+                  commonDirectory={commonDirectory}
+                  directoryInfo={directoryInfo}
+                  isDetailLoading={isDetailLoading}
+                  showDetail={showDetail}
+                  setRefresh={setRefresh}
+                  setRefreshDetail={setRefreshDetail}
+                  setUpdateDetail={setUpdateDetail}
+                />
+              );
+          })}
+      </List.Section>
+
+      <List.Section title={"Open Directories"}>
+        {!loading &&
+          openDirectory.map((directory, index) => {
+            if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
+              return (
+                <SendToDirectoryItem
+                  key={directory.id}
+                  directory={directory}
+                  index={index}
+                  commonDirectory={openDirectory}
+                  directoryInfo={directoryInfo}
+                  isDetailLoading={isDetailLoading}
+                  showDetail={showDetail}
+                  setRefresh={setRefresh}
+                  setRefreshDetail={setRefreshDetail}
+                  setUpdateDetail={setUpdateDetail}
+                />
+              );
+          })}
+      </List.Section>
     </List>
   );
 }
@@ -199,13 +183,13 @@ function SendToDirectoryItem(props: {
               setUpdateDetail(refreshNumber());
             }}
           />
-          <ActionPanel.Section title={"Advanced Actions"}>
+          <ActionPanel.Section>
             <Action
               title={
                 primaryAction === ActionType.COPY ? "Copy to Folder Chosen Manually" : "Move to Folder Chosen Manually"
               }
               icon={primaryAction === ActionType.COPY ? Icon.Clipboard : Icon.Download}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: primaryAction === ActionType.COPY ? "c" : "m" }}
               onAction={async () => {
                 await actionMoveOrCopy(directory, commonDirectory, index, primaryAction, true, setRefresh);
                 setUpdateDetail(refreshNumber());
@@ -216,7 +200,7 @@ function SendToDirectoryItem(props: {
                 primaryAction === ActionType.COPY ? "Move to Folder Chosen Manually" : "Copy to Folder Chosen Manually"
               }
               icon={primaryAction === ActionType.COPY ? Icon.Download : Icon.Clipboard}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: primaryAction === ActionType.COPY ? "m" : "c" }}
               onAction={async () => {
                 if (primaryAction === ActionType.COPY) {
                   await actionMoveOrCopy(directory, commonDirectory, index, ActionType.MOVE, true, setRefresh);
@@ -230,7 +214,7 @@ function SendToDirectoryItem(props: {
 
           <ActionCopyFile directory={directory} />
 
-          <ActionPanel.Section title={"Directory Action"}>
+          <ActionPanel.Section>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
@@ -315,7 +299,7 @@ function SendToDirectoryItem(props: {
             )}
           </ActionPanel.Section>
 
-          <ActionPanel.Section title={"Detail Action"}>
+          <ActionPanel.Section>
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
@@ -349,9 +333,9 @@ async function actionMoveOrCopy(
     if (pathValid) {
       let isMoved: boolean;
       if (manual) {
-        isMoved = await actionByChooseFolder(action);
+        isMoved = await getItemAndSend(action);
       } else {
-        isMoved = await getItemAndSend(directory.path, action);
+        isMoved = await getItemAndSend(action, directory.path);
       }
       _commonDirectory[index].valid = true;
       if (isMoved && getPreferenceValues<Preferences>().sortBy === SortBy.Rank) {
@@ -368,11 +352,6 @@ async function actionMoveOrCopy(
   } catch (e) {
     await showToast(Toast.Style.Failure, "Error!", "Path has expired." + String(e));
   }
-}
-
-async function actionByChooseFolder(action: ActionType) {
-  const destPath = await getChooseFolder();
-  return await getItemAndSend(destPath, action);
 }
 
 async function upRankSendFile(directories: DirectoryInfo[], index: number) {
