@@ -9,6 +9,7 @@ export const API_KEY = "apiKey";
 export const SHOW_PREVIEW = "showGifPreview";
 export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
+export const LAYOUT = "layoutType";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
@@ -103,4 +104,14 @@ export async function fetchConfig(forceRefresh?: boolean) {
   }
 
   return config;
+}
+
+export type LayoutType = "list" | "grid";
+export const LAYOUT_TYPE: { [type: string]: LayoutType } = {
+  List: "list",
+  Grid: "grid",
+};
+
+export function getLayoutType() {
+  return getPrefs()[LAYOUT];
 }

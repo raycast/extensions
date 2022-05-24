@@ -2,7 +2,14 @@ import { useEffect, useReducer, useState } from "react";
 
 import { showToast, Toast, Icon } from "@raycast/api";
 
-import { ServiceName, getShowPreview, getMaxResults, GIF_SERVICE, getServiceTitle } from "../preferences";
+import {
+  ServiceName,
+  getShowPreview,
+  getMaxResults,
+  GIF_SERVICE,
+  getServiceTitle,
+  getLayoutType,
+} from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 
@@ -14,6 +21,7 @@ import useGifPopulator, { GifIds } from "../hooks/useGifPopulator";
 export function GifSearch() {
   const showPreview = getShowPreview();
   const limit = getMaxResults();
+  const layoutType = getLayoutType();
 
   const [searchService, setSearchService] = useState<ServiceName>();
   const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
@@ -129,6 +137,7 @@ export function GifSearch() {
   if (showAllFavs()) {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoadingFavIds || isLoadingFavs}
         showDropdown={true}
         showDetail={showPreview && (favItems?.items?.size ?? 0) !== 0}

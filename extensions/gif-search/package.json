@@ -29,6 +29,24 @@
       "description": "Shows a large preview of the selected gif in search results."
     },
     {
+      "name": "layoutType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Results Layout",
+      "description": "Layout style for displaying GIF search results",
+      "default": "list",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
       "name": "maxResults",
       "type": "textfield",
       "required": false,
