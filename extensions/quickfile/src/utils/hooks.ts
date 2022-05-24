@@ -13,7 +13,7 @@ export const useAsyncData = <T = any, I extends string | string[] | number[] = s
   useEffect(() => {
     if (!key) return;
 
-    Promise.race([
+    Promise.any([
       LocalStorage.getItem(key).then((storedValue: unknown) => {
         if (!storedValue || typeof storedValue !== "string") return;
         return JSON.parse(storedValue) as T;
@@ -24,10 +24,7 @@ export const useAsyncData = <T = any, I extends string | string[] | number[] = s
           setData(value);
           return value;
         })
-        .catch((err) => {
-          setError(err);
-          throw err;
-        })
+        .catch((err) => setError(err))
         .finally(() => setLoading(false)),
     ]).then((d) => d && setData(d));
   }, [key]);
