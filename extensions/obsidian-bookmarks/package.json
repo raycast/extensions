@@ -143,7 +143,8 @@
       "title": "Available Tags",
       "description": "You can add tags to any of your bookmarks. Use this preference to include a list of (comma-separated) tags that should always be available to add to your bookmarks.",
       "type": "textfield",
-      "placeholder": "home, work, fun"
+      "placeholder": "home, work, fun",
+      "required": false
     }
   ]
 }
