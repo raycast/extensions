@@ -1,6 +1,6 @@
 # Rsync Commands Changelog
 
-## [1.1.1] - 2020-05-22
+## [1.1.1] - 2020-05-24
 - Added ability to preview entry commands (cmd+shift+p)
 - Fixed a bug where the extension crashed if entry contained errors when copying to clipboard.
 
