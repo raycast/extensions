@@ -53,6 +53,7 @@ export default function Command() {
 
   return (
     <List isLoading={loadingDomain || loadingAccounts || loadingTransactions}>
+      <List.EmptyView icon={{ source: "icon-64px.png" }} title="No Accounts to Display" />
       {accountTypes.map((type) => (
         <List.Section title={bankTypeNames[type] || type} key={type}>
           {accounts

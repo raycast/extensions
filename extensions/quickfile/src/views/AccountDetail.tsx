@@ -10,24 +10,24 @@ export interface AccountDetailProps {
 export default (props: AccountDetailProps) => {
   return (
     <List isLoading={!props.url}>
-      {props.transactions.Transactions.Transaction.map((transaction) => (
-        <List.Item
-          title={transaction.Reference}
-          icon={
-            transaction.TagStatus === "untagged"
-              ? {
-                  source: Icon.Dot,
-                  tintColor: Color.Yellow,
-                  tooltip: "This transaction has not yet been tagged.",
-                }
-              : undefined
-          }
-          key={transaction.TransactionId}
-          subtitle={formatDate(transaction.TransactionDate)}
-          accessories={[{ text: formatCurrency(transaction.Amount, props.transactions.MetaData.Currency) }]}
-          actions={<ActionPanel>{!!props.url && <Action.OpenInBrowser url={props.url} />}</ActionPanel>}
-        />
-      ))}
+      <List.EmptyView icon={{ source: "icon-64px.png" }} title="No Transactions to Display" />
+      {props.transactions.Transactions.Transaction.map((transaction) => {
+        const isTagged = transaction.TagStatus === "tagged";
+        return (
+          <List.Item
+            title={transaction.Reference}
+            icon={{
+              source: isTagged ? Icon.Checkmark : Icon.Circle,
+              tintColor: isTagged ? Color.Green : Color.Red,
+              tooltip: `This transaction has ${isTagged ? "" : "not yet "}been tagged.`,
+            }}
+            key={transaction.TransactionId}
+            subtitle={formatDate(transaction.TransactionDate)}
+            accessories={[{ text: formatCurrency(transaction.Amount, props.transactions.MetaData.Currency) }]}
+            actions={<ActionPanel>{!!props.url && <Action.OpenInBrowser url={props.url} />}</ActionPanel>}
+          />
+        );
+      })}
     </List>
   );
 };
