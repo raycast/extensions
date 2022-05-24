@@ -24,7 +24,7 @@ const createObsidianActions = (
     [
       "openObsidian",
       {
-        title: "Open Obsidian",
+        title: "Save and Open Obsidian",
         shortcut: { modifiers: ["cmd", "shift"], key: "o" },
         onAction: async () => {
           const file = await saveFile(values);
@@ -36,7 +36,7 @@ const createObsidianActions = (
     [
       "copyObsidianUrl",
       {
-        title: "Copy Obsidian Link",
+        title: "Save and Copy Obsidian Link",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
         onAction: async () => {
           const file = await saveFile(values);
@@ -47,7 +47,7 @@ const createObsidianActions = (
     [
       "copyObsidianUrlAsMarkdown",
       {
-        title: "Copy Obsidian Link as Markdown",
+        title: "Save and Copy as Markdown",
         shortcut: { modifiers: ["cmd", "shift"], key: "l" },
         onAction: async () => {
           const file = await saveFile(values);
@@ -66,7 +66,7 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
     [
       "openUrl",
       {
-        title: "Open Link",
+        title: "Save and Open Link",
         icon: Icon.Globe,
         shortcut: { modifiers: ["cmd", "ctrl"], key: "o" },
         onAction: async () => {
@@ -79,7 +79,7 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
       "copyUrl",
       {
         icon: Icon.Link,
-        title: "Copy Link",
+        title: "Save and Copy Link",
         shortcut: { modifiers: ["cmd", "ctrl"], key: "c" },
         onAction: async () => {
           const file = await saveFile(values);
@@ -91,7 +91,7 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
       "copyUrlAsMarkdown",
       {
         icon: Icon.Link,
-        title: "Copy Link as Markdown",
+        title: "Save and Copy as Markdown",
         shortcut: { modifiers: ["cmd", "ctrl"], key: "l" },
         onAction: async () => {
           const file = await saveFile(values);
@@ -110,11 +110,5 @@ export default function FormActions({ values }: FormActionsProps): JSX.Element {
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
 
-  return (
-    <OrderedActionPanel
-      title="Save Bookmark and…"
-      groups={[obsidianActions, browserActions]}
-      defaultAction={defaultAction}
-    />
-  );
+  return <OrderedActionPanel groups={[obsidianActions, browserActions]} defaultAction={defaultAction} />;
 }
