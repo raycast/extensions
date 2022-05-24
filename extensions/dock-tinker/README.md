@@ -1,6 +1,6 @@
-# Dock Manager
+# Dock Tinker
 
-Custom advanced preferences of Dock.
+Custom hidden preferences of Dock.
 Backup, restore and reset Dock state.
 
 **Have you ever unintentionally messed up the state of your Dock?** At least this happens to me a lot, especially when uninstalling apps, hate it

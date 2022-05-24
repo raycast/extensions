@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dock-manager",
-  "title": "Dock Manager",
-  "description": "Custom advanced preferences of Dock.\nBackup, restore and reset Dock state.",
-  "icon": "dock-manager.png",
+  "name": "dock-tinker",
+  "title": "Dock Tinker",
+  "description": "Custom hidden preferences of Dock.\nBackup, restore and reset Dock state.",
+  "icon": "dock-tinker.png",
   "author": "koinzhang",
   "categories": [
-    "Productivity",
+    "Developer Tools",
     "System"
   ],
   "license": "MIT",

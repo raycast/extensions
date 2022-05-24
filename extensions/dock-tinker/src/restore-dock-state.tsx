@@ -7,7 +7,7 @@ export default async () => {
   await closeMainWindow({ clearRootSearch: false });
   const backupPath = environment.supportPath + "/com.apple.dock.plist";
   if (!fs.existsSync(backupPath)) {
-    await showHUD("No backup files");
+    await showHUD("No backups");
     return;
   }
   const plistPath = homedir() + "/Library/Preferences/com.apple.dock.plist";
