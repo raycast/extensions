@@ -6,25 +6,6 @@
 
 ---
 
-**Commands:**
-
-- **Open Common Directory**: Quick access to frequently used folder directories
-
-  - Open
-  - Show in Finder
-  - Copy File
-  - Copy Name
-  - Copy Path
-  - Add Directory
-  - Remove Directory
-  - Rest All Rank
-  - Toggle Detail
-- **Add Common Directory**: Add frequently used folder directories
-
-  - Add Directory
-  - Fetch Directory
-  - Choose Directory
-
 **Preferences:**
 
 - **Open Common Directory**:
@@ -47,7 +28,5 @@
   - This command will detect the selected folder first.
   - If there are no selected folders, the folder that gets the focus (activated by the mouse) is detected.
   - You can also fill in the folder directory manually (Mac's native way of choosing folders).
-
-  
 
 - Sometimes Raycast does not detect the selected files (folders), this is Raycast's bug, you just need to restart Raycast.

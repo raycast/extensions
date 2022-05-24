@@ -1,5 +1,13 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2022-05-23
+
+Adds back the support for remote workspaces that got broken in an earlier fix
+
+## [Updates] - 2022-05-12
+
+Fixed the filter rules
+
 ## [Updates] - 2022-05-12
 
 Fixed missing workspaces from previous update.

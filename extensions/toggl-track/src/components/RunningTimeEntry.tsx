@@ -26,7 +26,10 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
     <List.Section title="Running time entry" key="running-time-entry">
       <List.Item
         title={runningTimeEntry.description || "No description"}
-        subtitle={dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")}
+        subtitle={
+          (runningTimeEntry.billable ? "$  " : "") +
+          dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
+        }
         accessoryTitle={getProjectById(runningTimeEntry?.pid)?.name}
         accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
         icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}

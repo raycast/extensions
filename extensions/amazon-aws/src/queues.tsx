@@ -87,10 +87,10 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
   const subtitle =
     attr !== undefined
       ? "📨 " + attr.ApproximateNumberOfMessages + "  ✈️ " + attr.ApproximateNumberOfMessagesNotVisible
-      : "";
+      : "📨 ...  ✈️ ...️";
 
   const accessoryTitle =
-    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "";
+    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...";
 
   const path =
     "https://" +

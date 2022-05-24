@@ -5,13 +5,20 @@ function stringToBool(s: string): boolean {
   return s === "true" ? true : false;
 }
 
-function getSortIndices(arr: string[]): number[] {
-  return Array.from(Array(arr.length).keys()).sort((a, b) => arr[a].localeCompare(arr[b]));
+function getSortIndices(deviceNames: string[], deviceStatuses: boolean[]): number[] {
+  return Array.from(Array(deviceNames.length).keys()).sort((a, b) => {
+    if (deviceStatuses[a] === deviceStatuses[b]) {
+      return deviceNames[a].localeCompare(deviceNames[b]);
+    }
+    return deviceStatuses[a] ? -1 : 1;
+  });
 }
 
 interface Devices {
   deviceNames: string[];
+  deviceAddresses: string[];
   deviceStatuses: boolean[];
+  deviceBatteries: string[];
 }
 
 export async function getBluetoothDevices(): Promise<Devices> {
@@ -19,22 +26,55 @@ export async function getBluetoothDevices(): Promise<Devices> {
     use framework "IOBluetooth"
     set deviceList to {}
     set deviceStatus to {}
+    set deviceAddresses to {}
     repeat with device in (current application's IOBluetoothDevice's pairedDevices() as list)
       copy (device's nameOrAddress as string) to the end of deviceList
       copy (device's isConnected as boolean) to the end of deviceStatus
+      copy (device's addressString as string) to the end of deviceAddresses
     end repeat
-    return {deviceList, deviceStatus}
+    return {deviceList, deviceStatus, deviceAddresses}
   `);
+  console.log(response);
   const results = response.split(",");
-  let deviceNames = results.slice(0, results.length / 2).map((deviceName) => deviceName.trim());
+  let deviceNames = results.slice(0, results.length / 3).map((deviceName) => deviceName.trim());
   let deviceStatuses = results
-    .slice(results.length / 2, results.length)
+    .slice(results.length / 3, (results.length / 3) * 2)
     .map((deviceStatus) => deviceStatus.trim())
     .map((deviceStatus) => stringToBool(deviceStatus));
-  const indices = getSortIndices(deviceNames);
+  let deviceAddresses = results
+    .slice((results.length / 3) * 2, results.length)
+    .map((deviceStatus) => deviceStatus.trim());
+  const indices = getSortIndices(deviceNames, deviceStatuses);
   deviceNames = indices.map((i) => deviceNames[i]);
   deviceStatuses = indices.map((i) => deviceStatuses[i]);
-  return { deviceNames, deviceStatuses };
+  deviceAddresses = indices.map((i) => deviceAddresses[i]);
+  const batteryMap: Record<string, string> = {};
+  try {
+    const batteryResponse: string = await runAppleScript(
+      `do shell script "/usr/sbin/ioreg -c AppleDeviceManagementHIDEventService | grep -e BatteryPercent -e DeviceAddress"`
+    );
+    const addressBattery = batteryResponse
+      .split("\r")
+      .filter((x) => x.match("(DeviceAddress)|(BatteryPercent)"))
+      .map((x) => {
+        const matches = /"([A-z]+)"[\s=]+(["\- A-z0-9]+)/.exec(x);
+        if (matches) {
+          return [matches[1], matches[2].replace('"', "").replace('"', "")];
+        } else {
+          return ["", ""];
+        }
+      });
+    for (let i = 0; i < addressBattery.length - 1; i++) {
+      if (addressBattery[i][0] === "DeviceAddress" && addressBattery[i + 1][0] === "BatteryPercent") {
+        batteryMap[addressBattery[i][1]] = addressBattery[i + 1][1];
+      }
+    }
+  } catch (e) {
+    // Means battery response failed
+  }
+
+  const deviceBatteries = deviceAddresses.map((x) => batteryMap[x] ?? "");
+  return { deviceNames, deviceAddresses, deviceStatuses, deviceBatteries };
 }
 
 export async function toggleBluetoothDevice(deviceName: string): Promise<boolean> {

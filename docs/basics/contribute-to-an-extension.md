@@ -12,7 +12,7 @@ First, you need to find the source code of the extension. The easiest way to do 
 
 ![View source code of an extension](https://user-images.githubusercontent.com/17166544/159994970-ec6d8265-4195-4a4f-86fd-237424fff6d2.png)
 
-Then, you need to [clone our repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to have the source code locally.
+Then, you need to [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to have the source code locally.
 
 ## Develop the extension
 
@@ -20,4 +20,4 @@ After you've cloned the repository, open the Terminal and navigate to the extens
 
 ![Open imported extension](../.gitbook/assets/basics-open-command.png) ![Icon list command](../.gitbook/assets/basics-icon-list.png)
 
-You should see your imported extension at the top of your root search and can open its commands. When you're done remixing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties), then submit a pull request to [publish your changes to the store](publish-an-extension.md).
+You should see your imported extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties), and then submit a pull request to [publish your changes to the store](publish-an-extension.md).

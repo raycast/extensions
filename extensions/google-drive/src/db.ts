@@ -21,6 +21,7 @@ import {
   getDriveRootPath,
   throttledUpdateToastMessage,
   driveFileStream,
+  log,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -33,7 +34,9 @@ export const shouldInvalidateFilesIndex = async () => {
 
   if (lastIndexedAt === null) return true;
 
-  return lastIndexedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
+  const { autoReindexingInterval } = getPreferenceValues<Preferences>();
+
+  return lastIndexedAt.getTime() < new Date().getTime() - parseInt(autoReindexingInterval);
 };
 
 const mandateFilesIndexInvalidation = async () => {
@@ -70,6 +73,20 @@ const dbConnection = async () => {
         favorite INTEGER NOT NULL DEFAULT 0
       )`;
 
+    const deleteDuplicatesByDisplayPath = `
+      DELETE FROM files
+      WHERE displayPath IN (
+        SELECT displayPath
+        FROM files
+        GROUP BY displayPath
+        HAVING COUNT(*) > 1
+      );`;
+
+    const createIndexes = `
+      CREATE UNIQUE INDEX IF NOT EXISTS filesDisplayPathUniqueIndex
+        ON files (displayPath);
+    `;
+
     // Delete the paths that were indexed for a Google Drive root path that was
     // previously specified in the preferences but has been changed to
     // another path now.
@@ -78,11 +95,13 @@ const dbConnection = async () => {
           WHERE path NOT LIKE "${getDriveRootPath()}%"`;
 
     db.exec(createFilesTable);
+    db.exec(deleteDuplicatesByDisplayPath);
+    db.exec(createIndexes);
     db.exec(deleteUnwantedFiles);
 
     return db;
   } catch (e) {
-    console.error(e);
+    log("error", e);
     showToast({ style: Toast.Style.Failure, title: `Unable to open the database file at ${DB_FILE_PATH}` });
     return null;
   }
@@ -173,8 +192,8 @@ export const insertFile = (
       INSERT
         INTO files (name, path, displayPath, fileSizeFormatted, createdAt, updatedAt)
         VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT (path) DO
-          UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
+        ON CONFLICT (displayPath) DO
+          UPDATE SET name = EXCLUDED.name, path = EXCLUDED.path, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
   db.run(insertStatement, [name, path, displayPath, fileSizeFormatted, createdAt, updatedAt]);
 };

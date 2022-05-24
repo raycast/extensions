@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LocalStorage,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import {
   cases,
   checkAffix,
@@ -154,7 +164,9 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               }
               value={array[index].content[0]}
               onChange={(newValue) => {
-                tactions[index].content[0] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[0] = newValue;
+                setTactions(_tactions);
               }}
             />
             <Form.TextField
@@ -164,7 +176,9 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
-                tactions[index].content[1] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[1] = newValue;
+                setTactions(_tactions);
               }}
             />
           </React.Fragment>
@@ -313,6 +327,15 @@ function CreateShortcutActions(props: {
         }}
       />
       <TactionActions tactions={tactions} setTactions={setTactions} />
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Gear}
+          title="Open Extension Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openExtensionPreferences}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -380,7 +403,7 @@ export function TactionActions(props: {
         <Action
           title="Remove Last Action"
           icon={Icon.Trash}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             const _tactions = [...tactions];
             _tactions.pop();
@@ -390,7 +413,7 @@ export function TactionActions(props: {
         <Action
           title="Remove All Actions"
           icon={Icon.ExclamationMark}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
           onAction={async () => {
             setTactions([]);
           }}

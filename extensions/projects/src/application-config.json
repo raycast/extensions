@@ -1,0 +1,85 @@
+{
+  "searchPlaceholders": [
+    "Search for a project",
+    "Search projects by name",
+    "Search projects by type. e.g. 'type: node'",
+    "Search projects in directory. e.g. 'dir: ajay'",
+    "Combine keywords to search. e.g. 'dir: ajay type: node'",
+    "Exclude projects types by selecting '-' in preferences"
+  ],
+  "projectTypes": [
+    {
+      "type": "node",
+      "finder": "package.json",
+      "finderType": "file",
+      "icon": "node-js.png",
+      "spotlightQuery": ["kMDItemDisplayName == package.json"],
+      "openWithKey": "openNodeWith"
+    },
+    {
+      "type": "gradle",
+      "finder": "build.gradle",
+      "finderType": "file",
+      "icon": "gradle.png",
+      "spotlightQuery": ["kMDItemDisplayName == build.gradle"],
+      "openWithKey": "openGradleWith"
+    },
+    {
+      "type": "maven",
+      "finder": "pom.xml",
+      "finderType": "file",
+      "icon": "maven.png",
+      "spotlightQuery": ["kMDItemDisplayName == pom.xml"],
+      "openWithKey": "openMavenWith"
+    },
+    {
+      "type": "xcode",
+      "finder": ".xcodeproj",
+      "finderType": "extension",
+      "icon": "xcode.png",
+      "spotlightQuery": ["kMDItemDisplayName == *.xcodeproj"],
+      "openWithKey": "openXcodeWith"
+    },
+    {
+      "type": "xcode",
+      "finder": ".xcworkspace",
+      "finderType": "extension",
+      "icon": "xcode.png",
+      "spotlightQuery": ["kMDItemDisplayName == *.xcworkspace"],
+      "openWithKey": "openXcodeWith"
+    },
+    {
+      "type": "xcode",
+      "finder": "Package.swift",
+      "finderType": "extension",
+      "icon": "xcode.png",
+      "spotlightQuery": ["kMDItemDisplayName == Package.swift"],
+      "openWithKey": "openXcodeWith"
+    },
+    {
+      "type": "xcode",
+      "finder": ".playground",
+      "finderType": "extension",
+      "icon": "xcode.png",
+      "spotlightQuery": ["kMDItemDisplayName == *.playground"],
+      "openWithKey": "openXcodeWith",
+      "singleFileProject": true
+    },
+    {
+      "type": "tauri",
+      "finder": "tauri.conf.json",
+      "finderType": "file",
+      "icon": "tauri-app.png",
+      "spotlightQuery": ["kMDItemDisplayName == tauri.conf.json"],
+      "openWithKey": "openTauriWith"
+    },
+    {
+      "type": "wails",
+      "finder": "project.json",
+      "finderType": "file",
+      "icon": "wails-app.png",
+      "spotlightQuery": ["kMDItemDisplayName == project.json"],
+      "openWithKey": "openWailsWith"
+    }
+  ]
+}

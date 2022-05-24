@@ -153,6 +153,6 @@ export function mapTenorResponse(tenorResp: TenorGif) {
       labels: [{ title: "Created", text: formatRelative(fromUnixTime(tenorResp.created), new Date()) }],
       tags: tenorResp.tags,
     },
-    attribution: environment.theme === "light" ? "PB_tenor_logo_grey_vertical.png" : "PB_tenor_logo_blue_vertical.png",
+    attribution: "tenor-logo-square-180.png",
   };
 }

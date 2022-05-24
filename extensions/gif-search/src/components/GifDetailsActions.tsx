@@ -96,7 +96,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       icon={Icon.Eye}
       key="viewDetails"
       title="View GIF Details"
-      target={<GifDetails item={item} />}
+      target={<GifDetails item={item} service={service} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
     />
