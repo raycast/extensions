@@ -22,12 +22,30 @@ export default function WordDictionary(props: { from: string; to: string }) {
     const res = await axios.get(
       encodeURI(`https://api.redfoxsanakirja.fi/redfox-api/api/basic/autocomplete/${props.from}/${query}`)
     );
-    const sugg = res.data.map((item: string) => ({
-      title: item,
-      url: `https://redfoxsanakirja.fi/fi/sanakirja/-/s/${props.from}/${props.to}/${item}`,
-      detail: null,
-    }));
-    setSuggestions(sugg);
+    if (res.data.length > 0) {
+      const sugg = res.data.map((item: string) => ({
+        title: item,
+        url: `https://redfoxsanakirja.fi/fi/sanakirja/-/s/${props.from}/${props.to}/${item}`,
+        detail: null,
+      }));
+      setSuggestions(sugg);
+    } else {
+      const backup = await axios.get(
+        encodeURI(`https://api.redfoxsanakirja.fi/redfox-api/api/basic/query/${props.from}/${props.to}/${query}`)
+      );
+      if (!backup.data.subtitleResult.query.word2) {
+        setSuggestions([]);
+        setIsLoading(false);
+        return;
+      }
+      setSuggestions([
+        {
+          title: backup.data.subtitleResult.query.word1,
+          url: `https://redfoxsanakirja.fi/fi/sanakirja/-/s/${props.from}/${props.to}/${backup.data.subtitleResult.query.word1}`,
+          detail: undefined,
+        },
+      ]);
+    }
     setIsLoading(false);
   }
 
@@ -118,7 +136,7 @@ const ResultDetail = ({ res, from, to }: ResultDetailProps) => {
               detail: detail,
             },
             ...recent,
-          ].splice(0, 5);
+          ].splice(0, 10);
           await LocalStorage.setItem(`recent-searches-${from}-${to}`, JSON.stringify(recent));
 
           setState({ isLoading: false, content: detail });
