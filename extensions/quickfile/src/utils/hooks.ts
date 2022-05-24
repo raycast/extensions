@@ -1,15 +1,15 @@
 import { showToast, Toast, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-export const useAsyncData = <T = any, I extends string | string[] | number[] = string>(
-  _key: I,
-  fetcher: (key: I) => Promise<T>
+export const useAsyncData = <T = any, I extends string | Array<string | number> = string>(
+  source: I,
+  fetcher: (source: I) => Promise<T>
 ) => {
   const [data, setData] = useState<T>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>();
 
-  const key: string = Array.isArray(_key) ? _key.join(",") : _key;
+  const key: string = Array.isArray(source) ? source.join(",") : source;
   useEffect(() => {
     if (!key) return;
 
@@ -18,7 +18,7 @@ export const useAsyncData = <T = any, I extends string | string[] | number[] = s
         if (!storedValue || typeof storedValue !== "string") return;
         return JSON.parse(storedValue) as T;
       }),
-      fetcher(_key)
+      fetcher(source)
         .then((value) => {
           LocalStorage.setItem(key, JSON.stringify(value));
           setData(value);
