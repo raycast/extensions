@@ -52,27 +52,27 @@
       "description": "CSL format for generating references",
       "data": [
         {
-          "title": "APA",
+          "title": "American Psychological Association",
           "value": "apa"
         },
         {
-          "title": "ACS",
+          "title": "American Chemical Society",
           "value": "american-chemical-society"
         },
         {
-          "title": "AMA",
+          "title": "American Medical Association",
           "value": "american-medical-association"
         },
         {
-          "title": "APSA",
+          "title": "American Political Science Association",
           "value": "american-political-science-association"
         },
         {
-          "title": "ASA",
+          "title": "American Socialology Association",
           "value": "american-sociological-association"
         },
         {
-          "title": "HARVARD",
+          "title": "Elsevier Harvard",
           "value": "elsevier-harvard"
         },
         {
