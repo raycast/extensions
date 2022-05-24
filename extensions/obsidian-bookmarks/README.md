@@ -47,6 +47,6 @@ See [Default Form Action](#default-form-action) for a list of other possible act
 
 ## Screenshots
 
-![Save a bookmark to Obsidian](./metadata/save-bookmark.png)
-![Search all your bookmarks in Obsidian](./metadata/search-bookmarks.png)
-![View your bookmark notes](./metadata/bookmark-details.png)
+![Save a bookmark to Obsidian](./metadata/screenshot2.png)
+![Search all your bookmarks in Obsidian](./metadata/screenshot3.png)
+![View your bookmark notes](./metadata/screenshot4.png)
