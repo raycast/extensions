@@ -1,6 +1,7 @@
-import { COPY_TYPE } from "./consts"
+type COPY_TYPE = "Normal" | "Uppercase" | "LowercaseCamelCase"
+type RESULT_TYPE = "Standard" | "Detail" | "Derivatives"
 
-export interface ITranslateResult {
+interface ITranslateResult {
     l: string
     query: string
     returnPhrase: []
@@ -10,40 +11,44 @@ export interface ITranslateResult {
     basic?: ITranslateResultBasicItem
 }
 
-export interface ITranslateReformatResult {
-    type?: string
-    children?: ITranslateReformatResultItem[]
+interface ITranslateReformatResult {
+    type?: RESULT_TYPE
+    title?: string
+    children: ITranslateReformatResultItem[]
 }
 
-export interface ITranslateReformatResultItem {
+interface ITranslateReformatResultItem {
     key: string
     phonetic?: string
     title: string
     subtitle?: string
 }
 
-export interface ITranslateResultWebItem {
+interface ITranslateResultWebItem {
     key: string
     value: string[]
 }
 
-export interface ITranslateResultBasicItem {
+interface ITranslateResultBasicItem {
     explains: string[]
     phonetic?: string
     "us-phonetic": string
     "uk-phonetic": string
 }
 
-export interface IPreferences {
+interface IPreferences {
     lang1: string
     lang2: string
     appId: string
     appKey: string
+    isPlayTTS: boolean
     isAutomaticPaste: boolean
+    isQuickSwitchLanguage: boolean
+    openThirdPartyDict: Application
     delayFetchTranslateAPITime: string
 }
 
-export interface IListItemActionPanelItem {
+interface IListItemActionPanelItem {
     copyText?: string
     queryText?: string
     copyMode: COPY_TYPE
@@ -52,18 +57,18 @@ export interface IListItemActionPanelItem {
     onLanguageUpdate: (language: ILanguageListItem) => void
 }
 
-export interface IReformatTranslateResult {
+interface IReformatTranslateResult {
     title: string
     value: string
 }
 
-export interface IActionCopyListSection {
+interface IActionCopyListSection {
     copyText?: string
     copyMode: COPY_TYPE
     autoPasteText?: string
 }
 
-export interface ILanguageListItem {
+interface ILanguageListItem {
     languageId: string
     languageTitle: string
     languageVoice: string[]
