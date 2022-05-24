@@ -21,19 +21,25 @@ export default class EntryLocation {
     }
   }
 
-  validate(identifier: string, includeSsh: boolean) {
+  getErrors(identifier: string, includeSsh: boolean) {
+    const errors: string[] = []
+
     const userName = this.userName.trim()
     const hostName = this.hostName.trim()
     const path = this.path.trim()
+    const port = this.port
 
-    if (!path) throw `Path is missing for ${identifier}`
-    if (includeSsh && userName && !hostName) throw `Hostname is missing for ${identifier}`
-    if (includeSsh && !userName && hostName) throw `Username is missing for ${identifier}`
+    if (!path) errors.push(`Path missing for ${identifier}.`)
+    if (includeSsh) {
+      if (port !== "22" && isNaN(Number(port))) errors.push(`Port for ${identifier} is not a number.`)
+      if (userName && !hostName) errors.push(`Hostname is missing for ${identifier}.`)
+      if (!userName && hostName) errors.push(`Username is missing for ${identifier}.`)
+    }
+
+    return errors
   }
 
   getCommandPart(identifier: string, includeSsh: boolean): string {
-    this.validate(identifier, includeSsh)
-
     const userName = this.userName.trim()
     const hostName = this.hostName.trim()
     const path = this.path.trim()
