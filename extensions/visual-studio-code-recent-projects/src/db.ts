@@ -67,7 +67,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
             return {
               id: id,
               label: label,
-              fileUri: `${uri.scheme}://${uri.path}`,
+              fileUri: encodeURI(`${uri.scheme}://${uri.path}`),
             };
 
           case RecentOpenedItemId.File:
@@ -75,14 +75,14 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
             return {
               id: id,
               label: label,
-              fileUri: `${uri.scheme}://${uri.path}`,
+              fileUri: encodeURI(`${uri.scheme}://${uri.path}`),
             };
 
           case RecentOpenedItemId.Folder:
             return {
               id: id,
               label: "vscode-remote" === uri.scheme ? label : basename(uri.path),
-              folderUri: "vscode-remote" === uri.scheme ? uri.external : `${uri.scheme}://${uri.path}`,
+              folderUri: "vscode-remote" === uri.scheme ? uri.external : encodeURI(`${uri.scheme}://${uri.path}`),
               scheme: uri.scheme,
             };
         }
