@@ -12,12 +12,11 @@ type Props = {
 };
 
 const openExtLinkCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "1" };
-
-const copyRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
-const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
-const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
-const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
-const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
+const copyRefCommandShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "2" };
+const copyRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "3" };
+const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
+const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
+const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
 function getURL(item: RefData): string {
   return `${
@@ -64,7 +63,7 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
       throttle={throttle}
     >
       {queryResults[0].length < 1 ? (
-        <List.EmptyView icon={{ source: "command-icon.png" }} title="Type something to search Zotero Database!" />
+        <List.EmptyView icon={{ source: "no-view.png" }} title="Type something to search Zotero Database!" />
       ) : (
         sectionNames.map((sectionName, sectionIndex) => (
           <List.Section
@@ -104,10 +103,6 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                         onOpen={onOpen}
                       />
                     )}
-                    {preferences.use_bibtex && <RefCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <BibCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <RefPasteAction selected={item.citekey} />}
-                    {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
                     {preferences.use_bibtex && (
                       <Action.CopyToClipboard
                         title="Copy Bibtex Citation Key"
@@ -115,6 +110,10 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                         shortcut={copyRefCommandShortcut}
                       />
                     )}
+                    {preferences.use_bibtex && <RefCopyToClipboardAction selected={item.citekey} />}
+                    {preferences.use_bibtex && <BibCopyToClipboardAction selected={item.citekey} />}
+                    {preferences.use_bibtex && <RefPasteAction selected={item.citekey} />}
+                    {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
                   </ActionPanel>
                 }
               />
