@@ -1,6 +1,10 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Fix] - 2022-05-23
+## [Updates] - 2022-05-24
+
+Fixed a bug where it was unable to open project that has space in path
+
+## [Updates] - 2022-05-23
 
 Adds back the support for remote workspaces that got broken in an earlier fix
 
