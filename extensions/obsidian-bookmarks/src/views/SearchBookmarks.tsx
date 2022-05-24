@@ -59,15 +59,15 @@ export default function SearchBookmarks() {
         }
         case "last1d": {
           const date = midnight(1);
-          return input.filter((item) => item.attributes.added >= date);
+          return input.filter((item) => item.attributes.saved >= date);
         }
         case "last7d": {
           const date = midnight(7);
-          return input.filter((item) => item.attributes.added >= date);
+          return input.filter((item) => item.attributes.saved >= date);
         }
         case "last30d": {
           const date = midnight(30);
-          return input.filter((item) => item.attributes.added >= date);
+          return input.filter((item) => item.attributes.saved >= date);
         }
         default: {
           if (!filter.startsWith("tag:")) {

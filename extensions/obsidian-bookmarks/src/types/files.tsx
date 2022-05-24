@@ -5,10 +5,11 @@ export function isFrontMatter(v: unknown): v is FrontMatter {
   if (v == null || typeof v !== "object") return false;
   const frontMatter = v as FrontMatter;
   return (
-    typeof frontMatter.url === "string" &&
+    typeof frontMatter.source === "string" &&
     typeof frontMatter.title === "string" &&
-    typeof frontMatter.added === "string" &&
+    typeof frontMatter.saved === "string" &&
     typeof frontMatter.read === "boolean" &&
+    (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
     isStringArray(frontMatter.tags)
   );
 }
@@ -32,10 +33,11 @@ export function unique(files: File[]): File[] {
 }
 
 export interface FrontMatter {
-  url: string;
+  source: string;
+  publisher: string | null;
   title: string;
   tags: string[];
-  added: Date;
+  saved: Date;
   read: boolean;
 }
 

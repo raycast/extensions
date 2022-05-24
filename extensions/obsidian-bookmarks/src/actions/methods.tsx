@@ -11,16 +11,16 @@ export async function openObsidianFile(file: File) {
 }
 
 export async function openUrl(file: File) {
-  return open(file.attributes.url);
+  return open(file.attributes.source);
 }
 
 export async function copyUrl(file: File) {
-  return copyUrlToClipboard(file.attributes.url, file.attributes.title);
+  return copyUrlToClipboard(file.attributes.source, file.attributes.title);
 }
 
 export async function copyUrlAsMarkdown(file: File) {
   const safeTitle = file.attributes.title.replace(/[[\]]/g, "");
-  return Clipboard.copy(`[${safeTitle}](${file.attributes.url})`);
+  return Clipboard.copy(`[${safeTitle}](${file.attributes.source})`);
 }
 
 export async function copyObsidianUri(file: File) {

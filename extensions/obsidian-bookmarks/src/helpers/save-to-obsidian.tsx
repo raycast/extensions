@@ -7,6 +7,7 @@ import { LinkFormState } from "../hooks/use-link-form";
 import { File, FrontMatter } from "../types";
 
 import { fileExists } from "./file-utils";
+import getPublisher from "./get-publisher";
 import { addToLocalStorageFiles } from "./localstorage-files";
 import { addToLocalStorageTags } from "./localstorage-tags";
 import slugify from "./slugify";
@@ -39,10 +40,11 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   midnight.setHours(0, 0, 0, 0);
 
   const attributes: FrontMatter = {
-    url: values.url,
+    source: values.url,
+    publisher: getPublisher(values.url),
     title: values.title,
     tags: values.tags.flatMap((t) => tagify(t)),
-    added: midnight,
+    saved: midnight,
     read: false,
   };
 
@@ -53,11 +55,12 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   `;
 
   const frontmatter = dedent`
-  url: ${JSON.stringify(attributes.url)}
   title: ${JSON.stringify(attributes.title)}
-  tags: ${JSON.stringify(attributes.tags)}
-  added: ${formatDate(midnight)}
+  saved: ${formatDate(midnight)}
+  source: ${JSON.stringify(attributes.source)}
+  publisher: ${JSON.stringify(attributes.publisher)}
   read: ${JSON.stringify(attributes.read)}
+  tags: ${JSON.stringify(attributes.tags)}
   `;
 
   const fileSlug = `${formatDate(midnight)}-${slugify(attributes.title)}`.slice(0, 150);
@@ -78,11 +81,12 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
 export default async function saveToObsidian(file: File): Promise<string> {
   const template = dedent`
     ---
-    url: ${JSON.stringify(file.attributes.url)}
     title: ${JSON.stringify(file.attributes.title)}
-    tags: ${JSON.stringify(file.attributes.tags.flatMap((t) => tagify(t)))}
-    added: ${formatDate(file.attributes.added)}
+    saved: ${formatDate(file.attributes.saved)}
+    source: ${JSON.stringify(file.attributes.source)}
+    publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
+    tags: ${JSON.stringify(file.attributes.tags.flatMap((t) => tagify(t)))}
     ---
 
     ${file.body}
