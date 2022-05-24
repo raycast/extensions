@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-bookmarks",
+  "title": "Obsidian Bookmarks",
+  "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks.",
+  "icon": "obsidian-bookmarks.png",
+  "author": "dru89",
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Save a bookmark to Obsidian",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Save your Obsidian bookmarks",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "front-matter": "^4.0.2",
+    "fuse.js": "^6.6.0",
+    "run-applescript": "^6.0.0",
+    "run-jxa": "^3.0.0",
+    "slugify": "^1.6.5",
+    "ts-dedent": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault Path",
+      "description": "The file path to your Obsidian vault directory. We use this to create new files.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "bookmarksPath",
+      "title": "Bookmarks Subfolder",
+      "description": "The subfolder where all of your bookmarks should be stored.",
+      "type": "textfield",
+      "required": true,
+      "default": "Bookmarks"
+    },
+    {
+      "name": "defaultFormAction",
+      "title": "Default Form Action",
+      "description": "The default action to take when submitting a form.",
+      "type": "dropdown",
+      "required": true,
+      "default": "openObsidian",
+      "data": [
+        {
+          "title": "Open Obsidian",
+          "value": "openObsidian"
+        },
+        {
+          "title": "Copy Obsidian Link",
+          "value": "copyObsidianUrl"
+        },
+        {
+          "title": "Copy Obsidian Link as Markdown",
+          "value": "copyObsidianUrlAsMarkdown"
+        },
+        {
+          "title": "Open Link",
+          "value": "openUrl"
+        },
+        {
+          "title": "Copy Link",
+          "value": "copyUrl"
+        },
+        {
+          "title": "Copy Link as Markdown",
+          "value": "copyUrlAsMarkdown"
+        }
+      ]
+    },
+    {
+      "name": "defaultItemAction",
+      "title": "Default Item Action",
+      "description": "The default action to take on an item in your bookmarks.",
+      "type": "dropdown",
+      "required": true,
+      "default": "showDetails",
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "showDetails"
+        },
+        {
+          "title": "Open Obsidian",
+          "value": "openObsidian"
+        },
+        {
+          "title": "Copy Obsidian Link",
+          "value": "copyObsidianUrl"
+        },
+        {
+          "title": "Copy Obsidian Link as Markdown",
+          "value": "copyObsidianUrlAsMarkdown"
+        },
+        {
+          "title": "Open Link",
+          "value": "openUrl"
+        },
+        {
+          "title": "Copy Link",
+          "value": "copyUrl"
+        },
+        {
+          "title": "Copy Link as Markdown",
+          "value": "copyUrlAsMarkdown"
+        }
+      ]
+    },
+    {
+      "name": "extraTags",
+      "title": "Available Tags",
+      "description": "You can add tags to any of your bookmarks. Use this preference to include a list of (comma-separated) tags that should always be available to add to your bookmarks.",
+      "type": "textfield",
+      "placeholder": "home, work, fun",
+      "required": false
+    }
+  ]
+}
