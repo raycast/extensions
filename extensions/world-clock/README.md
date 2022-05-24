@@ -1,6 +1,6 @@
 # World Clock
 
-Lookup the current time of a region, ip or domain.
+Query the current time of a region, ip or domain.
 
 **World Time** Query Service from [World Time API](http://worldtimeapi.org). The following notes are from the official website
 

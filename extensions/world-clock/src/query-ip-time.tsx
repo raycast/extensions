@@ -1,9 +1,7 @@
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
-import { ListEmptyView } from "./components/list-empty-view";
 import { isEmpty } from "./utils/common-utils";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function PopularArticles() {
   const [searchContent, setSearchContent] = useState<string>("");
@@ -22,7 +20,7 @@ export default function PopularArticles() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Look current time via IP or domain"}
+      searchBarPlaceholder={"Query current time via IP or domain"}
       onSearchTextChange={(text) => {
         if (typeof text !== "undefined" && !isEmpty(text.replaceAll(" ", "")))
           setSearchContent(text.replaceAll(" ", ""));

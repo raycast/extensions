@@ -1,5 +1,5 @@
 # World Clock Changelog
 
-## [Initial Version] - 2022-05-23
+## [Initial Version] - 2022-05-26
 
-Lookup the current time of a region, ip or domain.
+Query the current time of a region, ip or domain.
