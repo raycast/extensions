@@ -63,7 +63,10 @@ This extension supports both quick search and tags. `tags` should be prefixed wi
 Lets consider this example: "machine learning .python .ML resnet" -> This will search for "machine learning resnet"
 with tags of python OR resnet.
 
-Please not that currently only OR operation is supported for the tags.
+If you want to search for tags with whitespaces, please replace every space character by '+'.
+For eg. to search for tag, "deep learning", you will need to use ".deep+learning".
+
+Please note that currently only OR operation is supported for the tags.
 
 This extension support a few sub commands.
 
