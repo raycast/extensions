@@ -13,4 +13,5 @@ export interface Preferences {
   bookmarksPath: string;
   defaultFormAction: FormActionPreference;
   defaultItemAction: DetailActionPreference;
+  extraTags?: string;
 }

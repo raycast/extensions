@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { isStringArray } from "../types";
-import slugify from "./slugify";
+import tagify from "./tagify";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safelyRun<F extends (...args: any[]) => any>(func: F, defaultValue: ReturnType<F>): F {
@@ -27,14 +27,14 @@ async function getLocalStorageTagsInternal(): Promise<Set<string>> {
 }
 
 async function replaceLocalStorageTagsInternal(tags: Set<string> | string[]): Promise<void> {
-  const array = [...tags].map((tag) => slugify(tag));
+  const array = [...tags].flatMap((tag) => tagify(tag));
   const json = JSON.stringify(array);
   await LocalStorage.setItem("obsidian-tags", json);
 }
 
 async function addToLocalStorageTagsInternal(tags: Set<string> | string[]): Promise<void> {
   const existing = await getLocalStorageTagsInternal();
-  const slugified = [...tags].map((tag) => slugify(tag));
+  const slugified = [...tags].flatMap((tag) => tagify(tag));
   const newSet = new Set([...existing, ...slugified]);
   await replaceLocalStorageTagsInternal(newSet);
 }

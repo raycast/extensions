@@ -7,6 +7,7 @@ import { File, FrontMatter, Preferences } from "../types";
 import { addToLocalStorageFiles } from "./localstorage-files";
 import { addToLocalStorageTags } from "./localstorage-tags";
 import slugify from "./slugify";
+import tagify from "./tagify";
 
 function formatDate(date: Date): string {
   const year = String(date.getFullYear()).padStart(4, "0");
@@ -45,7 +46,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   const attributes: FrontMatter = {
     url: values.url,
     title: values.title,
-    tags: values.tags.map((t) => slugify(t)),
+    tags: values.tags.flatMap((t) => tagify(t)),
     added: midnight,
     read: false,
   };
@@ -84,7 +85,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     ---
     url: ${JSON.stringify(file.attributes.url)}
     title: ${JSON.stringify(file.attributes.title)}
-    tags: ${JSON.stringify(file.attributes.tags.map((t) => slugify(t)))}
+    tags: ${JSON.stringify(file.attributes.tags.flatMap((t) => tagify(t)))}
     added: ${formatDate(file.attributes.added)}
     read: ${JSON.stringify(file.attributes.read)}
     ---
