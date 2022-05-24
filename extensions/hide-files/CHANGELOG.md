@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [Optimize the icon clarity] - 2022-05-26
+## [Optimize the icon clarity] - 2022-05-24
 
 - Optimize the icon clarity
 - Add action "Open Command Preferences"
