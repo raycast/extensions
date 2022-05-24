@@ -52,9 +52,6 @@ export function formatTranslateResult(data: ITranslateResult): ITranslateReforma
         })
     }
 
-    if (reformatData.length === 1) {
-    }
-
     return reformatData
 }
 
