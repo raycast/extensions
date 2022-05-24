@@ -9,7 +9,6 @@ export function ListEmptyView(props: { setRefresh: Dispatch<SetStateAction<numbe
     <List.EmptyView
       icon={{ source: { light: "empty-view-icon.svg", dark: "empty-view-icon@dark.svg" } }}
       title={"No directories"}
-      description={""}
       actions={
         <ActionPanel>
           <Action.Push
