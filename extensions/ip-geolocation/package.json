@@ -23,7 +23,17 @@
       "title": "My IP Geolocation",
       "icon": "my-ip-geolocation.png",
       "description": "Show geolocation for local and public IPv4/IPv6 address.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showIPv6",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show IPv6 Address",
+          "description": "Query and display my IPv6 address.",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [

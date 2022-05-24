@@ -1,13 +1,14 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";
 import { listIcons } from "./utils/constants";
-import { commonPreferences, isEmpty } from "./utils/common-utils";
+import { isEmpty } from "./utils/common-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { Preferences } from "./types/preferences";
 
 export default function QueryIpGeolocation() {
-  const { language } = commonPreferences();
+  const { language } = getPreferenceValues<Preferences>();
   const [searchContent, setSearchContent] = useState<string>("");
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
 

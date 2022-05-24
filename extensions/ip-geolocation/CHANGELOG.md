@@ -4,6 +4,8 @@
 
 - Update command name
 - Add _Open Extension Preferences_ action
+- Add _Show IPv6 Address_ preference
+- Add time for TimeZone
 
 ## [Initial Version] - 2022-05-15
 
