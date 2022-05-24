@@ -1,13 +1,17 @@
-import { getPreferenceValues } from "@raycast/api";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+
 import dedent from "ts-dedent";
+
 import { LinkFormState } from "../hooks/use-link-form";
-import { File, FrontMatter, Preferences } from "../types";
+import { File, FrontMatter } from "../types";
+
+import { fileExists } from "./file-utils";
 import { addToLocalStorageFiles } from "./localstorage-files";
 import { addToLocalStorageTags } from "./localstorage-tags";
 import slugify from "./slugify";
 import tagify from "./tagify";
+import { getOrCreateBookmarksPath } from "./vault-path";
 
 function formatDate(date: Date): string {
   const year = String(date.getFullYear()).padStart(4, "0");
@@ -17,24 +21,15 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-async function exists(filename: string): Promise<boolean> {
-  try {
-    const stat = await fs.stat(filename);
-    return Boolean(stat);
-  } catch (err) {
-    return false;
-  }
-}
-
 async function getFileName(filename: string): Promise<string> {
-  const prefs = getPreferenceValues<Preferences>();
   const ext = path.extname(filename);
   const base = path.basename(filename, ext);
-  let file = path.join(prefs.vaultPath, prefs.bookmarksPath, filename);
+  const bookmarksPath = await getOrCreateBookmarksPath();
+  let file = path.join(bookmarksPath, filename);
   let index = 1;
-  while (await exists(file)) {
+  while (await fileExists(file)) {
     const newFilename = `${base}-${index++}.md`;
-    file = path.join(prefs.vaultPath, prefs.bookmarksPath, newFilename);
+    file = path.join(bookmarksPath, newFilename);
   }
   return file;
 }

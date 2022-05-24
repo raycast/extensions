@@ -1,7 +1,7 @@
 import { Context, createContext, useEffect, useState } from "react";
 
 export type Promisable<T> = T | PromiseLike<T>;
-export type Loadable<T> = { loading: boolean; value?: T };
+export type Loadable<T> = { loading: boolean; value?: T; error?: unknown };
 
 export default function useLoadable<T>(loader: () => Promisable<T>): Loadable<T> {
   const [state, setState] = useState<Loadable<T>>({ loading: true });
