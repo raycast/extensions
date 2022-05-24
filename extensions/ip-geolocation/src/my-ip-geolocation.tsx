@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import React from "react";
 import { searchMyIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";

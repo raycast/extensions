@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";
@@ -6,7 +6,7 @@ import { listIcons } from "./utils/constants";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
-export default function LookupIpGeolocation() {
+export default function QueryIpGeolocation() {
   const { language } = commonPreferences();
   const [searchContent, setSearchContent] = useState<string>("");
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
@@ -24,7 +24,7 @@ export default function LookupIpGeolocation() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Lookup any IP address/domain"}
+      searchBarPlaceholder={"Query any IP address/domain"}
       searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}

@@ -3,6 +3,7 @@
 ## [Update command name] - 2022-05-26
 
 - Update command name
+- Add _Open Extension Preferences_ action
 
 ## [Initial Version] - 2022-05-15
 

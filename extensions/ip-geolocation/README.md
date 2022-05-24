@@ -1,7 +1,7 @@
 # IP Geolocation
 
-Show local and public IPv4/6 address.
-Lookup geolocation for any IP address or domain.
+Show local and public IPv4/IPv6 address.
+Query geolocation for any IP address or domain.
 
 **Preferences:**
 
@@ -15,7 +15,7 @@ Lookup geolocation for any IP address or domain.
   - 中国 (Chinese)
   - Русский (Russian)
 
-------
+---
 
 **IP Geolocation** Query Service from [ip-api.com](https://ip-api.com). The following notes are from the official website
 
