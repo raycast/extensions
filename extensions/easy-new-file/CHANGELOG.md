@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Optimize Choose File Path action] - 2022-05-23
+## [Optimize Choose File Path action] - 2022-05-24
 
 - Optimize _Choose File Path_ action
 - Add action _Open Command Preferences_
