@@ -1,26 +1,29 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
-import { useEffect, useState } from 'react'
-import { fetchDiscountList } from './api'
-import { IGame } from './model'
-import PriceList from './PriceList'
-import { calcCutoff } from './utils'
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { fetchDiscountList } from "./api";
+import { IGame } from "./model";
+import PriceList from "./PriceList";
+import { calcCutoff } from "./utils";
 
 export default function Command() {
-  const [gameList, setGameList] = useState<IGame[]>([])
+  const [gameList, setGameList] = useState<IGame[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
       gameList.length === 0 &&
         fetchDiscountList().then((res) => {
-          setGameList(res.games)
-        })
+          setGameList(res.games);
+          setLoading(false);
+        });
     } catch (error) {
-      throw new Error('Failed to fetch discount list')
+      setLoading(false);
+      showToast(Toast.Style.Failure, "Failed to fetch discount list");
     }
-  })
+  });
 
   return (
-    <List>
+    <List isLoading={loading}>
       {gameList.map((game) => {
         return (
           <List.Item
@@ -38,8 +41,8 @@ export default function Command() {
               </ActionPanel>
             }
           ></List.Item>
-        )
+        );
       })}
     </List>
-  )
+  );
 }
