@@ -37,7 +37,7 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
       <List.Section title="Workspaces">
         {entries.filter(isWorkspaceEntry).map((entry) => (
-          <LocalListItem key={entry.fileUri} uri={entry.fileUri} />
+          <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
         ))}
       </List.Section>
 

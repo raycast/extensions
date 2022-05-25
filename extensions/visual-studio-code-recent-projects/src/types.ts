@@ -20,12 +20,19 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
 }
 
 export interface WorkspaceEntry {
-  fileUri: string;
+  workspace: {
+    configPath: string;
+  };
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  const { fileUri } = entry as WorkspaceEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") !== -1;
+  const { workspace } = entry as WorkspaceEntry;
+
+  return (
+    workspace !== undefined &&
+    existsSync(new URL(workspace.configPath)) &&
+    workspace.configPath.indexOf(".code-workspace") !== -1
+  );
 }
 
 export interface RemoteEntry {
