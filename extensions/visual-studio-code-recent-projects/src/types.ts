@@ -30,7 +30,11 @@ export interface WorkspaceEntryData {
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   const { workspace } = entry as WorkspaceEntry;
-  return workspace !== undefined && existsSync(new URL(workspace.configPath)) && workspace.configPath.indexOf(".code-workspace") !== -1;
+  return (
+    workspace !== undefined &&
+    existsSync(new URL(workspace.configPath)) &&
+    workspace.configPath.indexOf(".code-workspace") !== -1
+  );
 }
 
 export interface RemoteEntry {
