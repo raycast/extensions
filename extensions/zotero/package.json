@@ -33,11 +33,66 @@
       "default": false,
       "label": "Use BibTex?",
       "description": "Whether to use BibTex or not?"
+    },
+    {
+      "name": "bibtex_path",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Zotero/lib.json",
+      "title": "Better Bibtex CSL JSON File",
+      "description": "Path to Better Bibtex CSL JSON File",
+      "placeholder": "~/Zotero/lib.json"
+    },
+    {
+      "name": "csl_style",
+      "type": "dropdown",
+      "required": false,
+      "default": "apa",
+      "title": "CSL Format",
+      "description": "CSL format for generating references",
+      "data": [
+        {
+          "title": "American Psychological Association",
+          "value": "apa"
+        },
+        {
+          "title": "American Chemical Society",
+          "value": "american-chemical-society"
+        },
+        {
+          "title": "American Medical Association",
+          "value": "american-medical-association"
+        },
+        {
+          "title": "American Political Science Association",
+          "value": "american-political-science-association"
+        },
+        {
+          "title": "American Socialology Association",
+          "value": "american-sociological-association"
+        },
+        {
+          "title": "Elsevier Harvard",
+          "value": "elsevier-harvard"
+        },
+        {
+          "title": "IEEE",
+          "value": "ieee"
+        },
+        {
+          "title": "Nature",
+          "value": "nature"
+        },
+        {
+          "title": "Vancouver",
+          "value": "vancouver"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
-    "biblatex-csl-converter": "^2.0.4",
+    "@raycast/api": "^1.35.1",
+    "citation-js": "^0.5.7",
     "fuse.js": "^6.6.1",
     "sql.js": "^1.6.2"
   },

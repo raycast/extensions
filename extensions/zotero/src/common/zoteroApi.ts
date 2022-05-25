@@ -9,6 +9,8 @@ import path = require("path");
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
+  bibtex_path?: string;
+  csl_style?: string;
 }
 
 export interface RefData {
@@ -110,7 +112,7 @@ AND itemAttachments.contentType = 'application/pdf'
 
 const cachePath = utils.cachePath("zotero.json");
 
-function resolveHome(filepath: string): string {
+export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
     return path.join(process.env.HOME, filepath.slice(1));
   }
@@ -261,12 +263,12 @@ const parseQuery = (q: string) => {
   const ts = queryItems.filter((c) => c.startsWith("."));
 
   let qss = "";
-  if (qs.length) {
+  if (qs.length > 0) {
     qss = qs.join(" ");
   }
 
   let tss = [];
-  if (ts.length) {
+  if (ts.length > 0) {
     tss = ts.map((x) => x.substring(1));
   }
 
@@ -281,8 +283,13 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
+    const fData = {
+      zotero_path: preferences.zotero_path,
+      use_bibtex: preferences.use_bibtex,
+      data: data,
+    };
     try {
-      await writeFile(cachePath, JSON.stringify(data));
+      await writeFile(cachePath, JSON.stringify(fData));
     } catch (err) {
       console.error("Failed to write installed cache:", err);
     }
@@ -300,14 +307,18 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
     if (diffTime < 3600000) {
       const cacheBuffer = await readFile(cachePath);
-      const data = JSON.parse(cacheBuffer.toString());
-      return data;
+      const fData = JSON.parse(cacheBuffer.toString());
+      return fData.data;
     } else {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
-        const data = JSON.parse(cacheBuffer.toString());
-        return data;
+        const fData = JSON.parse(cacheBuffer.toString());
+        if (fData.zotero_path === preferences.zotero_path && fData.use_bibtex === preferences.use_bibtex) {
+          return fData.data;
+        } else {
+          throw "Invalid cache";
+        }
       } else {
         throw "Invalid cache";
       }
@@ -347,15 +358,16 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   const query: Fuse.Expression = {
     $or: [{ title: qss }, { abstractNote: qss }],
   };
+
   // filter for ALL tags, ignoring case
   if (tss.length > 0) {
-    for (const c of tss) {
-      ret = ret.filter((r) => {
-        return r.tags?.some((e) => {
-          return e.toLowerCase() === c.toLowerCase();
+    ret = ret.filter((r) => {
+      return r.tags?.some((e) => {
+        return tss.some((c) => {
+          return e.toLowerCase().includes(c.replaceAll("+", " ").toLowerCase());
         });
       });
-    }
+    });
   }
 
   if (!qss.trim()) {
@@ -369,7 +381,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     includeMatches: false,
     findAllMatches: true,
     minMatchCharLength: 3,
-    threshold: 0.9,
+    threshold: 0.1,
     ignoreLocation: true,
     keys: [
       {
@@ -378,7 +390,11 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       },
       {
         name: "abstractNote",
-        weight: 4,
+        weight: 2,
+      },
+      {
+        name: "tags",
+        weight: 2,
       },
     ],
   };

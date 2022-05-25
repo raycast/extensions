@@ -1,8 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Updates] - 2022-05-24
+## [Updates] - 2022-05-25
 
-Fixed a bug where it was unable to open project that has space in path
+- Fixed a bug where it was unable to open project that has space in path
+- Fixed so deleted paths are not visible in the list
 
 ## [Updates] - 2022-05-23
 

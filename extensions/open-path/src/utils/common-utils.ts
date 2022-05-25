@@ -5,6 +5,7 @@ import Values = LocalStorage.Values;
 export interface Preference extends Values {
   trimText: boolean;
   isShowHud: boolean;
+  fileOperation: string;
   priorityDetection: string;
   searchEngine: string;
 }
