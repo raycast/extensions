@@ -34,12 +34,19 @@ export const buildMatchQuery = (str: string): string => {
   return `{content exactMatchContent} : (${phrases.join(") OR (")})`;
 };
 
-export const searchBlocks = (database: Database, spaceID: string, query: string, params: BindParams) =>
-  database
-    .exec(query, params)
-    .map((res) => res.values)
-    .flat()
-    .map(sqlValueArr2Block(spaceID));
+export const searchBlocks = (database: Database, spaceID: string, query: string, params: BindParams): Block[] => {
+  try {
+    return database
+      .exec(query, params)
+      .map((res) => res.values)
+      .flat()
+      .map(sqlValueArr2Block(spaceID));
+  } catch (e) {
+    console.error(`db exec error: ${e}`);
+
+    return [];
+  }
+};
 
 export const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
   ...new Set(blocks.map((block) => block.documentID)),
