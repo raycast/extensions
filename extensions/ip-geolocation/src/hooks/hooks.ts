@@ -12,12 +12,8 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(async () => {
-    if (isEmpty(searchContent)) {
-      setIpGeolocation([]);
-      setLoading(false);
-      return;
-    }
-    if (!searchContent.includes(".")) {
+    setIpGeolocation([]);
+    if (isEmpty(searchContent) || !searchContent.includes(".")) {
       setLoading(false);
       return;
     }
@@ -58,6 +54,8 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
               console.error(String(reason));
               setLoading(false);
             });
+        } else {
+          setLoading(false);
         }
       })
       .catch((error: Error) => {
