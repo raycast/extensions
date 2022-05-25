@@ -26,7 +26,7 @@ export interface Preferences {
  * @returns A properly URI encoded string according to Apple Maps documentation
  */
 export function makeDirectionsURL(origin: string, destination: string, travelmode: string): string {
-  const mapsBase = "http://maps.apple.com";
+  const mapsBase = "maps://";
   return (
     mapsBase + "?saddr=" + encodeURI(origin) + "&daddr=" + encodeURI(destination) + "&dirflg=" + encodeURI(travelmode)
   );
@@ -40,6 +40,6 @@ export function makeDirectionsURL(origin: string, destination: string, travelmod
  * @returns A properly URI encoded string according to Apple Maps documentation
  */
 export function makeSearchURL(query: string): string {
-  const mapsBase = "http://maps.apple.com";
+  const mapsBase = "maps://";
   return mapsBase + "?q=" + encodeURI(query);
 }
