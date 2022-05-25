@@ -12,9 +12,9 @@ This extension is List based with single view and show result immediately after 
 
 Hope it can somehow improve your work efficiency.
 
-![](./assets/1046589d11ea90eb22322910418db5616a7a4ea7.png)
+![](./media/1046589d11ea90eb22322910418db5616a7a4ea7.png)
 
-![](./assets/dea3f1e2f3444d664b668a910b37503bb59458bc.png)
+![](./media/dea3f1e2f3444d664b668a910b37503bb59458bc.png)
 
 Now by default, it will use auto-detecting language for translation.
 
