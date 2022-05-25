@@ -91,26 +91,7 @@ export const documentize = (database: Database, spaceID: string, blocks: Block[]
       .exec(sql, documentIDs)
       .map((res) => res.values)
       .flat()
-      .reduce((acc, val) => {
-        const block = sqlValueArr2Block(spaceID)(val);
-        let obj = acc.find((item) => item.block.documentID === block.documentID);
-        if (!obj) {
-          obj =
-            block.entityType === "document"
-              ? ({ block, blocks: [] } as DocBlock)
-              : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
-
-          acc.push(obj);
-        } else {
-          if (block.entityType === "document") {
-            obj.block = block;
-          } else {
-            obj.blocks.push(block);
-          }
-        }
-
-        return acc;
-      }, [] as DocBlock[]);
+      .reduce(compactBlocksToDocBlocks(spaceID), [] as DocBlock[]);
   } catch (e) {
     console.error(`db exec error: ${e}`);
 
@@ -118,15 +99,38 @@ export const documentize = (database: Database, spaceID: string, blocks: Block[]
   }
 };
 
+const compactBlocksToDocBlocks = (spaceID: string) =>
+  (acc: DocBlock[], val: SqlValue[]): DocBlock[] => {
+    const block = sqlValueArr2Block(spaceID)(val);
+
+    let obj = acc.find((item) => item.block.documentID === block.documentID);
+    if (!obj) {
+      obj =
+        block.entityType === "document"
+          ? ({ block, blocks: [] } as DocBlock)
+          : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
+
+      acc.push(obj);
+    } else {
+      if (block.entityType === "document") {
+        obj.block = block;
+      } else {
+        obj.blocks.push(block);
+      }
+    }
+
+    return acc;
+  };
+
 const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
-  ...new Set(blocks.map((block) => block.documentID)),
+  ...new Set(blocks.map((block) => block.documentID))
 ];
 
 const termsForFTS5 = (str: string): string[] =>
   str
     .split(/\s+/)
     .map((word) => word.trim())
-    .map((word) => word.replace('"', " "))
+    .map((word) => word.replace("\"", " "))
     .map((word) => `"${word}"`);
 
 const phrasesForFTS5 = (terms: string[]): string[] => {
@@ -141,5 +145,5 @@ const phrasesForFTS5 = (terms: string[]): string[] => {
 
 const sqlValueArr2Block =
   (spaceID: string) =>
-  ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
-    ({ id, content, type, entityType, documentID, spaceID } as Block);
+    ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
+      ({ id, content, type, entityType, documentID, spaceID } as Block);
