@@ -7,7 +7,7 @@ import {
   limit,
   searchBlocks,
   searchQuery,
-  searchQueryDocumentsOnEmptyParams
+  searchQueryDocumentsOnEmptyParams,
 } from "./common";
 
 type UseDocumentSearch = {
@@ -41,4 +41,3 @@ export default function useDocumentSearch({ databasesLoading, databases }: UseDB
 
   return state;
 }
-

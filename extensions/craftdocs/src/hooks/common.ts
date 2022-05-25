@@ -99,7 +99,8 @@ export const documentize = (database: Database, spaceID: string, blocks: Block[]
   }
 };
 
-const compactBlocksToDocBlocks = (spaceID: string) =>
+const compactBlocksToDocBlocks =
+  (spaceID: string) =>
   (acc: DocBlock[], val: SqlValue[]): DocBlock[] => {
     const block = sqlValueArr2Block(spaceID)(val);
 
@@ -120,20 +121,18 @@ const createDocBlock = (block: Block): DocBlock =>
     : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
 
 const applyBlockToDocBlock = (docBlock: DocBlock, block: Block) => {
-  block.entityType === "document"
-    ? (docBlock.block = block)
-    : docBlock.blocks.push(block);
+  block.entityType === "document" ? (docBlock.block = block) : docBlock.blocks.push(block);
 };
 
 const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
-  ...new Set(blocks.map((block) => block.documentID))
+  ...new Set(blocks.map((block) => block.documentID)),
 ];
 
 const termsForFTS5 = (str: string): string[] =>
   str
     .split(/\s+/)
     .map((word) => word.trim())
-    .map((word) => word.replace("\"", " "))
+    .map((word) => word.replace('"', " "))
     .map((word) => `"${word}"`);
 
 const phrasesForFTS5 = (terms: string[]): string[] => {
@@ -148,5 +147,5 @@ const phrasesForFTS5 = (terms: string[]): string[] => {
 
 const sqlValueArr2Block =
   (spaceID: string) =>
-    ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
-      ({ id, content, type, entityType, documentID, spaceID } as Block);
+  ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
+    ({ id, content, type, entityType, documentID, spaceID } as Block);

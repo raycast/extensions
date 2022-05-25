@@ -6,7 +6,7 @@ import {
   limit,
   searchBlocks,
   searchQuery,
-  searchQueryOnEmptyParams
+  searchQueryOnEmptyParams,
 } from "./common";
 
 export type Block = {
@@ -42,4 +42,3 @@ export default function useSearch({ databasesLoading, databases }: UseDB, text: 
 
   return state;
 }
-

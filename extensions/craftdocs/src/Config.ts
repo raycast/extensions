@@ -2,10 +2,8 @@ import { homedir } from "os";
 import { readdirSync } from "fs";
 import path from "path";
 
-const craftDataRoot =
-  "~/Library/Containers/com.lukilabs.lukiapp/Data/Library/Application Support/com.lukilabs.lukiapp";
-const searchPath =
-  `${craftDataRoot}/Search`;
+const craftDataRoot = "~/Library/Containers/com.lukilabs.lukiapp/Data/Library/Application Support/com.lukilabs.lukiapp";
+const searchPath = `${craftDataRoot}/Search`;
 
 type SpaceSQLite = {
   path: string;
@@ -40,14 +38,13 @@ export default class Config {
     const regexIDsPart = readdirSync(root)
       .filter(this.selectRealmFiles)
       .map(this.extractSpaceIDs)
-      .filter(str => str)
+      .filter((str) => str)
       .join("|");
 
     return new RegExp(`(?:${regexIDsPart})[^.]*.sqlite$`);
   };
 
-  private selectRealmFiles = (str: string): boolean =>
-    str.match(/\.realm$/) !== null;
+  private selectRealmFiles = (str: string): boolean => str.match(/\.realm$/) !== null;
 
   // Main Realm file is named in this way:
   // LukiMain_e95db95e-286c-e7c9-276e-c61b378d1e1c_2E3178A2-26CD-4991-BBCB-67F097040B59.realm
@@ -72,6 +69,6 @@ export default class Config {
   private makeSpaceFromStr = (pwd: string, str: string): SpaceSQLite => ({
     primary: !str.includes("||"),
     path: path.join(pwd, str),
-    spaceID: str.match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)?.pop() || ""
+    spaceID: str.match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)?.pop() || "",
   });
 }
