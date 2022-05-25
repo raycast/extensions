@@ -1,24 +1,22 @@
-import { commonPreferences, getFocusFinderPath } from "./utils/common-utils";
-import { Clipboard, closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
-import { parse } from "path";
+import { getFocusFinderPath } from "./utils/applescript-utils";
+import { Clipboard, closeMainWindow, getPreferenceValues, getSelectedFinderItems, showHUD } from "@raycast/api";
+import { Preferences } from "./types/preferences";
 
 export default async () => {
   try {
-    const { multiPathSeparator } = commonPreferences();
+    const { multiPathSeparator } = getPreferenceValues<Preferences>();
     await closeMainWindow();
     const fileSystemItems = await getSelectedFinderItems();
     if (fileSystemItems.length === 0) {
       await copyFinderPath();
     } else {
-      const filePaths = fileSystemItems.map((item) => {
-        const parsedPath = parse(item.path);
-        return parsedPath.dir + "/" + parsedPath.base;
-      });
+      const filePaths = fileSystemItems.map((item) =>
+        item.path.endsWith("/") && item.path.length !== 1 ? item.path.slice(0, -1) : item.path
+      );
 
-      console.debug(multiPathSeparator);
       const output = filePaths.join(multiPathSeparator);
       await Clipboard.copy(output);
-      await showHUD("Copy: " + filePaths[0]);
+      await showHUD("Copy: " + (filePaths.length > 1 ? filePaths[0] + "..." : filePaths[0]));
     }
   } catch (e) {
     await copyFinderPath();
@@ -28,8 +26,7 @@ export default async () => {
 
 const copyFinderPath = async () => {
   const finderPath = await getFocusFinderPath();
-  const parsedPath = parse(finderPath);
-  const output = parsedPath.dir + "/" + parsedPath.base;
-  await Clipboard.copy(output);
-  await showHUD("Copy: " + output);
+  const finalPath = finderPath.endsWith("/") && finderPath.length !== 1 ? finderPath.slice(0, -1) : finderPath;
+  await Clipboard.copy(finalPath);
+  await showHUD("Copy: " + finalPath);
 };

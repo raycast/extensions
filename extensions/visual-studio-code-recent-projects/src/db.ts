@@ -2,13 +2,13 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
-import path from "path";
+import path, { basename } from "path";
 import initSqlJs from "sql.js";
 import get from "lodash.get";
 import {
   EntryLike,
   Preferences,
-  recentOpenedLabel,
+  RecentOpenedId,
   VSCodeBuild,
   lastKnownMenubarItems,
   RecentOpenedItemId,
@@ -43,7 +43,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
     }
     const db = await loadDB();
     const res = db.exec(
-      "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
+      "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
     ) as unknown as QueryResult;
 
     // Filtering is handled by Raycast, so the DB can be closed immediately
@@ -55,28 +55,35 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
 
     const json = JSON.parse(await readFile(STORAGE_PATH, "utf8"));
     const lastKnownMenubarItems = get(json, "lastKnownMenubarData.menus.File.items", []) as lastKnownMenubarItems[];
-    const recentOpenedMenu = lastKnownMenubarItems.find(({ label }) => label === recentOpenedLabel);
+    const recentOpenedMenu = lastKnownMenubarItems.find(({ id }) => id === RecentOpenedId);
     const entries = recentOpenedMenu?.submenu?.items || [];
     return entries
       .filter(({ id }) =>
-        [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id),
+        [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id)
       )
-      .map(({ id, uri }) => {
+      .map(({ id, uri, label }) => {
         switch (id) {
           case RecentOpenedItemId.Workspace:
             return {
+              id: id,
+              label: label,
               fileUri: `${uri.scheme}://${uri.path}`,
             };
 
           case RecentOpenedItemId.File:
           default:
             return {
+              id: id,
+              label: label,
               fileUri: `${uri.scheme}://${uri.path}`,
             };
 
           case RecentOpenedItemId.Folder:
             return {
-              folderUri: `${uri.scheme}://${uri.path}`,
+              id: id,
+              label: "vscode-remote" === uri.scheme ? label : basename(uri.path),
+              folderUri: "vscode-remote" === uri.scheme ? uri.external : `${uri.scheme}://${uri.path}`,
+              scheme: uri.scheme,
             };
         }
       });

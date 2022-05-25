@@ -1,16 +1,18 @@
-import { useState } from "react";
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, isImage, preferences } from "./utils/common-utils";
+import React, { useState } from "react";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { getFinderPath, isImage } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-here";
-import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
+import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./types/file-type";
 import { getFileType } from "./hooks/hooks";
 import { parse } from "path";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { Preferences } from "./types/preferences";
 
 export default function NewFileWithName(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
 }) {
-  const preference = preferences();
+  const { showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
   const [fileName, setFileName] = useState<string>("");
@@ -56,6 +58,8 @@ export default function NewFileWithName(props: {
               }
             }}
           />
+
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >
@@ -82,7 +86,7 @@ export default function NewFileWithName(props: {
           })}
         </Form.Dropdown.Section>
 
-        {preference.showDocument && (
+        {showDocument && (
           <Form.Dropdown.Section title={"Document"}>
             {documentFileTypes.map((fileType, index) => {
               return (
@@ -96,7 +100,7 @@ export default function NewFileWithName(props: {
             })}
           </Form.Dropdown.Section>
         )}
-        {preference.showCode && (
+        {showCode && (
           <Form.Dropdown.Section title={"Code"}>
             {codeFileTypes.map((fileType, index) => {
               return (
@@ -110,7 +114,7 @@ export default function NewFileWithName(props: {
             })}
           </Form.Dropdown.Section>
         )}
-        {preference.showScript && (
+        {showScript && (
           <Form.Dropdown.Section title={"Script"}>
             {scriptFileTypes.map((fileType, index) => {
               return (

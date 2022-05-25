@@ -3,14 +3,26 @@ import { useEffect, useState } from "react";
 import { PlayAction } from "./client/actions";
 import { authorize, spotifyApi } from "./client/client";
 import { Response } from "./client/interfaces";
+import { isSpotifyInstalled } from "./client/utils";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
   const response = useAlbumSearch(searchText);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
+
+  useEffect(() => {
+    async function checkForSpotify() {
+      const spotifyIsInstalled = await isSpotifyInstalled();
+
+      setSpotifyInstalled(spotifyIsInstalled);
+    }
+
+    checkForSpotify();
+  }, []);
 
   return (
     <List
@@ -20,14 +32,15 @@ export default function SpotifyList() {
       throttle
     >
       {response.result?.albums.items.map((a) => (
-        <AlbumItem key={a.id} album={a} />
+        <AlbumItem key={a.id} album={a} spotifyInstalled={spotifyInstalled} />
       ))}
     </List>
   );
 }
 
-function AlbumItem(props: { album: SpotifyApi.AlbumObjectSimplified }) {
+function AlbumItem(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInstalled: boolean }) {
   const album = props.album;
+  const spotifyInstalled = props.spotifyInstalled;
   const icon: Image.ImageLike = {
     source: album.images[album.images.length - 1].url,
     mask: Image.Mask.Circle,
@@ -49,11 +62,14 @@ function AlbumItem(props: { album: SpotifyApi.AlbumObjectSimplified }) {
           <PlayAction itemURI={album.uri} />
           <Action.OpenInBrowser
             title={`Show Album (${album.name.trim()})`}
-            url={album.external_urls.spotify}
+            url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
-          <Action.OpenInBrowser title="Show Artist" url={album.artists[0].external_urls.spotify} />
+          <Action.OpenInBrowser
+            title="Show Artist"
+            url={spotifyInstalled ? `spotify:artist:${album.artists[0].id}` : album.artists[0].external_urls.spotify}
+          />
           <Action.CopyToClipboard
             title="Copy URL"
             content={album.external_urls.spotify}

@@ -35,3 +35,5 @@ export const ZIP_EXT = [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".i
 export const NO_PREVIEW_EXTENSIONS = [".exe", ".DS_Store", ".gdoc", ".gsheet", ".gslides", ".ts", ".css"];
 export const DMG_EXT = ".dmg";
 export const APP_EXT = ".app";
+
+export const IMAGE_PREVIEW_HEIGHT = 190;

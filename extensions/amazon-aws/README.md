@@ -2,10 +2,11 @@
 
 ### Commands:
 
+- List your CloudFormation Stacks.
+- List your CodePipelines.
+- List yout DynamoDB tables.
 - List your EC2 Instances.
 - List your SQS Queues.
-- List your CodePipelines.
-- List your CloudFormation Stacks.
 - Access your AWS Console.
 
 ## Configuration
