@@ -2,7 +2,6 @@ import { existsSync } from "fs";
 import { URL } from "url";
 
 export interface FileEntry {
-  id: string;
   fileUri: string;
 }
 
@@ -12,9 +11,7 @@ export function isFileEntry(entry: EntryLike): entry is FileEntry {
 }
 
 export interface FolderEntry {
-  id: string;
   folderUri: string;
-  scheme: string;
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
@@ -23,7 +20,6 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
 }
 
 export interface WorkspaceEntry {
-  id: string;
   fileUri: string;
 }
 
@@ -33,9 +29,7 @@ export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
 }
 
 export interface RemoteEntry {
-  id: string;
   folderUri: string;
-  scheme: string;
   remoteAuthority: string;
   label: string;
 }
