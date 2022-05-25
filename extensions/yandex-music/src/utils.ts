@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { Application, getPreferenceValues, showHUD } from "@raycast/api";
+import { Application, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 
 // May work in other browser too, but it's confirmed to work only in these
 type SupportedBrowsers = "Safari" | "Chrome" | "Yandex";
@@ -20,22 +20,39 @@ export async function runJSInYandexMusicTab(code: string) {
   const browser = getPreferenceValues<{ browser: Application }>().browser;
 
   try {
-    await runAppleScript(`
+    const tabFound =
+      (await runAppleScript(`
             tell application "${browser.name}"
                 repeat with w in (every window)		
                     repeat with t in (every tab whose URL contains "music.yandex.ru") of w			
                         ${runJS(browser.name, code)}
+                        return true
                     end repeat	
                 end repeat
             end tell
-        `);
+            return false
+        `)) === "true";
+
+    if (!tabFound) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "The Yandex Music tab hasn't been found",
+        message: `Try to check selected browser in extension preferences.`,
+      });
+    }
+
+    return tabFound;
   } catch (e) {
     const message = (e as OsaError).stderr;
 
     if (message.includes("Allow JavaScript from Apple Events")) {
-      showHUD(
-        `You must enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu to use extension`
-      );
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot run JavaScript in selected browser.",
+        message: `You must enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu to use extension.`,
+      });
+
+      return false;
     }
   }
 }
