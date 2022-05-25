@@ -4,7 +4,7 @@ export interface FileEntry {
 }
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
-  const { id, fileUri } = entry as FileEntry;
+  const { id } = entry as FileEntry;
   return id === "openRecentFile";
 }
 
@@ -15,7 +15,7 @@ export interface FolderEntry {
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
-  const { id, scheme, folderUri } = entry as FolderEntry;
+  const { id, scheme } = entry as FolderEntry;
   return id === "openRecentFolder" && scheme !== "vscode-remote";
 }
 
@@ -25,7 +25,7 @@ export interface WorkspaceEntry {
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  const { id, fileUri } = entry as WorkspaceEntry;
+  const { id } = entry as WorkspaceEntry;
   return id === "openRecentWorkspace";
 }
 
