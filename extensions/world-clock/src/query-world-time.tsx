@@ -8,7 +8,7 @@ import { Timezone } from "./types/types";
 import { filterTag } from "./utils/costants";
 import { Preferences } from "./types/preferences";
 
-export default function PopularArticles() {
+export default function QueryWorldTime() {
   const { rememberTag } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");

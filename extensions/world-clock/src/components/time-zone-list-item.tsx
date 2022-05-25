@@ -5,6 +5,7 @@ import { TimeInfoDetail } from "./time-info-detail";
 import { LOCALSTORAGE_KEY } from "../utils/costants";
 import { ActionTimeInfo } from "./action-time-info";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
+import { buildTimeByUTCTime } from "../utils/common-utils";
 
 export function TimeZoneListItem(props: {
   timezone: string;
@@ -19,6 +20,9 @@ export function TimeZoneListItem(props: {
       id={JSON.stringify({ type: "all", region: timezone })}
       icon={{ source: { light: "timezone.png", dark: "timezone@dark.png" } }}
       title={timezone}
+      accessories={[
+        timeInfo.timezone === timezone ? { text: buildTimeByUTCTime(timeInfo.datetime).substring(11) } : {},
+      ]}
       detail={<TimeInfoDetail timeInfo={timeInfo} detailLoading={detailLoading} />}
       actions={
         <ActionPanel>
@@ -57,6 +61,9 @@ export function StarTimeZoneListItem(props: {
       id={JSON.stringify({ type: "star", region: timezone })}
       icon={{ source: { light: "timezone.png", dark: "timezone@dark.png" }, tintColor: Color.Yellow }}
       title={timezone}
+      accessories={[
+        timeInfo.timezone === timezone ? { text: buildTimeByUTCTime(timeInfo.datetime).substring(11) } : {},
+      ]}
       detail={<TimeInfoDetail timeInfo={timeInfo} detailLoading={detailLoading} />}
       actions={
         <ActionPanel>

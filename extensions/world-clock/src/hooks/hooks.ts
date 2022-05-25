@@ -82,8 +82,8 @@ export const getIpTime = (searchContent: string) => {
 
   const fetchData = useCallback(async () => {
     try {
+      setTimeInfo([]);
       if (isEmpty(searchContent)) {
-        setTimeInfo([]);
         setLoading(false);
         return;
       }
@@ -94,31 +94,25 @@ export const getIpTime = (searchContent: string) => {
         if (typeof _timeInfo !== "undefined") {
           setTimeInfo(_timeInfo);
         }
-        setLoading(false);
       } else if (searchContent.includes(".")) {
         //domain
-        axios({
+        const res = await axios({
           method: "GET",
           url: IP_GEOLOCATION_API + searchContent,
           params: {
             fields: "57344",
           },
-        })
-          .then(async (response) => {
-            const ipGeolocation = response.data as IPGeolocation;
-            if (isIPv4(ipGeolocation.query)) {
-              const _timeInfo = await axiosGetIpTime(ipGeolocation.query);
-              if (typeof _timeInfo !== undefined) {
-                setTimeInfo(_timeInfo as [string, string][]);
-              }
-            }
-            setLoading(false);
-          })
-          .catch((reason) => {
-            showToast(Style.Failure, String(reason)).then();
-            setLoading(false);
-          });
-      } else setLoading(false);
+        });
+
+        const ipGeolocation = res?.data as IPGeolocation;
+        if (isIPv4(ipGeolocation.query)) {
+          const _timeInfo = await axiosGetIpTime(ipGeolocation.query);
+          if (typeof _timeInfo !== "undefined" && _timeInfo?.length != 0) {
+            setTimeInfo(_timeInfo as [string, string][]);
+          }
+        }
+      }
+      setLoading(false);
     } catch (e) {
       setLoading(false);
       console.error(String(e));

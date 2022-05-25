@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
 import { isEmpty } from "./utils/common-utils";
 
-export default function PopularArticles() {
+export default function QueryIpTime() {
   const [searchContent, setSearchContent] = useState<string>("");
   const { timeInfo, loading } = getIpTime(searchContent);
 
