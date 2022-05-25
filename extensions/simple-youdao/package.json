@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-youdao",
   "title": "Simple Youdao Translate",
-  "description": "This is a youdao translation extension with simple interaction",
+  "description": "This is a Youdao translation extension with simple interaction",
   "icon": "command-icon.png",
   "author": "xeric",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Youdao",
-      "subtitle": "Simple Youdao Tranlsate",
-      "description": "simple youdao with quick translation",
+      "title": "Translate",
+      "subtitle": "Youdao",
+      "description": "Simple youdao with quick translation",
       "mode": "view"
     }
   ],
