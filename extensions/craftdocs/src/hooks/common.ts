@@ -103,24 +103,27 @@ const compactBlocksToDocBlocks = (spaceID: string) =>
   (acc: DocBlock[], val: SqlValue[]): DocBlock[] => {
     const block = sqlValueArr2Block(spaceID)(val);
 
-    let obj = acc.find((item) => item.block.documentID === block.documentID);
-    if (!obj) {
-      obj =
-        block.entityType === "document"
-          ? ({ block, blocks: [] } as DocBlock)
-          : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
+    const docBlock = acc.find((item) => item.block.documentID === block.documentID);
 
-      acc.push(obj);
+    if (!docBlock) {
+      acc.push(createDocBlock(block));
     } else {
-      if (block.entityType === "document") {
-        obj.block = block;
-      } else {
-        obj.blocks.push(block);
-      }
+      applyBlockToDocBlock(docBlock, block);
     }
 
     return acc;
   };
+
+const createDocBlock = (block: Block): DocBlock =>
+  block.entityType === "document"
+    ? ({ block, blocks: [] } as DocBlock)
+    : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
+
+const applyBlockToDocBlock = (docBlock: DocBlock, block: Block) => {
+  block.entityType === "document"
+    ? (docBlock.block = block)
+    : docBlock.blocks.push(block);
+};
 
 const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
   ...new Set(blocks.map((block) => block.documentID))
