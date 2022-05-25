@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Query on Numi",
-      "description": "",
+      "description": "Search on numi any query",
       "mode": "view"
     }
   ],
