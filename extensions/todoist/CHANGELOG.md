@@ -4,6 +4,8 @@
 
 - Added the ability to add a new task from a project
 - Shared the task actions between the task detail and the task list item
+- Add flag icon for priorities in the detail view as well as in the action panel
+
 ## [Edit your projects] - 2022-04-30
 
 - Added a new action on projects to edit them
