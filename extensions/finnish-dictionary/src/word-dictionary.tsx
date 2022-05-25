@@ -64,13 +64,13 @@ export default function WordDictionary(props: { from: string; to: string }) {
       throttle
       searchBarPlaceholder="Search..."
       onSearchTextChange={search}
-      isShowingDetail={suggestions.length > 0 || recentSearches.length > 0}
+      isShowingDetail={(suggestions.length > 0 || recentSearches.length > 0) && !isLoading}
       navigationTitle={`Define ${props.from} word in ${props.to}`}
     >
       {(searchQuery === "" || isLoading) && suggestions.length === 0 && recentSearches.length == 0 ? (
         <List.EmptyView icon={Icon.Text} title="Type a word to define" />
       ) : searchQuery === "" && recentSearches.length > 0 ? (
-        <List.Section title="Recent searches">
+        <List.Section title="Recently viewed">
           {recentSearches.map((result, i) => (
             <List.Item
               id={result.title + i}
@@ -128,6 +128,7 @@ const ResultDetail = ({ res, from, to }: ResultDetailProps) => {
           const detail = resToDetail(res.title, from, to, translation.data);
           const historyJson = (await LocalStorage.getItem(`recent-searches-${from}-${to}`)) as string;
           let recent = historyJson ? JSON.parse(historyJson) : [];
+          recent = recent.filter((item: any) => item.title !== res.title);
           recent = [
             {
               title: res.title,
