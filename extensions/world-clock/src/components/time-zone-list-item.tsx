@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
 import React, { Dispatch, SetStateAction } from "react";
-import { TimeInfo, Timezone, TimezoneId } from "../types/types";
+import { TimeInfo, Timezone } from "../types/types";
 import { TimeInfoDetail } from "./time-info-detail";
 import { LOCALSTORAGE_KEY } from "../utils/costants";
 import { ActionTimeInfo } from "./action-time-info";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
-import { buildTimeByUTCTime } from "../utils/common-utils";
+import { calculateTimeInfoByOffset } from "../utils/common-utils";
 
 export function TimeZoneListItem(props: {
   timezone: string;
@@ -21,7 +21,12 @@ export function TimeZoneListItem(props: {
       icon={{ source: { light: "timezone.png", dark: "timezone@dark.png" } }}
       title={timezone}
       accessories={[
-        timeInfo.timezone === timezone ? { text: buildTimeByUTCTime(timeInfo.datetime).substring(11) } : {},
+        timezone === timeInfo.timezone
+          ? {
+              text: calculateTimeInfoByOffset(timeInfo.unixtime, timeInfo.utc_offset).time,
+              tooltip: timeInfo.datetime,
+            }
+          : {},
       ]}
       detail={<TimeInfoDetail timeInfo={timeInfo} detailLoading={detailLoading} />}
       actions={

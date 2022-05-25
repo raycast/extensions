@@ -17,7 +17,20 @@ export const calculateDateTimeByOffset = (offset: string) => {
   };
 };
 
-export const makeUpTwoDigits = (str: string | number) => {
-  str = str + "";
-  return str.length > 1 ? str : "0" + str;
+export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
+  let unixtimeStr = unixtime + "";
+  unixtimeStr = unixtimeStr.length === 10 ? unixtimeStr + "000" : unixtimeStr;
+  //local current time
+  const dateTime = new Date(parseInt(unixtimeStr));
+  dateTime.setDate(dateTime.getUTCDate());
+  dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
+  //utc time
+  const utc = new Date(parseInt(unixtimeStr));
+  utc.setDate(utc.getDate());
+  utc.setHours(utc.getUTCHours());
+  return {
+    date_time: dateTime.toLocaleString(),
+    time: dateTime.toLocaleTimeString(),
+    utc_datetime: utc.toLocaleString(),
+  };
 };

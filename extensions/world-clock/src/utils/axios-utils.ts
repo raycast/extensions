@@ -1,7 +1,7 @@
 import axios from "axios";
 import { IP_BASE_URL } from "./costants";
 import { TimeInfo } from "../types/types";
-import { buildTimeByUTCTime } from "./common-utils";
+import { calculateTimeInfoByOffset } from "./common-utils";
 
 export const axiosGetIpTime = async (param: string) => {
   return await axios({
@@ -11,10 +11,12 @@ export const axiosGetIpTime = async (param: string) => {
     .then((axiosResponse) => {
       if (axiosResponse && typeof axiosResponse?.data?.error === "undefined") {
         const _timeInfo = axiosResponse.data as TimeInfo;
+        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).date_time;
+        _timeInfo.utc_datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).utc_datetime;
         if (typeof _timeInfo === "undefined") return undefined;
         const _timeInfos: [string, string][] = [];
-        _timeInfos.push(["Date Time", buildTimeByUTCTime(_timeInfo.datetime)]);
-        _timeInfos.push(["UTC Time", buildTimeByUTCTime(_timeInfo.utc_datetime)]);
+        _timeInfos.push(["Date Time", _timeInfo.datetime]);
+        _timeInfos.push(["UTC Time", _timeInfo.utc_datetime]);
         _timeInfos.push(["UTC Offset", _timeInfo.utc_offset]);
         _timeInfos.push(["Day of Week", _timeInfo.day_of_week + ""]);
         _timeInfos.push(["Day of Year", _timeInfo.day_of_year + ""]);

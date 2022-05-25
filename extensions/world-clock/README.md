@@ -21,3 +21,5 @@ Want to check the Geolocation of IP address? Try **IP Geolocation**.
 
 <a id="install-extension-button" title="Install IP Geolocation Raycast Extension" href="https://www.raycast.com/koinzhang/ip-geolocation#install">
 <img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/ip-geolocation/install_button@2x.png"></a>
+
+Want to install more extensions? [Click here.](https://www.raycast.com/koinzhang)

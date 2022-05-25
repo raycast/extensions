@@ -3,7 +3,7 @@ import axios from "axios";
 import { IP_GEOLOCATION_API, LOCALSTORAGE_KEY, TIMEZONE_BASE_URL } from "../utils/costants";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { IPGeolocation, TimeInfo, Timezone } from "../types/types";
-import { calculateDateTimeByOffset, isEmpty } from "../utils/common-utils";
+import { calculateDateTimeByOffset, calculateTimeInfoByOffset, isEmpty } from "../utils/common-utils";
 import { isIPv4 } from "net";
 import { axiosGetIpTime } from "../utils/axios-utils";
 import Style = Toast.Style;
@@ -74,7 +74,11 @@ export const getRegionTime = (timezone: string) => {
       url: TIMEZONE_BASE_URL + "/" + timezone,
     })
       .then((axiosResponse) => {
-        setTimeInfo(axiosResponse.data as TimeInfo);
+        const _timeInfo = axiosResponse.data as TimeInfo;
+        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).date_time;
+        _timeInfo.utc_datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).utc_datetime;
+
+        setTimeInfo(_timeInfo);
         setLoading(false);
       })
       .catch((reason) => {
