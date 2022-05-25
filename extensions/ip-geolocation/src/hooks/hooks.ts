@@ -12,7 +12,12 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(async () => {
-    if (isEmpty(searchContent) || !searchContent.includes(".")) {
+    if (isEmpty(searchContent)) {
+      setIpGeolocation([]);
+      setLoading(false);
+      return;
+    }
+    if (!searchContent.includes(".")) {
       setLoading(false);
       return;
     }

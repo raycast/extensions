@@ -25,7 +25,7 @@ export default function QueryIpGeolocation() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Query any IP address/domain"}
+      searchBarPlaceholder={"Query geolocation of IP or domain"}
       searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
