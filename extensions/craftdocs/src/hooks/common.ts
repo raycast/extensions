@@ -118,7 +118,7 @@ export const documentize = (database: Database, spaceID: string, blocks: Block[]
   }
 };
 
-export const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
+const uniqueDocumentIDsFromBlocks = (blocks: Block[]): string[] => [
   ...new Set(blocks.map((block) => block.documentID)),
 ];
 
@@ -139,7 +139,7 @@ const phrasesForFTS5 = (terms: string[]): string[] => {
   return phrases;
 };
 
-export const sqlValueArr2Block =
+const sqlValueArr2Block =
   (spaceID: string) =>
   ([id, content, type, entityType, documentID]: SqlValue[]): Block =>
     ({ id, content, type, entityType, documentID, spaceID } as Block);
