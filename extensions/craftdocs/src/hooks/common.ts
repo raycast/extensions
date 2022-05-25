@@ -1,5 +1,6 @@
 import { BindParams, Database, SqlValue } from "../../assets/sql-wasm-fts5";
 import { Block } from "./useSearch";
+import { DocBlock } from "./useDocumentSearch";
 
 export const searchQuery = `
 SELECT id, content, type, entityType, documentId
@@ -41,6 +42,75 @@ export const searchBlocks = (database: Database, spaceID: string, query: string,
       .map((res) => res.values)
       .flat()
       .map(sqlValueArr2Block(spaceID));
+  } catch (e) {
+    console.error(`db exec error: ${e}`);
+
+    return [];
+  }
+};
+
+export const backfillBlocksWithDocumentNames = (database: Database, blocks: Block[]): Block[] => {
+  if (blocks.length === 0) {
+    return [];
+  }
+
+  const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
+  const placeholders = new Array(documentIDs.length).fill("?").join(", ");
+  const sql = `select documentId, content from BlockSearch where entityType = 'document' and documentId in (${placeholders})`;
+
+  try {
+    database
+      .exec(sql, documentIDs)
+      .map((res) => res.values)
+      .flat()
+      .map(([documentID, content]) =>
+        blocks
+          .filter((block) => block.documentID === documentID)
+          .forEach((block) => (block.documentName = content as string))
+      );
+
+    return blocks;
+  } catch (e) {
+    console.error(`db exec error: ${e}`);
+
+    return [];
+  }
+};
+
+export const documentize = (database: Database, spaceID: string, blocks: Block[]): DocBlock[] => {
+  if (blocks.length === 0) {
+    return [];
+  }
+
+  const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
+  const placeholders = new Array(documentIDs.length).fill("?").join(", ");
+  const sql = `SELECT id, content, type, entityType, documentId FROM BlockSearch WHERE documentId in (${placeholders})`;
+
+  try {
+    return database
+      .exec(sql, documentIDs)
+      .map((res) => res.values)
+      .flat()
+      .reduce((acc, val) => {
+        const block = sqlValueArr2Block(spaceID)(val);
+        let obj = acc.find((item) => item.block.documentID === block.documentID);
+        if (!obj) {
+          obj =
+            block.entityType === "document"
+              ? ({ block, blocks: [] } as DocBlock)
+              : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
+
+          acc.push(obj);
+        } else {
+          if (block.entityType === "document") {
+            obj.block = block;
+          } else {
+            obj.blocks.push(block);
+          }
+        }
+
+        return acc;
+      }, [] as DocBlock[]);
   } catch (e) {
     console.error(`db exec error: ${e}`);
 
