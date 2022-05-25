@@ -1,5 +1,10 @@
 # Raycast Wallpaper Changelog
 
+## [Optimize image loading speed] - 2022-05-23
+
+- Optimize image loading speed
+- Add action "Open Extension Preferences"
+
 ## [Update Extension Icons] - 2022-04-26
 
 - Update Extension Icons

@@ -18,38 +18,94 @@
   ],
   "preferences": [
     {
-      "name": "api_token",
-      "type": "password",
-      "required": true,
-      "title": "Zotero API Token",
-      "description": "Your Zotero API Token",
-      "placeholder": "Enter Your Zotero API Token"
+      "name": "zotero_path",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Zotero/zotero.sqlite",
+      "title": "Zotero Path",
+      "description": "Path to locate zotero sqlite file",
+      "placeholder": "~/Zotero/zotero.sqlite"
     },
     {
-      "name": "user_id",
-      "type": "password",
-      "required": true,
-      "title": "Zotero User ID",
-      "description": "Your Zotero User ID",
-      "placeholder": "Enter Your Zotero User ID"
+      "name": "use_bibtex",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use BibTex?",
+      "description": "Whether to use BibTex or not?"
+    },
+    {
+      "name": "bibtex_path",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Zotero/lib.json",
+      "title": "Better Bibtex CSL JSON File",
+      "description": "Path to Better Bibtex CSL JSON File",
+      "placeholder": "~/Zotero/lib.json"
+    },
+    {
+      "name": "csl_style",
+      "type": "dropdown",
+      "required": false,
+      "default": "apa",
+      "title": "CSL Format",
+      "description": "CSL format for generating references",
+      "data": [
+        {
+          "title": "American Psychological Association",
+          "value": "apa"
+        },
+        {
+          "title": "American Chemical Society",
+          "value": "american-chemical-society"
+        },
+        {
+          "title": "American Medical Association",
+          "value": "american-medical-association"
+        },
+        {
+          "title": "American Political Science Association",
+          "value": "american-political-science-association"
+        },
+        {
+          "title": "American Socialology Association",
+          "value": "american-sociological-association"
+        },
+        {
+          "title": "Elsevier Harvard",
+          "value": "elsevier-harvard"
+        },
+        {
+          "title": "IEEE",
+          "value": "ieee"
+        },
+        {
+          "title": "Nature",
+          "value": "nature"
+        },
+        {
+          "title": "Vancouver",
+          "value": "vancouver"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "he": "^1.2.0",
-    "node-fetch": "^3.0.0",
-    "modern-async": "^1.1.2"
+    "@raycast/api": "^1.35.1",
+    "citation-js": "^0.5.7",
+    "fuse.js": "^6.6.1",
+    "sql.js": "^1.6.2"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
-    "@types/node": "^16.11.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^16.0.17",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.22.0",
+    "@typescript-eslint/parser": "^5.22.0",
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.24.5",
+    "typescript": "^4.6.4"
   },
   "scripts": {
     "build": "ray build -e dist",

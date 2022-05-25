@@ -1,19 +1,23 @@
-import { ActionPanel, Detail, Action } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Page, PageContent, fetchPageContent } from "../utils/notion";
-import { storeRecentlyOpenedPage } from "../utils/local-storage";
+import { useSetAtom } from "jotai";
+import { fetchPageContent } from "../utils/notion";
+import { Page, PageContent } from "../utils/types";
+import { recentlyOpenedPagesAtom } from "../utils/state";
 import { handleOnOpenPage } from "../utils/openPage";
+import { AppendToPageForm } from "./forms";
 
 export function PageDetail(props: { page: Page }): JSX.Element {
-  const page = props.page;
+  const { page } = props;
   const pageName = (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
-
-  useEffect(() => {
-    storeRecentlyOpenedPage(page);
-  }, [page]);
 
   const [pageContent, setPageContent] = useState<PageContent>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const storeRecentlyOpenedPage = useSetAtom(recentlyOpenedPagesAtom);
+
+  useEffect(() => {
+    storeRecentlyOpenedPage(page);
+  }, [page.id]);
 
   // Load page content
   useEffect(() => {
@@ -43,9 +47,24 @@ export function PageDetail(props: { page: Page }): JSX.Element {
               <Action
                 title="Open in Notion"
                 icon={"notion-logo.png"}
-                onAction={function () {
-                  handleOnOpenPage(page);
+                onAction={() => {
+                  handleOnOpenPage(page, storeRecentlyOpenedPage);
                 }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action.Push
+                title="Append Content to Page"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                target={
+                  <AppendToPageForm
+                    page={page}
+                    onContentUpdate={(markdown) =>
+                      setPageContent((prev) => ({ ...prev, markdown: (prev?.markdown || "") + markdown }))
+                    }
+                  />
+                }
               />
             </ActionPanel.Section>
             <ActionPanel.Section>

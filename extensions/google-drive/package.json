@@ -57,10 +57,64 @@
       "default": "",
       "placeholder": "e.g. ~/Google Drive/My Drive/Share, ...",
       "required": false
+    },
+    {
+      "name": "autoReindexingInterval",
+      "title": "Auto Reindexing Interval",
+      "description": "The recurring interval to reindex the cached files in Google Drive folder",
+      "type": "dropdown",
+      "default": "604800000",
+      "required": false,
+      "data": [
+        {
+          "title": "Every hour",
+          "value": "3600000"
+        },
+        {
+          "title": "Every 2 hours",
+          "value": "7200000"
+        },
+        {
+          "title": "Every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "Every 6 hours",
+          "value": "21600000"
+        },
+        {
+          "title": "Every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "Every day",
+          "value": "86400000"
+        },
+        {
+          "title": "Every 2 days",
+          "value": "172800000"
+        },
+        {
+          "title": "Twice a week",
+          "value": "302400000"
+        },
+        {
+          "title": "Every week",
+          "value": "604800000"
+        },
+        {
+          "title": "Every 15 days",
+          "value": "1296000000"
+        },
+        {
+          "title": "Every month",
+          "value": "2592000000"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.0",
+    "@raycast/api": "^1.35.0",
     "fast-glob": "^3.2.11",
     "fzf": "^0.5.1",
     "sql.js": "^1.6.2"

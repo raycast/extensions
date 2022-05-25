@@ -202,6 +202,7 @@ export interface Snippet {
   isDeleted: boolean;
   createdAt: number;
   updatedAt: number;
+  description: ?string;
 }
 
 export interface State {

@@ -153,8 +153,13 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
       />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
-        {priorities.map(({ value, name }) => (
-          <Form.Dropdown.Item value={String(value)} title={name} key={value} />
+        {priorities.map(({ value, name, color, icon }) => (
+          <Form.Dropdown.Item
+            value={String(value)}
+            title={name}
+            key={value}
+            icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
+          />
         ))}
       </Form.Dropdown>
 

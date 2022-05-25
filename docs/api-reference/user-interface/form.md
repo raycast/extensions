@@ -10,12 +10,7 @@ Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Fo
 
 #### Props
 
-| Prop            | Type                                                                                                                | Required | Default       | Description                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- | -------- | ------------- | ------------------------------------------------------------------------------ |
-| actions         | `null` or [`ActionPanel`](action-panel.md#actionpanel)                                                              | No       | -             | A reference to an [ActionPanel](action-panel.md#actionpanel).                  |
-| children        | `null` or `ReactElement<Form.ItemProps<FormValue>, string>` or `ReactElement<Form.ItemProps<Form.Value>, string>[]` | No       | -             | The Form.Item elements of the form.                                            |
-| isLoading       | `boolean`                                                                                                           | No       | false         | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | `string`                                                                                                            | No       | Command title | The main title for that view displayed in Raycast                              |
+<PropsTableFromJSDoc component="Form" />
 
 ### Form.TextField
 
@@ -82,16 +77,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TextField" />
 
 #### Methods (Imperative API)
 
@@ -169,16 +155,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.PasswordField" />
 
 #### Methods (Imperative API)
 
@@ -259,16 +236,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TextArea" />
 
 #### Methods (Imperative API)
 
@@ -276,7 +244,6 @@ export default function Command() {
 | ----- | ----------------------- | -------------------------------------------------------------------------- |
 | focus | <code>() => void</code> | Makes the item request focus.                                              |
 | reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
-
 
 ### Form.Checkbox
 
@@ -348,15 +315,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                     | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `boolean`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                 | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| label        | `string`                                 | Yes      | -       | The label displayed on the right side of the checkbox.                                                                                                                                                            |
-| storeValue   | `boolean`                                | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                 | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `boolean`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: boolean) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.Checkbox" />
 
 #### Methods (Imperative API)
 
@@ -439,15 +398,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                       | Required | Default                         | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------------------------- | -------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `Date`                                                     | No       | -                               | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                   | Yes      | -                               | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| storeValue   | `boolean`                                                  | No       | -                               | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                   | No       | -                               | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `Date`                                                     | No       | -                               | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: Date) => void</code>                      | No       | -                               |                                                                                                                                                                                                                   |
-| type         | <code>[Form.DatePicker.Type](#form.datepicker.type]</code> | No       | `Form.DatePicker.Type.DateTime` | Indicates what types of date components can be picked                                                                                                                                                             |
+<PropsTableFromJSDoc component="Form.DatePicker" />
 
 #### Methods (Imperative API)
 
@@ -455,15 +406,6 @@ export default function Command() {
 | ----- | ----------------------- | -------------------------------------------------------------------------- |
 | focus | <code>() => void</code> | Makes the item request focus.                                              |
 | reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
-
-#### Form.DatePicker.Type
-
-The types of date components the user can pick with a \`Form.DatePicker
-
-| Name     | Description                                                      |
-| -------- | ---------------------------------------------------------------- |
-| DateTime | Hour and second can be picked in addition to year, month and day |
-| Date     | Only year, month, and day can be picked                          |
 
 ### Form.Dropdown
 
@@ -551,15 +493,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                                                                                                                                                                                                                                                       | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| children     | `null` or <code>[Form.Dropdown.Section](form.md#form.dropdown.section)</code> or <code>[Form.Dropdown.Section](form.md#form.dropdown.section)[]</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)[]</code> | No       | -       | Sections or items. If [Form.Dropdown.Item](form.md#form.dropdown.item) elements are specified, a default section is automatically created.                                                                        |
-| defaultValue | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                                                                                                                                                                                                                                                   | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| storeValue   | `boolean`                                                                                                                                                                                                                                                                                  | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code>                                                                                                                                                                                                                                                    | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.Dropdown" />
 
 #### Methods (Imperative API)
 
@@ -599,11 +533,7 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type                                                    | Required | Default | Description                                                                                                                 |
-| ----- | ------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| icon  | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No       | -       | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
-| title | `string`                                                | Yes      | -       | The title displayed for the item.                                                                                           |
-| value | `string`                                                | Yes      | -       | Value of the dropdown item. Make sure to assign each unique value for each item.                                            |
+<PropsTableFromJSDoc component="Form.Dropdown.Item" />
 
 ### Form.Dropdown.Section
 
@@ -645,10 +575,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                                                                                       | Required | Default | Description                       |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | --------------------------------- |
-| children | `null` or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)[]</code> | No       | -       | The item elements of the section. |
-| title    | `string`                                                                                                                                   | No       | -       | Title displayed above the section |
+<PropsTableFromJSDoc component="Form.Dropdown.Section" />
 
 ### Form.TagPicker
 
@@ -736,16 +663,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                                                                                                           | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| children     | `null` or <code>[Form.TagPicker.Item](form.md#form.tagpicker.item)</code> or <code>[Form.TagPicker.Item](form.md#form.tagpicker.item)[]</code> | No       | -       | The list of tag picker's items.                                                                                                                                                                                   |
-| defaultValue | `string[]`                                                                                                                                     | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                                                                                                       | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                                                                                                                       | No       | -       | Placeholder text shown in the token field.                                                                                                                                                                        |
-| storeValue   | `boolean`                                                                                                                                      | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                                                                                                       | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string[]`                                                                                                                                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string[]) => void</code>                                                                                                      | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TagPicker" />
 
 #### Methods (Imperative API)
 
@@ -799,11 +717,7 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type                                                    | Required | Default | Description                                                                   |
-| ----- | ------------------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------- |
-| icon  | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No       | -       | An icon to show in the token.                                                 |
-| title | `string`                                                | Yes      | -       | The display title of the token.                                               |
-| value | `string`                                                | Yes      | -       | Value of the tag picker item. Make sure to assign unique value for each item. |
+<PropsTableFromJSDoc component="Form.TagPicker.Item" />
 
 ### Form.Separator
 
@@ -872,14 +786,11 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type     | Required | Default | Description                                                   |
-| ----- | -------- | -------- | ------- | ------------------------------------------------------------- |
-| title | `string` | No       | -       | The display title of the left side from the description item. |
-| text  | `string` | Yes      | -       | Text that will be displayed in the middle.                    |
+<PropsTableFromJSDoc component="Form.Description" />
 
 ## Types
 
-### Values
+### Form.Values
 
 Values of items in the form.
 
@@ -920,6 +831,17 @@ export default function Command() {
 | Name              | Type  | Required | Description                     |
 | ----------------- | ----- | -------- | ------------------------------- |
 | \[itemId: string] | `any` | Yes      | The form value of a given item. |
+
+### Form.DatePicker.Type
+
+The types of date components the user can pick with a `Form.DatePicker`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |
 
 ---
 

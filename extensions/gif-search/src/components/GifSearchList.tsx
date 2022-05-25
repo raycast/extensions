@@ -20,7 +20,7 @@ export function GifSearchList(props: GifListProps) {
   return (
     <List
       searchBarAccessory={
-        props.showDropdown && (
+        props.showDropdown ? (
           <List.Dropdown tooltip="" storeValue={true} onChange={props.onDropdownChange}>
             <List.Dropdown.Section>
               <List.Dropdown.Item
@@ -48,7 +48,7 @@ export function GifSearchList(props: GifListProps) {
               <List.Dropdown.Item title="Recent" value={GIF_SERVICE.RECENTS} icon={{ source: Icon.Clock }} />
             </List.Dropdown.Section>
           </List.Dropdown>
-        )
+        ) : undefined
       }
       enableFiltering={props.enableFiltering}
       isLoading={props.isLoading}
