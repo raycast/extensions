@@ -316,17 +316,19 @@ function pronunceIt(speak_url: string | undefined, speak_text: string | undefine
   if (speak_url == undefined || speak_url.length === 0) {
     return;
   }
-  fetch(speak_url).then((res) => {
-    if (res.status !== 200 && res.headers.get('Content-Type') === 'audio/mp3' && speak_text != undefined) {
-      return fetch(`http://dict.youdao.com/dictvoice?audio=${speak_text}`)
-    } else {
-      return res;
-    }
-  }).then((res) => {
-    const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
-    res?.body?.pipe(fileStream);
-    sound.play("/tmp/tmp_raycast_simpleyd.mp3");
-  })
+  fetch(speak_url)
+    .then((res) => {
+      if (res.status !== 200 && res.headers.get("Content-Type") === "audio/mp3" && speak_text != undefined) {
+        return fetch(`http://dict.youdao.com/dictvoice?audio=${speak_text}`);
+      } else {
+        return res;
+      }
+    })
+    .then((res) => {
+      const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
+      res?.body?.pipe(fileStream);
+      sound.play("/tmp/tmp_raycast_simpleyd.mp3");
+    });
 }
 
 interface TranslateState {
