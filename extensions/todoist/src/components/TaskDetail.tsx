@@ -14,7 +14,7 @@ interface TaskDetailProps {
 }
 
 export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
-  const { data: task, error: getTaskError } = useSWR(SWRKeys.task, () => todoist.getTask(taskId));
+  const { data: task, error: getTaskError } = useSWR([SWRKeys.task, taskId], () => todoist.getTask(taskId));
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
   const { data: comments, error: getCommentsError } = useSWR(
@@ -76,11 +76,14 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
 
-                <Detail.Metadata.Label
-                  title="Priority"
-                  text={priority?.name}
-                  icon={{ source: Icon.LevelMeter, tintColor: priority?.color }}
-                />
+                {priority ? (
+                  <Detail.Metadata.Label
+                    title="Priority"
+                    text={priority.name}
+                    icon={{ source: priority.icon, tintColor: priority?.color }}
+                  />
+                ) : null}
+
                 {taskLabels && taskLabels.length > 0 ? (
                   <Detail.Metadata.TagList title="Labels">
                     {taskLabels.map((taskLabel, index) => (

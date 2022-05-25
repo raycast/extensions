@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, open } from "@raycast/api";
+import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation } from "@raycast/api";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
@@ -33,7 +33,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
       mutate(SWRKeys.tasks);
 
       if (fromDetail) {
-        mutate(SWRKeys.task);
+        mutate([SWRKeys.task, task.id]);
         pop();
       }
     } catch (error) {
@@ -50,7 +50,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
       mutate(SWRKeys.tasks);
 
       if (fromDetail) {
-        mutate(SWRKeys.task);
+        mutate([SWRKeys.task, task.id]);
       }
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
@@ -68,7 +68,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
         mutate(SWRKeys.tasks);
 
         if (fromDetail) {
-          mutate(SWRKeys.task);
+          mutate([SWRKeys.task, task.id]);
           pop();
         }
       } catch (error) {
@@ -115,12 +115,12 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           title="Change Priority"
         >
-          {priorities.map(({ value, name, color }) => (
+          {priorities.map(({ value, name, color, icon }) => (
             <Action
               key={name}
               id={name}
               title={name}
-              icon={{ source: Icon.Circle, tintColor: color }}
+              icon={{ source: icon, tintColor: color }}
               onAction={() => updateTask(task, { priority: value })}
             />
           ))}
