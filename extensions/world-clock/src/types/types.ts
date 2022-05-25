@@ -16,9 +16,16 @@ export interface TimeInfo {
   week_number: number;
 }
 
-export interface Timezone {
+export interface TimezoneId {
   type: string;
   region: string;
+}
+
+export interface Timezone {
+  timezone: string;
+  utc_offset: string;
+  date_time: string;
+  unixtime: number;
 }
 
 export interface IPGeolocation {

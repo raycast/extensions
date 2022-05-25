@@ -2,18 +2,29 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { IP_GEOLOCATION_API, LOCALSTORAGE_KEY, TIMEZONE_BASE_URL } from "../utils/costants";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { IPGeolocation, TimeInfo } from "../types/types";
-import { isEmpty } from "../utils/common-utils";
+import { IPGeolocation, TimeInfo, Timezone } from "../types/types";
+import { calculateDateTimeByOffset, isEmpty } from "../utils/common-utils";
 import { isIPv4 } from "net";
 import { axiosGetIpTime } from "../utils/axios-utils";
 import Style = Toast.Style;
 
-export const getAllTimezones = (refresh: number) => {
+export const getAllTimezones = (refresh: number, timezone: string) => {
+  const [oldTimezone, setOldTimezone] = useState<string>("");
   const [timezones, setTimezones] = useState<string[]>([]);
-  const [starTimezones, setStarTimezones] = useState<string[]>([]);
+  const [starTimezones, setStarTimezones] = useState<Timezone[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
+    if (timezone !== oldTimezone) {
+      setOldTimezone(timezone);
+      const _starTimezones = [...starTimezones];
+      _starTimezones.forEach((value) => {
+        value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
+        value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
+      });
+      setStarTimezones(_starTimezones);
+      return;
+    }
     setLoading(true);
 
     axios({
@@ -22,12 +33,15 @@ export const getAllTimezones = (refresh: number) => {
     })
       .then(async (axiosResponse) => {
         const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
-        const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as string[]);
+        const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
 
         const allTimeZone = axiosResponse.data as string[];
         _starTimezones.forEach((value) => {
-          const index = allTimeZone.indexOf(value);
+          const index = allTimeZone.indexOf(value.timezone);
           if (index !== -1) allTimeZone.splice(index, 1);
+
+          value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
+          value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
         });
 
         setStarTimezones(_starTimezones);
@@ -38,7 +52,7 @@ export const getAllTimezones = (refresh: number) => {
         showToast(Style.Failure, String(reason));
         setLoading(false);
       });
-  }, [refresh]);
+  }, [refresh, timezone]);
 
   useEffect(() => {
     void fetchData();
@@ -47,17 +61,17 @@ export const getAllTimezones = (refresh: number) => {
   return { starTimezones: starTimezones, timezones: timezones, loading: loading };
 };
 
-export const getRegionTime = (region: string) => {
+export const getRegionTime = (timezone: string) => {
   const [timeInfo, setTimeInfo] = useState<TimeInfo>({} as TimeInfo);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    if (isEmpty(region)) return;
+    if (isEmpty(timezone)) return;
 
     axios({
       method: "GET",
-      url: TIMEZONE_BASE_URL + "/" + region,
+      url: TIMEZONE_BASE_URL + "/" + timezone,
     })
       .then((axiosResponse) => {
         setTimeInfo(axiosResponse.data as TimeInfo);
@@ -67,7 +81,7 @@ export const getRegionTime = (region: string) => {
         showToast(Style.Failure, String(reason));
         setLoading(false);
       });
-  }, [region]);
+  }, [timezone]);
 
   useEffect(() => {
     void fetchData();

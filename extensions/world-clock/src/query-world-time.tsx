@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { getAllTimezones, getRegionTime } from "./hooks/hooks";
 import { ListEmptyView } from "./components/list-empty-view";
 import { isEmpty } from "./utils/common-utils";
-import { StarTimeZoneListItem, TimeZoneListItem } from "./components/time-zone-list-item";
-import { Timezone } from "./types/types";
+import { StarredTimeZoneListItem, TimeZoneListItem } from "./components/time-zone-list-item";
+import { TimezoneId } from "./types/types";
 import { filterTag } from "./utils/costants";
 import { Preferences } from "./types/preferences";
 
@@ -13,7 +13,7 @@ export default function QueryWorldTime() {
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
-  const { starTimezones, timezones, loading } = getAllTimezones(refresh);
+  const { starTimezones, timezones, loading } = getAllTimezones(refresh, region);
   const { timeInfo, detailLoading } = getRegionTime(region);
 
   return (
@@ -23,7 +23,7 @@ export default function QueryWorldTime() {
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined" && !isEmpty(id)) {
-          setRegion((JSON.parse(id) as Timezone).region);
+          setRegion((JSON.parse(id) as TimezoneId).region);
         }
       }}
       throttle={true}
@@ -42,9 +42,10 @@ export default function QueryWorldTime() {
         <List.Section title={"Star"}>
           {starTimezones.map((value, index) => {
             return (
-              <StarTimeZoneListItem
+              <StarredTimeZoneListItem
                 key={index}
-                timezone={value}
+                index={index}
+                timezone={value.timezone}
                 timeInfo={timeInfo}
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
