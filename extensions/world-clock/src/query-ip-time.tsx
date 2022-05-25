@@ -22,8 +22,7 @@ export default function PopularArticles() {
       isLoading={loading}
       searchBarPlaceholder={"Query current time via IP or domain"}
       onSearchTextChange={(text) => {
-        if (typeof text !== "undefined" && !isEmpty(text.replaceAll(" ", "")))
-          setSearchContent(text.replaceAll(" ", ""));
+        if (typeof text !== "undefined") setSearchContent(text.replaceAll(" ", ""));
       }}
       throttle={true}
     >

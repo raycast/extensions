@@ -82,7 +82,11 @@ export const getIpTime = (searchContent: string) => {
 
   const fetchData = useCallback(async () => {
     try {
-      if (isEmpty(searchContent)) return;
+      if (isEmpty(searchContent)) {
+        setTimeInfo([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       if (isIPv4(searchContent)) {
         //ip
