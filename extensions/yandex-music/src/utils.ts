@@ -50,7 +50,7 @@ export async function runJSInYandexMusicTab(code: string) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Cannot run JavaScript in selected browser.",
-        message: `You must enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu to use extension.`,
+        message: `Enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu.`,
       });
 
       return false;
