@@ -71,7 +71,7 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
         }
       })
       .map(({ id, uri, label }) => {
-        const path = `${uri.scheme}://${uri.path}`;
+        const path = encodeURI(`${uri.scheme}://${uri.path}`);
         switch (id) {
           case RecentOpenedItemId.Workspace:
             return {
