@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - 2022-05-23
+## [Features] - 2022-05-25
 
 - Adds Action to copy reference citations using CSA styles to Clipboard
 - Adds Action to copy bibtex entry for reference to Clipboard
