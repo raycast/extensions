@@ -1,8 +1,9 @@
 import { runAppleScript } from "run-applescript";
-import { Application, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { Application, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-// May work in other browser too, but it's confirmed to work only in these
-type SupportedBrowsers = "Safari" | "Chrome" | "Yandex";
+// Extension should work with any Chromium or Firefox (not sure) based browser, but it impossible to check every such browser.
+// So i cannot confirm that extension will work with any else browser except that listed below.
+type SupportedBrowsers = "Safari" | "Chrome" | "Yandex" | "Microsoft Edge";
 
 interface OsaError {
   stderr: string;
