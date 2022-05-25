@@ -263,12 +263,12 @@ const parseQuery = (q: string) => {
   const ts = queryItems.filter((c) => c.startsWith("."));
 
   let qss = "";
-  if (qs.length) {
+  if (qs.length > 0) {
     qss = qs.join(" ");
   }
 
   let tss = [];
-  if (ts.length) {
+  if (ts.length > 0) {
     tss = ts.map((x) => x.substring(1));
   }
 
@@ -381,15 +381,19 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     includeMatches: false,
     findAllMatches: true,
     minMatchCharLength: 3,
-    threshold: 0.9,
+    threshold: 0.1,
     ignoreLocation: true,
     keys: [
       {
         name: "title",
-        weight: 8,
+        weight: 6,
       },
       {
         name: "abstractNote",
+        weight: 2,
+      },
+      {
+        name: "tags",
         weight: 2,
       },
     ],
