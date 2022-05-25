@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2022-05-25
+
+Fixed so deleted paths are not visible in the list
+
 ## [Fix] - 2022-05-23
 
 Adds back the support for remote workspaces that got broken in an earlier fix

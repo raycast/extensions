@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
+import { URL } from "url";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path, { basename } from "path";
@@ -61,13 +62,22 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
       .filter(({ id }) =>
         [RecentOpenedItemId.File, RecentOpenedItemId.Folder, RecentOpenedItemId.Workspace].includes(id)
       )
+      .filter(({ id, uri }) => {
+        if (
+          (id === RecentOpenedItemId.Folder && "vscode-remote" !== uri.scheme) ||
+          [RecentOpenedItemId.File, RecentOpenedItemId.Workspace].includes(id)
+        ) {
+          return existsSync(new URL(`${uri.scheme}://${uri.path}`));
+        }
+      })
       .map(({ id, uri, label }) => {
+        const path = `${uri.scheme}://${uri.path}`;
         switch (id) {
           case RecentOpenedItemId.Workspace:
             return {
               id: id,
               label: label,
-              fileUri: `${uri.scheme}://${uri.path}`,
+              fileUri: path,
             };
 
           case RecentOpenedItemId.File:
@@ -75,14 +85,14 @@ export async function getRecentEntries(): Promise<EntryLike[]> {
             return {
               id: id,
               label: label,
-              fileUri: `${uri.scheme}://${uri.path}`,
+              fileUri: path,
             };
 
           case RecentOpenedItemId.Folder:
             return {
               id: id,
               label: "vscode-remote" === uri.scheme ? label : basename(uri.path),
-              folderUri: "vscode-remote" === uri.scheme ? uri.external : `${uri.scheme}://${uri.path}`,
+              folderUri: "vscode-remote" === uri.scheme ? uri.external : path,
               scheme: uri.scheme,
             };
         }
