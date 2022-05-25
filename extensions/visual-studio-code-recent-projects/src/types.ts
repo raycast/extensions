@@ -1,11 +1,14 @@
+import { existsSync } from "fs";
+import { URL } from "url";
+
 export interface FileEntry {
   id: string;
   fileUri: string;
 }
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
-  const { id } = entry as FileEntry;
-  return id === "openRecentFile";
+  const { id, fileUri } = entry as FileEntry;
+  return id === "openRecentFile" && existsSync(new URL(fileUri));
 }
 
 export interface FolderEntry {
@@ -15,8 +18,8 @@ export interface FolderEntry {
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
-  const { id, scheme } = entry as FolderEntry;
-  return id === "openRecentFolder" && scheme !== "vscode-remote";
+  const { id, scheme, folderUri } = entry as FolderEntry;
+  return id === "openRecentFolder" && scheme !== "vscode-remote" && existsSync(new URL(folderUri));
 }
 
 export interface WorkspaceEntry {
@@ -25,8 +28,8 @@ export interface WorkspaceEntry {
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  const { id } = entry as WorkspaceEntry;
-  return id === "openRecentWorkspace";
+  const { id, fileUri } = entry as WorkspaceEntry;
+  return id === "openRecentWorkspace" && existsSync(new URL(fileUri));
 }
 
 export interface RemoteEntry {
