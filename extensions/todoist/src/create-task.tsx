@@ -5,8 +5,8 @@ import useSWR, { mutate } from "swr";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers";
-import Project from "./components/Project";
 import { SWRKeys } from "./types";
+import TaskDetail from "./components/TaskDetail";
 
 export default function CreateTask({ fromProjectId }: { fromProjectId?: number }) {
   const { push } = useNavigation();
@@ -87,18 +87,18 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
     await toast.show();
 
     try {
-      const { projectId, url } = await todoist.addTask(body);
+      const { url, id } = await todoist.addTask(body);
       toast.style = Toast.Style.Success;
       toast.title = "Task created";
 
       toast.primaryAction = {
-        title: "Go to project",
-        shortcut: { modifiers: ["cmd"], key: "g" },
-        onAction: () => push(<Project projectId={projectId} />),
+        title: "Open Task",
+        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        onAction: () => push(<TaskDetail taskId={id} />),
       };
 
       toast.secondaryAction = {
-        title: "Open in browser",
+        title: "Open in Browser",
         shortcut: { modifiers: ["cmd"], key: "o" },
         onAction: () => open(url),
       };

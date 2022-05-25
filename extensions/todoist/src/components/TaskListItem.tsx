@@ -71,7 +71,7 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
+          <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
 
           <TaskActions task={task} />
 

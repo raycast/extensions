@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action } from "@raycast/api";
+import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, open } from "@raycast/api";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
@@ -18,9 +18,12 @@ const schedules = [
 
 interface TaskActionsProps {
   task: Task;
+  fromDetail?: boolean;
 }
 
-export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
+export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX.Element {
+  const { pop } = useNavigation();
+
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
 
@@ -28,6 +31,11 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       await todoist.closeTask(task.id);
       await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
       mutate(SWRKeys.tasks);
+
+      if (fromDetail) {
+        mutate(SWRKeys.task);
+        pop();
+      }
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
     }
@@ -40,6 +48,10 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       await todoist.updateTask(task.id, payload);
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       mutate(SWRKeys.tasks);
+
+      if (fromDetail) {
+        mutate(SWRKeys.task);
+      }
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
     }
@@ -52,7 +64,13 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       try {
         await todoist.deleteTask(task.id);
         await showToast({ style: Toast.Style.Success, title: "Task deleted" });
+
         mutate(SWRKeys.tasks);
+
+        if (fromDetail) {
+          mutate(SWRKeys.task);
+          pop();
+        }
       } catch (error) {
         handleError({ error, title: "Unable to delete task" });
       }

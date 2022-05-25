@@ -14,6 +14,7 @@ export interface SectionWithTasks {
 export enum SWRKeys {
   projects = "projects",
   tasks = "tasks",
+  task = "task",
   labels = "labels",
   sections = "sections",
   comments = "comments",
