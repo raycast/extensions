@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-tapo-smart-devices",
+  "title": "Tapo Smart Devices",
+  "description": "Manage Tapo smart home device, for example plugs and lightbulbs, with just a few keystrokes",
+  "icon": "command-icon.png",
+  "author": "timrogers",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Devices",
+      "subtitle": "Tapo",
+      "description": "List smart devices on your local network, and turn them on or off",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "description": "The email address you use to log in to the TP-Link Tapo app",
+      "type": "textfield",
+      "required": true,
+      "title": "Email address"
+    },
+    {
+      "name": "password",
+      "description": "The password you use to log in to the TP-Link Tapo app",
+      "type": "password",
+      "required": true,
+      "title": "Password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "local-devices": "github:timrogers/local-devices",
+    "tp-link-tapo-connect": "^1.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.35",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
