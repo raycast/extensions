@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "liveblocks",
+  "title": "Liveblocks",
+  "description": "Exposes the Liveblocks API via a pleasant and easy to use UI.",
+  "icon": "command-icon.png",
+  "author": "andreaselia",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "init-room-storage",
+      "title": "Initialize Room Storage",
+      "subtitle": "Liveblocks",
+      "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "get-room-storage",
+      "title": "Get Room Storage",
+      "subtitle": "Liveblocks",
+      "description": "Get the room storage data as a JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "delete-room-storage",
+      "title": "Delete Room Storage",
+      "subtitle": "Liveblocks",
+      "description": "Delete all elements of the room storage.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "secret",
+      "type": "password",
+      "required": true,
+      "title": "Secret Key",
+      "description": "You can find your Secret Key in the Liveblocks Dashboard."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2",
+    "axios": "^0.26.1",
+    "sha.js": "^2.4.11"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sha.js": "^2.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

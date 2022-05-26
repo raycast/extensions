@@ -1,23 +1,30 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
   "description": "Fastest way to search and create Notion page.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "license": "MIT",
+  "contributors": [
+    "mathieudutour"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "create-database-page",
       "title": "Create Database Page",
       "subtitle": "Notion",
-      "description": "Create a database page.",
+      "description": "Create a page in a Notion database.",
       "mode": "view"
     },
     {
       "name": "search-page",
-      "title": "Search Page",
-      "subtitle": "Notion",
-      "description": "Search database and page.",
+      "title": "Search Notion",
+      "description": "Search for Notion databases and pages.",
       "mode": "view"
     }
   ],
@@ -25,8 +32,8 @@
     {
       "name": "notion_token",
       "type": "password",
-      "required": true,
       "title": "Notion Token",
+      "required": false,
       "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
       "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
       "link": "https://www.notion.so/my-integrations"
@@ -51,15 +58,17 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^0.4.12",
-    "@raycast/api": "^1.25.0",
+    "@notionhq/client": "^1.0.4",
+    "@raycast/api": "^1.33.0",
+    "@tryfabric/martian": "^1.2.0",
+    "jotai": "^1.6.5",
     "moment": "^2.29.1",
-    "node-fetch": "^2.6.1",
-    "open": "^8.4.0"
+    "node-fetch": "^3.2.4",
+    "notion-to-md": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
+    "@types/node-fetch": "^2.6.1",
     "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",

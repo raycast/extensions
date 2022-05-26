@@ -1,16 +1,28 @@
+import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { authorize, spotifyApi } from "./client/client";
 import { PlayAction } from "./client/actions";
-import { showToast, List, ActionPanel, Action, Toast, Image } from "@raycast/api";
+import { authorize, spotifyApi } from "./client/client";
 import { Response } from "./client/interfaces";
+import { isSpotifyInstalled } from "./client/utils";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
   const response = useTrackSearch(searchText);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
+
+  useEffect(() => {
+    async function checkForSpotify() {
+      const spotifyIsInstalled = await isSpotifyInstalled();
+
+      setSpotifyInstalled(spotifyIsInstalled);
+    }
+
+    checkForSpotify();
+  }, []);
 
   return (
     <List
@@ -22,34 +34,47 @@ export default function SpotifyList() {
       {response.result?.tracks.items
         .sort((t) => t.popularity)
         .map((t: SpotifyApi.TrackObjectFull) => (
-          <TrackListItem key={t.id} track={t} />
+          <TrackListItem key={t.id} track={t} spotifyInstalled={spotifyInstalled} />
         ))}
     </List>
   );
 }
 
-function TrackListItem(props: { track: SpotifyApi.TrackObjectFull }) {
+function TrackListItem(props: { track: SpotifyApi.TrackObjectFull; spotifyInstalled: boolean }) {
   const track = props.track;
+  const spotifyInstalled = props.spotifyInstalled;
+  const image = track.album.images[track.album.images.length - 1].url;
   const icon: Image.ImageLike = {
-    source: track.album.images[track.album.images.length - 1].url,
+    source: image,
     mask: Image.Mask.Circle,
   };
-  const title = `${track.artists[0].name} – ${track.name}`;
+  const title = track.name;
+  const subtitle = `${track.artists.map((a) => a.name).join(", ")}`;
   return (
     <List.Item
       title={title}
-      accessoryTitle={msToHMS(track.duration_ms)}
+      subtitle={subtitle}
+      accessories={[{ text: msToHMS(track.duration_ms), tooltip: "duration of song" }]}
       icon={icon}
       actions={
         <ActionPanel title={title}>
           <PlayAction itemURI={track.uri} />
           <Action.OpenInBrowser
-            title={`Show Album (${track.album.name.trim()})`}
-            url={track.album.external_urls.spotify}
+            title={`Show Track (${track.name.trim()})`}
+            url={spotifyInstalled ? `spotify:track:${track.id}` : track.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
-          <Action.OpenInBrowser title="Show Artist" url={track.artists[0].external_urls.spotify} />
+          <Action.OpenInBrowser
+            title={`Show Album (${track.album.name.trim()})`}
+            url={spotifyInstalled ? `spotify:album:${track.album.id}` : track.album.external_urls.spotify}
+            icon={icon}
+            shortcut={{ modifiers: ["cmd"], key: "a" }}
+          />
+          <Action.OpenInBrowser
+            title="Show Artist"
+            url={spotifyInstalled ? `spotify:artist:${track.artists[0].id}` : track.artists[0].external_urls.spotify}
+          />
           <Action.CopyToClipboard
             title="Copy URL"
             content={track.external_urls.spotify}

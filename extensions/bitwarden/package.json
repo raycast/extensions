@@ -8,7 +8,7 @@
   "contributors": [
     "daniel-stoneuk",
     "jomifepe",
-    "dre"
+    "andreaselia"
   ],
   "license": "MIT",
   "keywords": [
@@ -74,6 +74,15 @@
       "placeholder": "client_secret"
     },
     {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Privacy",
+      "label": "Fetch Vault Items Icons",
+      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
+    },
+    {
       "name": "cliPath",
       "type": "textfield",
       "required": false,
@@ -82,18 +91,26 @@
       "placeholder": "CLI Installation Path"
     },
     {
-      "name": "fetchFavicons",
-      "type": "checkbox",
+      "name": "serverUrl",
+      "type": "textfield",
       "required": false,
-      "default": true,
-      "title": "Privacy",
-      "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
+      "default": "",
+      "title": "Bitwarden Server URL",
+      "description": "Optional: URL to use for self-hosted servers.",
+      "placeholder": "https://bitwarden.com"
+    },
+    {
+      "name": "serverCertsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-signed Certificates Path",
+      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
+      "placeholder": "absolute/path/to/your/certs.pem"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
-    "execa": "^5.1.1",
+    "@raycast/api": "^1.33.0",
+    "execa": "^6.1.0",
     "throttle-debounce": "^3.0.1"
   },
   "devDependencies": {

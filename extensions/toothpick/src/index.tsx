@@ -1,16 +1,20 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getBluetoothDevices, openBluetoothPreferences, toggleBluetoothDevice } from "./utils";
 
 export default function Index() {
   const [deviceNames, setDeviceNames] = useState<string[]>([]);
+  const [deviceAddresses, setDeviceAddresses] = useState<string[]>([]);
+  const [deviceBatteries, setDeviceBatteries] = useState<string[]>([]);
   const [deviceStatuses, setDeviceStatuses] = useState<boolean[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchDevices() {
-      const { deviceNames, deviceStatuses } = await getBluetoothDevices();
+      const { deviceNames, deviceAddresses, deviceStatuses, deviceBatteries } = await getBluetoothDevices();
       setDeviceNames(deviceNames);
+      setDeviceAddresses(deviceAddresses);
+      setDeviceBatteries(deviceBatteries);
       setDeviceStatuses(deviceStatuses);
       setIsLoading(false);
     }
@@ -37,18 +41,16 @@ export default function Index() {
   };
 
   return (
-    <List
-      enableFiltering={true}
-      isLoading={isLoading}
-      navigationTitle="Connect/Disconnect Bluetooth Devices"
-      searchBarPlaceholder="Search devices"
-    >
+    <List enableFiltering={true} isLoading={isLoading} searchBarPlaceholder="Search devices">
       <List.Section title="Devices">
         {deviceNames.map((deviceName, i) => (
           <List.Item
             key={deviceName}
             title={deviceName}
             icon={{ source: deviceStatuses[i] ? "on.png" : "off.png" }}
+            accessories={
+              deviceBatteries[i] ? [{ text: deviceBatteries[i] + "%", icon: { source: "battery.png" } }] : []
+            }
             actions={
               <ActionPanel>
                 <Action
@@ -57,6 +59,11 @@ export default function Index() {
                   onAction={async () => await toggleBluetooth(deviceName, i)}
                 />
                 <Action title="Open Bluetooth Preferences" icon={Icon.Gear} onAction={openBluetoothPreferences} />
+                <Action
+                  title={"Copy Address: " + deviceAddresses[i]}
+                  icon={Icon.Hammer}
+                  onAction={() => Clipboard.copy(deviceAddresses[i])}
+                />
               </ActionPanel>
             }
           />

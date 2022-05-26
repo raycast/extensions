@@ -24,6 +24,7 @@
     {
       "name": "search-gist",
       "title": "Search Gist",
+      "subtitle": "GitHub",
       "description": "Search and display GitHub Gist.",
       "mode": "view",
       "preferences": [
@@ -45,20 +46,28 @@
           "default": true
         },
         {
-          "name": "primary-action",
+          "name": "perPage",
           "type": "dropdown",
-          "description": "Set the primary action.",
+          "description": "Number of gist loaded per page.",
           "required": false,
-          "title": "Primary action",
-          "default": "copy",
+          "title": "Per Page",
+          "default": "30",
           "data": [
             {
-              "title": "Copy to Clipboard",
-              "value": "copy"
+              "title": "30",
+              "value": "30"
             },
             {
-              "title": "Paste to Active App",
-              "value": "paste"
+              "title": "50",
+              "value": "50"
+            },
+            {
+              "title": "80",
+              "value": "80"
+            },
+            {
+              "title": "100",
+              "value": "100"
             }
           ]
         }
@@ -67,13 +76,14 @@
     {
       "name": "create-gist",
       "title": "Create Gist",
+      "subtitle": "GitHub",
       "description": "Create GitHub Gist from selection or clipboard.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@octokit/core": "^3.6.0",
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.34.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

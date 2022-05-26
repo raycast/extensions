@@ -49,7 +49,8 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 - open the package's repository (if it is known)
 - open the package's homepage (if it is known)
 - open the package's npm page
-- open a npms.io search results page based on the package name
+- open the package's Skypack.dev page
+- open a npms.io search results page based on the search term
 
 #### Info
 
@@ -62,11 +63,21 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 
 - copy yarn/npm install commands to clipboard
   - copy install command for preferred package manager: <kbd>cmd + shift + c</kbd>
-  - copy install command for alternate package manager: <kbd>cmd< + opt + c</kbd>
-- copy package name to clipboard - <kbd>cmd + c</kbd>
+  - copy install command for alternate package manager: <kbd>cmd + opt + c</kbd>
+- copy package name to clipboard
 
 ### Preferences
 
-- choose your preferred npm registry. `yarn` or `npm`
+- choose your default package manager. `yarn`, `npm` or `pnpm`
+- choose your secondary package manager. `yarn`, `npm` or `pnpm`
+- choose the default "open" action for a package: "open repository", "open homepage" or "open npm package page" or "open Skypack package page"
 
-https://user-images.githubusercontent.com/64883/139598309-f47e1478-5f4e-44f6-bbea-e33a3b2f988b.mp4
+### Screencast
+
+https://user-images.githubusercontent.com/64883/166630703-962ac4de-5da5-40f6-8895-25aeb92bcfb6.mp4
+
+![package list item](https://user-images.githubusercontent.com/64883/166632417-89e2e5dd-b01e-43af-984c-e4b29740f53f.gif)
+
+### Options
+
+<img width="310" alt="image" src="https://user-images.githubusercontent.com/64883/166630716-8d9eb232-4278-42a0-9237-96da2242e2af.png">

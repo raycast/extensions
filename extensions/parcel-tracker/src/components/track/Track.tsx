@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from 
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getTrackData } from "../../api/api";
-import { ITrackData } from "../../model/trackData";
+import { ITrackData, TrackingDetail } from "../../model/trackData";
 
 interface IProps {
   vendorKey: string;
@@ -58,7 +58,13 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
     );
   };
   const convertDate = (dateString: string) => {
-    return moment(dateString).format("YYYY-MM-DD hh:mm");
+    const replacedDateString = dateString.replace(/\./gi, "-");
+    return moment(replacedDateString).format("YYYY-MM-DD HH:mm");
+  };
+
+  const resolveSubTitle = (trackingDetail: TrackingDetail): string => {
+    if (trackingDetail.trackingWhere === "") return trackingDetail.trackingDescription;
+    else return `${trackingDetail.trackingDescription} (${trackingDetail.trackingWhere})`;
   };
 
   function ListItems() {
@@ -93,7 +99,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
                   key={index}
                   icon={Icon.Binoculars}
                   title={tracking.trackingKind}
-                  subtitle={tracking.trackingWhere}
+                  subtitle={resolveSubTitle(tracking)}
                   accessoryTitle={convertDate(tracking.trackingTimeString)}
                 />
               );

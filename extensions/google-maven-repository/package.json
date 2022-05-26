@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-maven-repository",
+  "title": "Google Maven Repository",
+  "description": "Show and search for artifacts in Google's Maven repository.",
+  "icon": "google-maven.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-google-maven-repository",
+      "title": "Show Google Maven Repository",
+      "icon": "show-google-maven.png",
+      "description": "Show All artifacts in Google's Maven repository.",
+      "mode": "view"
+    },
+    {
+      "name": "search-google-maven-repository",
+      "title": "Search Google Maven Repository",
+      "icon": "search-google-maven-repository.png",
+      "description": "Search for an artifact in Google's Maven repository.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
