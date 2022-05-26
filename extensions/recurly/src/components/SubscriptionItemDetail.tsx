@@ -1,5 +1,5 @@
 import {List} from "@raycast/api";
-import {Subscription, SubscriptionAddOn} from "recurly";
+import {Subscription} from "recurly";
 import {formatCustomFields, formatDateTime} from "./AccountDetail";
 
 export type SubscriptionItemDetailProps = {
@@ -46,10 +46,25 @@ export default function SubscriptionItemDetail({subscription}: SubscriptionItemD
   />
 }
 
-const formatSubscriptionDetails = (subscription: Subscription) => 
+const formatSubscriptionDetails = (subscription: Subscription) =>
   [
-    <Label title={`${subscription.quantity} x ${subscription.plan?.name}`} text={`${subscription.unitAmount} ${subscription.currency}`} />
-  ]
+    <Label title={`${subscription.quantity} x ${subscription.plan?.name}`}
+           text={`${subscription.unitAmount} ${subscription.currency}`}/>
+  ].concat(
+    !subscription.addOns
+      ? []
+      : subscription.addOns.map(
+        addOn =>
+          <Label
+            title={`${addOn.quantity} x ${addOn.addOn?.name}`}
+            text={`${addOn.unitAmount} ${subscription.currency}`}
+          />
+      )
+  ).concat(
+    <Label title="Estimated Total*" text={`${subscription.total} ${subscription.currency}`} />,
+    <Label title="* Does not include coupons or discounts." />
+
+  )
 
 const formatCurrentPeriod = (subscription: Subscription) =>
   `${formatDate(subscription.currentPeriodStartedAt)} — ${formatDate(subscription.currentPeriodEndsAt)}`

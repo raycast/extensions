@@ -15,6 +15,7 @@ export default function AccountSubscriptionsList({recurly, account}: AccountSubs
   return <List
     isLoading={subscriptionsLoading}
     isShowingDetail={true}
+    navigationTitle={account.email || "No Email"}
   >
     {subscriptions.map((subscription, idx) => <List.Item
       key={subscription.id || idx}

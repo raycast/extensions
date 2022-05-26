@@ -13,10 +13,10 @@ export default function EmailItem({tenant, email}: EmailItemProps) {
     subtitle={email ? `${email} ➡️` : 'Please start entering an email'}
     actions={
       <ActionPanel>
-        <Action.Push
+        {email.length > 0 && <Action.Push
           title="Find"
-          target={<AccountsList tenant={tenant} email={email} />}
-        />
+          target={<AccountsList tenant={tenant} email={email}/>}
+        />}
       </ActionPanel>
     }
   />
