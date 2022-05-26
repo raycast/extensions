@@ -28,9 +28,5 @@ export function ProjectLabelList(props: { project: Project }): JSX.Element {
     showToast(Toast.Style.Failure, "Cannot search Project labels", error);
   }
 
-  if (!data) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
-  return <LabelList labels={data} onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true} />;
+  return <LabelList labels={data || []} onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true} />;
 }

@@ -42,7 +42,7 @@ export function usePresets(): {
   isLoading: boolean;
 } {
   const [presets, setPresets] = useState<Status[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>();
 
   useEffect(() => {

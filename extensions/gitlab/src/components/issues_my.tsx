@@ -11,7 +11,7 @@ import { MyProjectsDropdown } from "./project";
 
 function MyIssueList(props: {
   issues: Issue[] | undefined;
-  isLoading?: boolean | undefined;
+  isLoading: boolean;
   title?: string;
   performRefetch: () => void;
   searchBarAccessory?:
@@ -21,10 +21,6 @@ function MyIssueList(props: {
     | undefined;
 }): JSX.Element {
   const issues = props.issues;
-
-  if (props.isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
 
   const refresh = () => {
     props.performRefetch();
@@ -72,7 +68,7 @@ function useMyIssues(
   project: Project | undefined
 ): {
   issues: Issue[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {
