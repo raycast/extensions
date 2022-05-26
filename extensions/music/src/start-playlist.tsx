@@ -38,8 +38,8 @@ export default function PlaySelected() {
       playlistKind,
       music.playlists.getPlaylists,
       TE.mapLeft((e) => {
-        console.error(e)
-        showToast(Toast.Style.Failure, "Could not get your playlists")
+        console.error(e);
+        showToast(Toast.Style.Failure, "Could not get your playlists");
       }),
       TE.map(
         flow(
