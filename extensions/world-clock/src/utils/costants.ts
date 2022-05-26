@@ -6,6 +6,6 @@ export const LOCALSTORAGE_KEY = "StarTimeZone";
 
 export const filterTag = [
   { title: "All", value: "All" },
-  { title: "Star", value: "Star" },
+  { title: "Starred", value: "Starred" },
   { title: "Other", value: "Other" },
 ];
