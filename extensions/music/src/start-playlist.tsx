@@ -41,7 +41,7 @@ export default function PlaySelected() {
       TE.map(
         flow(
           parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind.split(" ")[0])(data),
+          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? 'unknown')(data),
           setPlaylists
         )
       )
