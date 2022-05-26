@@ -38,7 +38,7 @@ export default function QueryWorldTime() {
       }
     >
       <ListEmptyView title={"No timezones"} />
-      {(tag === "All" || tag === "Star") && (
+      {(tag === "All" || tag === "Starred") && (
         <List.Section title={"Star"}>
           {starTimezones.map((value, index) => {
             return (
