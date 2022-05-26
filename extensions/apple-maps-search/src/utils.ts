@@ -1,7 +1,7 @@
 /**
  * Corresponds to Apple Map's four possible modes of travel.
  */
-export enum TravelMode {
+ export enum TravelMode {
   Driving = "d",
   Walking = "w",
   Transit = "r",

@@ -76,7 +76,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.1"
+    "@raycast/api": "^1.35.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -89,6 +89,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
