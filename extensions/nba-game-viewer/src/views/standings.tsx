@@ -5,15 +5,7 @@ import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 
 const Standings = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const standings = useStandings();
-
-  useEffect(() => {
-    if (standings) {
-      setLoading(false);
-    }
-  }, [standings]);
+  const { standings, loading } = useStandings();
 
   return (
     <List isLoading={loading}>

@@ -2,8 +2,12 @@ import getStandings from "../utils/getStandings";
 import { useState, useEffect } from "react";
 import { Team, Conferences } from "../standings.types";
 
-const useStandings = () => {
+const useStandings = (): {
+  standings: Conferences;
+  loading: boolean;
+} => {
   const [standings, setStandings] = useState<Conferences>({ eastern: [], western: [] });
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getTeamStandings = async () => {
@@ -42,12 +46,13 @@ const useStandings = () => {
         });
 
       setStandings({ eastern, western });
+      setLoading(false);
     };
 
     getTeamStandings();
   }, []);
 
-  return standings;
+  return { standings, loading };
 };
 
 export default useStandings;

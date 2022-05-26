@@ -4,8 +4,12 @@ import { Day, Game, Competitor } from "../schedule.types";
 import { Toast, showToast } from "@raycast/api";
 import convertDate from "../utils/convertDate";
 
-const useSchedule = () => {
+const useSchedule = (): {
+  schedule: Day[];
+  loading: boolean;
+} => {
   const [schedule, setSchedule] = useState<Array<Day>>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getGames = async () => {
@@ -67,12 +71,13 @@ const useSchedule = () => {
       });
 
       setSchedule(scheduledGames);
+      setLoading(false);
     };
 
     getGames();
   }, []);
 
-  return schedule;
+  return { schedule, loading };
 };
 
 export default useSchedule;

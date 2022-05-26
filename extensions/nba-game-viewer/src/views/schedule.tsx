@@ -5,15 +5,7 @@ import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 
 const Schedue = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const schedule = useSchedule();
-
-  useEffect(() => {
-    if (schedule) {
-      setLoading(false);
-    }
-  }, [schedule]);
+  const { schedule, loading } = useSchedule();
 
   return (
     <List isLoading={loading}>
