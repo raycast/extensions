@@ -18,8 +18,28 @@ export default function AccountSubscriptionsList({recurly, account}: AccountSubs
   >
     {subscriptions.map((subscription, idx) => <List.Item
       key={subscription.id || idx}
-      title={subscription.uuid || 'no id'}
-      detail={<SubscriptionItemDetail subscription={subscription} />}
+      title={`${subscription.plan?.name} (${subscription.plan?.code})`}
+      icon={formatSubscriptionStateEmoji(subscription.state)}
+      detail={<SubscriptionItemDetail subscription={subscription}/>}
     />)}
   </List>
 }
+
+const formatSubscriptionStateEmoji = (state: string | null | undefined) => {
+  switch (state) {
+    case 'active':
+      return '🟢';
+    case 'canceled':
+      return '🟡';
+    case 'expired':
+      return '⚪';
+    case 'failed':
+      return '🔴';
+    case 'future':
+      return '🔵';
+    case 'paused':
+      return '🟣';
+    default:
+     return '⚪';
+  }
+};

@@ -1,5 +1,5 @@
 import {List} from "@raycast/api";
-import {Account} from "recurly";
+import {Account, CustomField} from "recurly";
 
 const Label = List.Item.Detail.Metadata.Label;
 
@@ -28,12 +28,12 @@ export default function AccountDetail({account}: { account: Account }) {
 
         <List.Item.Detail.Metadata.Separator />
 
-        <Label title="Created at" text={format(account.createdAt)} />
-        <Label title="Updated at" text={format(account.updatedAt)} />
+        <Label title="Created at" text={formatDateTime(account.createdAt)} />
+        <Label title="Updated at" text={formatDateTime(account.updatedAt)} />
 
         <List.Item.Detail.Metadata.Separator />
 
-        {formatCustomFields(account)}
+        {formatCustomFields(account.customFields)}
       </List.Item.Detail.Metadata>
     }
   />
@@ -58,7 +58,7 @@ const formatBillingExpiration = (account: Account) => {
   return `${account.billingInfo?.paymentMethod?.expMonth}/${account.billingInfo?.paymentMethod?.expYear}`
 };
 
-const format = (date: Date | null | undefined) =>
+export const formatDateTime = (date: Date | null | undefined) =>
   date
     ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
     : undefined;
@@ -71,9 +71,9 @@ const formatBillingName = (account: Account) =>
 const formatCreditCard = (account: Account) =>
   `${account.billingInfo?.paymentMethod?.cardType} ${account.billingInfo?.paymentMethod?.lastFour}`
 
-const formatCustomFields = (account: Account) =>
-  account.customFields && account.customFields.length > 0 &&
-    account.customFields.map(({name, value}) => <Label title={name || ''} text={value || '<no value>'} />);
+export const formatCustomFields = (customFields: CustomField[] | null | undefined) =>
+  customFields && customFields.length > 0 &&
+    customFields.map(({name, value}) => <Label title={name || ''} text={value || '<no value>'} />);
 
 
 export const formatSubscriptionEmoji = (account: Account) =>

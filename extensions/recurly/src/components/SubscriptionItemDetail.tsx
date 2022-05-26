@@ -1,62 +1,58 @@
 import {List} from "@raycast/api";
 import {Subscription, SubscriptionAddOn} from "recurly";
+import {formatCustomFields, formatDateTime} from "./AccountDetail";
 
 export type SubscriptionItemDetailProps = {
   subscription: Subscription;
 };
 
+const Label = List.Item.Detail.Metadata.Label;
+
 export default function SubscriptionItemDetail({subscription}: SubscriptionItemDetailProps) {
-  return <List.Item.Detail markdown={formatSubscriptionMarkdown(subscription)}/>
+  return <List.Item.Detail
+    metadata={
+      <List.Item.Detail.Metadata>
+        <Label title="Subscription ID" text={subscription.uuid || ''}/>
+
+        <List.Item.Detail.Metadata.Separator/>
+
+        <Label title="Plan"/>
+        <Label title="Name" text={subscription.plan?.name || ''}/>
+        <Label title="Code" text={subscription.plan?.code || ''}/>
+
+        <List.Item.Detail.Metadata.Separator/>
+
+        <Label title="Current Period" text={formatCurrentPeriod(subscription)}/>
+        <Label title="Auto Renew" text={subscription.autoRenew ? 'Yes' : 'No'}/>
+        <Label title="Collection" text={subscription.collectionMethod || 'Unknown'}/>
+        {
+          subscription.autoRenew &&
+            <Label title="Renews On" text={formatDateTime(subscription.currentPeriodEndsAt) || ''}/>
+        }
+        <Label title="Started On" text={formatDateTime(subscription.currentTermStartedAt) || ''}/>
+
+        <List.Item.Detail.Metadata.Separator/>
+
+        <Label title="Subscription Details"/>
+        {formatSubscriptionDetails(subscription)}
+
+        <List.Item.Detail.Metadata.Separator/>
+
+        <Label title="Custom Fields"/>
+        {formatCustomFields(subscription.customFields)}
+
+      </List.Item.Detail.Metadata>
+    }
+  />
 }
 
-const formatSubscriptionMarkdown = (subscription: Subscription) =>
-  `${formatPlan(subscription)}
-`
+const formatSubscriptionDetails = (subscription: Subscription) => 
+  [
+    <Label title={`${subscription.quantity} x ${subscription.plan?.name}`} text={`${subscription.unitAmount} ${subscription.currency}`} />
+  ]
 
-const formatPlan = (subscription: Subscription) =>
-  !subscription.plan
-    ? 'No plan set'
-    : `
-Created at ${formatDateTime(subscription.createdAt)} 
+const formatCurrentPeriod = (subscription: Subscription) =>
+  `${formatDate(subscription.currentPeriodStartedAt)} — ${formatDate(subscription.currentPeriodEndsAt)}`
 
-Activated at ${formatDateTime(subscription.activatedAt)}
-
-Updated at ${formatDateTime(subscription.updatedAt)}
-
-Canceled at ${formatDateTime(subscription.canceledAt)}
-
-Expires at ${formatDateTime(subscription.expiresAt)}
-
----
-
-# Plan
-
-## ${subscription.plan.name}
-
-Plan: ${subscription.unitAmount} ${subscription.currency}
-
-Add-Ons: ${subscription.addOnsTotal || 0} ${subscription.currency}
-
-Subtotal: ${subscription.subtotal} ${subscription.currency}
-
-Tax: ${subscription.tax || 0} ${subscription.currency}
-
-Total: ${subscription.total} ${subscription.currency}
-
-${formatAddOns(subscription)}`;
-
-const formatAddOns = (subscription: Subscription) =>
-  !subscription.addOns || subscription.addOns.length === 0
-    ? ''
-    : `\n\n## AddOns\n\n${subscription.addOns.map(addOn => formatAddOn(subscription, addOn)).join("\n")}`;
-
-const formatAddOn = (subscription: Subscription, addOnMini: SubscriptionAddOn | null | undefined) =>
-  addOnMini && `- ${addOnMini.addOn?.name} (${addOnPrice(addOnMini)} ${subscription.currency})`
-
-const addOnPrice = (addOnMini: SubscriptionAddOn) =>
-  (addOnMini.quantity || 0) * (addOnMini.unitAmount || 0)
-
-const formatDateTime = (date: Date | null | undefined) =>
-  !date
-    ? 'Not applicable'
-    : `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+const formatDate = (date: Date | null | undefined) =>
+  date ? date.toLocaleDateString() : 'Unknown';
