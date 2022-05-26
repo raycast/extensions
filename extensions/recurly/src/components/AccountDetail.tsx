@@ -73,7 +73,7 @@ const formatCreditCard = (account: Account) =>
 
 export const formatCustomFields = (customFields: CustomField[] | null | undefined) =>
   customFields && customFields.length > 0 &&
-    customFields.map(({name, value}) => <Label title={name || ''} text={value || '<no value>'} />);
+    customFields.map(({name, value}) => <Label key={name} title={name || ''} text={value || '<no value>'} />);
 
 
 export const formatSubscriptionEmoji = (account: Account) =>

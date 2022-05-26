@@ -48,7 +48,7 @@ export default function SubscriptionItemDetail({subscription}: SubscriptionItemD
 
 const formatSubscriptionDetails = (subscription: Subscription) =>
   [
-    <Label title={`${subscription.quantity} x ${subscription.plan?.name}`}
+    <Label key="plan" title={`${subscription.quantity} x ${subscription.plan?.name}`}
            text={`${subscription.unitAmount} ${subscription.currency}`}/>
   ].concat(
     !subscription.addOns
@@ -56,13 +56,14 @@ const formatSubscriptionDetails = (subscription: Subscription) =>
       : subscription.addOns.map(
         addOn =>
           <Label
+            key={addOn.id}
             title={`${addOn.quantity} x ${addOn.addOn?.name}`}
             text={`${addOn.unitAmount} ${subscription.currency}`}
           />
       )
   ).concat(
-    <Label title="Estimated Total*" text={`${subscription.total} ${subscription.currency}`} />,
-    <Label title="* Does not include coupons or discounts." />
+    <Label key="estimated-total" title="Estimated Total*" text={`${subscription.total} ${subscription.currency}`} />,
+    <Label key="asterisk" title="* Does not include coupons or discounts." />
 
   )
 
