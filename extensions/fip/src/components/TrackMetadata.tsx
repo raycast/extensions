@@ -41,7 +41,7 @@ export default function TrackMetadata({ metadataKey }: TrackObject) {
         <ActionPanel>
           <Action.OpenInBrowser url="https://fip.fr" />
           <Action.CopyToClipboard
-            title="Copy artist and title"
+            title="Copy Track Name"
             content={`${metadata.firstLine} ${metadata.secondLine}`}
           />
         </ActionPanel>
