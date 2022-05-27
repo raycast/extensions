@@ -20,7 +20,7 @@
     {
       "name": "prev",
       "title": "Previous Track",
-      "subtitle": "Previous track played on fip",
+      "subtitle": "Fip Radio",
       "description": "The last track played before the current one on fip radio",
       "mode": "view"
     },
