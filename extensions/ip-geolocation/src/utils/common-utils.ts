@@ -1,17 +1,9 @@
 import * as os from "os";
-import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import Values = LocalStorage.Values;
+import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { IP_GEOLOCATION_API } from "./constants";
 import { IPGeolocation } from "../types/ip-geolocation";
 import Style = Toast.Style;
-
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    language: preferencesMap.get("language") as string,
-  };
-};
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
