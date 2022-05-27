@@ -234,6 +234,7 @@
 /extensions/must                                     @eggsy
 /extensions/myip                                     @kkange
 /extensions/nativebase-docs                          @ShubhamVerma1811
+/extensions/nba-game-viewer                          @AbhinavPalacharla
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner
 /extensions/nextcloud                                @uetchy
@@ -350,6 +351,7 @@
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor
+/extensions/tapo-smart-devices                       @timrogers
 /extensions/temporary-email                          @natterstefan
 /extensions/terminalfinder                           @yedongze
 /extensions/text-shortcuts                           @koinzhang

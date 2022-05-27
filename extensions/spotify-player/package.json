@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-player",
   "title": "Spotify Player",
-  "description": "Search and Play Spotify music from the Raycast",
+  "description": "Search and Play Spotify music from the Raycast, control your library with convinient commands like Like",
   "icon": "icon.png",
   "author": "mattisssa",
   "contributors": [
@@ -14,47 +14,47 @@
     {
       "name": "searchTracks",
       "title": "Search Tracks",
-      "subtitle": "Spotify",
+      "subtitle": "Spotify Player",
       "description": "Search & Play tracks in Spotify",
       "mode": "view"
     },
     {
       "name": "searchAlbums",
       "title": "Search Albums",
-      "subtitle": "Spotify",
+      "subtitle": "Spotify Player",
       "description": "Search & Play albums in Spotify",
       "mode": "view"
     },
     {
       "name": "searchPlaylists",
       "title": "Search Playlists",
-      "subtitle": "Spotify",
+      "subtitle": "Spotify Player",
       "description": "Search & Play playlists in Spotify",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "clientId",
-      "type": "password",
-      "required": true,
-      "title": "Personal Client ID",
-      "description": "Your clientId value from Spotify",
-      "placeholder": "Enter your clientId"
     },
     {
-      "name": "secret",
-      "type": "password",
-      "required": true,
-      "title": "Client id's secret",
-      "description": "Your secret value from Spotify",
-      "placeholder": "Enter your secret"
+      "name": "searchArtists",
+      "title": "Search Artists",
+      "subtitle": "Spotify Player",
+      "description": "Search Artists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "like_current_song",
+      "title": "Like Current Song",
+      "subtitle": "Spotify Player",
+      "description": "Likes currently playing song",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2"
+    "@raycast/api": "^1.35.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.3",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.180",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/spotify-web-api-node": "^5.0.7",
