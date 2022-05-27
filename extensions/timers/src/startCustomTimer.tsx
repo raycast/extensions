@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showHUD, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  getPreferenceValues,
+  popToRoot,
+  showHUD,
+  Toast,
+} from "@raycast/api";
 import { createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
 import { Values } from "./types";
 
@@ -32,6 +41,14 @@ export default function CustomTimerView() {
     }
   };
 
+  const inputFields = [
+    { id: "hours", title: "Hours", placeholder: "0" },
+    { id: "minutes", title: "Minutes", placeholder: "00" },
+    { id: "seconds", title: "Seconds", placeholder: "00" },
+  ];
+  const sortOrder = getPreferenceValues().newTimerInputOrder;
+  sortOrder !== "hhmmss" ? inputFields.reverse() : inputFields;
+
   return (
     <Form
       actions={
@@ -40,9 +57,9 @@ export default function CustomTimerView() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="hours" title="Hours" placeholder="0" />
-      <Form.TextField id="minutes" title="Minutes" placeholder="00" />
-      <Form.TextField id="seconds" title="Seconds" placeholder="00" />
+      {inputFields.map((item, index) => (
+        <Form.TextField key={index} id={item.id} title={item.title} placeholder={item.placeholder} />
+      ))}
       <Form.TextField id="name" title="Name" placeholder="Pour Tea" />
       <Form.Checkbox id="willBeSaved" label="Save as preset" />
     </Form>
