@@ -31,7 +31,7 @@ export async function searchImage(query: {
       } else {
         summary.url = `https://hub.docker.com/r/${summary.slug}`;
       }
-      
+
       summary.from = summary.filter_type.replace("_", " ").toUpperCase();
       return summary;
     });
