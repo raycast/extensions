@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Update command name] - 2022-05-25
+## [Update command name] - 2022-05-27
 
 - Update command name
 - Add _Open Extension Preferences_ action
