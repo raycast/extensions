@@ -40,8 +40,8 @@
     },
     {
       "name": "stop",
-      "title": "Stop fip",
-      "subtitle": "Stop fip stream from VLC",
+      "title": "Stop Playing",
+      "subtitle": "Fip Radio",
       "description": "Pause fip radio stream on VLC",
       "mode": "no-view"
     }
