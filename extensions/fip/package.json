@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "now",
-      "title": "Now Playing",
-      "subtitle": "fip's currently playing track",
+      "title": "Currently Playing Track",
+      "subtitle": "Fip Radio",
       "description": "What's currently playing on fip radio",
       "mode": "view"
     },
