@@ -9,6 +9,7 @@ export interface Video {
   status: string;
   liveViewers: number;
   topic?: string;
+  clips?: Video[];
 }
 
 export interface Clip {
@@ -39,6 +40,7 @@ export interface Archive {
   channel: Channel;
   topic_id?: string;
   live_tl_count?: { [lang: string]: number };
+  clips?: Clip[];
 }
 
 export interface Live {

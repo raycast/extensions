@@ -5,9 +5,7 @@
   "description": "Search live streams, archives, clips and channels in Holodex.",
   "icon": "holodex.png",
   "author": "uetchy",
-  "categories": [
-    "Web"
-  ],
+  "categories": ["Web"],
   "license": "MIT",
   "commands": [
     {
@@ -221,7 +219,6 @@
     "numeral": "^2.0.6"
   },
   "devDependencies": {
-    "@types/date-fns": "^2.6.0",
     "@types/node": "^17.0.24",
     "@types/numeral": "^2.0.2",
     "@types/react": "^18.0.5",
