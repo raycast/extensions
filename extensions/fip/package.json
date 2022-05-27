@@ -27,7 +27,7 @@
     {
       "name": "next",
       "title": "Next Track",
-      "subtitle": "Next scheduled track on fip",
+      "subtitle": "Fip Radio",
       "description": "The next track to by played by fip radio",
       "mode": "view"
     },
