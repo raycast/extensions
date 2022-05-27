@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { UseDB } from "./useDB";
-import { Database } from "../../assets/sql-wasm-fts5";
 import {
+  backfillBlocksWithDocumentNames,
   buildMatchQuery,
   limit,
   searchBlocks,
   searchQuery,
   searchQueryOnEmptyParams,
-  uniqueDocumentIDsFromBlocks,
 } from "./common";
 
 export type Block = {
@@ -43,21 +42,3 @@ export default function useSearch({ databasesLoading, databases }: UseDB, text: 
 
   return state;
 }
-
-const backfillBlocksWithDocumentNames = (database: Database, blocks: Block[]) => {
-  const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
-  const placeholders = new Array(documentIDs.length).fill("?").join(", ");
-  const sql = `select documentId, content from BlockSearch where entityType = 'document' and documentId in (${placeholders})`;
-
-  database
-    .exec(sql, documentIDs)
-    .map((res) => res.values)
-    .flat()
-    .map(([documentID, content]) =>
-      blocks
-        .filter((block) => block.documentID === documentID)
-        .forEach((block) => (block.documentName = content as string))
-    );
-
-  return blocks;
-};
