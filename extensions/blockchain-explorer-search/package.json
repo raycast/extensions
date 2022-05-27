@@ -18,8 +18,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "etherscan-api": "^10.0.5"
+    "@raycast/api": "^1.35.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
