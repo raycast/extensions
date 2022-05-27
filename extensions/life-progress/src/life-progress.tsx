@@ -1,21 +1,18 @@
-import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import {
-  tagsTimeLeftFirst,
-  getHourLeftThisDay,
-  getLifeProgress,
-  isBirthDay,
-  LifeProgress,
-  timeLeftFirstList,
-  timeLeftLastList,
-  tagsTimeLeftLast,
-  getBirthDay,
-} from "./utils/life-progress-utils";
+import { getBirthDay, getHourLeftThisDay, getLifeProgress, isBirthDay } from "./utils/life-progress-utils";
 import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./utils/shanbei-utils";
-import { isEmpty, preferences } from "./utils/common-utils";
+import { LifeProgressListItem } from "./components/life-progress-list-item";
+import { LifeProgress } from "./types/types";
+import { Preferences } from "./types/preferences";
+import { WordOfTheDayItem } from "./components/word-of-the-day-item";
+import { LifeProgressCanvasItem } from "./components/life-progress-canvas-item";
+import { BirthdayItem } from "./components/birthday-item";
+import { tagsTimeLeftFirst, tagsTimeLeftLast, timeLeftFirstList, timeLeftLastList } from "./utils/constants";
 
 export default function main() {
+  const { showDailyWord, showProgressBar, timeLeftFirst } = getPreferenceValues<Preferences>();
   const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
   const [tag, setTag] = useState<string>("All");
   const [isEnglishWord, setIsEnglishWord] = useState<boolean>(true);
@@ -25,7 +22,6 @@ export default function main() {
     author: "",
     translation: "",
   });
-  const { showDailyWord, timeLeftFirst } = preferences();
 
   const sectionList = timeLeftFirst ? timeLeftFirstList : timeLeftLastList;
   const tagList = timeLeftFirst ? tagsTimeLeftFirst : tagsTimeLeftLast;
@@ -71,131 +67,67 @@ export default function main() {
         isBirthDay() ? "celebrate your birthday" : "cherish the present"
       }`}
       searchBarAccessory={
-        <List.Dropdown tooltip={"You life progress"} storeValue={true} onChange={setTag}>
+        <List.Dropdown tooltip={"Your life progress"} storeValue={true} onChange={setTag}>
           {tagList.map((value) => {
             return <List.Dropdown.Item key={value} title={value} value={value} />;
           })}
         </List.Dropdown>
       }
     >
-      {!getBirthDay().isValid ? (
-        <List.EmptyView
-          icon={Icon.QuestionMark}
-          title={"Invalid age detected"}
-          description={"Go to preferences and correct"}
-        />
-      ) : (
+      <List.EmptyView
+        icon={Icon.Clock}
+        title={"Cherish the present"}
+        description={"Everything is gone, but time is always on"}
+      />
+
+      {getBirthDay().isValid && isBirthDay() && <BirthdayItem />}
+
+      {!isBirthDay() && (
         <>
-          {isBirthDay() && (
-            <List.Item
-              icon={"🎉"}
-              title={"🎉🎉🎉 Happy Birthday! Go find your birthday cake! 🎉🎉🎉"}
-              actions={
-                <ActionPanel>
-                  {isBirthDay() && (
-                    <Action
-                      title={"Rummage Here"}
-                      icon={"🎂"}
-                      onAction={async () => {
-                        await showToast(Toast.Style.Failure, "The 🎂 is not here.", "Try again somewhere else.");
-                      }}
-                    />
-                  )}
-                </ActionPanel>
-              }
+          {showDailyWord && (
+            <WordOfTheDayItem
+              wordOfTheDay={wordOfTheDay}
+              isEnglishWord={isEnglishWord}
+              setIsEnglishWord={setIsEnglishWord}
             />
           )}
-          {!isBirthDay() && showDailyWord && (
-            <List.Item
-              icon={{ source: isEnglishWord ? "word-icon.png" : "word-icon@chinese.png" }}
-              title={isEnglishWord ? wordOfTheDay.content : wordOfTheDay.translation}
-              accessories={[{ text: isEmpty(wordOfTheDay.author) ? " " : wordOfTheDay.author }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={"Translate Word"}
-                    icon={Icon.TwoArrowsClockwise}
-                    onAction={() => {
-                      setIsEnglishWord(!isEnglishWord);
-                    }}
-                  />
-                  <Action
-                    title={"Copy Word"}
-                    icon={Icon.Clipboard}
-                    onAction={async () => {
-                      await Clipboard.copy(isEnglishWord ? wordOfTheDay.content : wordOfTheDay.translation);
-                      await showToast(Toast.Style.Success, "Copy word success!");
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          )}
-          {(tag === tagList[0] || tag === tagList[1]) && (
-            <List.Section title={sectionList[0]}>
-              {lifeProgresses.map((lifeProgress, index) => {
-                return (
-                  lifeProgress.section === sectionList[0] && (
-                    <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
-                  )
-                );
-              })}
-            </List.Section>
-          )}
-          {(tag === tagList[0] || tag === tagList[2]) && (
-            <List.Section title={sectionList[1]}>
-              {lifeProgresses.map((lifeProgress, index) => {
-                return (
-                  lifeProgress.section === sectionList[1] && (
-                    <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
-                  )
-                );
-              })}
-            </List.Section>
-          )}
-          {(tag === tagList[0] || tag === tagList[3]) && (
-            <List.Section title={sectionList[2]}>
-              {lifeProgresses.map((lifeProgress, index) => {
-                return (
-                  lifeProgress.section === sectionList[2] && (
-                    <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
-                  )
-                );
-              })}
-            </List.Section>
-          )}
+          {showProgressBar && <LifeProgressCanvasItem />}
         </>
       )}
-    </List>
-  );
-}
 
-function LifeProgressListItem(props: { cakeIndex: number; index: number; lifeProgress: LifeProgress }) {
-  const cakeIndex = props.cakeIndex;
-  const index = props.index;
-  const lifeProgress = props.lifeProgress;
-  return (
-    <List.Item
-      icon={lifeProgress.icon}
-      title={lifeProgress.title}
-      accessories={lifeProgress.accessUnit}
-      actions={
-        <ActionPanel>
-          {isBirthDay() && (
-            <Action
-              title={"Rummage Here"}
-              icon={"🎂"}
-              onAction={async () => {
-                if (cakeIndex == index) {
-                  await showToast(Toast.Style.Success, "You found the 🎂", "Enjoy it!");
-                } else {
-                  await showToast(Toast.Style.Failure, "The 🎂 is not here.", "Try again somewhere else.");
-                }
-              }}
-            />
-          )}
-        </ActionPanel>
-      }
-    />
+      {(tag === tagList[0] || tag === tagList[1]) && (
+        <List.Section title={sectionList[0]}>
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === sectionList[0] && (
+                <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
+              )
+            );
+          })}
+        </List.Section>
+      )}
+      {(tag === tagList[0] || tag === tagList[2]) && (
+        <List.Section title={sectionList[1]}>
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === sectionList[1] && (
+                <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
+              )
+            );
+          })}
+        </List.Section>
+      )}
+      {(tag === tagList[0] || tag === tagList[3]) && (
+        <List.Section title={sectionList[2]}>
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === sectionList[2] && (
+                <LifeProgressListItem key={index} index={index} cakeIndex={cakeIndex} lifeProgress={lifeProgress} />
+              )
+            );
+          })}
+        </List.Section>
+      )}
+    </List>
   );
 }
