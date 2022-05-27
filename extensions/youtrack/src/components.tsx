@@ -33,13 +33,11 @@ function Actions(props: { item: ReducedIssue; instance: string }) {
   const link = `${props.instance}/issue/${identifier}`;
   return (
     <ActionPanel title={props.item.summary}>
-      <ActionPanel.Section>{link && <Action.OpenInBrowser url={link} />}</ActionPanel.Section>
       <ActionPanel.Section>
+        {link && <Action.OpenInBrowser url={link} />}
         {link && (
           <Action.CopyToClipboard content={identifier} title="Copy ID" shortcut={{ modifiers: ["cmd"], key: "." }} />
         )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
         {link && (
           <Action.CopyToClipboard content={link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
         )}
