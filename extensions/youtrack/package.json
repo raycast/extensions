@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "browse",
-      "title": "Browse YouTrack Issues",
+      "title": "Browse Issues",
+      "subtitle": "YouTrack",
       "description": "Find issues you need as fast as you can with this Raycast command.",
       "mode": "view"
     }
