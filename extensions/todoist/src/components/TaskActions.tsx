@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action } from "@raycast/api";
+import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation } from "@raycast/api";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
@@ -18,9 +18,12 @@ const schedules = [
 
 interface TaskActionsProps {
   task: Task;
+  fromDetail?: boolean;
 }
 
-export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
+export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX.Element {
+  const { pop } = useNavigation();
+
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
 
@@ -28,6 +31,11 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       await todoist.closeTask(task.id);
       await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
       mutate(SWRKeys.tasks);
+
+      if (fromDetail) {
+        mutate([SWRKeys.task, task.id]);
+        pop();
+      }
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
     }
@@ -40,6 +48,10 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       await todoist.updateTask(task.id, payload);
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       mutate(SWRKeys.tasks);
+
+      if (fromDetail) {
+        mutate([SWRKeys.task, task.id]);
+      }
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
     }
@@ -52,7 +64,13 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       try {
         await todoist.deleteTask(task.id);
         await showToast({ style: Toast.Style.Success, title: "Task deleted" });
+
         mutate(SWRKeys.tasks);
+
+        if (fromDetail) {
+          mutate([SWRKeys.task, task.id]);
+          pop();
+        }
       } catch (error) {
         handleError({ error, title: "Unable to delete task" });
       }
@@ -61,6 +79,8 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
 
   return (
     <>
+      <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+
       <ActionPanel.Section>
         <Action.Push
           title="Edit Task"
@@ -73,7 +93,7 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
           id="completeTask"
           title="Complete Task"
           icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           onAction={() => completeTask(task)}
         />
 
@@ -95,12 +115,12 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           title="Change Priority"
         >
-          {priorities.map(({ value, name, color }) => (
+          {priorities.map(({ value, name, color, icon }) => (
             <Action
               key={name}
               id={name}
               title={name}
-              icon={{ source: Icon.Circle, tintColor: color }}
+              icon={{ source: icon, tintColor: color }}
               onAction={() => updateTask(task, { priority: value })}
             />
           ))}
@@ -116,8 +136,6 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-
         {task.commentCount > 0 ? (
           <Action.Push
             title="Show Comments"
@@ -131,6 +149,12 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
           title="Copy Task URL"
           content={task.url}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Task Title"
+          content={task.content}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
     </>
