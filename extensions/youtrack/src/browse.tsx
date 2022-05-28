@@ -1,6 +1,8 @@
+// noinspection JSIgnoredPromiseFromCall
+
 import { useEffect, useState } from "react";
-import { List, showToast, getPreferenceValues, Toast } from "@raycast/api";
-import { ReducedIssue, ReducedProject, Youtrack } from "youtrack-rest-client";
+import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { ReducedIssue, Youtrack } from "youtrack-rest-client";
 import { IssueListItem } from "./components";
 
 interface Preferences {
@@ -13,40 +15,40 @@ interface Preferences {
 interface State {
   isLoading: boolean;
   items: ReducedIssue[];
-  projects: ReducedProject[];
   project: string | null;
   error?: Error;
+  yt: Youtrack | null;
 }
 
 // noinspection JSUnusedGlobalSymbols
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
   const query = prefs.query;
-  const yt = new Youtrack({
-    baseUrl: prefs.instance,
-    token: prefs.token,
-  });
-  const [state, setState] = useState<State>({ isLoading: true, items: [], projects: [], project: null });
 
-  if (state.projects.length == 0) {
-    yt.projects.all().then((projects: ReducedProject[]) => {
-      setState((previous) => ({
-        ...previous,
-        projects: projects,
-        isLoading: false,
-      }));
-    });
-  }
+  const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
 
   useEffect(() => {
-    if (!state.project) {
-      setState((previous) => ({ ...previous, project: state.projects[0]?.shortName ?? "QD" }));
+    try {
+      const yt = new Youtrack({ baseUrl: prefs.instance, token: prefs.token });
+      setState({ isLoading: false, items: [], project: null, yt });
+    } catch (error) {
+      setState((previous) => ({
+        ...previous,
+        error: error instanceof Error ? error : new Error("Something went wrong"),
+        isLoading: false,
+        items: [],
+      }));
     }
+  }, [prefs.instance, prefs.token]);
 
+  useEffect(() => {
     async function fetchIssues() {
+      if (state.yt === null) {
+        return;
+      }
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const feed = await yt.issues.search(query, { $top: Number(prefs.maxIssues) });
+        const feed = await state.yt.issues.search(query, { $top: Number(prefs.maxIssues) });
         setState((previous) => ({ ...previous, items: feed, isLoading: false }));
       } catch (error) {
         setState((previous) => ({
@@ -59,7 +61,7 @@ export default function Command() {
     }
 
     fetchIssues();
-  }, [state.projects]);
+  }, [state.yt]);
 
   useEffect(() => {
     if (state.error) {
@@ -70,12 +72,6 @@ export default function Command() {
       });
     }
   }, [state.error]);
-
-  showToast({
-    style: Toast.Style.Success,
-    title: prefs.instance,
-    message: prefs.query,
-  });
 
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
