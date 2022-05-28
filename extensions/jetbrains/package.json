@@ -5,7 +5,10 @@
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
-  "contributors": ["adrienbaron", "dima-m711"],
+  "contributors": [
+    "adrienbaron",
+    "dima-m711"
+  ],
   "license": "MIT",
   "commands": [
     {
