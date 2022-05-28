@@ -15,8 +15,8 @@ export function getPreference(): Preference {
 
 export const preference = getPreference();
 
-export const TYPE_TLD = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
+export const DOMAIN = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
 
-export const API_DOMAIN = `https://${preference.subdomain}.${TYPE_TLD}`;
+export const API_DOMAIN = `https://${preference.subdomain}.${DOMAIN}`;
 
-export const INTERNAL_API_DOMAIN = `https://internal-api-space.${TYPE_TLD}`;
+export const INTERNAL_API_DOMAIN = `https://internal-api-space.${DOMAIN}`;

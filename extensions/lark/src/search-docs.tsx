@@ -75,7 +75,7 @@ const SearchDocsView: React.FC = () => {
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search documents..." onSearchTextChange={handleSearch} throttle>
-      {documentList !== null ? (
+      {documentList != null && documentList.entities ? (
         isRecentList(documentList) ? (
           <RecentDocumentsView list={documentList} onRemove={handleRemoveRecent} />
         ) : (
