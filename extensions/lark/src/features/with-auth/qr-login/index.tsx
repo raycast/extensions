@@ -4,15 +4,15 @@ import { toDataURL } from 'qrcode';
 import { initQRCode, NextStep, QRCodeStatus, User } from '../../../services/auth';
 
 interface QRLoginProps {
-  onConfirm: (cookie: string[]) => void;
+  onConfirm: (tenantDomain: string, cookies: string[]) => void;
 }
 
 export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
   const timer = useRef<NodeJS.Timeout>();
   const unmountedRef = useRef(false);
   const tokenRef = useRef('');
+  const userRef = useRef<User | null>();
   const [markdown, setMarkdown] = useState<string>();
-  const [user, setUser] = useState<User | null>();
   const [status, setStatus] = useState(QRCodeStatus.Init);
 
   const cleanUp = useCallback(() => {
@@ -27,6 +27,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
       tokenRef.current = qrCode.token;
 
       const qrCodeMarkdown = await getQRCodeMarkdownContent(qrCode.token);
+      userRef.current = null;
       setMarkdown(qrCodeMarkdown);
       setStatus(QRCodeStatus.NotScanned);
 
@@ -36,15 +37,15 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
         if (unmountedRef.current || tokenRef.current !== qrCode.token) return;
 
         if (result.next_step === NextStep.EnterApp) {
-          return onConfirm(result.cookie || []);
+          return onConfirm(userRef.current!.tenant.tenant_full_domain, result.cookie || []);
         }
 
         if (result.status === QRCodeStatus.Outdated) {
           return refreshQRCode();
         }
 
+        userRef.current = result.user;
         setStatus(result.status);
-        setUser(result.user);
 
         if (timer.current && !unmountedRef.current && result.next_step === NextStep.Polling) {
           timer.current = setTimeout(polling, 500);
@@ -86,11 +87,11 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
               <Detail.Metadata.Label title="Status" text={QRCodeStatus[status]} />
             )}
             <Detail.Metadata.Separator />
-            {user && (
+            {userRef.current && (
               <Detail.Metadata.Label
                 title="User"
-                icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
-                text={user.name}
+                icon={{ source: userRef.current.avatar_url, mask: Image.Mask.Circle }}
+                text={userRef.current.name}
               />
             )}
           </Detail.Metadata>
@@ -116,10 +117,10 @@ async function getQRCodeMarkdownContent(token: string): Promise<string> {
       color:
         environment.theme === 'light'
           ? {
-              light: '#dedede',
+              light: '#0000',
               dark: '#262426',
             }
-          : { light: '#262426', dark: '#dedede' },
+          : { light: '#0000', dark: '#dedede' },
     }
   );
   return `![](${qrCodeData})`;

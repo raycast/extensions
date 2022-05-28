@@ -2,7 +2,6 @@ import { getPreferenceValues } from '@raycast/api';
 
 export interface Preference {
   type: 'feishu' | 'lark';
-  subdomain: string;
   recentListCount: number;
 }
 
@@ -21,7 +20,3 @@ export function getDomain(sub?: string): string {
 }
 
 export const GENERAL_DOMAIN = getDomain('www');
-
-export const TENANT_DOMAIN = getDomain(preference.subdomain);
-
-export const INTERNAL_API_DOMAIN = getDomain('internal-api-space');

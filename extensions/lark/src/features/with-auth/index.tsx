@@ -1,7 +1,7 @@
 import { Detail } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { parse } from 'tough-cookie';
-import { checkAuthState, isAuthenticated, setSpaceSession } from '../../services/shared';
+import { checkAuthState, isAuthenticated, setAuthData } from '../../services/shared';
 import { QRLogin } from './qr-login';
 
 const AuthGuard: React.FC<{ component: React.FC }> = ({ component: Component }) => {
@@ -12,12 +12,12 @@ const AuthGuard: React.FC<{ component: React.FC }> = ({ component: Component }) 
     checkAuthState().finally(() => setChecked(true));
   }, []);
 
-  const handleLogin = async (cookie: string[]) => {
-    for (const item of cookie) {
+  const handleLogin = async (tenantDomain: string, cookies: string[]) => {
+    for (const item of cookies) {
       const cookie = parse(item);
       if (!cookie) return;
       if (cookie.key === 'session') {
-        await setSpaceSession(cookie.value);
+        await setAuthData(tenantDomain, cookie.value);
         refresh(Math.random());
         break;
       }

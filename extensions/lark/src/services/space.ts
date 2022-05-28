@@ -1,8 +1,8 @@
 import { Toast, showToast } from '@raycast/api';
 import got from 'got';
-import { TENANT_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
+import { preference } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-import { cookieJar } from './shared';
+import { cookieJar, getTenantPrefixUrl } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -125,13 +125,13 @@ export interface SearchDocsResponse {
 }
 
 const client = got.extend({
-  prefixUrl: `${TENANT_DOMAIN}/space/api/`,
   cookieJar,
-  headers: { Referer: TENANT_DOMAIN, 'User-Agent': 'Raycast' },
+  headers: { 'User-Agent': 'Raycast' },
   responseType: 'json',
   hooks: {
     beforeRequest: [
       (options) => {
+        options.headers.referer = getTenantPrefixUrl();
         // remove `_csrf_token`
         options.headers.cookie = String(options.headers.cookie)
           .split('; ')
@@ -158,9 +158,13 @@ export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEnti
   return 'obj_token' in entity;
 }
 
+function prependUrl(url: string) {
+  return `${getTenantPrefixUrl()}/space/api/${url}`;
+}
+
 export async function fetchRecentList(length = preference.recentListCount): Promise<RecentListResponse> {
   try {
-    const { body } = await client.get<RecentListResponse>('explorer/recent/list/', {
+    const { body } = await client.get<RecentListResponse>(prependUrl('explorer/recent/list/'), {
       searchParams: { length },
     });
     return body;
@@ -191,7 +195,7 @@ export interface SearchDocsParams {
 
 export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsResponse> {
   try {
-    const { body } = await client.get<SearchDocsResponse>('search/refine_search/', {
+    const { body } = await client.get<SearchDocsResponse>(prependUrl('search/refine_search/'), {
       searchParams: { offset: 0, count: 15, ...params },
     });
     Object.keys(body.entities.objs).forEach((key) => {
@@ -251,8 +255,7 @@ const computeType = (objEntity: ObjEntity) => {
 
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {
-    await client.post('space/api/explorer/recent/delete/', {
-      prefixUrl: INTERNAL_API_DOMAIN,
+    await client.post(prependUrl('explorer/recent/delete/'), {
       form: {
         obj_token: objToken,
       },

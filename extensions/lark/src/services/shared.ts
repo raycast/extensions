@@ -5,19 +5,24 @@ import { getStorage, setStorage, StorageKey } from '../utils/storage';
 export const cookieJar = new CookieJar();
 
 export let isAuthenticated = false;
+let tenantPrefixUrl = '';
 
 export async function checkAuthState(): Promise<boolean> {
   if (isAuthenticated) return true;
-  const session = await getStorage(StorageKey.SpaceSession);
-  if (session) {
-    await setSpaceSession(session);
+  const [tenantDomain, session] = await Promise.all([
+    getStorage(StorageKey.TenantDomain),
+    getStorage(StorageKey.SpaceSession),
+  ]);
+  if (tenantDomain && session) {
+    await setAuthData(tenantDomain, session);
     return true;
   }
   return false;
 }
 
-export async function setSpaceSession(session: string): Promise<void> {
+export async function setAuthData(tenantDomain: string, session: string): Promise<void> {
   isAuthenticated = true;
+  tenantPrefixUrl = `https://${tenantDomain}`;
 
   cookieJar.setCookieSync(
     new Cookie({
@@ -28,5 +33,9 @@ export async function setSpaceSession(session: string): Promise<void> {
     GENERAL_DOMAIN
   );
 
-  await setStorage(StorageKey.SpaceSession, session);
+  await Promise.all([setStorage(StorageKey.TenantDomain, tenantDomain), setStorage(StorageKey.SpaceSession, session)]);
+}
+
+export function getTenantPrefixUrl(): string {
+  return tenantPrefixUrl;
 }

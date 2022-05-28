@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
@@ -39,14 +39,6 @@
           "value": "lark"
         }
       ]
-    },
-    {
-      "name": "subdomain",
-      "type": "textfield",
-      "required": true,
-      "title": "Subdomain",
-      "description": "Subdomain of your Feishu/Lark enterprise e.g. bytedance",
-      "placeholder": "Subdomain of your Feishu/Lark enterprise"
     },
     {
       "name": "recentListCount",

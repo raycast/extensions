@@ -2,6 +2,7 @@ import { LocalStorage } from '@raycast/api';
 import { RecentListResponse } from '../services/space';
 
 export const StorageKey = {
+  TenantDomain: 'TENANT_DOMAIN',
   SpaceSession: 'SPACE_SESSION',
   DocsRecentList: 'DOCS_RECENT_LIST',
 } as const;
@@ -9,6 +10,7 @@ export const StorageKey = {
 export type StorageKey = ValueOf<typeof StorageKey>;
 
 type StorageTypes = {
+  TENANT_DOMAIN: string;
   SPACE_SESSION: string;
   DOCS_RECENT_LIST: RecentListResponse;
 };

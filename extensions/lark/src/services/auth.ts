@@ -76,7 +76,7 @@ const client = got.extend({
   responseType: 'json',
   headers: {
     'x-api-version': '1.0.8',
-    'x-app-id': '11',
+    'x-app-id': '2',
     'x-device-info': 'device_id=0;device_name=Raycast;device_os=Mac',
     'x-locale': 'en-US',
     'x-terminal-type': '2',
