@@ -1,8 +1,8 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { getLiftProgressCanvas } from "./common-utils";
 import { CountdownDate, LifeProgress } from "../types/types";
 import { allTheme, numberPathList, SectionTitle, SYMBOL_NUM } from "./constants";
-import { birthday, birthdayEveryDay, iconTheme, Preferences, weekStart } from "../types/preferences";
+import { birthday, birthdayEveryDay, iconTheme, weekStart } from "../types/preferences";
 
 export const getBirthDay = () => {
   const nowDate = new Date();
@@ -148,28 +148,13 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
   if (_iconTheme == "simple" && raycastTheme == "dark") {
     _iconTheme = _iconTheme + "-dark";
   }
-  const meaningfulDaysIcon = (num: number) => {
-    if (num < 5475) {
-      return "☁️";
-    }
-    if (num < 7300) {
-      return "🌥";
-    }
-    if (num < 9125) {
-      return "⛅️";
-    }
-    if (num < 10950) {
-      return "🌤";
-    }
-    return "☀️";
-  };
 
   //you have
   const spentDays = getSpendDays();
   const leftDays = getLeftNights();
   lifeProgresses.push({
     section: SectionTitle.YOU_HAVE,
-    icon: meaningfulDaysIcon(spentDays),
+    icon: buildMeaningfulDaysIcon(spentDays + ""),
     title: `Spent ${spentDays} meaningful days`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(spentDays, leftDays, SYMBOL_NUM).canvas,
@@ -284,7 +269,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
   const { spentMonth, leftMonth, allMonth } = getDaysLeftThisMonth();
   lifeProgresses.push({
     section: SectionTitle.COUNTDOWN_DATE,
-    icon: leftMonth < 15 ? "⌛️" : "⏳",
+    icon: buildMonthIcon(leftMonth),
     title: `${leftMonth} days left in the month`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(spentMonth, leftMonth, allMonth).canvas,
@@ -298,7 +283,7 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
   const { spentDayThisYear, leftDayThisYear, allDayThisYear } = getDaysLeftThisYear();
   lifeProgresses.push({
     section: SectionTitle.COUNTDOWN_DATE,
-    icon: leftDayThisYear < 182 ? "🎇" : "🎆",
+    icon: buildYearIcon(leftDayThisYear),
     title: `${leftDayThisYear} days left in the year`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(spentDayThisYear, leftDayThisYear, allDayThisYear).canvas,
@@ -309,9 +294,8 @@ export const getLifeProgress = (countdownDates: CountdownDate[]) => {
     accessUnit: getNumberCanvas(_iconTheme, leftDayThisYear),
   });
 
-  const now = new Date();
-
   //countdown date
+  const now = new Date();
   countdownDates.forEach((value) => {
     let _title;
     let days;
@@ -372,4 +356,46 @@ export const getNumberCanvas = (iconTheme: string, number: number) => {
     });
   }
   return numberPaths;
+};
+
+const buildMeaningfulDaysIcon = (num: string) => {
+  if (num.endsWith("0")) return "🌈";
+  if (num.endsWith("1")) return "🌤";
+  if (num.endsWith("2")) return "⛅️";
+  if (num.endsWith("3")) return "🌦";
+  if (num.endsWith("4")) return "🌧";
+  if (num.endsWith("5")) return "⛈";
+  if (num.endsWith("6")) return "🌨";
+  if (num.endsWith("7")) return "🌥";
+  if (num.endsWith("8")) return "☀️";
+  if (num.endsWith("9")) return "🌈";
+  return "🌈";
+};
+
+const buildMonthIcon = (num: number) => {
+  if (num <= 3) return "🌑";
+  if (num <= 7) return "🌘";
+  if (num <= 11) return "🌗";
+  if (num <= 14) return "🌖";
+  if (num <= 18) return "🌕";
+  if (num <= 21) return "🌔";
+  if (num <= 24) return "🌓";
+  if (num <= 28) return "🌒";
+  return "🌑";
+};
+
+const buildYearIcon = (num: number) => {
+  if (num <= 3) return "🎊";
+  if (num <= 10) return "🎁";
+  if (num <= 40) return "🏮";
+  if (num <= 80) return "❄️";
+  if (num <= 120) return "🪆";
+  if (num <= 150) return "🍁";
+  if (num <= 180) return "🎐";
+  if (num <= 220) return "⛱";
+  if (num <= 260) return "🌸";
+  if (num <= 300) return "🏮";
+  if (num <= 330) return "🧨";
+  if (num <= 355) return "🎉";
+  return "🎊";
 };

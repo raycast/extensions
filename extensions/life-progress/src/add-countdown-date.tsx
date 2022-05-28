@@ -4,6 +4,7 @@ import { CountdownDate } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
 import Style = Toast.Style;
 import { isEmpty } from "./utils/common-utils";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function AddCountdownDate(props: {
   countdownDates: CountdownDate[];
@@ -22,10 +23,14 @@ export default function AddCountdownDate(props: {
       if (typeof date !== "undefined") {
         const now = new Date();
         if (now < date) {
-          const days = (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+          const days =
+            (new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime() - now.getTime()) /
+            (1000 * 60 * 60 * 24);
           setPreview(`${icon} ${Math.floor(days)} days left until ${title}`);
         } else {
-          const days = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+          const days =
+            (now.getTime() - new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime()) /
+            (1000 * 60 * 60 * 24);
           setPreview(`${icon} ${Math.floor(days)} days passed since ${title}`);
         }
       }
@@ -41,7 +46,7 @@ export default function AddCountdownDate(props: {
         <ActionPanel>
           <Action
             title={"Add Countdown Date"}
-            icon={Icon.Plus}
+            icon={Icon.Clock}
             onAction={async () => {
               if (isEmpty(title)) {
                 await showToast(Style.Failure, "Title cannot be empty!");
@@ -56,8 +61,8 @@ export default function AddCountdownDate(props: {
                   modifyAt: now.getTime(),
                   title: title,
                   description: description,
-                  date: date.getTime(),
-                  icon: isEmpty(icon) ? "🕛" : icon,
+                  date: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime(),
+                  icon: isEmpty(icon) ? (Date.now() > date.getTime() ? "⌛️" : "⏳") : icon,
                 });
 
                 const lastDate = _cdDate.filter((value) => {
@@ -84,6 +89,7 @@ export default function AddCountdownDate(props: {
               }
             }}
           />
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     >

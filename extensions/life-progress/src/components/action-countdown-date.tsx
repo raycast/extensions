@@ -12,6 +12,7 @@ export function ActionAddCountdownDate(props: {
   const { countdownDates, setRefresh } = props;
   return (
     <Action.Push
+      icon={Icon.Clock}
       title={"Add CountDown Date"}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
       target={<AddCountdownDate countdownDates={countdownDates} setRefresh={setRefresh} />}
