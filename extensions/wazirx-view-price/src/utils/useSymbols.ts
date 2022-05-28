@@ -3,7 +3,29 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { BASE_URL, QUOTE_ASSET } from "./lib";
 
-interface SymbolsInterface {}
+interface FilterInterface {
+  filterType: string;
+  minPrice: string;
+  tickSize: string;
+}
+
+interface SymbolInterface {
+  symbol: string;
+  status: string;
+  baseAsset: string;
+  quoteAsset: string;
+  baseAssetPrecision: number;
+  quoteAssetPrecision: number;
+  orderTypes: Array<string>;
+  isSpotTradingAllowed: boolean;
+  filters: Array<FilterInterface>;
+}
+
+interface ExchangeInterface {
+  timezone: string;
+  serverTime: number;
+  symbols: Array<SymbolInterface>;
+}
 
 export default function useSymbols() {
   const [isLoadingSymbols, setIsLoadingSymbols] = useState<boolean>(true);
@@ -20,9 +42,9 @@ export default function useSymbols() {
       .get(`${BASE_URL}/sapi/v1/exchangeInfo`)
       .then((res: AxiosResponse) => {
         if (res.status === 200) {
-          let temp: (string | null)[] = [];
+          const temp: (string | null)[] = [];
 
-          res.data.symbols.map((ast: any) => {
+          (res.data as ExchangeInterface).symbols.map((ast) => {
             if (ast.quoteAsset === QUOTE_ASSET && ast.status === "trading") {
               temp.push(ast.baseAsset);
             }
