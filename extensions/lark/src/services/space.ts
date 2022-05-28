@@ -1,4 +1,4 @@
-import { Toast, showToast } from '@raycast/api';
+import { Toast, showToast, LocalStorage } from '@raycast/api';
 import got from 'got';
 import { preference } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
@@ -143,7 +143,14 @@ const client = got.extend({
       (response) => {
         try {
           const data = response.body as Record<string, unknown>;
-          if (data.code !== 0) throw Error();
+          if (data.code !== 0) {
+            if (data.code === 5) {
+              // Login Required
+              LocalStorage.clear();
+              showToast(Toast.Style.Failure, 'Session expired, please login again');
+            }
+            throw Error();
+          }
           response.body = data.data;
           return response;
         } catch {
