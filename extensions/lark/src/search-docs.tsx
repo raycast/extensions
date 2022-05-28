@@ -1,15 +1,16 @@
 import { Action, Icon, List, showToast, Toast } from '@raycast/api';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { SpaceListItem } from './components/space-list-item';
+import { withAuth } from './features/with-auth';
 import {
   fetchRecentList,
   searchDocs,
-  setRecentListCache,
-  getRecentListCache,
   removeRecentDocument,
   RecentListResponse as RecentList,
   SearchDocsResponse as SearchResults,
 } from './services/space';
+import { noop } from './utils/function';
+import { getStorage, setStorage, StorageKey } from './utils/storage';
 
 const SearchDocsView: React.FC = () => {
   const fetchIdRef = useRef(0);
@@ -18,11 +19,9 @@ const SearchDocsView: React.FC = () => {
 
   useEffect(() => {
     // load cache
-    getRecentListCache()
+    getStorage(StorageKey.DocsRecentList)
       .then((cache) => setDocumentList(cache))
-      .catch(() => {
-        // noop
-      })
+      .catch(noop)
       .then(handleFetchRecentList);
   }, []);
 
@@ -36,7 +35,7 @@ const SearchDocsView: React.FC = () => {
         if (fetchIdRef.current === id) {
           setLoading(false);
           // set cache
-          setRecentListCache(recentList);
+          setStorage(StorageKey.DocsRecentList, recentList);
           setDocumentList(recentList);
         }
       })
@@ -135,4 +134,4 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
   );
 };
 
-export default SearchDocsView;
+export default withAuth(SearchDocsView);

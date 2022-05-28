@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Image, List } from '@raycast/api';
-import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../services/space';
-import { timeFormat, timeSince } from '../utils/time';
+import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../../services/space';
+import { timeFormat, timeSince } from '../../utils/time';
 
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;

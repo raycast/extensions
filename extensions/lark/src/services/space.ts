@@ -1,8 +1,8 @@
-import { LocalStorage, Toast, showToast } from '@raycast/api';
+import { Toast, showToast } from '@raycast/api';
 import got from 'got';
-import { CookieJar, Cookie } from 'tough-cookie';
-import { API_DOMAIN, INTERNAL_API_DOMAIN, preference, DOMAIN } from '../utils/config';
+import { TENANT_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
+import { cookieJar } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -124,21 +124,10 @@ export interface SearchDocsResponse {
   };
 }
 
-const cookieJar = new CookieJar();
-
-cookieJar.setCookieSync(
-  new Cookie({
-    key: 'session',
-    value: preference.spaceSession,
-    domain: DOMAIN,
-  }),
-  API_DOMAIN
-);
-
 const client = got.extend({
-  prefixUrl: `${API_DOMAIN}/space/api/`,
+  prefixUrl: `${TENANT_DOMAIN}/space/api/`,
   cookieJar,
-  headers: { Referer: API_DOMAIN, 'User-Agent': 'Raycast' },
+  headers: { Referer: TENANT_DOMAIN, 'User-Agent': 'Raycast' },
   responseType: 'json',
   hooks: {
     beforeRequest: [
@@ -259,20 +248,6 @@ const computeType = (objEntity: ObjEntity) => {
 
   return objEntity.type;
 };
-
-const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
-
-export function setRecentListCache(recentList: RecentListResponse): Promise<void> {
-  return LocalStorage.setItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
-}
-
-export async function getRecentListCache(): Promise<RecentListResponse | null> {
-  const cache = await LocalStorage.getItem(CACHE_DOCS_RECENT_LIST);
-  if (typeof cache === 'string') {
-    return JSON.parse(cache) as RecentListResponse;
-  }
-  return null;
-}
 
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {

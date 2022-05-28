@@ -3,7 +3,6 @@ import { getPreferenceValues } from '@raycast/api';
 export interface Preference {
   type: 'feishu' | 'lark';
   subdomain: string;
-  spaceSession: string;
   recentListCount: number;
 }
 
@@ -17,6 +16,12 @@ export const preference = getPreference();
 
 export const DOMAIN = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
 
-export const API_DOMAIN = `https://${preference.subdomain}.${DOMAIN}`;
+export function getDomain(sub?: string): string {
+  return `https://${sub ? `${sub}.` : ''}${DOMAIN}`;
+}
 
-export const INTERNAL_API_DOMAIN = `https://internal-api-space.${DOMAIN}`;
+export const GENERAL_DOMAIN = getDomain('www');
+
+export const TENANT_DOMAIN = getDomain(preference.subdomain);
+
+export const INTERNAL_API_DOMAIN = getDomain('internal-api-space');

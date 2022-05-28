@@ -49,14 +49,6 @@
       "placeholder": "Subdomain of your Feishu/Lark enterprise"
     },
     {
-      "name": "spaceSession",
-      "type": "password",
-      "required": true,
-      "title": "Space Session",
-      "description": "Your space session. Open your docs homepage and copy it in Cookies.",
-      "placeholder": "Enter your space session"
-    },
-    {
       "name": "recentListCount",
       "type": "textfield",
       "required": false,
@@ -75,11 +67,13 @@
     "@raycast/api": "^1.35.2",
     "dayjs": "^1.11.2",
     "got": "^12.1.0",
+    "qrcode": "^1.5.0",
     "string": "^3.3.3",
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~17.0.35",
+    "@types/qrcode": "^1.4.2",
     "@types/react": "^18.0.9",
     "@types/string": "^0.0.31",
     "@types/tough-cookie": "^4.0.2",
