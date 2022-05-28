@@ -36,7 +36,10 @@ const BlockItem = ({ block }: { block: Block }) => (
     title={block.documentName || block.content}
     actions={
       <ActionPanel>
-        <Action.OpenInBrowser url={`craftdocs://open?blockId=${block.id}&spaceId=${block.spaceID}`} />
+        <Action.OpenInBrowser
+          title="Open in Craft"
+          url={`craftdocs://open?blockId=${block.id}&spaceId=${block.spaceID}`}
+        />
       </ActionPanel>
     }
   />

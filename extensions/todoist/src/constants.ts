@@ -1,4 +1,4 @@
-import { Color, Icon } from "@raycast/api";
+import { Color } from "@raycast/api";
 
 // Todoist priorities are reversed
 export const priorities = [

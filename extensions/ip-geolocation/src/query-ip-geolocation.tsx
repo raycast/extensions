@@ -1,12 +1,14 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchIpGeolocation } from "./hooks/hooks";
 import { IpEmptyView } from "./components/ip-empty-view";
 import { listIcons } from "./utils/constants";
-import { commonPreferences, isEmpty } from "./utils/common-utils";
+import { isEmpty } from "./utils/common-utils";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { Preferences } from "./types/preferences";
 
-export default function SearchIpGeolocation() {
-  const { language } = commonPreferences();
+export default function QueryIpGeolocation() {
+  const { language } = getPreferenceValues<Preferences>();
   const [searchContent, setSearchContent] = useState<string>("");
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
 
@@ -23,7 +25,7 @@ export default function SearchIpGeolocation() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search any IP address/domain"}
+      searchBarPlaceholder={"Query geolocation of IP or domain"}
       searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
@@ -46,6 +48,7 @@ export default function SearchIpGeolocation() {
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
               />
+              <ActionOpenExtensionPreferences />
             </ActionPanel>
           }
         />
