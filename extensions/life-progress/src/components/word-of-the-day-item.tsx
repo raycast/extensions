@@ -3,13 +3,17 @@ import { isEmpty } from "../utils/common-utils";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React, { Dispatch, SetStateAction } from "react";
 import { WordOfTheDay } from "../utils/shanbei-utils";
+import { CountdownDate } from "../types/types";
+import { ActionAddCountdownDate } from "./action-countdown-date";
 
 export function WordOfTheDayItem(props: {
   isEnglishWord: boolean;
   setIsEnglishWord: Dispatch<SetStateAction<boolean>>;
   wordOfTheDay: WordOfTheDay;
+  countdownDates: CountdownDate[];
+  setRefresh: Dispatch<SetStateAction<number>>;
 }) {
-  const { isEnglishWord, setIsEnglishWord, wordOfTheDay } = props;
+  const { isEnglishWord, setIsEnglishWord, wordOfTheDay, countdownDates, setRefresh } = props;
   return (
     <List.Item
       icon={{
@@ -36,6 +40,7 @@ export function WordOfTheDayItem(props: {
               await showToast(Toast.Style.Success, "Copy word success!");
             }}
           />
+          <ActionAddCountdownDate countdownDates={countdownDates} setRefresh={setRefresh} />
           <ActionOpenPreferences />
         </ActionPanel>
       }

@@ -4,17 +4,10 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const getLiftProgressCanvas = (
-  spentTime: number,
-  leftTime: number,
-  symbolNum: number,
-  titleProgressBar = false
-) => {
-  //■□
-  //★☆
-  //✪✫
+const getCanvasSymbols = (titleProgressBar = false) => {
   let spentSymbol = "■";
   let leftSymbol = "□";
+  let symbolNum = 40;
   switch (progressSymbol) {
     case "■": {
       spentSymbol = "■";
@@ -79,6 +72,27 @@ export const getLiftProgressCanvas = (
     default:
       break;
   }
+  return { spentSymbol: spentSymbol, leftSymbol: leftSymbol, titleSymbolNum: symbolNum };
+};
+
+export const getLiftProgressCanvas = (
+  spentTime: number,
+  leftTime: number,
+  symbolNum: number,
+  titleProgressBar = false
+) => {
+  const { spentSymbol, leftSymbol, titleSymbolNum } = getCanvasSymbols(titleProgressBar);
+  const finalSymbolNum = titleProgressBar ? titleSymbolNum : symbolNum;
+
+  const canvas =
+    spentSymbol.repeat(Math.floor((spentTime / (spentTime + leftTime)) * finalSymbolNum)) +
+    leftSymbol.repeat(finalSymbolNum - Math.floor((spentTime / (spentTime + leftTime)) * finalSymbolNum));
+  const text = ((spentTime / (spentTime + leftTime)) * 100).toFixed(0) + "%";
+  return { canvas: canvas, text: text };
+};
+
+export const getCountdownCanvas = (spentTime: number, leftTime: number, symbolNum: number) => {
+  const { spentSymbol, leftSymbol } = getCanvasSymbols();
 
   const canvas =
     spentSymbol.repeat(Math.floor((spentTime / (spentTime + leftTime)) * symbolNum)) +

@@ -1,14 +1,20 @@
 import { isBirthDay } from "../utils/life-progress-utils";
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import React from "react";
-import { LifeProgress } from "../types/types";
+import React, { Dispatch, SetStateAction } from "react";
+import { CountdownDate, LifeProgress } from "../types/types";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { spawnSync } from "child_process";
+import { ActionAddCountdownDate, ActionRemoveCountdownDate } from "./action-countdown-date";
 
-export function LifeProgressListItem(props: { cakeIndex: number; index: number; lifeProgress: LifeProgress }) {
-  const cakeIndex = props.cakeIndex;
-  const index = props.index;
-  const lifeProgress = props.lifeProgress;
+export function LifeProgressListItem(props: {
+  cakeIndex: number;
+  index: number;
+  lifeProgressesLength: number;
+  lifeProgress: LifeProgress;
+  countdownDates: CountdownDate[];
+  setRefresh: Dispatch<SetStateAction<number>>;
+}) {
+  const { cakeIndex, index, lifeProgressesLength, lifeProgress, countdownDates, setRefresh } = props;
   return (
     <List.Item
       icon={lifeProgress.icon}
@@ -16,6 +22,7 @@ export function LifeProgressListItem(props: { cakeIndex: number; index: number; 
         value: lifeProgress.title,
         tooltip: lifeProgress.titleCanvas.canvas + "  " + lifeProgress.titleCanvas.text,
       }}
+      subtitle={{ value: lifeProgress.subTitle, tooltip: lifeProgress.subTitle }}
       accessories={lifeProgress.accessUnit}
       actions={
         <ActionPanel>
@@ -31,6 +38,15 @@ export function LifeProgressListItem(props: { cakeIndex: number; index: number; 
                   await showToast(Toast.Style.Failure, "The 🎂 is not here.", "Try again somewhere else.");
                 }
               }}
+            />
+          )}
+          <ActionAddCountdownDate countdownDates={countdownDates} setRefresh={setRefresh} />
+          {index > 9 && (
+            <ActionRemoveCountdownDate
+              countdownDates={countdownDates}
+              setRefresh={setRefresh}
+              lifeProgressesLength={lifeProgressesLength}
+              index={index}
             />
           )}
           <ActionOpenPreferences />

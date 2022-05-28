@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 export interface Preferences {
   showDailyWord: boolean;
   showProgressBar: boolean;
-  timeLeftFirst: boolean;
+  countdownDateFirst: boolean;
   birthdayEveryDay: boolean;
   birthday: string;
   weekStart: string;

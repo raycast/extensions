@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { getLiftProgressCanvas } from "./common-utils";
-import { LifeProgress } from "../types/types";
+import { CountdownDate, LifeProgress } from "../types/types";
 import { allTheme, numberPathList, SectionTitle, SYMBOL_NUM } from "./constants";
 import { birthday, birthdayEveryDay, iconTheme, Preferences, weekStart } from "../types/preferences";
 
@@ -135,7 +135,7 @@ export const getDaysLeftThisYear = () => {
   };
 };
 
-export const getLifeProgress = () => {
+export const getLifeProgress = (countdownDates: CountdownDate[]) => {
   const raycastTheme = environment.theme;
   const lifeProgresses: LifeProgress[] = [];
 
@@ -164,6 +164,7 @@ export const getLifeProgress = () => {
     return "☀️";
   };
 
+  //you have
   const spentDays = getSpendDays();
   const leftDays = getLeftNights();
   lifeProgresses.push({
@@ -174,6 +175,7 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentDays, leftDays, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentDays, leftDays, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: spentDays,
     accessUnit: getNumberCanvas(_iconTheme, spentDays),
   });
@@ -188,6 +190,7 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentYears, leftYears, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentYears, leftYears, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: getSpendYears(),
     accessUnit: getNumberCanvas(_iconTheme, spentYears),
   });
@@ -202,10 +205,12 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentCentury, leftCentury, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentCentury, leftCentury, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: spentCentury,
     accessUnit: getNumberCanvas(_iconTheme, spentCentury),
   });
 
+  //you may be able to
   const { spentPaychecks, leftPaychecks } = getLeftPaychecks();
   lifeProgresses.push({
     section: SectionTitle.YOU_MAY_BE_ABLE_TO,
@@ -215,6 +220,7 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentPaychecks, leftPaychecks, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentPaychecks, leftPaychecks, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: spentPaychecks,
     accessUnit: getNumberCanvas(_iconTheme, spentPaychecks),
   });
@@ -228,6 +234,7 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentWeeks, leftWeeks, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentWeeks, leftWeeks, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: spentWeeks,
     accessUnit: getNumberCanvas(_iconTheme, spentWeeks),
   });
@@ -240,60 +247,93 @@ export const getLifeProgress = () => {
       canvas: getLiftProgressCanvas(spentDays, leftDays, SYMBOL_NUM).canvas,
       text: getLiftProgressCanvas(spentDays, leftDays, SYMBOL_NUM).text,
     },
+    subTitle: "",
     number: leftDays,
     accessUnit: getNumberCanvas(_iconTheme, leftDays),
   });
 
+  //time left
   const leftHour = getHourLeftThisDay();
   lifeProgresses.push({
-    section: SectionTitle.TIME_LEFT,
+    section: SectionTitle.COUNTDOWN_DATE,
     icon: timeIcon24[leftHour],
     title: `${leftHour} hours left in the day`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(24 - leftHour, leftHour, 24).canvas,
       text: getLiftProgressCanvas(24 - leftHour, leftHour, 24).text,
     },
+    subTitle: "",
     number: leftHour,
     accessUnit: getNumberCanvas(_iconTheme, leftHour),
   });
 
   const leftWeek = getDaysLeftThisWeek();
   lifeProgresses.push({
-    section: SectionTitle.TIME_LEFT,
+    section: SectionTitle.COUNTDOWN_DATE,
     icon: leftWeek <= 1 ? "🏝" : "💼",
     title: `${leftWeek} days left in the week`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(7 - leftWeek, leftWeek, 7).canvas,
       text: getLiftProgressCanvas(7 - leftWeek, leftWeek, 7).text,
     },
+    subTitle: "",
     number: leftWeek,
     accessUnit: getNumberCanvas(_iconTheme, leftWeek),
   });
 
   const { spentMonth, leftMonth, allMonth } = getDaysLeftThisMonth();
   lifeProgresses.push({
-    section: SectionTitle.TIME_LEFT,
+    section: SectionTitle.COUNTDOWN_DATE,
     icon: leftMonth < 15 ? "⌛️" : "⏳",
     title: `${leftMonth} days left in the month`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(spentMonth, leftMonth, allMonth).canvas,
       text: getLiftProgressCanvas(spentMonth, leftMonth, allMonth).text,
     },
+    subTitle: "",
     number: leftMonth,
     accessUnit: getNumberCanvas(_iconTheme, leftMonth),
   });
 
   const { spentDayThisYear, leftDayThisYear, allDayThisYear } = getDaysLeftThisYear();
   lifeProgresses.push({
-    section: SectionTitle.TIME_LEFT,
+    section: SectionTitle.COUNTDOWN_DATE,
     icon: leftDayThisYear < 182 ? "🎇" : "🎆",
     title: `${leftDayThisYear} days left in the year`,
     titleCanvas: {
       canvas: getLiftProgressCanvas(spentDayThisYear, leftDayThisYear, allDayThisYear).canvas,
       text: getLiftProgressCanvas(spentDayThisYear, leftDayThisYear, allDayThisYear).text,
     },
+    subTitle: "",
     number: leftDayThisYear,
     accessUnit: getNumberCanvas(_iconTheme, leftDayThisYear),
+  });
+
+  const now = new Date();
+
+  //countdown date
+  countdownDates.forEach((value) => {
+    let _title;
+    let days;
+    if (now.getTime() < value.date) {
+      days = Math.floor((value.date - now.getTime()) / (1000 * 60 * 60 * 24));
+      _title = `${days} days left until ${value.title}`;
+    } else {
+      days = Math.floor((now.getTime() - value.date) / (1000 * 60 * 60 * 24));
+      _title = `${days} days passed since ${value.title}`;
+    }
+    lifeProgresses.push({
+      section: SectionTitle.COUNTDOWN_DATE,
+      icon: value.icon,
+      title: _title,
+      titleCanvas: {
+        canvas: new Date(value.date).toLocaleDateString(),
+        text: "",
+      },
+      subTitle: value.description,
+      number: leftDayThisYear,
+      accessUnit: getNumberCanvas(_iconTheme, days),
+    });
   });
 
   if (isBirthDay()) {

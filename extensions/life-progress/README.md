@@ -1,16 +1,18 @@
 ## Life Progress
 
-- **Life Progress**: View life progress. See how much time is left.
+- **Life Progress**: View life progress and custom Countdown Date. See how much time is left.
 - **Find Cake**: If it's your birthday, 🎉happy birthday to you🎉! Go find the hidden cake.
 
 **Preference:**
 
 - Show Quote of the Day: Show quote of the day
-- Time Left First: Show Time Left first
+- Show Progress Bar: Show life progress bar
+- Countdown Date First: Show Countdown Date first
 - Birthday Every Day: Birthday every day!!! If you want to **Find Cake** right away, check it.
 - Birthday: Your birthday
 - Week Start: Weekly start date
 - Icon Theme: Date icon style theme
+- Progress Bar Symbol: Symbols for the composition of the progress bar
 
 Want more fun extension? Try **Hidden Icons**. [©koinzhang](https://www.raycast.com/koinzhang)
 

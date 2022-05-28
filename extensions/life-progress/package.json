@@ -2,13 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "life-progress",
   "title": "Life Progress",
-  "description": "View life progress. See how much time is left.",
+  "description": "View life progress and custom Countdown Date. See how much time is left.",
   "icon": "life-progress-icon.png",
   "author": "koinzhang",
   "categories": [
     "Fun"
   ],
   "license": "MIT",
+  "commands": [
+    {
+      "name": "life-progress",
+      "title": "Life Progress",
+      "description": "View life progress and custom Countdown Date. See how much time is left.",
+      "mode": "view"
+    }
+  ],
   "preferences": [
     {
       "name": "showDailyWord",
@@ -28,11 +36,11 @@
       "default": true
     },
     {
-      "name": "timeLeftFirst",
+      "name": "countdownDateFirst",
       "type": "checkbox",
       "required": false,
-      "label": "Time Left First",
-      "description": "Show Time Left first.",
+      "label": "Countdown Date First",
+      "description": "Show Countdown Date first.",
       "default": true
     },
     {
@@ -169,14 +177,6 @@
       ],
       "required": false,
       "default": "■"
-    }
-  ],
-  "commands": [
-    {
-      "name": "life-progress",
-      "title": "Life Progress",
-      "description": "View life progress. See how much time is left.",
-      "mode": "view"
     }
   ],
   "dependencies": {
