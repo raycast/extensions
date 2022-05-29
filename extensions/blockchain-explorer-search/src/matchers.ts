@@ -100,8 +100,8 @@ export class TokenMatch extends AddressMatch {
       const foundToken = this.tokenList.find(({ address }) => address === this.search);
       if (foundToken) {
         this.token = foundToken;
+        return true;
       }
-      return true;
     }
     return false;
   }
