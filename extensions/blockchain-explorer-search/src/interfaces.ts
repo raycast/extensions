@@ -4,8 +4,8 @@ export interface Explorer {
   baseUrl: string;
   chainId: number;
   currency: string;
+  iconUri: string;
   testNet?: boolean;
-  assetUri?: string;
   imageUrl?: string;
 }
 export interface Token {

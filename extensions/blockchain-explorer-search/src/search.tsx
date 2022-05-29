@@ -96,9 +96,10 @@ export default function Command() {
         filteredItems
       ) : (
         <List.EmptyView
+          icon={{ source: selectedExplorer.iconUri }}
           description={`Type an Address, Transaction hash,${
             selectedExplorer.chainId === 1 ? " ENS name," : ""
-          } or block number to get started.`}
+          } or block number.`}
           title={`Searching on the ${selectedExplorer.chainName} network.`}
         />
       )}
