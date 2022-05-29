@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Detail, getPreferenceValues, openCommandPre
 export const NoApiKey = () => {
   const { token, steamid } = getPreferenceValues();
   const markdown =
-    "To access your games, you need to set your API key and Steam ID in the preferences.\n\nGrab an API key from Steam here: \n\n[https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey)\n\nTo find your steam ID, visit this page and look toward the top just under your user name\n\n[https://store.steampowered.com/account/](https://store.steampowered.com/account/)\n\n\nPress `Enter` to continue";
+    "To access your games, you need to set your API key and Steam ID in the preferences.\n\nGrab an API key from Steam here: \n\n[https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey)\n\nTo find your steam ID, visit this page and look toward the top just under your user name.\n\n[https://store.steampowered.com/account/](https://store.steampowered.com/account/)\n\n\nPress `Enter` to continue";
   return (
     <Detail
       markdown={markdown}
