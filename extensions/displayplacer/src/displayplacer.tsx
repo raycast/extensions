@@ -1,41 +1,22 @@
-import {
-  ActionPanel,
-  Color,
-  Form,
-  Icon,
-  List,
-  randomId,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-  Action,
-  LocalStorage,
-} from "@raycast/api";
+import { ActionPanel, Color, Icon, List, showHUD, showToast, Toast, useNavigation, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ClearLocalStorage from "./components/clearLocalStorage";
-import Help from "./components/help";
+import { Favorite } from "./components/favoritesForm";
 import NotInstalled from "./components/not-installed";
+import Config from "./config";
 import { listScreenInfo, switchSettings } from "./utils/displayplacer";
+import { useFavorites } from "./utils/use-favorites";
 
 export default function DisplayPlacer() {
-  const { push, pop } = useNavigation();
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { push } = useNavigation();
+  const { favorites, actions, isLoading: favsLoading } = useFavorites();
+  const [loading, setIsLoading] = useState(true);
   const [currentCommand, setCurrentCommand] = useState<DisplayPlacerList["currentCommand"]>(null);
   const [isError, setIsError] = useState(false);
 
-  async function init() {
-    const myFavs = await LocalStorage.getItem("favorites");
-    if (myFavs) {
-      setFavorites(JSON.parse(myFavs.toString()));
-    } else {
-      setFavorites([]);
-      await LocalStorage.setItem("favorites", "[]");
-    }
-
+  function init() {
     try {
-      const result = await listScreenInfo();
+      const result = listScreenInfo();
 
       if (!result.currentCommand) {
         console.error("problem");
@@ -55,100 +36,14 @@ export default function DisplayPlacer() {
     init();
   }, []);
 
-  async function getCommandForCurrentSettings() {
-    const result = await listScreenInfo();
-
-    if (!result.currentCommand) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not get current display settings",
-      });
-      return null;
-    }
-
-    return result.currentCommand;
-  }
+  const isLoading = loading || favsLoading;
 
   function newPreset() {
-    push(
-      <Form
-        navigationTitle="New DisplayPlacer Preset"
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="New Preset"
-              icon={Icon.Plus}
-              onSubmit={async (values: { name: string; subtitle: string }) => {
-                const command = await getCommandForCurrentSettings();
-                if (!command) return;
-
-                favorites.push({
-                  id: randomId(),
-                  name: values.name,
-                  subtitle: values.subtitle ?? "",
-                  command,
-                });
-                setFavorites(favorites);
-                LocalStorage.setItem("favorites", JSON.stringify(favorites));
-                init().then(pop);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField title="Preset Name" key="name" id="name" />
-        <Form.TextField
-          title="Subtitle"
-          placeholder="Short description shown next to title"
-          defaultValue=""
-          key="subtitle"
-          id="subtitle"
-        />
-      </Form>
-    );
+    push(<Favorite />);
   }
 
   function editPreset(fav: Favorite) {
-    push(
-      <Form
-        navigationTitle="Edit DisplayPlacer Preset"
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Save Changes"
-              icon={Icon.Document}
-              onSubmit={async (values: { name: string; subtitle: string; overwrite: boolean }) => {
-                const command = await getCommandForCurrentSettings();
-                if (!command) return;
-
-                const i = favorites.findIndex((f) => f.id === fav.id);
-
-                favorites[i] = {
-                  ...favorites[i],
-                  name: values.name,
-                  subtitle: values.subtitle ?? "",
-                  command: values.overwrite ? command : favorites[i].command,
-                };
-
-                setFavorites(favorites);
-                LocalStorage.setItem("favorites", JSON.stringify(favorites));
-                init().then(pop);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField title="Preset Name" key="name" id="name" defaultValue={fav.name} />
-        <Form.TextField
-          title="Subtitle"
-          placeholder="Short description shown next to title"
-          defaultValue={fav.subtitle}
-          key="subtitle"
-          id="subtitle"
-        />
-        <Form.Checkbox label="Overwrite saved display settings with current display settings" id="overwrite" />
-      </Form>
-    );
+    push(<Favorite fav={fav} />);
   }
 
   const NewPresetAction = (
@@ -182,7 +77,6 @@ export default function DisplayPlacer() {
                   title={fav.name}
                   key={i}
                   subtitle={fav.subtitle}
-                  accessoryTitle={`# ${(i + 1).toString()}`}
                   icon={currentCommand === fav.command ? { source: Icon.Dot, tintColor: Color.Blue } : ""}
                   actions={
                     <ActionPanel>
@@ -221,19 +115,16 @@ export default function DisplayPlacer() {
                         title="Delete Display Preset"
                         icon={Icon.Trash}
                         shortcut={{ key: "delete", modifiers: ["cmd"] }}
-                        onAction={() => {
-                          const i = favorites.findIndex((f) => f.id === fav.id);
-
-                          favorites.splice(i, 1);
-
-                          setFavorites(favorites);
-                          LocalStorage.setItem("favorites", JSON.stringify(favorites));
-                          init();
-                        }}
+                        onAction={() => actions.removeAt(i)}
                       />
                       {NewPresetAction}
                     </ActionPanel>
                   }
+                  accessories={[
+                    {
+                      text: `# ${(i + 1).toString()}`,
+                    },
+                  ]}
                 />
               );
             })}
@@ -261,7 +152,7 @@ export default function DisplayPlacer() {
               icon={Icon.QuestionMark}
               actions={
                 <ActionPanel>
-                  <Action.Push icon={Icon.QuestionMark} title="Open Readme" target={<Help />} />
+                  <Action.Push icon={Icon.QuestionMark} title="Open Readme" target={<Config />} />
                 </ActionPanel>
               }
             />

@@ -1,5 +1,5 @@
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
-import { ActionPanel, Navigation, showToast, ToastStyle } from "@raycast/api";
+import { Action, Navigation, showToast, Toast } from "@raycast/api";
 import { XcodeAddSwiftPackageSelectXcodeProject } from "./xcode-add-swift-package-select-xcode-project.user-interface";
 import { XcodeProject } from "../../models/project/xcode-project.model";
 
@@ -14,7 +14,7 @@ export function AddSwiftPackageAction(props: {
   onSelect: (xcodeProject: XcodeProject) => void;
 }): JSX.Element {
   return (
-    <ActionPanel.Item
+    <Action
       key="add-swift-package-action"
       title="Add Swift Package"
       onAction={() => {
@@ -35,8 +35,11 @@ export function AddSwiftPackageAction(props: {
           // Push select XcodeProject component
           props.navigation.push(selectXcodeProjectComponent);
         } else {
-          // Otherwise show failure Toast
-          showToast(ToastStyle.Failure, "Please enter a valid url to a Swift Package");
+          // Otherwise, show failure Toast
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Please enter a valid url to a Swift Package",
+          });
         }
       }}
     />

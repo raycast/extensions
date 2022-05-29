@@ -2,6 +2,7 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   Detail,
+  getPreferenceValues,
   Icon,
   List,
   OpenInBrowserAction,
@@ -9,9 +10,11 @@ import {
   ToastStyle,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import urljoin from "url-join";
+
+const { locale } = getPreferenceValues<{ locale: string }>();
 
 export default function MDNSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
@@ -100,7 +103,7 @@ type Result = {
 
 async function searchMDNByQuery(query: string): Promise<Result[]> {
   try {
-    const response = await axios.get<MDNResponse>("https://developer.mozilla.org/api/v1/search/en-US", {
+    const response = await axios.get<MDNResponse>(`https://developer.mozilla.org/api/v1/search/${locale}`, {
       params: {
         q: query,
         sort: "best",

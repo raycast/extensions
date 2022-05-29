@@ -1,7 +1,7 @@
 import { XcodeRelease } from "../models/release/xcode-release.model";
 import { XcodeReleaseSDK } from "../models/release/xcode-release-sdk.model";
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import fetch from "node-fetch";
+import { LocalStorage } from "@raycast/api";
 
 /**
  * XcodeReleaseService
@@ -17,7 +17,7 @@ export class XcodeReleaseService {
    */
   async cachedXcodeReleases(): Promise<XcodeRelease[] | undefined> {
     // Retrieve XcodeReleases JSON from LocalStorage
-    const xcodeReleasesJSON = await getLocalStorageItem<string>(this.xcodeReleasesJSONLocalStorageKey);
+    const xcodeReleasesJSON = await LocalStorage.getItem<string>(this.xcodeReleasesJSONLocalStorageKey);
     // Check if XcodeReleases JSON is not available
     if (!xcodeReleasesJSON) {
       // Return undefined
@@ -33,7 +33,7 @@ export class XcodeReleaseService {
    */
   private async cacheXcodeReleases(xcodeReleases: XcodeRelease[]) {
     // Store XcodeReleases JSON in LocalStorage
-    return setLocalStorageItem(this.xcodeReleasesJSONLocalStorageKey, JSON.stringify(xcodeReleases));
+    return LocalStorage.setItem(this.xcodeReleasesJSONLocalStorageKey, JSON.stringify(xcodeReleases));
   }
 
   /**

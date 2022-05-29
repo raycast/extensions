@@ -35,6 +35,10 @@ const blockNamesToFilter = [
   "Mathematical Alphanumeric Symbols",
 ];
 
+// Specify here any additional characters and blocks to include in the dataset.
+const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
+const additionalBlockNames = ["Miscellaneous Technical", "Private Use Area"];
+
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
 const allBlocks = getBlocks();
 const allCharacters = getCharacters();
@@ -59,20 +63,46 @@ function getCharactersByCodeRange(startCode: number, endCode: number) {
   return characters;
 }
 
+// Some symbols don't have a proper name set in the unicode database.
+const unicodeToNameMap: Record<number, string> = { 63743: "APPLE LOGO" };
+const mapCodeToName = (char: Character): Character => {
+  return {
+    ...char,
+    name: unicodeToNameMap[char.code] || char.name,
+  };
+};
+
+function mapCharacterToDatasetItem(char: Character) {
+  return { value: String.fromCodePoint(char.code), code: char.code, name: char.name };
+}
+
+function sanitizeCharacters(characters: Character[]) {
+  return characters
+    .filter(Boolean) // Include only valid characters
+    .map(mapCodeToName)
+    .map(mapCharacterToDatasetItem)
+    .filter((char) => char.name !== "<control>"); // Exclude invisible control characters
+}
+
 // Run the dataset generation.
 (function generateDataset() {
   const filteredBlocks = allBlocks.filter((block) => blockNamesToFilter.includes(block.blockName));
+  const additionalBlocks = allBlocks.filter((block) => additionalBlockNames.includes(block.blockName));
 
   const characters = filteredBlocks.flatMap((block) => {
-    return getCharactersByCodeRange(block.startCode, block.endCode)
-      .filter(Boolean) // Include only valid characters
-      .filter((char) => char.name !== "<control>") // Exclude invisible control characters
-      .map((char) => ({ value: String.fromCodePoint(char.code), code: char.code, name: char.name }));
+    return sanitizeCharacters(getCharactersByCodeRange(block.startCode, block.endCode));
   });
 
-  const dataset = { blocks: filteredBlocks, characters };
+  const additionalCharacters = sanitizeCharacters(
+    allCharacters.filter((char) => additionalCharacterValues.includes(String.fromCodePoint(char.code)))
+  );
 
-  fs.writeFileSync(datasetOutputPath, JSON.stringify(dataset));
+  const dataset = {
+    blocks: [...filteredBlocks, ...additionalBlocks],
+    characters: [...characters, ...additionalCharacters],
+  };
+
+  fs.writeFileSync(datasetOutputPath, JSON.stringify(dataset, null, 2));
 
   console.log(`✅ Dataset with ${dataset.characters.length} unicode characters generated in ${datasetOutputPath}`);
 })();

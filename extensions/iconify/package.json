@@ -22,10 +22,17 @@
       "subtitle": "Iconify",
       "description": "View available icons",
       "mode": "view"
+    },
+    {
+      "name": "search-icons",
+      "title": "Search All Icons",
+      "subtitle": "Iconify",
+      "description": "Search through all available icons",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
+    "@raycast/api": "^1.32.1",
     "axios": "^0.26.1",
     "js-base64": "^3.7.2"
   },

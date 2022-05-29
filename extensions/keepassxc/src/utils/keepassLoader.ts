@@ -9,6 +9,22 @@ interface Preference {
   dbPassword: string;
 }
 
+const getKeepassXCVersion = () =>
+  new Promise<number>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, ["--version"]);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    const chuncks: Buffer[] = [];
+    cli.stdout.on("data", (chunck) => {
+      chuncks.push(chunck);
+    });
+    cli.stdout.on("end", () => {
+      const version = parseFloat(chuncks.join("").toString().split(".").slice(0, 2).join("."));
+      console.log("current keepassxc version:", version);
+      // remove \n in the end
+      resolve(version);
+    });
+  });
+
 const preferences: Preference = getPreferenceValues();
 // keepass database file path
 const database = preferences.database;
@@ -16,6 +32,8 @@ const database = preferences.database;
 const dbPassword = preferences.dbPassword;
 // keepass-cli executable path
 const keepassxcCli = path.join(preferences.keepassxcRootPath, "Contents/MacOS/keepassxc-cli");
+// search entry command, since version 2.7 command 'locate' has been renamed to 'search'
+const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 ? "search" : "locate");
 
 const entryFilter = (entryStr: string) => {
   return entryStr
@@ -29,21 +47,25 @@ const entryFilter = (entryStr: string) => {
  * @returns all entries in keepass database
  */
 const loadEntries = () =>
-  new Promise<string[]>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["locate", "-q", `${database}`, "/"]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    // finish when all chunck has been collected
-    cli.stdout.on("end", () => {
-      resolve(entryFilter(chuncks.join().toString()));
-    });
-  });
+  getSearchEntryCommand().then(
+    (cmd) =>
+      new Promise<string[]>((resolve, reject) => {
+        const search_keywrod = cmd === "search" ? "" : "/";
+        const cli = spawn(`${keepassxcCli}`, [cmd, "-q", `${database}`, search_keywrod]);
+        cli.stdin.write(`${dbPassword}\n`);
+        cli.stdin.end();
+        cli.on("error", reject);
+        cli.stderr.on("data", cliStdOnErr(reject));
+        const chuncks: Buffer[] = [];
+        cli.stdout.on("data", (chunck) => {
+          chuncks.push(chunck);
+        });
+        // finish when all chunck has been collected
+        cli.stdout.on("end", () => {
+          resolve(entryFilter(chuncks.join("").toString()));
+        });
+      })
+  );
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
   if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
@@ -64,7 +86,7 @@ const getPassword = (entry: string) =>
       chuncks.push(chunck);
     });
     cli.stdout.on("end", () => {
-      const password = chuncks.join().toString();
+      const password = chuncks.join("").toString();
       // remove \n in the end
       resolve(password.slice(0, password.length - 1));
     });
@@ -82,13 +104,14 @@ const getUsername = (entry: string) =>
       chuncks.push(chunck);
     });
     cli.stdout.on("end", () => {
-      const username = chuncks.join().toString();
+      const username = chuncks.join("").toString();
       // remove \n in the end
       resolve(username.slice(0, username.length - 1));
     });
   });
 
 const copyAndPastePassword = async (entry: string) => {
+  console.log("copy and password of entry:", entry);
   return copyPassword(entry).then((password) => {
     return pasteText(password).then(() => password);
   });

@@ -10,6 +10,7 @@ interface Item {
 
 export interface User extends Item {
   username: string;
+  conversationId: string | undefined;
 }
 
 export type Channel = Item;
@@ -19,6 +20,16 @@ export type PresenceStatus = "online" | "offline" | "forced-offline";
 export interface SnoozeStatus {
   nextDndEnd: Date | undefined;
   snoozeEnd: Date | undefined;
+}
+
+export interface Message {
+  receivedAt: Date;
+  message: string;
+  senderId: string;
+}
+export interface UnreadChannelInfo {
+  conversationId: string;
+  messageHistory: Message[];
 }
 
 const sortNames = (a: string, b: string) => {
@@ -35,7 +46,7 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
   await showToast({
     style: Toast.Style.Failure,
     title: "Slack API Error",
-    message: "Your Slack token might be invalid",
+    message: "Try again after checking your Slack token and permission scopes.",
   });
 
   if (props?.exitExtension) {
@@ -46,6 +57,11 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
     const userList = await slackWebClient.users.list();
+    const conversations = await slackWebClient.conversations.list({
+      exclude_archived: true,
+      types: "im",
+      limit: 1000,
+    });
 
     const users =
       userList.members
@@ -61,12 +77,15 @@ export class SlackClient {
             (x): x is string => !!x?.trim()
           );
 
+          const conversation = conversations.channels?.find((c) => c.user === id);
+
           return {
             id,
             name: displayName,
             icon: profile?.image_24,
             teamId: team_id,
             username,
+            conversationId: conversation?.id,
           };
         })
         .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))
@@ -160,5 +179,57 @@ export class SlackClient {
 
   public static async endSnooze(): Promise<void> {
     await slackWebClient.dnd.endSnooze();
+  }
+
+  public static async getUnreadConversations(conversationIds: string[]): Promise<UnreadChannelInfo[]> {
+    if (conversationIds.length > 30) {
+      throw new Error("Too many conversations");
+    }
+
+    if (conversationIds.length === 0) {
+      return [];
+    }
+
+    const conversationInfos = await Promise.all(
+      conversationIds.map((id) => slackWebClient.conversations.info({ channel: id }))
+    );
+
+    const conversationHistories = await Promise.all(
+      conversationInfos.map((conversationInfo) =>
+        slackWebClient.conversations.history({
+          channel: conversationInfo.channel!.id!,
+          oldest:
+            parseFloat(conversationInfo.channel!.last_read || "0") !== 0
+              ? conversationInfo.channel!.last_read
+              : undefined,
+        })
+      )
+    );
+
+    const unreadConversations = conversationHistories
+      .map(({ messages }, index) => ({
+        conversationId: conversationInfos[index].channel!.id!,
+        messageHistory: messages
+          ?.map((message) => ({
+            receivedAt: message.ts ? new Date(parseFloat(message.ts) * 1000) : undefined,
+            message:
+              message.text && message.text !== "This content can't be displayed."
+                ? message.text
+                : message.blocks?.map((block) => block.text?.text).join("\n\n\n\n\n\n\n\n"),
+            senderId: message.user ?? message.bot_id,
+          }))
+          .filter((x): x is Message => !!x.receivedAt && !!x.message && !!x.senderId),
+      }))
+      .filter((channel): channel is UnreadChannelInfo => !!channel.messageHistory && channel.messageHistory.length > 0)
+      .sort(
+        (a, b) =>
+          new Date(b.messageHistory[0].receivedAt).getTime() - new Date(a.messageHistory[0].receivedAt).getTime()
+      );
+
+    return unreadConversations;
+  }
+
+  public static async markAsRead(conversationId: string): Promise<void> {
+    await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
   }
 }

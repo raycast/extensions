@@ -5,6 +5,9 @@
   "icon": "icon.png",
   "author": "Kinbaum",
   "license": "MIT",
+  "contributors": [
+    "emanguy"
+  ],
   "commands": [
     {
       "name": "issues-create",
@@ -66,6 +69,15 @@
       "title": "Token",
       "description": "Your GitHub API token",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "unsafeHttps",
+      "type": "checkbox",
+      "required": false,
+      "title": "Unsafe HTTPS",
+      "description": "Activate unsafe HTTPS mode for self-signed certificates",
+      "default": false,
+      "label": "Enable"
     }
   ],
   "dependencies": {

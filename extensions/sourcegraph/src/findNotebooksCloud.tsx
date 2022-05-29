@@ -1,6 +1,6 @@
-import FindNotebooksCommand from "./components/findNotebooks";
-import { sourcegraphCloud } from "./sourcegraph";
+import CloudCommand from "./components/CloudCommand";
+import FindNotebooksCommand from "./components/FindNotebooksCommand";
 
-export default function SearchCloud() {
-  return FindNotebooksCommand(sourcegraphCloud());
+export default function FindNotebooksCloud() {
+  return <CloudCommand Command={FindNotebooksCommand} />;
 }

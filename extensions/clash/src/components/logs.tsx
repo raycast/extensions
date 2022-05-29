@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, Icon, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { GetLogs } from "./client/ws";
 import { LogLevelT } from "./types";
@@ -25,7 +25,7 @@ export default function Logs(): JSX.Element {
             accessoryTitle={`LogLevel(${level})`}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   title="Swith Level"
                   onAction={() => {
                     setLevel((old) => {
@@ -46,7 +46,7 @@ export default function Logs(): JSX.Element {
               accessoryTitle={log.type}
               actions={
                 <ActionPanel>
-                  <PushAction title="Show Detail" target={<Detail markdown={`\`\`\`\n${log.payload}\n\`\`\``} />} />
+                  <Action.Push title="Show Detail" target={<Detail markdown={`\`\`\`\n${log.payload}\n\`\`\``} />} />
                 </ActionPanel>
               }
             />

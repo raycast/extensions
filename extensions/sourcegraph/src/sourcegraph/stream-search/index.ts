@@ -1,12 +1,7 @@
-import EventSource from "@bobheadxi/node-eventsource-http2";
-import { AbortSignal } from "node-fetch";
-import { remark } from "remark";
-import strip from "strip-markdown";
+import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
-import { Sourcegraph } from "..";
-
-const stripMarkdown = remark().use(strip);
+import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
+import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
   url: string;
@@ -16,7 +11,9 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  query?: string;
+  // query describes an entire query to replace the existing query with, or a partial
+  // addition.
+  query?: { addition: string } | string;
 }
 
 export interface Alert {
@@ -36,42 +33,43 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
+export type PatternType = "literal" | "regexp" | "structural";
+
 export async function performSearch(
   abort: AbortSignal,
   src: Sourcegraph,
   query: string,
+  patternType: PatternType,
   handlers: SearchHandlers
 ): Promise<void> {
   if (query.length === 0) {
     return;
   }
 
-  const parameters = [
+  const link = new LinkBuilder("search");
+
+  const parameters = new URLSearchParams([
     ["q", query],
-    ["v", "V2"],
-    ["t", "literal"],
-    // ["dl", "0"],
-    // ['dk', (decorationKinds || ['html']).join('|')],
-    // ['dc', (decorationContextLines || '1').toString()],
+    ["v", LATEST_VERSION],
+    ["t", patternType],
     ["display", "1500"],
-  ];
-  const parameterEncoded = parameters.map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
-  const requestURL = `${src.instance}/.api/search/stream?${parameterEncoded}`;
+  ]);
+  const requestURL = link.new(src, "/.api/search/stream", parameters);
   const stream = src.token
     ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
     : new EventSource(requestURL);
 
-  return new Promise((resolve, reject) => {
-    // signal cancelling
-    abort.addEventListener("abort", () => {
+  return new Promise((resolve) => {
+    /**
+     * All events that indicate the end of the request should use this to resolve.
+     */
+    const resolveStream = () => {
       stream.close();
       resolve();
-    });
+    };
 
-    // errors from stream
-    stream.addEventListener("error", (error) => {
-      reject(`${JSON.stringify(error)}`);
-    });
+    // signal cancelling
+    abort.addEventListener("abort", resolveStream);
 
     // matches from the Sourcegraph API
     stream.addEventListener("matches", (message) => {
@@ -82,15 +80,10 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const matchURL = `${src.instance}${getMatchUrl(match)}`;
+          const matchURL = link.new(src, getMatchUrl(match));
           // Do some pre-processing of results, since some of the API outputs are a bit
           // confusing, to make it easier later on.
           switch (match.type) {
-            case "commit":
-              // Commit stuff comes already markdown-formatted?? so strip formatting
-              match.label = stripMarkdown.processSync(match.label)?.value.toString().split(`› `).pop() || "";
-              match.detail = stripMarkdown.processSync(match.detail)?.value.toString();
-              break;
             case "content":
               // Line number appears 0-indexed, for ease of use increment it so links
               // aren't off by 1.
@@ -100,10 +93,8 @@ export async function performSearch(
               break;
             case "symbol":
               match.symbols.forEach((s) => {
-                // Trim out the path that we already have in matchURL so that we can just
-                // append it, similar to other match types where we append the line number
-                // of the match.
-                s.url = s.url.split("#").pop() || "";
+                // Turn this into a full URL
+                s.url = link.new(src, s.url);
               });
           }
           return { url: matchURL, match };
@@ -125,11 +116,23 @@ export async function performSearch(
             return {
               title: `Filter for '${f.label}'`,
               description: `${f.count} matches`,
-              query: f.value,
+              query: { addition: f.value },
             };
           }),
         false
       );
+    });
+
+    // errors from stream
+    stream.addEventListener("error", (message) => {
+      const event: SearchEvent = {
+        type: "error",
+        data: message.data ? JSON.parse(message.data) : {},
+      };
+      handlers.onAlert({
+        title: event.data.name ? event.data.name : event.data.message,
+        description: event.data.name ? event.data.message : undefined,
+      });
     });
 
     // alerts from the Sourcegraph API
@@ -184,8 +187,6 @@ export async function performSearch(
     });
 
     // done indicator
-    stream.addEventListener("done", () => {
-      resolve();
-    });
+    stream.addEventListener("done", resolveStream);
   });
 }

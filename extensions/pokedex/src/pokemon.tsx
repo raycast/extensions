@@ -53,7 +53,9 @@ export default function SearchPokemon() {
           <List.Item
             key="surprise"
             title="Surprise Me!"
-            accessoryTitle={showPreview ? undefined : "Random Pokémon selector"}
+            accessories={
+              showPreview ? undefined : [{ text: "Random Pokémon selector" }]
+            }
             icon="icon_sort.svg"
             actions={
               <ActionPanel>
@@ -98,6 +100,9 @@ export default function SearchPokemon() {
             {pokemonList.map((pokemon) => {
               const props: Partial<List.Item.Props> = showPreview
                 ? {
+                    accessories: pokemon.types.map((type) => ({
+                      icon: `types/${type.toLowerCase()}.svg`,
+                    })),
                     detail: (
                       <List.Item.Detail
                         markdown={json2md([
@@ -116,8 +121,10 @@ export default function SearchPokemon() {
                     ),
                   }
                 : {
-                    accessoryTitle: pokemon.types.join(", "),
-                    accessoryIcon: `types/${pokemon.types[0].toLowerCase()}.svg`,
+                    accessories: pokemon.types.map((type) => ({
+                      text: type,
+                      icon: `types/${type.toLowerCase()}.svg`,
+                    })),
                     icon: {
                       source: pokemon.artwork,
                       fallback: "icon.png",

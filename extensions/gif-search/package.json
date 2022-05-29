@@ -13,41 +13,9 @@
   ],
   "commands": [
     {
-      "name": "giphy",
-      "title": "Search Giphy",
-      "description": "Search for animated gifs on Giphy.com",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "giphy-apiKey",
-          "type": "password",
-          "required": false,
-          "title": "Giphy API Key",
-          "placeholder": "Giphy API Key",
-          "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
-        }
-      ]
-    },
-    {
-      "name": "tenor",
-      "title": "Search Tenor",
-      "description": "Search for animated gifs on Tenor.com",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "tenor-apiKey",
-          "type": "password",
-          "required": false,
-          "title": "Tenor API Key",
-          "placeholder": "Tenor API Key",
-          "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
-        }
-      ]
-    },
-    {
-      "name": "finergifsclub",
-      "title": "Search The Finer Gifs Club",
-      "description": "Search quotes from The Office on TheFinerGifs.club",
+      "name": "search",
+      "title": "Search for GIFs",
+      "description": "Search for GIFs across multiple services...",
       "mode": "view"
     }
   ],
@@ -56,8 +24,17 @@
       "name": "showGifPreview",
       "type": "checkbox",
       "required": false,
+      "default": true,
       "label": "Show GIF Preview",
       "description": "Shows a large preview of the selected gif in search results."
+    },
+    {
+      "name": "maxResults",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "title": "Max Results",
+      "description": "Max number of results to return for a search"
     },
     {
       "name": "defaultAction",
@@ -65,34 +42,58 @@
       "required": false,
       "title": "Default Action",
       "description": "Customize what happens when hitting ENTER on a Gif",
+      "default": "copyFile",
       "data": [
         {
-          "title": "Open in Browser",
-          "value": "openInBrowser"
+          "title": "Copy GIF",
+          "value": "copyFile"
         },
         {
-          "title": "Copy GIF URL to Clipboard",
+          "title": "Copy GIF Link",
           "value": "copyGifUrl"
         },
         {
-          "title": "Copy Page URL to Clipboard",
-          "value": "copyPageUrl"
+          "title": "Copy GIF Markdown",
+          "value": "copyGifMarkdown"
         },
         {
-          "title": "Copy File to Clipboard",
-          "value": "copyFile"
+          "title": "Add or Remove from Favorites",
+          "value": "toggleFav"
         },
         {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Copy Page Link",
+          "value": "copyPageUrl"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "openUrlInBrowser"
         }
       ]
+    },
+    {
+      "name": "giphy-apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Giphy API Key",
+      "placeholder": "Giphy API Key (optional)",
+      "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
+    },
+    {
+      "name": "tenor-apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Tenor API Key",
+      "placeholder": "Tenor API Key (optional)",
+      "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
     }
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "date-fns": "^2.28.0",
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.35.0",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.28.0",
     "node-fetch": "^3.2.1",

@@ -1,5 +1,9 @@
 # Spotify Controls Changelog
 
+## [New commands] - 2022-05-02
+
+Add Decrease volume and Increase volume commands.
+
 ## [Fix] - 2022-02-07
 
 Fixed shuffle and repeat commands on Spotify Controls.

@@ -40,7 +40,7 @@ Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parande
 
 ## Installing
 
-Make sure RayCast is installed and go to https://github.com/Ali-Parandeh/raycast-clickup-extension
+Make sure Raycast is installed and go to https://github.com/Ali-Parandeh/raycast-clickup-extension
 
 ## Running locally
 

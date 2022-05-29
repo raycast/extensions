@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
@@ -6,7 +6,7 @@ import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
 import { hashRecord } from "../utils";
 import { EpicListItem } from "./epics";
 
-export function MyEpicList(props: { scope: EpicScope; state: EpicState }) {
+export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Epic[]>(
     hashRecord(props, "myepiclist"),
@@ -21,17 +21,13 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }) {
     {
       deps: [searchText],
       onFilter: async (epics) => {
-        return await searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
+        return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
     }
   );
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search epics", error);
-  }
-
-  if (!data) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showToast(Toast.Style.Failure, "Cannot search epics", error);
   }
 
   return (

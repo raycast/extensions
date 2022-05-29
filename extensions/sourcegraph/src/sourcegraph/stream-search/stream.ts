@@ -1,6 +1,4 @@
-// Copied from https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12&subtree=true
-
-// https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/graphqlbackend/schema.graphql?L3323&subtree=true
+// https://sourcegraph.com/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+file:%5Ecmd/frontend/graphqlbackend/schema%5C.graphql+SymbolKind&patternType=literal
 export type SymbolKind = string;
 
 // https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/common/src/errors/types.ts?L3&subtree=true
@@ -8,6 +6,13 @@ export interface ErrorLike {
   message: string;
   name?: string;
 }
+
+// Copied from https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12&subtree=true
+
+// The latest supported version of our search syntax. Users should never be able to determine the search version.
+// The version is set based on the release tag of the instance. Anything before 3.9.0 will not pass a version parameter,
+// and will therefore default to V1.
+export const LATEST_VERSION = "V2";
 
 export type SearchEvent =
   | { type: "matches"; data: SearchMatch[] }
@@ -98,10 +103,12 @@ type MarkdownText = string;
  */
 export interface CommitMatch {
   type: "commit";
-  label: MarkdownText;
   url: string;
-  detail: MarkdownText;
   repository: string;
+  oid: string;
+  message: string;
+  authorName: string;
+  authorDate: string;
   repoStars?: number;
   repoLastFetched?: string;
 
@@ -217,36 +224,6 @@ interface ProposedQuery {
 
 export type StreamingResultsState = "loading" | "error" | "complete";
 
-interface BaseAggregateResults {
-  state: StreamingResultsState;
-  results: SearchMatch[];
-  alert?: Alert;
-  filters: Filter[];
-  progress: Progress;
-}
-
-interface SuccessfulAggregateResults extends BaseAggregateResults {
-  state: "loading" | "complete";
-}
-
-interface ErrorAggregateResults extends BaseAggregateResults {
-  state: "error";
-  error: Error;
-}
-
-export type AggregateStreamingSearchResults = SuccessfulAggregateResults | ErrorAggregateResults;
-
-export const emptyAggregateResults: AggregateStreamingSearchResults = {
-  state: "loading",
-  results: [],
-  filters: [],
-  progress: {
-    durationMs: 0,
-    matchCount: 0,
-    skipped: [],
-  },
-};
-
 export function getRepositoryUrl(repository: string, branches?: string[]): string {
   const branch = branches?.[0];
   const revision = branch ? `@${branch}` : "";
@@ -284,6 +261,10 @@ export function getRepoMatchUrl(repoMatch: RepositoryMatch): string {
   return "/" + encodeURI(label);
 }
 
+export function getCommitMatchUrl(commitMatch: CommitMatch): string {
+  return "/" + encodeURI(commitMatch.repository) + "/-/commit/" + commitMatch.oid;
+}
+
 export function getMatchUrl(match: SearchMatch): string {
   switch (match.type) {
     case "path":
@@ -291,7 +272,7 @@ export function getMatchUrl(match: SearchMatch): string {
     case "symbol":
       return getFileMatchUrl(match);
     case "commit":
-      return match.url;
+      return getCommitMatchUrl(match);
     case "repo":
       return getRepoMatchUrl(match);
   }

@@ -1,4 +1,4 @@
-import { ActionPanelItem, Icon, List, showToast, ToastStyle } from '@raycast/api';
+import { Action, Icon, List, showToast, Toast } from '@raycast/api';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { SpaceListItem } from './components/space-list-item';
 import {
@@ -68,7 +68,7 @@ const SearchDocsView: React.FC = () => {
   const handleRemoveRecent = async (objToken: string) => {
     const result = await removeRecentDocument(objToken);
     if (result) {
-      showToast(ToastStyle.Success, 'Removed successfully');
+      showToast(Toast.Style.Success, 'Removed successfully');
       handleFetchRecentList();
     }
   };
@@ -107,7 +107,7 @@ const RecentDocumentsView: React.FC<{ list: RecentList; onRemove?: (objToken: st
             owner={ownerEntity}
             actions={
               <>
-                <ActionPanelItem
+                <Action
                   icon={Icon.Trash}
                   title="Remove from recent documents"
                   shortcut={{ key: 'x', modifiers: ['ctrl'] }}

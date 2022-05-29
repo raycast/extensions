@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Application, Detail, getApplications, List } from "@raycast/api";
+import { ActionPanel, Application, getApplications, List } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { dirname, resolve } from "path";
@@ -52,25 +52,40 @@ const globFromHistory = (history: History) => {
   );
 };
 
+const getReadHistoryFile = async (filePath: string) => {
+  try {
+    return JSON.parse(String(await readFile(filePath)));
+  } catch (e) {
+    return {};
+  }
+};
+
 const getHistory = async () => {
   const icons = await getIcons();
-  return await Promise.all(
-    (
-      await getFiles(HISTORY_GLOB)
-    ).map(async (file) => {
-      const history: History = JSON.parse(String(await readFile(file.path))).history.pop() as History;
-      const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
-      const tool = history.item.intellij_platform?.shell_script_name ?? false;
-      const activation = history.item.activation?.hosts[0] ?? false;
-      return {
-        title: history.item.name,
-        url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
-        tool: tool ? await which(tool, { path: bin }).catch(() => false) : false,
-        icon,
-        xmlFiles: await getRecent(globFromHistory(history), icon),
-      } as AppHistory;
-    })
-  );
+  return (
+    await Promise.all(
+      (
+        await getFiles(HISTORY_GLOB)
+      ).map(async (file) => {
+        const historyFile = await getReadHistoryFile(file.path);
+        if (!historyFile.history?.length) {
+          return null;
+        }
+
+        const history: History = historyFile.history.pop() as History;
+        const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
+        const tool = history.item.intellij_platform?.shell_script_name ?? false;
+        const activation = history.item.activation?.hosts[0] ?? false;
+        return {
+          title: history.item.name,
+          url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
+          tool: tool ? await which(tool, { path: bin }).catch(() => false) : false,
+          icon,
+          xmlFiles: await getRecent(globFromHistory(history), icon),
+        } as AppHistory;
+      })
+    )
+  ).filter((history) => history !== null) as AppHistory[];
 };
 
 const getIcons = async () => {
@@ -124,7 +139,7 @@ export default function ProjectList(): JSX.Element {
   }, []);
 
   if (loading) {
-    return <Detail isLoading />;
+    return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
   } else if (toolboxApp === undefined) {
     const message = [
       "# Unable to find JetBrains Toolbox",

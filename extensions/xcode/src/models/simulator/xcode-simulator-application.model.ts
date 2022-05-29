@@ -1,7 +1,7 @@
 import { XcodeSimulator } from "./xcode-simulator.model";
 
 /**
- * An Application that is installed in an Xcode Simulator
+ * An Application that is installed in a Xcode Simulator
  */
 export interface XcodeSimulatorApplication {
   /**

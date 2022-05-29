@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 
 const prefPath = getPreferenceValues<Preferences>().path;
-const PATH = prefPath !== "" ? prefPath : "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
+export const PATH = prefPath !== "" ? prefPath : "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
 
 export function listScreenInfo() {
   const stout = execSync(`zsh -l -c 'PATH=${PATH} displayplacer list'`);

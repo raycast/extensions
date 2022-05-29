@@ -22,6 +22,6 @@
 - Added Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
 - Fixed extension icon
 
-## [Pokédex] - 2022-02-18
+## [Initial Version] - 2022-02-18
 
-Initial Version
+- Added Pokédex

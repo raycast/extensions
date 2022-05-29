@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
 import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
@@ -25,13 +25,7 @@ function ClearCacheAction(): JSX.Element {
       // ignore
     }
   };
-  return (
-    <ActionPanel.Item
-      title="Clear CLI Cache"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-      onAction={handle}
-    />
-  );
+  return <Action title="Clear CLI Cache" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
 }
 
 function ISPListItem(props: { name: string | undefined; summary: JSX.Element }): JSX.Element {
@@ -40,14 +34,18 @@ function ISPListItem(props: { name: string | undefined; summary: JSX.Element }):
     <List.Item
       title="Internet Service Provider"
       icon={{ source: Icon.Globe, tintColor: Color.Green }}
-      accessoryTitle={`${n ? n : "?"}`}
       actions={
         <ActionPanel>
           {props.summary}
-          {n && <CopyToClipboardAction content={n} />}
+          {n && <Action.CopyToClipboard content={n} />}
           <ClearCacheAction />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${n ? n : "?"}`,
+        },
+      ]}
     />
   );
 }
@@ -58,13 +56,17 @@ function ServerListItem(props: { serverName: string | undefined; summary: JSX.El
     <List.Item
       title="Server"
       icon={{ source: "server.png" }}
-      accessoryTitle={`${sn ? sn : "?"}`}
       actions={
         <ActionPanel>
           {props.summary}
-          {sn && <CopyToClipboardAction content={sn} />}
+          {sn && <Action.CopyToClipboard content={sn} />}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${sn ? sn : "?"}`,
+        },
+      ]}
     />
   );
 }
@@ -80,13 +82,17 @@ function PingListItem(props: {
       title="Ping"
       subtitle={percentageToString(props.progress)}
       icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
-      accessoryTitle={`${pingToString(p)}`}
       actions={
         <ActionPanel>
           {props.summary}
-          {p && <CopyToClipboardAction content={pingToString(p)} />}
+          {p && <Action.CopyToClipboard content={pingToString(p)} />}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${pingToString(p)}`,
+        },
+      ]}
     />
   );
 }
@@ -102,13 +108,17 @@ function DownloadListItem(props: {
       title="Download"
       subtitle={percentageToString(props.progress)}
       icon={{ source: "download.png", tintColor: Color.Blue }}
-      accessoryTitle={`${speedToString(d)}`}
       actions={
         <ActionPanel>
           {props.summary}
-          {d && <CopyToClipboardAction content={speedToString(d)} />}
+          {d && <Action.CopyToClipboard content={speedToString(d)} />}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${speedToString(d)}`,
+        },
+      ]}
     />
   );
 }
@@ -124,13 +134,17 @@ function UploadListItem(props: {
       title="Upload"
       subtitle={percentageToString(props.progress)}
       icon={{ source: "download.png", tintColor: "#bf71ff" }}
-      accessoryTitle={`${speedToString(u)}`}
       actions={
         <ActionPanel>
           {props.summary}
-          {u && <CopyToClipboardAction content={speedToString(u)} />}
+          {u && <Action.CopyToClipboard content={speedToString(u)} />}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${speedToString(u)}`,
+        },
+      ]}
     />
   );
 }
@@ -145,13 +159,17 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
     `Upload: ${speedToString(r.upload)}`,
     `Result: ${r.url || "?"}`,
   ];
-  return <CopyToClipboardAction title="Copy Summary To Clipboard" content={parts.join("; ")} />;
+  return <Action.CopyToClipboard title="Copy Summary To Clipboard" content={parts.join("; ")} />;
 }
 
 export default function SpeedtestList() {
   const { result, error, isLoading, resultProgress } = useSpeedtest();
   if (error) {
-    showToast(ToastStyle.Failure, "Speedtest failed", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Speedtest failed",
+      message: error,
+    });
   }
   const title = isLoading ? "Speedtest running" : undefined;
   const summaryAction = <CopySummaryAction result={result} />;
@@ -171,14 +189,18 @@ function ResultListItem(props: { result: Result; isLoading: boolean; summary: JS
   return (
     <List.Item
       title="Result Link"
-      accessoryTitle={props.isLoading ? "?" : `${props.result.url}`}
       icon={{ source: "results.png", tintColor: Color.Blue }}
       actions={
         <ActionPanel>
           {props.summary}
-          {!props.isLoading && <CopyToClipboardAction content={props.result?.url ?? ""} />}
+          {!props.isLoading && <Action.CopyToClipboard content={props.result?.url ?? ""} />}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: props.isLoading ? "?" : `${props.result.url}`,
+        },
+      ]}
     />
   );
 }

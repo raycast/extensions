@@ -1,4 +1,4 @@
-import { ItemType } from "./utils";
+import { ItemType } from "./input";
 
 export const SEARCH_ENGINE = {
   google: `https://google.com/search?q=`,

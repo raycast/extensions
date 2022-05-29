@@ -56,8 +56,12 @@ export default function Move() {
                   title={move.name}
                   subtitle={showPreview ? undefined : move.short_effect}
                   icon={`moves/${move.damage_class || "status"}.svg`}
-                  accessoryTitle={move.type}
-                  accessoryIcon={`types/${move.type.toLowerCase()}.svg`}
+                  accessories={[
+                    {
+                      text: move.type,
+                      icon: `types/${move.type.toLowerCase()}.svg`,
+                    },
+                  ]}
                   detail={
                     showPreview ? (
                       <List.Item.Detail
