@@ -1,5 +1,11 @@
 # Zotero Changelog
 
+## [Features] - 2022-05-30
+
+- Add additional CSL formats
+- Use independent CSL formats from extension directly rather than relying upon installed ones only
+- Querying much more complex and complete now. Adds support for searching title, abstract, tags, date and authors. Different words are searched independently in OR sense. AND search is also supported by replacing "spaces" with "+" chars.
+
 ## [Features] - 2022-05-25
 
 - Adds Action to copy reference citations using CSA styles to Clipboard
