@@ -17,7 +17,7 @@ async function fetchGames(url: string) {
 
 async function fetchGameData({ appid, url }: { appid: number; url: string }) {
   const response = await fetch(url);
-  // TODO: Check rare limiting error
+
   if (!response.ok) {
     throw Object.assign(new Error(`${response.status} ${response.statusText}`), { status: response.status });
   }
@@ -76,6 +76,7 @@ export const useGameData = ({ appid = 0, ready = true }) => {
   );
 
   // Slightly hacky way to grab something from swr cache
+  // If swr changes their serialization implimentation, this will break (gracefully)
   const cacheKey = `#url:"${key.url}",appid:${appid},`;
   if (!data && cache.get(cacheKey) && !error) {
     return { data: cache.get(cacheKey) };
