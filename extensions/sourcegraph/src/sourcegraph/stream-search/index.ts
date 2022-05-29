@@ -1,5 +1,4 @@
 import EventSource from "eventsource";
-import { Duration } from "luxon";
 
 import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
