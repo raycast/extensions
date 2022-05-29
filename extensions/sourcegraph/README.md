@@ -27,7 +27,11 @@
 
 ## Install
 
-To get started, install [Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
+To get started, [install Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
+
+<a id="install-extension-button" title="Install Sourcegraph Raycast Extension" href="https://www.raycast.com/bobheadxi/sourcegraph#install">
+  <img style="height: 64px" src="https://assets.raycast.com/bobheadxi/sourcegraph/install_button@2x.png" height="64">
+</a>
 
 Alternatively, you can [install this extension from source](./CONTRIBUTING.md).
 
