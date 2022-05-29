@@ -40,10 +40,7 @@ export default function TrackMetadata({ metadataKey }: TrackObject) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url="https://fip.fr" />
-          <Action.CopyToClipboard
-            title="Copy Track Name"
-            content={`${metadata.firstLine} ${metadata.secondLine}`}
-          />
+          <Action.CopyToClipboard title="Copy Track Name" content={`${metadata.firstLine} ${metadata.secondLine}`} />
         </ActionPanel>
       }
       metadata={
