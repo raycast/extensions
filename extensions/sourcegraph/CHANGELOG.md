@@ -1,6 +1,6 @@
 # Changelog
 
-## [Search performance improvements] - 2022-05-29
+## [Search performance improvements](https://github.com/raycast/extensions/pull/1844) - 2022-05-29
 
 - **search**: Limit the number of rendered results, which drastically improves performance.
 - **search**: Progress text now indicates whether there are more results to be found and when rendered results are a subset of all results.
