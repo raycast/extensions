@@ -11,9 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "search",
       "title": "Search Explorer",
       "description": "Search by Address / Txn Hash / Block / Token",
+      "mode": "view"
+    },
+    {
+      "name": "list-explorers",
+      "title": "List Explorers",
+      "description": "View and change explorers",
       "mode": "view"
     }
   ],
