@@ -17,7 +17,7 @@ export const MyGames = ({ sortBy = "name", order = "asc", extraFilter = () => tr
 
   if (!isLoggedIn) return <NoApiKey />;
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search your games...">
+    <List navigationTitle="My Steam Account" isLoading={isLoading} searchBarPlaceholder="Search your games...">
       {myGames
         ?.filter((g) => g?.name)
         ?.sort((a, b) => (a?.[sortBy] > b?.[sortBy] ? direction : -direction))

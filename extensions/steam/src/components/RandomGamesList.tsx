@@ -16,6 +16,7 @@ export const RandomGamesList = () => {
 
   return (
     <List
+      navigationTitle="Random Games"
       enableFiltering={false}
       isLoading={isLoading}
       searchBarPlaceholder=""
