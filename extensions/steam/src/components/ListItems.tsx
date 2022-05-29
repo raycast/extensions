@@ -70,7 +70,7 @@ export const MyGamesListType = ({ game }: { game: GameDataSimple }) => (
     icon={{
       source: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`,
     }}
-    accessories={[{ text: game?.playtime_forever ? `Played for ${humanTime(game.playtime_forever)}` : undefined }]}
+    accessories={[{ text: game?.playtime_forever ? "Played for " + humanTime(game.playtime_forever) : undefined }]}
     actions={
       <ActionPanel>
         <Action.Push title="View Game Details" target={<GameDetails game={game} />} />

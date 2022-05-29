@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+import { useMemo } from "react";
 import { NoApiKey } from "../errors";
 import { useMyGames } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
@@ -15,16 +16,19 @@ export const MyGames = ({ sortBy = "name", order = "asc", extraFilter = () => tr
   const direction = order === "asc" ? 1 : -1;
   const isLoggedIn = useIsLoggedIn();
 
+  const gamesFiltered = useMemo(() => {
+    return myGames
+      ?.filter((g) => g?.name)
+      ?.sort((a, b) => (a?.[sortBy] > b?.[sortBy] ? direction : -direction))
+      ?.filter(extraFilter);
+  }, [direction, extraFilter, myGames, sortBy]);
+
   if (!isLoggedIn) return <NoApiKey />;
   return (
     <List navigationTitle="My Steam Account" isLoading={isLoading} searchBarPlaceholder="Search your games...">
-      {myGames
-        ?.filter((g) => g?.name)
-        ?.sort((a, b) => (a?.[sortBy] > b?.[sortBy] ? direction : -direction))
-        ?.filter(extraFilter)
-        ?.map((game) => (
-          <MyGamesListType key={game.appid} game={game} />
-        ))}
+      {gamesFiltered?.map((game) => (
+        <MyGamesListType key={game.appid} game={game} />
+      ))}
     </List>
   );
 };
