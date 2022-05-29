@@ -33,7 +33,7 @@ To get started, [install Raycast](https://www.raycast.com/) and [install the Sou
   <img style="height: 64px" src="https://assets.raycast.com/bobheadxi/sourcegraph/install_button@2x.png" height="64">
 </a>
 
-Alternatively, you can [install this extension from source](./CONTRIBUTING.md).
+Alternatively, you can [install this extension from source](https://github.com/bobheadxi/raycast-sourcegraph/blob/main/CONTRIBUTING.md).
 
 <br />
 
