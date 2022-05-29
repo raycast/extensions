@@ -26,7 +26,7 @@ export interface Alert {
 
 export interface Progress {
   matchCount: number;
-  duration: string;
+  durationMs: number;
   skipped: number;
 }
 
@@ -191,9 +191,7 @@ export async function performSearch(
 
       handlers.onProgress({
         matchCount: matchCount,
-        duration: Duration.fromObject({ seconds: durationMs > 1000 ? 0 : undefined, milliseconds: durationMs })
-          .normalize()
-          .toHuman({ unitDisplay: "narrow" }),
+        durationMs: durationMs,
         skipped: skipped?.length || 0,
       });
     });

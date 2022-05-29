@@ -1,5 +1,6 @@
 import { useNavigation } from "@raycast/api";
 import { useState, useRef } from "react";
+import { Duration } from "luxon";
 
 import { Sourcegraph } from "../sourcegraph";
 import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
@@ -104,10 +105,17 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
         onAlert: (alert) => {
           ExpandableErrorToast(push, "Alert", alert.title, alert.description || "").show();
         },
-        onProgress: (progress) => {
+        onProgress: ({ durationMs, matchCount, skipped }) => {
+          const duration = Duration.fromMillis(durationMs)
+            .normalize()
+            .shiftTo(durationMs > 1000 ? "seconds" : "milliseconds")
+            .toHuman({ unitDisplay: "narrow" });
+
+          const results = `${Intl.NumberFormat().format(matchCount)}${skipped ? "+" : ""}`;
+
           setState((oldState) => ({
             ...oldState,
-            summary: `Found ${progress.matchCount}${progress.skipped ? "+" : ""} results in ${progress.duration}`,
+            summary: `Found ${results} results in ${duration}`,
           }));
         },
       });
