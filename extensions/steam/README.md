@@ -11,9 +11,8 @@ Source repo: https://github.com/KevinBatdorf/steam-raycast
 Notes:
 - You may hit the Steam API rate limit if you search too often. If that's the case, just wait a few minutes and try again. While developing this extension it only happened to me once.
 - Sometimes the Steam API sends a random language. There doesn't seem to be any logic to this. Just press escape and try again.
-- Sometimes games are removed from Steam yet still show in the top level API. Verifying this premptively would require making multiple network requests at once so instead the extension will just provide feedback that the game no longer exists.
+- Sometimes games are removed from Steam yet still show in the API. To avoid extra network costs, the extension will just provide feedback that the game no longer exists.
 - Icons will only show if you own the game. Steam doesn't send the icons via the public api.
-- You may hit memory issues with large library data. I've tried to mitigate this but the Steam API is essentially all or nothing.
 
 To run the dev build, you can:
 
@@ -23,8 +22,8 @@ To run the dev build, you can:
    tab (look for the +)
 4. Open an issue here if you get stuck and I'll try to help.
 
-<!-- <img src="assets/screenshot-dark.png" />
-<img src="assets/screenshot.png" /> -->
+<img src="metadata/steam-01.png" />
+<img src="metadata/steam-02.png" />
 
 ## Features
 
