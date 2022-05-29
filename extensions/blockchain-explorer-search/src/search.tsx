@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, LocalStorage, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, List, LocalStorage, Clipboard, Icon } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { defaultExplorer, explorers } from "./explorers";
 import { Explorer } from "./interfaces";
@@ -65,12 +65,15 @@ export default function Command() {
     <List.Item
       key={match.title}
       title={match.title}
-      accessories={clipboard === search ? [{ text: "From clipboard", icon: "📋" }] : []}
+      accessories={clipboard === search ? [{ text: "From clipboard", icon: Icon.Clipboard }] : []}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open link in Browser" url={match.path} />
-          <Action.CopyToClipboard title="Copy link to Clipboard" content={match.path} />
-          <Action.Paste title="Paste to Top Window" content={match.path} />
+          <Action.CreateQuicklink
+            quicklink={{ link: match.path, name: `${match.explorer.chainName}: ${match.title} — ` }}
+          />
+          <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "c" }} content={match.path} />
+          <Action.Paste shortcut={{ modifiers: ["cmd"], key: "v" }} content={match.path} />
         </ActionPanel>
       }
     />

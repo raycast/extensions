@@ -19,7 +19,7 @@ export class TransactionMatch extends Match {
     super(search, explorer);
   }
   get title() {
-    return `Transaction ${this.search}.`;
+    return `Transaction ${this.search}`;
   }
   get path() {
     return `https://${this.explorer.baseUrl}/tx/${this.parsedSearch}`;
@@ -46,7 +46,7 @@ export class AddressMatch extends Match {
     super(search, explorer);
   }
   get title() {
-    return `Address ${this.search}.`;
+    return `Address ${this.search}`;
   }
   get path() {
     return `https://${this.explorer.baseUrl}/address/${this.parsedSearch}`;
@@ -83,7 +83,7 @@ export class TokenMatch extends AddressMatch {
       const { name, symbol, decimals } = this.token;
       return `${name} token (${symbol}) - ${decimals} decimals ${this.parsedSearch}.`;
     }
-    return `Token ${this.parsedSearch}.`;
+    return `Token ${this.parsedSearch}`;
   }
   get path() {
     return `https://${this.explorer.baseUrl}/token/${this.parsedSearch}`;
@@ -113,7 +113,7 @@ export class ENSMatch extends Match {
     super(search, explorer);
   }
   get title() {
-    return `ENS name ${this.parsedSearch}.`;
+    return `ENS name ${this.parsedSearch}`;
   }
   get path() {
     return `https://${this.explorer.baseUrl}/enslookup-search?search=${this.parsedSearch}`;
@@ -134,7 +134,7 @@ export class BlockMatch extends Match {
     super(search, explorer);
   }
   get title() {
-    return `Block height ${this.parsedSearch}.`;
+    return `Block height ${this.parsedSearch}`;
   }
   get path() {
     return `https://${this.explorer.baseUrl}/block/${this.parsedSearch}`;

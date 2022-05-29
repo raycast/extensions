@@ -4,7 +4,6 @@ import { defaultExplorer, explorers } from "./explorers";
 import { Explorer } from "./interfaces";
 
 export default function Command() {
-  // Grab the clipboard contents and run a search
   const [selectedExplorer, setSelectedExplorer] = useState<Explorer | null>(null);
   useEffect(() => {
     const setFromStorage = async () => {
@@ -43,6 +42,11 @@ export default function Command() {
             tooltip: "The explorer used in searches.",
           });
         }
+        if (explorer?.testNet) {
+          keywords.push("testnet");
+        } else {
+          keywords.push("mainnet");
+        }
         return (
           <List.Item
             key={explorer.chainName}
@@ -75,7 +79,10 @@ export default function Command() {
                   title={"Change Explorer"}
                   onAction={() => handleExplorerChange(explorer)}
                 />
-                <Action.CopyToClipboard content={`https://${explorer.baseUrl}`} />
+                <Action.CopyToClipboard
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  content={`https://${explorer.baseUrl}`}
+                />
               </ActionPanel>
             }
           />
