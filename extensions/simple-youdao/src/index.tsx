@@ -72,6 +72,7 @@ function Translate({
                   setState={setState}
                   text={searchText}
                   copy_content={item}
+                  language={translate_result.l}
                   url={
                     translate_result.webdict && translate_result.webdict.url ? translate_result.webdict.url : undefined
                   }
@@ -93,6 +94,7 @@ function Translate({
               actions={
                 <TranslateResultActionPanel
                   copy_content={item}
+                  language={translate_result.l}
                   url={
                     translate_result.webdict && translate_result.webdict.url ? translate_result.webdict.url : undefined
                   }
@@ -113,6 +115,7 @@ function Translate({
               actions={
                 <TranslateResultActionPanel
                   copy_content={item.value.join(", ")}
+                  language={translate_result.l}
                   url={
                     translate_result.webdict && translate_result.webdict.url ? translate_result.webdict.url : undefined
                   }
@@ -129,16 +132,26 @@ function Translate({
 function TranslateResultActionPanel(props: {
   text?: string;
   copy_content: string;
+  language: string;
   url: string | undefined;
   speak_url?: string;
   tspeak_url?: string;
   setState?: React.Dispatch<React.SetStateAction<TranslateState>>;
 }) {
-  const { text, copy_content, url, speak_url, tspeak_url, setState } = props;
+  const { text, copy_content, language, url, speak_url, tspeak_url, setState } = props;
+
+  //if need to use modern translation page
+  const {is_using_modern_web} = getPreferenceValues();
+  let webURL = url;
+  if (is_using_modern_web) {
+    const lang = language.split('2')[0];
+    webURL = text && lang ? `https://www.youdao.com/result?word=${encodeURIComponent(text)}&lang=${lang}` : url;
+  }
+
   return (
     <ActionPanel>
       <Action.CopyToClipboard content={copy_content} />
-      {url ? <Action.OpenInBrowser url={url} /> : null}
+      {webURL ? <Action.OpenInBrowser url={webURL} /> : null}
       <Action
         icon={Icon.Message}
         onAction={() => {
@@ -304,7 +317,7 @@ function translateAPI(content: string, signal: AbortSignal): Promise<Response> {
   content;
   const sign = generateSign(q, salt, app_key, app_secret);
   const query = qs.stringify({ q: q, appKey: app_key, from: from_language, to: to_language, salt, sign });
-  console.log(query);
+  console.log(`https://openapi.youdao.com/api?${query}`);
   return fetch(`https://openapi.youdao.com/api?${query}`, {
     signal: signal,
     method: "GET",
