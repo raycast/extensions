@@ -61,6 +61,9 @@ ${gameData.short_description}
             {gameData?.price_overview ? (
               <Detail.Metadata.Label title="Price" text={gameData?.price_overview.final_formatted} />
             ) : null}
+            {gameData?.release_date?.date ? (
+              <Detail.Metadata.Label title="Release Date" text={gameData?.release_date?.date} />
+            ) : null}
             {gameData?.metacritic?.url ? (
               <Detail.Metadata.Link
                 title="Data"
