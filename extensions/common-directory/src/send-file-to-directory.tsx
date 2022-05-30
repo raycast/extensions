@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-  LocalStorage,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./types/directory-info";
 import React, { useState } from "react";
 import { isEmpty } from "./utils/common-utils";
@@ -30,9 +20,9 @@ import { ActionOpenCommandPreferences } from "./components/action-open-command-p
 import { ActionCopyFile } from "./components/action-copy-file";
 import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
-import { getChooseFolder } from "./utils/applescript-utils";
 import { DirectoryDetailMetadata } from "./components/directory-detail-metadata";
 import { ListEmptyView } from "./components/list-empty-view";
+import { FolderPage } from "./components/folder-page";
 
 export default function CommonDirectory() {
   const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
@@ -183,6 +173,14 @@ function SendToDirectoryItem(props: {
               setUpdateDetail(refreshNumber());
             }}
           />
+
+          <Action.Push
+            icon={Icon.ChevronDown}
+            title={"Enter Folder"}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<FolderPage folderPath={directory.path} isOpenDirectory={false} />}
+          />
+
           <ActionPanel.Section>
             <Action
               title={
@@ -212,7 +210,7 @@ function SendToDirectoryItem(props: {
             />
           </ActionPanel.Section>
 
-          <ActionCopyFile directory={directory} />
+          <ActionCopyFile name={directory.name} path={directory.path} />
 
           <ActionPanel.Section>
             <Action.Push
@@ -331,14 +329,14 @@ async function actionMoveOrCopy(
     let _commonDirectory = [...commonDirectory];
     const pathValid = fse.pathExistsSync(directory.path);
     if (pathValid) {
-      let isMoved: boolean;
+      let isSent: boolean;
       if (manual) {
-        isMoved = await getItemAndSend(action);
+        isSent = await getItemAndSend(action);
       } else {
-        isMoved = await getItemAndSend(action, directory.path);
+        isSent = await getItemAndSend(action, directory.path);
       }
       _commonDirectory[index].valid = true;
-      if (isMoved && getPreferenceValues<Preferences>().sortBy === SortBy.Rank) {
+      if (isSent && getPreferenceValues<Preferences>().sortBy === SortBy.Rank) {
         _commonDirectory = await upRankSendFile(_commonDirectory, index);
       }
     } else {

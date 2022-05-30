@@ -19,6 +19,7 @@ import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
 import { DirectoryDetailMetadata } from "./components/directory-detail-metadata";
 import { ListEmptyView } from "./components/list-empty-view";
+import { FolderPage } from "./components/folder-page";
 
 export default function OpenCommonDirectory() {
   const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
@@ -151,8 +152,14 @@ function DirectoryItem(props: {
             path={directory.path}
             onShow={() => openAndUpRank(directory, index, commonDirectory, setRefresh)}
           />
+          <Action.Push
+            icon={Icon.ChevronDown}
+            title={"Enter Folder"}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<FolderPage folderPath={directory.path} isOpenDirectory={true} />}
+          />
 
-          <ActionCopyFile directory={directory} />
+          <ActionCopyFile name={directory.name} path={directory.path} />
 
           <ActionPanel.Section>
             <Action.Push

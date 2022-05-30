@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
-import { checkDirectoryValid } from "../utils/common-utils";
+import { checkDirectoryValid, checkIsFolder } from "../utils/common-utils";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
-import { FileContentInfo } from "../types/file-content-info";
+import { FileContentInfo, FolderPageItem } from "../types/file-content-info";
 import { getOpenFinderWindowPath } from "../utils/applescript-utils";
+import fse from "fs-extra";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -71,6 +72,38 @@ export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
 
   return { directoryInfo: directoryInfo, isDetailLoading: isDetailLoading };
 };
+
+export function getFolderByPath(folderPath: string, isOpenDirectory: boolean) {
+  const [folders, setFolders] = useState<FolderPageItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const fetchData = useCallback(async () => {
+    console.debug(folderPath);
+    const files = fse.readdirSync(folderPath);
+    const _folders: FolderPageItem[] = [];
+    if (isOpenDirectory) {
+      files.forEach((value) => {
+        if (!value.startsWith(".")) {
+          _folders.push({ name: value, isFolder: checkIsFolder(folderPath + "/" + value) });
+        }
+      });
+    } else {
+      files.forEach((value) => {
+        if (checkIsFolder(folderPath + "/" + value)) {
+          _folders.push({ name: value, isFolder: true });
+        }
+      });
+    }
+    setFolders(_folders);
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { folders: folders, loading: loading };
+}
 
 export async function getDirectory(key: string, sortBy: string) {
   const _localDirectory = await LocalStorage.getItem(key);
