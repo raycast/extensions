@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2022-05-30
 
 Fixed issue that caused the extension to crash
 
