@@ -57,6 +57,7 @@ export default function AddCountdownDate(props: {
                 const _cdDate = [...countdownDates];
                 const now = new Date();
                 _cdDate.push({
+                  id: "CountdownDate_" + now.getTime(),
                   creatAt: now.getTime(),
                   modifyAt: now.getTime(),
                   title: title,
