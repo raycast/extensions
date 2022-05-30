@@ -77,7 +77,7 @@ async function fetchGHUsername(extension, raycastUsername) {
   } else {
     const package = await fs.readFile(path.join(extensionsDir, `${extension.name}/package.json`), "utf8");
 
-    const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1);
+    const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1) + 1;
     const commitHash = await new Promise((resolve, reject) =>
       exec(
         // find commit that added contributor to the package.json
