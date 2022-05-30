@@ -30,7 +30,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
-      subtitle={"Stars " + project.star_count}
+      subtitle={project.star_count > 0 ? `⭐ ${project.star_count}` : ""}
       icon={localImageFilepath}
       actions={
         <ActionPanel>
@@ -99,10 +99,6 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
 
   if (error) {
     showToast(Toast.Style.Failure, "Cannot search Project", error);
-  }
-
-  if (isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
   return (

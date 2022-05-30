@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryWithFileInfo, FileInfo } from "../utils/directory-info";
+import { DirectoryWithFileInfo, FileInfo } from "../types/types";
 import {
   checkDirectoryValid,
-  commonPreferences,
   getDirectoryFiles,
   getFileShowNumber,
   getLocalStorage,
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
+import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
+import { Preferences } from "../types/preferences";
 
 //for refresh useState
 export const refreshNumber = () => {
-  return new Date().getTime();
+  return Date.now();
 };
 
 //get is show detail
@@ -40,7 +41,7 @@ export const localDirectoryWithFiles = (refresh: number) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
-  const { fileShowNumber, sortBy } = commonPreferences();
+  const { fileShowNumber, sortBy } = getPreferenceValues<Preferences>();
 
   const fetchData = useCallback(async () => {
     const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
@@ -93,19 +94,22 @@ export const localDirectoryWithFiles = (refresh: number) => {
 
 //get file or folder info
 export const getFileInfoAndPreview = (fileInfo: FileInfo, updateDetail = 0) => {
-  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const [fileContentInfo, setFileContentInfo] = useState<FileContentInfo>(fileContentInfoInit);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
     if (isEmpty(fileInfo.path)) {
       return;
     }
-    setDirectoryInfo(await getFileContent(fileInfo));
+    setIsDetailLoading(true);
+    setFileContentInfo(await getFileContent(fileInfo));
+    setIsDetailLoading(false);
   }, [updateDetail, fileInfo]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return directoryInfo;
+  return { fileContentInfo: fileContentInfo, isDetailLoading: isDetailLoading };
 };
 
 //get local directory with files

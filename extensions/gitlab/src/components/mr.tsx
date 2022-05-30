@@ -140,7 +140,7 @@ function useDetail(issueID: number): {
 } {
   const [mrdetail, setMRDetail] = useState<MRDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -224,10 +224,6 @@ export function MRList({
     showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
   }
 
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
 
   return (
@@ -239,8 +235,8 @@ export function MRList({
       searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
-      <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
-        {mrs?.map((mr) => (
+      <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
+        {mrs.map((mr) => (
           <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
@@ -378,14 +374,14 @@ export function useSearch(
   project?: Project,
   group?: Group
 ): {
-  mrs?: MergeRequest[];
+  mrs: MergeRequest[];
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
+  const [mrs, setMRs] = useState<MergeRequest[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -458,7 +454,7 @@ export function useMR(
 } {
   const [mr, setMR] = useState<MergeRequest>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

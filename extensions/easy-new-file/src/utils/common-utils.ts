@@ -1,17 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import Values = LocalStorage.Values;
-
-export const preferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    createAndOpen: preferencesMap.get("createAndOpen") as boolean,
-    showDocument: preferencesMap.get("show_document") as boolean,
-    showCode: preferencesMap.get("show_code") as boolean,
-    showScript: preferencesMap.get("show_script") as boolean,
-  };
-};
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);

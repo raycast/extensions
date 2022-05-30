@@ -221,7 +221,7 @@ export function runShortcut(input: string, tactions: Taction[]) {
     });
     return output;
   } catch (e) {
-    console.error(String(e));
+    console.error("runShortcut " + String(e));
     return input;
   }
 }

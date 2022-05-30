@@ -1,5 +1,8 @@
 # GitLab Changelog
 
+## [Projects list] - 2022-05-18
+- Display project stars only if there are ([#1728](https://github.com/raycast/extensions/pull/1728))
+
 ## [Optimize] - 2022-04-03
 - Set minimum Raycast version to `1.31`
 - Increase project cache invalid time to `7` days

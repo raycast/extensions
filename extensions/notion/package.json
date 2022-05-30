@@ -18,14 +18,13 @@
       "name": "create-database-page",
       "title": "Create Database Page",
       "subtitle": "Notion",
-      "description": "Create a database page.",
+      "description": "Create a page in a Notion database.",
       "mode": "view"
     },
     {
       "name": "search-page",
-      "title": "Search Page",
-      "subtitle": "Notion",
-      "description": "Search database and page.",
+      "title": "Search Notion",
+      "description": "Search for Notion databases and pages.",
       "mode": "view"
     }
   ],
@@ -33,8 +32,8 @@
     {
       "name": "notion_token",
       "type": "password",
-      "required": true,
       "title": "Notion Token",
+      "required": false,
       "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
       "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
       "link": "https://www.notion.so/my-integrations"
@@ -62,6 +61,7 @@
     "@notionhq/client": "^1.0.4",
     "@raycast/api": "^1.33.0",
     "@tryfabric/martian": "^1.2.0",
+    "jotai": "^1.6.5",
     "moment": "^2.29.1",
     "node-fetch": "^3.2.4",
     "notion-to-md": "^2.3.2"

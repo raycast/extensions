@@ -531,7 +531,7 @@ function SuggestionItem({
   return (
     <List.Item
       title={suggestion.title}
-      subtitle={suggestion.description}
+      subtitle={suggestion.description || "Press 'Enter' to apply suggestion"}
       icon={{
         source: suggestion.query ? Icon.Binoculars : Icon.ExclamationMark,
         tintColor: suggestion.query ? ColorDefault : ColorEmphasis,
@@ -543,7 +543,12 @@ function SuggestionItem({
               title="Apply Suggestion"
               icon={Icon.Clipboard}
               onAction={async () => {
-                setSearchText(`${searchText} ${suggestion.query}`);
+                const { query } = suggestion;
+                if (typeof query === "object") {
+                  setSearchText(`${searchText} ${query.addition}`);
+                } else {
+                  setSearchText(query || "");
+                }
               }}
             />
           </ActionPanel>
