@@ -1,6 +1,6 @@
 # Google Drive Changelog
 
-## [Remove Swift dependency] - {PR_MERGE_DATE}
+## [Remove Swift dependency] - 2022-05-30
 
 - Removed Swift dependency that was used to get the fallback file icons using `Cocoa`'s `NSWorkspace.icon(forFile:)` API since not all users have Developer Tools installed.
 
