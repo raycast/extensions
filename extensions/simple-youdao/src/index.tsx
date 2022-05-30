@@ -141,10 +141,10 @@ function TranslateResultActionPanel(props: {
   const { text, copy_content, language, url, speak_url, tspeak_url, setState } = props;
 
   //if need to use modern translation page
-  const {is_using_modern_web} = getPreferenceValues();
+  const { is_using_modern_web } = getPreferenceValues();
   let webURL = url;
   if (is_using_modern_web) {
-    const lang = language.split('2')[0];
+    const lang = language.split("2")[0];
     webURL = text && lang ? `https://www.youdao.com/result?word=${encodeURIComponent(text)}&lang=${lang}` : url;
   }
 
