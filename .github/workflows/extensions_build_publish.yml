@@ -24,6 +24,7 @@ on:
 
 jobs:
   extensions_build_publish:
+    if: github.repository == 'raycast/extensions'
     name: Extensions Build & Publish
     runs-on: ubuntu-latest
     steps:

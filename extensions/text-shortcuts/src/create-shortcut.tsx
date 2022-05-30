@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LocalStorage,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import {
   cases,
   checkAffix,
@@ -120,7 +130,13 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"delete" + index}
               key={"delete" + index}
               title={TactionType.DELETE + " " + (index + 1)}
-              placeholder={"Delete word"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Delete all numbers: /\\d/g\n" +
+                "Delete all Blank characters: /\\s/g\n" +
+                "Delete all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
                 const _tactions = [...tactions];
@@ -139,20 +155,30 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"replace" + index}
               key={"replace" + index}
               title={TactionType.REPLACE + " " + (index + 1)}
-              placeholder={"Replace"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Replace all numbers: /\\d/g\n" +
+                "Replace all Blank characters: /\\s/g\n" +
+                "Replace all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
-                tactions[index].content[0] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[0] = newValue;
+                setTactions(_tactions);
               }}
             />
             <Form.TextField
               id={"replace_with" + index}
               key={"replace_with" + index}
               title={""}
-              placeholder={"with"}
+              placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
-                tactions[index].content[1] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[1] = newValue;
+                setTactions(_tactions);
               }}
             />
           </React.Fragment>
@@ -301,6 +327,15 @@ function CreateShortcutActions(props: {
         }}
       />
       <TactionActions tactions={tactions} setTactions={setTactions} />
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Gear}
+          title="Open Extension Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openExtensionPreferences}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -368,7 +403,7 @@ export function TactionActions(props: {
         <Action
           title="Remove Last Action"
           icon={Icon.Trash}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             const _tactions = [...tactions];
             _tactions.pop();
@@ -378,7 +413,7 @@ export function TactionActions(props: {
         <Action
           title="Remove All Actions"
           icon={Icon.ExclamationMark}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+          shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
           onAction={async () => {
             setTactions([]);
           }}

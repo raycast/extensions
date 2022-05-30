@@ -1,15 +1,15 @@
-import { Collection, createClient, ErrorResponse, Photos } from "pexels";
+import { Collection, createClient, ErrorResponse, Photo, Photos, Video } from "pexels";
 import React, { useCallback, useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { CollectionMediasResponse, CollectionsResponse } from "../utils/types";
+import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../utils/types";
 import { commonPreferences, isEmpty } from "../utils/common-utils";
 import Style = Toast.Style;
 
 const pexelsClient = createClient(commonPreferences().apikey);
 
-export const searchPhotos = (searchContent: string, page: number) => {
+export const searchPhotos = (searchRequest: SearchRequest) => {
+  const { searchContent, page } = searchRequest;
   const [pexelsPhotos, setPexelsPhotos] = useState<Photos>({ page: 0, next_page: 1, per_page: 15, photos: [] });
-  const [oldSearchContent, setOldSearchContent] = useState<string>(searchContent);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -24,10 +24,7 @@ export const searchPhotos = (searchContent: string, page: number) => {
         per_page: 15,
         page: page,
       });
-      if (oldSearchContent === searchContent) {
-        //load more content
-        await updatePexelsPhoto(photosResponse, pexelsPhotos, setPexelsPhotos, page);
-      } else {
+      if (page === 1) {
         //search new content
         if ((photosResponse as ErrorResponse).error) {
           console.error((photosResponse as ErrorResponse).error);
@@ -35,7 +32,9 @@ export const searchPhotos = (searchContent: string, page: number) => {
         } else {
           setPexelsPhotos(photosResponse as Photos);
         }
-        setOldSearchContent(searchContent);
+      } else {
+        //load more content
+        await updatePexelsPhoto(photosResponse, pexelsPhotos, setPexelsPhotos, page);
       }
     } catch (e) {
       console.error(String(e));
@@ -57,6 +56,7 @@ export const getCuratedPhotos = (page: number) => {
 
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true);
       const photosResponse = await pexelsClient.photos.curated({
         per_page: 15,
         page: page,
@@ -166,33 +166,27 @@ export const getCollections = (collectionTag: string, page: number) => {
 };
 
 export const getCollectionMedias = (id: string, page: number) => {
-  const [collectionMedias, setCollectionMedias] = useState<CollectionMediasResponse>({
-    page: 0,
-    per_page: 15,
-    total_results: 0,
-    media: [],
-  });
+  const [collectionMedias, setCollectionMedias] = useState<
+    ((Photo & { type: "Video" | "Photo" }) | (Video & { type: "Video" | "Photo" }))[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true);
       const _featuredCollections = (await pexelsClient.collections.media({
         page: page,
         id: id,
         type: "photos",
       })) as CollectionMediasResponse | ErrorResponse;
+
       if ((_featuredCollections as ErrorResponse).error) {
         console.error((_featuredCollections as ErrorResponse).error);
         await showToast(Style.Failure, String((_featuredCollections as ErrorResponse).error));
       } else {
         const newCollectionMedias = _featuredCollections as CollectionMediasResponse;
-        const allCollectionMedias = collectionMedias.media.concat(newCollectionMedias.media);
-        setCollectionMedias({
-          page: page,
-          per_page: newCollectionMedias.per_page,
-          total_results: newCollectionMedias.total_results,
-          media: allCollectionMedias,
-        });
+        const allCollectionMedias = collectionMedias.concat(newCollectionMedias.media);
+        setCollectionMedias(allCollectionMedias);
       }
     } catch (e) {
       console.error(String(e));

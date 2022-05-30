@@ -13,10 +13,6 @@ export function UserList(): JSX.Element {
     showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
   }
 
-  if (!users) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
   return (
     <List searchBarPlaceholder="Filter Users by name..." onSearchTextChange={setSearchText} isLoading={isLoading}>
       {users?.map((user) => (
@@ -53,7 +49,7 @@ export function useSearch(query: string | undefined): {
 } {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

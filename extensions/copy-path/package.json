@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy path of the selected file or the current Finder window.",
+  "description": "Copy path of the selected files or the current Finder window.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "categories": [
@@ -15,12 +15,44 @@
     {
       "name": "copy-path",
       "title": "Copy Path",
-      "description": "Copy path of the selected file or the current Finder window.",
+      "description": "Copy path of the selected files or the current Finder window.",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "multiPathSeparator",
+      "type": "dropdown",
+      "required": false,
+      "title": "Multi-path separator",
+      "description": "The separator between paths when copying multiple file paths.",
+      "default": "\n",
+      "data": [
+        {
+          "title": "⏎",
+          "value": "\n"
+        },
+        {
+          "title": "␣",
+          "value": " "
+        },
+        {
+          "title": ",",
+          "value": ","
+        },
+        {
+          "title": ";",
+          "value": ";"
+        },
+        {
+          "title": ":",
+          "value": ":"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.32.1",
+    "@raycast/api": "^1.35.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

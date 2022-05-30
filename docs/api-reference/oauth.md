@@ -68,7 +68,7 @@ const { authorizationCode } = await client.authorize(authRequest);
 
 **Important**: When in development mode, make sure not to trigger auto-reloading (e.g. by saving a file) while you're testing an active OAuth authorization and redirect. This would cause an OAuth state mismatch when you're redirected back into the extension since the client would be reinitialized on reload.
 
-That that you have received the authorization code, you can exchange this code for an access token using your provider's token endpoint. This token exchange (and the following API calls) can be done with your preferred Node HTTP client library. Example using `node-fetch`:
+Now that you have received the authorization code, you can exchange this code for an access token using your provider's token endpoint. This token exchange (and the following API calls) can be done with your preferred Node HTTP client library. Example using `node-fetch`:
 
 ```typescript
 async function fetchTokens(
@@ -222,7 +222,7 @@ A promise for an [AuthorizationRequest](#oauth.authorizationrequest) that you ca
 
 ### authorize
 
-Starts the authorization and shows the OAuth overlay in Raycast. As parameter you can either directly use the returned request from [authorizationRequest](#authorizationRequest), or customize the URL by extracting parameters from [AuthorizationRequest](#oauth.authorizationrequest) and providing your own URL via [AuthorizationOptions](#oauth.authorizationoptions). Eventually the URL will be used to open the authorization page of the provider in the web browser.
+Starts the authorization and shows the OAuth overlay in Raycast. As parameter you can either directly use the returned request from [authorizationRequest](#oauth.authorizationrequest), or customize the URL by extracting parameters from [AuthorizationRequest](#oauth.authorizationrequest) and providing your own URL via [AuthorizationOptions](#oauth.authorizationoptions). Eventually the URL will be used to open the authorization page of the provider in the web browser.
 
 #### Signature
 
@@ -403,9 +403,9 @@ Securely store a token set via [setTokens](#settokens) and retrieve it via [getT
 
 #### Methods
 
-| Name        | Type                       | Description                                                                                                                |
-| :---------- | :------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| isExpired() | <code>() => boolean</code> | A convenience method for checking whether the access token has expired. This requires the `expiresIn` parameter to be set. |
+| Name        | Type                       | Description                                                                                                                                                                                                                                          |
+| :---------- | :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| isExpired() | <code>() => boolean</code> | A convenience method for checking whether the access token has expired. The method factors in some seconds of "buffer", so it returns true a couple of seconds before the actual expiration time. This requires the `expiresIn` parameter to be set. |
 
 ### OAuth.TokenSetOptions
 

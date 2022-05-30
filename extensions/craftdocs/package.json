@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "craftdocs",
+  "title": "Craft",
+  "description": "Search documents in Craft",
+  "icon": "command-icon.png",
+  "author": "bgnfu7re",
+  "contributors": [
+    "mafredri"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Blocks Search",
+      "subtitle": "Craft",
+      "description": "Search documents in Craft",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Detailed View",
+          "name": "useDetailedView",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use detailed view",
+          "description": "Changes the view of the search to show info about documents. It is messy!"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

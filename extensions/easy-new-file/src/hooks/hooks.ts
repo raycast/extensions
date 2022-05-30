@@ -1,7 +1,8 @@
-import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../utils/file-type";
+import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../types/file-type";
 import { useCallback, useEffect, useState } from "react";
 import fse from "fs-extra";
 import path from "path";
+import { Alert, confirmAlert, Icon } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -83,4 +84,28 @@ export const getFileType = (newFileType: { section: string; index: number }, tem
   }, [fetchData]);
 
   return { isSimpleContent: isSimpleContent, fileExtension: fileExtension };
+};
+
+export const alertDialog = async (
+  icon: Icon,
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction?: () => void
+) => {
+  const options: Alert.Options = {
+    icon: icon,
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

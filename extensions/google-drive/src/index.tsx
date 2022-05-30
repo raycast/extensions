@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, createContext, useContext } from "react";
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Color, openExtensionPreferences } from "@raycast/api";
 import { existsSync } from "fs";
 import { dirname } from "path";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
@@ -10,16 +10,20 @@ import {
   clearAllFilePreviewsCache,
   displayPath,
   escapePath,
-  fileMetadataMarkdown,
+  filePreview,
   getDriveRootPath,
   initialSetup,
   isEmpty,
+  log,
 } from "./utils";
+import { SPINNER_GIF_PATH } from "./constants";
 
 type CommandContextType = {
   handleToggleFavorite: (file: FileInfo) => void;
   reindexFiles: () => void;
-  fileDetailsMarkup: string;
+  selectedFile: FileInfo | null;
+  toggleDetails: () => void;
+  isShowingDetail: boolean;
 };
 const CommandContext = createContext<CommandContextType | null>(null);
 const useCommandContext = () => {
@@ -34,7 +38,6 @@ const useCommandContext = () => {
 
 const Command = () => {
   const drivePath = getDriveRootPath();
-  const [fileDetailsMarkup, setFileDetailsMarkup] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText] = useDebounce(searchText, 100);
@@ -43,14 +46,11 @@ const Command = () => {
     favorites: Array<FileInfo>;
     selected: FileInfo | null;
   }>({ filtered: [], favorites: [], selected: null });
+  const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [filesIndexGeneratedAt, setFilesIndexGeneratedAt] = useState<Date | null>(null);
   const db = useDb();
 
   useEffect(initialSetup, []);
-
-  useEffect(() => {
-    (async () => setFileDetailsMarkup(await fileMetadataMarkdown(files.selected)))();
-  }, [files.selected]);
 
   useEffect(() => {
     (async () => {
@@ -65,22 +65,11 @@ const Command = () => {
       }
 
       if (db) {
-        const alreadyIndexed = !!(await filesLastIndexedAt());
         try {
-          const toast = showToast({
-            style: Toast.Style.Animated,
-            title: `${alreadyIndexed ? "Updating" : "Indexing"} files cache index ${
-              alreadyIndexed ? "" : "for the first time"
-            }`,
-            message: "This may take some time, please wait...",
-          });
-
-          const isIndexed = await indexFiles(drivePath, db);
+          const isIndexed = await indexFiles(db);
           if (isIndexed) {
             setFilesIndexGeneratedAt(await filesLastIndexedAt());
           }
-
-          (await toast).hide();
 
           if (files.filtered.length === 0) {
             setIsFetching(true);
@@ -91,7 +80,7 @@ const Command = () => {
             }));
           }
         } catch (e) {
-          console.error(e);
+          log("error", e);
           showToast({
             style: Toast.Style.Failure,
             title: "Error! Is Google Drive app running and accessible?",
@@ -133,17 +122,16 @@ const Command = () => {
     setIsFetching(true);
     setFiles({ filtered: [], favorites: [], selected: null });
 
-    showToast({ style: Toast.Style.Animated, title: "Rebuilding files cache index..." });
     try {
-      const isIndexed = await indexFiles(drivePath, db, { force: true });
+      const isIndexed = await indexFiles(db, { force: true });
 
       if (isIndexed) {
         setFilesIndexGeneratedAt(await filesLastIndexedAt());
-        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
         showToast({ style: Toast.Style.Success, title: "Done rebuilding files index! 🎉" });
+        setFiles({ filtered: queryFiles(db, ""), favorites: queryFavoriteFiles(db), selected: null });
       }
     } catch (e) {
-      console.error(e);
+      log("error", e);
       showToast({
         style: Toast.Style.Failure,
         title: "💥 Could not rebuild files index!",
@@ -151,7 +139,7 @@ const Command = () => {
     } finally {
       setIsFetching(false);
     }
-  }, [drivePath, db]);
+  }, [db]);
 
   const handleToggleFavorite = useCallback(
     (file: FileInfo) => {
@@ -173,10 +161,14 @@ const Command = () => {
     setFiles((prevFiles) => ({ ...prevFiles, selected: file }));
   }, 100);
 
+  const toggleDetails = () => setIsShowingDetail((prevIsShowingDetail) => !prevIsShowingDetail);
+
   return (
-    <CommandContext.Provider value={{ handleToggleFavorite, reindexFiles, fileDetailsMarkup }}>
+    <CommandContext.Provider
+      value={{ handleToggleFavorite, reindexFiles, selectedFile: files.selected, toggleDetails, isShowingDetail }}
+    >
       <List
-        isShowingDetail={files.filtered.length > 0}
+        isShowingDetail={isShowingDetail && files.filtered.length > 0}
         enableFiltering={false}
         onSearchTextChange={setSearchText}
         searchBarPlaceholder={`Fuzzy search in ${displayPath(drivePath)}`}
@@ -208,16 +200,7 @@ const Command = () => {
         ) : (
           <List.EmptyView
             title={isFetching ? "Fetching files, please wait..." : "No files found"}
-            actions={
-              <ActionPanel>
-                {!isFetching && (
-                  <ActionPanel.Section title="General Actions">
-                    <ReindexFilesCacheAction />
-                    <ClearFilePreviewsCacheAction />
-                  </ActionPanel.Section>
-                )}
-              </ActionPanel>
-            }
+            actions={<ActionPanel>{!isFetching && <GeneralActions showToggleDetailsAction={false} />}</ActionPanel>}
           />
         )}
       </List>
@@ -230,15 +213,18 @@ type ListItemProps = {
   idPrefix: "__fav__" | "";
 };
 const ListItem = ({ file, idPrefix }: ListItemProps) => {
-  const { handleToggleFavorite, fileDetailsMarkup } = useCommandContext();
+  const { handleToggleFavorite } = useCommandContext();
 
   return (
     <List.Item
       id={`${idPrefix}${file.displayPath}`}
       key={file.displayPath}
       icon={{ fileIcon: file.path }}
-      title={`${file.favorite ? "⭐ " : ""}${file.name}`}
-      detail={<List.Item.Detail markdown={fileDetailsMarkup} />}
+      title={file.name}
+      accessories={
+        file.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
+      detail={<ListItemDetail file={file} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="File Actions">
@@ -262,36 +248,87 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="General Actions">
-            <ReindexFilesCacheAction />
-            <ClearFilePreviewsCacheAction />
-          </ActionPanel.Section>
+          <GeneralActions />
         </ActionPanel>
       }
     />
   );
 };
 
-const ReindexFilesCacheAction = () => {
-  const { reindexFiles } = useCommandContext();
+type ListItemDetailProps = {
+  file: FileInfo;
+};
+const ListItemDetail = ({ file }: ListItemDetailProps) => {
+  const { selectedFile, isShowingDetail } = useCommandContext();
+  const [previewImage, setPreviewImage] = useState(`<img src="file://${SPINNER_GIF_PATH}" />`);
+
+  useEffect(() => {
+    if (file.displayPath === selectedFile?.displayPath && isShowingDetail) {
+      const controller = new AbortController();
+      filePreview(file, controller).then((image) => {
+        if (!controller.signal.aborted) {
+          setPreviewImage(image);
+        }
+      });
+      return () => {
+        controller.abort();
+      };
+    }
+  }, [selectedFile, isShowingDetail]);
 
   return (
-    <Action
-      title="Reindex Files Cache"
-      icon={Icon.Hammer}
-      onAction={reindexFiles}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+    <List.Item.Detail
+      markdown={previewImage}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Name" text={file.name} icon={{ fileIcon: file.path }} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Where" text={file.displayPath} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Size" text={file.fileSizeFormatted} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Created" text={new Date(file.createdAt).toLocaleString()} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Updated" text={new Date(file.updatedAt).toLocaleString()} />
+        </List.Item.Detail.Metadata>
+      }
     />
   );
 };
 
-const ClearFilePreviewsCacheAction = () => (
-  <Action
-    title="Clear File Previews Cache"
-    icon={Icon.Trash}
-    onAction={clearAllFilePreviewsCache}
-    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-  />
-);
+const GeneralActions = ({ showToggleDetailsAction = true }) => {
+  const { reindexFiles, toggleDetails } = useCommandContext();
+
+  return (
+    <ActionPanel.Section title="General Actions">
+      {showToggleDetailsAction ? (
+        <Action
+          title="Toggle Details"
+          icon={Icon.Sidebar}
+          onAction={toggleDetails}
+          shortcut={{ modifiers: ["cmd"], key: "b" }}
+        />
+      ) : null}
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+      />
+      <Action
+        title="Reindex Files Cache"
+        icon={Icon.Hammer}
+        onAction={reindexFiles}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      />
+      <Action
+        title="Clear File Previews Cache"
+        icon={Icon.Trash}
+        onAction={clearAllFilePreviewsCache}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+      />
+    </ActionPanel.Section>
+  );
+};
 
 export default Command;

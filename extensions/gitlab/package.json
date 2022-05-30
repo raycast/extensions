@@ -195,7 +195,8 @@
   ],
   "contributors": [
     "Loskir",
-    "immint023"
+    "immint023",
+    "duboiss"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

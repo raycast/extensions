@@ -1,5 +1,27 @@
 # Google Drive Changelog
 
+## [Use new List.Item.Detail metadata prop] - 2022-05-18
+
+- Revamped the `List.Item.Detail` component to use the new `metadata` prop.
+- Added an "Open Extension Preferences" general action.
+- Updated file preview logic to fetch a fallback file icon using `Cocoa`'s `NSWorkspace.icon(forFile:)` API when the file preview fails to generate.
+
+## [Minor update to the database schema] - 2022-05-16
+
+- Added a unique index on the `files.displayPath` column since we use it to look up files in the database. This should _slightly_ speed up the search.
+
+## [Configurable re-indexing interval] - 2022-05-15
+
+- Added configurable `Auto Reindexing Interval` setting to the preferences.
+
+## [Faster indexing with progress] - 2022-05-06
+
+- Show the indexing progress in percentage + processed/total format.
+
+## [Toggle details] - 2022-05-03
+
+- Added a general action to toggle the right-side details view.
+
 ## [Support favorites] - 2022-05-01
 
 - Added ability to favorite/unfavorite files.

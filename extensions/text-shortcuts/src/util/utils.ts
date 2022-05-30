@@ -1,21 +1,21 @@
-import { Form, getPreferenceValues } from "@raycast/api";
+import { Form } from "@raycast/api";
 import Values = Form.Values;
 
 export const regexPunctuation = /\p{Z}|\p{P}|\p{S}/gu;
 
-export const preferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    annotation: preferencesMap.get("annotation"),
-    case: preferencesMap.get("case"),
-    coder: preferencesMap.get("coder"),
-    format: preferencesMap.get("format"),
-    markdown: preferencesMap.get("markdown"),
-    time: preferencesMap.get("time"),
-    rememberTag: preferencesMap.get("remember-tag"),
-    detail: preferencesMap.get("detail"),
-  };
-};
+export interface Preference extends Values {
+  closeMainWindow: boolean;
+  annotation: string;
+  caser: string;
+  coder: string;
+  format: string;
+  markdown: string;
+  time: string;
+  rememberTag: boolean;
+  showDetail: boolean;
+  showTag: boolean;
+}
+
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
@@ -59,4 +59,41 @@ export function calculateCharacter(input: string) {
     characterWithoutPunctuation: input.replaceAll(/\p{Z}|\p{P}|\p{S}/gu, "").length,
     line: Array.from(input.matchAll(/\n/g)).length + 1,
   };
+}
+
+export function buildRegexp(content: string) {
+  try {
+    if (eval(content) instanceof RegExp) {
+      const regSource = content.substring(content.indexOf("/") + 1, content.lastIndexOf("/"));
+      const regModifier = content.substring(content.lastIndexOf("/") + 1);
+      return new RegExp(regSource, regModifier);
+    }
+  } catch (e) {
+    console.error("[buildRegexp] " + String(e));
+  }
+  return content;
+}
+
+export function camelCaseToOtherCase(str: string, linkCharacter: string) {
+  let finalStr = str.replaceAll(" ", "");
+  try {
+    let outString = "";
+    finalStr.split("").forEach((value, index) => {
+      if (index === 0) {
+        outString = outString + value.toLowerCase();
+      } else {
+        isUpper(value)
+          ? (outString = outString + linkCharacter + value.toLowerCase())
+          : (outString = outString + value);
+      }
+    });
+    finalStr = outString;
+  } catch (e) {
+    console.error(String(e));
+  }
+  return finalStr;
+}
+
+function isUpper(char: string) {
+  return !/\d/.test(char) && char !== char.toLowerCase();
 }

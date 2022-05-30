@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docker",
   "title": "Docker",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Manage Docker with Raycast",
   "icon": "docker-icon.png",
   "author": "priithaamer",

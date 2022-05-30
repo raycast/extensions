@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { TweetList } from "../components/tweet";
 import { loggedInUserAccount, refreshTweets, twitterClient, useRefresher } from "../twitterapi";
@@ -10,7 +10,7 @@ export default function MyTweetList() {
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Error", error);
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
 }

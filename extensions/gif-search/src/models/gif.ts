@@ -1,4 +1,5 @@
-import { environment } from "@raycast/api";
+// Height of the list item detail window when metadata is shown
+const DETAIL_WINDOW_HEIGHT = 190;
 
 export interface IGif {
   id: string | number;
@@ -22,12 +23,7 @@ export interface IGif {
     }[];
     tags?: string[];
   };
-  attribution?:
-    | {
-        dark: string;
-        light: string;
-      }
-    | string;
+  attribution?: string;
 }
 
 export type APIOpt = { offset?: number; limit?: number; abort?: AbortController };
@@ -38,17 +34,7 @@ export interface IGifAPI {
   gifs: (id: string[]) => Promise<IGif[]>;
 }
 
-export function renderGifMarkdownDetails(gif: IGif) {
-  let md = `
-### ${gif.title}
-
-<img alt="${gif.title}" src="${gif.gif_url}" height="200" />
-
-  `;
-
-  if (gif.attribution) {
-    md += `<img height="36" alt="Powered by" src="file:${environment.assetsPath}/${gif.attribution}" />`;
-  }
-
-  return md;
+export function renderGifMarkdownDetails(gif: IGif, limitHeight?: boolean) {
+  const height = limitHeight ? DETAIL_WINDOW_HEIGHT : "";
+  return `<img alt="${gif.title}" src="${gif.gif_url}" height="${height}" />`;
 }

@@ -1,5 +1,5 @@
 import { Icon, LocalStorage } from "@raycast/api";
-import { calculateCharacter, isEmpty, regexPunctuation } from "./utils";
+import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
 import { Md5 } from "ts-md5/dist/md5";
 
 enum Tags {
@@ -36,6 +36,8 @@ enum Cases {
   PASCAL = "PascalCase",
   SNAKE = "snake_case",
   KEBAB = "kebab-case",
+  CAMEL_TO_SNAKE = "camelCase to snake_case",
+  CAMEL_TO_KEBAB = "camelCase to kebab-case",
 }
 export const cases = Object.values(Cases);
 
@@ -180,11 +182,23 @@ export function runShortcut(input: string, tactions: Taction[]) {
     tactions.map((value) => {
       switch (value.type) {
         case TactionType.DELETE: {
-          output = output.replaceAll(value.content[0], "");
+          const searchValue = buildRegexp(value.content[0]);
+          if (typeof searchValue == "string") {
+            output = output.replaceAll(searchValue, "");
+          } else {
+            output = output.replace(searchValue, "");
+          }
+          output = output.length === 0 ? " " : output;
           break;
         }
         case TactionType.REPLACE: {
-          output = output.replaceAll(value.content[0], value.content[1]);
+          const searchValue = buildRegexp(value.content[0]);
+          if (typeof searchValue == "string") {
+            output = output.replaceAll(searchValue, isEmpty(value.content[1]) ? "" : value.content[1]);
+          } else {
+            output = output.replace(searchValue, isEmpty(value.content[1]) ? "" : value.content[1]);
+          }
+          output = output.length === 0 ? " " : output;
           break;
         }
         case TactionType.AFFIX: {
@@ -207,6 +221,7 @@ export function runShortcut(input: string, tactions: Taction[]) {
     });
     return output;
   } catch (e) {
+    console.error("runShortcut " + String(e));
     return input;
   }
 }
@@ -351,6 +366,12 @@ function tactionCase(input: string, taction: Taction) {
       }
       return outputArray.join("-");
     }
+    case Cases.CAMEL_TO_SNAKE: {
+      return camelCaseToOtherCase(input, "_");
+    }
+    case Cases.CAMEL_TO_KEBAB: {
+      return camelCaseToOtherCase(input, "-");
+    }
     default:
       return input;
   }
@@ -394,8 +415,7 @@ function tactionTransform(input: string, taction: Taction) {
   switch (taction.content[0]) {
     case Transform.STAMP_TO_TIME_LOCAL: {
       if (/^[0-9]*$/.test(input)) {
-        const timeT = new Date(Number(input)).toLocaleString().slice(0, 19);
-        return timeT.replace("T", " ").replaceAll("/", "-");
+        return new Date(Number(input)).toLocaleString();
       } else {
         return input;
       }

@@ -7,7 +7,8 @@
   "author": "dieserRobin",
   "contributors": [
     "suth",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "MiracleXYZ"
   ],
   "license": "MIT",
   "preferences": [
@@ -136,6 +137,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

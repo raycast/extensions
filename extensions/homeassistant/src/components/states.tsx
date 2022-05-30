@@ -53,6 +53,7 @@ import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
+import { ShowWeatherAction, weatherConditionToIcon, weatherStatusToIcon } from "./weather";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -224,6 +225,8 @@ function getIcon(state: State): Image.ImageLike | undefined {
       source = "clock-time-four.png";
     }
     return { source: source, tintColor: PrimaryIconColor };
+  } else if (e.startsWith("weather")) {
+    return { source: weatherConditionToIcon(state.state) };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -1026,6 +1029,30 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <UpdateShowChangelog state={state} />
             <UpdateOpenInBrowser state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Install">
+            <UpdateInstallAction state={state} />
+            <UpdateSkipVersionAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "weather": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ShowWeatherAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Install">
             <UpdateInstallAction state={state} />

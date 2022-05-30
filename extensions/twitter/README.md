@@ -78,6 +78,21 @@ After all these steps you should have all required 4 tokens.
 
 Store them in a secure box, twitter want display that again for you.
 
+You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will get an `403` error.
+
+- Click on your Twitter app on https://apps.twitter.com 
+- Navigate to `User authentication settings`
+- Press `Set up`
+  - Activate `OAuth 1.0a`
+  - Choose your App permissions as you like
+  - Set `https://raycast.com/redirect` as `Callback URI` 
+  - Set `https://raycast.com` as Website URL
+  - Press on `Save`
+
+## v1 vs v2 API
+Twitter has 2 APIs - `v1` and `v2`. Your Twitter app needs to have enabled `v1` access, otherwise you will get a `403` error.
+The `v2` API of Twitter is still in progress and not all features are available which would be required for this extension.
+
 ## Showcases
 
 ### Tweets from your timelime
