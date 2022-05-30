@@ -52,7 +52,10 @@ jobs:
           else
             echo "No changes, skipping sync."
           fi
-      - name: Merg
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
+      - name: Merge
         run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
       - name: Notify Failure to Slack
         if: failure()
