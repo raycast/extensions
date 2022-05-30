@@ -1,8 +1,8 @@
 # Apple Music Changelog
 
-## [Fix] - 2022-05-15
+## [Fix] - 2022-05-30
 
-Fixed issue #1692
+Fixed issue that caused the extension to crash
 
 ## [Track Rating / Fixes] - 2022-05-05
 

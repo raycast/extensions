@@ -37,11 +37,14 @@ export default function PlaySelected() {
     pipe(
       playlistKind,
       music.playlists.getPlaylists,
-      TE.mapLeft((_) => showToast(Toast.Style.Failure, "Could not get your playlists")),
+      TE.mapLeft((e) => {
+        console.error(e);
+        showToast(Toast.Style.Failure, "Could not get your playlists");
+      }),
       TE.map(
         flow(
           parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind.split(" ")[0])(data),
+          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
           setPlaylists
         )
       )
