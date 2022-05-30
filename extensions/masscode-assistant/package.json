@@ -15,7 +15,25 @@
       "name": "index",
       "title": "MassCode Assistant",
       "description": "Fetch snippets from massCode app",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [{
+          "name": "sort_order",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort order",
+          "data": [
+            {
+              "title": "Sort by last copied",
+              "value": "last_copied"
+            },
+            {
+              "title": "Keep massCode original sort",
+              "value": "original"
+            }
+          ],
+          "description": "How snippets are ordered",
+          "default": "last_copied"
+        }]
     }
   ],
   "dependencies": {

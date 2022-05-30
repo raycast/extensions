@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
-import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../utils/directory-info";
-import { getOpenFinderWindowPath } from "../utils/common-utils";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
+import { checkDirectoryValid } from "../utils/common-utils";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
+import { FileContentInfo } from "../types/file-content-info";
+import { getOpenFinderWindowPath } from "../utils/applescript-utils";
 
 //for refresh useState
 export const refreshNumber = () => {
-  return new Date().getTime();
+  return Date.now();
 };
 
 //open common directory
@@ -35,12 +37,16 @@ export const getCommonDirectory = (
   const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
 
   const fetchData = useCallback(async () => {
-    setCommonDirectory(await getDirectory(localDirectoryKey, sortBy));
     if (showOpenDirectory) {
       setOpenDirectory(await getOpenFinderWindowPath());
     }
+    const _localDirectory = await getDirectory(localDirectoryKey, sortBy);
+    const validDirectory = checkDirectoryValid(_localDirectory);
+    setCommonDirectory(validDirectory);
 
     setLoading(false);
+
+    await LocalStorage.setItem(localDirectoryKey, JSON.stringify(validDirectory));
   }, [refresh]);
 
   useEffect(() => {
@@ -51,16 +57,19 @@ export const getCommonDirectory = (
 };
 
 export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
-  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const [directoryInfo, setDirectoryInfo] = useState<FileContentInfo>({} as FileContentInfo);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
+    setIsDetailLoading(true);
     setDirectoryInfo(getDirectoryContent(directoryPath));
+    setIsDetailLoading(false);
   }, [updateDetail, directoryPath]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return directoryInfo;
+  return { directoryInfo: directoryInfo, isDetailLoading: isDetailLoading };
 };
 
 export async function getDirectory(key: string, sortBy: string) {

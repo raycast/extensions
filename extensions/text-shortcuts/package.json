@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "case-word",
+  "name": "text-shortcuts",
   "title": "Text Shortcuts",
-  "description": "Use Text Shortcuts to handle text from the selection or clipboard.",
+  "description": "Use Text Shortcuts to handle text from the selection or clipboard",
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -20,20 +20,28 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "remember-tag",
+          "name": "rememberTag",
           "type": "checkbox",
           "required": false,
-          "title": "Preferences",
+          "title": "Advanced Preferences",
           "label": "Remember Filter Tag",
           "description": "Remember Shortcut Filter Tag.",
           "default": true
         },
         {
-          "name": "detail",
+          "name": "showDetail",
           "type": "checkbox",
           "required": false,
           "label": "Show Shortcut Detail",
           "description": "Show Shortcut's text on the right.",
+          "default": true
+        },
+        {
+          "name": "showTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Shortcut Tag",
+          "description": "Show Shortcut's first tag on the right.",
           "default": true
         },
         {
@@ -46,7 +54,7 @@
           "default": true
         },
         {
-          "name": "case",
+          "name": "caser",
           "type": "checkbox",
           "required": false,
           "label": "Case",
@@ -104,8 +112,19 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "closeMainWindow",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced Preferences",
+      "label": "Close Main Window",
+      "description": "Close the Raycast main window after running a shortcut.",
+      "default": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
+    "@raycast/api": "^1.35.0",
     "ts-md5": "^1.2.11"
   },
   "devDependencies": {

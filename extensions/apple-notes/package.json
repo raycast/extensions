@@ -61,7 +61,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.35.1",
     "run-applescript": "^6.0.0",
     "sugar": "^2.0.6"
   },

@@ -16,7 +16,10 @@ export default function Command() {
 
   async function handleSubmit(values: CommandForm) {
     if (!values.content) {
-      return showToast({ style: Toast.Style.Failure, title: "🐝 Type something to get started" });
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "🐝 Type something to get started",
+      });
     }
     validateUserConfigGraphPath()
       .catch((e) => {

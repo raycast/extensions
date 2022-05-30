@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs";
-import { CacheType, Preferences, RepoSearchResponse, SourceRepo } from "./types";
+import { CacheType, Preferences, ProjectTypeConfig, RepoSearchResponse, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
-import { buildAllProjectsCache } from "./cache/all-projects-cache-builder";
+import { buildAllProjectsCache } from "./cache/all-projects-cache-builder-v2";
+import { getRepoKey, isProjectTypeEnabled } from "./common-utils";
+import applicationConfig from "./application-config.json";
 
 export function resolvePath(filepath: string): string {
   if (filepath.length > 0 && filepath[0] === "~") {
@@ -65,45 +67,70 @@ export function useRepoCache(query: string | undefined): {
 
   let cancel = false;
   const repos = allProjectsCache.repos;
+  let enabledProjectTypes: string[] = [];
 
   function filterRepos(repos: SourceRepo[], query: string): SourceRepo[] {
-    return repos.filter((repo) => repo.name.toLocaleLowerCase().includes(query.toLowerCase()));
+    const queries = query.split(" ");
+    const dir = queries.filter((q) => q.startsWith("dir:") && q.split(":").length > 1)[0]?.split(":")[1];
+    const type = queries.filter((q) => q.startsWith("type:") && q.split(":").length > 1)[0]?.split(":")[1];
+    const name = queries.filter((q) => !q.includes(":"))[0];
+    let filteredRepos: SourceRepo[] = repos;
+    if (dir) {
+      filteredRepos = filteredRepos.filter((repo) =>
+        repo.fullPath.toLocaleLowerCase().includes(dir.trim().toLowerCase())
+      );
+    }
+
+    if (type) {
+      filteredRepos = filteredRepos.filter((repo) => repo.type.toLocaleLowerCase().includes(type.trim().toLowerCase()));
+    }
+
+    if (name) {
+      filteredRepos = filteredRepos.filter((repo) => repo.name.toLocaleLowerCase().includes(name.trim().toLowerCase()));
+    }
+
+    return filteredRepos;
   }
 
-  function filterAndSetFullResponse(repos: SourceRepo[]) {
+  function filterAndSetFullResponse(repos: SourceRepo[]): void {
     let filteredAllRepos = repos;
     let filteredRecentRepos = recentlyAccessedCache.repos;
     let filteredPinnedRepos = pinnedCache.repos;
-    let allProjectsSectionTitle = `${repos.length} Project${repos.length != 1 ? "s" : ""}`;
-    const recentlyAccessedProjectsSectionTitle = `Recent Projects${
-      recentlyAccessedCache.repos?.length != 1 ? "s" : ""
-    }`;
+
+    if (enabledProjectTypes?.length > 0) {
+      filteredAllRepos = filteredAllRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+      filteredRecentRepos = filteredRecentRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+      filteredPinnedRepos = filteredPinnedRepos.filter((repo) => enabledProjectTypes.includes(repo.type));
+    }
 
     if (query && query.length > 0) {
       filteredAllRepos = filterRepos(filteredAllRepos, query);
       filteredRecentRepos = filterRepos(filteredRecentRepos, query);
       filteredPinnedRepos = filterRepos(filteredPinnedRepos, query);
-      allProjectsSectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""} Found`;
     }
-    const filteredRecentReposSet = new Set(filteredRecentRepos);
-    const allButRecentRepos = [...filteredAllRepos].filter((x) => !filteredRecentReposSet.has(x));
+
+    const allButRecentRepos = [...filteredAllRepos].filter((all) => {
+      return !filteredRecentRepos.some((recent) => {
+        return getRepoKey(all) === getRepoKey(recent);
+      });
+    });
 
     setResponse({
       all: {
-        sectionTitle: allProjectsSectionTitle,
+        sectionTitle: `${filteredAllRepos.length} project${filteredAllRepos.length != 1 ? "s" : ""} Found`,
         repos: allButRecentRepos || [],
       },
       recent:
         filteredRecentRepos?.length > 0
           ? {
-              sectionTitle: recentlyAccessedProjectsSectionTitle,
+              sectionTitle: `Recent project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
               repos: filteredRecentRepos || [],
             }
           : undefined,
       pinned:
         filteredPinnedRepos?.length > 0
           ? {
-              sectionTitle: "Pinned Projects",
+              sectionTitle: `Pinned project${filteredRecentRepos?.length != 1 ? "s" : ""}`,
               repos: filteredPinnedRepos || [],
             }
           : undefined,
@@ -127,7 +154,12 @@ export function useRepoCache(query: string | undefined): {
         if (unresolvedPaths.length > 0) {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
-        const repos = await buildAllProjectsCache(repoPaths, preferences.repoScanDepth ?? 3);
+
+        const repos = await buildAllProjectsCache(repoPaths, preferences);
+
+        enabledProjectTypes = (applicationConfig.projectTypes as ProjectTypeConfig[])
+          .filter((project) => isProjectTypeEnabled(project.openWithKey, preferences))
+          .map((project) => project.type);
 
         if (!cancel) {
           filterAndSetFullResponse(repos);
