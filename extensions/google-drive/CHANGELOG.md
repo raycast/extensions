@@ -1,5 +1,9 @@
 # Google Drive Changelog
 
+## [Remove Swift dependency] - {PR_MERGE_DATE}
+
+- Removed Swift dependency that was used to get the fallback file icons using `Cocoa`'s `NSWorkspace.icon(forFile:)` API since not all users have Developer Tools installed.
+
 ## [Use new List.Item.Detail metadata prop] - 2022-05-18
 
 - Revamped the `List.Item.Detail` component to use the new `metadata` prop.
