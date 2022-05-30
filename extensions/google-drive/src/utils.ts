@@ -3,11 +3,13 @@ import util from "util";
 import fs, { accessSync, existsSync, mkdirSync, PathLike, readdirSync, rm, rmSync, statSync } from "fs";
 import { extname, join, resolve } from "path";
 import { homedir } from "os";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Fzf } from "fzf";
 import fg from "fast-glob";
 
 import {
+  DEFAULT_FILE_PREVIEW_IMAGE_PATH,
+  DEFAULT_FOLDER_PREVIEW_IMAGE_PATH,
   FILE_SIZE_UNITS,
   IGNORED_GLOBS,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
@@ -15,6 +17,10 @@ import {
   TMP_FILE_PREVIEWS_PATH,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
+
+export const log = (type: "debug" | "error", ...args: unknown[]) => {
+  if (environment.isDevelopment) type === "error" ? console.error(...args) : console.log(...args);
+};
 
 export const fuzzyMatch = (source: string, target: string): number => {
   const result = new Fzf([target], { sort: false }).find(source);
@@ -72,6 +78,7 @@ const filePreviewPath = async (file: FileInfo, controller: AbortController): Pro
     try {
       await execAsync(`qlmanage -t -s 256 ${escapePath(file.path)} -o ${TMP_FILE_PREVIEWS_PATH}`, {
         signal: controller.signal,
+        timeout: 2000 /* milliseconds */,
         killSignal: "SIGKILL",
       });
     } catch (e) {
@@ -131,40 +138,15 @@ export const filePreview = async (file: FileInfo | null, controller: AbortContro
 
   const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
-  const previewImage = previewExists ? `<img src="${previewPath}" alt="${file.name}" height="200" />` : "";
 
-  return previewImage;
-};
-
-export const fileMetadataMarkdown = (file: FileInfo | null): string => {
-  if (!file) {
-    return "";
+  if (previewExists) {
+    return `<img src="${previewPath}" alt="${file.name}" />`;
+  } else {
+    const iconPath = statSync(file.path).isDirectory()
+      ? DEFAULT_FOLDER_PREVIEW_IMAGE_PATH
+      : DEFAULT_FILE_PREVIEW_IMAGE_PATH;
+    return `<img src="file://${iconPath}" alt="${file.name}" width="192" height="192" />`;
   }
-
-  return `
-## File Information
-**Name**\n
-${file.name}
-
----
-
-**Path**\n
-\`${file.displayPath}\`
-
----
-
-**Size**\n
-${file.fileSizeFormatted}
-
----
-
-**Created**\n
-${new Date(file.createdAt).toLocaleString()}
-
----
-
-**Updated**\n
-${new Date(file.updatedAt).toLocaleString()}`;
 };
 
 type DriveFileStreamOptions = { stats?: boolean };

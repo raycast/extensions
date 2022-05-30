@@ -27,7 +27,7 @@ export function getServices() {
   });
 }
 
-export function getServiceTitle(service: ServiceName) {
+export function getServiceTitle(service?: ServiceName) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
       return "Giphy";

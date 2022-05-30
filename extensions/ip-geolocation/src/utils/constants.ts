@@ -1,4 +1,5 @@
 export const IP_GEOLOCATION_API = "http://ip-api.com/json/";
+export const WORLD_TIME_API = "http://worldtimeapi.org/api/timezone/";
 
 export const listIcons = [
   { light: "lists/ip.png", dark: "lists/ip@dark.png" },

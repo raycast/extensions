@@ -73,7 +73,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
 }
 
 export function MilestoneList(props: { project?: Project; group?: Group }): JSX.Element {
-  const isGroup = props.group ? true : false;
+  const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
     fullPath = props.group ? props.group.full_path : "";
@@ -102,7 +102,7 @@ export function useSearch(
 } {
   const [milestones, setMilestones] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

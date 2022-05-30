@@ -1,20 +1,24 @@
 import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
   List,
   LocalStorage,
+  openExtensionPreferences,
+  showHUD,
   showToast,
   Toast,
-  Clipboard,
-  ActionPanel,
-  Action,
-  Icon,
   useNavigation,
-  confirmAlert,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchItemInput } from "./util/input";
 import { runShortcut, Shortcut, ShortcutSource, tags } from "./util/shortcut";
 import CreateShortcut from "./create-shortcut";
-import { preferences } from "./util/utils";
+import { Preference } from "./util/utils";
 import { ANNOTATIONS_SHORTCUTS } from "./build-in/annotation";
 import { MARKDOWNS_SHORTCUTS } from "./build-in/markdown";
 import { CASES_SHORTCUTS } from "./build-in/case";
@@ -30,6 +34,8 @@ export default function ShortcutLibrary() {
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [selectId, setSelectId] = useState<number>(0);
   const { push } = useNavigation();
+  const { closeMainWindow, annotation, caser, coder, format, markdown, time, rememberTag, showDetail, showTag } =
+    getPreferenceValues<Preference>();
 
   useEffect(() => {
     async function _fetchBuildInShortcut() {
@@ -38,27 +44,26 @@ export default function ShortcutLibrary() {
       let _userShortcuts = [];
       if (typeof _localStorage == "string") {
         _userShortcuts = JSON.parse(_localStorage);
-        console.debug(JSON.stringify(_userShortcuts));
         setUserShortcuts(_userShortcuts);
       }
       //build-in
       let _buildInShortcuts: Shortcut[] = [];
-      if (preferences().annotation) {
+      if (annotation) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(ANNOTATIONS_SHORTCUTS)];
       }
-      if (preferences().case) {
+      if (caser) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(CASES_SHORTCUTS)];
       }
-      if (preferences().coder) {
+      if (coder) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(CODERS_SHORTCUTS)];
       }
-      if (preferences().format) {
+      if (format) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(FORMAT_SHORTCUTS)];
       }
-      if (preferences().markdown) {
+      if (markdown) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(MARKDOWNS_SHORTCUTS)];
       }
-      if (preferences().time) {
+      if (time) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(TIMES_SHORTCUTS)];
       }
       setAllShortcuts([..._userShortcuts.concat(_buildInShortcuts)]);
@@ -80,7 +85,7 @@ export default function ShortcutLibrary() {
 
   return (
     <List
-      isShowingDetail={preferences().detail}
+      isShowingDetail={showDetail}
       isLoading={allShortcuts.length == 0}
       searchBarPlaceholder={"Search shortcuts"}
       onSelectionChange={async (id) => {
@@ -89,7 +94,7 @@ export default function ShortcutLibrary() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Shortcut Tags"
-          storeValue={preferences().rememberTag}
+          storeValue={rememberTag}
           onChange={async (newValue) => {
             setTag(newValue);
           }}
@@ -106,8 +111,12 @@ export default function ShortcutLibrary() {
           return (
             <List.Item
               id={index + ""}
-              icon={value.info.icon}
+              icon={{
+                source: value.info.icon,
+                tintColor: value.info.source === ShortcutSource.USER ? Color.Blue : "",
+              }}
               title={value.info.name}
+              accessories={[showTag ? { text: value.info.tag[0], tooltip: `${value.info.tag.join(", ")}` } : {}]}
               key={index}
               detail={<List.Item.Detail markdown={`${detail}`} />}
               actions={(() => {
@@ -121,7 +130,11 @@ export default function ShortcutLibrary() {
                           const _inputItem = await fetchItemInput();
                           const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                           await Clipboard.paste(_runShortcut);
-                          await showToast(Toast.Style.Success, "Pasted result to active app!");
+                          if (closeMainWindow) {
+                            await showHUD("Pasted result to active app");
+                          } else {
+                            await showToast(Toast.Style.Success, "Pasted result to active app!");
+                          }
                         }}
                       />
                       <Action
@@ -134,6 +147,14 @@ export default function ShortcutLibrary() {
                           );
                         }}
                       />
+                      <ActionPanel.Section>
+                        <Action
+                          icon={Icon.Gear}
+                          title="Open Extension Preferences"
+                          shortcut={{ modifiers: ["cmd"], key: "," }}
+                          onAction={openExtensionPreferences}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   );
                 } else {
@@ -147,7 +168,11 @@ export default function ShortcutLibrary() {
                             const _inputItem = await fetchItemInput();
                             const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                             await Clipboard.paste(_runShortcut);
-                            await showToast(Toast.Style.Success, "Pasted result to active app!");
+                            if (closeMainWindow) {
+                              await showHUD("Pasted result to active app");
+                            } else {
+                              await showToast(Toast.Style.Success, "Pasted result to active app!");
+                            }
                           }}
                         />
                         <Action
@@ -170,26 +195,38 @@ export default function ShortcutLibrary() {
                         <Action
                           title={"Remove Shortcut"}
                           icon={Icon.Trash}
-                          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
                           onAction={async () => {
-                            const newShortCuts = [...userShortcuts];
-                            newShortCuts.splice(index, 1);
-                            await showToast(Toast.Style.Success, "Remove shortcut success!");
-                            await LocalStorage.setItem("shortcuts", JSON.stringify(newShortCuts));
-                            const _updateList = [...updateList];
-                            _updateList[0]++;
-                            setUpdateList(_updateList);
+                            if (
+                              await confirmAlert({
+                                icon: Icon.Trash,
+                                title: "Remove Shortcut",
+                                message: `Are you sure you want remove shortcut ${value.info.name}?`,
+                              })
+                            ) {
+                              const newShortCuts = [...userShortcuts];
+                              newShortCuts.splice(index, 1);
+                              await showToast(Toast.Style.Success, "Successfully removed shortcut!");
+                              await LocalStorage.setItem("shortcuts", JSON.stringify(newShortCuts));
+                              const _updateList = [...updateList];
+                              _updateList[0]++;
+                              setUpdateList(_updateList);
+                            }
                           }}
                         />
                         <Action
                           title={"Remove All Shortcuts"}
                           icon={Icon.ExclamationMark}
-                          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                          shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
                           onAction={async () => {
                             if (
-                              await confirmAlert({ title: "Are you sure?", message: "Remove all custom shortcuts" })
+                              await confirmAlert({
+                                icon: Icon.ExclamationMark,
+                                title: "Remove All Shortcuts",
+                                message: "Are you sure you want remove all custom shortcuts?",
+                              })
                             ) {
-                              await showToast(Toast.Style.Success, "Remove all success!");
+                              await showToast(Toast.Style.Success, "Successfully removed all shortcuts!");
                               await LocalStorage.clear();
                               const _updateList = [...updateList];
                               _updateList[0]++;
@@ -197,6 +234,14 @@ export default function ShortcutLibrary() {
                             }
                           }}
                         />
+                        <ActionPanel.Section>
+                          <Action
+                            icon={Icon.Gear}
+                            title="Open Extension Preferences"
+                            shortcut={{ modifiers: ["cmd"], key: "," }}
+                            onAction={openExtensionPreferences}
+                          />
+                        </ActionPanel.Section>
                       </ActionPanel>
                     </>
                   );

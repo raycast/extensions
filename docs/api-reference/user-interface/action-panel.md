@@ -42,10 +42,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                       | Required | Default | Description                                                                                                        |
-| :------- | :--------------------------------------------------------- | :------- | :------ | :----------------------------------------------------------------------------------------------------------------- |
-| children | <code>[ActionPanel.Children](#actionpanel.children)</code> | No       | -       | Sections or Actions. If [Action](./actions.md) elements are specified, a default section is automatically created. |
-| title    | <code>string</code>                                        | No       | -       | The title displayed at the top of the panel                                                                        |
+<PropsTableFromJSDoc component="ActionPanel" />
 
 ### ActionPanel.Section
 
@@ -97,10 +94,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :-------------------------------- |
-| children | <code>[ActionPanel.Section.Children](#actionpanel.section.children)</code> | No       | -       | The item elements of the Section. |
-| title    | <code>string</code>                                                        | No       | -       | Title displayed above the section |
+<PropsTableFromJSDoc component="ActionPanel.Section" />
 
 ### ActionPanel.Submenu
 
@@ -148,13 +142,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                                                                                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :------------------------------------------------------------------------------------------------ |
-| children | <code>[ActionPanel.Submenu.Children](#actionpanel.submenu.children)</code> | No       | -       | Items of the submenu.                                                                             |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                  | No       | -       | The icon displayed for the submenu.                                                               |
-| id       | <code>string</code>                                                        | No       | -       | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code>                  | No       | -       | The keyboard shortcut for the submenu.                                                            |
-| title    | <code>string</code>                                                        | Yes      | -       | The title displayed for submenu.                                                                  |
+<PropsTableFromJSDoc component="ActionPanel.Submenu" />
 
 ## Types
 

@@ -4,12 +4,15 @@ import { showToast, Toast } from "@raycast/api";
 import { IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
 import publicIp from "public-ip";
 import Style = Toast.Style;
+import axios from "axios";
+import { WORLD_TIME_API } from "../utils/constants";
 
 export const searchIpGeolocation = (language: string, searchContent: string) => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(async () => {
+    setIpGeolocation([]);
     if (isEmpty(searchContent) || !searchContent.includes(".")) {
       setLoading(false);
       return;
@@ -33,9 +36,27 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
           };
-          setIpGeolocation(Object.entries(ipGeolocationReadable));
+
+          axios({
+            method: "GET",
+            url: WORLD_TIME_API + ipGeolocationReadable.Timezone,
+          })
+            .then((axiosResponse) => {
+              const dateTime = axiosResponse.data.datetime;
+              const _ipGeolocationReadable = { ...ipGeolocationReadable };
+              _ipGeolocationReadable.Timezone =
+                _ipGeolocationReadable.Timezone + ", " + dateTime.substring(0, dateTime.indexOf(".")).replace("T", " ");
+              setIpGeolocation(Object.entries(_ipGeolocationReadable));
+              setLoading(false);
+            })
+            .catch((reason) => {
+              setIpGeolocation(Object.entries(ipGeolocationReadable));
+              console.error(String(reason));
+              setLoading(false);
+            });
+        } else {
+          setLoading(false);
         }
-        setLoading(false);
       })
       .catch((error: Error) => {
         setLoading(false);
@@ -50,7 +71,7 @@ export const searchIpGeolocation = (language: string, searchContent: string) => 
   return { ipGeolocation: ipGeolocation, loading: loading };
 };
 
-export const searchMyIpGeolocation = (language: string) => {
+export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -58,22 +79,27 @@ export const searchMyIpGeolocation = (language: string) => {
     try {
       const _ipv4 = getIPV4Address();
       const myInternalIpv4 = (isEmpty(_ipv4) ? "" : _ipv4) as string;
-      const _ipv6 = getIPV6Address();
-      const myInternalIpv6 = (isEmpty(_ipv6) ? "" : _ipv6) as string;
+      let myInternalIpv6 = "";
+      if (showIPv6) {
+        const _ipv6 = getIPV6Address();
+        myInternalIpv6 = (isEmpty(_ipv6) ? "" : _ipv6) as string;
+      }
       const myPublicIpv4 = await publicIp
         .v4({ onlyHttps: true })
         .then((ip) => ip)
         .catch(() => "");
-      const myPublicIpv6 = await publicIp
-        .v6({ onlyHttps: true })
-        .then((ip) => ip)
-        .catch(() => "");
+      let myPublicIpv6 = "";
+      if (showIPv6) {
+        myPublicIpv6 = await publicIp
+          .v6({ onlyHttps: true })
+          .then((ip) => ip)
+          .catch(() => "");
+      }
 
       getIPGeolocation(myPublicIpv4, language)
         .then((ipGeolocation: IPGeolocation) => {
-          let ipGeolocationReadable;
           if (ipGeolocation.status === "success") {
-            ipGeolocationReadable = {
+            const ipGeolocationReadable = {
               "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
               "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
                 isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
@@ -87,16 +113,36 @@ export const searchMyIpGeolocation = (language: string) => {
               ISP: ipGeolocation.isp,
               Organization: ipGeolocation.org,
             };
+
+            axios({
+              method: "GET",
+              url: WORLD_TIME_API + ipGeolocationReadable.Timezone,
+            })
+              .then((axiosResponse) => {
+                const dateTime = axiosResponse.data.datetime;
+                const _ipGeolocationReadable = { ...ipGeolocationReadable };
+                _ipGeolocationReadable.Timezone =
+                  _ipGeolocationReadable.Timezone +
+                  ", " +
+                  dateTime.substring(0, dateTime.indexOf(".")).replace("T", " ");
+                setIpGeolocation(Object.entries(_ipGeolocationReadable));
+                setLoading(false);
+              })
+              .catch((reason) => {
+                setIpGeolocation(Object.entries(ipGeolocationReadable));
+                setLoading(false);
+                console.error(String(reason));
+              });
           } else {
-            ipGeolocationReadable = {
+            const ipGeolocationReadable = {
               "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
               "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
                 isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
               }`,
             };
+            setIpGeolocation(Object.entries(ipGeolocationReadable));
+            setLoading(false);
           }
-          setIpGeolocation(Object.entries(ipGeolocationReadable));
-          setLoading(false);
         })
         .catch((error: Error) => {
           setLoading(false);

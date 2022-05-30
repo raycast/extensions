@@ -1,55 +1,27 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Picsum } from "picsum-photos/dist";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
+import { useState } from "react";
 import { ImageDetail } from "./components/image-detail";
-import { commonPreferences } from "./utils/common-utils";
-import { ImageAction } from "./components/image-action";
+import { PicsumImageAction } from "./components/picsum-image-action";
+import { getRandomPlaceholderImageURL } from "./hooks/hooks";
+import { RandomImageConfig, randomImageConfigInit } from "./types/types";
+import { Preferences } from "./types/preferences";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateShortcut() {
-  const [width, setWidth] = useState<string>("300");
-  const [height, setHeight] = useState<string>("300");
-  const [blur, setBlur] = useState<string>("0");
-  const [jpg, setJpg] = useState<boolean>(false);
-  const [grayscale, setGrayscale] = useState<boolean>();
-  const [cache, setCache] = useState<boolean>(false);
-  const [staticRandom, setStaticRandom] = useState<boolean>(true);
+  const { primaryAction, autoRefresh } = getPreferenceValues<Preferences>();
+
+  const [picsumConfig, setPicsumConfig] = useState<RandomImageConfig>(randomImageConfigInit);
   const [refresh, setRefresh] = useState<number>(0);
 
-  const [imageURL, setImageURL] = useState<string>("");
-  const { primaryAction, autoRefresh } = commonPreferences();
-
-  useEffect(() => {
-    async function _fetch() {
-      let _blur = parseFloat(blur);
-      if (isNaN(_blur) || _blur < 0) {
-        _blur = 0;
-      }
-      if (_blur > 10) {
-        _blur = 10;
-      }
-      let _imageURL = Picsum.url({
-        width: parseInt(width),
-        height: parseInt(height),
-        blur: _blur,
-        cache: cache,
-        grayscale: grayscale,
-        jpg: jpg,
-      });
-      if (staticRandom) {
-        _imageURL = _imageURL.replace("https://picsum.photos/", "https://picsum.photos/seed/" + Date.now() + "/");
-      }
-      setImageURL(_imageURL);
-    }
-
-    _fetch().then();
-  }, [width, height, blur, jpg, cache, staticRandom, grayscale, refresh]);
+  const { imageURL } = getRandomPlaceholderImageURL(picsumConfig, refresh);
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <ImageAction
+          <PicsumImageAction
             imageURL={imageURL}
+            size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
             primaryAction={primaryAction}
             autoRefresh={autoRefresh}
             setRefresh={setRefresh}
@@ -62,6 +34,7 @@ export default function CreateShortcut() {
               target={
                 <ImageDetail
                   imageURL={imageURL}
+                  size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
                   primaryAction={primaryAction}
                   autoRefresh={autoRefresh}
                   setRefresh={setRefresh}
@@ -71,84 +44,99 @@ export default function CreateShortcut() {
             <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={imageURL} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {staticRandom && (
+            {picsumConfig.staticRandom && (
               <Action
                 icon={Icon.TwoArrowsClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 title={"Refresh Image URL"}
                 onAction={() => {
-                  setRefresh(refresh + 1);
+                  setRefresh(Date.now);
                 }}
               />
             )}
           </ActionPanel.Section>
+          <ActionOpenPreferences />
         </ActionPanel>
       }
     >
       <Form.TextField
         id={"Width"}
         title="Width"
-        value={width + ""}
+        value={picsumConfig.width + ""}
         info={"Image width"}
         placeholder={"300"}
         onChange={(newValue) => {
-          setWidth(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.width = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.TextField
         id={"Height"}
         title="Height"
-        value={height}
+        value={picsumConfig.height}
         info={"Image height"}
         placeholder={"300"}
         onChange={(newValue) => {
-          setHeight(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.height = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.TextField
         id={"Blur"}
         title="Blur"
-        value={blur}
+        value={picsumConfig.blur}
         placeholder={"0-10"}
         info={"Level of image blurriness form 0-10"}
         onChange={(newValue) => {
-          setBlur(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.blur = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.Checkbox
         id={"JPG"}
         label={"JPG"}
-        value={jpg}
+        value={picsumConfig.jpg}
         info={"Get image url as .jpg"}
         onChange={(newValue) => {
-          setJpg(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.jpg = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.Checkbox
         id={"Grayscale"}
         label={"Grayscale"}
-        value={grayscale}
+        value={picsumConfig.grayscale}
         info={"Image grayscale or normal"}
         onChange={(newValue) => {
-          setGrayscale(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.grayscale = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.Checkbox
         id={"Cache"}
         label={"Cache"}
-        value={cache}
+        value={picsumConfig.cache}
         info={"Allow browser image cache"}
         onChange={(newValue) => {
-          setCache(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.cache = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.Checkbox
         id={"Static Random"}
         label={"Static Random"}
-        value={staticRandom}
+        value={picsumConfig.staticRandom}
         info={"Get the same random image every time based on a seed"}
         onChange={(newValue) => {
-          setStaticRandom(newValue);
+          const _randomImageConfig = { ...picsumConfig };
+          _randomImageConfig.staticRandom = newValue;
+          setPicsumConfig(_randomImageConfig);
         }}
       />
       <Form.Description title="Image URL" text={imageURL} />

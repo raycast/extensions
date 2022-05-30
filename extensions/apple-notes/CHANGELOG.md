@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Fix] - 2022-05-20
+
+- Ignore incompatible caches
+
 ## [Fix] - 2022-05-11
 
 - Skip duplicate notes caused by smart folders.

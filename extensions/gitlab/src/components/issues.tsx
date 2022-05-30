@@ -123,7 +123,7 @@ function useDetail(issueID: number): {
 } {
   const [issueDetail, setIssueDetail] = useState<IssueDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -246,11 +246,7 @@ export function IssueList({
     showToast(Toast.Style.Failure, "Cannot search issue", error);
   }
 
-  if (!issues) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
-  const title = scope == IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
+  const title = scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
 
   return (
     <List
@@ -331,7 +327,7 @@ export function useSearch(
 } {
   const [issues, setIssues] = useState<Issue[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -404,7 +400,7 @@ export function useIssue(
 } {
   const [issue, setIssue] = useState<Issue>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

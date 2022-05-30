@@ -77,7 +77,7 @@ export function useSearch(
 } {
   const [branches, setBranches] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

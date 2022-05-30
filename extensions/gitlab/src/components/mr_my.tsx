@@ -11,7 +11,7 @@ import { MyProjectsDropdown } from "./project";
 
 function MyMRList(props: {
   mrs: MergeRequest[] | undefined;
-  isLoading?: boolean | undefined;
+  isLoading: boolean;
   title?: string;
   performRefetch: () => void;
   searchText?: string | undefined;
@@ -23,10 +23,6 @@ function MyMRList(props: {
     | undefined;
 }): JSX.Element {
   const mrs = props.mrs;
-
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
 
   const refresh = () => {
     props.performRefetch();
@@ -84,7 +80,7 @@ export function useMyMergeRequests(
   project: Project | undefined
 ): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {
