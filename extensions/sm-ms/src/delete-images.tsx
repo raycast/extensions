@@ -5,6 +5,7 @@ import { deleteImageByHash } from "./utils/axios-utils";
 import Style = Toast.Style;
 import { ActionToSmMs } from "./components/action-to-sm-ms";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { isEmpty } from "./utils/common-utils";
 
 export default function DeleteImages() {
   const [hash, setHash] = useState<string>("");
@@ -18,6 +19,10 @@ export default function DeleteImages() {
             title={"Delete Image"}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => {
+              if (isEmpty(hash)) {
+                showToast(Style.Failure, "Hash cannot be empty!").then();
+                return;
+              }
               alertDialog(
                 Icon.Trash,
                 "Delete Image",
