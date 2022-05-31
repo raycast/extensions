@@ -1,6 +1,6 @@
 # Life Progress Changelog
 
-## [Add Feature: Countdown Date] - 2022-06-02
+## [Add Feature: Countdown Date] - {PR_MERGE_DATE}
 
 - Release of Life Progress version 2.0
 - Add feature **Countdown Date**: Now you can add custom countdown dates
