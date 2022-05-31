@@ -2,7 +2,7 @@ import axios from "axios";
 import { SM_MS_BASE_URL } from "./costants";
 import { ImageData, SMMSResponse } from "../types/types";
 import { Clipboard, showToast, Toast } from "@raycast/api";
-import { isEmpty, titleCase } from "./common-utils";
+import { isEmpty, isUrl, titleCase } from "./common-utils";
 import * as fs from "fs";
 import { secretToken } from "../hooks/hooks";
 import FormData = require("form-data");
@@ -25,18 +25,22 @@ export const deleteImageByHash = async (hash: string) => {
 };
 
 export const uploadImage = async (imagePath: string) => {
-  await showToast(Style.Animated, "Uploading image...");
   const formData = new FormData();
   let imageStream;
   if (isEmpty(imagePath)) {
-    showToast(Style.Failure, "Image path cannot be empty!");
+    await showToast(Style.Failure, "Image path cannot be empty!");
+    return;
   }
+  await showToast(Style.Animated, "Uploading image...");
   if (fs.existsSync(imagePath)) {
     //Path
     imageStream = fs.createReadStream(imagePath);
-  } else {
+  } else if (isUrl(imagePath)) {
     //URL
     imageStream = (await axios.get(imagePath, { responseType: "stream" })).data;
+  } else {
+    await showToast(Style.Failure, "Invalid image path!");
+    return;
   }
   formData.append("smfile", imageStream);
 
