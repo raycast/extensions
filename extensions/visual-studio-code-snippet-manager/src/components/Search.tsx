@@ -1,7 +1,8 @@
-import { List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import fs from "fs";
 import { useEffect, useState } from "react";
 import { vsCodePath, vsCodeInsidersPath } from "../data";
+import Editor from "./Editor";
 import SearchSection from "./SearchSection";
 
 type SetItem = Required<Item>;
@@ -40,7 +41,14 @@ export default function Search() {
   }, []);
 
   return (
-    <List isShowingDetail>
+    <List
+      isShowingDetail
+      actions={
+        <ActionPanel>
+          <Action.Push icon={Icon.Pencil} title="Create Snippet" target={<Editor />}></Action.Push>
+        </ActionPanel>
+      }
+    >
       <SearchSection title={"Visual Studio Code"} items={vsCodeItems} />
       <SearchSection title={"Visual Studio Code Insiders"} items={vsCodeInsidersItems} />
     </List>

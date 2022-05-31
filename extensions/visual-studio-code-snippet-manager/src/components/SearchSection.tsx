@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List, popToRoot, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, popToRoot, useNavigation } from "@raycast/api";
 import Editor from "./Editor";
 import Search from "./Search";
 import fs from "fs";
@@ -41,16 +41,16 @@ const SearchSection = ({ items, title }: Props) => {
                 ></Action.CopyToClipboard>
                 <Action.Push
                   icon={Icon.Gear}
-                  title={"Edit Snippet"}
+                  title="Edit Snippet"
                   target={<Editor {...v} title={v.id} type="Visual Studio Code Insiders" />}
                 ></Action.Push>
                 <Action
-                  icon={"Trash"}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Delete Snippet"
                   onAction={async () => {
                     await confirmAlert({
                       title: "Delete Snippet",
-                      message: `${v.id} is deleted. Are you sure?`,
+                      message: `Are you sure you want to delete ${v.id}?`,
                       primaryAction: {
                         style: Alert.ActionStyle.Destructive,
                         title: "Delete",
@@ -63,6 +63,8 @@ const SearchSection = ({ items, title }: Props) => {
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 ></Action>
+
+                <Action.Push icon={Icon.Pencil} title="Create Snippet" target={<Editor />}></Action.Push>
                 <Action
                   icon={Icon.ArrowClockwise}
                   title="Back"
@@ -76,17 +78,17 @@ const SearchSection = ({ items, title }: Props) => {
             detail={
               <List.Item.Detail
                 markdown={`
-## prefix
+## Prefix
 \`\`\`
 ${v.prefix}
 \`\`\`
 ---
-## body
+## Body
 \`\`\`
 ${v.body}
 \`\`\`
 ---
-## langages
+## Languages
 ${v.scope}
 
 `}

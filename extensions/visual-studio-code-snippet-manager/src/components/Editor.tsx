@@ -102,7 +102,7 @@ const Editor = (props?: Item & { title?: string; type?: "Visual Studio Code" | "
                   if (v.title === "" || v.prefix === "" || v.body === "") {
                     showToast({
                       title: "Error",
-                      message: "title, prefix and body are required",
+                      message: "Title, Prefix and Body are required",
                       style: Toast.Style.Failure,
                     });
                   } else {
@@ -153,15 +153,15 @@ const Editor = (props?: Item & { title?: string; type?: "Visual Studio Code" | "
             </>
           )}
 
-          <Form.TagPicker id="language" title="language" defaultValue={props?.scope}>
+          <Form.TagPicker id="language" title="Language" defaultValue={props?.scope}>
             {languages.map((language) => {
               return <Form.TagPicker.Item key={language} title={language} value={language}></Form.TagPicker.Item>;
             })}
           </Form.TagPicker>
-          <Form.TextField id="title" title="title" defaultValue={props?.title}></Form.TextField>
-          <Form.TextField id="prefix" title="prefix" defaultValue={props?.prefix}></Form.TextField>
-          <Form.TextField id="description" title="description" defaultValue={props?.description}></Form.TextField>
-          <Form.TextArea id="body" title="body" defaultValue={props?.body}></Form.TextArea>
+          <Form.TextField id="title" title="Title" defaultValue={props?.title}></Form.TextField>
+          <Form.TextField id="prefix" title="Prefix" defaultValue={props?.prefix}></Form.TextField>
+          <Form.TextField id="description" title="Description" defaultValue={props?.description}></Form.TextField>
+          <Form.TextArea id="body" title="Body" defaultValue={props?.body}></Form.TextArea>
         </Form>
       )}
     </>
