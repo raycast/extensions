@@ -286,7 +286,7 @@ export function ensureCleanAccessories(
 }
 
 export function showErrorToast(message: string, title?: string): Promise<Toast> {
-  const t = title || "Error";
+  const t = title || "Something went wrong";
   return showToast({
     style: Toast.Style.Failure,
     title: t,
