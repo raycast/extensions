@@ -26,7 +26,7 @@ export interface ImageData {
   size: number;
   path: string;
   hash: string;
-  created_at: number;
+  created_at: string;
   url: string;
   delete: string;
   page: string;

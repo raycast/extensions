@@ -3,8 +3,8 @@ import { SM_MS_BASE_URL } from "./costants";
 import { ImageData, SMMSResponse } from "../types/types";
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { isEmpty, isUrl, titleCase } from "./common-utils";
-import * as fs from "fs";
 import { secretToken } from "../hooks/hooks";
+import fse from "fs-extra";
 import FormData = require("form-data");
 import Style = Toast.Style;
 
@@ -32,9 +32,9 @@ export const uploadImage = async (imagePath: string) => {
     return;
   }
   await showToast(Style.Animated, "Uploading image...");
-  if (fs.existsSync(imagePath)) {
+  if (fse.existsSync(imagePath)) {
     //Path
-    imageStream = fs.createReadStream(imagePath);
+    imageStream = fse.createReadStream(imagePath);
   } else if (isUrl(imagePath)) {
     //URL
     imageStream = (await axios.get(imagePath, { responseType: "stream" })).data;
@@ -66,4 +66,13 @@ export const uploadImage = async (imagePath: string) => {
     .catch((reason) => {
       showToast(Style.Failure, String(reason));
     });
+};
+
+export const axiosGetImageArrayBuffer = async (url: string) => {
+  const res = await axios({
+    url: url,
+    method: "GET",
+    responseType: "arraybuffer",
+  });
+  return res.data;
 };

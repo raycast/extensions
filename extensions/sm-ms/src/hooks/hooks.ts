@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ImageData, SMMSResponse, UserData } from "../types/types";
 import Style = Toast.Style;
 import { SM_MS_BASE_URL } from "../utils/costants";
 import { Preferences } from "../types/preferences";
 import { titleCase } from "../utils/common-utils";
+import fse from "fs-extra";
 
 export const secretToken = getPreferenceValues<Preferences>().secretToken;
 
@@ -64,11 +65,18 @@ export const getUploadHistory = () => {
       .then((axiosResponse) => {
         const smmsResponse = axiosResponse.data as SMMSResponse;
         if (smmsResponse.success) {
-          setUploadHistories(smmsResponse.data as ImageData[]);
+          const imageData = smmsResponse.data as ImageData[];
+          imageData.sort((a, b) => b.created_at.localeCompare(a.created_at));
+          setUploadHistories(imageData);
         } else {
           showToast(Style.Failure, titleCase(smmsResponse.code), smmsResponse.message);
         }
         setLoading(false);
+
+        //clear cache
+        const cachePath = environment.supportPath + "/" + "Cache";
+        fse.ensureDirSync(cachePath);
+        fse.removeSync(cachePath);
       })
       .catch((reason) => {
         showToast(Style.Failure, String(reason));

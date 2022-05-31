@@ -18,20 +18,15 @@ export const chooseFile = async () => {
   return finderPath;
 };
 
-const scriptReadClipboard = `
-if application "Finder" is not running then
-    return "Not running"
-end if
+const scriptCopyFile = (path: string) => {
+  return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;
+};
 
-return the clipboard
-`;
-
-export const readClipboard = async () => {
-  let content = "";
+export const copyFileByPath = async (path: string) => {
   try {
-    content = await runAppleScript(scriptReadClipboard);
+    await runAppleScript(scriptCopyFile(path));
+    return "";
   } catch (e) {
-    console.error(String(e));
+    return String(e);
   }
-  return content;
 };
