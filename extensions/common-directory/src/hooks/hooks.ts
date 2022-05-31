@@ -77,7 +77,6 @@ export function getFolderByPath(folderPath: string, isOpenDirectory: boolean) {
   const [folders, setFolders] = useState<FolderPageItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
-    console.debug(folderPath);
     const files = fse.readdirSync(folderPath);
     const _folders: FolderPageItem[] = [];
     if (isOpenDirectory) {

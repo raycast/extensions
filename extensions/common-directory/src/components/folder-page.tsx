@@ -7,13 +7,13 @@ import { ActionCopyFile } from "./action-copy-file";
 import { Preferences } from "../types/preferences";
 import { ActionType, getItemAndSend } from "../utils/send-file-utils";
 
-export function FolderPage(props: { folderPath: string; isOpenDirectory: boolean }) {
+export function FolderPage(props: { folderName: string; folderPath: string; isOpenDirectory: boolean }) {
   const primaryAction = getPreferenceValues<Preferences>().primaryAction as ActionType;
-  const { folderPath, isOpenDirectory } = props;
+  const { folderName, folderPath, isOpenDirectory } = props;
   const { folders, loading } = getFolderByPath(folderPath, isOpenDirectory);
   const { pop } = useNavigation();
   return (
-    <List navigationTitle={folderPath} isLoading={loading} searchBarPlaceholder={"Search"}>
+    <List navigationTitle={folderName} isLoading={loading} searchBarPlaceholder={folderPath}>
       <FolderPageListEmptyView
         path={folderPath}
         isOpenDirectory={isOpenDirectory}
@@ -71,7 +71,13 @@ export function FolderPage(props: { folderPath: string; isOpenDirectory: boolean
                     icon={Icon.ChevronDown}
                     title={"Enter Folder"}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                    target={<FolderPage folderPath={folderPath + "/" + value.name} isOpenDirectory={isOpenDirectory} />}
+                    target={
+                      <FolderPage
+                        folderName={value.name}
+                        folderPath={folderPath + "/" + value.name}
+                        isOpenDirectory={isOpenDirectory}
+                      />
+                    }
                   />
                 )}
 

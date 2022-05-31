@@ -178,7 +178,7 @@ function SendToDirectoryItem(props: {
             icon={Icon.ChevronDown}
             title={"Enter Folder"}
             shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-            target={<FolderPage folderPath={directory.path} isOpenDirectory={false} />}
+            target={<FolderPage folderName={directory.name} folderPath={directory.path} isOpenDirectory={false} />}
           />
 
           <ActionPanel.Section>
