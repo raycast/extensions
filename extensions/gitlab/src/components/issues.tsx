@@ -217,7 +217,6 @@ interface IssueListProps {
   project?: Project;
   group?: Group;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;

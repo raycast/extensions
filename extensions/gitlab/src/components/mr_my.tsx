@@ -17,7 +17,6 @@ function MyMRList(props: {
   searchText?: string | undefined;
   onSearchTextChange?: (text: string) => void;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;

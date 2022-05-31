@@ -15,7 +15,6 @@ function MyIssueList(props: {
   title?: string;
   performRefetch: () => void;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
