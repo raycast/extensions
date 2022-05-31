@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, showToast, Toast, Detail, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
@@ -11,6 +11,7 @@ import {
   now,
   optimizeMarkdownText,
   Query,
+  showErrorToast,
   toDateString,
   tokenizeQueryText,
 } from "../utils";
@@ -43,7 +44,7 @@ const GET_ISSUE_DETAIL = gql`
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Issue Details", error);
+    showErrorToast(error, "Could not fetch Issue Details");
   }
   if (isLoading || !issue) {
     return <Detail isLoading={isLoading} />;
@@ -69,7 +70,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not get issue details", error);
+    showErrorToast(error, "Could not get Issue Details");
   }
 
   const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
@@ -243,7 +244,7 @@ export function IssueList({
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search issue", error);
+    showErrorToast(error, "Cannot search Issue");
   }
 
   const title = scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";

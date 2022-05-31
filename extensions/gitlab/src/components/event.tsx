@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, daysInSeconds, ensureCleanAccessories } from "../utils";
+import { capitalizeFirstLetter, daysInSeconds, ensureCleanAccessories, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
@@ -419,7 +419,7 @@ export function EventList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Events", error);
+    showErrorToast(error, "Cannot search Events");
   }
 
   if (!data) {

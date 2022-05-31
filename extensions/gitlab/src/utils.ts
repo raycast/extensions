@@ -1,4 +1,4 @@
-import { Image, List, LocalStorage } from "@raycast/api";
+import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
@@ -283,4 +283,18 @@ export function ensureCleanAccessories(
     return result;
   }
   return undefined;
+}
+
+export function showErrorToast(message: string, title?: string): Promise<Toast> {
+  const t = title || "Error";
+  return showToast({
+    style: Toast.Style.Failure,
+    title: t,
+    message: message,
+    primaryAction: {
+      title: "Copy Error Message",
+      onAction: (toast) => Clipboard.copy(`${t}: ${toast.message ?? ""}`),
+      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+    },
+  });
 }

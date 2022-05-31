@@ -1,9 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue, Project } from "../gitlabapi";
-import { daysInSeconds } from "../utils";
+import { daysInSeconds, showErrorToast } from "../utils";
 import { IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
@@ -47,7 +47,7 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   const [project, setProject] = useState<Project>();
   const { issues: raw, isLoading, error, performRefetch } = useMyIssues(scope, state, project);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot load issues", error);
+    showErrorToast(error, "Cannot load Issues");
   }
   const issues: Issue[] | undefined = project ? raw?.filter((i) => i.project_id === project.id) : raw;
   const title = scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Recently Created Issues";
