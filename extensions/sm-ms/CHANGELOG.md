@@ -1,5 +1,5 @@
 # SM.MS Changelog
 
-## [Initial Version] - 2022-05-30
+## [Initial Version] - {PR_MERGE_DATE}
 
 -SM.MS image hosting service to upload and share images.
