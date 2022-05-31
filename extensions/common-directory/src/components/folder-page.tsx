@@ -1,5 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
-import React from "react";
+import React, { useState } from "react";
 import { getFolderByPath } from "../hooks/hooks";
 import { FolderPageListEmptyView } from "./list-empty-view";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
@@ -10,10 +10,18 @@ import { ActionType, getItemAndSend } from "../utils/send-file-utils";
 export function FolderPage(props: { folderName: string; folderPath: string; isOpenDirectory: boolean }) {
   const primaryAction = getPreferenceValues<Preferences>().primaryAction as ActionType;
   const { folderName, folderPath, isOpenDirectory } = props;
+  const [currentItem, setCurrentItem] = useState<string>("");
   const { folders, loading } = getFolderByPath(folderPath, isOpenDirectory);
   const { pop } = useNavigation();
   return (
-    <List navigationTitle={folderName} isLoading={loading} searchBarPlaceholder={folderPath}>
+    <List
+      navigationTitle={folderName}
+      isLoading={loading}
+      searchBarPlaceholder={folderPath}
+      onSelectionChange={(id) => {
+        if (typeof id !== "undefined") setCurrentItem(id);
+      }}
+    >
       <FolderPageListEmptyView
         path={folderPath}
         isOpenDirectory={isOpenDirectory}
@@ -23,9 +31,11 @@ export function FolderPage(props: { folderName: string; folderPath: string; isOp
       {folders.map((value, index) => {
         return (
           <List.Item
+            id={value.name}
             key={index}
             icon={{ fileIcon: folderPath + "/" + value.name }}
             title={value.name}
+            accessories={[currentItem === value.name ? { text: folderPath + "/" + value.name } : {}]}
             actions={
               <ActionPanel>
                 {isOpenDirectory ? (
