@@ -27,8 +27,9 @@ export const searchIpGeolocation = (searchContent: string) => {
         if (ipGeolocation.status === "success") {
           const ipGeolocationReadable: IPGeolocationReadable = {
             IP: ipGeolocation.query,
-            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
-              }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
+            Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
+              isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
+            }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
             GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
             Timezone: ipGeolocation.timezone,
             AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
@@ -97,10 +98,12 @@ export const searchMyIpGeolocation = () => {
           if (ipGeolocation.status === "success") {
             const ipGeolocationReadable = {
               "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
-              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
-                }`,
-              Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
-                }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
+              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
+                isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
+              }`,
+              Location: `${ipGeolocation.country}, ${ipGeolocation.regionName}, ${ipGeolocation.city}${
+                isEmpty(ipGeolocation.district) ? "" : ", " + ipGeolocation.district
+              }${isEmpty(ipGeolocation.zip) ? "" : ", ZIP: " + ipGeolocation.zip}`, //country  regionName city districtGeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, //(lon,lat)
               GeoCoordinates: `${ipGeolocation.lon} , ${ipGeolocation.lat}`, ////(lon,lat)
               Timezone: ipGeolocation.timezone,
               AS: ipGeolocation.as.substring(0, ipGeolocation.as.indexOf(" ")),
@@ -130,8 +133,9 @@ export const searchMyIpGeolocation = () => {
           } else {
             const ipGeolocationReadable = {
               "Local IP": `${myInternalIpv4}${isEmpty(myInternalIpv6) ? "" : " , " + myInternalIpv6}`,
-              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
-                }`,
+              "Public IP": `${isEmpty(myPublicIpv4) ? ipGeolocation.query : myPublicIpv4}${
+                isEmpty(myPublicIpv6) ? "" : " , " + myPublicIpv6
+              }`,
             };
             setIpGeolocation(Object.entries(ipGeolocationReadable));
             setLoading(false);
