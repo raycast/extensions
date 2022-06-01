@@ -1,0 +1,315 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easydict",
+  "title": "Easy Dictionary",
+  "description": "Look up words or translate text in an easy way, especially optimized for English and Chinese words.",
+  "icon": "eudic-icon.png",
+  "author": "isfeng",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "easydict",
+      "title": "Search Word",
+      "subtitle": "Easy Dictionary",
+      "description": "Easy to look up words or translate text, support Youdao, Baidu and Caiyun translation API.",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "dictionary",
+    "translate",
+    "youdao",
+    "eudic",
+    "baidu",
+    "caiyun"
+  ],
+  "preferences": [
+    {
+      "title": "First Language",
+      "name": "language1",
+      "type": "dropdown",
+      "required": false,
+      "default": "Chinese-Simplified",
+      "description": "Select the first language you want to translate into",
+      "data": [
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        }
+      ]
+    },
+    {
+      "title": "Second Language",
+      "name": "language2",
+      "type": "dropdown",
+      "required": false,
+      "default": "English",
+      "description": "Select the second language you want to translate into",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        }
+      ]
+    },
+    {
+      "title": "Switch Boxes",
+      "name": "isAutomaticQueryClipboard",
+      "type": "checkbox",
+      "label": "Automatic Query Clipboard",
+      "required": false,
+      "description": "Automatic query clipboard text when you first enter the extension",
+      "default": true
+    },
+    {
+      "name": "isDisplayTargetTranslationLanguage",
+      "type": "checkbox",
+      "label": "Display Target Translation Language",
+      "required": false,
+      "description": "Display the target translation language in action panel",
+      "default": false
+    },
+    {
+      "title": "Youdao App ID",
+      "name": "youdaoAppId",
+      "type": "password",
+      "required": false,
+      "description": "Your Youdao App ID",
+      "default": "17555d7e1ec6fdce"
+    },
+    {
+      "title": "Youdao App Secret",
+      "name": "youdaoAppSecret",
+      "type": "password",
+      "required": false,
+      "description": "Your Youdao App Secret",
+      "default": "6tIP98TMTJIE6HqKsLpKQxlJWfJq4wgx"
+    },
+    {
+      "title": "Baidu App ID",
+      "name": "baiduAppId",
+      "type": "password",
+      "required": false,
+      "description": "Your Baidu App ID",
+      "default": "20220428001194113"
+    },
+    {
+      "title": "Baidu App Secret",
+      "name": "baiduAppSecret",
+      "type": "password",
+      "required": false,
+      "description": "Your Baidu App Secret",
+      "default": "kiaee1BtT9d2MGJUdAMi"
+    },
+    {
+      "title": "Caiyun App Token",
+      "name": "caiyunAppToken",
+      "type": "password",
+      "required": false,
+      "description": "Your Caiyun App Token",
+      "default": "izz99g9m50n4hpi71oke"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "axios": "^0.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix": "prettier --write ."
+  }
+}
