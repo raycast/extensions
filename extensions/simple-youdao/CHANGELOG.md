@@ -1,6 +1,6 @@
 # Youdao Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2022-06-01
 
 - Added option to show modern translation page when opening in browser
 
