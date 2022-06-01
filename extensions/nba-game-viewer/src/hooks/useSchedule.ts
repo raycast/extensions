@@ -33,7 +33,7 @@ const useSchedule = (): {
         }
       });
 
-      const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const weekdays = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
       const scheduledGames: Array<Day> = Object.keys(data).map((key) => {
         return {
