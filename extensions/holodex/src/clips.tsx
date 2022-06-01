@@ -28,14 +28,14 @@ export default function Command() {
     >
       <List.Section title="Clips" subtitle={results.length + ""}>
         {results.map((video) => (
-          <Item key={video.videoId} video={video} />
+          <ClipItem key={video.videoId} video={video} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function Item({ video }: { video: Video }) {
+export function ClipItem({ video }: { video: Video }) {
   const parts = [];
 
   switch (video.status) {
