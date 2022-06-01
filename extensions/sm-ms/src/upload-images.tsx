@@ -43,7 +43,7 @@ export default function UploadImages() {
         title={"Image"}
         value={imagePath}
         onChange={setImagePath}
-        placeholder={"Path, URL"}
+        placeholder={"Path (⌘+⇧+↩) or URL"}
       ></Form.TextField>
     </Form>
   );
