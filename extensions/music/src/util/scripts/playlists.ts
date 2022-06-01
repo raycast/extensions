@@ -1,5 +1,6 @@
 import * as TE from "fp-ts/TaskEither";
 import { tell, runScript, createQueryString } from "../apple-script";
+import { pipe } from 'fp-ts/lib/function';
 
 const outputQuery = createQueryString({
   id: "pId",
@@ -8,7 +9,6 @@ const outputQuery = createQueryString({
   count: "pCount",
   time: "pTime",
   kind: "pKind",
-  description: "pDesc",
 });
 
 enum PlaylistKind {
@@ -27,13 +27,17 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
 		set pCount to count (tracks of selectedPlaylist)
 		set pTime to the time of selectedPlaylist
 		set pKind to the class of selectedPlaylist
-		set pDesc to the description of selectedPlaylist
 		set output to output & ${outputQuery} & "\n"
     end repeat
 `;
 
+
 export const play = (name: string): TE.TaskEither<Error, string> => tell("Music", `play playlist "${name.trim()}"`);
-export const playById = (id: string) => tell("Music", `play (every playlist whose id is "${id}")`);
+
+export const playById = (shuffle = false) => (id: string) => pipe(
+  tell("Music", `set shuffle enabled to ${shuffle.toString()}`),
+  TE.chain(() => tell("Music", `play (every playlist whose id is "${id}")`))
+)
 
 export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =>
   runScript(`
