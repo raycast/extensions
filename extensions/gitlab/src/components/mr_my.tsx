@@ -1,9 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { MergeRequest, Project } from "../gitlabapi";
-import { daysInSeconds } from "../utils";
+import { daysInSeconds, showErrorToast } from "../utils";
 import { MRListItem, MRScope, MRState } from "./mr";
 import { MyProjectsDropdown } from "./project";
 
@@ -17,7 +17,6 @@ function MyMRList(props: {
   searchText?: string | undefined;
   onSearchTextChange?: (text: string) => void;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
@@ -56,7 +55,7 @@ export function MyMergeRequests(props: {
   const [project, setProject] = useState<Project>();
   const { mrs: raw, isLoading, error, performRefetch } = useMyMergeRequests(scope, state, project);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
   const mrs: MergeRequest[] | undefined = project ? raw?.filter((m) => m.project_id === project.id) : raw;
   const title =

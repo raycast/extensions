@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Detail, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
@@ -11,6 +11,7 @@ import {
   now,
   optimizeMarkdownText,
   Query,
+  showErrorToast,
   toDateString,
   tokenizeQueryText,
 } from "../utils";
@@ -50,7 +51,7 @@ const GET_MR_DETAIL = gql`
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Merge Request Details", error);
+    showErrorToast(error, "Could not fetch Merge Request Details");
   }
   if (isLoading || !mr) {
     return <Detail isLoading={isLoading} />;
@@ -82,7 +83,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not get merge request details", error);
+    showErrorToast(error, "Could not get Merge Request Details");
   }
 
   const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
@@ -221,7 +222,7 @@ export function MRList({
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
