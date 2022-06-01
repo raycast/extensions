@@ -1,5 +1,5 @@
 # next-holidays Changelog
 
-## [Initial Version] - 2022-06-01
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Allows to query the next holidays for a given country.
