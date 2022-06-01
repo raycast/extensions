@@ -31,6 +31,7 @@ export default function DeleteImages() {
                 async () => {
                   await showToast(Style.Animated, `Deleting image...`);
                   await deleteImageByHash(hash);
+                  setHash("");
                 }
               ).then();
             }}

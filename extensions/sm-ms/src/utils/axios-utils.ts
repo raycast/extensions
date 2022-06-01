@@ -12,7 +12,9 @@ export const deleteImageByHash = async (hash: string) => {
   return await axios({
     method: "GET",
     url: SM_MS_BASE_URL + "/delete/" + hash,
-    headers: {},
+    headers: {
+      Authorization: secretToken,
+    },
   })
     .then((axiosResponse) => {
       const smmsResponse = axiosResponse.data as SMMSResponse;

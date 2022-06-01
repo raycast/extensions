@@ -17,7 +17,9 @@ export default function UploadImages() {
             title={"Upload Image"}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
             onAction={() => {
-              uploadImage(imagePath).then();
+              uploadImage(imagePath).then(() => {
+                setImagePath("");
+              });
             }}
           />
           <Action
