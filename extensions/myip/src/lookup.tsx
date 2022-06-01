@@ -4,7 +4,6 @@ import { IpEmptyView } from "./components/ip-empty-view";
 import { myIpListIcons } from "./utils/constants";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
-
 export default function SearchIpGeolocation() {
   const { ipGeolocation, loading } = searchMyIpGeolocation();
 

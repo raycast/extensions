@@ -5,6 +5,9 @@
   "description": "My IP information",
   "icon": "icon.png",
   "author": "Kang",
+  "contributors": [
+    "Aayush9029"
+  ],
   "license": "MIT",
   "categories": [
     "System",

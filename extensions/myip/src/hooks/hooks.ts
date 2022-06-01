@@ -22,7 +22,7 @@ export const searchIpGeolocation = (searchContent: string) => {
       searchContent = searchContent.replace("https://", "").replace("http://", "");
     }
 
-    getIPGeolocation(searchContent)
+    getIPGeolocation()
       .then((ipGeolocation: IPGeolocation) => {
         if (ipGeolocation.status === "success") {
           const ipGeolocationReadable: IPGeolocationReadable = {
@@ -91,7 +91,6 @@ export const searchMyIpGeolocation = () => {
         .v6({ onlyHttps: true })
         .then((ip) => ip)
         .catch(() => "");
-
 
       getIPGeolocation()
         .then((ipGeolocation: IPGeolocation) => {
