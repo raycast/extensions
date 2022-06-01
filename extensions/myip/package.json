@@ -22,21 +22,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "axios": "^0.26.1",
-    "cheerio": "^1.0.0-rc.10",
-    "ip": "^1.1.5"
+    "@raycast/api": "^1.35.2",
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.11",
+    "ip": "^1.1.8",
+    "public-ip": "^5.0.0"
   },
   "devDependencies": {
     "@types/ip": "^1.1.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "~17.0.38",
+    "@types/react": "^18.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.24.7",
+    "typescript": "^4.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

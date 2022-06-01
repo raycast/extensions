@@ -1,79 +1,38 @@
-import { ActionPanel, Detail, Action, useNavigation } from "@raycast/api";
-import axios from "axios";
-import * as cheerio from "cheerio";
-import { useEffect, useState } from "react";
-import { LoadingStatus } from ".";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { searchMyIpGeolocation } from "./hooks/hooks";
+import { IpEmptyView } from "./components/ip-empty-view";
+import { myIpListIcons } from "./utils/constants";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
-let isLive = true;
 
-export default function LookUp() {
-  const [status, setStatus] = useState<LoadingStatus>("loading");
-  const [data, setData] = useState("");
-  const { pop } = useNavigation();
-
-  useEffect(() => {
-    async function getIp() {
-      try {
-        const { data } = await axios.get(`https://ipaddress.my`);
-
-        const $ = cheerio.load(data);
-        let temp = ``;
-
-        $("tbody").each(function (index, item) {
-          switch (index) {
-            case 1:
-              $("tr", item).each(function (index, item) {
-                temp += `## ${$("td", item).first().text().trim().replace(":", "")}
-`;
-                temp += `${$("td", item).last().text().trim()}
-`;
-              });
-              break;
-            case 2:
-              $("tr", item).each(function (index, item) {
-                temp += `## ${$("td", item).first().text().trim().replace(":", "")}
-`;
-                temp += `${$("td", item).last().text().trim()}
-`;
-              });
-              break;
-            default:
-              break;
-          }
-        });
-
-        if (isLive) {
-          setData(temp);
-          setStatus("success");
-        }
-      } catch (error) {
-        if (isLive) {
-          setStatus("failure");
-        }
-      }
-    }
-    isLive = true;
-    getIp();
-    return () => {
-      isLive = false;
-    };
-  }, []);
+export default function SearchIpGeolocation() {
+  const { ipGeolocation, loading } = searchMyIpGeolocation();
 
   return (
-    <Detail
-      isLoading={status === "loading"}
-      navigationTitle="IP Lookup"
-      markdown={data}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            url={"https://ipaddress.my"}
-            onOpen={() => {
-              pop();
-            }}
-          />
-        </ActionPanel>
-      }
-    />
+    <List isLoading={loading} searchBarPlaceholder={"My IP Geolocation"}>
+      <IpEmptyView title={"No Geolocation Info"} />
+      {ipGeolocation.map((value, index) => (
+        <List.Item
+          key={index}
+          icon={{ source: { light: myIpListIcons[index].light, dark: myIpListIcons[index].dark } }}
+          title={value[0]}
+          subtitle={value[1]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard
+                icon={{ source: { light: myIpListIcons[index].light, dark: myIpListIcons[index].dark } }}
+                title={`Copy ${value[0]}`}
+                content={value[1]}
+              />
+              <Action.CopyToClipboard
+                title={`Copy All Info`}
+                content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
+              />
+              <ActionOpenExtensionPreferences />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }

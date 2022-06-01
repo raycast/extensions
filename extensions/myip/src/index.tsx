@@ -69,7 +69,7 @@ export default function Command() {
           <List.Item
             icon={ip === "" ? "" : Icon.Eye}
             title=""
-            subtitle="IP Lookup"
+            subtitle="Location Lookup"
             accessoryTitle="Details of the public IP address"
             actions={
               <ActionPanel>
