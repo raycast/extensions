@@ -7,7 +7,6 @@ import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 
-
 enum PlaylistKind {
   ALL = "all",
   USER = "user",

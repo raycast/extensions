@@ -1,6 +1,6 @@
-import { pipe } from 'fp-ts/lib/function';
-import * as TE from 'fp-ts/TaskEither'
-import { general } from '.';
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import { general } from ".";
 import { createQueryString, runScript } from "../apple-script";
 
 export const getAll = runScript(`
@@ -55,10 +55,13 @@ export const search = (search: string) => {
 	`);
 };
 
-export const play = (shuffle = false) => (album: string) => pipe(
-	general.setShuffle(shuffle),
-	TE.chain(() =>
-		runScript(`
+export const play =
+  (shuffle = false) =>
+  (album: string) =>
+    pipe(
+      general.setShuffle(shuffle),
+      TE.chain(() =>
+        runScript(`
 			tell application "Music"
 				if (exists playlist "Raycast DJ") then
 					delete playlist "Raycast DJ"
@@ -68,5 +71,5 @@ export const play = (shuffle = false) => (album: string) => pipe(
 				play playlist "Raycast DJ"
 			end tell
 		`)
-	)
-);
+      )
+    );

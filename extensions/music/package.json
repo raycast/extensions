@@ -100,7 +100,7 @@
     },
     {
       "name": "play-library-track",
-      "title": "Search & Play Library Track",
+      "title": "Play Library Track",
       "subtitle": "Apple Music",
       "description": "Search and start a track from your library.",
       "keywords": [
@@ -110,7 +110,7 @@
     },
     {
       "name": "play-library-album",
-      "title": "Search & Play Library Album",
+      "title": "Play Library Album",
       "subtitle": "Apple Music",
       "description": "Search and start an album from your library.",
       "keywords": [
