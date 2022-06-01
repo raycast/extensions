@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2022-06-01
 
 Fixed wrong day of the week being displayed on upcoming games.
 
