@@ -18,7 +18,6 @@
 - [x] Support for displaying multiple translation results, currently supports Youdao, Baidu and Caiyun translation API.
 - [x] Support 23 languages.
 
-
 Next:
 
 - [ ] Support more dictionary API, such as homonyms, synonyms, antonyms, 金山词霸, etc.
@@ -34,11 +33,7 @@ Next:
 
 ![你是非常可爱](https://github.com/tisfeng/ImageBed/blob/main/uPic/你是非常可爱.png?raw=true)
 
-
-
 ## Advanced
-
-
 
 Actually, it works well without you having to do any extra work. The next are advanced documents for those who want to use `Easydic` better or understand how the extension works.
 
@@ -60,7 +55,7 @@ Preference language will be given priority in order during automatic recognition
 For example, if you input a sentence arbitrarily, it will be translated into the first preferred language. If the automatically recognized language is the same as your first preferred language, it will be automatically translated into the second preferred language.
 </details>
 
-[Youdao translation](https://fanyi.youdao.com/?keyfrom=dict2.top) 
+[Youdao translation](https://fanyi.youdao.com/?keyfrom=dict2.top)
 
 ![image-20220531223631425](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220531223631425.png)
 
@@ -74,14 +69,12 @@ In order to better match the automatic clipboard query feature, it is a good ide
 In addition, to avoid frequently querying the same clipboard words, we set a `10 minute` limit, that is, if the latest word on the clipboard is automatically queried only once within 10 minutes, of course, you can manually paste and query at any time.
 </details>
 
-
 ### Display Target Translation Language
 
 <details>
   <summary> Specify the target translation language. This option is turned off by default. </summary>
 By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can turn on the option `Display Target Translation Language` on the preference page, and then you can temporarily select another target language in the action panel.
 </details>
-
 
 ### Translation Services
 
@@ -96,8 +89,6 @@ Apply Translation Services link:
 - [百度翻译](https://fanyi-api.baidu.com/)
 
 - [彩云小译](https://dashboard.caiyunapp.com/user/sign_in/)
-
-  
 
 ## Thanks
 
