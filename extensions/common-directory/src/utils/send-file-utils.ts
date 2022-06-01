@@ -3,6 +3,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
+  Icon,
   open,
   showHUD,
   showInFinder,
@@ -139,9 +140,18 @@ export async function sendFileShowAlert(
   let isCancel = false;
   //check if file and folder exists
   if (checkExistsSameFiles(destPath, selectedFile) || checkExistsSameFiles(destPath, selectedFolder)) {
+    const title = () => {
+      if (selectedFile.length > 0) {
+        return selectedFile[0].base;
+      } else if (selectedFolder.length > 0) {
+        return selectedFolder[0].base;
+      }
+      return "Files or Folders";
+    };
     const options: Alert.Options = {
-      title: "⚠️ Overwrite",
-      message: "Files or folders already exist in the destination path. Do you want to overwrite?",
+      icon: Icon.ExclamationMark,
+      title: "Overwrite",
+      message: `${title()} already exist in the ${path.basename(destPath)}. Overwrite?`,
       primaryAction: {
         title: "Overwrite All",
         onAction: () => {
@@ -151,6 +161,7 @@ export async function sendFileShowAlert(
       dismissAction: {
         title: "Cancel",
         onAction: () => {
+          showToast(Toast.Style.Failure, "Error!", `User cancels the operation.`);
           isCancel = true;
         },
       },
