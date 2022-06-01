@@ -132,20 +132,22 @@ export const initialSetup = () => {
 };
 
 export const filePreview = async (file: FileInfo | null, controller: AbortController): Promise<string> => {
-  if (!file) {
-    return "";
+  const previewImage = (path: string) => `<img src="file://${path}" width="192" height="192" />`;
+
+  if (!file || !pathExists(file.path)) {
+    return previewImage(DEFAULT_FILE_PREVIEW_IMAGE_PATH);
   }
 
   const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
 
   if (previewExists) {
-    return `<img src="${previewPath}" alt="${file.name}" />`;
+    return previewImage(previewPath);
   } else {
     const iconPath = statSync(file.path).isDirectory()
       ? DEFAULT_FOLDER_PREVIEW_IMAGE_PATH
       : DEFAULT_FILE_PREVIEW_IMAGE_PATH;
-    return `<img src="file://${iconPath}" alt="${file.name}" width="192" height="192" />`;
+    return previewImage(iconPath);
   }
 };
 

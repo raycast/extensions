@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlabgql } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -80,7 +80,7 @@ export function MilestoneList(props: { project?: Project; group?: Group }): JSX.
   }
   const { milestones, error, isLoading } = useSearch("", fullPath, isGroup);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Milestones", error);
+    showErrorToast(error, "Cannot search Milestones");
   }
   return (
     <List isLoading={isLoading} navigationTitle="Milestones">

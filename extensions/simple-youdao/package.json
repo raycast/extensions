@@ -955,6 +955,14 @@
       "required": false,
       "title": "Clipboard Support",
       "description": "by default search with content copied in Clipboard if there's no selection or input"
+    },
+    {
+      "name": "is_using_modern_web",
+      "type": "checkbox",
+      "label": "Use Modern Translation page of Youdao",
+      "required": false,
+      "title": "Modern Translation Page",
+      "description": "by default use Youdao mobile page, check it to show tranlsation page in a modern web page"
     }
   ],
   "dependencies": {

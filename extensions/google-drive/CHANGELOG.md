@@ -1,5 +1,10 @@
 # Google Drive Changelog
 
+## [Fix retrieving stats of a non-existing files] - 2022-05-31
+
+- Fixed [an issue](https://github.com/raycast/extensions/issues/1855) due to which the extension was crashing while retrieving the stats of a file that doesn't exists anymore.
+- When the cache is reindexed (automatically after it gets invalidated at the configured interval or forcefully via the Actions menu), now it would overwrite all existing indexed files (by retaining the favorites) so as to avoid having non-existing file paths in the database.
+
 ## [Remove Swift dependency] - 2022-05-30
 
 - Remove Swift dependency that was used to get the fallback file icons using `Cocoa`'s `NSWorkspace.icon(forFile:)` API since not all users have Developer Tools installed.

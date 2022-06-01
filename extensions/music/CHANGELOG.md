@@ -8,7 +8,6 @@
 - Renamed "Search & Play Library Track" to "Play Library Track"
 
 ## [Fix] - 2022-05-30
-
 Fixed issue that caused the extension to crash
 
 ## [Track Rating / Fixes] - 2022-05-05

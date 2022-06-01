@@ -1,8 +1,8 @@
-import { Action, ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -102,7 +102,7 @@ export function PipelineList(props: { projectFullPath: string }): JSX.Element {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   return (
     <List isLoading={isLoading} navigationTitle="Pipelines">
