@@ -1,6 +1,7 @@
 import * as TE from "fp-ts/TaskEither";
 import { tell, runScript, createQueryString } from "../apple-script";
 import { pipe } from 'fp-ts/lib/function';
+import { general } from '.';
 
 const outputQuery = createQueryString({
   id: "pId",
@@ -32,10 +33,13 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
 `;
 
 
-export const play = (name: string): TE.TaskEither<Error, string> => tell("Music", `play playlist "${name.trim()}"`);
+export const play = (shuffle = false) => (name: string): TE.TaskEither<Error, string> => pipe(
+  general.setShuffle(shuffle),
+  TE.chain(() => tell("Music", `play playlist "${name.trim()}"`))
+)
 
 export const playById = (shuffle = false) => (id: string) => pipe(
-  tell("Music", `set shuffle enabled to ${shuffle.toString()}`),
+  general.setShuffle(shuffle),
   TE.chain(() => tell("Music", `play (every playlist whose id is "${id}")`))
 )
 

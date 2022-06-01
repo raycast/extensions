@@ -1,3 +1,6 @@
+import { pipe } from 'fp-ts/lib/function';
+import * as TE from 'fp-ts/TaskEither'
+import { general } from '.';
 import { createQueryString, runScript } from "../apple-script";
 
 export const getAll = runScript(`
@@ -52,14 +55,18 @@ export const search = (search: string) => {
 	`);
 };
 
-export const play = (album: string) =>
-  runScript(`
-	tell application "Music"
-		if (exists playlist "Raycast DJ") then
-			delete playlist "Raycast DJ"
-		end if
-		make new user playlist with properties {name:"Raycast DJ", shuffle:false, song repeat:one}
-		duplicate (every track of playlist 1 whose album contains "${album}") to playlist "Raycast DJ"
-		play playlist "Raycast DJ"
-	end tell
-`);
+export const play = (shuffle = false) => (album: string) => pipe(
+	general.setShuffle(shuffle),
+	TE.chain(() =>
+		runScript(`
+			tell application "Music"
+				if (exists playlist "Raycast DJ") then
+					delete playlist "Raycast DJ"
+				end if
+				make new user playlist with properties {name:"Raycast DJ", shuffle:false, song repeat:one}
+				duplicate (every track of playlist 1 whose album contains "${album}") to playlist "Raycast DJ"
+				play playlist "Raycast DJ"
+			end tell
+		`)
+	)
+);
