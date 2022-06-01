@@ -3,7 +3,7 @@
 ## Features
 * Support 161 currencies, see list: https://www.exchangerate-api.com/docs/supported-currencies
 * Support calculate expression e.g `1+2/3*4`
-* Support find target currency by filter, format: `${expression} to ${filter key word}`
+* Support find target currency by filter, format: `${expression} in ${filter key word}`
 * Support pin your favorite currencies
 * Remember the source currency
 

@@ -207,7 +207,7 @@ function useExchange() {
         }
 
         if (matches[2]) {
-          const filterMatches = /\s+to\s+([a-zA-Z\s]+)/.exec(matches[2]);
+          const filterMatches = /\s+in\s+([a-zA-Z\s]+)/.exec(matches[2]);
           console.log(filterMatches);
           filter = filterMatches ? filterMatches[1] : "";
         }
