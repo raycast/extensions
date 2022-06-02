@@ -2,13 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-search",
   "title": "Word Search",
-  "description": "Search for synonyms, antonyms and rhymes",
+  "description": "Search for synonyms, antonyms, rhymes and more",
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [
     "thomas"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "word-synonym-search",
@@ -30,10 +33,24 @@
       "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
       "mode": "view"
+    },
+    {
+      "name": "word-adjective-search",
+      "title": "Search Word Adjective",
+      "subtitle": "Datamuse",
+      "description": "Search for rhymes given a word",
+      "mode": "view"
+    },
+    {
+      "name": "word-missing-letters-search",
+      "title": "Search Word With Missing Letters",
+      "subtitle": "Datamuse",
+      "description": "Search for word with missing letters",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
+    "@raycast/api": "^1.35.0",
     "node-fetch": "^3.2.0"
   },
   "devDependencies": {
