@@ -1,15 +1,15 @@
-import { 
-  getPreferenceValues, 
-  List, 
+import {
+  getPreferenceValues,
+  List,
   PushAction,
-  OpenInBrowserAction, 
+  OpenInBrowserAction,
   CopyToClipboardAction,
   PasteAction,
-  ActionPanel, 
+  ActionPanel,
   showToast,
   ToastStyle,
-  Icon, 
-  Color 
+  Icon,
+  Color,
 } from "@raycast/api";
 import { api as getApi } from "./api";
 import { useEffect, useState } from "react";
@@ -17,18 +17,19 @@ import { useEffect, useState } from "react";
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
 
 const Icons = {
-  "Announcement": "../assets/announcement.png",
-  "Assignment": "../assets/assignment.png",
-  "Code": "../assets/code.png",
-  "Course": "../assets/course.png",
-  "ExternalUrl": Icon.Link,
-  "File": Icon.TextDocument,
-  "Page": "../assets/page.png",
-  "Passcode": "../assets/check-lock.png",
-  "Quiz": "../assets/quiz.png",
-}
+  Announcement: "../assets/announcement.png",
+  Assignment: "../assets/assignment.png",
+  Code: "../assets/code.png",
+  Course: "../assets/course.png",
+  ExternalUrl: Icon.Link,
+  File: Icon.TextDocument,
+  Page: "../assets/page.png",
+  Passcode: "../assets/check-lock.png",
+  Quiz: "../assets/quiz.png",
+};
 
-const fileTypes = [".c",
+const fileTypes = [
+  ".c",
   ".cs",
   ".cpp",
   ".h",
@@ -46,8 +47,8 @@ const fileTypes = [".c",
   ".php",
   ".py",
   ".ipynb",
-  ".csv"
-]
+  ".csv",
+];
 
 interface Preferences {
   token: string;
@@ -147,21 +148,21 @@ export default function main() {
                       }))
                     );
                   })
-                  .catch((err:any) => {
-                    showToast(ToastStyle.Failure, `Error: ${err.message}`)
+                  .catch((err: any) => {
+                    showToast(ToastStyle.Failure, `Error: ${err.message}`);
                   });
                 setLoading(false);
               })
-              .catch((err:any) => {
-                showToast(ToastStyle.Failure, `Error: ${err.message}`)
+              .catch((err: any) => {
+                showToast(ToastStyle.Failure, `Error: ${err.message}`);
               });
           })
-          .catch((err:any) => {
-            showToast(ToastStyle.Failure, `Error: ${err.message}`)
+          .catch((err: any) => {
+            showToast(ToastStyle.Failure, `Error: ${err.message}`);
           });
       })
-      .catch((err:any) => {
-        showToast(ToastStyle.Failure, `Error: ${err.message}`)
+      .catch((err: any) => {
+        showToast(ToastStyle.Failure, `Error: ${err.message}`);
       });
   }, []);
 
@@ -177,11 +178,9 @@ export default function main() {
               <ActionPanel>
                 <PushAction
                   title="See Modules"
-                  target={<ModulePage 
-                    id={item.id} 
-                    url={`https://${preferences.domain}/courses/${item.id}`} 
-                    api={api} 
-                  />}
+                  target={
+                    <ModulePage id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
+                  }
                 />
               </ActionPanel>
             }
@@ -240,34 +239,35 @@ export default function main() {
   );
 }
 
-const ModulePage = (props: {
-  id: any, 
-  url: string,
-  api: any
-}) => {
-  const [modules, setModules]:any = useState();
-  const [isLoading, setIsLoading]:any = useState(true);
+const ModulePage = (props: { id: any; url: string; api: any }) => {
+  const [modules, setModules]: any = useState();
+  const [isLoading, setIsLoading]: any = useState(true);
 
   useEffect(() => {
     props.api.courses[props.id].modules
       .get()
       .then((json: any) => {
-        const promises = json.map((module: any) => module.id).map((id: any) => {
-          return props.api.courses[props.id].modules[id].items
-            .get()
-            .then((items: any) => {
-              items = items.filter((item: any) => item.type !== "SubHeader");
-              return items.map((item: any) => ({
-                name: item.title.replace(/\s\(.*/g, "").replace(/\s?:.*/g, "").replace(/PM/g, "pm"),
-                passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
-                type: item.type,
-                url: item.html_url,
-              }))
-            })
-            .catch((err:any) => {
-              showToast(ToastStyle.Failure, `Error: ${err.message}`)
-            })
-        })
+        const promises = json
+          .map((module: any) => module.id)
+          .map((id: any) => {
+            return props.api.courses[props.id].modules[id].items
+              .get()
+              .then((items: any) => {
+                items = items.filter((item: any) => item.type !== "SubHeader");
+                return items.map((item: any) => ({
+                  name: item.title
+                    .replace(/\s\(.*/g, "")
+                    .replace(/\s?:.*/g, "")
+                    .replace(/PM/g, "pm"),
+                  passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
+                  type: item.type,
+                  url: item.html_url,
+                }));
+              })
+              .catch((err: any) => {
+                showToast(ToastStyle.Failure, `Error: ${err.message}`);
+              });
+          });
         Promise.all(promises)
           .then((items: any) => {
             const modules = json.map((module: any, index: number) => {
@@ -275,63 +275,77 @@ const ModulePage = (props: {
                 name: module.name,
                 id: module.id,
                 url: module.url,
-                items: items[index]
-              }
-            })
+                items: items[index],
+              };
+            });
             setModules(modules);
             setIsLoading(false);
           })
-          .catch((err:any) => {
-            showToast(ToastStyle.Failure, `Error: ${err.message}`)
-          })
-        })
-        .catch((err:any) => {
-          showToast(ToastStyle.Failure, `Error: ${err.message}`)
-        });
+          .catch((err: any) => {
+            showToast(ToastStyle.Failure, `Error: ${err.message}`);
+          });
+      })
+      .catch((err: any) => {
+        showToast(ToastStyle.Failure, `Error: ${err.message}`);
+      });
   }, []);
 
   const isCodeFile = (file: string) => {
-    let isCodeFile = false
-    for (let type of fileTypes) {
+    let isCodeFile = false;
+    for (const type of fileTypes) {
       if (file.endsWith(type)) {
-        isCodeFile = true; 
-        break; 
+        isCodeFile = true;
+        break;
       }
     }
-    return isCodeFile
-  }
+    return isCodeFile;
+  };
 
   return (
     <List isLoading={isLoading}>
-      {modules?.map((module:any, index:number) => (
+      {modules?.map((module: any, index: number) => (
         <List.Section title={module.name} key={index}>
-          {module.items?.map((element:any, key:number) => (
-            <List.Item 
-              title={element.name} key={key} 
-              icon={{ source: isCodeFile(element.name) ? Icons["Code"] : 
-                    element.passcode ? Icons["Passcode"] : 
-                    element.type in Icons ? Icons[element.type] : 
-                    Icon.ExclamationMark }}
+          {module.items?.map((element: any, key: number) => (
+            <List.Item
+              title={element.name}
+              key={key}
+              icon={{
+                source: isCodeFile(element.name)
+                  ? Icons["Code"]
+                  : element.passcode
+                  ? Icons["Passcode"]
+                  : element.type in Icons
+                  ? Icons[element.type]
+                  : Icon.ExclamationMark,
+              }}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction title="Open in Browser" url={element.url} icon={{source: Icon.Link}}/>
+                  <OpenInBrowserAction title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
                   {element.passcode && <CopyToClipboardAction title="Copy Passcode" content={element.passcode} />}
-                  {element.passcode && <PasteAction title="Paste Passcode" content={element.passcode} 
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}/>}
+                  {element.passcode && (
+                    <PasteAction
+                      title="Paste Passcode"
+                      content={element.passcode}
+                      shortcut={{ modifiers: ["cmd"], key: "p" }}
+                    />
+                  )}
                 </ActionPanel>
               }
             />
           ))}
         </List.Section>
       ))}
-      {!isLoading && (modules?.length === 0 || modules[0].items?.length === 0) && 
-        <List.Item title="Open Home Page" icon={{source: Icon.Link}} actions={
-          <ActionPanel>
-            <OpenInBrowserAction title="Open in Browser" url={props.url} icon={{source: Icon.Link}}/>
-          </ActionPanel>
-        }/>
-      }
+      {!isLoading && (modules?.length === 0 || modules[0].items?.length === 0) && (
+        <List.Item
+          title="Open Home Page"
+          icon={{ source: Icon.Link }}
+          actions={
+            <ActionPanel>
+              <OpenInBrowserAction title="Open in Browser" url={props.url} icon={{ source: Icon.Link }} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 };
-
