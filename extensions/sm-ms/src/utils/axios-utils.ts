@@ -18,7 +18,11 @@ export const deleteImageByHash = async (hash: string) => {
   })
     .then((axiosResponse) => {
       const smmsResponse = axiosResponse.data as SMMSResponse;
-      showToast(Style.Success, titleCase(smmsResponse.code), smmsResponse.message);
+      if (smmsResponse.success) {
+        showToast(Style.Success, titleCase(smmsResponse.code), smmsResponse.message);
+      } else {
+        showToast(Style.Failure, titleCase(smmsResponse.code), smmsResponse.message);
+      }
       return { success: smmsResponse.success, code: titleCase(smmsResponse.code), message: smmsResponse.message };
     })
     .catch((reason) => {
@@ -60,13 +64,15 @@ export const uploadImage = async (imagePath: string) => {
         showToast(Style.Success, titleCase(smmsResponse.code), "URL is copied to clipboard.");
         const imageData = smmsResponse.data as ImageData;
         Clipboard.copy(imageData.url);
+        return { success: smmsResponse.success, code: smmsResponse.code, message: imageData.url };
       } else {
-        showToast(Style.Success, titleCase(smmsResponse.code), smmsResponse.message);
+        showToast(Style.Failure, titleCase(smmsResponse.code), smmsResponse.message);
+        return { success: smmsResponse.success, code: smmsResponse.code, message: smmsResponse.message };
       }
-      return smmsResponse;
     })
     .catch((reason) => {
       showToast(Style.Failure, String(reason));
+      return { success: false, code: "Error!", message: String(reason) };
     });
 };
 

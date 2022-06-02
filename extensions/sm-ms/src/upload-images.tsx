@@ -7,6 +7,7 @@ import { ActionToSmMs } from "./components/action-to-sm-ms";
 
 export default function UploadImages() {
   const [imagePath, setImagePath] = useState<string>("");
+  const [uploadedImage, setUploadedImage] = useState<string[]>([]);
 
   return (
     <Form
@@ -17,7 +18,14 @@ export default function UploadImages() {
             title={"Upload Image"}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
             onAction={() => {
-              uploadImage(imagePath).then(() => {
+              uploadImage(imagePath).then((value) => {
+                if (typeof value !== "undefined") {
+                  if (value.success) {
+                    const _uploadedImage = [...uploadedImage];
+                    _uploadedImage.unshift(value.message);
+                    setUploadedImage(_uploadedImage);
+                  }
+                }
                 setImagePath("");
               });
             }}
@@ -33,6 +41,11 @@ export default function UploadImages() {
               });
             }}
           />
+          <Action.CopyToClipboard
+            title={"Copy All Image URL"}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+            content={uploadedImage.join("\n")}
+          />
           <ActionToSmMs />
           <ActionOpenExtensionPreferences />
         </ActionPanel>
@@ -44,7 +57,10 @@ export default function UploadImages() {
         value={imagePath}
         onChange={setImagePath}
         placeholder={"Path (⌘+⇧+↩) or URL"}
-      ></Form.TextField>
+      />
+      {uploadedImage.map((value, index, array) => {
+        return <Form.Description title={array.length - index + ""} text={value} />;
+      })}
     </Form>
   );
 }

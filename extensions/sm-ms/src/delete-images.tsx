@@ -9,6 +9,7 @@ import { isEmpty } from "./utils/common-utils";
 
 export default function DeleteImages() {
   const [hash, setHash] = useState<string>("");
+  const [deletedImage, setDeletedImage] = useState<string[]>([]);
 
   return (
     <Form
@@ -30,7 +31,12 @@ export default function DeleteImages() {
                 "Delete Image",
                 async () => {
                   await showToast(Style.Animated, `Deleting image...`);
-                  await deleteImageByHash(hash);
+                  const result = await deleteImageByHash(hash);
+                  if (result.success) {
+                    const _deletedImage = [...deletedImage];
+                    _deletedImage.unshift(hash);
+                    setDeletedImage(_deletedImage);
+                  }
                   setHash("");
                 }
               ).then();
@@ -41,13 +47,11 @@ export default function DeleteImages() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id={"Hash"}
-        title={"Hash"}
-        value={hash}
-        onChange={setHash}
-        placeholder={"Image hash"}
-      ></Form.TextField>
+      <Form.TextField id={"Hash"} title={"Hash"} value={hash} onChange={setHash} placeholder={"Image hash"} />
+
+      {deletedImage.map((value, index, array) => {
+        return <Form.Description title={array.length - index + ""} text={value} />;
+      })}
     </Form>
   );
 }
