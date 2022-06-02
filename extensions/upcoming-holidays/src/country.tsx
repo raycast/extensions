@@ -30,14 +30,12 @@ export const Country = ({ countryCode }: { countryCode: string }) => {
   const { data, error } = useSWR(countryCode, fetcher);
 
   useEffect(() => {
-
     if (error) {
       setHolidays([]);
     }
     if (data) {
       setHolidays(data);
     }
-    
   }, [data, error]);
 
   return <List.Item.Detail isLoading={!holidays} markdown={buildMarkdown(holidays)} />;
