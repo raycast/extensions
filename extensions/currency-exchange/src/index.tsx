@@ -39,13 +39,10 @@ export default function Command() {
         <List.Dropdown
           tooltip="From Currency"
           value={state.fromCurrencyCode}
-          onChange={(newValue) =>
-            setState((previous) => {
-              //store it
-              LocalStorage.setItem(STORAGE_KEY_FROM_CURRENCY_CODE, newValue);
-              return { ...previous, fromCurrencyCode: newValue };
-            })
-          }
+          onChange={(newValue) => {
+            LocalStorage.setItem(STORAGE_KEY_FROM_CURRENCY_CODE, newValue);
+            setState((previous) => ({ ...previous, fromCurrencyCode: newValue }));
+          }}
         >
           {Object.keys(currencyCode2Country).map((currencyCode: string) => (
             <List.Dropdown.Item
