@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "autoscroll",
+  "title": "Autoscroll",
+  "description": "Control automatic scrolling in any direction, right from Raycast.",
+  "icon": "command-icon.png",
+  "author": "ThatNerd",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "autoscroll-downward",
+      "title": "Autoscroll Downward",
+      "description": "Start scrolling downward at the set speed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "autoscroll-upward",
+      "title": "Autoscroll Upward",
+      "description": "Start scrolling upward at the set speed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "autoscroll-left",
+      "title": "Autoscroll Left",
+      "description": "Start scrolling left at the set speed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "autoscroll-right",
+      "title": "Autoscroll Right",
+      "description": "Start scrolling right at the set speed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-autoscroll",
+      "title": "Stop Autoscroll",
+      "description": "Stop any running autoscrollers.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+      {
+        "name": "autoscrollSpeed",
+        "type": "textfield",
+        "required": true,
+        "title": "Autoscroll Speed",
+        "description": "Interval that scrolling is triggered in seconds.",
+        "placeholder": "1",
+        "default": "1"
+      }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
