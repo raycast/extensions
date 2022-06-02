@@ -1,4 +1,4 @@
-# next-holiday
+# upcoming-holiday
 
 Show the upcoming five holidays for a country
 
