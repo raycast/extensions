@@ -245,9 +245,9 @@
     {
       "name": "isDisplayTargetTranslationLanguage",
       "type": "checkbox",
-      "label": "Display Target Translation Language",
+      "label": "Select Target Translation Language",
       "required": false,
-      "description": "Display the target translation language in action panel",
+      "description": "Allow manual selection of target translation language in action panel",
       "default": false
     },
     {
@@ -303,7 +303,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

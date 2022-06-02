@@ -9,12 +9,13 @@
 - [x] Out of the box, easy to look up words or translate text.
 - [x] Beautiful and practical UI, friendly UI interaction and prompts.
 - [x] Automatically recognize the language type of your input text and translate it into the preferred language.
-- [x] Provide word rich query information, including basic translation, pronunciation, parts of speech, forms and tenses, web translations and web phrases.
+- [x] Provide word rich query information, including basic translation, pronunciation, multiple parts of speech and explanations, forms and tenses, web translations and web phrases.
 - [x] Show the types of exams that include the word, such as CET-4 and CET-6, TOEFL, IELTS, etc.
 - [x] Support automatic query clipboard text, enabled by default.
 - [x] Support to open the [Eudic Application](https://www.eudic.net/v4/en/app/eudic) and quickly look up words, if installed on your Mac.
 - [x] Quick search query text online, supports Eudic, Youdao dictionary and Google translation.
-- [x] Support Text to Speech, aka TTS.
+- [x] Support Text to Speech(aka TTS).
+- [x] Support shortcut `Cmd`+`S` to quickly play the pronunciation of query words.
 - [x] Support for displaying multiple translation results, currently supports Youdao, Baidu and Caiyun translation API.
 - [x] Support 23 languages.
 
