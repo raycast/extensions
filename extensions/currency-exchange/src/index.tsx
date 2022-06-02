@@ -46,7 +46,7 @@ export default function Command() {
         >
           {Object.keys(currencyCode2Country).map((currencyCode: string) => (
             <List.Dropdown.Item
-              title={currencyCode2Country[currencyCode]}
+              title={`${currencyCode} - ${currencyCode2Country[currencyCode]}`}
               value={currencyCode}
               icon={getFlagEmoji(currencyCode.substring(0, 2))}
             />
