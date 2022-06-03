@@ -1,4 +1,4 @@
-## What is Easydict?
+## What is Easydict?  [【中文简介】](https://github.com/tisfeng/Raycast-Easydict/wiki/Easydict-%E4%B8%AD%E6%96%87%E7%AE%80%E4%BB%8B)
 
 `Easydict` is an easy dictionary, for looking up words or translate text in an easy way. Use it out of the box, automatically recognize the input text language, support 23 translation languages with the help of Youdao, Baidu and Caiyun translation API.
 
@@ -48,8 +48,9 @@ Preference language has two main functions:
 
 <details>
   <summary> First, it improves the accuracy of automatic recognition of input text language. </summary>
-Preference language will be given priority in order during automatic recognition. This is because some words may represent multiple languages at the same time, and the automatic recognition program cannot work as expected. In most cases, the automatic recognition of input text is very useful, except for very few special cases. For example, the English word `heel` will be automatically recognized into Dutch by Youdao translation, and then the translation results are not what we expect. At this time, if your preferred language contains English, it will be recognized into English first and translated correctly.
+Preference language will be given priority in order during automatic recognition. This is because some words may represent multiple languages at the same time, and the automatic recognition program cannot work as expected. In most cases, the automatic recognition of input text is very useful, except for very few special cases. For example, the English word `heel` will be automatically recognized into Dutch by Youdao translation, and then the translation results are not what we expect. At this time, if your `Easydict` preferred language contains English, it will be recognized into English first and translated correctly.
 </details>
+
 
 <details>
   <summary> Second, it is used to confirm your target translation language.  </summary>
@@ -69,12 +70,11 @@ For example, if you input a sentence arbitrarily, it will be translated into the
 In order to better match the automatic clipboard query feature, it is a good idea to set a hotkey for `Easydic`, such as `Shift` + `Cmd ` + `E`, so that after copying the text, you can directly query words through the hotkey, which is very smooth and elegant. 
 In addition, to avoid frequently querying the same clipboard words, we set a `10 minute` limit, that is, if the latest word on the clipboard is automatically queried only once within 10 minutes, of course, you can manually paste and query at any time.
 </details>
-
-### Display Target Translation Language
+### Select Target Translation Language
 
 <details>
   <summary> Specify the target translation language. This option is turned off by default. </summary>
-By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can turn on the option `Display Target Translation Language` on the preference page, and then you can temporarily select another target language in the action panel.
+By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can turn on the option `Select Target Translation Language` on the preference page, and then you can temporarily select another target language in the action panel.
 </details>
 
 ### Translation Services
@@ -94,3 +94,9 @@ Apply Translation Services link:
 ## Thanks
 
 This project is inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and based on it. `Easydic` has improved many UI displays, added more practical features, deleted some complex or inappropriate operations, and made a lot of optimization && improvements on the original project.
+
+
+
+Finally, all those interested in this project are welcome to contribute to the project, issues and PRs are fine. The project is still in the rapid development stage, any practical suggestions or interesting ideas are OK. There is no guarantee that they will be accepted, but they will be definitely considered. 
+
+In addition, if submitting a PR, it is recommended to open a issue to briefly describe the content of the PR, or in [discussions](https://github.com/tisfeng/Raycast-Easydict/discussions) Let's have a brief discussion to avoid conflicts between PR and the features I am currently developing. Thank you.
