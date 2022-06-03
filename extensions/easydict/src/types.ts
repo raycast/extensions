@@ -50,7 +50,11 @@ export interface MyPreferences {
 }
 
 export interface ListItemActionPanelItem {
-  isInstalledEudic: Boolean;
+  isInstalledEudic: boolean;
+  isShowOpenInEudicWeb: boolean;
+  eudicWebUrl: string;
+  isShowOpenInYoudaoWeb: boolean;
+  youdaoWebUrl: string;
   copyText?: string;
   queryText?: string;
   currentFromLanguage?: LanguageItem;
@@ -70,6 +74,8 @@ export interface RequestErrorInfo {
 
 export interface LanguageItem {
   youdaoLanguageId: string;
+  youdaoWebLanguageId?: string;
+  eudicWebLanguageId?: string;
   baiduLanguageId?: string;
   caiyunLanguageId?: string;
   languageTitle: string;
@@ -139,4 +145,15 @@ export interface TranslateDisplayItem {
   phonetic?: string;
   examTypes?: string[];
   translationType?: TranslationType;
+}
+
+export interface ClipboardRecoredItem {
+  key: string;
+  vale: string;
+}
+
+export interface QueryRecoredItem {
+  timestamp: number;
+  queryText: string;
+  result?: string;
 }

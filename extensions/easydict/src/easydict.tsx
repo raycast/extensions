@@ -5,15 +5,7 @@ import {
   getWordAccessories,
   ListActionPanel,
 } from "./components";
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  LocalStorage,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import {
   LanguageItem,
   TranslateSourceResult,
@@ -23,6 +15,7 @@ import {
 import {
   BaiduRequestStateCode,
   getYoudaoErrorInfo,
+  maxInputTextLength,
   requestStateCodeLinkMap,
   TranslationType,
   YoudaoRequestStateCode,
@@ -30,13 +23,15 @@ import {
 import axios from "axios";
 import {
   checkIsInstalledEudic,
-  clipboardQueryInterval,
   defaultLanguage1,
   defaultLanguage2,
   getAutoSelectedTargetLanguageId,
+  getEudicWebTranslateURL,
   getInputTextLanguageId,
-  getItemFromLanguageList,
+  getLanguageItemFromList,
+  getYoudaoWebTranslateURL,
   saveQueryClipboardRecord,
+  tryQueryClipboardText,
 } from "./utils";
 import { requestAllTranslateAPI } from "./request";
 import {
@@ -82,7 +77,7 @@ export default function () {
      the language type of text, depending on the language type of the current input text, it is preferred to judge whether it is English or Chinese according to the preferred language, and then auto
      */
   const [currentFromLanguageState, updateCurrentFromLanguageState] =
-    useState<LanguageItem>();
+    useState<LanguageItem>(defaultLanguage1);
 
   /*
     default translation language, based on user's preference language, can only defaultLanguage1 or defaultLanguage2 depending on the currentFromLanguageState. cannot be changed manually.
@@ -175,7 +170,7 @@ export default function () {
         const [from, to] = youdaoTranslateResult.l.split("2"); // from2to
         if (from === to) {
           const target = getAutoSelectedTargetLanguageId(from);
-          updateAutoSelectedTargetLanguage(getItemFromLanguageList(target));
+          updateAutoSelectedTargetLanguage(getLanguageItemFromList(target));
           translate(from, target);
           return;
         }
@@ -184,7 +179,7 @@ export default function () {
         updateTranslateDisplayResult(
           reformatTranslateDisplayResult(reformatResult)
         );
-        updateCurrentFromLanguageState(getItemFromLanguageList(from));
+        updateCurrentFromLanguageState(getLanguageItemFromList(from));
 
         checkIsInstalledEudic(updateIsInstalledEudic);
       })
@@ -197,22 +192,12 @@ export default function () {
     updateTranslateDisplayResult([]);
   }
 
-  // function: query the clipboard text from LocalStorage
-  async function queryClipboardText() {
-    let text = await Clipboard.readText();
-    console.log("query clipboard text: " + text);
-    if (text) {
-      const timestamp = (await LocalStorage.getItem<number>(text)) || 0;
-      const now = new Date().getTime();
-      console.log(`before: ${new Date(timestamp).toUTCString()}`);
-      console.log(`now:    ${new Date(now).toUTCString()}`);
-      if (!timestamp || now - timestamp > clipboardQueryInterval) {
-        text = text.trim();
-        saveQueryClipboardRecord(text);
-        updateSearchText(text);
-        updateInputText(text);
-      }
-    }
+  function queryClipboardText(text: string) {
+    text = text.trim();
+    text = text.substring(0, maxInputTextLength);
+    saveQueryClipboardRecord(text);
+    updateSearchText(text);
+    updateInputText(text);
   }
 
   useEffect(() => {
@@ -223,7 +208,7 @@ export default function () {
       const currentLanguageId = getInputTextLanguageId(searchText);
       console.log("currentLanguageId: ", currentLanguageId);
       updateCurrentFromLanguageState(
-        getItemFromLanguageList(currentLanguageId)
+        getLanguageItemFromList(currentLanguageId)
       );
 
       // priority to use user selected target language
@@ -233,6 +218,9 @@ export default function () {
       // if conflict, use auto selected target language
       if (currentLanguageId === tartgetLanguageId) {
         tartgetLanguageId = getAutoSelectedTargetLanguageId(currentLanguageId);
+        updateAutoSelectedTargetLanguage(
+          getLanguageItemFromList(tartgetLanguageId)
+        );
         console.log("autoSelectedTargetLanguage: ", tartgetLanguageId);
       }
       translate(currentLanguageId, tartgetLanguageId);
@@ -241,7 +229,7 @@ export default function () {
     }
 
     if (!searchText) {
-      queryClipboardText();
+      tryQueryClipboardText(queryClipboardText);
     }
   }, [searchText]);
 
@@ -288,6 +276,18 @@ export default function () {
       );
     }
 
+    let eudicWebUrl = getEudicWebTranslateURL(
+      searchText || "",
+      currentFromLanguageState!,
+      autoSelectedTargetLanguage
+    );
+
+    let youdaoWebUrl = getYoudaoWebTranslateURL(
+      searchText || "",
+      currentFromLanguageState!,
+      autoSelectedTargetLanguage
+    );
+
     return (
       <Fragment>
         {translateDisplayResult?.map((resultItem, idx) => {
@@ -307,6 +307,10 @@ export default function () {
                     actions={
                       <ListActionPanel
                         isInstalledEudic={isInstalledEudic}
+                        isShowOpenInEudicWeb={eudicWebUrl.length != 0}
+                        isShowOpenInYoudaoWeb={youdaoWebUrl.length != 0}
+                        eudicWebUrl={eudicWebUrl}
+                        youdaoWebUrl={youdaoWebUrl}
                         queryText={searchText}
                         copyText={item.copyText}
                         currentFromLanguage={currentFromLanguageState}
@@ -334,7 +338,7 @@ export default function () {
   function onInputChangeEvent(text: string) {
     updateInputText(text);
 
-    const trimText = text.trim();
+    let trimText = text.trim();
     if (trimText.length == 0) {
       updateLoadingState(false);
       updateTranslateDisplayResult([]);
@@ -346,6 +350,7 @@ export default function () {
     // start delay timer for fetch translate API
     if (trimText.length > 0 && trimText !== searchText) {
       delayFetchTranslateAPITimer = setTimeout(() => {
+        trimText = trimText.substring(0, maxInputTextLength);
         updateSearchText(trimText);
       }, delayRequestTime);
     }

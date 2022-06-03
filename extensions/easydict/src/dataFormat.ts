@@ -92,15 +92,17 @@ export function reformatTranslateDisplayResult(
       tooltip = "";
     }
 
+    let oneLineTranslation = translation.text.split("\n").join("");
+
     displayResult.push({
       type: sectionType,
       sectionTitle: sectionTitle,
       items: [
         {
-          key: translation.text + i,
-          title: translation.text,
+          key: oneLineTranslation + i,
+          title: oneLineTranslation,
           tooltip: tooltip,
-          copyText: translation.text,
+          copyText: oneLineTranslation,
           phonetic: reformatResult.queryTextInfo.phonetic,
           examTypes: reformatResult.queryTextInfo.examTypes,
         },
