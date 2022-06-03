@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
 import { List } from "@raycast/api";
-import { Team } from "../standings.types";
+import { Team } from "../types/standings.types";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 

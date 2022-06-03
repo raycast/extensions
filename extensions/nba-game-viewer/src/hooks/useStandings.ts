@@ -1,6 +1,6 @@
 import getStandings from "../utils/getStandings";
 import { useState, useEffect } from "react";
-import { Team, Conferences } from "../standings.types";
+import { Team, Conferences } from "../types/standings.types";
 
 const useStandings = (): {
   standings: Conferences;

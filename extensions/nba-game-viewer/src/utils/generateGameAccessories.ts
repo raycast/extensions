@@ -1,7 +1,7 @@
-import type { Game } from "../schedule.types";
+import type { Game } from "../types/schedule.types";
 import { Icon, Color } from "@raycast/api";
 
-const generatAccessories = (game: Game) => {
+const generateGameAccessories = (game: Game) => {
   if (game.status.period === 0) {
     return [{ text: game.time }, { icon: { source: Icon.Calendar }, tooltip: "Scheduled" }];
   }
@@ -11,9 +11,9 @@ const generatAccessories = (game: Game) => {
   }
 
   return [
-    { text: `Q${game.status.period}` },
+    { text: `Quarter #${game.status.period}` },
     { icon: { source: Icon.Video, tintColor: Color.Green }, tooltip: "In Progress" },
   ];
 };
 
-export default generatAccessories;
+export default generateGameAccessories;

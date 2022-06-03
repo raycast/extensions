@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
-import { List } from "@raycast/api";
-import { Day } from "../schedule.types";
+import { List, Toast, showToast } from "@raycast/api";
+import { Day } from "../types/schedule.types";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 
 const Schedue = () => {
-  const { schedule, loading } = useSchedule();
+  let { schedule, loading, error } = useSchedule();
+
+  if (error) {
+    showToast(Toast.Style.Failure, "Failed to get roster");
+    loading = false;
+  }
 
   return (
     <List isLoading={loading}>

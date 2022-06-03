@@ -1,15 +1,17 @@
 import getSchedule from "../utils/getSchedule";
 import { useState, useEffect } from "react";
-import { Day, Game, Competitor } from "../schedule.types";
+import { Day, Game, Competitor } from "../types/schedule.types";
 import { Toast, showToast } from "@raycast/api";
 import convertDate from "../utils/convertDate";
 
 const useSchedule = (): {
   schedule: Day[];
   loading: boolean;
+  error: boolean;
 } => {
   const [schedule, setSchedule] = useState<Array<Day>>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     const getGames = async () => {
@@ -23,8 +25,9 @@ const useSchedule = (): {
           month: currentDate.getUTCMonth() + 1,
           day: currentDate.getUTCDate(),
         });
-      } catch (e) {
-        showToast(Toast.Style.Failure, "Failed to get schedule");
+      } catch (error) {
+        setError(true);
+        return error;
       }
 
       Object.keys(data).map((key) => {
@@ -77,7 +80,7 @@ const useSchedule = (): {
     getGames();
   }, []);
 
-  return { schedule, loading };
+  return { schedule, loading, error };
 };
 
 export default useSchedule;
