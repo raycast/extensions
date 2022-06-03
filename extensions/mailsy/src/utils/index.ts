@@ -1,6 +1,6 @@
 import axios from "axios";
 import { LocalStorage } from "@raycast/api";
-import { Clipboard, showHUD, closeMainWindow } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
 
 const clearLocalStorage = async () => {
   const account = {
@@ -89,6 +89,8 @@ export const fetchMessages = async () => {
 
     const email = data["hydra:member"];
 
+    console.log(email);
+
     return email;
   } catch (error) {
     console.log(error);
@@ -137,7 +139,9 @@ export const ShowInfo = async () => {
     });
 
     return data;
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const openEmail = async (id: string) => {

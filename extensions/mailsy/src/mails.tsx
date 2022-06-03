@@ -1,9 +1,23 @@
 import { Detail, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchMessages, openEmail } from "./utils";
+
+interface messages {
+  id: string;
+  subject: string;
+  from: from;
+  intro: string;
+  createdAt: string;
+}
+
+interface from {
+  name: string;
+  address: string;
+}
+
 export default function Command() {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [error, setError] = useState<any>("");
+  const [messages, setMessages] = useState<messages[]>([]);
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

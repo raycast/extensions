@@ -1,1 +1,3 @@
-export default async () => require("./utils").deleteAccount();
+import { deleteAccount } from "./utils";
+
+export default async () => deleteAccount();

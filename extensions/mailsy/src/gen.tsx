@@ -1,1 +1,3 @@
-export default async () => require("./utils").createAccount();
+import { createAccount } from "./utils";
+
+export default async () => createAccount();

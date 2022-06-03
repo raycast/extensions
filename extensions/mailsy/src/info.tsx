@@ -1,10 +1,21 @@
 import { List, Icon, Detail, Action, ActionPanel } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ShowInfo } from "./utils";
+
+interface info {
+  id: string;
+  address: string;
+  createdAt: string;
+}
+
 export default function Command() {
-  const [info, setInfo] = useState<any>({});
+  const [info, setInfo] = useState<info>({
+    id: "",
+    address: "",
+    createdAt: "",
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     async function response() {
@@ -12,7 +23,11 @@ export default function Command() {
 
       !info && setError("# Create Account First");
 
-      setInfo(info);
+      setInfo({
+        id: info.id,
+        address: info.address,
+        createdAt: info.createdAt,
+      });
 
       setLoading(false);
     }
