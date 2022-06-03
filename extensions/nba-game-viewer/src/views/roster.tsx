@@ -9,17 +9,17 @@ type RosterArgs = {
 };
 
 const Roster = ({ id: id }: RosterArgs) => {
-  let { roster, loading, error } = useRoster({ id: id });
+  const data = useRoster({ id: id });
   const [showingDetail, setIsShowingDetail] = useState<boolean>(false);
 
-  if (error) {
+  if (data.error) {
     showToast(Toast.Style.Failure, "Failed to get roster");
-    loading = false;
+    data.loading = false;
   }
 
   return (
-    <List isLoading={loading} isShowingDetail={showingDetail}>
-      {roster.map((player: Player) => {
+    <List isLoading={data.loading} isShowingDetail={showingDetail}>
+      {data.roster.map((player: Player) => {
         return <PlayerComponent key={player.id} player={player} setIsShowingDetail={setIsShowingDetail} />;
       })}
     </List>

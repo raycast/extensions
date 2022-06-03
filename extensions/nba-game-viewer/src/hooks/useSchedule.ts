@@ -1,7 +1,6 @@
 import getSchedule from "../utils/getSchedule";
 import { useState, useEffect } from "react";
 import { Day, Game, Competitor } from "../types/schedule.types";
-import { Toast, showToast } from "@raycast/api";
 import convertDate from "../utils/convertDate";
 
 const useSchedule = (): {
@@ -58,7 +57,7 @@ const useSchedule = (): {
                     home: competitor.homeAway,
                   };
                 })
-                .sort((a: Competitor, b: Competitor) => {
+                .sort((a: Competitor) => {
                   return a.home === "home" ? -1 : 1;
                 }),
               status: {
