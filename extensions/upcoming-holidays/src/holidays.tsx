@@ -50,7 +50,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       enableFiltering={true}
     >
-      <List.Section title="Pinned countries">
+      <List.Section title="Pinned Countries">
         {pinnedCountries &&
           pinnedCountries.map((country) => {
             const props: Partial<List.Item.Props> = {
@@ -64,14 +64,14 @@ export default function Command() {
                 {...props}
                 actions={
                   <ActionPanel>
-                    <Action title="Unpin country" onAction={() => unpinCountry(country)} />
+                    <Action title="Unpin Country" onAction={() => unpinCountry(country)} />
                   </ActionPanel>
                 }
               />
             );
           })}
       </List.Section>
-      <List.Section title="Unpinned countries">
+      <List.Section title="Unpinned Countries">
         {unpinnedCountries &&
           unpinnedCountries.map((country) => {
             const props: Partial<List.Item.Props> = {
@@ -85,7 +85,7 @@ export default function Command() {
                 {...props}
                 actions={
                   <ActionPanel>
-                    <Action title="Pin country" onAction={() => pinCountry(country)} />
+                    <Action title="Pin Country" onAction={() => pinCountry(country)} />
                   </ActionPanel>
                 }
               />
