@@ -1,5 +1,8 @@
 # Paste as Plain text Changelog
 
+## [Refactor code] - {PR_MERGE_DATE}
+- Refactor code
+
 ## [Update Raycast Api] - 2022-05-01
 - Update Raycast Api
 
