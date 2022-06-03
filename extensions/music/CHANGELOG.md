@@ -1,7 +1,13 @@
 # Apple Music Changelog
 
-## [Fix] - 2022-05-30
+## [Shuffle Playlist/Album] - 2022-06-01
 
+- Ability to shuffle an album
+- Ability to shuffle a playlist
+- Renamed "Search & Play Library Album" to "Play Library Abum"
+- Renamed "Search & Play Library Track" to "Play Library Track"
+
+## [Fix] - 2022-05-30
 Fixed issue that caused the extension to crash
 
 ## [Track Rating / Fixes] - 2022-05-05

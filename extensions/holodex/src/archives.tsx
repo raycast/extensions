@@ -49,7 +49,7 @@ function Item({ video }: { video: Video }) {
       icon={{ source: video.avatarUrl, mask: Image.Mask.Circle }}
       detail={<DetailView {...video} />}
       actions={
-        <ActionPanel title={`Archive: ${video.videoId}`}>
+        <ActionPanel title={`${video.title}`}>
           <Actions video={video} isInDetail={true} />
         </ActionPanel>
       }
@@ -75,6 +75,9 @@ function useSearch(org: string) {
 
 async function performSearch(signal: AbortSignal, org: string, query?: string): Promise<Video[]> {
   const { preferEnglishName } = getPreferences();
+  const { language } = getPreferences();
+
+  const languageList = language.split(",").map((ln) => ln.trim());
 
   const emptyQuery = !query || query.length === 0;
 
@@ -83,10 +86,11 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
       ? await apiRequest("videos", {
           params: {
             type: "stream",
-            include: "description",
+            include: ["description", "clips"],
             status: ["new", "past"],
             limit: 50,
             org,
+            lang: languageList,
           },
           signal,
         })
@@ -97,6 +101,7 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
             limit: 50,
             org: org === "All Vtubers" ? [] : [org],
             conditions: [{ text: query }],
+            lang: languageList,
           },
           signal,
         })
@@ -104,13 +109,12 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
 
   return response
     .filter((video) => !["missing", "live"].includes(video.status))
-    .map((video) => {
+    .map((video): Video => {
       const channelName = (preferEnglishName && video.channel.english_name) || video.channel.name;
 
       return {
         videoId: video.id,
         title: video.title,
-        videoType: video.type,
         startAt: parseISO(video.available_at ?? video.published_at),
         topic: video.topic_id,
         description: video.description,
@@ -118,8 +122,22 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
         channelId: video.channel.id,
         channelName,
         avatarUrl: video.channel.photo,
-        type: video.type,
         liveViewers: 0,
-      } as Video;
+        clips: video.clips?.map((clip) => {
+          const channelName = (preferEnglishName && clip.channel.english_name) || clip.channel.name;
+
+          return {
+            videoId: clip.id,
+            title: clip.title,
+            startAt: parseISO(clip.available_at ?? clip.published_at),
+            description: clip.description,
+            status: clip.status,
+            channelId: clip.channel.id,
+            channelName,
+            avatarUrl: clip.channel.photo,
+            liveViewers: 0,
+          };
+        }),
+      };
     });
 }
