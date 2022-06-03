@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "holidays",
+      "name": "index",
       "title": "List Upcoming Holidays",
       "description": "Allows you to see the upcoming holidays for a country",
       "mode": "view"
