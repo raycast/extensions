@@ -1,12 +1,16 @@
 # Easy New File Changelog
 
+## [Add New File with Text command] - {PR_MERGE_DATE}
+
+- Add **New File with Text** command: Create a new file with selected or clipboard text now.
+
 ## [Optimize Choose File Path action] - 2022-05-24
 
 - Optimize _Choose File Path_ action
 - Add action _Open Command Preferences_
 - Add empty view for **New File Here** command
 
-## [Add Easy New File] - 2022-04-25
+## [Add Open With action] - 2022-04-25
 
 - Modify shortcut keys for certain actions
 - Add _Open With_ actions for New File Here command

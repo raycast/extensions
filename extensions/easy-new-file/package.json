@@ -20,13 +20,26 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "createAndOpen",
-          "type": "checkbox",
-          "required": true,
-          "title": "Advanced Preference",
-          "description": "After creating a new file, it is automatically opened with the default app.",
-          "default": true,
-          "label": "Auto-open after file created"
+          "name": "createdActions",
+          "type": "dropdown",
+          "required": false,
+          "title": "Actions after Creation",
+          "description": "Operations after file creation.",
+          "default": "open",
+          "data": [
+            {
+              "title": "No Action",
+              "value": "no"
+            },
+            {
+              "title": "Open File",
+              "value": "open"
+            },
+            {
+              "title": "Show in Finder",
+              "value": "show"
+            }
+          ]
         },
         {
           "name": "showDocument",
@@ -52,6 +65,113 @@
           "description": "Show file templates for script types.",
           "default": true,
           "label": "Script"
+        }
+      ]
+    },
+    {
+      "name": "new-file-with-text",
+      "icon": "new-file-here-icon.png",
+      "title": "New File with Text",
+      "subtitle": "Easy New File",
+      "description": "Create a new file with selected or clipboard text now.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "createdActions",
+          "type": "dropdown",
+          "required": false,
+          "title": "Actions after Creation",
+          "description": "Operations after file creation.",
+          "default": "show",
+          "data": [
+            {
+              "title": "No Action",
+              "value": "no"
+            },
+            {
+              "title": "Open File",
+              "value": "open"
+            },
+            {
+              "title": "Show in Finder",
+              "value": "show"
+            }
+          ]
+        },
+        {
+          "name": "fileType",
+          "type": "dropdown",
+          "required": false,
+          "title": "File Type",
+          "description": "Type of the new file created.",
+          "default": "txt",
+          "data": [
+            {
+              "title": "Text",
+              "value": "txt"
+            },
+            {
+              "title": "Markdown",
+              "value": "md"
+            },
+            {
+              "title": "Java",
+              "value": "java"
+            },
+            {
+              "title": "Javascript",
+              "value": "js"
+            },
+            {
+              "title": "Typescript",
+              "value": "ts"
+            },
+            {
+              "title": "Json",
+              "value": "json"
+            },
+            {
+              "title": "XML",
+              "value": "xml"
+            },
+            {
+              "title": "CSS",
+              "value": "css"
+            },
+            {
+              "title": "Html",
+              "value": "html"
+            },
+            {
+              "title": "Apple",
+              "value": "applescript"
+            },
+            {
+              "title": "Perl",
+              "value": "pl"
+            },
+            {
+              "title": "Python",
+              "value": "py"
+            },
+            {
+              "title": "Ruby",
+              "value": "rb"
+            },
+            {
+              "title": "Shell",
+              "value": "sh"
+            }
+          ]
+        },
+        {
+          "name": "saveDirectory",
+          "title": "Save Directory",
+          "description": "The directory of file to save. Path format: /Users/Username/Downloads or ~/Desktop.",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "~/Desktop",
+          "default": "~/Desktop"
         }
       ]
     },

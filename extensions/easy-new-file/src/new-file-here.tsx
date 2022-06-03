@@ -9,6 +9,7 @@ import {
   List,
   open,
   showHUD,
+  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -279,9 +280,18 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
   await showCreateSuccess(fileName, filePath, desPath);
 }
 
-const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
-  await showHUD(`${fileName} created in ${folderPath.slice(0, -1)}`);
-  if (getPreferenceValues<Preferences>().createAndOpen) {
-    await open(filePath);
+export const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
+  switch (getPreferenceValues<Preferences>().createdActions) {
+    case "no": {
+      break;
+    }
+    case "open": {
+      await open(filePath);
+      break;
+    }
+    case "show": {
+      await showInFinder(filePath);
+    }
   }
+  await showHUD(`${fileName} created in ${folderPath.slice(0, -1)}`);
 };
