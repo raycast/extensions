@@ -4,7 +4,8 @@ import useSWR from "swr";
 import { fetcher, Holiday } from "./api";
 
 const buildMarkdown = (holidays: Holiday[] | undefined) => {
-  const markdown = holidays?.map((holiday) => {
+  const markdown = holidays
+    ?.map((holiday) => {
       const { date, name } = holiday;
       return `
 ### ${name}
