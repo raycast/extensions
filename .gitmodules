@@ -1,0 +1,3 @@
+[submodule "extensions/ihelper"]
+	path = extensions/ihelper
+	url = https://github.com/fumeboy/ihelper-raycast
