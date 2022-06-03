@@ -1,8 +1,9 @@
 import { Action, ActionPanel, List, LocalStorage } from "@raycast/api";
 import { getAllCountries } from "country-locale-map";
 import { useEffect, useState } from "react";
-import { CountryDetail } from "./country";
-import type { Country } from "./country";
+import { CountryDetail } from "./country-detail";
+import type { Country } from "./country-detail";
+import { CountryItem } from "./country-item";
 
 type Values = {
   [countryCode: string]: boolean;
@@ -54,16 +55,13 @@ export default function Holidays() {
         {pinnedCountries &&
           pinnedCountries.map((country) => {
             return (
-              <List.Item
+              <CountryItem
                 key={country.alpha2}
-                title={country.name}
-                icon={country.emoji}
-                detail={<CountryDetail countryCode={country.alpha2} />}
-                actions={
-                  <ActionPanel>
-                    <Action title="Unpin Country" onAction={() => unpinCountry(country)} />
-                  </ActionPanel>
-                }
+                country={country}
+                action={{
+                  title: "Unpin Country",
+                  handler: () => unpinCountry(country),
+                }}
               />
             );
           })}
@@ -72,16 +70,13 @@ export default function Holidays() {
         {unpinnedCountries &&
           unpinnedCountries.map((country) => {
             return (
-              <List.Item
+              <CountryItem
                 key={country.alpha2}
-                title={country.name}
-                icon={country.emoji}
-                detail={<CountryDetail countryCode={country.alpha2} />}
-                actions={
-                  <ActionPanel>
-                    <Action title="Pin Country" onAction={() => pinCountry(country)} />
-                  </ActionPanel>
-                }
+                country={country}
+                action={{
+                  title: "Pin Country",
+                  handler: () => pinCountry(country),
+                }}
               />
             );
           })}
