@@ -70,7 +70,7 @@
     },
     {
       "name": "new-file-with-text",
-      "icon": "new-file-here-icon.png",
+      "icon": "new-file-with-text-icon.png",
       "title": "New File with Text",
       "subtitle": "Easy New File",
       "description": "Create a new file with selected or clipboard text now.",
