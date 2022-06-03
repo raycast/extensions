@@ -1,5 +1,10 @@
 import { LanguageItem, RequestErrorInfo } from "./types";
 
+export const clipboardQueryTextKey = "clipboardQueryTextKey";
+
+// 百度翻译：query 长度：为保证翻译质量，请将单次请求长度控制在 6000 bytes以内（汉字约为输入参数 2000 个）
+export const maxInputTextLength = 2000;
+
 export enum SectionType {
   Translation = "Translate",
   Explanations = "Explanation",
@@ -92,6 +97,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "en",
+    youdaoWebLanguageId: "eng",
+    eudicWebLanguageId: "en",
     baiduLanguageId: "en",
     caiyunLanguageId: "en",
     googleLanguageId: "en",
@@ -112,6 +119,7 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "ja",
+    youdaoWebLanguageId: "jap",
     baiduLanguageId: "jp",
     caiyunLanguageId: "ja",
     languageTitle: "Japanese",
@@ -119,18 +127,22 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "ko",
+    youdaoWebLanguageId: "ko",
     baiduLanguageId: "kor",
     languageTitle: "Korean",
     languageVoice: ["Yuna"],
   },
   {
     youdaoLanguageId: "fr",
+    youdaoWebLanguageId: "fr",
+    eudicWebLanguageId: "fr",
     baiduLanguageId: "fra",
     languageTitle: "French",
     languageVoice: ["Amelie", "Thomas"],
   },
   {
     youdaoLanguageId: "es",
+    eudicWebLanguageId: "es",
     baiduLanguageId: "spa",
     languageTitle: "Spanish",
     languageVoice: ["Jorge", "Juan", "Diego", "Monica", "Paulina"],
@@ -155,7 +167,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "de",
-    baiduLanguageId: "de	",
+    eudicWebLanguageId: "de",
+    baiduLanguageId: "de",
     languageTitle: "German",
     languageVoice: ["Anna"],
   },

@@ -1,4 +1,4 @@
-## What is Easydict?  [【中文简介】](https://github.com/tisfeng/Raycast-Easydict/wiki/Easydict-%E4%B8%AD%E6%96%87%E7%AE%80%E4%BB%8B)
+## What is Easydict? [【中文简介】](https://github.com/tisfeng/Raycast-Easydict/wiki/Easydict-%E4%B8%AD%E6%96%87%E7%AE%80%E4%BB%8B)
 
 `Easydict` is an easy dictionary, for looking up words or translate text in an easy way. Use it out of the box, automatically recognize the input text language, support 23 translation languages with the help of Youdao, Baidu and Caiyun translation API.
 
@@ -51,7 +51,6 @@ Preference language has two main functions:
 Preference language will be given priority in order during automatic recognition. This is because some words may represent multiple languages at the same time, and the automatic recognition program cannot work as expected. In most cases, the automatic recognition of input text is very useful, except for very few special cases. For example, the English word `heel` will be automatically recognized into Dutch by Youdao translation, and then the translation results are not what we expect. At this time, if your `Easydict` preferred language contains English, it will be recognized into English first and translated correctly.
 </details>
 
-
 <details>
   <summary> Second, it is used to confirm your target translation language.  </summary>
 For example, if you input a sentence arbitrarily, it will be translated into the first preferred language. If the automatically recognized language is the same as your first preferred language, it will be automatically translated into the second preferred language.
@@ -95,8 +94,6 @@ Apply Translation Services link:
 
 This project is inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and based on it. `Easydic` has improved many UI displays, added more practical features, deleted some complex or inappropriate operations, and made a lot of optimization && improvements on the original project.
 
-
-
-Finally, all those interested in this project are welcome to contribute to the project, issues and PRs are fine. The project is still in the rapid development stage, any practical suggestions or interesting ideas are OK. There is no guarantee that they will be accepted, but they will be definitely considered. 
+Finally, all those interested in this project are welcome to contribute to the project, issues and PRs are fine. The project is still in the rapid development stage, any practical suggestions or interesting ideas are OK. There is no guarantee that they will be accepted, but they will be definitely considered.
 
 In addition, if submitting a PR, it is recommended to open a issue to briefly describe the content of the PR, or in [discussions](https://github.com/tisfeng/Raycast-Easydict/discussions) Let's have a brief discussion to avoid conflicts between PR and the features I am currently developing. Thank you.

@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { Component, useState } from "react";
 import { exec, execFile } from "child_process";
 import { languageItemList, SectionType, TranslationType } from "./consts";
 import {
@@ -16,7 +16,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { myPreferences, truncate } from "./utils";
+import { getGoogleTranslateURL, myPreferences, truncate } from "./utils";
 
 export const eudicBundleId = "com.eusoft.freeeudic";
 
@@ -136,17 +136,6 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
     }
   }
 
-  getGoogleTranslateURL(): string {
-    const from =
-      this.props.currentFromLanguage?.googleLanguageId ||
-      this.props.currentFromLanguage?.youdaoLanguageId;
-    const to =
-      this.props.currentTargetLanguage?.googleLanguageId ||
-      this.props.currentTargetLanguage?.youdaoLanguageId;
-    const text = encodeURI(this.props.queryText!);
-    return `https://translate.google.cn/?sl=${from}&tl=${to}&text=${text}&op=translate`;
-  }
-
   openInEudic = (queryText?: string) => {
     const url = `eudic://dict/${queryText}`;
     execFile("open", [url], (error, stdout, stderr) => {
@@ -184,24 +173,29 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
         </ActionPanel.Section>
 
         <ActionPanel.Section title="Search Query Text Online">
-          <Action.OpenInBrowser
-            icon={Icon.Link}
-            title="See Eudic Translate Results"
-            url={`https://dict.eudic.net/dicts/en/${encodeURI(
-              this.props.queryText!
-            )}`}
-          />
-          <Action.OpenInBrowser
-            icon={Icon.Link}
-            title="See Youdao Translate Results"
-            url={`https://www.youdao.com/w/eng/${encodeURI(
-              this.props.queryText!
-            )}`}
-          />
+          {this.props.isShowOpenInEudicWeb && (
+            <Action.OpenInBrowser
+              icon={Icon.Link}
+              title="See Eudic Translate Results"
+              url={this.props.eudicWebUrl}
+            />
+          )}
+          {this.props.isShowOpenInYoudaoWeb && (
+            <Action.OpenInBrowser
+              icon={Icon.Link}
+              title="See Youdao Translate Results"
+              url={this.props.youdaoWebUrl}
+            />
+          )}
+
           <Action.OpenInBrowser
             icon={Icon.Link}
             title="See Google Translate Results"
-            url={this.getGoogleTranslateURL()}
+            url={getGoogleTranslateURL(
+              this.props.queryText!,
+              this.props.currentFromLanguage!,
+              this.props.currentTargetLanguage!
+            )}
           />
         </ActionPanel.Section>
 

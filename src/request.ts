@@ -1,7 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
 import querystring from "node:querystring";
-import { getItemFromLanguageList, myPreferences } from "./utils";
+import { getLanguageItemFromList, myPreferences } from "./utils";
 
 // concurrent request for multiple translation interfaces
 export function requestAllTranslateAPI(
@@ -76,8 +76,8 @@ export function requestBaiduAPI(
   const sign = md5.update(md5Content).digest("hex");
   const apiServer = "https://fanyi-api.baidu.com/api/trans/vip/translate";
 
-  const from = getItemFromLanguageList(fromLanguage).baiduLanguageId;
-  const to = getItemFromLanguageList(targetLanguage).baiduLanguageId;
+  const from = getLanguageItemFromList(fromLanguage).baiduLanguageId;
+  const to = getLanguageItemFromList(targetLanguage).baiduLanguageId;
 
   let encodeQueryText = encodeURIComponent(queryText);
 
@@ -97,8 +97,8 @@ export function requestCaiyunAPI(
   const appToken = myPreferences.caiyunAppToken;
 
   const url = "https://api.interpreter.caiyunai.com/v1/translator";
-  const from = getItemFromLanguageList(fromLanguage).caiyunLanguageId || "auto";
-  const to = getItemFromLanguageList(targetLanguage).caiyunLanguageId;
+  const from = getLanguageItemFromList(fromLanguage).caiyunLanguageId || "auto";
+  const to = getLanguageItemFromList(targetLanguage).caiyunLanguageId;
   const trans_type = `${from}2${to}`; // "auto2xx";
 
   // Note that Caiyun Xiaoyi only supports these types of translation at present.
