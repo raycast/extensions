@@ -13,7 +13,7 @@ const getPinnedCountries = async () => {
   return Object.keys(countries);
 };
 
-export default function Command() {
+export default function Holidays() {
   const countries = getAllCountries();
   const [pinnedCountries, setPinnedCountries] = useState<Country[]>();
   const [unpinnedCountries, setUnpinnedCountries] = useState<Country[]>();
@@ -53,15 +53,12 @@ export default function Command() {
       <List.Section title="Pinned Countries">
         {pinnedCountries &&
           pinnedCountries.map((country) => {
-            const props: Partial<List.Item.Props> = {
-              detail: <CountryDetail countryCode={country.alpha2} />,
-            };
             return (
               <List.Item
                 key={country.alpha2}
                 title={country.name}
                 icon={country.emoji}
-                {...props}
+                detail={<CountryDetail countryCode={country.alpha2} />}
                 actions={
                   <ActionPanel>
                     <Action title="Unpin Country" onAction={() => unpinCountry(country)} />
@@ -74,15 +71,12 @@ export default function Command() {
       <List.Section title="Unpinned Countries">
         {unpinnedCountries &&
           unpinnedCountries.map((country) => {
-            const props: Partial<List.Item.Props> = {
-              detail: <CountryDetail countryCode={country.alpha2} />,
-            };
             return (
               <List.Item
                 key={country.alpha2}
                 title={country.name}
                 icon={country.emoji}
-                {...props}
+                detail={<CountryDetail countryCode={country.alpha2} />}
                 actions={
                   <ActionPanel>
                     <Action title="Pin Country" onAction={() => pinCountry(country)} />

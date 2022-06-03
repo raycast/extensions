@@ -1,18 +1,10 @@
 import { List } from "@raycast/api";
 import moment from "moment";
-import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { fetcher, Holiday } from "./api";
 
-const buildMarkdown = (holidays: Holiday[] | null) => {
-  if (!holidays) {
-    return "";
-  }
-  if (holidays.length === 0) {
-    return "No upcoming holidays known";
-  }
-  const markdown = holidays
-    .map((holiday) => {
+const buildMarkdown = (holidays: Holiday[] | undefined) => {
+  const markdown = holidays?.map((holiday) => {
       const { date, name } = holiday;
       return `
 ### ${name}
@@ -26,19 +18,13 @@ ${moment(date).format("dddd, MMMM Do")} (${moment(date).fromNow()})
 };
 
 export const CountryDetail = ({ countryCode }: { countryCode: string }) => {
-  const [holidays, setHolidays] = useState<Holiday[] | null>(null);
   const { data, error } = useSWR(countryCode, fetcher);
 
-  useEffect(() => {
-    if (error) {
-      setHolidays([]);
-    }
-    if (data) {
-      setHolidays(data);
-    }
-  }, [data, error]);
-
-  return <List.Item.Detail isLoading={!holidays} markdown={buildMarkdown(holidays)} />;
+  if (error || data?.length === 0) {
+    return <List.Item.Detail markdown={"No upcoming holidays known"} />;
+  } else {
+    return <List.Item.Detail isLoading={!data} markdown={buildMarkdown(data)} />;
+  }
 };
 
 // Because this is not imported by country-locale-map
