@@ -1,7 +1,6 @@
-import { Action, ActionPanel, List, LocalStorage } from "@raycast/api";
+import { List, LocalStorage } from "@raycast/api";
 import { getAllCountries } from "country-locale-map";
 import { useEffect, useState } from "react";
-import { CountryDetail } from "./country-detail";
 import type { Country } from "./country-detail";
 import { CountryItem } from "./country-item";
 
