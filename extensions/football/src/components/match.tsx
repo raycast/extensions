@@ -6,34 +6,6 @@ import { useGroupedMatches } from '../hooks/useGroupedMatches';
 import { Match, Team } from '../shared/types';
 import { getScoreValue } from '../shared/utilities';
 
-export const MatchDetails = ({ match }: { match: Match }) => (
-  <List.Item.Detail
-    markdown={`![${match.homeTeam.name}](${match.homeTeam.crest})![${match.awayTeam.name}](${match.awayTeam.crest})`}
-    metadata={
-      <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Score" />
-        {match.homeTeam.name && (
-          <List.Item.Detail.Metadata.Label
-            title={match.homeTeam.name}
-            icon={match.homeTeam.crest}
-            text={match.score.fullTime.home?.toString() ?? ''}
-          />
-        )}
-        {match.awayTeam.name && (
-          <List.Item.Detail.Metadata.Label
-            title={match.awayTeam.name}
-            icon={match.awayTeam.crest}
-            text={match.score.fullTime.away?.toString() ?? ''}
-          />
-        )}
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label title="Additional Information" />
-        <List.Item.Detail.Metadata.Label title="Date" text={format(parseISO(match.utcDate), 'yyyy-MM-dd')} />
-      </List.Item.Detail.Metadata>
-    }
-  />
-);
-
 export const MatchItem = ({ match, team }: { match: Match; team?: Team }) => {
   const matchDate = parseISO(match.utcDate);
   const getMatchTitle = () =>

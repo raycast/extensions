@@ -1,21 +1,6 @@
 import { List } from '@raycast/api';
 import { Competition } from '../shared/types';
 
-export const CompetitionList = ({
-  competitions,
-  loadingCompetitions,
-}: {
-  competitions: Competition[];
-  loadingCompetitions: true;
-}) => (
-  <List isLoading={loadingCompetitions}>
-    {!loadingCompetitions &&
-      competitions?.map((competition) => (
-        <List.Item icon={competition.emblem} title={competition.name} key={competition.id} />
-      ))}
-  </List>
-);
-
 export const CompetitionDropdownSelector = ({
   competitions,
   setSelectedCompetition,
