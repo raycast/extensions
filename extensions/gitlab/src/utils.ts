@@ -1,4 +1,4 @@
-import { getLocalStorageItem, ImageLike, ImageMask, setLocalStorageItem } from "@raycast/api";
+import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
@@ -7,9 +7,12 @@ import { constants } from "fs";
 import * as crypto from "crypto";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import urljoin from "url-join";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types,no-useless-escape */
 
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
@@ -22,7 +25,7 @@ export function projectIconUrl(project: Project): string | undefined {
   return result;
 }
 
-export function projectIcon(project: Project): ImageLike {
+export function projectIcon(project: Project): Image.ImageLike {
   let result: string = GitLabIcons.project;
   // TODO check also namespace for icon
   if (project.avatar_url) {
@@ -30,16 +33,17 @@ export function projectIcon(project: Project): ImageLike {
   } else if (project.owner && project.owner.avatar_url) {
     result = project.owner.avatar_url;
   }
-  return { source: result, mask: ImageMask.Circle };
+  return { source: result, mask: Image.Mask.Circle };
 }
 
-export function toDateString(d: Date) {
-  const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(d);
-  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(d);
+export function toDateString(d: string): string {
+  const date = new Date(d);
+  const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
+  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
   return `${da}. ${mo}`;
 }
 
-export function getIdFromGqlId(id: string) {
+export function getIdFromGqlId(id: string): number {
   const splits = id.split("/");
   return parseInt(splits.pop() || "");
 }
@@ -50,7 +54,7 @@ export function currentSeconds(): number {
 
 export async function getCacheObject(key: string, seconds: number): Promise<any> {
   console.log(`get cache object ${key} from store`);
-  const cache = await getLocalStorageItem(key);
+  const cache = await LocalStorage.getItem(key);
   console.log("after local storage");
   console.log(cache);
   if (cache) {
@@ -66,7 +70,7 @@ export async function getCacheObject(key: string, seconds: number): Promise<any>
   return undefined;
 }
 
-export async function setCacheObject(key: string, payload: any) {
+export async function setCacheObject(key: string, payload: any): Promise<void> {
   const cache_data = {
     timestamp: currentSeconds(),
     payload: payload,
@@ -75,7 +79,7 @@ export async function setCacheObject(key: string, payload: any) {
   console.log(cache_data);
   const text = JSON.stringify(cache_data);
   console.log(text.length);
-  await setLocalStorageItem(key, text);
+  await LocalStorage.setItem(key, text);
 }
 
 export async function fileExists(filename: string): Promise<boolean> {
@@ -94,11 +98,11 @@ export function fileExistsSync(filename: string): boolean {
   }
 }
 
-export function replaceAll(str: string, find: RegExp, replace: string) {
+export function replaceAll(str: string, find: RegExp, replace: string): string {
   return str.replace(find, replace);
 }
 
-export function optimizeMarkdownText(text: string): string {
+export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   let result = text;
   // remove html comments
   result = replaceAll(result, /<!--[\s\S]*?-->/g, "");
@@ -108,6 +112,31 @@ export function optimizeMarkdownText(text: string): string {
 
   // <br> to markdown new line
   result = replaceAll(result, /<br>/g, "  \n");
+
+  if (baseUrl) {
+    // replace relative links with absolute ones
+    try {
+      const regexMdLinks = /\[([^\[]+)\](\(.*\))/gm;
+      const matches = result.match(regexMdLinks);
+      if (matches) {
+        const singleMatch = /\[([^\[]+)\]\((.*)\)/;
+        for (let i = 0; i < matches.length; i++) {
+          const text = singleMatch.exec(matches[i]);
+          if (text) {
+            const word = text[1];
+            const link = text[2].trim();
+            if (link.startsWith("/")) {
+              const fullUrl = urljoin(baseUrl, link);
+              const mdUrl = `[${word}](${fullUrl})`;
+              result = result.replace(text[0], mdUrl);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // ignore errors
+    }
+  }
 
   return result;
 }
@@ -133,7 +162,7 @@ export function hashRecord(rec: Record<string, any>, prefix?: string | undefined
   }
 }
 
-export function capitalizeFirstLetter(name: string) {
+export function capitalizeFirstLetter(name: string): string {
   return name.replace(/^./, name[0].toUpperCase());
 }
 
@@ -222,11 +251,50 @@ export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
 }
 
-export function formatDate(input: Date | string) {
+export function formatDate(input: Date | string): string {
   const date = typeof input === "string" ? new Date(input) : input;
   return timeAgo.format(date) as string;
 }
 
 export function now(): Date {
   return new Date();
+}
+
+export function daysInSeconds(days: number): number {
+  return days * 24 * 60 * 60;
+}
+
+export function ensureCleanAccessories(
+  accessories: List.Item.Accessory[] | undefined
+): List.Item.Accessory[] | undefined {
+  if (accessories) {
+    if (accessories.length <= 0) {
+      return undefined;
+    }
+    const result: List.Item.Accessory[] = [];
+    for (const a of accessories) {
+      if (a.icon || a.text) {
+        result.push(a);
+      }
+    }
+    if (result.length <= 0) {
+      return undefined;
+    }
+    return result;
+  }
+  return undefined;
+}
+
+export function showErrorToast(message: string, title?: string): Promise<Toast> {
+  const t = title || "Something went wrong";
+  return showToast({
+    style: Toast.Style.Failure,
+    title: t,
+    message: message,
+    primaryAction: {
+      title: "Copy Error Message",
+      onAction: (toast) => Clipboard.copy(`${t}: ${toast.message ?? ""}`),
+      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+    },
+  });
 }

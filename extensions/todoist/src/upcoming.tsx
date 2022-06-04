@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import TaskList from "./components/TaskList";
-import { getSectionsWithDueDates } from "./utils";
+import { getSectionsWithDueDates } from "./helpers";
 import { handleError, todoist } from "./api";
 import { SWRKeys } from "./types";
 

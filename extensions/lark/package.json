@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
@@ -53,7 +53,7 @@
       "type": "password",
       "required": true,
       "title": "Space Session",
-      "description": "Your Space Session. Open your docs homepage and copy it in Cookies.",
+      "description": "Your space session. Open your docs homepage and copy it in Cookies.",
       "placeholder": "Enter your space session"
     },
     {
@@ -72,9 +72,9 @@
     "dev": "ray develop"
   },
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "axios": "^0.24.0",
-    "dayjs": "^1.10.7",
+    "@raycast/api": "^1.32.1",
+    "axios": "^0.26.1",
+    "dayjs": "^1.11.1",
     "string": "^3.3.3"
   },
   "devDependencies": {
@@ -85,7 +85,7 @@
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.4"
+    "react-devtools": "^4.24.4",
+    "typescript": "^4.6.3"
   }
 }

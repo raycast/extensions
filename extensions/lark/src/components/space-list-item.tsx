@@ -1,6 +1,6 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from '@raycast/api';
-import dayjs from 'dayjs';
+import { Action, ActionPanel, Image, List } from '@raycast/api';
 import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../services/space';
+import { timeFormat, timeSince } from '../utils/time';
 
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;
@@ -11,19 +11,26 @@ export interface SpaceListItemProps {
 export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actions }) => {
   let id: string;
   let title: string;
-  let subtitle: string;
+  let subtitle: string | undefined;
   let icon: string;
-  let accessoryTitle: string;
+  let time: {
+    short: string;
+    full: string;
+  };
+  const ownerAvatar = owner.avatar_url;
+  const ownerName = owner.name;
 
   if (isNodeEntity(node)) {
     id = node.obj_token;
     title = node.name;
-    subtitle = owner.name;
     icon =
       node.type === NodeType.Box
         ? `space-icons/type-${node.type}-${node.extra.subtype}.png`
         : `space-icons/type-${node.type}.png`;
-    accessoryTitle = dayjs(node.activity_time * 1000).format('YYYY-MM-DD');
+    time = {
+      short: timeSince(node.activity_time),
+      full: `Last visit: ${timeFormat(node.activity_time)}`,
+    };
   } else {
     id = node.token;
     title = node.title;
@@ -32,20 +39,26 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
       node.type === NodeType.Box
         ? `space-icons/type-${node.type}-${node.subtype}.png`
         : `space-icons/type-${node.type}.png`;
-    accessoryTitle = node.author;
+    time = {
+      short: timeSince(node.edit_time),
+      full: `Last edit: ${timeFormat(node.edit_time)}`,
+    };
   }
 
   return (
     <List.Item
       id={id}
+      icon={icon}
       title={title}
       subtitle={subtitle}
-      icon={icon}
-      accessoryTitle={accessoryTitle}
+      accessories={[
+        { text: time.short, tooltip: time.full },
+        { icon: { source: ownerAvatar, mask: Image.Mask.Circle }, tooltip: ownerName },
+      ]}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={node.url} />
-          <CopyToClipboardAction title="Copy URL" content={node.url} />
+          <Action.OpenInBrowser url={node.url} />
+          <Action.CopyToClipboard title="Copy URL" content={node.url} />
           {actions}
         </ActionPanel>
       }

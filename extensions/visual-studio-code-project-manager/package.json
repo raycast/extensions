@@ -34,6 +34,15 @@
       "description": "Groups projects by tag instead of just showing"
     },
     {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide projects...",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tag"
+    },
+    {
       "name": "terminalAppPath",
       "type": "textfield",
       "required": false,
@@ -69,7 +78,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "1.33.2",
     "open": "^8.4.0",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"

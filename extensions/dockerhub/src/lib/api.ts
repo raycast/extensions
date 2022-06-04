@@ -31,17 +31,8 @@ export async function searchImage(query: {
       } else {
         summary.url = `https://hub.docker.com/r/${summary.slug}`;
       }
-      switch (summary.filter_type) {
-        case FilterType.OFFICIAL:
-          summary.from = "Official";
-          break;
-        case FilterType.VERIFIED_PUBLISHER:
-          summary.from = "Verified";
-          break;
-        case FilterType.COMMUNITY:
-          summary.from = "Community";
-          break;
-      }
+
+      summary.from = summary.filter_type.replace("_", " ").toUpperCase();
       return summary;
     });
     return Promise.resolve(result.summaries);

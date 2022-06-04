@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
-import { getAPIDate } from "./utils";
-import Project from "./components/Project";
+import { getAPIDate } from "./helpers";
 import { SWRKeys } from "./types";
+import TaskDetail from "./components/TaskDetail";
 
-export default function CreateTask() {
+export default function CreateTask({ fromProjectId }: { fromProjectId?: number }) {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
@@ -34,9 +34,11 @@ export default function CreateTask() {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
-  const [projectId, setProjectId] = useState<string>();
+  const [projectId, setProjectId] = useState<string>(fromProjectId ? String(fromProjectId) : "");
   const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
+
+  const titleField = useRef<Form.TextField>(null);
 
   function clear() {
     setContent("");
@@ -85,20 +87,28 @@ export default function CreateTask() {
     await toast.show();
 
     try {
-      const { projectId, url } = await todoist.addTask(body);
+      const { url, id } = await todoist.addTask(body);
       toast.style = Toast.Style.Success;
       toast.title = "Task created";
+
       toast.primaryAction = {
-        title: "Go to project",
-        shortcut: { modifiers: ["cmd"], key: "g" },
-        onAction: () => push(<Project projectId={projectId} />),
+        title: "Open Task",
+        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        onAction: () => push(<TaskDetail taskId={id} />),
       };
+
       toast.secondaryAction = {
-        title: "Open in browser",
+        title: "Open in Browser",
         shortcut: { modifiers: ["cmd"], key: "o" },
         onAction: () => open(url),
       };
+
+      if (fromProjectId) {
+        mutate(SWRKeys.tasks);
+      }
+
       clear();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create task" });
     }
@@ -115,7 +125,14 @@ export default function CreateTask() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="content" title="Title" placeholder="Buy fruits" value={content} onChange={setContent} />
+      <Form.TextField
+        id="content"
+        title="Title"
+        placeholder="Buy fruits"
+        value={content}
+        onChange={setContent}
+        ref={titleField}
+      />
 
       <Form.TextArea
         id="description"
@@ -136,8 +153,13 @@ export default function CreateTask() {
       />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
-        {priorities.map(({ value, name }) => (
-          <Form.Dropdown.Item value={String(value)} title={name} key={value} />
+        {priorities.map(({ value, name, color, icon }) => (
+          <Form.Dropdown.Item
+            value={String(value)}
+            title={name}
+            key={value}
+            icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
+          />
         ))}
       </Form.Dropdown>
 

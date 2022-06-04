@@ -1,52 +1,85 @@
-import { LocalStorage, confirmAlert, Icon, popToRoot } from "@raycast/api";
-import { useState, useEffect, useReducer } from "react";
+import { LocalStorage, confirmAlert, Icon, popToRoot, closeMainWindow, Alert } from "@raycast/api";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
-import { PasswordGeneratorOptions } from "./types";
+import { PasswordGeneratorOptions, VaultState } from "./types";
+import { getServerUrlPreference } from "./utils";
 
-const initialState = {
+const initialPasswordGeneratorState = {
+  options: undefined as PasswordGeneratorOptions | undefined,
   password: undefined as string | undefined,
-  isGenerating: false,
+  isGenerating: true,
 };
 
-type State = typeof initialState;
+type State = typeof initialPasswordGeneratorState;
 
 type Action =
   | { type: "generate" }
   | { type: "setPassword"; password: string }
-  | { type: "fail" }
-  | { type: "clear"; password: string };
+  | { type: "setOptions"; options: PasswordGeneratorOptions }
+  | { type: "cancelGenerate" }
+  | { type: "clearPassword"; password: string };
 
 const passwordReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "generate":
       return { ...state, isGenerating: true };
     case "setPassword":
-      return { password: action.password, isGenerating: false };
-    case "fail":
+      return { ...state, password: action.password, isGenerating: false };
+    case "setOptions":
+      return { ...state, options: action.options };
+    case "cancelGenerate":
       return { ...state, isGenerating: false };
-    case "clear":
-      return { isGenerating: false, password: undefined };
+    case "clearPassword":
+      return { ...state, isGenerating: false, password: undefined };
   }
 };
 
-export function usePasswordGenerator(
-  bitwardenApi: Bitwarden,
-  options: PasswordGeneratorOptions | undefined,
-  hookOptions?: { regenerateOnOptionChange: boolean }
-) {
+type UsePasswordGeneratorOptions = {
+  regenerateOnOptionChange?: boolean;
+};
+
+export function usePasswordGenerator(bitwardenApi: Bitwarden, hookOptions?: UsePasswordGeneratorOptions) {
   const { regenerateOnOptionChange = true } = hookOptions ?? {};
-  const [state, dispatch] = useReducer(passwordReducer, initialState);
+
+  const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
+  const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
 
   const generatePassword = async () => {
     try {
-      if (state.isGenerating) return;
+      renewAbortController();
       dispatch({ type: "generate" });
-      const password = await bitwardenApi.generatePassword(options);
+      const password = await bitwardenApi.generatePassword(options, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
     } catch (error) {
-      dispatch({ type: "fail" });
+      dispatch({ type: "cancelGenerate" });
     }
+  };
+
+  const regeneratePassword = () => {
+    if (state.isGenerating) return;
+    generatePassword();
+  };
+
+  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
+    option: Option,
+    value: PasswordGeneratorOptions[Option]
+  ) => {
+    if (!options || options[option] === value) return;
+    if (state.isGenerating) {
+      abortPreviousGenerate();
+      dispatch({ type: "cancelGenerate" });
+    }
+
+    const newOptions = { ...options, [option]: value };
+    dispatch({ type: "setOptions", options: newOptions });
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
+  };
+
+  const restoreStoredOptions = async () => {
+    const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
+    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
+    dispatch({ type: "setOptions", options: newOptions });
   };
 
   useEffect(() => {
@@ -54,34 +87,12 @@ export function usePasswordGenerator(
     generatePassword();
   }, [options]);
 
-  return { ...state, regeneratePassword: generatePassword };
-}
-
-export const usePasswordOptions = () => {
-  const [options, setOptions] = useState<PasswordGeneratorOptions>();
-
-  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
-    option: Option,
-    value: PasswordGeneratorOptions[Option]
-  ) => {
-    if (!options || options[option] === value) return;
-    const newOptions = { ...options, [option]: value };
-    setOptions(newOptions);
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
-  };
-
-  const restoreStoredOptions = async () => {
-    const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
-    setOptions(newOptions);
-  };
-
   useEffect(() => {
     restoreStoredOptions();
   }, []);
 
-  return { options, setOption };
-};
+  return { ...state, regeneratePassword, options, setOption };
+}
 
 export const useOneTimePasswordHistoryWarning = async () => {
   const handleDismissAction = () => popToRoot({ clearSearchBar: false });
@@ -111,3 +122,67 @@ export const useOneTimePasswordHistoryWarning = async () => {
     displayWarning();
   }, []);
 };
+
+export function useAbortController() {
+  const abortControllerRef = useRef(new AbortController());
+
+  const renew = () => {
+    if (!abortControllerRef.current.signal.aborted) return;
+    abortControllerRef.current = new AbortController();
+  };
+
+  const abort = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  return { abortControllerRef, renew, abort };
+}
+
+export function useVaultMessages(bitwardenApi: Bitwarden): {
+  userMessage: string;
+  serverMessage: string;
+  shouldShowServer: boolean;
+} {
+  const [vaultState, setVaultState] = useState<VaultState | null>(null);
+
+  useEffect(() => {
+    bitwardenApi.status().then((vaultState) => {
+      setVaultState(vaultState);
+    });
+  }, []);
+
+  const shouldShowServer = !!getServerUrlPreference();
+
+  let userMessage = "...";
+  let serverMessage = "...";
+
+  if (vaultState) {
+    const { status, userEmail, serverUrl } = vaultState;
+    userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
+    if (serverUrl) {
+      serverMessage = serverUrl || "";
+    } else if ((!serverUrl && shouldShowServer) || (serverUrl && !shouldShowServer)) {
+      // Hosted state not in sync with CLI (we don't check for equality)
+      confirmAlert({
+        icon: Icon.ExclamationMark,
+        title: "Restart Required",
+        message: "Bitwarden server URL preference has been changed since the extension was opened.",
+        primaryAction: {
+          title: "Close Extension",
+        },
+        dismissAction: {
+          title: "Close Raycast", // Only here to provide the necessary second option
+          style: Alert.ActionStyle.Cancel,
+        },
+      }).then((closeExtension) => {
+        if (closeExtension) {
+          popToRoot();
+        } else {
+          closeMainWindow();
+        }
+      });
+    }
+  }
+
+  return { userMessage, serverMessage, shouldShowServer };
+}

@@ -19,6 +19,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [billable, setBillable] = useState<boolean>(false);
 
   async function handleSubmit(values: { description: string }) {
     try {
@@ -26,6 +27,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         projectId: selectedProject?.id,
         description: values.description,
         tags: selectedTags,
+        billable,
       });
       await showToast(ToastStyle.Animated, "Starting time entry...");
       await storage.runningTimeEntry.refresh();
@@ -89,6 +91,9 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
       </Form.TagPicker>
+      {selectedProject?.billable && (
+        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
+      )}
     </Form>
   );
 }

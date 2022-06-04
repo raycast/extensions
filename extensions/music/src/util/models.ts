@@ -18,6 +18,10 @@ export interface Playlist {
   name: string;
   duration: string;
   count: string;
+
+  time: string;
+  description: string;
+  kind: `${"subscription" | "user" | "library"} playlist`;
 }
 
 export interface Album {

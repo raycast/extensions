@@ -39,6 +39,7 @@ function ListView() {
         projectId: timeEntry.pid,
         description: timeEntry.description,
         tags: timeEntry.tags,
+        billable: timeEntry.billable,
       });
       await storage.runningTimeEntry.refresh();
       await showToast(ToastStyle.Success, "Time entry resumed");
@@ -80,6 +81,7 @@ function ListView() {
                     key={timeEntry.id}
                     keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
                     title={timeEntry.description || "No description"}
+                    subtitle={timeEntry.billable ? "$" : ""}
                     accessoryTitle={getProjectById(timeEntry?.pid)?.name}
                     accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
                     icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}

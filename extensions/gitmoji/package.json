@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "gitmoji",
-      "title": "gitmoji",
-      "description": "Search your gitmoji",
+      "title": "Gitmoji",
+      "description": "Search your Gitmoji",
       "mode": "view"
     }
   ],
@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "gitmojis": "^3.5.0"
+    "gitmojis": "^3.9.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

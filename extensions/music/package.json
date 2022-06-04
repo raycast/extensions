@@ -11,6 +11,12 @@
     "player",
     "media"
   ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
   "commands": [
     {
       "name": "toggle-play-pause",
@@ -94,7 +100,7 @@
     },
     {
       "name": "play-library-track",
-      "title": "Search & Play Library Track",
+      "title": "Play Library Track",
       "subtitle": "Apple Music",
       "description": "Search and start a track from your library.",
       "keywords": [
@@ -104,18 +110,29 @@
     },
     {
       "name": "play-library-album",
-      "title": "Search & Play Library Album",
+      "title": "Play Library Album",
       "subtitle": "Apple Music",
       "description": "Search and start an album from your library.",
       "keywords": [
         "album"
       ],
       "mode": "view"
+    },
+    {
+      "name": "set-rating",
+      "title": "Rate Track",
+      "subtitle": "Apple Music",
+      "description": "Rate currently playing track.",
+      "mode": "view",
+      "keywords": [
+        "track",
+        "rating"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "fp-ts": "^2.11.5",
+    "@raycast/api": "^1.34.1",
+    "fp-ts": "^2.12.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -123,13 +140,9 @@
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
   }
 }

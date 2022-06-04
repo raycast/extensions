@@ -2,7 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safari",
   "title": "Safari",
-  "description": "Manage your Safari Tabs (Local and iCloud) and Reading List",
+  "description": "Manage your Safari Tabs, History and Reading List",
+  "categories": [
+    "Applications",
+    "Web"
+  ],
   "icon": "safari-icon.png",
   "author": "loris",
   "contributors": [

@@ -55,6 +55,9 @@ export function UpdateInstallAction(props: { state: State }): JSX.Element | null
   if (s.state !== "on") {
     return null;
   }
+  if (s.attributes.in_progress !== false) {
+    return null;
+  }
   const handle = async () => {
     if (
       await confirmAlert({

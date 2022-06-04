@@ -18,6 +18,9 @@ export class XcodeCleanupService {
     return execAsync("rm -rf ~/Library/Caches/org.swift.swiftpm/repositories").then();
   }
 
+  /**
+   * Delete unsupported Simulators
+   */
   deleteUnsupportedSimulators(): Promise<void> {
     return execAsync("xcrun simctl delete unavailable").then();
   }

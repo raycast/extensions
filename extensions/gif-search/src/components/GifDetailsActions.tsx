@@ -65,6 +65,14 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
   ) : undefined;
   const copyGifUrl = <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF Link" content={stripQParams(gif_url)} />;
+  const copyGifMarkdown = (
+    <Action.CopyToClipboard
+      key="copyGifMarkdown"
+      title="Copy GIF Markdown"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      content={`![${item.title}](${stripQParams(gif_url)})`}
+    />
+  );
   const copyPageUrl = url ? (
     <Action.CopyToClipboard
       key="copyPageUrl"
@@ -88,7 +96,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       icon={Icon.Eye}
       key="viewDetails"
       title="View GIF Details"
-      target={<GifDetails item={item} />}
+      target={<GifDetails item={item} service={service} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
     />
@@ -122,7 +130,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   ) : undefined;
 
   const actions: Array<(JSX.Element | undefined)[]> = [
-    [copyFile, copyGifUrl],
+    [copyFile, copyGifUrl, copyGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser],
   ];
