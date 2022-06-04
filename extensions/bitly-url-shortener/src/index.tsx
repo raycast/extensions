@@ -1,13 +1,13 @@
-import {copyTextToClipboard, getPreferenceValues, showToast, ToastStyle} from "@raycast/api";
-import {runAppleScript} from "run-applescript";
-import fetch, {Headers} from "node-fetch";
+import { copyTextToClipboard, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
+import fetch, { Headers } from "node-fetch";
 
 function getErrorMessage(error: unknown) {
-  if (error instanceof Error) return error.message
-  return String(error)
+  if (error instanceof Error) return error.message;
+  return String(error);
 }
 
-async function reportError ({message}: {message: string}) {
+async function reportError({ message }: { message: string }) {
   await showToast(ToastStyle.Failure, "Error", message.toString());
 }
 
@@ -41,6 +41,6 @@ export default async function () {
     await copyTextToClipboard(link);
     await showToast(ToastStyle.Success, "Success", "Copied shortened URL to clipboard");
   } catch (error: unknown) {
-    await reportError({message: getErrorMessage(error)})
+    await reportError({ message: getErrorMessage(error) });
   }
 }
