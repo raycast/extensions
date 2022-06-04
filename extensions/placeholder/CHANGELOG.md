@@ -1,6 +1,6 @@
 # Placeholder Changelog
 
-## [Fix text error] - {PR_MERGE_DATE}
+## [Fix text error] - 2022-06-04
 
 - Fix text error
 
