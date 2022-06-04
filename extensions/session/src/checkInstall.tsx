@@ -3,7 +3,7 @@ import { getApplications, showToast, Toast, open, popToRoot, showHUD } from "@ra
 async function isSessionInstalled() {
   const applications = await getApplications();
   return applications.some(({ bundleId }) =>
-    ["com.philipyoungg.session-setapp", "com.philipyoungg.session"].includes(bundleId)
+    bundleId ? ["com.philipyoungg.session-setapp", "com.philipyoungg.session"].includes(bundleId) : false
   );
 }
 
