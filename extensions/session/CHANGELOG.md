@@ -1,3 +1,3 @@
 # Session Changelog
 
-## [Initial Version] - 2022-05-25
+## [Initial Version] - {PR_MERGE_DATE}
