@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Add New File with Text command] - {PR_MERGE_DATE}
+## [Add New File with Text command] - 2022-06-04
 
 - Add **New File with Text** command: Create a new file with selected or clipboard text now.
 
