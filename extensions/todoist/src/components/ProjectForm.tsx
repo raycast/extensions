@@ -92,7 +92,7 @@ export default function ProjectForm({ project }: ProjectFormProps) {
         onAction: () => open(url),
       };
       clear();
-      titleField.current.focus();
+      titleField.current?.focus();
     } catch (error) {
       handleError({ error, title: "Unable to create project" });
     }
@@ -121,8 +121,8 @@ export default function ProjectForm({ project }: ProjectFormProps) {
       />
 
       <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId}>
-        {colors.map(({ name, id }) => (
-          <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+        {colors.map(({ name, id, value }) => (
+          <Form.Dropdown.Item value={String(id)} title={name} key={id} icon={{ source: Icon.Dot, tintColor: value }} />
         ))}
       </Form.Dropdown>
 

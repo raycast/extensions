@@ -1,21 +1,22 @@
-import { ActionPanel, List, Action, Detail, Icon, Image, useNavigation } from "@raycast/api";
-import { useState, useRef, Fragment, useMemo } from "react";
+import { ActionPanel, List, Action, Detail, Icon, Image } from "@raycast/api";
+import { useState, Fragment, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
-import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
+import { PatternType, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
-import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
-import ExpandableErrorToast from "./ExpandableErrorToast";
-import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
-import { useLazyQuery } from "@apollo/client";
-import { GET_FILE_CONTENTS } from "../sourcegraph/gql/queries";
-import { BlobContents, GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
+import { BlobContentsFragment as BlobContents, useGetFileContentsLazyQuery } from "../sourcegraph/gql/operations";
 import { bold, codeBlock, quoteBlock } from "../markdown";
 import { count, sentenceCase } from "../text";
+import { useSearch } from "../hooks/search";
+
+import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
+import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
 
 const link = new LinkBuilder("search");
+
+const MAX_RENDERED_RESULTS = 100;
 
 /**
  * SearchCommand is the shared search command implementation.
@@ -26,7 +27,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
     src.featureFlags.searchPatternDropdown ? undefined : "literal"
   );
 
-  const { state, search } = useSearch(src);
+  const { state, search } = useSearch(src, MAX_RENDERED_RESULTS);
   useMemo(() => {
     if (patternType) {
       search(searchText, patternType);
@@ -48,9 +49,9 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {/* show suggestions IFF no results */}
       {!state.isLoading && state.results.length === 0 ? (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
-          {state.suggestions.slice(0, 3).map((suggestion) => (
+          {state.suggestions.slice(0, 3).map((suggestion, i) => (
             <SuggestionItem
-              key={nanoid()}
+              key={`suggestion-item-${i}`}
               suggestion={suggestion}
               searchText={searchText}
               setSearchText={setSearchText}
@@ -83,10 +84,13 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       )}
 
       {/* results */}
-      <List.Section title="Results" subtitle={state.summary || ""}>
-        {state.results.map((searchResult) => (
+      <List.Section
+        title="Results"
+        subtitle={state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary}
+      >
+        {state.results.map((searchResult, i) => (
           <SearchResultItem
-            key={nanoid()}
+            key={`result-item-${i}`}
             searchResult={searchResult}
             searchText={searchText}
             src={src}
@@ -266,7 +270,7 @@ function SearchResultItem({
       subtitle = DateTime.fromISO(match.authorDate).toRelative() || match.authorDate;
       subtitleTooltip = match.authorDate;
       matchDetails.push(`by ${match.authorName}`);
-      drilldownAction = makeDrilldownAction("Search Revision", setSearchText, {
+      drilldownAction = makeDrilldownAction("Search Revision of Repository", setSearchText, {
         repo: match.repository,
         revision: match.oid,
       });
@@ -421,9 +425,7 @@ function ResultView({
   searchResult: SearchResult;
   icon: Image.ImageLike;
 }) {
-  const [getFileContents, fileContents] = useLazyQuery<GetFileContents, GetFileContentsVariables>(GET_FILE_CONTENTS, {
-    client: src.client,
-  });
+  const [getFileContents, fileContents] = useGetFileContentsLazyQuery(src);
 
   const { match } = searchResult;
   const navigationTitle = `View ${match.type} result`;
@@ -569,89 +571,4 @@ function SuggestionItem({
       }
     />
   );
-}
-
-interface SearchState {
-  results: SearchResult[];
-  suggestions: Suggestion[];
-  summary: string | null;
-  isLoading: boolean;
-  previousSearch: string;
-}
-
-function useSearch(src: Sourcegraph) {
-  const [state, setState] = useState<SearchState>({
-    results: [],
-    suggestions: [],
-    summary: "",
-    isLoading: false,
-    previousSearch: "",
-  });
-  const cancelRef = useRef<AbortController | null>(null);
-  const { push } = useNavigation();
-
-  async function search(searchText: string, pattern: PatternType) {
-    // Do not repeat searches that are essentially the same
-    if (state.previousSearch.trim() === searchText.trim()) {
-      return;
-    }
-
-    // Cancel previous search
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-
-    // Reset state for new search
-    setState((oldState) => ({
-      ...oldState,
-      results: [],
-      suggestions: [],
-      summary: null,
-      isLoading: true,
-      previousSearch: searchText,
-    }));
-
-    try {
-      await performSearch(cancelRef.current.signal, src, searchText, pattern, {
-        onResults: (results) => {
-          setState((oldState) => ({
-            ...oldState,
-            results: oldState.results.concat(results),
-          }));
-        },
-        onSuggestions: (suggestions, pushToTop) => {
-          setState((oldState) => ({
-            ...oldState,
-            suggestions: pushToTop
-              ? suggestions.concat(oldState.suggestions)
-              : oldState.suggestions.concat(suggestions),
-          }));
-        },
-        onAlert: (alert) => {
-          ExpandableErrorToast(push, "Alert", alert.title, alert.description || "").show();
-        },
-        onProgress: (progress) => {
-          setState((oldState) => ({
-            ...oldState,
-            summary: `${progress.matchCount} results in ${progress.duration}`,
-          }));
-        },
-      });
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-      }));
-    } catch (error) {
-      ExpandableErrorToast(push, "Unexpected error", "Search failed", String(error)).show();
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-      }));
-    }
-  }
-
-  return {
-    state: state,
-    search: search,
-  };
 }

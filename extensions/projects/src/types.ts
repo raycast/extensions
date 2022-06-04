@@ -3,7 +3,8 @@ export interface SourceRepo {
   name: string;
   fullPath: string;
   icon: string;
-  type: ProjectType;
+  type: string;
+  openWithKey: string;
 }
 
 export interface RepoSearchResponse {
@@ -20,22 +21,15 @@ export interface OpenWith {
 
 export interface Preferences {
   repoScanPath: string;
-  scanForProjectTypes: string;
-  openNodeWith: OpenWith;
-  openXcodeWith: OpenWith;
-  openMavenWith: OpenWith;
-  openGradleWith: OpenWith;
-  openWith1: OpenWith;
+  openDefaultWith: OpenWith;
+  openNodeWith?: OpenWith;
+  openXcodeWith?: OpenWith;
+  openMavenWith?: OpenWith;
+  openGradleWith?: OpenWith;
+  openWailsWith?: OpenWith;
+  openTauriWith?: OpenWith;
   openWith2?: OpenWith;
   openWith3?: OpenWith;
-}
-
-export enum ProjectType {
-  NODE = "node",
-  MAVEN = "maven",
-  GRADLE = "gradle",
-  XCODE = "xcode",
-  UNKNOWN = "unknown",
 }
 
 export enum CacheType {
@@ -43,3 +37,15 @@ export enum CacheType {
   RECENT_PROJECTS = "recent-projects",
   PINNED_PROJECTS = "pinned-projects",
 }
+
+export type ProjectTypeConfig = {
+  type: string;
+  finder: string;
+  finderType: string;
+  icon: string;
+  spotlightQuery: string[];
+  openWithKey: string;
+  singleFileProject?: boolean;
+};
+
+export type ListType = "pinned" | "recent" | "all";

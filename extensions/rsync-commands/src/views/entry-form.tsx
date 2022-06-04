@@ -7,6 +7,7 @@ import useEntries from "../hooks/use-entries"
 import EntryOptionFormFields from "../components/entry-option-form-fields"
 import EntryLocationFormFields from "../components/entry-location-form-fields"
 import EntryLocation from "../models/entry-location"
+import EntryPreview from "./entry-preview"
 
 const createEntryOption = (source: EntryOptionData): EntryOption => {
   return {
@@ -30,7 +31,7 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
 
   const isUpdating = source && source.id
 
-  const saveEntry = async () => {
+  const saveOrUpdateEntry = async () => {
     let success: boolean
     if (isUpdating) {
       success = await updateEntry(entry)
@@ -94,12 +95,17 @@ const EntryForm: FC<EntryFormProps> = ({ source }) => {
       navigationTitle={cta}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={cta} onSubmit={saveEntry} />
+          <Action.SubmitForm title={cta} onSubmit={saveOrUpdateEntry} />
           <Action title={"Run"} onAction={() => runEntry(entry)} />
           <Action
             title="Copy to Clipboard"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={() => copyEntryCommand(entry)}
+          />
+          <Action.Push
+            title="Preview"
+            target={<EntryPreview entry={entry} />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
           {source && (
             <Action

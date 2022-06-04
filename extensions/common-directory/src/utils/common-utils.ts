@@ -42,6 +42,18 @@ export const isDirectoryOrFile = (path: string) => {
   return DirectoryType.DIRECTORY;
 };
 
+export const checkIsFolder = (path: string) => {
+  try {
+    const stat = fse.lstatSync(path);
+    if (stat.isDirectory()) {
+      return true;
+    }
+  } catch (e) {
+    return false;
+  }
+  return false;
+};
+
 export const checkDirectoryEmpty = (pathName: string) => {
   try {
     const files = fse.readdirSync(pathName);

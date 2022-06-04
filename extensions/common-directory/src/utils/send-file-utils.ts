@@ -3,6 +3,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
+  Icon,
   open,
   showHUD,
   showInFinder,
@@ -11,8 +12,9 @@ import {
 } from "@raycast/api";
 import fse from "fs-extra";
 import path, { ParsedPath } from "path";
-import { checkDirectoryEmpty } from "./common-utils";
+import { checkDirectoryEmpty, isEmpty } from "./common-utils";
 import { Preferences } from "../types/preferences";
+import { getChooseFolder } from "./applescript-utils";
 
 export enum ActionType {
   MOVE = "move",
@@ -69,8 +71,24 @@ function checkMoveToSubdirectory(srcPath: ParsedPath, toPath: string) {
 }
 
 //start send file
-export const getItemAndSend = async (toPath: string, action: ActionType): Promise<boolean> => {
+export const getItemAndSend = async (action: ActionType, toPath = ""): Promise<boolean> => {
   const { selectedFile, selectedFolder } = await getSelectedItemPath();
+  if (isEmpty(toPath)) {
+    toPath = await getChooseFolder()
+      .then(async (_path) => {
+        await open("raycast://");
+        return _path;
+      })
+      .catch(async () => {
+        await open("raycast://");
+        return "";
+      });
+  }
+
+  if (isEmpty(toPath)) {
+    await showToast(Toast.Style.Failure, "Error!", "Path is invalid.");
+    return false;
+  }
 
   //pre check
   if (selectedFile.length === 0 && selectedFolder.length === 0) {
@@ -122,9 +140,18 @@ export async function sendFileShowAlert(
   let isCancel = false;
   //check if file and folder exists
   if (checkExistsSameFiles(destPath, selectedFile) || checkExistsSameFiles(destPath, selectedFolder)) {
+    const title = () => {
+      if (selectedFile.length > 0) {
+        return selectedFile[0].base;
+      } else if (selectedFolder.length > 0) {
+        return selectedFolder[0].base;
+      }
+      return "Files or Folders";
+    };
     const options: Alert.Options = {
-      title: "⚠️ Overwrite",
-      message: "Files or folders already exist in the destination path. Do you want to overwrite?",
+      icon: Icon.ExclamationMark,
+      title: "Overwrite",
+      message: `${title()} already exist in the ${path.basename(destPath)}. Overwrite?`,
       primaryAction: {
         title: "Overwrite All",
         onAction: () => {
@@ -134,6 +161,7 @@ export async function sendFileShowAlert(
       dismissAction: {
         title: "Cancel",
         onAction: () => {
+          showToast(Toast.Style.Failure, "Error!", `User cancels the operation.`);
           isCancel = true;
         },
       },
@@ -200,7 +228,7 @@ const followUpWork = async (
         },
       },
       secondaryAction: {
-        title: "Reveal Folder",
+        title: "Show Folder",
         onAction: (toast) => {
           showInFinder(destPath);
           toast.hide();

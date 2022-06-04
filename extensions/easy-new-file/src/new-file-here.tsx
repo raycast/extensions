@@ -1,17 +1,32 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { Action, ActionPanel, environment, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  environment,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import React, { useState } from "react";
-import { copyFileByPath, getFinderPath, isEmpty, isImage, preferences } from "./utils/common-utils";
-import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
+import { copyFileByPath, getFinderPath, isEmpty, isImage } from "./utils/common-utils";
+import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./types/file-type";
 import NewFileWithName from "./new-file-with-name";
 import AddFileTemplate from "./add-file-template";
 import { homedir } from "os";
-import { getTemplateFile, refreshNumber } from "./hooks/hooks";
+import { alertDialog, getTemplateFile, refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { Preferences } from "./types/preferences";
+import { ListEmptyView } from "./components/list-empty-view";
 
 export default function main() {
-  const preference = preferences();
+  const { showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   const templateFolderPath = environment.supportPath + "/templates";
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -25,6 +40,11 @@ export default function main() {
       searchBarPlaceholder={"Search and create files"}
       selectedItemId={templateFiles.length > 0 ? templateFiles[0].path : ""}
     >
+      <ListEmptyView
+        title={"No templates"}
+        description={"You can add template from the Action Panel"}
+        setRefresh={setRefresh}
+      />
       <List.Section title={"Template"}>
         {templateFiles.map((template, index, array) => {
           return (
@@ -32,8 +52,8 @@ export default function main() {
               id={template.path}
               key={template.path}
               icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-              title={template.name}
-              subtitle={template.extension}
+              title={{ value: template.name, tooltip: template.name + "." + template.extension }}
+              subtitle={template.extension.toUpperCase()}
               actions={
                 <ActionPanel>
                   <Action
@@ -75,7 +95,7 @@ export default function main() {
                       await showHUD(`${template.name} copied to clipboard.`);
                     }}
                   />
-                  <ActionPanel.Section title={"Template Action"}>
+                  <ActionPanel.Section>
                     <Action.Push
                       title={"Add File Template"}
                       icon={Icon.Document}
@@ -87,21 +107,31 @@ export default function main() {
                       icon={Icon.Trash}
                       shortcut={{ modifiers: ["ctrl"], key: "x" }}
                       onAction={async () => {
-                        await showToast(Toast.Style.Animated, "Removing template...");
-                        fse.unlinkSync(template.path);
-                        setRefresh(refreshNumber());
-                        await showToast(Toast.Style.Success, "Removed template successfully.");
+                        await alertDialog(
+                          Icon.Trash,
+                          "Remove Template",
+                          `Are you sure you want to remove the ${template.name + "." + template.extension}?`,
+                          "Remove",
+                          async () => {
+                            await showToast(Toast.Style.Animated, "Removing template...");
+                            fse.removeSync(template.path);
+                            setRefresh(refreshNumber());
+                            await showToast(Toast.Style.Success, "Remove template success!");
+                          }
+                        );
                       }}
                     />
                     <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={template.path} />
                   </ActionPanel.Section>
+
+                  <ActionOpenCommandPreferences />
                 </ActionPanel>
               }
             />
           );
         })}
       </List.Section>
-      {!isLoading && preference.showDocument && (
+      {!isLoading && showDocument && (
         <List.Section title={"Document"}>
           {documentFileTypes.map((fileType, index) => {
             return (
@@ -116,7 +146,7 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {!isLoading && preference.showCode && (
+      {!isLoading && showCode && (
         <List.Section title={"Code"}>
           {codeFileTypes.map((fileType, index) => {
             return (
@@ -131,7 +161,7 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {!isLoading && preference.showScript && (
+      {!isLoading && showScript && (
         <List.Section title={"Script"}>
           {scriptFileTypes.map((fileType, index) => {
             return (
@@ -160,7 +190,7 @@ function FileTypeItem(props: {
   return (
     <List.Item
       icon={{ source: fileType.icon }}
-      title={fileType.name}
+      title={{ value: fileType.name, tooltip: fileType.name + "." + fileType.extension }}
       actions={
         <ActionPanel>
           <Action
@@ -191,7 +221,7 @@ function FileTypeItem(props: {
               }
             }}
           />
-          <ActionPanel.Section title={"Template Action"}>
+          <ActionPanel.Section>
             <Action.Push
               title={"Add File Template"}
               icon={Icon.Document}
@@ -199,6 +229,7 @@ function FileTypeItem(props: {
               target={<AddFileTemplate setRefresh={setRefresh} />}
             />
           </ActionPanel.Section>
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     />
@@ -249,9 +280,18 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
   await showCreateSuccess(fileName, filePath, desPath);
 }
 
-const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
-  await showHUD(`${fileName} created in ${folderPath.slice(0, -1)}`);
-  if (preferences().createAndOpen) {
-    await open(filePath);
+export const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
+  switch (getPreferenceValues<Preferences>().createdActions) {
+    case "no": {
+      break;
+    }
+    case "open": {
+      await open(filePath);
+      break;
+    }
+    case "show": {
+      await showInFinder(filePath);
+    }
   }
+  await showHUD(`${fileName} created in ${folderPath.slice(0, -1)}`);
 };

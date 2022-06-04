@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Detail, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
@@ -11,6 +11,7 @@ import {
   now,
   optimizeMarkdownText,
   Query,
+  showErrorToast,
   toDateString,
   tokenizeQueryText,
 } from "../utils";
@@ -50,7 +51,7 @@ const GET_MR_DETAIL = gql`
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Merge Request Details", error);
+    showErrorToast(error, "Could not fetch Merge Request Details");
   }
   if (isLoading || !mr) {
     return <Detail isLoading={isLoading} />;
@@ -82,7 +83,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not get merge request details", error);
+    showErrorToast(error, "Could not get Merge Request Details");
   }
 
   const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
@@ -140,7 +141,7 @@ function useDetail(issueID: number): {
 } {
   const [mrdetail, setMRDetail] = useState<MRDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -221,11 +222,7 @@ export function MRList({
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
-  }
-
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
@@ -239,8 +236,8 @@ export function MRList({
       searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
-      <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
-        {mrs?.map((mr) => (
+      <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
+        {mrs.map((mr) => (
           <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
@@ -378,14 +375,14 @@ export function useSearch(
   project?: Project,
   group?: Group
 ): {
-  mrs?: MergeRequest[];
+  mrs: MergeRequest[];
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
+  const [mrs, setMRs] = useState<MergeRequest[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -458,7 +455,7 @@ export function useMR(
 } {
   const [mr, setMR] = useState<MergeRequest>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
