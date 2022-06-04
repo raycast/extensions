@@ -1,6 +1,7 @@
 # nextjs Changelog
 
 ## [Performance Improvement] - 2022-05-24
+
 - Performance improvement
 - Caching improvement
 

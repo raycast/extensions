@@ -12,12 +12,12 @@ const TopicDetail = (props: { topic: TopicType }) => {
     async function getPageContent() {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Fetching Data...",
+        title: "",
       });
 
       const cached_data = await getPageFromCache(props.topic).catch((err) => {
-        toast.style = Toast.Style.Animated;
-        toast.title = "Let me fetch fresh data...";
+        toast.style = Toast.Style.Failure;
+        toast.title = "Fetching fresh data...";
         toast.show();
       });
 
@@ -40,15 +40,7 @@ const TopicDetail = (props: { topic: TopicType }) => {
 
   return (
     <>
-      <Detail
-        navigationTitle={props.topic.title}
-        markdown={mark}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Home" target={<Home></Home>} />
-          </ActionPanel>
-        }
-      />
+      <Detail navigationTitle={props.topic.title} markdown={mark} />
     </>
   );
 };

@@ -10,13 +10,12 @@ export default function main() {
   useEffect(() => {
     async function getAllPages() {
       const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Fetching Data...",
+        style: Toast.Style.Failure,
+        title: "",
       });
-
       const cached_pages = await getPagesFromCache().catch((err) => {
         toast.style = Toast.Style.Failure;
-        toast.title = "Let's try fetching fresh data...";
+        toast.title = "Fetching fresh data...";
         toast.show();
       });
 
