@@ -1,9 +1,12 @@
 import open from "open";
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { SessionInstallationCheck } from "./checkInstall";
 
 export default async () => {
-  const url = "session:///pause";
-  open(url);
-  await closeMainWindow();
-  await showHUD("Session paused ⏲️");
+  if (await SessionInstallationCheck()) {
+    const url = "session:///pause";
+    open(url);
+    await closeMainWindow();
+    await showHUD("Session paused ⏲️");
+  }
 };
