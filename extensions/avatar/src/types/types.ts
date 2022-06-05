@@ -24,7 +24,10 @@ export const avatarInit: AvatarOptions = {
   backgroundColor: "#ffffff",
 };
 
-export enum AvatarExtension {
-  SVG = ".svg",
-  PNG = ".png",
+export interface AvatarInfo {
+  svgCode: string;
+  markdownImage: string;
+  png: string;
+  svg: string;
 }
+export const avatarInfoInit = { svgCode: "", markdownImage: "", png: "", svg: "" };

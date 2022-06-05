@@ -2,7 +2,7 @@
 
 An avatar library for designers and developers. You can choose between simple identicons and lovely designed characters.
 
-This extension comes from **[Multiavatar](https://multiavatar.com)** and **[DiceBear Avatars](https://avatars.dicebear.com)**.
+The avatars come from **[Multiavatar](https://multiavatar.com)** and **[DiceBear Avatars](https://avatars.dicebear.com)**.
 
 **Note (DiceBear Avatars)**:
 

@@ -1,24 +1,23 @@
 import { Action, ActionPanel, Clipboard, Icon, showHUD } from "@raycast/api";
 import { downloadAndCopyImage, downloadImage, guid } from "../utils/common-utils";
 import React, { Dispatch, SetStateAction } from "react";
-import { AvatarOptions } from "../types/types";
+import { AvatarInfo, AvatarOptions } from "../types/types";
 import AdvancedOptionsPage from "../advanced-options-page";
 
 export function AvatarImageAction(props: {
   avatarOptions: AvatarOptions;
   setAvatarOptions: Dispatch<SetStateAction<AvatarOptions>>;
-  svgURL: string;
-  pngURL: string;
+  avatarInfo: AvatarInfo;
   advancedOptions: boolean;
 }) {
-  const { avatarOptions, setAvatarOptions, svgURL, pngURL, advancedOptions } = props;
+  const { avatarOptions, setAvatarOptions, avatarInfo, advancedOptions } = props;
   return (
     <>
       <Action
         icon={Icon.Link}
         title={"Copy SVG URL"}
         onAction={() => {
-          Clipboard.copy(svgURL).then(() => {
+          Clipboard.copy(avatarInfo.svg).then(() => {
             showHUD("SVG URL copied to clipboard").then();
           });
         }}
@@ -27,7 +26,7 @@ export function AvatarImageAction(props: {
         icon={Icon.Link}
         title={"Copy PNG URL"}
         onAction={() => {
-          Clipboard.copy(pngURL).then(() => {
+          Clipboard.copy(avatarInfo.png).then(() => {
             showHUD("PNG URL copied to clipboard").then();
           });
         }}
@@ -51,12 +50,20 @@ export function AvatarImageAction(props: {
         />
       )}
       <ActionPanel.Section>
+        {!advancedOptions && (
+          <Action.CopyToClipboard
+            icon={Icon.Terminal}
+            title={"Copy SVG Code"}
+            shortcut={{ modifiers: ["ctrl"], key: "c" }}
+            content={avatarInfo.svgCode}
+          />
+        )}
         <Action
           icon={Icon.Clipboard}
           title={"Copy SVG Avatar"}
           shortcut={{ modifiers: ["ctrl"], key: "s" }}
           onAction={() => {
-            downloadAndCopyImage(svgURL, "svg").then();
+            downloadAndCopyImage(avatarInfo.svg, "svg").then();
           }}
         />
         <Action
@@ -64,7 +71,7 @@ export function AvatarImageAction(props: {
           title={"Copy PNG Avatar"}
           shortcut={{ modifiers: ["ctrl"], key: "p" }}
           onAction={() => {
-            downloadAndCopyImage(pngURL, "png").then();
+            downloadAndCopyImage(avatarInfo.png, "png").then();
           }}
         />
         <Action
@@ -72,7 +79,7 @@ export function AvatarImageAction(props: {
           shortcut={{ modifiers: ["shift", "ctrl"], key: "s" }}
           title={"Download SVG Avatar"}
           onAction={() => {
-            downloadImage(svgURL, "svg", avatarOptions.seed).then();
+            downloadImage(avatarInfo.svg, "svg", avatarOptions.seed).then();
           }}
         />
         <Action
@@ -80,7 +87,7 @@ export function AvatarImageAction(props: {
           shortcut={{ modifiers: ["shift", "ctrl"], key: "p" }}
           title={"Download PNG Avatar"}
           onAction={() => {
-            downloadImage(pngURL, "png", avatarOptions.seed).then();
+            downloadImage(avatarInfo.png, "png", avatarOptions.seed).then();
           }}
         />
       </ActionPanel.Section>

@@ -22,6 +22,7 @@
     }
   ],
   "dependencies": {
+    "@multiavatar/multiavatar": "^1.0.7",
     "@raycast/api": "^1.35.1",
     "axios": "^0.27.2",
     "d3-color": "^3.1.0",

@@ -12,10 +12,11 @@ import { ActionToMultiAvatar } from "./components/action-to-multi-avatar";
 export default function GenerateAvatar() {
   const [avatarOptions, setAvatarOptions] = useState<AvatarOptions>(avatarInit);
   const [tag, setTag] = useState<string>("");
-  const { avatarURL, multiAvatarURL } = createAvatarURL(avatarOptions);
+  const { diceBearAvatarInfo, multiAvatarInfo, loading } = createAvatarURL(avatarOptions);
 
   return (
     <List
+      isLoading={loading}
       isShowingDetail={true}
       searchBarPlaceholder={"Enter custom seed, don't use sensitive or personal data as seeds"}
       onSearchTextChange={(newValue) => {
@@ -23,7 +24,7 @@ export default function GenerateAvatar() {
         if (isEmpty(newValue)) {
           _avatarOptions.seed = defaultSeed;
         } else {
-          _avatarOptions.seed = encodeURI(newValue);
+          _avatarOptions.seed = newValue;
         }
         setAvatarOptions(_avatarOptions);
       }}
@@ -38,7 +39,7 @@ export default function GenerateAvatar() {
       throttle={true}
       searchBarAccessory={
         <List.Dropdown
-          tooltip={"Filter tag"}
+          tooltip={"Avatar Sources"}
           storeValue={true}
           onChange={(newValue) => {
             setTag(newValue);
@@ -58,7 +59,7 @@ export default function GenerateAvatar() {
             title={"multiavatar"}
             detail={
               <List.Item.Detail
-                markdown={isEmpty(multiAvatarURL.svg) ? " " : `<img src="${multiAvatarURL.svg}" alt="" height="190" />`}
+                markdown={multiAvatarInfo.markdownImage}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={"Multiavatar"} />
@@ -67,7 +68,7 @@ export default function GenerateAvatar() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title={"License"} text={"MULTIAVATAR LICENSE v1.0"} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="URL" text={multiAvatarURL.svg} />
+                    <List.Item.Detail.Metadata.Label title="URL" text={multiAvatarInfo.svg} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -77,11 +78,10 @@ export default function GenerateAvatar() {
                 <AvatarImageAction
                   avatarOptions={avatarOptions}
                   setAvatarOptions={setAvatarOptions}
-                  svgURL={multiAvatarURL.svg}
-                  pngURL={multiAvatarURL.png}
+                  avatarInfo={multiAvatarInfo}
                   advancedOptions={false}
                 />
-                <ActionToMultiAvatar avatarURL={multiAvatarURL.svg} />
+                <ActionToMultiAvatar avatarURL={multiAvatarInfo.svg} />
               </ActionPanel>
             }
           />
@@ -104,8 +104,12 @@ export default function GenerateAvatar() {
                 }}
                 detail={
                   <List.Item.Detail
-                    isLoading={isEmpty(avatarURL.png)}
-                    markdown={isEmpty(avatarURL.svg) ? " " : `<img src="${avatarURL.png}" alt="" height="190" />`}
+                    isLoading={isEmpty(diceBearAvatarInfo.png)}
+                    markdown={
+                      isEmpty(diceBearAvatarInfo.svg)
+                        ? " "
+                        : `<img src="${diceBearAvatarInfo.png}" alt="" height="190" />`
+                    }
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Title" text={value.title} />
@@ -114,7 +118,7 @@ export default function GenerateAvatar() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label title={"License"} text={value.license.name} />
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="URL" text={avatarURL.svg} />
+                        <List.Item.Detail.Metadata.Label title="URL" text={diceBearAvatarInfo.svg} />
                       </List.Item.Detail.Metadata>
                     }
                   />
@@ -124,8 +128,7 @@ export default function GenerateAvatar() {
                     <AvatarImageAction
                       avatarOptions={avatarOptions}
                       setAvatarOptions={setAvatarOptions}
-                      svgURL={avatarURL.svg}
-                      pngURL={avatarURL.png}
+                      avatarInfo={diceBearAvatarInfo}
                       advancedOptions={true}
                     />
                     <Action
@@ -138,7 +141,7 @@ export default function GenerateAvatar() {
                         setAvatarOptions(_avatar);
                       }}
                     />
-                    <ActionToDiceBearAvatars avatarURL={avatarURL.svg} />
+                    <ActionToDiceBearAvatars avatarURL={diceBearAvatarInfo.svg} />
                   </ActionPanel>
                 }
               />
