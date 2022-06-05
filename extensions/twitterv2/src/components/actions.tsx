@@ -39,6 +39,10 @@ export function ReplyTweetAction(props: { tweet: Tweet }): ReactElement {
 export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.likeTweet(props.tweet);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Tweet liked",
+    });
   };
   return (
     <Action
@@ -53,6 +57,10 @@ export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
 export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.unlikeTweet(props.tweet);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Tweet unliked",
+    });
   };
   return (
     <Action
@@ -67,6 +75,10 @@ export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
 export function RetweetAction(props: { tweet: Tweet }): ReactElement {
   const handle = async () => {
     clientV2.retweet(props.tweet);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Tweet Retweeted",
+    });
   };
   return (
     <Action
