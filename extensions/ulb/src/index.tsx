@@ -7,11 +7,6 @@ const preference = ({
   image: preferences.photo.value as string,
 });
 
-const items = [
-  "Horaire sur TimeEdit de "+preference.name,
-  "Cours de l'université virtuelle de "+preference.name
-];
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   return (
@@ -19,31 +14,36 @@ export default function Command() {
     searchText={searchText}
     onSearchTextChange={setSearchText}
     >
-      {items.map((item) => (
-        <List.Item
+      <List.Item
         icon={{
           source: preference.image,
           mask: Image.Mask.Circle,
         }}
-          key={item}
-          title={item}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
+        title={"Horaire sur TimeEdit de "+preference.name}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
               url={preference.linkulb}
               title="Open Comments in Browser"
               />
-              <Action.OpenInBrowser
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        icon={{
+          source: preference.image,
+          mask: Image.Mask.Circle,
+        }}
+        title={"Cours de l'université virtuelle de "+preference.name}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
               url={'https://uv.ulb.ac.be/my/index.php'}
               title="Open Comments in Browser"
               />
-              
-            </ActionPanel>
-            
-            
-          }
-        />
-      ))}
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
