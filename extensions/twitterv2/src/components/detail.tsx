@@ -12,18 +12,20 @@ import {
   UnlikeTweetAction,
 } from "./actions";
 
-export function getMarkdownFromTweet(tweet: Tweet): string {
+export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
   const t = tweet;
-  const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.like_count}`];
 
   const parts = [`## ${t.user.name} \`@${t.user.username}\``, t.text || ""];
   if (t.image_url) {
     parts.push(`![${t.image_url}](${t.image_url})`);
   }
-  if (t.created_at) {
-    parts.push(`\`${new Date(t.created_at).toLocaleString()}\``);
+  if (withMeta) {
+    if (t.created_at) {
+      parts.push(`\`${new Date(t.created_at).toLocaleString()}\``);
+    }
+    const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.like_count}`];
+    parts.push(states.join("   "));
   }
-  parts.push(states.join("   "));
   const md = parts.join("\n\n");
   return md;
 }
@@ -41,7 +43,7 @@ export function TweetDetail(props: { tweet: Tweet }) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   const t = data || tweet;
-  const md = getMarkdownFromTweet(t);
+  const md = getMarkdownFromTweet(t, true);
   return (
     <Detail
       isLoading={isLoading}

@@ -7,7 +7,7 @@ import {
   UserV2,
 } from "twitter-api-v2";
 import { authorize, getOAuthTokens } from "./oauth";
-import { Tweet, User } from "./twitter";
+import { Tweet, TweetNonPublicMetrics, User } from "./twitter";
 import { getErrorMessage } from "./utils";
 
 function twitterUserToUser(result: UserV2): User {
@@ -87,7 +87,16 @@ export class ClientV2 {
     const api = await this.getAPI();
     const tweetsRaw = await api.v2.userTimeline(authorID, {
       max_results: 20,
-      "tweet.fields": ["public_metrics", "author_id", "attachments", "created_at", "id", "entities", "conversation_id"],
+      "tweet.fields": [
+        "public_metrics",
+        "non_public_metrics",
+        "author_id",
+        "attachments",
+        "created_at",
+        "id",
+        "entities",
+        "conversation_id",
+      ],
       "media.fields": ["url", "type", "media_key", "preview_image_url"],
       expansions: [
         "attachments.media_keys",
@@ -102,6 +111,13 @@ export class ClientV2 {
     await this.prefetchUserAccounts(tweetsRaw);
     for (const t of tweetsRaw) {
       const media = includes.medias(t);
+      let non_public_metrics: TweetNonPublicMetrics | undefined;
+      if (t.non_public_metrics) {
+        non_public_metrics = {
+          impression_count: t.non_public_metrics.impression_count,
+          url_link_clicks: t.non_public_metrics.url_link_clicks,
+        };
+      }
       let image_url: string | undefined = undefined;
       if (media && media.length > 0) {
         const m = media[0];
@@ -126,6 +142,7 @@ export class ClientV2 {
         reply_count: t.public_metrics?.reply_count || 0,
         retweet_count: t.public_metrics?.retweet_count || 0,
         like_count: t.public_metrics?.like_count || 0,
+        non_public_metrics: non_public_metrics,
       };
       tweets.push(nt);
     }

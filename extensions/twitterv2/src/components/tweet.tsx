@@ -1,4 +1,5 @@
-import { ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { ReactElement, useState } from "react";
 import { Tweet } from "../lib/twitter";
 import { Fetcher } from "../lib/twitterapi_v2";
 import { compactNumberFormat, padStart } from "../lib/utils";
@@ -18,6 +19,74 @@ import {
 } from "./actions";
 import { getMarkdownFromTweet } from "./detail";
 
+function TweetListItemLikesLabel(props: { tweet: Tweet }): ReactElement | null {
+  const t = props.tweet;
+  return <List.Item.Detail.Metadata.Label title="Likes" text={`❤️ ${t.like_count}`} />;
+}
+
+function TweetListItemRetweetsLabel(props: { tweet: Tweet }): ReactElement | null {
+  const t = props.tweet;
+  return <List.Item.Detail.Metadata.Label title="Retweets" text={`🔁 ${t.retweet_count}`} />;
+}
+
+function TweetListItemRepliesLabel(props: { tweet: Tweet }): ReactElement | null {
+  const t = props.tweet;
+  return <List.Item.Detail.Metadata.Label title="Replies" text={`💬 ${t.reply_count || 0}`} />;
+}
+
+function TweetListItemCreatedAtLabel(props: { tweet: Tweet }): ReactElement | null {
+  const t = props.tweet;
+  if (!t.created_at) {
+    return null;
+  }
+  return <List.Item.Detail.Metadata.Label title="Tweeted" text={`${new Date(t.created_at).toLocaleString()}`} />;
+}
+
+function TweetListItemImpressionLabel(props: { tweet: Tweet }): ReactElement | null {
+  const m = props.tweet.non_public_metrics;
+  if (!m) {
+    return null;
+  }
+  return <List.Item.Detail.Metadata.Label title="Impressions" text={`👁️ ${m.impression_count}`} />;
+}
+
+function TweetListItemProfileClicksLabel(props: { tweet: Tweet }): ReactElement | null {
+  const m = props.tweet.non_public_metrics;
+  if (!m || m.url_link_clicks === undefined) {
+    return null;
+  }
+  return <List.Item.Detail.Metadata.Label title="User Profile Clicks" text={`👤 ${m.url_link_clicks}`} />;
+}
+
+function TweetListItemShowMetaToggleAction(props: {
+  showMeta: boolean;
+  onStateChange: (val: boolean) => void;
+}): ReactElement {
+  const show = props.showMeta;
+  return (
+    <Action
+      title={show ? "Hide Details" : "Show Details"}
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      icon={show ? Icon.EyeSlash : Icon.Eye}
+      onAction={() => props.onStateChange(!props.showMeta)}
+    />
+  );
+}
+
+function TweetListItemDetailMeta(props: { tweet: Tweet }): ReactElement {
+  const t = props.tweet;
+  return (
+    <List.Item.Detail.Metadata>
+      <TweetListItemCreatedAtLabel tweet={t} />
+      <TweetListItemLikesLabel tweet={t} />
+      <TweetListItemRetweetsLabel tweet={t} />
+      <TweetListItemRepliesLabel tweet={t} />
+      <TweetListItemImpressionLabel tweet={t} />
+      <TweetListItemProfileClicksLabel tweet={t} />
+    </List.Item.Detail.Metadata>
+  );
+}
+
 export function TweetListItem(props: {
   tweet: Tweet;
   fetcher?: Fetcher;
@@ -31,6 +100,7 @@ export function TweetListItem(props: {
   const withDetail = props.withDetail;
   const fetcher = props.fetcher;
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
+  const [showMeta, setShowMeta] = useState<boolean>(true);
 
   const maxLength = 70;
   const textRaw = t.text ? t.text.trim() : "";
@@ -84,7 +154,14 @@ export function TweetListItem(props: {
       title={text}
       icon={icon}
       accessories={!withDetail ? accessories : undefined}
-      detail={withDetail ? <List.Item.Detail markdown={getMarkdownFromTweet(t)} /> : undefined}
+      detail={
+        withDetail ? (
+          <List.Item.Detail
+            markdown={getMarkdownFromTweet(t, !showMeta)}
+            metadata={showMeta ? <TweetListItemDetailMeta tweet={t} /> : null}
+          />
+        ) : undefined
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -109,6 +186,7 @@ export function TweetListItem(props: {
             <RefreshTweetsAction fetcher={fetcher} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <TweetListItemShowMetaToggleAction showMeta={showMeta} onStateChange={setShowMeta} />
             <LogoutAction />
           </ActionPanel.Section>
         </ActionPanel>

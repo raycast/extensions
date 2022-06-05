@@ -18,4 +18,10 @@ export interface Tweet {
   reply_count?: number;
   retweet_count: number;
   like_count: number;
+  non_public_metrics?: TweetNonPublicMetrics;
+}
+
+export interface TweetNonPublicMetrics {
+  impression_count: number;
+  url_link_clicks: number;
 }
