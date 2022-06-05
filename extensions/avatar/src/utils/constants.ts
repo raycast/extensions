@@ -2,6 +2,9 @@ export const DICEBEAR_AVATARS = "https://avatars.dicebear.com";
 export const DICEBEAR_AVATARS_LICENSE = "https://avatars.dicebear.com/licenses";
 export const AVATAR_URL = "https://avatars.dicebear.com/api";
 
+export const MULTI_AVATAR = "https://multiavatar.com";
+export const MULTI_AVATAR_URL = "https://api.multiavatar.com";
+
 export const defaultSeed = "your-custom-seed";
 
 export const avatarStyles = [
@@ -130,4 +133,10 @@ export const avatarStyles = [
       url: "https://github.com/dicebear/dicebear/blob/main/packages/%40dicebear/pixel-art-neutral/LICENSE",
     },
   },
+];
+
+export const filterTags = [
+  { title: "All", value: "All" },
+  { title: "Multiavatar", value: "Multiavatar" },
+  { title: "DiceBear Avatars", value: "DiceBear Avatars" },
 ];

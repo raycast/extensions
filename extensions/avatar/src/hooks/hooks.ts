@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { avatarInit, AvatarOptions } from "../types/types";
-import { AVATAR_URL } from "../utils/constants";
+import { AVATAR_URL, MULTI_AVATAR_URL } from "../utils/constants";
 
 export const createAvatarURL = (avatarOptions: AvatarOptions) => {
   const [avatarURL, setAvatarURL] = useState<{ png: string; svg: string }>({ png: "", svg: "" });
+  const [multiAvatarURL, setMultiAvatarURL] = useState<{ png: string; svg: string }>({ png: "", svg: "" });
 
   const fetchData = useCallback(async () => {
     const options = () => {
@@ -25,13 +26,15 @@ export const createAvatarURL = (avatarOptions: AvatarOptions) => {
     };
     const pngURL = AVATAR_URL + "/" + avatarOptions.style + "/" + avatarOptions.seed + ".png" + options();
     const svgURL = AVATAR_URL + "/" + avatarOptions.style + "/" + avatarOptions.seed + ".svg" + options();
-
+    const multiSVGURL = MULTI_AVATAR_URL + "/" + avatarOptions.seed + ".svg";
+    const multiPNGURL = MULTI_AVATAR_URL + "/" + avatarOptions.seed + ".png";
     setAvatarURL({ png: pngURL, svg: svgURL });
+    setMultiAvatarURL({ png: multiPNGURL, svg: multiSVGURL });
   }, [avatarOptions]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return { avatarURL: avatarURL };
+  return { avatarURL: avatarURL, multiAvatarURL: multiAvatarURL };
 };
