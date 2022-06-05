@@ -1,11 +1,41 @@
-import { Detail } from "@raycast/api";
-import { ReactElement } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { ReactElement, useState } from "react";
 
-export function UserSearchV2List(): ReactElement {
-  const parts: string[] = [
-    "# Unsupported",
-    "Sorry, the V2 API of Twitter does not support this feature right now",
-    "You can only use this command when you using the API key for an V1",
-  ];
-  return <Detail markdown={parts.join("  \n")} />;
+function OpenSearchInBrowserAction(props: { search: string }): ReactElement {
+  const url = new URL("https://twitter.com/search");
+  url.searchParams.append("q", props.search);
+  url.searchParams.append("f", "user");
+  return <Action.OpenInBrowser title="Search on Twitter.com" icon="twitter.png" url={url.href} />;
+}
+
+function ListItemSearch(props: { search: string | undefined }): ReactElement | null {
+  const s = props.search;
+  if (!s || s.length <= 0) {
+    return null;
+  }
+  return (
+    <List.Item
+      title={`Search '${s}' on twitter.com`}
+      icon="twitter.png"
+      actions={
+        <ActionPanel>
+          <OpenSearchInBrowserAction search={s} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function SearchUserList(): ReactElement {
+  const [search, setSearch] = useState<string>();
+  // INFO search user via twitter.com because twitter v2 has no endpoint for user search
+  return (
+    <List
+      searchText={search}
+      onSearchTextChange={setSearch}
+      searchBarPlaceholder="Search Users by Name or Handle (e.g. @tonka_2000 or Michael Aigner)"
+    >
+      <ListItemSearch search={search} />
+    </List>
+  );
 }

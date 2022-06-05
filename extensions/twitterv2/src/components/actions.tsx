@@ -66,7 +66,7 @@ export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
     <Action
       title="Unlike"
       icon={{ source: "heart_empty.png", tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       onAction={handle}
     />
   );

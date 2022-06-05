@@ -27,6 +27,13 @@
       "subtitle": "Twitter v2",
       "description": "Send a tweet",
       "mode": "view"
+    },
+    {
+      "name": "search_user",
+      "title": "Search User",
+      "description": "Search Users",
+      "mode": "view",
+      "subtitle": "Twitter v2"
     }
   ],
   "preferences": [
