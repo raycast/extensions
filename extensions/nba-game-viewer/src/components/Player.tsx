@@ -4,10 +4,11 @@ import generatePlayerAccessories from "../utils/generatePlayerAccessories";
 
 type PropTypes = {
   player: Player;
+  isShowingDetail: boolean;
   setIsShowingDetail: any;
 };
 
-const PlayerComponent = ({ player, setIsShowingDetail }: PropTypes) => {
+const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTypes) => {
   return (
     <List.Item
       key={player.id}
@@ -20,6 +21,8 @@ const PlayerComponent = ({ player, setIsShowingDetail }: PropTypes) => {
           markdown={`<img src="${player.headshot}" alt="drawing" width="250"/>`}
           metadata={
             <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Name" text={player.fullName} />
+              <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Position" text={player.position} />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Height" text={player.height} />
@@ -41,7 +44,11 @@ const PlayerComponent = ({ player, setIsShowingDetail }: PropTypes) => {
       }
       actions={
         <ActionPanel title="Player Actions">
-          <Action title="Show Player Info" icon={Icon.Sidebar} onAction={() => setIsShowingDetail(true)} />
+          <Action
+            title="Show Player Info"
+            icon={Icon.Sidebar}
+            onAction={() => (isShowingDetail ? setIsShowingDetail(false) : setIsShowingDetail(true))}
+          />
           <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
         </ActionPanel>
       }
