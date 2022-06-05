@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ulb",
+  "title": "ULB Time Manager",
+  "description": "check your planning",
+  "icon": "ulb.png",
+  "author": "samuser107",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "ULB Time Manager",
+      "description": "Montre ton horaire",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "linkUlb",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://cloud.timeedit.net/be_ulb/web/etudiant/ID",
+      "title": "Lien du planning",
+      "description": "Lien du Planning"
+    },
+    {
+      "name": "name",
+      "type" : "textfield",
+      "required": true,
+      "placeholder": "John",
+      "title": "Ton nom",
+      "description": "nom"
+    },
+    {
+      "name": "photo",
+      "type":"textfield",
+      "required": true,
+      "placeholder": "Lien de ton image",
+      "title": "Ton image",
+      "description": "image"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
