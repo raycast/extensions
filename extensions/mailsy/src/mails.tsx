@@ -1,6 +1,7 @@
 import { Detail, List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchMessages, openEmail } from "./utils";
+import path from "path";
 
 interface messages {
   id: string;
@@ -33,8 +34,6 @@ export default function Command() {
   }, []);
 
   if (error) return <Detail markdown={error} />;
-
-  if (messages.length === 0) return <Detail markdown={`# No Emails`} />;
 
   return (
     <List isLoading={loading} navigationTitle="Mails">
@@ -72,7 +71,20 @@ function Email({ id }: { id: string }) {
     }
     response();
   }),
-    [id];
+    [];
 
-  return <Detail markdown={email} isLoading={!email} navigationTitle={subject}></Detail>;
+  const dir = path.dirname(__filename);
+
+  return (
+    <Detail
+      markdown={email}
+      isLoading={!email}
+      navigationTitle={subject}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={`${dir}/assets/email.html`} />
+        </ActionPanel>
+      }
+    ></Detail>
+  );
 }

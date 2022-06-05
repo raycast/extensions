@@ -1,6 +1,8 @@
 import axios from "axios";
 import { LocalStorage } from "@raycast/api";
 import { Clipboard, showHUD } from "@raycast/api";
+import path from "path";
+import fs from "fs/promises";
 
 const clearLocalStorage = async () => {
   const account = {
@@ -89,8 +91,6 @@ export const fetchMessages = async () => {
 
     const email = data["hydra:member"];
 
-    console.log(email);
-
     return email;
   } catch (error) {
     console.log(error);
@@ -161,6 +161,12 @@ export const openEmail = async (id: string) => {
         Authorization: `Bearer ${account.token}`,
       },
     });
+
+    // current directory
+    const dir = path.dirname(__filename);
+
+    //write to file
+    await fs.writeFile(`${dir}/assets/email.html`, data.html[0]);
 
     return data;
   } catch (error) {
