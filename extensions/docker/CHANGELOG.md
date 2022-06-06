@@ -3,6 +3,7 @@
 ## [Improvement] - 2022-06-06
 
  - Added ability to Copy Container ID
+ - Added container details metadata
 
 ## [Fix] - 2022-05-16
 

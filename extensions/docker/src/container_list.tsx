@@ -1,5 +1,5 @@
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, PushAction, CopyToClipboardAction } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useMemo } from 'react';
 import ContainerDetail from './container_detail';
 import { useDocker } from './docker';
@@ -36,7 +36,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
           actions={
             <ActionPanel>
               {isContainerRunning(containerInfo) && (
-                <ActionPanel.Item
+                <Action
                   title="Stop Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
                   icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
@@ -48,7 +48,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 />
               )}
               {isContainerRunning(containerInfo) && (
-                <ActionPanel.Item
+                <Action
                   title="Restart Container"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ['opt'], key: 'r' }}
@@ -60,14 +60,14 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 />
               )}
               {isContainerRunning(containerInfo) && (
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   title="Copy Container ID"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
                   content={containerInfo.Id}
                 />
               )}
               {!isContainerRunning(containerInfo) && (
-                <ActionPanel.Item
+                <Action
                   title="Start Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
                   icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
@@ -78,13 +78,13 @@ export default function ContainerList(props: { projectFilter?: string }) {
                   })}
                 />
               )}
-              <PushAction
+              <Action.Push
                 title="Inspect"
                 icon={{ source: Icon.Binoculars }}
                 shortcut={{ modifiers: ['cmd'], key: 'i' }}
                 target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
               />
-              <ActionPanel.Item
+              <Action
                 title="Remove Container"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
