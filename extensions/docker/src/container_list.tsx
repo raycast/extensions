@@ -1,5 +1,5 @@
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, PushAction } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, PushAction, CopyToClipboardAction } from '@raycast/api';
 import { useMemo } from 'react';
 import ContainerDetail from './container_detail';
 import { useDocker } from './docker';
@@ -57,6 +57,13 @@ export default function ContainerList(props: { projectFilter?: string }) {
                     onSuccess: () => `Container ${containerName(containerInfo)} restarted`,
                     onFailure: (error) => formatContainerError(error, containerInfo),
                   })}
+                />
+              )}
+              {isContainerRunning(containerInfo) && (
+                <CopyToClipboardAction
+                  title="Copy Container ID"
+                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                  content={containerInfo.Id}
                 />
               )}
               {!isContainerRunning(containerInfo) && (
