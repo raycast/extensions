@@ -1,6 +1,6 @@
 # Signal Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2022-06-06
 
 Fixed a bug where Open Signal didn't work if Signal was not open
 
