@@ -44,12 +44,13 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       }
       actions={
         <ActionPanel title="Player Actions">
-          <Action
-            title="Show Player Info"
-            icon={Icon.Sidebar}
-            onAction={() => (isShowingDetail ? setIsShowingDetail(false) : setIsShowingDetail(true))}
-          />
           <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
+          <Action
+            title="Toggle Player Info"
+            icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={() => (setIsShowingDetail(!isShowingDetail))}
+          />
         </ActionPanel>
       }
     />
