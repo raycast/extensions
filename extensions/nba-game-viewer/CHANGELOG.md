@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [New Feature] - 2022-06-02
+## [New Feature] - 2022-06-06
 
 - New Addition to celebrate the beginning of the NBA 2022 Finals 🎉
 - When viewing team standings you can now view the team's roster
