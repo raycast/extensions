@@ -15,7 +15,7 @@ export default function AdvancedOptionsPage(props: {
       navigationTitle={"Advanced Options"}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Sidebar} title={"Back to Generate Avatar"} onAction={pop} />
+          <Action icon={Icon.Sidebar} title={"Save Settings"} onAction={pop} />
         </ActionPanel>
       }
     >
