@@ -134,9 +134,8 @@ async function openSingalUrl(url: string) {
   const result = executeJxa(`
   const app = Application("Signal");
 var running = app.running();
-if (!running){
- app.activate();
-} else {
+app.activate();
+if (running){
   app.includeStandardAdditions = true;
   app.openLocation('${url}');
 }
