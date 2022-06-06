@@ -39,7 +39,6 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
         _starTimezones.forEach((value) => {
           const index = allTimeZone.indexOf(value.timezone);
           if (index !== -1) allTimeZone.splice(index, 1);
-
           value.date_time = calculateDateTimeByOffset(value.utc_offset).date_time;
           value.unixtime = calculateDateTimeByOffset(value.utc_offset).unixtime;
         });
@@ -66,8 +65,8 @@ export const getRegionTime = (timezone: string) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     if (isEmpty(timezone)) return;
+    setLoading(true);
 
     axios({
       method: "GET",
@@ -75,7 +74,7 @@ export const getRegionTime = (timezone: string) => {
     })
       .then((axiosResponse) => {
         const _timeInfo = axiosResponse.data as TimeInfo;
-        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).date_time;
+        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).dateTime;
         _timeInfo.utc_datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).utc_datetime;
 
         setTimeInfo(_timeInfo);

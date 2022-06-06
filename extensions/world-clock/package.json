@@ -36,6 +36,17 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "title": "Advanced Preferences",
+      "name": "hour24",
+      "type": "checkbox",
+      "required": true,
+      "label": "Hour 24",
+      "description": "24 hour clock",
+      "default": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.35.1",
     "axios": "^0.27.2"
