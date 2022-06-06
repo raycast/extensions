@@ -55,7 +55,7 @@ export default function GenerateAvatar() {
         <List.Section title={"Multiavatar"}>
           <List.Item
             id={"multiAvatar"}
-            icon={{ source: MULTI_AVATAR_URL + "/" + defaultSeed + ".svg" }}
+            icon={{ source: MULTI_AVATAR_URL + "/" + defaultSeed + ".svg", fallback: "avatar-icon.png" }}
             title={"multiavatar"}
             detail={
               <List.Item.Detail
@@ -97,6 +97,7 @@ export default function GenerateAvatar() {
                 icon={{
                   source: AVATAR_URL + "/" + value.name + "/" + defaultSeed + ".png",
                   mask: Mask.RoundedRectangle,
+                  fallback: "avatar-icon.png",
                 }}
                 title={{
                   value: value.name,
