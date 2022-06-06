@@ -51,11 +51,19 @@ function TweetListItemImpressionLabel(props: { tweet: Tweet }): ReactElement | n
 }
 
 function TweetListItemProfileClicksLabel(props: { tweet: Tweet }): ReactElement | null {
+  const m = props.tweet.organic_metrics;
+  if (!m || m.user_profile_clicks === undefined) {
+    return null;
+  }
+  return <List.Item.Detail.Metadata.Label title="User Profile Clicks" text={`👤 ${m.user_profile_clicks}`} />;
+}
+
+function TweetListItemUrlClicksLabel(props: { tweet: Tweet }): ReactElement | null {
   const m = props.tweet.non_public_metrics;
   if (!m || m.url_link_clicks === undefined) {
     return null;
   }
-  return <List.Item.Detail.Metadata.Label title="User Profile Clicks" text={`👤 ${m.url_link_clicks}`} />;
+  return <List.Item.Detail.Metadata.Label title="Url Clicks" text={`🔗 ${m.url_link_clicks}`} />;
 }
 
 function TweetListItemShowMetaToggleAction(props: {
@@ -83,6 +91,7 @@ function TweetListItemDetailMeta(props: { tweet: Tweet }): ReactElement {
       <TweetListItemRepliesLabel tweet={t} />
       <TweetListItemImpressionLabel tweet={t} />
       <TweetListItemProfileClicksLabel tweet={t} />
+      <TweetListItemUrlClicksLabel tweet={t} />
     </List.Item.Detail.Metadata>
   );
 }

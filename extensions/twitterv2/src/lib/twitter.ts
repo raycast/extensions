@@ -19,9 +19,19 @@ export interface Tweet {
   retweet_count: number;
   like_count: number;
   non_public_metrics?: TweetNonPublicMetrics;
+  organic_metrics?: TweetOrganicMetrics;
 }
 
 export interface TweetNonPublicMetrics {
   impression_count: number;
   url_link_clicks: number;
+}
+
+export interface TweetOrganicMetrics {
+  impression_count: number;
+  url_link_clicks: number;
+  user_profile_clicks: number;
+  retweet_count: number;
+  reply_count: number;
+  like_count: number;
 }

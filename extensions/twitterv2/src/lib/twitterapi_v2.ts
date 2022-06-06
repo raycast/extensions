@@ -11,7 +11,7 @@ import {
   UserV2,
 } from "twitter-api-v2";
 import { authorize, getOAuthTokens } from "./oauth";
-import { Tweet, TweetNonPublicMetrics, User } from "./twitter";
+import { Tweet, TweetNonPublicMetrics, TweetOrganicMetrics, User } from "./twitter";
 import { getErrorMessage } from "./utils";
 
 const max_results = 20;
@@ -105,7 +105,7 @@ export class ClientV2 {
   async getMyTweets(): Promise<Tweet[]> {
     const api = await this.getAPI();
     const me = await api.v2.me();
-    return await this.getTweetsFromAuthor(me.data.id, ["non_public_metrics"]);
+    return await this.getTweetsFromAuthor(me.data.id, ["non_public_metrics", "organic_metrics"]);
   }
 
   async getTweetsFromAuthor(authorID: string, extraFields?: TTweetv2TweetField[]): Promise<Tweet[]> {
@@ -139,6 +139,17 @@ export class ClientV2 {
         url_link_clicks: t.non_public_metrics.url_link_clicks,
       };
     }
+    let organic_metrics: TweetOrganicMetrics | undefined;
+    if (t.organic_metrics) {
+      organic_metrics = {
+        impression_count: t.organic_metrics.impression_count,
+        url_link_clicks: t.organic_metrics.url_link_clicks,
+        user_profile_clicks: t.organic_metrics.user_profile_clicks,
+        retweet_count: t.organic_metrics.retweet_count,
+        reply_count: t.organic_metrics.reply_count,
+        like_count: t.organic_metrics.like_count,
+      };
+    }
     let image_url: string | undefined = undefined;
     if (media && media.length > 0) {
       const m = media[0];
@@ -164,6 +175,7 @@ export class ClientV2 {
       retweet_count: t.public_metrics?.retweet_count || 0,
       like_count: t.public_metrics?.like_count || 0,
       non_public_metrics: non_public_metrics,
+      organic_metrics: organic_metrics,
     };
     return nt;
   }
@@ -172,14 +184,20 @@ export class ClientV2 {
     if (tweets === undefined) {
       return undefined;
     }
-    const containsPrivateData = (): boolean => {
+    const containsNonPublicMetrics = (): boolean => {
       return tweets.length === tweets.filter((t) => t.non_public_metrics !== undefined).length;
+    };
+    const containsOrganicMetrics = (): boolean => {
+      return tweets.length === tweets.filter((t) => t.organic_metrics !== undefined).length;
     };
     const api = await this.getAPI();
     const tweetIds = tweets.map((t) => t.id);
     const fields = [...defaultFields];
-    if (containsPrivateData()) {
+    if (containsNonPublicMetrics()) {
       fields.push("non_public_metrics");
+    }
+    if (containsOrganicMetrics()) {
+      fields.push("organic_metrics");
     }
     const tweetsRaw = await api.v2.tweets(tweetIds, {
       "tweet.fields": fields,
