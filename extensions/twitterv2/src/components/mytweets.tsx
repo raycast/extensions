@@ -7,7 +7,7 @@ import { ReactElement } from "react";
 export function MyTweetList(): ReactElement {
   const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
     async (updateInline): Promise<Tweet[] | undefined> => {
-      return await clientV2.getMyTweets();
+      return updateInline ? await clientV2.refreshTweets(data) : await clientV2.getMyTweets();
     }
   );
   if (error) {

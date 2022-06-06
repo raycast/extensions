@@ -5,7 +5,7 @@ import { resetOAuthTokens } from "../lib/oauth";
 import { TweetDetail } from "./detail";
 import { TweetSendForm } from "./send";
 import { clientV2, Fetcher } from "../lib/twitterapi_v2";
-import { getErrorMessage } from "../lib/utils";
+import { getErrorMessage, sleep } from "../lib/utils";
 import { AuthorTweetList } from "./author";
 
 export function LogoutAction(): ReactElement {
@@ -36,13 +36,17 @@ export function ReplyTweetAction(props: { tweet: Tweet }): ReactElement {
   );
 }
 
-export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
+export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
   const handle = async () => {
     clientV2.likeTweet(props.tweet);
     showToast({
       style: Toast.Style.Success,
       title: "Tweet liked",
     });
+    if (props.fetcher) {
+      await sleep(1000); // make sure data is up2date
+      await props.fetcher.updateInline();
+    }
   };
   return (
     <Action
@@ -54,13 +58,17 @@ export function LikeTweetAction(props: { tweet: Tweet }): ReactElement {
   );
 }
 
-export function UnlikeTweetAction(props: { tweet: Tweet }): ReactElement {
+export function UnlikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
   const handle = async () => {
     clientV2.unlikeTweet(props.tweet);
     showToast({
       style: Toast.Style.Success,
       title: "Tweet unliked",
     });
+    if (props.fetcher) {
+      await sleep(1000); // make sure data is up2date
+      props.fetcher.updateInline();
+    }
   };
   return (
     <Action

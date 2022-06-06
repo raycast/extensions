@@ -169,8 +169,8 @@ export function TweetListItem(props: {
             <OpenTweetInBrowerAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <LikeTweetAction tweet={t} />
-            <UnlikeTweetAction tweet={t} />
+            <LikeTweetAction tweet={t} fetcher={fetcher} />
+            <UnlikeTweetAction tweet={t} fetcher={fetcher} />
             <ReplyTweetAction tweet={t} />
             <RetweetAction tweet={t} />
           </ActionPanel.Section>

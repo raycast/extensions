@@ -1,6 +1,6 @@
 import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { Tweet } from "../lib/twitter";
-import { useRefresher } from "../lib/twitterapi_v2";
+import { clientV2, useRefresher } from "../lib/twitterapi_v2";
 import {
   DeleteTweetAction,
   LikeTweetAction,
@@ -36,7 +36,10 @@ export function TweetDetail(props: { tweet: Tweet }) {
     if (data === undefined) {
       return props.tweet;
     } else {
-      return props.tweet; //return await refreshTweet(data);
+      const rd = await clientV2.refreshTweets([data]);
+      if (rd && rd.length > 0) {
+        return rd[0];
+      }
     }
   });
   if (error) {

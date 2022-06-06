@@ -6,9 +6,7 @@ import { Tweet } from "../lib/twitter";
 export function HomeTimelineList() {
   const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
     async (updateInline): Promise<Tweet[] | undefined> => {
-      // FIXME add refresh tweets
-      // return updateInline ? await refreshTweets(data) : await getHomeTimelineTweets();
-      return await clientV2.homeTimeline();
+      return updateInline ? await clientV2.refreshTweets(data) : await clientV2.homeTimeline();
     }
   );
   if (error) {
