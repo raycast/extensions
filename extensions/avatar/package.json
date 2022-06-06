@@ -16,7 +16,7 @@
     {
       "name": "generate-avatar",
       "title": "Generate Avatar",
-      "subtitle": "Avatar",
+      "subtitle": "Multiavatar",
       "description": "Generate your own avatar with custom seed.",
       "mode": "view"
     }
