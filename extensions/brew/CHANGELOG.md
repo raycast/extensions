@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - 2022-06-06
+
+- Removed --dry-run flag when running the Upgrade command so the casks and formulas actually upgraded
+
 ## [Search] - 2022-03-15
 
 - Improve search accuracy (now includes the description)
