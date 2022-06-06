@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  TTweetv2TweetField,
   TweetHomeTimelineV2Paginator,
   TweetUserTimelineV2Paginator,
   TwitterApi,
@@ -80,23 +81,26 @@ export class ClientV2 {
   async getMyTweets(): Promise<Tweet[]> {
     const api = await this.getAPI();
     const me = await api.v2.me();
-    return await this.getTweetsFromAuthor(me.data.id);
+    return await this.getTweetsFromAuthor(me.data.id, ["non_public_metrics"]);
   }
 
-  async getTweetsFromAuthor(authorID: string): Promise<Tweet[]> {
+  async getTweetsFromAuthor(authorID: string, extraFields?: TTweetv2TweetField[]): Promise<Tweet[]> {
     const api = await this.getAPI();
+    const fields: TTweetv2TweetField[] = [
+      "public_metrics",
+      "author_id",
+      "attachments",
+      "created_at",
+      "id",
+      "entities",
+      "conversation_id",
+    ];
+    if (extraFields) {
+      fields.push(...extraFields);
+    }
     const tweetsRaw = await api.v2.userTimeline(authorID, {
       max_results: 20,
-      "tweet.fields": [
-        "public_metrics",
-        "non_public_metrics",
-        "author_id",
-        "attachments",
-        "created_at",
-        "id",
-        "entities",
-        "conversation_id",
-      ],
+      "tweet.fields": fields,
       "media.fields": ["url", "type", "media_key", "preview_image_url"],
       expansions: [
         "attachments.media_keys",
