@@ -12,10 +12,31 @@ import {
   UnlikeTweetAction,
 } from "./actions";
 
+function isRetweet(tweet: Tweet): boolean {
+  if (tweet.text && tweet.text.startsWith("RT @")) {
+    return true;
+  }
+  return false;
+}
+
+function getCleanTweetText(tweet: Tweet): string | undefined {
+  if (tweet.text === undefined) {
+    return undefined;
+  }
+  if (isRetweet(tweet)) {
+    const i = tweet.text.indexOf(":");
+    if (i !== undefined && i > 0) {
+      return tweet.text.substring(i + 1).trimStart();
+    }
+  }
+  return tweet.text;
+}
+
 export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
   const t = tweet;
+  const retweetedText = isRetweet(t) ? " retweeted" : "";
 
-  const parts = [`## ${t.user.name} \`@${t.user.username}\``, t.text || ""];
+  const parts = [`## ${t.user.name} \`@${t.user.username}\`${retweetedText}`, getCleanTweetText(t) || ""];
   if (t.image_url) {
     parts.push(`![${t.image_url}](${t.image_url})`);
   }
