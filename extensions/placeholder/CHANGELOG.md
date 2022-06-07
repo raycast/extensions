@@ -1,5 +1,9 @@
 # Placeholder Changelog
 
+## [Fix text error] - 2022-06-04
+
+- Fix text error
+
 ## [Add Search Placeholder Image command] - 2022-05-23
 
 - Add Search Placeholder Image command

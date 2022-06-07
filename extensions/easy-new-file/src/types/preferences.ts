@@ -1,6 +1,9 @@
 export interface Preferences {
-  createAndOpen: boolean;
+  createdActions: string;
   showDocument: boolean;
   showCode: boolean;
   showScript: boolean;
+
+  fileType: string;
+  saveDirectory: string;
 }

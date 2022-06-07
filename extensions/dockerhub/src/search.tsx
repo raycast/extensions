@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-  showToast,
-  ToastStyle,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, List, showToast, Icon, Action, Toast } from "@raycast/api";
 import { searchImage, searchTag, SearchType } from "./lib/api";
 import { useEffect, useState } from "react";
 import { Image, Tag, TagImage } from "./lib/type";
@@ -39,14 +30,21 @@ export function Search(props: SearchProps) {
         setImages(result);
       } else if (props.searchType === SearchType.TAG) {
         if (!props.image) {
-          showToast(ToastStyle.Failure, "Please specify an image");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Please specify an image",
+          });
           return;
         }
         const result: Tag[] = await searchTag(props.image, { page_size: 50, name: text });
         setTags(result);
       }
     } catch (err) {
-      showToast(ToastStyle.Failure, "Search failed", (err as Error).message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search failed",
+        message: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
@@ -59,17 +57,21 @@ export function Search(props: SearchProps) {
           key={index}
           title={`[${item.from}] ${item.name}`}
           subtitle={item.short_description}
-          accessoryTitle={`${item.pull_count} Downloads`}
-          accessoryIcon={item.logo_url.small}
           actions={
             <ActionPanel>
-              <PushAction icon={Icon.List} title="Show Tags" target={<SearchTag image={item.slug} />} />
-              <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${item.slug}`} />
-              <CopyToClipboardAction title="Copy Image Name" content={`${item.slug}`} />
-              <OpenInBrowserAction url={item.url ? item.url : ""} />
-              <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
+              <Action.Push icon={Icon.List} title="Show Tags" target={<SearchTag image={item.slug} />} />
+              <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${item.slug}`} />
+              <Action.CopyToClipboard title="Copy Image Name" content={`${item.slug}`} />
+              <Action.OpenInBrowser url={item.url ? item.url : ""} />
+              <Action.CopyToClipboard title="Copy URL" content={item.url ? item.url : ""} />
             </ActionPanel>
           }
+          accessories={[
+            {
+              text: `${item.pull_count} Downloads`,
+              icon: item.logo_url.small,
+            },
+          ]}
         />
       ))}
       {tags.map((tag: Tag) =>
@@ -78,15 +80,19 @@ export function Search(props: SearchProps) {
             key={`${tag.id}-${image.digest}`}
             title={`${tag.name}`}
             subtitle={`${tag.update_time ? tag.update_time : ""} by ${tag.last_updater_username}`}
-            accessoryTitle={`${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${props.image}:${tag.name}`} />
-                <CopyToClipboardAction title="Copy Name with Tag" content={`${props.image}:${tag.name}`} />
-                <OpenInBrowserAction url={image.url ? image.url : ""} />
-                <CopyToClipboardAction title="Copy URL" content={image.url ? image.url : ""} />
+                <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${props.image}:${tag.name}`} />
+                <Action.CopyToClipboard title="Copy Name with Tag" content={`${props.image}:${tag.name}`} />
+                <Action.OpenInBrowser url={image.url ? image.url : ""} />
+                <Action.CopyToClipboard title="Copy URL" content={image.url ? image.url : ""} />
               </ActionPanel>
             }
+            accessories={[
+              {
+                text: `${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`,
+              },
+            ]}
           />
         ))
       )}

@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { ensureCleanAccessories } from "../utils";
+import { ensureCleanAccessories, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { ClearLocalCacheAction } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
@@ -73,7 +73,7 @@ export function EpicList(props: { group: Group }) {
   );
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search epics", error);
+    showErrorToast(error, "Cannot search Epics");
   }
 
   const navTitle = `Epics ${props.group.full_path}`;

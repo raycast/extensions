@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Action, Icon } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon, openExtensionPreferences } from "@raycast/api";
 import { useEffect } from "react";
 
 import checkAuthEffect from "../hooks/checkAuthEffect";
@@ -12,14 +12,16 @@ import { sourcegraphSelfHosted, Sourcegraph } from "../sourcegraph";
 export default function SelfHostedCommand({ Command }: { Command: React.FunctionComponent<{ src: Sourcegraph }> }) {
   const tryCloudMessage = "Alternatively, you can try the Sourcegraph Cloud version of this command first.";
 
-  const helpActions = (
-    <ActionPanel>
-      <Action.OpenInBrowser
-        title="Open Setup Guide"
-        icon={Icon.QuestionMark}
-        url="https://github.com/raycast/extensions/tree/main/extensions/sourcegraph#setup"
-      />
-    </ActionPanel>
+  const setupGuideAction = (
+    <Action.OpenInBrowser
+      title="View Setup Guide"
+      icon={Icon.QuestionMark}
+      url="https://www.raycast.com/bobheadxi/sourcegraph#setup"
+    />
+  );
+
+  const openPreferencesAction = (
+    <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
   );
 
   const src = sourcegraphSelfHosted();
@@ -29,8 +31,13 @@ export default function SelfHostedCommand({ Command }: { Command: React.Function
         navigationTitle="No Sourcegraph Self-Hosted instance configured"
         markdown={`${bold(
           `⚠️ No Sourcegraph Sourcegraph Self-Hosted instance configured`
-        )} - set one up in the extension preferences!\n\n${tryCloudMessage}`}
-        actions={helpActions}
+        )} - please set one up in the extension preferences to use this command!\n\n${tryCloudMessage}`}
+        actions={
+          <ActionPanel>
+            {setupGuideAction}
+            {openPreferencesAction}
+          </ActionPanel>
+        }
       />
     );
   }
@@ -43,7 +50,12 @@ export default function SelfHostedCommand({ Command }: { Command: React.Function
         markdown={`${bold(
           `⚠️ Sourcegraph Self-Hosted URL '${src.instance}' is invalid:`
         )} ${e}\n\nUpdate it in the extension preferences!\n\n${tryCloudMessage}`}
-        actions={helpActions}
+        actions={
+          <ActionPanel>
+            {openPreferencesAction}
+            {setupGuideAction}
+          </ActionPanel>
+        }
       />
     );
   }
@@ -53,8 +65,13 @@ export default function SelfHostedCommand({ Command }: { Command: React.Function
         navigationTitle="Invalid Sourcegraph Self-Hosted access token"
         markdown={`${bold(
           `⚠️ A token is required for Sourcegraph Self-Hosted instance '${src.instance}'`
-        )} - add an access token for Sourcegraph Self-Hosted in the extension preferences!\n\n${tryCloudMessage}`}
-        actions={helpActions}
+        )} - please add an access token for Sourcegraph Self-Hosted in the extension preferences!\n\n${tryCloudMessage}`}
+        actions={
+          <ActionPanel>
+            {openPreferencesAction}
+            {setupGuideAction}
+          </ActionPanel>
+        }
       />
     );
   }

@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import { Team } from "../standings.types";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { Team } from "../types/standings.types";
+import Roster from "../views/roster";
 
 type PropTypes = {
   team: Team;
@@ -14,7 +15,8 @@ const TeamComponent = ({ team }: PropTypes) => {
       accessories={[{ text: `W: ${team.wins}` }, { text: `L: ${team.losses}` }]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="View on ESPN" url={team.link} />
+          <Action.Push title="View Roster" icon={Icon.Person} target={<Roster id={team.id} />} />
+          <Action.OpenInBrowser title="View Team on ESPN" url={team.link} />
         </ActionPanel>
       }
     />

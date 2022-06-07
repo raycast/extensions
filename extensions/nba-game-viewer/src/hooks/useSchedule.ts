@@ -1,15 +1,16 @@
 import getSchedule from "../utils/getSchedule";
 import { useState, useEffect } from "react";
-import { Day, Game, Competitor } from "../schedule.types";
-import { Toast, showToast } from "@raycast/api";
+import { Day, Game, Competitor } from "../types/schedule.types";
 import convertDate from "../utils/convertDate";
 
 const useSchedule = (): {
   schedule: Day[];
   loading: boolean;
+  error: boolean;
 } => {
   const [schedule, setSchedule] = useState<Array<Day>>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     const getGames = async () => {
@@ -23,8 +24,9 @@ const useSchedule = (): {
           month: currentDate.getUTCMonth() + 1,
           day: currentDate.getUTCDate(),
         });
-      } catch (e) {
-        showToast(Toast.Style.Failure, "Failed to get schedule");
+      } catch (error) {
+        setError(true);
+        return error;
       }
 
       Object.keys(data).map((key) => {
@@ -33,7 +35,7 @@ const useSchedule = (): {
         }
       });
 
-      const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const weekdays = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
       const scheduledGames: Array<Day> = Object.keys(data).map((key) => {
         return {
@@ -55,7 +57,7 @@ const useSchedule = (): {
                     home: competitor.homeAway,
                   };
                 })
-                .sort((a: Competitor, b: Competitor) => {
+                .sort((a: Competitor) => {
                   return a.home === "home" ? -1 : 1;
                 }),
               status: {
@@ -77,7 +79,7 @@ const useSchedule = (): {
     getGames();
   }, []);
 
-  return { schedule, loading };
+  return { schedule, loading, error };
 };
 
 export default useSchedule;
