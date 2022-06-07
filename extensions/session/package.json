@@ -9,6 +9,9 @@
     "Applications",
     "Productivity"
   ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
