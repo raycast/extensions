@@ -13,14 +13,14 @@
     {
       "name": "turn-airplane-mode-on",
       "title": "Turn Airplane On",
-      "subtitle": "Airplane",
+      "subtitle": "",
       "description": "This command disable wireless technology such as WiFi and Bluetooth.",
       "mode": "no-view"
     },
     {
       "name": "turn-airplane-mode-off",
       "title": "Turn Airplane Off",
-      "subtitle": "Airplane",
+      "subtitle": "",
       "description": "This command enable wireless technology such as WiFi and Bluetooth.",
       "mode": "no-view"
     }
