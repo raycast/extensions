@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { Tweet } from "../lib/twitter";
 import { Fetcher } from "../lib/twitterapi_v2";
-import { compactNumberFormat, padStart } from "../lib/utils";
+import { compactNumberFormat, padStart, replaceAll } from "../lib/utils";
 import {
   DeleteTweetAction as DeleteTweetAction,
   LikeTweetAction,
@@ -96,6 +96,13 @@ function TweetListItemDetailMeta(props: { tweet: Tweet }): ReactElement {
   );
 }
 
+function getCleanTweetText(tweet:Tweet):string{
+  const textRaw = tweet.text ? tweet.text.trim() : "";
+  let text = replaceAll(textRaw, /\n/g," ");
+  text  = replaceAll(text, /&amp/g, " "); // &amp seems to break string operations in node
+  return text;
+}
+
 export function TweetListItem(props: {
   tweet: Tweet;
   fetcher?: Fetcher;
@@ -110,10 +117,9 @@ export function TweetListItem(props: {
   const fetcher = props.fetcher;
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
   const [showMeta, setShowMeta] = useState<boolean>(true);
-
-  const maxLength = 70;
-  const textRaw = t.text ? t.text.trim() : "";
-  const text = textRaw.slice(0, maxLength) + (textRaw.length > maxLength ? " ..." : "");
+  
+  const text = getCleanTweetText(t);
+  console.log("text: " ,text);
 
   const imgUrl = t.user.profile_image_url;
   const icon: Image.ImageLike | undefined = imgUrl ? { source: imgUrl, mask: Image.Mask.Circle } : undefined;
