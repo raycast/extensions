@@ -29,6 +29,24 @@
       "description": "Shows a large preview of the selected gif in search results."
     },
     {
+      "name": "layoutType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Results Layout",
+      "description": "Layout style for displaying GIF search results",
+      "default": "list",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
       "name": "maxResults",
       "type": "textfield",
       "required": false,
@@ -93,7 +111,7 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "^1.36.0",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.28.0",
     "node-fetch": "^3.2.1",
