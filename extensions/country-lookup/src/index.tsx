@@ -21,7 +21,7 @@ export default function Command() {
       <List.EmptyView icon={{ source: "noview.png" }} title="No Results" />
       {(data || []).map((entry) => {
         let phone: string | null = null;
-        let keywords = [entry.cca2];
+        const keywords = [entry.cca2];
         if (entry.idd.root && entry.idd.suffixes.length) {
           phone = entry.idd.suffixes
             .map((suffix) => {
