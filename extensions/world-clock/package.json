@@ -48,7 +48,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.35.2",
     "axios": "^0.27.2"
   },
   "devDependencies": {
