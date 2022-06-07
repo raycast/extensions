@@ -10,7 +10,7 @@ type RosterArgs = {
 
 const Roster = ({ id: id }: RosterArgs) => {
   const data = useRoster({ id: id });
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
 
   if (data.error) {
     showToast(Toast.Style.Failure, "Failed to get roster");
