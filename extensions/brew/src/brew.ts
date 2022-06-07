@@ -127,13 +127,10 @@ export async function brewDoctorCommand(): Promise<string> {
   }
 }
 
-export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean, cancel?: AbortController): Promise<string> {
+export async function brewUpgradeCommand(greedy: boolean, cancel?: AbortController): Promise<string> {
   let cmd = `${brewExecutable} upgrade`;
   if (greedy) {
     cmd += " --greedy";
-  }
-  if (dryRun) {
-    cmd += " --dry-run";
   }
   const output = await execSignal(cmd, cancel);
   return output.stdout;

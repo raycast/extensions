@@ -1,17 +1,26 @@
 import getStandings from "../utils/getStandings";
 import { useState, useEffect } from "react";
-import { Team, Conferences } from "../standings.types";
+import { Team, Conferences } from "../types/standings.types";
 
 const useStandings = (): {
   standings: Conferences;
   loading: boolean;
+  error: boolean;
 } => {
   const [standings, setStandings] = useState<Conferences>({ eastern: [], western: [] });
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     const getTeamStandings = async () => {
-      const data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
+      let data: any = null;
+
+      try {
+        data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
+      } catch (error) {
+        setError(true);
+        return error;
+      }
 
       const eastern: Array<Team> = data.children[0].standings.entries
         .map((data: any) => {
@@ -52,7 +61,7 @@ const useStandings = (): {
     getTeamStandings();
   }, []);
 
-  return { standings, loading };
+  return { standings, loading, error };
 };
 
 export default useStandings;

@@ -61,6 +61,7 @@
   - [Detail](api-reference/user-interface/detail.md)
   - [Form](api-reference/user-interface/form.md)
   - [List](api-reference/user-interface/list.md)
+  - [Grid](api-reference/user-interface/grid.md)
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)

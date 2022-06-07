@@ -1,10 +1,10 @@
-import { List } from "@raycast/api";
-
+import { ListOrGridSection } from "./ListOrGrid";
 import { GifResult } from "./GifResult";
 import type { IGif } from "../models/gif";
-import { ServiceName } from "../preferences";
+import { LayoutType, ServiceName } from "../preferences";
 
 export interface GifListSectionProps {
+  layoutType?: LayoutType;
   title?: string;
   term?: string;
   hide?: boolean;
@@ -19,10 +19,10 @@ export function GifListSection(props: GifListSectionProps) {
   }
 
   return !props.hide ? (
-    <List.Section title={title} key={props.title}>
+    <ListOrGridSection layoutType={props.layoutType} title={title} key={props.title}>
       {props.results?.map((result, index) => (
-        <GifResult key={result.id} item={result} index={index} service={props.service} />
+        <GifResult layoutType={props.layoutType} key={result.id} item={result} index={index} service={props.service} />
       ))}
-    </List.Section>
+    </ListOrGridSection>
   ) : null;
 }
