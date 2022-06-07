@@ -4,7 +4,7 @@ import type { Article } from "../types/news.types";
 type PropTypes = {
   article: Article;
   isShowingDetail: boolean;
-  setIsShowingDetail: Function;
+  setIsShowingDetail: any;
 };
 
 const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: PropTypes) => {
