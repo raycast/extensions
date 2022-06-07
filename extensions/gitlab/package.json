@@ -206,6 +206,14 @@
       "placeholder" : "/my/ca.pem",
       "required": false,
       "description": "Optionally override the trusted CA certificates"
+    },
+    {
+      "name" : "customcert",
+      "type" : "textfield",
+      "title": "Custom Certificate",
+      "placeholder" : "/my/cert.pem",
+      "required": false,
+      "description": "Set Custom Certificate"
     }
   ],
   "categories": [

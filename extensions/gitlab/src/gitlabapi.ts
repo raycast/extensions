@@ -9,6 +9,15 @@ const streamPipeline = util.promisify(pipeline);
 import https from "https";
 import { getPreferenceValues } from "@raycast/api";
 
+function readCACertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read CA cert file ${filename}`);
+  }
+}
+
 function readCertFileSync(filename: string): Buffer | undefined {
   try {
     const data = fs.readFileSync(filename);
@@ -16,7 +25,6 @@ function readCertFileSync(filename: string): Buffer | undefined {
   } catch (e) {
     throw Error(`Could not read cert file ${filename}`);
   }
-  return undefined;
 }
 
 export function getHttpAgent(): https.Agent | undefined {
@@ -24,9 +32,12 @@ export function getHttpAgent(): https.Agent | undefined {
   const preferences = getPreferenceValues();
   const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
   const customcacert = (preferences.customcacert as string) || "";
-  if (ignoreCertificates || customcacert.length > 0) {
-    const ca = readCertFileSync(customcacert);
-    agent = new https.Agent({ rejectUnauthorized: !ignoreCertificates, ca: ca });
+  const customcert = (preferences.customcert as string) || "";
+  if (ignoreCertificates || customcacert.length > 0 || customcert.length > 0) {
+    const ca = customcacert.length > 0 ? readCACertFileSync(customcacert) : undefined;
+    const cert = customcert.length > 0 ? readCertFileSync(customcert) : undefined;
+    const opt: https.AgentOptions = { rejectUnauthorized: !ignoreCertificates, ca: ca, cert: cert };
+    agent = new https.Agent(opt);
   }
   return agent;
 }
