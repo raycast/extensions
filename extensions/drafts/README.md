@@ -5,25 +5,17 @@ Created by [@FlohGro](https://twitter.com/FlohGro) ([Website](https://flohgro.co
 
 It supports the following features as commands:
 
-## Run Draft Action
+![drafts-01](metadata/drafts-01.png)
 
-Configure Actions you want to run from Raycast.
+## Create Draft
 
-Depending on your configuration Raycast will ask for text input you want to provide to the Drafts Action or run the Action without any text input.
+![drafts-02](metadata/drafts-02.png)
 
-## Open Drafts Workspace
-
-Configure Workspaces you want to quickly open from Raycast.
-
-You can configure as many workspaces as you like by their name and open them from the workspaces list in Raycast.
-
-In the Action Panel of each configured workspace you can also create a Raycast Quicklink for the workspace to open it even faster.
-
-## Dictate Draft
-
-Open the dictation interface in Drafts to quickly create a new Draft from dictated text.
+create drafts in a Raycast form with tags.
 
 ## Append/Prepend to Draft
+
+![drafts-03](metadata/drafts-03.png)
 
 Configure Drafts you often want to append / prepend text to.
 
@@ -41,7 +33,29 @@ Creates a new Draft with the current Clipboard text as content.
 
 Quickly create a new empty Draft and open it in Drafts app.
 
+## Run Draft Action
+
+![drafts-05](metadata/drafts-05.png)
+
+Configure Actions you want to run from Raycast.
+
+Depending on your configuration Raycast will ask for text input you want to provide to the Drafts Action or run the Action without any text input.
+
+## Open Drafts Workspace
+
+Configure Workspaces you want to quickly open from Raycast.
+
+You can configure as many workspaces as you like by their name and open them from the workspaces list in Raycast.
+
+In the Action Panel of each configured workspace you can also create a Raycast Quicklink for the workspace to open it even faster.
+
+## Dictate Draft
+
+Open the dictation interface in Drafts to quickly create a new Draft from dictated text.
+
 ## Create Drafts Quicklink
+
+![drafts-04](metadata/drafts-04.png)
 
 This is a helper command to easily create additional Raycast Quicklinks to perform the following actions:
 
