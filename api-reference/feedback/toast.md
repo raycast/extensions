@@ -66,9 +66,9 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Toast.Options](#toast.options)</code> | Yes      | The options used to create the Toast. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| options<mark style="color:red;">*</mark> | The options to customize the Toast. | <code>[Alert.Options](alert.md#alert.options)</code> |
 
 #### Return
 

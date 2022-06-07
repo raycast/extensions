@@ -28,9 +28,9 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                               | Required | Description                                                                                                                   |
-| :--- | :--------------------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| path | <code>[PathLike](#pathlike)</code> | No       | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| path | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. | <code>[PathLike](utilities.md#pathlike)</code> |
 
 #### Return
 
@@ -61,9 +61,9 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                               | Required | Description                                                        |
-| :--- | :--------------------------------- | :------- | :----------------------------------------------------------------- |
-| path | <code>[PathLike](#pathlike)</code> | Yes      | The path of the file or folder to get the default application for. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| path<mark style="color:red;">*</mark> | The path of the file or folder to get the default application for. | <code>[PathLike](utilities.md#pathlike)</code> |
 
 #### Return
 
@@ -91,9 +91,9 @@ showInFinder(join(homedir(), "Downloads"));
 
 #### Parameters
 
-| Name | Type                               | Required | Description                     |
-| :--- | :--------------------------------- | :------- | :------------------------------ |
-| path | <code>[PathLike](#pathlike)</code> | Yes      | The path to show in the Finder. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| path<mark style="color:red;">*</mark> | The path to show in the Finder. | <code>[PathLike](utilities.md#pathlike)</code> |
 
 #### Return
 
@@ -126,9 +126,9 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                                                                       | Required | Description |
-| :--- | :------------------------------------------------------------------------- | :------- | :---------- |
-| path | <code>[PathLike](#pathlike)</code> or <code>[PathLike](#pathlike)[]</code> | Yes      |             |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| path<mark style="color:red;">*</mark> |  | <code>[PathLike](utilities.md#pathlike)</code> or <code>[PathLike](utilities.md#pathlike)[]</code> |
 
 #### Return
 
@@ -159,10 +159,10 @@ export default async () => {
 
 #### Parameters
 
-| Name        | Type                                                            | Required | Description                                                                                                                                                                                                                                                        |
-| :---------- | :-------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| target      | <code>string</code>                                             | Yes      | The file, folder or URL to open                                                                                                                                                                                                                                    |
-| application | <code>[Application](#application)</code> or <code>string</code> | No       | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| target<mark style="color:red;">*</mark> | The file, folder or URL to open. | <code>string</code> |
+| application | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. | <code>string</code> or <code>[Application](utilities.md#application)</code> |
 
 #### Return
 

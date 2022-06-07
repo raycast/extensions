@@ -28,9 +28,9 @@ export default async () => {
 
 #### Parameters
 
-| Name  | Type                | Required | Description                                  |
-| :---- | :------------------ | :------- | :------------------------------------------- |
-| title | <code>string</code> | Yes      | The title that will be displayed in the HUD. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| title<mark style="color:red;">*</mark> | The title that will be displayed in the HUD. | <code>string</code> |
 
 #### Return
 

@@ -180,13 +180,13 @@ The options for creating a new [PKCEClient](#oauth.pkceclient).
 
 #### Properties
 
-| Name           | Type                                                 | Required | Description                                                                                                                                                                                                                             |
-| :------------- | :--------------------------------------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| redirectMethod | <code>[RedirectMethod](#oauth.redirectmethod)</code> | Yes      | Make sure to set this to the correct method for the provider, see [RedirectMethod](#oauth.redirectmethod) for more information.                                                                                                         |
-| providerName   | <code>string</code>                                  | Yes      | The name of the provider, displayed in the OAuth overlay.                                                                                                                                                                               |
-| providerIcon   | <code>string</code>                                  | Yes      | An icon referenced from the assets folder, displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels.                                                                                                        |
-| providerId     | <code>string</code>                                  | No       | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension.                                                                                                       |
-| description    | <code>string</code>                                  | No       | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| providerIcon<mark style="color:red;">*</mark> | An icon referenced from the assets folder, displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels. | <code>string</code> |
+| providerName<mark style="color:red;">*</mark> | The name of the provider, displayed in the OAuth overlay. | <code>string</code> |
+| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow. Make sure to set this to the correct method for the provider, see [OAuth.RedirectMethod](oauth.md#oauth.redirectmethod) for more information. | <code>[OAuth.RedirectMethod](oauth.md#oauth.redirectmethod)</code> |
+| description | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. | <code>string</code> |
+| providerId | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension. | <code>string</code> |
 
 ### authorizationRequest
 
@@ -334,35 +334,37 @@ Defines the supported redirect methods for the OAuth flow. You can choose betwee
 
 The options for an authorization request via [authorizationRequest](#authorizationrequest).
 
-| Name            | Type                                | Required | Description                                                                                                                                                                                                                                                                            |
-| :-------------- | :---------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| endpoint        | <code>string</code>                 | Yes      | The URL to the authorization endpoint for the OAuth provider.                                                                                                                                                                                                                          |
-| clientId        | <code>string</code>                 | Yes      | The client ID of the configured OAuth app.                                                                                                                                                                                                                                             |
-| scope           | <code>string</code>                 | Yes      | A space-delimited list of scopes for identifying the resources to access on the user's behalf. The scopes are typically shown to the user on the provider's consent screen in the browser. Note that some providers require the same scopes be configured in the registered OAuth app. |
-| extraParameters | <code>Record<string, string></code> | No       | Optional additional parameters for the authorization request. Note that some providers require additional parameters, for example to obtain long-lived refresh tokens.                                                                                                                 |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| clientId<mark style="color:red;">*</mark> | The client ID of the configured OAuth app. | <code>string</code> |
+| endpoint<mark style="color:red;">*</mark> | The URL to the authorization endpoint for the OAuth provider. | <code>string</code> |
+| scope<mark style="color:red;">*</mark> | A space-delimited list of scopes for identifying the resources to access on the user's behalf. The scopes are typically shown to the user on the provider's consent screen in the browser. Note that some providers require the same scopes be configured in the registered OAuth app. | <code>string</code> |
+| extraParameters | Optional additional parameters for the authorization request. Note that some providers require additional parameters, for example to obtain long-lived refresh tokens. | <code>Record&lt;string, string></code> |
 
 ### OAuth.AuthorizationRequestURLParams
 
 Values of [AuthorizationRequest](#oauth.authorizationrequest).
 The PKCE client automatically generates the values for you and returns them for [authorizationRequest](#authorizationrequest)
-| Name | Type | Required | Description |
-| :------------ | :------------------ | :------- | :----------------------------- |
-| codeChallenge | <code>string</code> | Yes | The PKCE `code_challenge` value. |
-| codeVerifier | <code>string</code> | Yes | The PKCE `code_verifier` value. |
-| state | <code>string</code> | Yes | The OAuth `state` value. |
-| redirectURI | <code>string</code> | Yes | The OAuth `redirect_uri` value. |
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| codeChallenge<mark style="color:red;">*</mark> | The PKCE `code_challenge` value. | <code>string</code> |
+| codeVerifier<mark style="color:red;">*</mark> | The PKCE `code_verifier` value. | <code>string</code> |
+| redirectURI<mark style="color:red;">*</mark> | The OAuth `redirect_uri` value. | <code>string</code> |
+| state<mark style="color:red;">*</mark> | The OAuth `state` value. | <code>string</code> |
 
 ### OAuth.AuthorizationRequest
 
 The request returned by [authorizationRequest](#authorizationrequest).
 Can be used as direct input to [authorize](#authorize), or to extract parameters for constructing a custom URL in [AuthorizationOptions](#oauth.authorizationoptions).
 
-| Name          | Type                | Required | Description                      |
-| :------------ | :------------------ | :------- | :------------------------------- |
-| codeChallenge | <code>string</code> | Yes      | The PKCE `code_challenge` value. |
-| codeVerifier  | <code>string</code> | Yes      | The PKCE `code_verifier` value.  |
-| state         | <code>string</code> | Yes      | The OAuth `state` value.         |
-| redirectURI   | <code>string</code> | Yes      | The OAuth `redirect_uri` value.  |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| codeChallenge<mark style="color:red;">*</mark> | The PKCE `code_challenge` value. | <code>string</code> |
+| codeVerifier<mark style="color:red;">*</mark> | The PKCE `code_verifier` value. | <code>string</code> |
+| redirectURI<mark style="color:red;">*</mark> | The OAuth `redirect_uri` value. | <code>string</code> |
+| state<mark style="color:red;">*</mark> | The OAuth `state` value. | <code>string</code> |
+| toURL<mark style="color:red;">*</mark> | Constructs the full authorization URL. | <code>() => string</code> |
 
 #### Methods
 
@@ -375,31 +377,32 @@ Can be used as direct input to [authorize](#authorize), or to extract parameters
 Options for customizing [authorize](#authorize).
 You can use values from [AuthorizationRequest](#oauth.authorizationrequest) to build your own URL.
 
-| Name | Type                | Required | Description                 |
-| :--- | :------------------ | :------- | :-------------------------- |
-| url  | <code>string</code> | Yes      | The full authorization URL. |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| url<mark style="color:red;">*</mark> | The full authorization URL. | <code>string</code> |
 
 ### OAuth.AuthorizationResponse
 
 The response returned by [authorize](#authorize), containing the authorization code after the provider redirect. You can then exchange the authorization code for an access token using the provider's token endpoint.
 
-| Name              | Type                | Required | Description                                     |
-| :---------------- | :------------------ | :------- | :---------------------------------------------- |
-| authorizationCode | <code>string</code> | Yes      | The authorization code from the OAuth provider. |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| authorizationCode<mark style="color:red;">*</mark> | The authorization code from the OAuth provider. | <code>string</code> |
 
 ### OAuth.TokenSet
 
 Describes the TokenSet created from an OAuth provider's token response. The `accessToken` is the only required parameter but typically OAuth providers also return a refresh token, an expires value, and the scope.
 Securely store a token set via [setTokens](#settokens) and retrieve it via [getTokens](#gettokens).
 
-| Name         | Type                | Required | Description                                                                                                                                                                                                                                                                      |
-| :----------- | :------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| accessToken  | <code>string</code> | Yes      | The access token returned by an OAuth token request.                                                                                                                                                                                                                             |
-| refreshToken | <code>string</code> | No       | An optional refresh token returned by an OAuth token request.                                                                                                                                                                                                                    |
-| idToken      | <code>string</code> | No       | An optional id token returned by an identity request (e.g. /me, Open ID Connect).                                                                                                                                                                                                |
-| expiresIn    | <code>number</code> | No       | An optional expires value (in seconds) returned by an OAuth token request.                                                                                                                                                                                                       |
-| scope        | <code>string</code> | No       | The optional space-delimited list of scopes returned by an OAuth token request. You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version, and then ask the user to re-authorize with new scopes. |
-| updatedAt    | <code>Date</code>   | Yes      | The date when the token set was stored via [setTokens](#settokens).                                                                                                                                                                                                              |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| accessToken<mark style="color:red;">*</mark> | The access token returned by an OAuth token request. | <code>string</code> |
+| updatedAt<mark style="color:red;">*</mark> | The date when the token set was stored via [OAuth.PKCEClient.setTokens](oauth.md#oauth.pkceclient). | <code>Date</code> |
+| isExpired<mark style="color:red;">*</mark> | A convenience method for checking whether the access token has expired. The method factors in some seconds of "buffer", so it returns true a couple of seconds before the actual expiration time. This requires the `expiresIn` parameter to be set. | <code>() => boolean</code> |
+| expiresIn | An optional expires value (in seconds) returned by an OAuth token request. | <code>number</code> |
+| idToken | An optional id token returned by an identity request (e.g. /me, Open ID Connect). | <code>string</code> |
+| refreshToken | An optional refresh token returned by an OAuth token request. | <code>string</code> |
+| scope | The optional space-delimited list of scopes returned by an OAuth token request. You can use this to compare the currently stored access scopes against new access scopes the extension might require in a future version, and then ask the user to re-authorize with new scopes. | <code>string</code> |
 
 #### Methods
 
@@ -411,23 +414,23 @@ Securely store a token set via [setTokens](#settokens) and retrieve it via [getT
 
 Options for a [TokenSet](#oauth.tokenset) to store via [setTokens](#settokens).
 
-| Name         | Type                | Required | Description                                                                       |
-| :----------- | :------------------ | :------- | :-------------------------------------------------------------------------------- |
-| accessToken  | <code>string</code> | Yes      | The access token returned by an OAuth token request.                              |
-| refreshToken | <code>string</code> | No       | An optional refresh token returned by an OAuth token request.                     |
-| idToken      | <code>string</code> | No       | An optional id token returned by an identity request (e.g. /me, Open ID Connect). |
-| expiresIn    | <code>number</code> | No       | An optional expires value (in seconds) returned by an OAuth token request.        |
-| scope        | <code>string</code> | No       | The optional scope value returned by an OAuth token request.                      |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| accessToken<mark style="color:red;">*</mark> | The access token returned by an OAuth token request. | <code>string</code> |
+| expiresIn | An optional expires value (in seconds) returned by an OAuth token request. | <code>number</code> |
+| idToken | An optional id token returned by an identity request (e.g. /me, Open ID Connect). | <code>string</code> |
+| refreshToken | An optional refresh token returned by an OAuth token request. | <code>string</code> |
+| scope | The optional scope value returned by an OAuth token request. | <code>string</code> |
 
 ### OAuth.TokenResponse
 
 Defines the standard JSON response for an OAuth token request.
 The response can be directly used to store a [TokenSet](#oauth.tokenset) via [setTokens](#settokens).
 
-| Name          | Type                | Required | Description                                                                               |
-| :------------ | :------------------ | :------- | :---------------------------------------------------------------------------------------- |
-| access_token  | <code>string</code> | Yes      | The `access_token` value returned by an OAuth token request.                              |
-| refresh_token | <code>string</code> | No       | An optional `refresh_token` value returned by an OAuth token request.                     |
-| id_token      | <code>string</code> | No       | An optional `id_token` value returned by an identity request (e.g. /me, Open ID Connect). |
-| expires_in    | <code>number</code> | No       | An optional `expires_in` value (in seconds) returned by an OAuth token request.           |
-| scope         | <code>string</code> | No       | The optional `scope` value returned by an OAuth token request.                            |
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| access_token<mark style="color:red;">*</mark> | The `access_token` value returned by an OAuth token request. | <code>string</code> |
+| expires_in | An optional `expires_in` value (in seconds) returned by an OAuth token request. | <code>number</code> |
+| id_token | An optional `id_token` value returned by an identity request (e.g. /me, Open ID Connect). | <code>string</code> |
+| refresh_token | An optional `refresh_token` value returned by an OAuth token request. | <code>string</code> |
+| scope | The optional `scope` value returned by an OAuth token request. | <code>string</code> |

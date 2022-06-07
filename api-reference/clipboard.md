@@ -1,12 +1,12 @@
 # Clipboard
 
-Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#copy) and clear it through [`Clipboard.clear`](clipboard.md#clear). The [`Clipboard.paste`](clipboard.md#paste) function inserts text at the current cursor position in your frontmost app.
+Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#clipboard.copy) and clear it through [`Clipboard.clear`](clipboard.md#clipboard.clear). The [`Clipboard.paste`](clipboard.md#clipboard.paste) function inserts text at the current cursor position in your frontmost app.
 
 The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text at in your frontmost app.
 
 ## API Reference
 
-### copy
+### Clipboard.copy
 
 Copies text to the clipboard.
 
@@ -28,15 +28,15 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                | Required | Description                        |
-| :--- | :------------------ | :------- | :--------------------------------- |
-| text | <code>string</code> | Yes      | The text to copy to the clipboard. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| text<mark style="color:red;">*</mark> | The text to copy to the clipboard. | <code>string</code> |
 
 #### Return
 
 A Promise that resolves when the text is copied to the clipboard.
 
-### paste
+### Clipboard.paste
 
 Pastes text to the current selection of the frontmost application.
 
@@ -58,15 +58,15 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                | Required | Description                       |
-| :--- | :------------------ | :------- | :-------------------------------- |
-| text | <code>string</code> | Yes      | The text to insert at the cursor. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| text<mark style="color:red;">*</mark> | The text to insert at the cursor. | <code>string</code> |
 
 #### Return
 
 A Promise that resolves when the text is pasted.
 
-### clear
+### Clipboard.clear
 
 Clears the current clipboard contents.
 
@@ -90,7 +90,7 @@ export default async () => {
 
 A Promise that resolves when the clipboard is cleared.
 
-### readText
+### Clipboard.readText
 
 Reads the clipboard as plain text.
 

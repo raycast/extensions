@@ -30,9 +30,9 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Alert.Options](#alert.options)</code> | Yes      | The options used to create the Alert. |
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| options<mark style="color:red;">*</mark> | The options used to create the Alert. | <code>[Alert.Options](alert.md#alert.options)</code> |
 
 #### Return
 
