@@ -1,6 +1,8 @@
 import { runAppleScript } from "run-applescript";
-import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { getSelectedFinderItems } from "@raycast/api";
 import fse from "fs-extra";
+import { homedir } from "os";
+import { buildFileName } from "../new-file-here";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -104,3 +106,28 @@ export const imgExt = [
 export const isImage = (ext: string) => {
   return imgExt.includes(ext);
 };
+
+export const getSavedDirectory = (saveDirectory: string) => {
+  let actualDirectory = saveDirectory;
+  if (saveDirectory.startsWith("~")) {
+    actualDirectory = saveDirectory.replace("~", `${homedir()}`);
+  }
+  if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
+    return homedir() + "/Desktop";
+  }
+  return actualDirectory.endsWith("/") ? actualDirectory : actualDirectory + "/";
+};
+
+export async function createNewFileWithText(
+  fileExtension: string,
+  saveDirectory: string,
+  fileContent = "",
+  fileName = ""
+) {
+  isEmpty(fileName)
+    ? (fileName = buildFileName(saveDirectory, "Untitled", fileExtension))
+    : (fileName = fileName + "." + fileExtension);
+  const filePath = saveDirectory + fileName;
+  fse.writeFileSync(filePath, fileContent);
+  return { fileName: fileName, filePath: filePath };
+}

@@ -2,7 +2,14 @@ import { useEffect, useReducer, useState } from "react";
 
 import { showToast, Toast, Icon } from "@raycast/api";
 
-import { ServiceName, getShowPreview, getMaxResults, GIF_SERVICE, getServiceTitle } from "../preferences";
+import {
+  ServiceName,
+  getShowPreview,
+  getMaxResults,
+  GIF_SERVICE,
+  getServiceTitle,
+  getLayoutType,
+} from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 
@@ -14,6 +21,7 @@ import useGifPopulator, { GifIds } from "../hooks/useGifPopulator";
 export function GifSearch() {
   const showPreview = getShowPreview();
   const limit = getMaxResults();
+  const layoutType = getLayoutType();
 
   const [searchService, setSearchService] = useState<ServiceName>();
   const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
@@ -129,6 +137,7 @@ export function GifSearch() {
   if (showAllFavs()) {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoadingFavIds || isLoadingFavs}
         showDropdown={true}
         showDetail={showPreview && (favItems?.items?.size ?? 0) !== 0}
@@ -139,13 +148,14 @@ export function GifSearch() {
         emptyStateText="Add some GIFs to your Favorites first!"
         emptyStateIcon={Icon.Star}
         sections={Array.from(favItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, layoutType };
         })}
       />
     );
   } else if (showAllRecents()) {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoadingRecentIds || isLoadingRecents}
         showDropdown={true}
         showDetail={showPreview && (recentItems?.items?.size ?? 0) !== 0}
@@ -156,13 +166,14 @@ export function GifSearch() {
         emptyStateText="Work with some GIFs first..."
         emptyStateIcon={Icon.Clock}
         sections={Array.from(recentItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, layoutType };
         })}
       />
     );
   } else {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs || isLoadingRecents}
         showDropdown={true}
         showDetail={showPreview && (results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
@@ -178,14 +189,22 @@ export function GifSearch() {
             results: favItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !favItems?.items || !!results?.term,
+            layoutType,
           },
           {
             title: "Recent",
             results: recentItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !recentItems?.items || !!results?.term,
+            layoutType,
           },
-          { title: "Trending", term: results?.term, results: results?.items, service: searchService },
+          {
+            title: "Trending",
+            term: results?.term,
+            results: results?.items,
+            service: searchService,
+            layoutType,
+          },
         ]}
       />
     );
