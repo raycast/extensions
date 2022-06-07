@@ -96,10 +96,10 @@ function TweetListItemDetailMeta(props: { tweet: Tweet }): ReactElement {
   );
 }
 
-function getCleanTweetText(tweet:Tweet):string{
+function getCleanTweetText(tweet: Tweet): string {
   const textRaw = tweet.text ? tweet.text.trim() : "";
-  let text = replaceAll(textRaw, /\n/g," ");
-  text  = replaceAll(text, /&amp/g, " "); // &amp seems to break string operations in node
+  let text = replaceAll(textRaw, /\n/g, " ");
+  text = replaceAll(text, /&amp/g, " "); // &amp seems to break string operations in node
   return text;
 }
 
@@ -117,9 +117,9 @@ export function TweetListItem(props: {
   const fetcher = props.fetcher;
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
   const [showMeta, setShowMeta] = useState<boolean>(true);
-  
+
   const text = getCleanTweetText(t);
-  console.log("text: " ,text);
+  console.log("text: ", text);
 
   const imgUrl = t.user.profile_image_url;
   const icon: Image.ImageLike | undefined = imgUrl ? { source: imgUrl, mask: Image.Mask.Circle } : undefined;

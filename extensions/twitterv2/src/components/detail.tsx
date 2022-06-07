@@ -1,6 +1,7 @@
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { ReactElement } from "react";
 import { Tweet } from "../lib/twitter";
-import { clientV2, useRefresher } from "../lib/twitterapi_v2";
+import { clientV2, Fetcher, useRefresher } from "../lib/twitterapi_v2";
 import {
   DeleteTweetAction,
   LikeTweetAction,
@@ -51,6 +52,13 @@ export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
   return md;
 }
 
+function TweetRefreshAction(props: { tweet: Tweet; fetcher: Fetcher }): ReactElement {
+  const handle = async () => {
+    await props.fetcher.updateInline();
+  };
+  return <Action title="Refresh Tweet" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={handle} />;
+}
+
 export function TweetDetail(props: { tweet: Tweet }) {
   const tweet = props.tweet;
   const { data, error, isLoading, fetcher } = useRefresher<Tweet | undefined>(async (): Promise<Tweet | undefined> => {
@@ -87,31 +95,14 @@ export function TweetDetail(props: { tweet: Tweet }) {
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Update">
+            <TweetRefreshAction tweet={t} fetcher={fetcher} />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }
-      /*actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Tweet">
-            <ReplyTweetAction tweet={t} />
-            <LikeAction tweet={t} fetcher={fetcher} />
-            <RetweetAction tweet={t} fetcher={fetcher} />
-            <ShowUserTweetsAction username={t.user.screen_name} />
-            <OpenInBrowserAction url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Info">
-            <OpenAuthorProfileAction tweet={t} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Destructive">
-            <DeleteTweetAction tweet={t} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Update">
-            <RefreshAction title="Refresh Tweet" fetcher={fetcher} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }*/
     />
   );
 }
