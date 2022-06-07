@@ -7,10 +7,10 @@ import { GifDetailsActions } from "./GifDetailsActions";
 
 import AppContext from "../components/AppContext";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
-import { getServiceTitle, ServiceName, LayoutType, LAYOUT_TYPE } from "../preferences";
+import { getServiceTitle, ServiceName, LayoutType, LAYOUT_TYPE, getGridItemSize } from "../preferences";
 
 export function GifResult(props: { item: IGif; index: number; service?: ServiceName; layoutType?: LayoutType }) {
-  const { preview_gif_url, title, id } = props.item;
+  const { preview_gif_url, title, id, gif_url } = props.item;
   const { state } = useContext(AppContext);
   const is_fav = state.favIds?.get(props.service as ServiceName)?.has(id.toString());
 
@@ -20,11 +20,13 @@ export function GifResult(props: { item: IGif; index: number; service?: ServiceN
   }
 
   const { metadata, attribution } = props.item;
+  const isGridLayout = props.layoutType === LAYOUT_TYPE.Grid;
+  const isLargeGridSize = getGridItemSize() === Grid.ItemSize.Large;
 
-  return props.layoutType === LAYOUT_TYPE.Grid ? (
+  return isGridLayout ? (
     <Grid.Item
       title={title}
-      content={{ source: preview_gif_url }}
+      content={{ source: isLargeGridSize ? gif_url : preview_gif_url }}
       actions={<GifDetailsActions item={props.item} showViewDetails={true} service={props.service} />}
     />
   ) : (

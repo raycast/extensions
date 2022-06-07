@@ -1,8 +1,9 @@
 # GIF Search Changelog
 
 ## [Add Grid Item Size option] - 2022-06-07
-- Removes "Show GIF Preview" preference. GIF previews are now solid and should always be shown
 - Adds preference for controlling the Grid Item Size
+- Use original gif files when displaying Large Grid items
+- Removes "Show GIF Preview" preference. GIF previews are now solid and should always be shown
 
 ## [Added Grid Layout Support] - 2022-06-07
 - Adds new option to display results in a Grid or a List
