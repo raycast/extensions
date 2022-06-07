@@ -196,7 +196,7 @@
       "required": false,
       "default": false,
       "title": "Certificate errors",
-      "description": "If checked the server will not reject any connection which is not authorized with the list of supplied CAs",
+      "description": "Ignore SSL Errors",
       "placeholder": "Ignore Certificates "
     },
     {
