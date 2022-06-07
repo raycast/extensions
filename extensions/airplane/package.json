@@ -8,6 +8,10 @@
   "categories": [
     "Productivity"
   ],
+  "keywords": [
+    "wifi",
+    "bluetooth"
+  ],
   "license": "MIT",
   "commands": [
     {
