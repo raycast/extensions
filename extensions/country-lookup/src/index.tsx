@@ -25,7 +25,7 @@ export default function Command() {
         if (entry.idd.root && entry.idd.suffixes.length) {
           phone = entry.idd.suffixes
             .map((suffix) => {
-              keywords.push(`${entry.idd.root}${suffix}`);
+              keywords.push(`${entry.idd.root}${suffix}`, `${entry.idd.root.replace("+", "")}${suffix}`);
               return `${entry.idd.root}${suffix}`;
             })
             .join(", ");
