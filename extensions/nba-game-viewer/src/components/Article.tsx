@@ -35,7 +35,7 @@ const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: Prop
       actions={
         <ActionPanel title="NBA News Actions">
           <Action
-            title="Show Article Info"
+            title={isShowingDetail ? "Hide Article Info" : "Show Article Info"}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
