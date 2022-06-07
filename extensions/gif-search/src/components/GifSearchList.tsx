@@ -1,4 +1,4 @@
-import { Image, Icon, Color } from "@raycast/api";
+import { List, Image, Icon, Color } from "@raycast/api";
 import { GIF_SERVICE, LayoutType } from "../preferences";
 
 import {
@@ -32,36 +32,41 @@ export function GifSearchList(props: GifListProps) {
       layoutType={layoutType}
       searchBarAccessory={
         props.showDropdown ? (
-          <ListOrGridDropdown layoutType={layoutType} tooltip="" storeValue={true} onChange={props.onDropdownChange}>
-            <ListOrGridDropdownSection layoutType={layoutType}>
+          <ListOrGridDropdown
+            layoutType={props.layoutType}
+            tooltip=""
+            storeValue={true}
+            onChange={props.onDropdownChange}
+          >
+            <ListOrGridDropdownSection layoutType={props.layoutType}>
               <ListOrGridDropdownItem
-                layoutType={layoutType}
+                layoutType={props.layoutType}
                 title="Giphy"
                 value={GIF_SERVICE.GIPHY}
                 icon={{ source: "giphy-logo-square-180.png" }}
               />
               <ListOrGridDropdownItem
-                layoutType={layoutType}
+                layoutType={props.layoutType}
                 title="Tenor"
                 value={GIF_SERVICE.TENOR}
                 icon={{ source: "tenor-logo-square-180.png" }}
               />
               <ListOrGridDropdownItem
-                layoutType={layoutType}
+                layoutType={props.layoutType}
                 title="Finer Gifs Club"
                 value={GIF_SERVICE.FINER_GIFS}
                 icon={{ source: "finergifs-logo.svg", tintColor: Color.PrimaryText }}
               />
             </ListOrGridDropdownSection>
-            <ListOrGridDropdownSection layoutType={layoutType}>
+            <ListOrGridDropdownSection layoutType={props.layoutType}>
               <ListOrGridDropdownItem
-                layoutType={layoutType}
+                layoutType={props.layoutType}
                 title="Favorites"
                 value={GIF_SERVICE.FAVORITES}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
               />
               <ListOrGridDropdownItem
-                layoutType={layoutType}
+                layoutType={props.layoutType}
                 title="Recent"
                 value={GIF_SERVICE.RECENTS}
                 icon={{ source: Icon.Clock }}
@@ -82,6 +87,7 @@ export function GifSearchList(props: GifListProps) {
       ) : (
         props.sections.map((sProps) => (
           <GifListSection
+            layoutType={sProps.layoutType}
             key={sProps.title}
             title={sProps.title}
             results={sProps.results}

@@ -1,15 +1,15 @@
 import { useContext } from "react";
 
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, Grid } from "@raycast/api";
 import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { GifDetailsActions } from "./GifDetailsActions";
 
 import AppContext from "../components/AppContext";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
-import { getShowPreview, getServiceTitle, ServiceName } from "../preferences";
+import { getShowPreview, getServiceTitle, ServiceName, LayoutType, LAYOUT_TYPE } from "../preferences";
 
-export function GifResult(props: { item: IGif; index: number; service?: ServiceName }) {
+export function GifResult(props: { item: IGif; index: number; service?: ServiceName; layoutType?: LayoutType }) {
   const { preview_gif_url, title, id } = props.item;
   const { state } = useContext(AppContext);
   const is_fav = state.favIds?.get(props.service as ServiceName)?.has(id.toString());
@@ -22,7 +22,13 @@ export function GifResult(props: { item: IGif; index: number; service?: ServiceN
 
   const { metadata, attribution } = props.item;
 
-  return (
+  return props.layoutType === LAYOUT_TYPE.Grid ? (
+    <Grid.Item
+      title={title}
+      content={{ source: preview_gif_url }}
+      actions={<GifDetailsActions item={props.item} showViewDetails={true} service={props.service} />}
+    />
+  ) : (
     <List.Item
       title={title}
       icon={{ source: preview_gif_url }}

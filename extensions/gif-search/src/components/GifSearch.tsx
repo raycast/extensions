@@ -148,13 +148,14 @@ export function GifSearch() {
         emptyStateText="Add some GIFs to your Favorites first!"
         emptyStateIcon={Icon.Star}
         sections={Array.from(favItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, layoutType };
         })}
       />
     );
   } else if (showAllRecents()) {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoadingRecentIds || isLoadingRecents}
         showDropdown={true}
         showDetail={showPreview && (recentItems?.items?.size ?? 0) !== 0}
@@ -165,13 +166,14 @@ export function GifSearch() {
         emptyStateText="Work with some GIFs first..."
         emptyStateIcon={Icon.Clock}
         sections={Array.from(recentItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, layoutType };
         })}
       />
     );
   } else {
     searchList = (
       <GifSearchList
+        layoutType={layoutType}
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs || isLoadingRecents}
         showDropdown={true}
         showDetail={showPreview && (results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
@@ -187,14 +189,22 @@ export function GifSearch() {
             results: favItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !favItems?.items || !!results?.term,
+            layoutType,
           },
           {
             title: "Recent",
             results: recentItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !recentItems?.items || !!results?.term,
+            layoutType,
           },
-          { title: "Trending", term: results?.term, results: results?.items, service: searchService },
+          {
+            title: "Trending",
+            term: results?.term,
+            results: results?.items,
+            service: searchService,
+            layoutType,
+          },
         ]}
       />
     );

@@ -21,7 +21,7 @@ export function GifListSection(props: GifListSectionProps) {
   return !props.hide ? (
     <ListOrGridSection layoutType={props.layoutType} title={title} key={props.title}>
       {props.results?.map((result, index) => (
-        <GifResult key={result.id} item={result} index={index} service={props.service} />
+        <GifResult layoutType={props.layoutType} key={result.id} item={result} index={index} service={props.service} />
       ))}
     </ListOrGridSection>
   ) : null;
