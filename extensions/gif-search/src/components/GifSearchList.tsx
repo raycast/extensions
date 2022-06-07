@@ -1,5 +1,5 @@
-import { List, Image, Icon, Color } from "@raycast/api";
-import { GIF_SERVICE, LayoutType } from "../preferences";
+import { Image, Icon, Color } from "@raycast/api";
+import { getGridItemSize, GIF_SERVICE, LayoutType } from "../preferences";
 
 import {
   ListOrGrid,
@@ -30,6 +30,7 @@ export function GifSearchList(props: GifListProps) {
   return (
     <ListOrGrid
       layoutType={layoutType}
+      itemSize={getGridItemSize()}
       searchBarAccessory={
         props.showDropdown ? (
           <ListOrGridDropdown
