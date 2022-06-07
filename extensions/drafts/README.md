@@ -56,8 +56,7 @@ This is a helper command to easily create additional Raycast Quicklinks to perfo
 
 If this eXtension is valuable for and you'd like to thank me you can support me on
 
-<a href="https://www.buymeacoffee.com/flohgro" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 220px !important;" ></a>
-
-<a href="https://www.patreon.com/flohgro" target="_blank"><img src="https://user-images.githubusercontent.com/13785667/162812708-55b96cdc-8c32-4433-a340-6dd4c1f7326d.jpg" alt="Become A patreon" style="height: 110px !important;width: 220px !important;" ></a>
+- [buymeacoffee](https://www.buymeacoffee.com/flohgro)
+- [patreon](https://www.patreon.com/flohgro)
 
 If you find any issues or have additional requests you can reach out to me on [Twitter](https://twitter.com/FlohGro) or via [e-mail](mailto:hi@flohgro.com)
