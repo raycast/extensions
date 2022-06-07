@@ -31,7 +31,7 @@ export default function Command() {
             .join(", ");
         }
 
-        let markdownCoat = entry.coatOfArms.png
+        const markdownCoat = entry.coatOfArms.png
           ? entry.coatOfArms.png
           : `file://${environment.assetsPath}/no-image@${environment.theme}.png`;
 
