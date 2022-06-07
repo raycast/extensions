@@ -49,9 +49,17 @@ export function createGitLabGQLClient(): GitLabGQL {
 }
 
 export const gitlab = createGitLabClient();
-export const gitlabgql = createGitLabGQLClient();
 
 const defaultRefreshInterval = 10 * 1000;
+
+let gitlabgql: GitLabGQL | undefined;
+
+export function getGitLabGQL(): GitLabGQL {
+  if (!gitlabgql) {
+    gitlabgql = createGitLabGQLClient();
+  }
+  return gitlabgql;
+}
 
 export function getCIRefreshInterval(): number | null {
   const preferences = getPreferenceValues();

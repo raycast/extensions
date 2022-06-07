@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
@@ -140,7 +140,7 @@ function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_ISSUE_DETAIL,
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });

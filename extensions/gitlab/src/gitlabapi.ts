@@ -14,7 +14,7 @@ function readCertFileSync(filename: string): Buffer | undefined {
     const data = fs.readFileSync(filename);
     return data;
   } catch (e) {
-    console.log(`Could not read cert file ${filename}`);
+    throw Error(`Could not read cert file ${filename}`);
   }
   return undefined;
 }
