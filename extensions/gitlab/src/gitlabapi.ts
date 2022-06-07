@@ -7,7 +7,7 @@ import fs from "fs";
 import { pipeline } from "stream";
 const streamPipeline = util.promisify(pipeline);
 import https from "https";
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 function readCertFileSync(filename: string): Buffer | undefined {
   try {
@@ -21,8 +21,9 @@ function readCertFileSync(filename: string): Buffer | undefined {
 
 export function getHttpAgent(): https.Agent | undefined {
   let agent: https.Agent | undefined;
-  const ignoreCertificates = (preferences.ignorecerts?.value as boolean) || false;
-  const customcacert = (preferences.customcacert?.value as string) || "";
+  const preferences = getPreferenceValues();
+  const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
+  const customcacert = (preferences.customcacert as string) || "";
   if (ignoreCertificates || customcacert.length > 0) {
     const ca = readCertFileSync(customcacert);
     agent = new https.Agent({ rejectUnauthorized: !ignoreCertificates, ca: ca });
