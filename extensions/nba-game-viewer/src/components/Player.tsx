@@ -5,7 +5,7 @@ import generatePlayerAccessories from "../utils/generatePlayerAccessories";
 type PropTypes = {
   player: Player;
   isShowingDetail: boolean;
-  setIsShowingDetail: Function;
+  setIsShowingDetail: any;
 };
 
 const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTypes) => {
