@@ -21,14 +21,6 @@
   ],
   "preferences": [
     {
-      "name": "showGifPreview",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Show GIF Preview",
-      "description": "Shows a large preview of the selected gif in search results."
-    },
-    {
       "name": "layoutType",
       "type": "dropdown",
       "required": false,
@@ -43,6 +35,28 @@
         {
           "title": "Grid",
           "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Item Size",
+      "description": "When using Grid layout, control the size of individual grid cells",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
         }
       ]
     },
