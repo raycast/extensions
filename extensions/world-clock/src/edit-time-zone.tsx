@@ -22,7 +22,7 @@ export default function EditTimeZone(props: {
             icon={Icon.Download}
             title={"Save Timezone"}
             onAction={async () => {
-              await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(starTimezones));
+              await LocalStorage.setItem(LOCALSTORAGE_KEY.STAR_TIMEZONE, JSON.stringify(starTimezones));
               setRefresh(Date.now());
               pop();
             }}

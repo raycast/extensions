@@ -2,8 +2,9 @@
 
 ## [Add feature: adding aliases to time zones] - {PR_MERGE_DATE}
 
-- Add feature: adding aliases to time zones, now you can set aliases for starred time zones
+- Add feature: you can set aliases for starred time zones now
 - Add new preference: Hour 24
+- Optimize list loading speed
 
 ## [Initial Version] - 2022-05-26
 

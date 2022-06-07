@@ -51,7 +51,7 @@ export function TimeZoneListItem(props: {
                   date_time: "",
                   unixtime: 0,
                 });
-                await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(_starTimezones)).then(() => {
+                await LocalStorage.setItem(LOCALSTORAGE_KEY.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
                   setRefresh(Date.now());
                 });
               }
@@ -106,14 +106,14 @@ export function StarredTimeZoneListItem(props: {
         <ActionPanel>
           <ActionTimeInfo timeInfo={timeInfo} />
           <Action
-            icon={Icon.Star}
+            icon={Icon.Circle}
             title={"Unstar Timezone"}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
             onAction={async () => {
               if (starTimezones.filter((value) => value.timezone === timezone).length >= 0) {
                 const _starTimezones = [...starTimezones];
                 _starTimezones.splice(index, 1);
-                await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(_starTimezones)).then(() => {
+                await LocalStorage.setItem(LOCALSTORAGE_KEY.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
                   setRefresh(Date.now());
                 });
               }
