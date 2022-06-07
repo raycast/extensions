@@ -6,7 +6,6 @@ import differenceInDays from "date-fns/differenceInDays";
 import { getPreferenceValues, environment } from "@raycast/api";
 
 export const API_KEY = "apiKey";
-export const SHOW_PREVIEW = "showGifPreview";
 export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
 export const LAYOUT = "layoutType";
@@ -61,10 +60,6 @@ export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean
   }
 
   return apiKey;
-}
-
-export function getShowPreview(): boolean {
-  return getPrefs()[SHOW_PREVIEW];
 }
 
 export function getDefaultAction(): string {

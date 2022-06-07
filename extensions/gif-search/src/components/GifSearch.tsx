@@ -2,14 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 
 import { showToast, Toast, Icon } from "@raycast/api";
 
-import {
-  ServiceName,
-  getShowPreview,
-  getMaxResults,
-  GIF_SERVICE,
-  getServiceTitle,
-  getLayoutType,
-} from "../preferences";
+import { ServiceName, getMaxResults, GIF_SERVICE, getServiceTitle, getLayoutType } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 
@@ -19,7 +12,6 @@ import { GifSearchList } from "./GifSearchList";
 import useGifPopulator, { GifIds } from "../hooks/useGifPopulator";
 
 export function GifSearch() {
-  const showPreview = getShowPreview();
   const limit = getMaxResults();
   const layoutType = getLayoutType();
 
@@ -140,7 +132,7 @@ export function GifSearch() {
         layoutType={layoutType}
         isLoading={isLoadingFavIds || isLoadingFavs}
         showDropdown={true}
-        showDetail={showPreview && (favItems?.items?.size ?? 0) !== 0}
+        showDetail={(favItems?.items?.size ?? 0) !== 0}
         showEmpty={!favItems?.items?.size && !results?.term}
         onDropdownChange={onServiceChange}
         enableFiltering={true}
@@ -158,7 +150,7 @@ export function GifSearch() {
         layoutType={layoutType}
         isLoading={isLoadingRecentIds || isLoadingRecents}
         showDropdown={true}
-        showDetail={showPreview && (recentItems?.items?.size ?? 0) !== 0}
+        showDetail={(recentItems?.items?.size ?? 0) !== 0}
         showEmpty={!recentItems?.items?.size && !results?.term}
         onDropdownChange={onServiceChange}
         enableFiltering={true}
@@ -176,7 +168,7 @@ export function GifSearch() {
         layoutType={layoutType}
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs || isLoadingRecents}
         showDropdown={true}
-        showDetail={showPreview && (results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
+        showDetail={(results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
         showEmpty={!favItems?.items?.size && !results?.term && !results?.items?.length}
         searchBarPlaceholder={`Search for GIFs${searchService ? ` on ${getServiceTitle(searchService)}` : ""}...`}
         emptyStateText="Enter a search above to get started..."

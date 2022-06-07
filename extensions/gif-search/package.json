@@ -21,14 +21,6 @@
   ],
   "preferences": [
     {
-      "name": "showGifPreview",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Show GIF Preview",
-      "description": "Shows a large preview of the selected gif in search results."
-    },
-    {
       "name": "layoutType",
       "type": "dropdown",
       "required": false,
