@@ -232,7 +232,7 @@ export default function Command() {
 {% tab title="ListWithEmptyView.tsx" %}
 
 ```typescript
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 
 export default function CommandWithCustomEmptyView() {
@@ -379,7 +379,7 @@ export default function Command() {
           <List.Dropdown.Item title="Three" value="three" />
         </List.Dropdown>
       }>
-        <List.Item title="Item in the Main List">
+        <List.Item title="Item in the Main List" />
       </List>
   );
 }
@@ -438,7 +438,7 @@ Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` prope
 #### Example
 
 ```typescript
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 
 export default function CommandWithCustomEmptyView() {
