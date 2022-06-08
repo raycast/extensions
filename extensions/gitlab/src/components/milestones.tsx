@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlabgql } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -73,14 +73,14 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
 }
 
 export function MilestoneList(props: { project?: Project; group?: Group }): JSX.Element {
-  const isGroup = props.group ? true : false;
+  const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
     fullPath = props.group ? props.group.full_path : "";
   }
   const { milestones, error, isLoading } = useSearch("", fullPath, isGroup);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Milestones", error);
+    showErrorToast(error, "Cannot search Milestones");
   }
   return (
     <List isLoading={isLoading} navigationTitle="Milestones">
@@ -102,7 +102,7 @@ export function useSearch(
 } {
   const [milestones, setMilestones] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

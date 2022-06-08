@@ -87,7 +87,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
         <Action.OpenInBrowser
           icon="vscode-action-icon.png"
           title="Clone in VSCode"
-          url="vscode://vscode.git/clone?url=https://github.com/"
+          url={`vscode://vscode.git/clone?url=${props.repository.url}`}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>

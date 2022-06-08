@@ -33,7 +33,7 @@ const validateFolderPath = (folder: string) => {
     });
 };
 
-const getUserConfiguredGraphPath = () => {
+export const getUserConfiguredGraphPath = () => {
   return untildify(getPreferenceValues().graphPath);
 };
 
@@ -79,7 +79,8 @@ const createFileIfNotExist = (filePath: string) => {
 export const showGraphPathInvalidToast = () => {
   showToast({
     style: Toast.Style.Failure,
-    title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
+    title: "Logseq graph path is invalid",
+    message: "Update the path and try again.",
   });
 };
 
@@ -88,4 +89,19 @@ export const appendContentToFile = (content: string, filePath: string) => {
   return validateFolderPath(path.dirname(filePath))
     .then(() => createFileIfNotExist(filePath))
     .then(() => fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode)));
+};
+
+export const getFilesInDir = async (dirPath: string) => {
+  return fs.promises.readdir(dirPath).then((files) => files.map((file) => path.join(dirPath, file)));
+};
+
+export const formatResult = (result: string) => {
+  const title = result.split("/");
+  return title[title.length - 1];
+};
+
+export const formatFilePath = (pageName: string) => {
+  const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
+  const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
+  return finalURL;
 };

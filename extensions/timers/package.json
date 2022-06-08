@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timers",
+  "title": "Timers",
+  "description": "Start, stop, and save countdown timers, directly in Raycast, with no external dependencies.",
+  "icon": "command-icon.png",
+  "author": "ThatNerd",
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start5MinuteTimer",
+      "title": "Start 5 Minute Timer",
+      "description": "Set a countdown for 5 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start10MinuteTimer",
+      "title": "Start 10 Minute Timer",
+      "description": "Set a countdown for 10 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start15MinuteTimer",
+      "title": "Start 15 Minute Timer",
+      "description": "Set a countdown for 15 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start25MinuteTimer",
+      "title": "Start 25 Minute Timer",
+      "description": "Set a countdown for 25 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start30MinuteTimer",
+      "title": "Start 30 Minute Timer",
+      "description": "Set a countdown for 30 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start45MinuteTimer",
+      "title": "Start 45 Minute Timer",
+      "description": "Set a countdown for 45 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start60MinuteTimer",
+      "title": "Start 60 Minute Timer",
+      "description": "Set a countdown for 60 minutes.",
+      "mode": "view"
+    },
+    {
+      "name": "start90MinuteTimer",
+      "title": "Start 90 Minute Timer",
+      "description": "Set a countdown for 90 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "startCustomTimer",
+      "title": "Start Custom Timer",
+      "description": "Set a countdown for a custom amount of time.",
+      "mode": "view"
+    },
+    {
+      "name": "manageTimers",
+      "title": "Manage Timers",
+      "description": "View, start, or stop existing countdown timers.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "selectedSound",
+      "type": "dropdown",
+      "required": true,
+      "title": "Selected Sound",
+      "description": "Sound played when a timer finishes.",
+      "default": "Submarine",
+      "data": [
+        {"title": "Alarm Clock", "value": "alarmClock.wav"},
+        {"title": "Dismembered Woodpecker", "value": "dismemberedWoodpecker.wav"},
+        {"title": "Flute Riff", "value": "fluteRiff.wav"},
+        {"title": "Level Up", "value": "levelUp.wav"},
+        {"title": "Piano Chime", "value": "pianoChime.wav"},
+        {"title": "Terminator", "value": "terminator.wav"},
+        {"title": "Speak Timer Name", "value": "speak_timer_name"}
+      ]
+    },
+    {
+        "name": "newTimerInputOrder",
+        "type": "dropdown",
+        "required": true,
+        "title": "New Timer Input Order",
+        "description": "Order for input fields in new timer form.",
+        "default": "Hours , Minutes, Seconds",
+        "data": [
+            {"title": "Hours, Minutes, Seconds", "value": "hhmmss"},
+            {"title": "Seconds, Minutes, Hours", "value": "ssmmhh"}
+        ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

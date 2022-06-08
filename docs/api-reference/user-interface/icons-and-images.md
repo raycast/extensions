@@ -109,7 +109,55 @@ export default function Command() {
 
 ## Types
 
-### ImageLike
+### Image
+
+Display different types of images, including network images or bundled assets.
+
+Apply image transforms to the source, such as a `mask` or a `tintColor`.
+
+#### Example
+
+```typescript
+// Built-in icon
+const icon = Icon.Eye;
+
+// Built-in icon with tint color
+const tintedIcon = { source: Icon.Bubble, tintColor: Color.Red };
+
+// Bundled asset with circular mask
+const avatar = { source: "avatar.png", mask: ImageMask.Circle };
+
+// Theme-aware icon
+const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" } };
+```
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Image" />
+
+### FileIcon
+
+An icon as it's used in the Finder.
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item title="File icon" icon={{ fileIcon: __filename }} />
+    </List>
+  );
+}
+```
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="FileIcon" />
+
+### Image.ImageLike
 
 ```typescript
 ImageLike: URL | Asset | Icon | FileIcon | Image;
@@ -140,61 +188,6 @@ export default function Command() {
   );
 }
 ```
-
-### FileIcon
-
-An icon as it's used in the Finder.
-
-#### Example
-
-```typescript
-import { List } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <List>
-      <List.Item title="File icon" icon={{ fileIcon: __filename }} />
-    </List>
-  );
-}
-```
-
-#### Properties
-
-| Name     | Type                | Required | Description                                        |
-| :------- | :------------------ | :------- | :------------------------------------------------- |
-| fileIcon | <code>string</code> | Yes      | The path to a file or folder to get its icon from. |
-
-### Image
-
-Display different types of images, including network images or bundled assets.
-
-Apply image transforms to the source, such as a `mask` or a `tintColor`.
-
-#### Example
-
-```typescript
-// Built-in icon
-const icon = Icon.Eye;
-
-// Built-in icon with tint color
-const tintedIcon = { source: Icon.Bubble, tintColor: Color.Red };
-
-// Bundled asset with circular mask
-const avatar = { source: "avatar.png", mask: ImageMask.Circle };
-
-// Theme-aware icon
-const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" } };
-```
-
-#### Properties
-
-| Name      | Type                                            | Required | Description                                                                               |
-| :-------- | :---------------------------------------------- | :------- | :---------------------------------------------------------------------------------------- |
-| mask      | <code>[Image.Mask](#image.mask)</code>          | No       | An [Image.Mask](#image.mask) to apply to the image.                                       |
-| source    | <code>[Image.Source](#image.source)</code>      | Yes      | The source of the image.                                                                  |
-| fallback  | <code>[Image.Fallback](#image.fallback)</code>  | Yes      | A fallback image in case source cannot be loaded.                                         |
-| tintColor | <code>[ColorLike](./colors.md#colorlike)</code> | No       | A [ColorLike](./colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Image.Source
 
@@ -266,7 +259,7 @@ export default function Command() {
 }
 ```
 
-### URL
+### Image.URL
 
 Image is a string representing a URL.
 
@@ -287,7 +280,7 @@ export default function Command() {
 }
 ```
 
-### Asset
+### Image.Asset
 
 Image is a string representing an asset from the `assets/` folder
 

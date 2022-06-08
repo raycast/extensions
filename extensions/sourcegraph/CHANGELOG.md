@@ -1,5 +1,14 @@
 # Changelog
 
+## [Search performance improvements](https://github.com/raycast/extensions/pull/1844) - 2022-05-29
+
+- **search**: The drilldown action shortcut is now <kbd>Tab</kbd>, to align the shortcut for selecting suggestions in the Sourcegraph web application. For example, on a repository result, <kbd>Tab</kbd> will start a search with the `repo:` filter.
+- **search**: The number of rendered results is now limited, which drastically improves performance and stability.
+- **search**: Progress text now indicates whether there are more results to be found and when rendered results are a subset of all results.
+- **search**: Empty search text states now load faster.
+- **self-hosted**: Setup prompts now include an action to directly open extension preferences.
+- **internal**: Migrate to `graphql-code-generator` ([#16](https://github.com/bobheadxi/raycast-sourcegraph/pull/16))
+
 ## [Fix search suggestions](https://github.com/raycast/extensions/pull/1696) - 2022-05-14
 
 - **search**: Fix 'Apply suggestions' on some suggestions returned by the search API. ([#15](https://github.com/bobheadxi/raycast-sourcegraph/pull/15))

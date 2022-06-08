@@ -27,7 +27,7 @@ export type WordOfTheDay = {
   translation: string;
 };
 
-export const buildBingImageURL = () => {
+export const buildShanBayURL = () => {
   const date = new Date();
   const queryDate = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
   return `https://apiv3.shanbay.com/weapps/dailyquote/quote/?date=${queryDate}`;

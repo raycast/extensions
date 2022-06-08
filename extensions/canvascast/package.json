@@ -5,6 +5,9 @@
   "icon": "canvas.png",
   "author": "Yoda",
   "license": "MIT",
+  "contributors": [
+    "yug2005"
+  ],
   "preferences": [
     {
       "name": "token",
@@ -49,6 +52,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

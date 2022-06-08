@@ -1,8 +1,8 @@
-import { ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlab, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -165,10 +165,10 @@ export function JobList(props: {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   if (!stages) {
-    return <List isLoading navigationTitle="Jobs" />;
+    return <List isLoading={isLoading} navigationTitle="Jobs" />;
   }
   return (
     <List isLoading={isLoading} navigationTitle="Jobs">
@@ -196,14 +196,14 @@ export function useSearch(
   pipelineID: string,
   pipelineIID?: string | undefined
 ): {
-  stages: Record<string, Job[]> | undefined;
+  stages?: Record<string, Job[]>;
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [stages, setStages] = useState<Record<string, Job[]> | undefined>(undefined);
+  const [stages, setStages] = useState<Record<string, Job[]> | undefined>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -305,10 +305,10 @@ interface Commit {
 export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
   const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Commit Details", error);
+    showErrorToast(error, "Could not fetch Commit Details");
   }
   if (isLoading || !commit) {
-    return <List isLoading />;
+    return <List isLoading={isLoading} />;
   }
   if (commit.last_pipeline) {
     return (
@@ -336,7 +336,7 @@ function useCommit(
 } {
   const [commit, setCommit] = useState<Commit>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
