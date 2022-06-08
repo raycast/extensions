@@ -5,7 +5,7 @@
   "description": "Efficiently search Next.js documentation",
   "icon": "command-icon.png",
   "author": "PrasadChinwal",
-  "contributors": ["PrasadChinwal", "vimtor"],
+  "contributors": ["vimtor"],
   "categories": [
     "Productivity",
     "Documentation",
