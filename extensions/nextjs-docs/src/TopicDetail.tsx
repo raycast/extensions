@@ -21,21 +21,7 @@ const TopicDetail = (props: { topic: Topic }) => {
       });
   }, []);
 
-  if (!mark) return <Detail navigationTitle={props.topic.title} isLoading />;
-
-  return (
-    <>
-      <Detail
-        navigationTitle={props.topic.title}
-        markdown={mark}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Home" target={<Home></Home>} />
-          </ActionPanel>
-        }
-      />
-    </>
-  );
+  return <Detail navigationTitle={props.topic.title} isLoading={mark.length == 0} markdown={mark} />;
 };
 
 export default TopicDetail;
