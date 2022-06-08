@@ -31,7 +31,7 @@ const AuthGuard: React.FC<{ component: React.FC }> = ({ component: Component }) 
       <QRLogin onConfirm={handleLogin} />
     )
   ) : (
-    <Detail markdown="Loading..." />
+    <Detail markdown="" />
   );
 };
 

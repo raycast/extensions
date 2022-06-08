@@ -14,7 +14,7 @@ import { getStorage, setStorage, StorageKey } from './utils/storage';
 
 const SearchDocsView: React.FC = () => {
   const fetchIdRef = useRef(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [documentList, setDocumentList] = useState<RecentList | SearchResults | null>(null);
 
   useEffect(() => {
