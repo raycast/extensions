@@ -96,7 +96,7 @@ export default function Command() {
             }))
           }
         >
-          {Object.keys(Language).map((language, index) => (
+          {Object.values(Language).map((language, index) => (
             <List.Dropdown.Item key={index} title={language} value={language} />
           ))}
         </List.Dropdown>

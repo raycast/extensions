@@ -50,9 +50,10 @@ function CreateForm(props: {
         value={detectedLanguage}
         ref={dropdownRef}
         info="We will try our best to dectect the programming langauge for you"
+        onChange={(language) => setDetectedLanguage(language)}
       >
         <Form.Dropdown.Item value="Unknown" title="Unknown" />
-        {Object.keys(Language).map(
+        {Object.values(Language).map(
           (language, index) =>
             language !== "All" && <Form.Dropdown.Item key={index} value={language} title={language} />
         )}
