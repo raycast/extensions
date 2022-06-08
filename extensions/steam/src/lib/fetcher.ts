@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import useSWR, { useSWRConfig } from "swr";
 import { fakeGameData, fakeGameDataSimpleMany, fakeGames, isFakeData } from "./fake";
 import { GameData, GameDataResponse, GameDataSimple, GameDataSimpleResponse, GameSimple } from "../types";
-import { getPreferenceValues, openCommandPreferences, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { useIsLoggedIn } from "./hooks";
 import { reverse } from "./util";
 
@@ -30,8 +30,11 @@ async function fetchGameData({ appid, url }: { appid: number; url: string }) {
 
 async function fetcherWithAuth(url: string) {
   const { token, steamid } = getPreferenceValues();
+  if (!token && !steamid) return [];
   const response = await fetch(url + `&key=${token.trim()}&steamid=${steamid.trim()}`);
   if (response.status === 403) {
+    // If the request fails to auth, stash it to check if they later updated it
+    await LocalStorage.setItem("API_KEY_ERROR", token.trim() + steamid.trim());
     showToast({
       title: "403 Error",
       message: "Please check your API key.",
@@ -45,8 +48,9 @@ async function fetcherWithAuth(url: string) {
     });
   }
   if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+    return [];
   }
+  await LocalStorage.removeItem("API_KEY_ERROR");
   const gamesResponse = (await response.json()) as GameDataSimpleResponse;
   return gamesResponse?.response?.games ?? [];
 }
@@ -93,14 +97,13 @@ export const useGameData = ({ appid = 0, ready = true }) => {
 export const useRecentlyPlayedGames = () => useGetOwnedGames("GetRecentlyPlayedGames");
 export const useMyGames = () => useGetOwnedGames("GetOwnedGames");
 const useGetOwnedGames = (type: string) => {
-  const isLoggedIn = useIsLoggedIn();
   const { data, error, isValidating } = useSWR<GameDataSimple[]>(
-    isLoggedIn ? `https://api.steampowered.com/IPlayerService/${type}/v1/?format=json&include_appinfo=1` : null,
+    `https://api.steampowered.com/IPlayerService/${type}/v1/?format=json&include_appinfo=1`,
     isFakeData ? () => fakeGameDataSimpleMany(30) : fetcherWithAuth
   );
 
   return {
-    data: data ? reverse(data) : undefined,
+    data: data && data?.length > 0 ? reverse(data) : undefined,
     isLoading: !data && !error,
     isValidating,
     isError: error,
