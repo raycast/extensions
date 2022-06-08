@@ -3,10 +3,12 @@
 /extensions/1loc                                     @kud @sxn
 /extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer
 /extensions/8ball                                    @Gitsack
+/extensions/airplane                                 @pradeepb28
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
 /extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss
+/extensions/amphetamine                              @gstvds
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/anybox                                   @francisfeng
 /extensions/api-icon-list                            @PitNikola
@@ -42,12 +44,13 @@
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
-/extensions/canvascast                               @YodaLightsabr
+/extensions/canvascast                               @YodaLightsabr @yug2005
 /extensions/capture-raycast-metadata                 @koinzhang
 /extensions/chakra-ui-docs                           @pgvr
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/cheatsheets                              @Destiner
+/extensions/chess-com                                @joshfarrant
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/citation-generator                       @AbhinavPalacharla
@@ -324,6 +327,7 @@
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn
 /extensions/sentry                                   @thomaspaulmann @mattisssa
+/extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/sf-symbols-search                        @peteschaffner
 /extensions/shopify-developer-changelog              @sandypockets
 /extensions/signal                                   @leeraymond78

@@ -35,13 +35,13 @@ const useSchedule = (): {
         }
       });
 
-      const weekdays = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
       const scheduledGames: Array<Day> = Object.keys(data).map((key) => {
         return {
-          date: `${weekdays[new Date(data[key].games[0].date.toLocaleString("en-US")).getUTCDay()]}  —  ${convertDate(
-            key
-          )}`,
+          date: `${
+            weekdays[new Date(data[key].games[0].date.toLocaleString("en-US")).getUTCDay() - 1]
+          }  —  ${convertDate(key)}`,
           games: data[key].games.map((game: any): Game => {
             return {
               id: game.id,

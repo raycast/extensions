@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.36.0 – 2022-06-01
+
+### ✨ New
+
+The `<Grid />` component’s made its way to our API. It’s perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component  for smooth adoption.
+
+![](.gitbook/assets/changelog-hello-world.png)
+
+### 🐞 Fixes
+
+- Fixed the controlled mode for `Form.DatePicker`
+- Fixed the dynamic appearance of form item’s `info` accessory
+- Fixed the OAuth logout preference not being shown for single-command extensions
+- Fixed a bug where components that are pushed with the same properties values would not be updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1843](https://github.com/raycast/extensions/issues/1843))
+- Fixed a bug where updated list metadata items would cause unnecessary list reloading
+- Fixed an issue with tinted, resized icons appearing blurred in some cases (e.g. Alerts)
+
 ## 1.35.0 – 2022-05-18
 
 ### ✨ New
