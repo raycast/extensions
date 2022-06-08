@@ -5,4 +5,3 @@
 - Added modules page
 - Better error handling
 - Added icons
-- Updated API
