@@ -55,6 +55,46 @@
       "default": ""
     },
     {
+      "name": "layout",
+      "type": "dropdown",
+      "description": "Set the layout of the photo items.",
+      "required": true,
+      "title": "Photo Layout",
+      "default": "Grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "Grid"
+        },
+        {
+          "title": "List",
+          "value": "List"
+        }
+      ]
+    },
+    {
+      "name": "itemSize",
+      "type": "dropdown",
+      "description": "Set the size of the photo items.",
+      "required": false,
+      "title": "Photo Item Size",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
       "name": "applyTo",
       "title": "Apply Wallpaper To",
       "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
@@ -125,7 +165,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
+    "@raycast/api": "^1.36.0",
     "fs-extra": "^10.0.1",
     "node-fetch": "^3.2.3",
     "pexels": "^1.3.0",

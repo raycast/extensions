@@ -1,14 +1,15 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
 import React, { useState } from "react";
 import { getCollections } from "./hooks/hooks";
 import ViewCollectionMedias from "./view-collection-medias";
-import { commonPreferences, isEmpty } from "./utils/common-utils";
+import { isEmpty } from "./utils/common-utils";
 import { collectionTags } from "./utils/costants";
 import { ActionToPexels } from "./components/action-to-pexels";
 import { PexelsEmptyView } from "./components/pexels-empty-view";
+import { Preferences } from "./types/preferences";
 
 export default function SearchCollections() {
-  const { rememberTag } = commonPreferences();
+  const { rememberTag } = getPreferenceValues<Preferences>();
   const [page, setPage] = useState<number>(1);
   const [collectionTag, setCollectionTag] = useState<string>("");
   const { collections, loading } = getCollections(collectionTag, page);
@@ -39,7 +40,7 @@ export default function SearchCollections() {
         </List.Dropdown>
       }
     >
-      <PexelsEmptyView title={"No Collections"} />
+      <PexelsEmptyView title={"No Collections"} layout={"List"} />
       {collections?.map((collection) => {
         return (
           <List.Item
@@ -57,6 +58,14 @@ export default function SearchCollections() {
                   target={<ViewCollectionMedias id={collection.id} title={collection.title} />}
                 />
                 <ActionToPexels />
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.Gear}
+                    title="Open Extension Preferences"
+                    shortcut={{ modifiers: ["cmd"], key: "," }}
+                    onAction={openExtensionPreferences}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

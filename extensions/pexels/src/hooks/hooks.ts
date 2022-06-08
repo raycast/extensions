@@ -1,11 +1,12 @@
 import { Collection, createClient, ErrorResponse, Photo, Photos, Video } from "pexels";
 import React, { useCallback, useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
-import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../utils/types";
-import { commonPreferences, isEmpty } from "../utils/common-utils";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../types/types";
+import { isEmpty } from "../utils/common-utils";
+import { Preferences } from "../types/preferences";
 import Style = Toast.Style;
 
-const pexelsClient = createClient(commonPreferences().apikey);
+const pexelsClient = createClient(getPreferenceValues<Preferences>().apikey);
 
 export const searchPhotos = (searchRequest: SearchRequest) => {
   const { searchContent, page } = searchRequest;
