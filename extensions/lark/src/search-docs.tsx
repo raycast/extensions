@@ -1,23 +1,21 @@
-import { Action, Icon, List, showToast, Toast } from "@raycast/api";
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { SpaceListItem } from "./components/space-list-item";
-import { withAuth } from "./features/with-auth";
+import { Action, Icon, List, showToast, Toast } from '@raycast/api';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { SpaceListItem } from './components/space-list-item';
+import { withAuth } from './features/with-auth';
 import {
   fetchRecentList,
   searchDocs,
   removeRecentDocument,
   RecentListResponse as RecentList,
   SearchDocsResponse as SearchResults,
-} from "./services/space";
-import { noop } from "./utils/function";
-import { getStorage, setStorage, StorageKey } from "./utils/storage";
+} from './services/space';
+import { noop } from './utils/function';
+import { getStorage, setStorage, StorageKey } from './utils/storage';
 
 const SearchDocsView: React.FC = () => {
   const fetchIdRef = useRef(0);
   const [loading, setLoading] = useState(true);
-  const [documentList, setDocumentList] = useState<
-    RecentList | SearchResults | null
-  >(null);
+  const [documentList, setDocumentList] = useState<RecentList | SearchResults | null>(null);
 
   useEffect(() => {
     // load cache
@@ -69,24 +67,16 @@ const SearchDocsView: React.FC = () => {
   const handleRemoveRecent = async (objToken: string) => {
     const result = await removeRecentDocument(objToken);
     if (result) {
-      showToast(Toast.Style.Success, "Removed successfully");
+      showToast(Toast.Style.Success, 'Removed successfully');
       handleFetchRecentList();
     }
   };
 
   return (
-    <List
-      isLoading={loading}
-      searchBarPlaceholder="Search documents..."
-      onSearchTextChange={handleSearch}
-      throttle
-    >
+    <List isLoading={loading} searchBarPlaceholder="Search documents..." onSearchTextChange={handleSearch} throttle>
       {documentList != null && documentList.entities ? (
         isRecentList(documentList) ? (
-          <RecentDocumentsView
-            list={documentList}
-            onRemove={handleRemoveRecent}
-          />
+          <RecentDocumentsView list={documentList} onRemove={handleRemoveRecent} />
         ) : (
           <SearchResultView list={documentList} />
         )
@@ -96,7 +86,7 @@ const SearchDocsView: React.FC = () => {
 };
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
-  return "nodes" in list.entities;
+  return 'nodes' in list.entities;
 };
 
 const RecentDocumentsView: React.FC<{
@@ -104,10 +94,7 @@ const RecentDocumentsView: React.FC<{
   onRemove?: (objToken: string) => void;
 }> = ({ list, onRemove }) => {
   return (
-    <List.Section
-      title="Recent Documents"
-      subtitle={`${list.node_list.length}`}
-    >
+    <List.Section title="Recent Documents" subtitle={`${list.node_list.length}`}>
       {list.node_list.map((nodeId) => {
         const nodeEntity = list.entities.nodes[nodeId];
         const ownerEntity = list.entities.users[nodeEntity.owner_id];
@@ -122,7 +109,7 @@ const RecentDocumentsView: React.FC<{
                 <Action
                   icon={Icon.Trash}
                   title="Remove From Recent Documents"
-                  shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                  shortcut={{ key: 'x', modifiers: ['ctrl'] }}
                   onAction={() => onRemove?.(nodeId)}
                 />
               </>
@@ -141,9 +128,7 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
         const objEntity = list.entities.objs[nodeId];
         const ownerEntity = list.entities.users[objEntity.owner_id];
 
-        return (
-          <SpaceListItem key={nodeId} node={objEntity} owner={ownerEntity} />
-        );
+        return <SpaceListItem key={nodeId} node={objEntity} owner={ownerEntity} />;
       })}
     </List.Section>
   );
