@@ -7,9 +7,13 @@
 * Support pin your favorite currencies
 * Remember the source currency
 
+
 ![exchange_based_on_expression](./media/expression.png)
+
 calculate currency exchange expression
+
 ![youdao_translate_result](./media/filter.png)
+
 find target currency with filter
 
 ## How to get API Keys
