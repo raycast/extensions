@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2022-06-08
 
 - Add additional CSL formats
 - Use independent CSL formats from extension directly rather than relying upon installed ones only
