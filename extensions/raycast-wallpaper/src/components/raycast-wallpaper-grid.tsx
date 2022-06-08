@@ -4,21 +4,12 @@ import {
   Alert,
   confirmAlert,
   getPreferenceValues,
+  Grid,
   Icon,
-  List,
   showToast,
   Toast,
 } from "@raycast/api";
-import {
-  buildCachePath,
-  buildIconCachePath,
-  checkCache,
-  checkIconCache,
-  deleteCache,
-  downloadPicture,
-  setWallpaper,
-} from "../utils/common-utils";
-import fileUrl from "file-url";
+import { buildIconCachePath, checkIconCache, deleteCache, downloadPicture, setWallpaper } from "../utils/common-utils";
 import { RAYCAST_WALLPAPER } from "../utils/constants";
 import React from "react";
 import { RaycastWallpaper } from "../types/types";
@@ -26,30 +17,24 @@ import { ActionOpenPreferences } from "./action-open-preferences";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 
-export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpaper[] }) {
+export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpaper[] }) {
   const preferences = getPreferenceValues<Preferences>();
   const { raycastWallpapers } = props;
 
   return (
-    <List
-      isShowingDetail={raycastWallpapers.length !== 0}
+    <Grid
       isLoading={raycastWallpapers.length === 0}
+      itemSize={preferences.itemSize as Grid.ItemSize}
       searchBarPlaceholder={"Search pictures"}
     >
       <RaycastWallpaperEmptyView layout={preferences.layout} />
       {raycastWallpapers.map((value, index, array) => {
         return (
-          <List.Item
+          <Grid.Item
             id={index + ""}
             key={index + value.title}
-            icon={{ source: checkIconCache(value) ? buildIconCachePath(value) : value.url }}
+            content={{ source: checkIconCache(value) ? buildIconCachePath(value) : value.url }}
             title={value.title}
-            detail={
-              <List.Item.Detail
-                isLoading={false}
-                markdown={`![](${checkCache(value) ? fileUrl(buildCachePath(value)) : value.url})`}
-              />
-            }
             actions={
               <ActionPanel>
                 <Action
@@ -109,6 +94,6 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
