@@ -2,7 +2,6 @@ import { List, Toast, showToast } from "@raycast/api";
 import { Day } from "../types/schedule.types";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
-import { useState } from "react";
 
 const Schedue = () => {
   const data = useSchedule();

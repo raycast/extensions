@@ -18,7 +18,7 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       accessories={generatePlayerAccessories(player)}
       detail={
         <List.Item.Detail
-          markdown={`<img src="${player.headshot}" alt="drawing" width="250"/>`}
+          markdown={`<img src="${player.headshot}" alt="image" width="250"/>`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={player.fullName} />
@@ -44,13 +44,13 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       }
       actions={
         <ActionPanel title="Player Actions">
-          <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
           <Action
-            title="Toggle Player Info"
+            title="Show Player Info"
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
+          <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
         </ActionPanel>
       }
     />
