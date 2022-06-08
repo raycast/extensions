@@ -33,7 +33,7 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={exchange}
-      searchBarPlaceholder={`input how much ${currencyCode2Name[state.fromCurrencyCode]}`}
+      searchBarPlaceholder={`Input how much ${currencyCode2Name[state.fromCurrencyCode]}`}
       throttle
       searchBarAccessory={
         <List.Dropdown
@@ -46,6 +46,7 @@ export default function Command() {
         >
           {Object.keys(currencyCode2Country).map((currencyCode: string) => (
             <List.Dropdown.Item
+              key={`from-${currencyCode}`}
               title={`${currencyCode} - ${currencyCode2Country[currencyCode]}`}
               value={currencyCode}
               icon={getFlagEmoji(currencyCode.substring(0, 2))}
@@ -56,7 +57,13 @@ export default function Command() {
     >
       {state.currencyResult ? (
         <Exchange currencyResult={state.currencyResult} state={state} setState={setState} />
-      ) : null}
+      ) : (
+        <List.EmptyView
+          icon={{ source: "../assets/spare1.png" }}
+          title="Type something to get exchange result?"
+          description="Example: '10', '1+2' or '1 in USD'"
+        />
+      )}
     </List>
   );
 }
@@ -173,7 +180,7 @@ function ExchangeResultActionPanel(props: {
         }}
         shortcut={{ modifiers: ["shift"], key: "return" }}
         title={`${
-          state.pinnedCurrencyCodes && state.pinnedCurrencyCodes.indexOf(toCurrencyCode) >= 0 ? "UnPin It" : "Pin It"
+          state.pinnedCurrencyCodes && state.pinnedCurrencyCodes.indexOf(toCurrencyCode) >= 0 ? "Unpin It" : "Pin It"
         }`}
       />
     </ActionPanel>
@@ -290,19 +297,37 @@ async function performExchange(
           }
         }
 
-        return currencyAPI(signal).then(async (response) => {
-          const responseJson = await response.json();
+        return currencyAPI(signal)
+          .then(async (response) => {
+            const responseJson = await response.json();
 
-          const result = responseJson as CurrencyResult;
-          if (result.result === "success") {
-            LocalStorage.setItem("currency", JSON.stringify(responseJson));
-          }
-
-          return result;
-        });
+            const result = responseJson as CurrencyResult;
+            if (result.result === "success") {
+              LocalStorage.setItem("currency", JSON.stringify(responseJson));
+              return result;
+            } else {
+              console.log(responseJson);
+              if (
+                result.result === "error" &&
+                (result["error-type"] === "invalid-key" || result["error-type"] === "inactive-account")
+              ) {
+                throw Error("Invalid API Key, please check!");
+              }
+              throw Error(result["error-type"]);
+            }
+          })
+          .catch((error: Error) => {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: error.message,
+            });
+          });
       })
-      .then((currencyData: CurrencyResult) => {
-        return enrichExchangeData(currencyData, amount, fromCode, filter.toLocaleLowerCase(), pinned);
+      .then((currencyData: CurrencyResult | void) => {
+        if (currencyData) {
+          return enrichExchangeData(currencyData, amount, fromCode, filter.toLocaleLowerCase(), pinned);
+        }
       });
   } else {
     return undefined;
@@ -383,6 +408,7 @@ interface ExchangeState {
 interface CurrencyResult {
   base_code: string;
   result: string;
+  ["error-type"]: string;
   conversion_rates: { [key: string]: number };
   conversion_rate_exchanged?: Array<ConversionRate>;
   conversion_rate_pin_exchanged?: Array<ConversionRate>;

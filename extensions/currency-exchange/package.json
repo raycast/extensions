@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Currency",
-      "subtitle": "currency exchange",
+      "title": "Currency Exchange",
       "description": "Calculate with Exchange Rate",
       "mode": "view"
     }
@@ -18,7 +17,7 @@
   "preferences": [
     {
       "name": "api_key",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "API Key",
       "description": "You can get API Key at https://app.exchangerate-api.com/dashboard",
