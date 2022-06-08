@@ -1,10 +1,18 @@
 # Tailwind CSS Changelog
 
-## Categories & Screenshots (2022-03-12)
-Add categories and screenshots for the store
+## [Search Classes command & Chores] - 2022-03-12
+- Update to the latest version of Raycast
+- Remove unnecessary dependencies
+- Add `Search Classes` command
+- Rename `Search CSS Documentation` to `Search Documentation`
+- Use `Tailwind CSS` as subtitle for commands instead of `Tailwind`
+- Rename the extension to `Tailwind CSS`
 
-## Upgrade for Tailwind v3 (2022-01-27)
-Update links for Tailwind v3 
+## [Categories & Screenshots] - 2022-03-12
+- Add categories and screenshots for the store
 
-## Added Tailwind CSS (2021-11-08)
-Initial version code
+## [Upgrade for Tailwind v3] - 2022-01-27
+- Update links for Tailwind v3 
+
+## [Added Tailwind CSS] - 2021-11-08
+- Initial version code
