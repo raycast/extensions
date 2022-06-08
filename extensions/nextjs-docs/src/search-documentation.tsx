@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getTopicsFromCache as getTopics } from "./services/Github";
 
 export default function main() {
-  const [topics, setTopics] = useState<Topic[]>();
+  const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
     getTopics()
@@ -15,17 +15,14 @@ export default function main() {
       .catch((err: string) => {
         showToast({
           style: Toast.Style.Failure,
-          title: "Sorry, something went wrong! " + err,
+          title: "Sorry, something went wrong! ",
+          message: err,
         });
       });
   }, []);
 
-  if (!topics) {
-    return <List isLoading />;
-  }
-
   return (
-    <List>
+    <List searchBarPlaceholder="Search documentation..." isLoading={topics.length === 0}>
       {topics.map((topic) => (
         <List.Item
           key={topic.sha}
