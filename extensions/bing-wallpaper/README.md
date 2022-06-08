@@ -9,7 +9,6 @@ Get, set, auto-download Bing wallpapers to explore the world.
 
 Want more **Media** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 
-
 <a title="Install Raycast Wallpaper Raycast Extension" href="https://www.raycast.com/koinzhang/raycast-wallpaper#install">
 <img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/raycast-wallpaper/install_button@2x.png">
 </a><a title="Install Placeholder Raycast Extension" href="https://www.raycast.com/koinzhang/placeholder#install">
