@@ -5,6 +5,9 @@
   "icon": "canvas.png",
   "author": "Yoda",
   "license": "MIT",
+  "contributors": [
+    "yug2005"
+  ],
   "preferences": [
     {
       "name": "token",
