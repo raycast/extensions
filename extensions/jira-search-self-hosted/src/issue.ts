@@ -52,6 +52,14 @@ function isIssueKey(query: string): boolean {
 
 function buildJql(query: string): string {
   const spaceAndInvalidChars = /[ "]/
+
+  const statusRegex = /:([a-z0-9_-]+|"[a-z0-9_ -]+")/ig
+  const statusMatchingGroup = Array.from(query.matchAll(statusRegex))
+  const statuus = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ''))
+  
+  console.log("Status: ", statuus)
+  query = query.replace(statusRegex, '')
+  
   const terms = query.split(spaceAndInvalidChars).filter((term) => term.length > 0)
 
   const collectPrefixed = (prefix: string, terms: string[]): string[] =>
@@ -60,10 +68,10 @@ function buildJql(query: string): string {
       .map((term) => term.substring(prefix.length))
   const projects = collectPrefixed("@", terms)
   const issueTypes = collectPrefixed("#", terms)
-  const issueStatus = collectPrefixed("|", terms)
+  
   const unwantedTextTermChars = /[-+!*&]/
   const textTerms = terms
-    .filter((term) => !"@#|".includes(term[0]))
+    .filter((term) => !"@#:".includes(term[0]))
     .flatMap((term) => term.split(unwantedTextTermChars))
     .filter((term) => term.length > 0)
 
@@ -73,7 +81,7 @@ function buildJql(query: string): string {
   const jqlConditions = [
     inClause("project", projects),
     inClause("issueType", issueTypes),
-    inClause("status", issueStatus),
+    inClause("status", statuus),
     ...textTerms.map((term) => `text~"${term}*"`),
   ]
 
@@ -107,5 +115,5 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType")
+  return SearchCommand(searchIssues, "Search issues by text, @project, :status and #issueType")
 }

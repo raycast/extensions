@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "emanguy",
   "contributors": [
-    "sven"
+    "sven",
+    "koseduhemak"
   ],
   "license": "MIT",
   "commands": [
