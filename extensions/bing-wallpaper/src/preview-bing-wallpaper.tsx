@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { BingImage, DownloadedBingImage } from "./types/types";
 import fileUrl from "file-url";
-import { buildBingImageURL } from "./utils/bing-wallpaper-utils";
+import { buildBingImageURL, getPictureName } from "./utils/bing-wallpaper-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
+import { downloadPicture, setDownloadedWallpaper, setWallpaper } from "./utils/common-utils";
+import { Preferences } from "./types/preferences";
 
 export default function PreviewBingWallpaper(props: {
   isOnline: boolean;
@@ -11,6 +13,7 @@ export default function PreviewBingWallpaper(props: {
   onlineImages: BingImage[];
   downloadedImage: DownloadedBingImage[];
 }) {
+  const { downloadSize } = getPreferenceValues<Preferences>();
   const { isOnline, index, onlineImages, downloadedImage } = props;
   const imagesLength = onlineImages.length + downloadedImage.length;
   const [pageIndex, setPageIndex] = useState<{ index: number; isOnline: boolean }>({
@@ -49,6 +52,31 @@ export default function PreviewBingWallpaper(props: {
               setPageIndex({ index: pageIndex.index - 1, isOnline: pageIndex.index - 1 < onlineImages.length });
             }}
           />
+          <Action
+            icon={Icon.Desktop}
+            title={"Set Desktop Wallpaper"}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onAction={() => {
+              if (pageIndex.isOnline) {
+                setWallpaper(
+                  getPictureName(onlineImages[pageIndex.index].url),
+                  buildBingImageURL(onlineImages[pageIndex.index].url, "raw")
+                ).then(() => "");
+              } else {
+                setDownloadedWallpaper(downloadedImage[pageIndex.index - onlineImages.length].path).then(() => "");
+              }
+            }}
+          />
+          {pageIndex.isOnline && (
+            <Action
+              icon={Icon.Download}
+              title={"Download Wallpaper"}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={async () => {
+                await downloadPicture(downloadSize, onlineImages[pageIndex.index]);
+              }}
+            />
+          )}
           <Action
             icon={Icon.Circle}
             title={"Back"}
