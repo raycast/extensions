@@ -59,7 +59,7 @@ export function AvatarGridLayout(props: {
         <Grid.Item
           id={"multiAvatar"}
           content={{
-            value: multiAvatarInfo.svg,
+            value: encodeURI(multiAvatarInfo.svg),
             tooltip: `Designer: Gie Katon, License: MULTIAVATAR LICENSE v1.0`,
           }}
           title={"multiavatar"}
@@ -69,7 +69,7 @@ export function AvatarGridLayout(props: {
                 avatarOptions={avatarOptions}
                 setAvatarOptions={setAvatarOptions}
                 avatarInfo={multiAvatarInfo}
-                advancedOptions={false}
+                advancedOptions={true}
               />
               <ActionToMultiAvatar avatarURL={multiAvatarInfo.svg} />
             </ActionPanel>
@@ -83,7 +83,7 @@ export function AvatarGridLayout(props: {
               id={value.name}
               key={value.name}
               content={{
-                value: AVATAR_URL + "/" + value.name + "/" + avatarOptions.seed + ".png",
+                value: AVATAR_URL + "/" + value.name + "/" + encodeURI(avatarOptions.seed) + ".png",
                 tooltip: `Designer: ${value.designer}, License: ${value.license.name}`,
               }}
               title={value.name}

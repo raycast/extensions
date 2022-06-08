@@ -11,7 +11,7 @@ export function ActionToMultiAvatar(props: { avatarURL: string }) {
         <Action.OpenInBrowser
           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
           title="Show Avatar in Browser"
-          url={avatarURL}
+          url={encodeURI(avatarURL)}
         />
 
         <Action.OpenInBrowser

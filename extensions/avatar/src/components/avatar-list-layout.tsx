@@ -81,7 +81,7 @@ export function AvatarListLayout(props: {
                   avatarOptions={avatarOptions}
                   setAvatarOptions={setAvatarOptions}
                   avatarInfo={multiAvatarInfo}
-                  advancedOptions={false}
+                  advancedOptions={true}
                 />
                 <ActionToMultiAvatar avatarURL={multiAvatarInfo.svg} />
               </ActionPanel>
