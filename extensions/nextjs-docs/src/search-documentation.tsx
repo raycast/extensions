@@ -22,7 +22,7 @@ export default function main() {
   }, []);
 
   return (
-    <List searchText="Search documentation..." isLoading={topics.length === 0}>
+    <List searchBarPlaceholder="Search documentation..." isLoading={topics.length === 0}>
       {topics.map((topic) => (
         <List.Item
           key={topic.sha}
