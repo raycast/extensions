@@ -1,3 +1,3 @@
-# Shane's Extension
+# Nature Sound Extension
 
-Test extension to see how this works
+Play nature sounds directly from Raycast

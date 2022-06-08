@@ -1,3 +1,3 @@
 # Nature Sounds Changelog
 
-## [Initial Version] - 2022-05-23
+## [Initial Version] - {PR_MERGE_DATE}
