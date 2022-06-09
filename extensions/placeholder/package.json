@@ -39,7 +39,7 @@
         {
           "name": "itemSize",
           "type": "dropdown",
-          "description": "Set the size of the image items.",
+          "description": "Set the size of the image items. (Only works with Grid layout)",
           "required": false,
           "title": "Image Item Size",
           "default": "medium",
