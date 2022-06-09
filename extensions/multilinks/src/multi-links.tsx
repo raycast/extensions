@@ -6,10 +6,12 @@ import { LinkItem } from "./types";
 
 export default function () {
   const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchLinks = async function () {
     const links = await Service.getLinks();
     setLinks([...links]);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function () {
 
   return (
     <List
+      isLoading={loading}
       actions={
         <ActionPanel>
           <Action.Push title="Create Link" target={<CreateForm onCreate={fetchLinks} />} />
@@ -50,9 +53,10 @@ export default function () {
         <List.Item
           key={link.name}
           title={link.name}
+          subtitle={`${link.links.split("\n").length} links`}
           actions={
             <ActionPanel>
-              <Action title="Select" onAction={() => openLinks(link)} icon={{ source: Icon.Globe }} />
+              <Action title="Open Links" onAction={() => openLinks(link)} icon={{ source: Icon.Globe }} />
               <Action.Push
                 title="Edit"
                 target={<CreateForm data={link} onCreate={fetchLinks} />}
