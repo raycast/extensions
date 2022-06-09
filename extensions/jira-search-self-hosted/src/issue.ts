@@ -34,7 +34,7 @@ interface Issues {
 const fields = "summary,issuetype,status";
 
 function statusIcon(status: IssueStatus): Image {
-  const icon = (source: Image.ImageSource, tintColor?: Color.ColorLike) => ({
+  const icon = (source: Image.Source, tintColor?: Color.ColorLike) => ({
     source,
     tintColor,
   });
