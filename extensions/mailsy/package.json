@@ -20,7 +20,7 @@
     },
     {
       "name": "mails",
-      "title": "Fetch E-mails",
+      "title": "Fetch Emails",
       "subtitle": "Mailsy",
       "description": "Fetch all emails",
       "mode": "view"
