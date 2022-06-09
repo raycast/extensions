@@ -65,7 +65,10 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Chain ID" text={explorer.chainId.toString()} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Testnet" text={explorer.testNet ? "Testnet" : "Mainnet"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Network Type"
+                      text={explorer.testNet ? "Testnet" : "Mainnet"}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                   </List.Item.Detail.Metadata>
                 }
