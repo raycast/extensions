@@ -21,6 +21,8 @@ export default function Command() {
   const [selectedExplorer, setSelectedExplorer] = useState(defaultExplorer);
   const [search, setSearch] = useState("");
   const [clipboard, setClipboard] = useState("");
+  const [loaded, setLoaded] = useState({ clipboard: false, explorer: false });
+
   const handleSearchTextChange = (search: string) => {
     setSearch(search);
   };
@@ -37,6 +39,7 @@ export default function Command() {
       const clipboard = (await Clipboard.readText()) || "";
       setClipboard(clipboard);
       handleSearchTextChange(clipboard);
+      setLoaded({ ...loaded, clipboard: true });
     };
     getClipboard();
   }, [selectedExplorer]);
@@ -52,6 +55,7 @@ export default function Command() {
         } catch (error) {
           console.log(error);
         }
+        setLoaded({ ...loaded, explorer: true });
       }
     };
     setFromStorage();
@@ -81,6 +85,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={!(loaded.clipboard || loaded.explorer)}
       searchBarPlaceholder="Search by Address / Transaction Hash / Block / Token"
       onSearchTextChange={handleSearchTextChange}
       searchBarAccessory={
