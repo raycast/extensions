@@ -55,8 +55,8 @@ export default function Command() {
         } catch (error) {
           console.log(error);
         }
-        setLoaded((prev) => ({ ...prev, explorer: true }));
       }
+      setLoaded((prev) => ({ ...prev, explorer: true }));
     };
     setFromStorage();
   }, []);
