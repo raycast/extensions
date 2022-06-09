@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { QuicklinkDefinitions } from "./utils/Defines";
 
 const detailText = `# Drafts Quicklink Helper
