@@ -59,7 +59,7 @@ export default function Command() {
         <Exchange currencyResult={state.currencyResult} state={state} setState={setState} />
       ) : (
         <List.EmptyView
-          icon={{ source: "../assets/spare1.png" }}
+          icon={{ source: "../assets/start.png" }}
           title="Type something to get exchange result?"
           description="Example: '10', '1+2' or '1 in USD'"
         />
