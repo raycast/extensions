@@ -158,6 +158,118 @@ export const getSections = async (url: string) => {
     return sections
 }
 
+export const getMemberFunctions = async (url: string) => {
+    const result = await axios.get("https://en.cppreference.com" + url)
+        .catch(err => {throw(err)})
+    const html = result.data
+    const $ = cheerio.load(html)
+
+    const elements = $('#mw-content-text').children()
+
+    let sections:any = [{
+        title: "",
+        functions: [],
+    }]
+    let atFunctions = false
+
+    for (const element of elements) {
+        const tag = element.tagName
+        if (tag === "h3") {
+            if ($(element).text().trim() === "[edit] Member functions") {
+                atFunctions = true
+            }
+            else if ($(element).text().trim() === "[edit] Non-member functions") {
+                sections.push({
+                    title: "Non-Member Functions",
+                    functions: [],
+                })
+            }
+        }
+        else if (atFunctions && element.attributes[0]?.value === "t-dsc-begin") {
+            for (const body of  $(element).children()) {
+                const rows = $(body).find('tr')
+                for (const row of rows) {
+                    let func:any = {}
+                    $(row).find('td').each((i, cell) => {
+                        if (i === 0) {
+                            if ($(cell).find('h5').length === 1) {
+                                const section = formatHeader($(cell).find('h5').text())
+                                sections.push({
+                                    title: section,
+                                    functions: [],
+                                })
+                            }
+                            else {
+                                const lines = $(cell).find('.t-lines').children().filter((i, line) => {
+                                    const text = $(line).text().trim()
+                                    return text.length > 0 && !text.includes("C++")
+                                })
+                                if (lines.length === 1) {
+                                    func.name = formatFunctionName($(lines[0]).text())
+                                    func.url = $(cell).find('a').attr('href')
+                                }
+                                else if (lines.length > 1) {
+                                    let name = ""
+                                    let link = $(cell).find('a')
+                                    link.find('span').each((i, span) => {
+                                        let text = formatFunctionName($(span).text())
+                                        if (i > 0 && text.length > 0) {
+                                            if (i > 1 && text.includes("operator")) {
+                                                text = text.replaceAll("operator", "")
+                                            }
+                                            name += text + ", "
+                                        }
+                                    })
+                                    func.name = name.trim().slice(0, -1)
+                                    func.url = link.attr('href')
+                                }
+                            }
+                        }
+                        else if (i === 1) {
+                            func.description = formatDescription($(cell).text())
+                        }
+                    })
+                    sections[sections.length - 1].functions.push(func)
+                }
+            }
+        }
+    }
+
+    for (const section of sections) {
+        section.functions = section.functions.filter(func => func.name)
+    }
+    
+    return sections
+}
+
+const getFunctionMarkdown = async (func:any) => {
+    const result = await axios.get("https://en.cppreference.com" + func.url)
+        .catch(err => {throw(err)})
+    const html = result.data
+    const $ = cheerio.load(html)
+
+    const elements = $('#mw-content-text')
+
+    const definitions = $(elements).find('.t-dcl-begin').find('.t-dcl-rev')
+    const descriptions = $(elements).find('.t-li1')
+
+    console.log(definitions.length, descriptions.length)
+
+    for (const definition of definitions) {
+        const text = "```" + $(definition).text()
+            .replaceAll(/[(].*C\+\+.*[)]/g, "")  // Remove (until/since C++..)
+            .replaceAll(/[(]\d.*[)]/g, "")       // Remove (1), (2), etc
+            .replaceAll(/\n[\n ]+/g, "\n")       // Remove extra newlines
+            .replaceAll(/\s\s+/g, " ")           // Remove extra spaces
+            .replaceAll(/[ ]([)>])/g, "$1")      // Remove space before )
+            .replaceAll(/([<(])[ ]/g, "$1")      // Remove space after (
+        + "```"
+    }
+
+}
+
+
+// helper functions for formatting
 const formatTitle = (title: string) => {
     return title.replaceAll(/_/g, ' ').replace(/std::/g, '')
         .replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())))
@@ -189,4 +301,12 @@ const formatDescription = (description: string) => {
         description += "."
     }
     return description
+}
+
+const formatFunctionName = (name: string) => {
+    return name.replace(/[(]std::.*[)]/g, "")
+        .replace("(size_type)", "")
+        .replace("(", "")
+        .replace(")", "")
+        .trim()
 }

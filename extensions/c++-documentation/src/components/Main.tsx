@@ -11,11 +11,15 @@ export const Main = (props: {
 
   return (
     <List 
+      isShowingDetail={state === 2}
       searchBarAccessory={
         <List.Dropdown 
           tooltip="See Documentation"
           storeValue={true}
-          onChange={(state) => {setState(parseInt(state))}}
+          onChange={(state) => {
+            setState(parseInt(state))
+            setLoading(true)
+          }}
         >
           <List.Dropdown.Item title="See Full Documentation" value="1" />
           <List.Dropdown.Item title="See Member Functions" value="2" />
@@ -23,8 +27,11 @@ export const Main = (props: {
       }
       isLoading={loading}
     >
-      {state === 1 ? <Documentation url={props.url} setLoading={setLoading}/> :
-       state === 2 ? <MemberFunctions url={props.url} setLoading={setLoading}/> : undefined}
+      {
+        state === 1 ? <Documentation url={props.url} setLoading={setLoading}/> :
+        state === 2 ? <MemberFunctions url={props.url} setLoading={setLoading}/> : 
+        undefined
+      }
     </List>
   )
 }

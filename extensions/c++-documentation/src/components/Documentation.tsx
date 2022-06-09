@@ -7,7 +7,6 @@ export const Documentation = (props: {
     setLoading: (loading: boolean) => void
   }) => {
     const [sections, setSections]:any = useState([])
-    // const [loading, setLoading] = useState(true)
   
     useEffect(() => {
       getSections(props.url)
@@ -18,11 +17,13 @@ export const Documentation = (props: {
         .catch((err) => {
           showToast(Toast.Style.Failure, err.message)
         })
-        
+      return () => {
+        setSections([])
+      }
     }, [])
   
     return (
-      sections?.map((section, index) => (
+      sections ? sections.map((section, index) => (
         <List.Item 
           title={section.title}
           key={index}
@@ -40,7 +41,7 @@ export const Documentation = (props: {
               <ActionPanel.Section title="General">
                 <Action.OpenInBrowser 
                   title="Open in Browser" 
-                  icon={{ source: "../assets/cpp-icon.png", tintColor: Color.PrimaryText  }}
+                  icon={{ source: "../assets/cpp-icon.png", tintColor: Color.PrimaryText }}
                   url={`https://en.cppreference.com${props.url}`} 
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
@@ -49,5 +50,5 @@ export const Documentation = (props: {
           }
         />
       ))
-    )
+    : undefined) 
 }
