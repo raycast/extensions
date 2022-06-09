@@ -41,6 +41,7 @@
     {
       "name": "workspace-list",
       "title": "Open Drafts Workspace",
+      "subtitle": "Drafts",
       "description": "open stored quick access workspaces",
       "mode": "view"
     },
