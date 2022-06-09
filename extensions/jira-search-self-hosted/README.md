@@ -10,7 +10,7 @@ search extension built by sven to work with JIRA server instances.
 - Find issues by text and project and type, where the text search is much more tolerant than the one built in to Raycast.
   - Filter issues by project using `@project` syntax.
   - Filter issue by type using `#issueType` syntax.
-  - Filter issue by status using `:status` syntax.
+  - Filter issue by status using `!status` syntax.
   - For example enter `pdf export @dev @it #bug #story` to find all issues which contain words starting with "pdf" and "export" and which are in the "DEV" or "IT" project and which are of type "Bug" or "Story."
   - Find issue directly by issue key (for example `DEV-1234`).
 - Find projects by title.
