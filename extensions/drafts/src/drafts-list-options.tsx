@@ -15,6 +15,7 @@ import Style = Toast.Style;
 import { LocalStorage } from "@raycast/api";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
 import { CallbackBasUrls } from "./utils/Defines";
+import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
 class Draft {
   public title = "";
@@ -166,6 +167,9 @@ function AddDraftForm(props: { onCreate: (draft: Draft) => void }) {
 }
 
 export default function Command() {
+  // app installation check (shows Toast if Drafts is not installed)
+  checkAppInstallation();
+
   const [drafts, setDrafts] = useState<Draft[]>([]);
 
   async function readStoredDrafts() {

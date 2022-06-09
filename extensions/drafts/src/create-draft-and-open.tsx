@@ -2,6 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast, Toast
 import Style = Toast.Style;
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
 import { CallbackBasUrls } from "./utils/Defines";
+import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
 interface CommandForm {
   content: string;
@@ -9,6 +10,8 @@ interface CommandForm {
 }
 
 export default function Command() {
+  // app installation check (shows Toast if Drafts is not installed)
+  checkAppInstallation();
   async function handleSubmit(values: CommandForm) {
     if (values.content === "") {
       await showToast({

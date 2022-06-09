@@ -16,6 +16,7 @@ import open from "open";
 import { LocalStorage } from "@raycast/api";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
 import { CallbackBasUrls } from "./utils/Defines";
+import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
 interface DraftsAction {
   actionName: string;
@@ -88,6 +89,9 @@ function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {
 }
 
 export default function Command() {
+  // app installation check (shows Toast if Drafts is not installed)
+  checkAppInstallation();
+
   const [actions, setActions] = useState<DraftsAction[]>([]);
 
   async function readStoredActions() {

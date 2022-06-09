@@ -15,6 +15,8 @@ To use your created Quicklinks just search for the names you selected and e.g. t
 `;
 
 export default function Command() {
+  // app installation check (shows Toast if Drafts is not installed)
+  checkAppInstallation();
   return (
     <Detail
       markdown={detailText}

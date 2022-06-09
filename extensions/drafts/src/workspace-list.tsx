@@ -12,6 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
+import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
 import { CallbackBasUrls } from "./utils/Defines";
 import Style = Toast.Style;
@@ -54,6 +55,7 @@ function AddWorkspaceForm(props: { onCreate: (workspace: DraftsWorkspace) => voi
 }
 
 export default function Command() {
+  checkAppInstallation();
   const [workspaces, setWorkspaces] = useState<DraftsWorkspace[]>([]);
 
   async function readStoredWorkspaces() {

@@ -8,6 +8,12 @@ export const CallbackBasUrls = {
   DICTATE: "drafts://x-callback-url/dictate?",
 };
 
+export const AppInstallCheckDefines = {
+  APP_NAME: "Drafts",
+  APP_BUNDLE_ID: "com.agiletortoise.Drafts-OSX",
+  APP_DOWNLOAD_LINK: "https://getdrafts.com",
+};
+
 type QuickLinkDefinition = {
   name: string;
   buttonDescription: string;
