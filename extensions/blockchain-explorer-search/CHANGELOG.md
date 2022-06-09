@@ -1,3 +1,3 @@
 # Etherscan Changelog
 
-## [Initial Version] - 2022-05-26
+## [Initial Version] - 2022-06-09
