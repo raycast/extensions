@@ -72,7 +72,7 @@ export default function Command() {
       accessories={clipboard === search ? [{ text: "From clipboard", icon: Icon.Clipboard }] : []}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open link in Browser" url={match.path} />
+          <Action.OpenInBrowser url={match.path} />
           <Action.CreateQuicklink
             quicklink={{ link: match.path, name: `${match.explorer.chainName}: ${match.title} — ` }}
           />
