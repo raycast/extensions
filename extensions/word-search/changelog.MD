@@ -1,6 +1,6 @@
 # Word Search Changelog
 
-## [Added new Word Search modes] - 2022-06-01
+## [Added new Word Search modes] - 2022-06-09
 
 - Add two new actions: search for adjectives, and search for words with missing letters
 - Update screenshots
