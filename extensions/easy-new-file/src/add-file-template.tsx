@@ -2,7 +2,6 @@ import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showT
 import React, { useEffect, useState } from "react";
 import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
-import { refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
@@ -35,7 +34,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
             icon={Icon.TextDocument}
             onAction={async () => {
               await addFileTemplate(name, path);
-              setRefresh(refreshNumber());
+              setRefresh(Date.now());
             }}
           />
 

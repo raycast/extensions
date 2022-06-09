@@ -7,7 +7,7 @@ import React from "react";
 import { createNewFileByTemplate } from "../new-file-here";
 import { TemplateType } from "../types/file-type";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
-import { alertDialog, refreshNumber } from "../hooks/hooks";
+import { alertDialog } from "../hooks/hooks";
 import fse from "fs-extra";
 
 export function ActionNewTemplateFileHere(props: {
@@ -76,7 +76,7 @@ export function ActionNewTemplateFileHere(props: {
               async () => {
                 await showToast(Toast.Style.Animated, "Removing template...");
                 fse.removeSync(template.path);
-                setRefresh(refreshNumber());
+                setRefresh(Date.now());
                 await showToast(Toast.Style.Success, "Remove template success!");
               }
             );

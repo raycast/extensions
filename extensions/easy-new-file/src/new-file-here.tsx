@@ -1,6 +1,6 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { environment, getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
+import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import React, { useState } from "react";
 import { isEmpty } from "./utils/common-utils";
 import { FileType, TemplateType } from "./types/file-type";
@@ -11,11 +11,10 @@ import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
 
 export default function NewFileHere() {
   const { layout } = getPreferenceValues<Preferences>();
-  const templateFolderPath = environment.supportPath + "/templates";
   const [refresh, setRefresh] = useState<number>(0);
 
   //hooks
-  const { templateFiles, isLoading } = getTemplateFile(templateFolderPath, refresh);
+  const { templateFiles, isLoading } = getTemplateFile(refresh);
 
   return layout === "List" ? (
     <NewFileHereListLayout isLoading={isLoading} templateFiles={templateFiles} setRefresh={setRefresh} />

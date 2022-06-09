@@ -205,12 +205,24 @@
               "value": "html"
             },
             {
+              "title": "SVG",
+              "value": "svg"
+            },
+            {
               "title": "Apple",
               "value": "applescript"
             },
             {
+              "title": "Groovy",
+              "value": "groovy"
+            },
+            {
               "title": "Perl",
               "value": "pl"
+            },
+            {
+              "title": "PHP",
+              "value": "php"
             },
             {
               "title": "Python",
@@ -223,10 +235,6 @@
             {
               "title": "Shell",
               "value": "sh"
-            },
-            {
-              "title": "SVG",
-              "value": "svg"
             }
           ]
         },

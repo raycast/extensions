@@ -1,3 +1,5 @@
+import { environment } from "@raycast/api";
+
 export const imgExt = [
   ".cr2",
   ".cr3",
@@ -18,3 +20,5 @@ export const imgExt = [
   ".tiff",
   ".webp",
 ];
+
+export const templateFolderPath = environment.supportPath + "/templates";

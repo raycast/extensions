@@ -24,12 +24,13 @@ export function ActionNewFileHere(props: {
           try {
             await createNewFile(fileType, await getFinderPath());
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+            await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
           }
         }}
       />
       <Action.Push
         title="New File with Name"
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.TextDocument}
         target={<NewFileWithName newFileType={newFileType} templateFiles={templateFiles} />}
       />
@@ -41,7 +42,7 @@ export function ActionNewFileHere(props: {
           try {
             await createNewFile(fileType, `${homedir()}/Desktop/`);
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+            await showToast(Toast.Style.Failure, "Failed to create file.", String(e));
           }
         }}
       />

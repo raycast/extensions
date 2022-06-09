@@ -13,7 +13,7 @@ export function NewFileHereItem(props: {
   const { layout, fileType, newFileType, templateFiles, setRefresh } = props;
   return layout === "List" ? (
     <List.Item
-      keywords={[fileType.extension]}
+      keywords={fileType.keywords}
       icon={{ source: fileType.icon }}
       title={{ value: fileType.name, tooltip: fileType.name + "." + fileType.extension }}
       actions={
@@ -27,7 +27,7 @@ export function NewFileHereItem(props: {
     />
   ) : (
     <Grid.Item
-      keywords={[fileType.extension]}
+      keywords={fileType.keywords}
       content={{ value: fileType.icon, tooltip: fileType.name + "." + fileType.extension }}
       title={fileType.name}
       subtitle={fileType.extension}

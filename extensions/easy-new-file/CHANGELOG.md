@@ -2,8 +2,9 @@
 
 ## [Add new file layout options] - {PR_MERGE_DATE}
 
-- Add new file layout options: List or Grid.
-- Optimize file icons.
+- Add new file layout options: List or Grid
+- Optimize file icons
+- Add three new file types
 
 ## [Add New File with Text command] - 2022-06-04
 
