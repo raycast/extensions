@@ -43,7 +43,7 @@
     {
       "name": "itemSize",
       "type": "dropdown",
-      "description": "Set the size of the avatar items.",
+      "description": "Set the size of the avatar items. (Only works with Grid layout)",
       "required": false,
       "title": "Avatar Item Size",
       "default": "small",
