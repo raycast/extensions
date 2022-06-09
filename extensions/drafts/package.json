@@ -63,6 +63,7 @@
     {
       "name": "quicklink-helper",
       "title": "Create Drafts Quicklink",
+      "subtitle": "Drafts",
       "description": "easily create Raycast Quicklinks for Drafts",
       "mode": "view"
     }
