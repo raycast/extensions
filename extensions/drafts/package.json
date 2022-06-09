@@ -19,7 +19,8 @@
     },
     {
       "name": "open-new-draft",
-      "title": "Create blank Draft",
+      "title": "Create Blank Draft",
+      "subtitle": "Drafts",
       "description": "opens a new empty draft in Drafts app",
       "mode": "no-view"
     },
