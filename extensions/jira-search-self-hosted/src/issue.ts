@@ -115,5 +115,5 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project, !status and #issueType")
+  return SearchCommand(searchIssues, "Search issues by text, @project, #issueType and !status")
 }
