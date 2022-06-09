@@ -1,5 +1,10 @@
 # Docker Changelog
 
+## [Improvement] - 2022-06-09
+
+ - Added ability to Copy Container ID
+ - Added container details metadata
+
 ## [Fix] - 2022-05-16
 
 Fixes Manage Images command
