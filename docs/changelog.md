@@ -6,7 +6,7 @@
 
 The `<Grid />` component’s made its way to our API. It’s perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component  for smooth adoption.
 
-![](.gitbook/assets/changelog-hello-world.png)
+![](.gitbook/assets/grid.png)
 
 ### 🐞 Fixes
 
