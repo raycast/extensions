@@ -53,7 +53,7 @@ function isIssueKey(query: string): boolean {
 function buildJql(query: string): string {
   const spaceAndInvalidChars = /[ "]/
 
-  const statusRegex = /\!([a-z0-9_-]+|"[a-z0-9_ -]+")/ig
+  const statusRegex = /!([a-z0-9_-]+|"[a-z0-9_ -]+")/ig
   const statusMatchingGroup = Array.from(query.matchAll(statusRegex))
   const statuus = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ''))
   
