@@ -123,10 +123,29 @@ function RemoveDraft(props: { onDelete: () => void }) {
 function AddDraftForm(props: { onCreate: (draft: Draft) => void }) {
   const { pop } = useNavigation();
 
-  function handleSubmit(values: { title: string; uuid: string; prefix: string; preferesPrepend: boolean }) {
-    // props.onCreate({ title: values.mdLink, uuid });
-    props.onCreate(new Draft(values.title, values.uuid, values.prefix, values.preferesPrepend));
-    pop();
+  async function handleSubmit(values: { title: string; uuid: string; prefix: string; preferesPrepend: boolean }) {
+    let isValidInput = true;
+    let errorTitle = "";
+    let errorMessage = "";
+    if(values.title.length == 0){
+      isValidInput = false;
+      errorTitle = "Title must not be empty!"
+    }
+    if(isValidInput && values.uuid.length == 0){
+      isValidInput = false;
+      errorTitle = "UUID must not be empty!"
+      errorMessage = "copy the UUID from an existing Draft"
+    }
+    if(isValidInput){
+      props.onCreate(new Draft(values.title, values.uuid, values.prefix, values.preferesPrepend));
+      pop();
+    } else {
+      await showToast({
+        style: Style.Failure,
+        title: errorTitle,
+        message: errorMessage
+      });
+    }
   }
 
   return (

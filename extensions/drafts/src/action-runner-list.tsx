@@ -64,9 +64,16 @@ function RemoveAction(props: { onDelete: () => void }) {
 function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {
   const { pop } = useNavigation();
 
-  function handleSubmit(values: { actionName: string; requiresInput: boolean }) {
-    props.onCreate({ actionName: values.actionName, requiresInput: values.requiresInput });
-    pop();
+  async function handleSubmit(values: { actionName: string; requiresInput: boolean }) {
+    if(values.actionName.length > 0){
+      props.onCreate({ actionName: values.actionName, requiresInput: values.requiresInput });
+      pop();
+    } else {
+      await showToast({
+        style: Style.Failure,
+        title: 'Action Name must not be empty!',
+      });
+    }
   }
 
   return (
