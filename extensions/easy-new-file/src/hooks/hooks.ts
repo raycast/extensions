@@ -17,6 +17,7 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
   const fetchData = useCallback(async () => {
     const _templateFiles: TemplateType[] = [];
     try {
+      fse.ensureDirSync(templateFolderPath);
       fse.readdirSync(templateFolderPath).forEach((file) => {
         if (!file.startsWith(".")) {
           const filePath = templateFolderPath + "/" + file;
@@ -31,7 +32,6 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
       });
     } catch (e) {
       console.error(String(e));
-      fse.mkdirSync(templateFolderPath);
     }
     setTemplateFiles(_templateFiles);
     setIsLoading(false);

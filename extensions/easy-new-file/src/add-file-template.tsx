@@ -4,7 +4,6 @@ import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-util
 import fse from "fs-extra";
 import { refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
-import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -118,17 +117,10 @@ const addFileTemplate = async (name: string, path: string) => {
         await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
         return;
       }
-      if (fse.existsSync(templateFolderPath)) {
-        fse.copyFileSync(path, desPath);
-      } else {
-        fse.mkdir(templateFolderPath, function (error) {
-          if (error) {
-            showToast(Toast.Style.Failure, String(error) + ".");
-            return false;
-          }
-          fse.copyFileSync(path, desPath);
-        });
-      }
+
+      fse.ensureDirSync(templateFolderPath);
+      fse.copyFileSync(path, desPath);
+
       await showHUD("Template added");
       await popToRoot({ clearSearchBar: false });
     } else {

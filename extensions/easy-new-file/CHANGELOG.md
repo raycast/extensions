@@ -1,5 +1,10 @@
 # Easy New File Changelog
 
+## [Add new file layout options] - {PR_MERGE_DATE}
+
+- Add new file layout options: List or Grid.
+- Optimize file icons.
+
 ## [Add New File with Text command] - 2022-06-04
 
 - Add **New File with Text** command: Create a new file with selected or clipboard text now.
