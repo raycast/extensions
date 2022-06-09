@@ -4,26 +4,19 @@ import { Clipboard, showHUD } from "@raycast/api";
 import path from "path";
 import fs from "fs/promises";
 
-const clearLocalStorage = async () => {
-  const account = {
-    email: "",
-    password: "",
-    token: "",
-    id: "",
-  };
+const checkLocalStorage = async () => {
+  const storage = await LocalStorage.allItems();
 
-  await LocalStorage.setItem("account", JSON.stringify(account));
+  if (!storage.account) {
+    return false;
+  }
+
+  return true;
 };
 
 export const createAccount = async () => {
-  const storage = await LocalStorage.allItems();
-
-  // parse storage
-  const account = JSON.parse(storage.account);
-
-  if (account.email) {
-    showHUD("Account Already Created");
-    return;
+  if (await checkLocalStorage()) {
+    return showHUD("Account already exists");
   }
 
   // get the available email domains
@@ -72,20 +65,23 @@ export const createAccount = async () => {
     return "Error creating account";
   }
 };
-export const fetchMessages = async () => {
-  // get all the items from local storage
-  const storage = await LocalStorage.allItems();
-  // parse storage
-  const account = JSON.parse(storage.account);
 
-  if (!account.email) {
+export const fetchMessages = async () => {
+  if (!(await checkLocalStorage())) {
+    showHUD("No account found");
+
     return false;
   }
+
+  const storage = await LocalStorage.allItems();
+
+  // parse the account object
+  const { token } = JSON.parse(storage.account);
 
   try {
     const { data } = await axios.get("https://api.mail.tm/messages", {
       headers: {
-        Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -97,24 +93,23 @@ export const fetchMessages = async () => {
   }
 };
 export const deleteAccount = async () => {
-  // get all the items from local storage
-  const storage = await LocalStorage.allItems();
-  // parse storage
-  const account = JSON.parse(storage.account);
-
-  if (!account.email) {
-    showHUD("Account not created");
-    return;
+  if (!(await checkLocalStorage())) {
+    showHUD("No account found");
+    return false;
   }
 
+  const storage = await LocalStorage.allItems();
+
+  const { token, id } = JSON.parse(storage.account);
+
   try {
-    await axios.delete(`https://api.mail.tm/accounts/${account.id}`, {
+    await axios.delete(`https://api.mail.tm/accounts/${id}`, {
       headers: {
-        Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    await clearLocalStorage();
+    await LocalStorage.clear();
 
     showHUD("Account deleted successfully");
   } catch (error) {
@@ -122,19 +117,20 @@ export const deleteAccount = async () => {
   }
 };
 export const ShowInfo = async () => {
-  // get all the items from local storage
-  const storage = await LocalStorage.allItems();
-  // parse storage
-  const account = JSON.parse(storage.account);
-
-  if (!account.email) {
+  if (!(await checkLocalStorage())) {
+    showHUD("No account found");
     return false;
   }
+
+  const storage = await LocalStorage.allItems();
+
+  const { token, id } = JSON.parse(storage.account);
+
   try {
     // get the account details
-    const { data } = await axios.get(`https://api.mail.tm/accounts/${account.id}`, {
+    const { data } = await axios.get(`https://api.mail.tm/accounts/${id}`, {
       headers: {
-        Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -150,15 +146,13 @@ export const openEmail = async (id: string) => {
   // parse storage
   const account = JSON.parse(storage.account);
 
-  if (!account.email) {
-    return false;
-  }
+  const { token } = account;
 
   try {
     // get the account details
     const { data } = await axios.get(`https://api.mail.tm/messages/${id}`, {
       headers: {
-        Authorization: `Bearer ${account.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
