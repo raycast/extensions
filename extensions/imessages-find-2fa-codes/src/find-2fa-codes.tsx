@@ -1,4 +1,4 @@
-import { Icon, List, getPreferenceValues, ActionPanel, Action, showHUD } from "@raycast/api";
+import { Icon, List, getPreferenceValues, ActionPanel, Action, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import path from "path";
 import { homedir } from "node:os";
@@ -198,13 +198,13 @@ export default function Command() {
   const setIcon = (type: string) => {
     switch (type) {
       case "unauthorized":
-        return Icon.Hammer;
+        return { source: Icon.Hammer, tintColor: Color.Blue };
       case "no-messages":
-        return Icon.MagnifyingGlass;
+        return { source: Icon.MagnifyingGlass, tintColor: Color.Blue };
       case "no-code":
-        return Icon.ExclamationMark;
+        return { source: Icon.ExclamationMark, tintColor: Color.Blue };
       case "loading":
-        return Icon.Eye;
+        return { source: Icon.Globe, tintColor: Color.Blue };
     }
   };
 
