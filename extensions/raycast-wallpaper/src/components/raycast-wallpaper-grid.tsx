@@ -1,35 +1,32 @@
-import { getPreferenceValues, List } from "@raycast/api";
+import { getPreferenceValues, Grid } from "@raycast/api";
 import React from "react";
 import { RaycastWallpaper } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
 
-export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpaper[] }) {
+export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpaper[] }) {
   const preferences = getPreferenceValues<Preferences>();
   const { raycastWallpapers } = props;
 
   return (
-    <List
-      isShowingDetail={raycastWallpapers.length !== 0}
+    <Grid
       isLoading={raycastWallpapers.length === 0}
+      itemSize={preferences.itemSize as Grid.ItemSize}
       searchBarPlaceholder={"Search pictures"}
     >
       <RaycastWallpaperEmptyView layout={preferences.layout} />
       {raycastWallpapers.map((value, index) => {
         return (
-          <List.Item
+          <Grid.Item
             id={index + ""}
             key={index + value.title}
-            icon={{ source: value.url.replace(".png", "-preview.png") }}
+            content={value.url.replace(".png", "-preview.png")}
             title={value.title}
-            detail={
-              <List.Item.Detail isLoading={false} markdown={`![](${value.url.replace(".png", "-preview.png")})`} />
-            }
             actions={<ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} />}
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
