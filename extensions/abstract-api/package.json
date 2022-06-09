@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "abstractApi",
+  "title": "Abstract API",
+  "description": "Automate routine dev work with Abstract's suite of APIs",
+  "icon": "command-icon.png",
+  "author": "andreaselia",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [{
+      "name": "ip-geolocation",
+      "title": "IP Geolocation",
+      "subtitle": "Abstract API",
+      "description": "The IP Geolocation allows you to look up the location, timezone, country details, and more of an IPv4 or IPv6 address.",
+      "mode": "view"
+    }, {
+      "name": "holidays",
+      "title": "Holidays",
+      "subtitle": "Abstract API",
+      "description": "Todo: description goes here.",
+      "mode": "view"
+    }, {
+      "name": "exchange-rates",
+      "title": "Exchange Rates",
+      "subtitle": "Abstract API",
+      "description": "Todo: description goes here.",
+      "mode": "view"
+    }, {
+      "name": "company-enrichment",
+      "title": "Company Enrichment",
+      "subtitle": "Abstract API",
+      "description": "Todo: description goes here.",
+      "mode": "view"
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "subtitle": "Abstract API",
+      "description": "The Time, Date, and Timezone API is the easiest way to find, convert, and manage time and timezone data across the world.",
+      "mode": "view"
+    },
+    {
+      "name": "avatars",
+      "title": "Avatars",
+      "subtitle": "Abstract API",
+      "description": "The User Avatar API, like all of Abstract's APIs, is organized around REST. It is designed to use predictable, resource-oriented URL's and to use HTTP status codes to indicate errors.",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot",
+      "title": "Screenshot",
+      "subtitle": "Abstract API",
+      "description": "Abstract's Website Screenshot API is a simple yet powerful REST API that allows you to request an image of a given URL.",
+      "mode": "view"
+    },
+    {
+      "name": "scrape",
+      "title": "Scrape",
+      "subtitle": "Abstract API",
+      "description": "Todo: description goes here.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [{
+      "name": "ipGeolocationApiKey",
+      "type": "password",
+      "required": true,
+      "title": "IP Geolocation API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "holidaysApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Holidays API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "exchangeRatesApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Exchange Rates API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "companyEnrichmentApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Company Enrichment API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "timezoneApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Timezone API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "avatarsApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Avatars API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "screenshotApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Screenshot API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    },
+    {
+      "name": "scrapeApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Scrape API Key",
+      "description": "You can find this API Key in the Abstract API Dashboard."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.26.1",
+    "fs": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
