@@ -34,9 +34,7 @@ export async function searchBoards(query: string): Promise<ResultItem[]> {
     return resultDetails;
   };
 
-  return result.values && result.values.length > 0
-    ? Promise.all(result.values.map(mapResult))
-    : [];
+  return result.values && result.values.length > 0 ? Promise.all(result.values.map(mapResult)) : [];
 }
 
 export default function SearchBoardCommand() {
