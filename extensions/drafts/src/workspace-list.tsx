@@ -68,6 +68,7 @@ export default function Command() {
   checkAppInstallation();
   
   const [workspaces, setWorkspaces] = useState<DraftsWorkspace[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function readStoredWorkspaces() {
     const retrievedStoredWorkspaces = await LocalStorage.getItem<string>("stored-workspaces");
@@ -80,6 +81,7 @@ export default function Command() {
         })
       );
     }
+    setIsLoading(false)
   }
   async function updateStoredWorkspaceNames(newWorkspaces: DraftsWorkspace[]) {
     await LocalStorage.setItem(
@@ -129,6 +131,7 @@ export default function Command() {
           <AddWorkspaceAction onCreate={handleAddWorkspace} />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
       <List.EmptyView
         actions={

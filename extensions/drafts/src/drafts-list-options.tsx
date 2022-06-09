@@ -190,6 +190,7 @@ export default function Command() {
   checkAppInstallation();
 
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function readStoredDrafts() {
     const retrievedStoredDrafts = await LocalStorage.getItem<string>("stored-drafts");
@@ -197,6 +198,7 @@ export default function Command() {
       const drafts: Draft[] = JSON.parse(retrievedStoredDrafts);
       setDrafts(drafts);
     }
+    setIsLoading(false)
   }
   async function updateStoredDraftNames(newDrafts: Draft[]) {
     const stringifiedDrafts = JSON.stringify(newDrafts);
@@ -276,6 +278,7 @@ export default function Command() {
           <AddDraft onCreate={handleAddDraft} />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
       <List.EmptyView
         actions={

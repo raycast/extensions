@@ -100,6 +100,7 @@ export default function Command() {
   checkAppInstallation();
 
   const [actions, setActions] = useState<DraftsAction[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function readStoredActions() {
     const retrievedStoredActions = await LocalStorage.getItem<string>("stored-actions");
@@ -107,6 +108,7 @@ export default function Command() {
       const draftsActions: DraftsAction[] = JSON.parse(retrievedStoredActions);
       setActions(draftsActions);
     }
+    setIsLoading(false)
   }
   async function updateStoredActionNames(newActions: DraftsAction[]) {
     const stringifiedActions = JSON.stringify(newActions);
@@ -189,6 +191,7 @@ export default function Command() {
           <AddAction onCreate={handleAddAction} />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
       <List.EmptyView
         actions={
