@@ -34,8 +34,8 @@
     },
     {
       "name": "info",
-      "title": "Account Information",
-      "subtitle": "Temporary Email account",
+      "title": "Temporary Account Information",
+      "subtitle": "Mailsy",
       "description": "About Temporary Email",
       "mode": "view"
     }
