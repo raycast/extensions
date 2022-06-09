@@ -103,7 +103,7 @@
 /extensions/displayplacer                            @eluce2
 /extensions/dock                                     @pradeepb28
 /extensions/dock-tinker                              @koinzhang
-/extensions/docker                                   @priithaamer
+/extensions/docker                                   @priithaamer @gebeto
 /extensions/dockerhub                                @k8scat
 /extensions/domainr                                  @Rawnly
 /extensions/doppler-share-secrets                    @thomaspaulmann
