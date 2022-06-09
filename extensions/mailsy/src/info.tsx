@@ -41,7 +41,6 @@ export default function Command() {
       <List.Item icon={Icon.Dot} key={info.id} title={"ID:"} subtitle={info.id} />
       <List.Item
         icon={Icon.Envelope}
-        key={info.address}
         title={"Email:"}
         subtitle={info.address}
         actions={
@@ -50,12 +49,7 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      <List.Item
-        icon={Icon.Calendar}
-        key={info.createdAt}
-        title={"CreatedAt:"}
-        subtitle={new Date(info.createdAt).toLocaleString()}
-      />
+      <List.Item icon={Icon.Calendar} title={"CreatedAt:"} subtitle={new Date(info.createdAt).toLocaleString()} />
     </List>
   );
 }
