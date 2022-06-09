@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "imessages - find-2fa-codes",
+  "title": "IMessages - Find 2FA Codes",
+  "description": "Find 2 factor Authentication Codes in your recent IMessages ",
+  "icon": "icon.png",
+  "author": "BalliAsghar",
+  "categories": [
+    "Communication",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-2fa-codes",
+      "title": "Find 2FA Codes",
+      "description": "Find 2FA Codes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "minutes",
+      "title": "How many minutes to look back?",
+      "description": "How many minutes to look back?",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
