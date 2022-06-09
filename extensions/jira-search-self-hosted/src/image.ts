@@ -25,10 +25,7 @@ function filePath(image: ImageSpec): string {
   return path.join(imageDir, image.imageType, `${image.key}.png`);
 }
 
-async function downloadImage(
-  image: ImageSpec,
-  filePath: string
-): Promise<string> {
+async function downloadImage(image: ImageSpec, filePath: string): Promise<string> {
   const { dir } = path.parse(filePath);
   await fs.mkdir(dir, { recursive: true });
   const response = await jiraFetch(image.urlPath);
@@ -44,8 +41,7 @@ function parseImageUrl(url: string): ImageSpec {
   };
   const matcher: UrlMatcher[] = [
     {
-      pattern:
-        /.*\/universal_avatar\/view\/type\/(?<imageType>[a-z]+)\/avatar\/(?<key>[0-9]+)/i,
+      pattern: /.*\/universal_avatar\/view\/type\/(?<imageType>[a-z]+)\/avatar\/(?<key>[0-9]+)/i,
       spec: (g) => ({
         urlPath: `rest/api/3/universal_avatar/view/type/${g.imageType}/avatar/${g.key}?format=png&size=medium`,
         imageType: g.imageType,
@@ -63,17 +59,13 @@ function parseImageUrl(url: string): ImageSpec {
   ];
   const imgSpec = matcher
     .map((m) => ({ matcher: m, match: url.match(m.pattern) }))
-    .map((m) =>
-      m.match && m.match.groups ? m.matcher.spec(m.match.groups) : undefined
-    )
+    .map((m) => (m.match && m.match.groups ? m.matcher.spec(m.match.groups) : undefined))
     .find((imgSpec) => imgSpec !== undefined);
   if (!imgSpec) throw new Warning(`Unexpected icon path ${url}`);
   return imgSpec;
 }
 
-export async function jiraImage(
-  url: string
-): Promise<Image.ImageLike | undefined> {
+export async function jiraImage(url: string): Promise<Image.ImageLike | undefined> {
   try {
     const imageSpec = parseImageUrl(url);
     const path = filePath(imageSpec);

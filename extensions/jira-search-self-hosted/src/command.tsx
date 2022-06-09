@@ -8,15 +8,10 @@ export type ResultItem = List.Item.Props & {
 };
 type SearchFunction = (query: string) => Promise<ResultItem[]>;
 
-const markdownLink = (item: ResultItem) =>
-  `[${item.linkText ?? item.title}](${item.url})`;
-const htmlLink = (item: ResultItem) =>
-  `<a href="${item.url}">${item.linkText ?? item.title}</a>`;
+const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${item.url})`;
+const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`;
 
-export function SearchCommand(
-  search: SearchFunction,
-  searchBarPlaceholder?: string
-) {
+export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<ResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,14 +48,8 @@ export function SearchCommand(
             <Action.CopyToClipboard content={item.url} title="Copy URL" />
           </ActionPanel.Section>
           <ActionPanel.Section title="Link">
-            <Action.CopyToClipboard
-              content={markdownLink(item)}
-              title="Copy Markdown Link"
-            />
-            <Action.CopyToClipboard
-              content={htmlLink(item)}
-              title="Copy HTML Link"
-            />
+            <Action.CopyToClipboard content={markdownLink(item)} title="Copy Markdown Link" />
+            <Action.CopyToClipboard content={htmlLink(item)} title="Copy HTML Link" />
           </ActionPanel.Section>
         </ActionPanel>
       }

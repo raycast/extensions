@@ -58,16 +58,12 @@ function buildJql(query: string): string {
 
   const statusRegex = /!([a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
   const statusMatchingGroup = Array.from(query.matchAll(statusRegex));
-  const statuus = statusMatchingGroup.map((item) =>
-    item[1].replace(/^"|"$/g, "")
-  );
+  const statuus = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
 
   console.log("Status: ", statuus);
   query = query.replace(statusRegex, "");
 
-  const terms = query
-    .split(spaceAndInvalidChars)
-    .filter((term) => term.length > 0);
+  const terms = query.split(spaceAndInvalidChars).filter((term) => term.length > 0);
 
   const collectPrefixed = (prefix: string, terms: string[]): string[] =>
     terms
@@ -92,9 +88,7 @@ function buildJql(query: string): string {
     ...textTerms.map((term) => `text~"${term}*"`),
   ];
 
-  const jql = jqlConditions
-    .filter((condition) => condition !== undefined)
-    .join(" AND ");
+  const jql = jqlConditions.filter((condition) => condition !== undefined).join(" AND ");
   return jql + " order by lastViewed desc";
 }
 
@@ -120,14 +114,9 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
     url: `${jiraUrl}/browse/${issue.key}`,
     linkText: `${issue.key}: ${issue.fields.summary}`,
   });
-  return result.issues && result.issues.length > 0
-    ? Promise.all(result.issues.map(mapResult))
-    : [];
+  return result.issues && result.issues.length > 0 ? Promise.all(result.issues.map(mapResult)) : [];
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(
-    searchIssues,
-    "Search issues by text, @project, #issueType and !status"
-  );
+  return SearchCommand(searchIssues, "Search issues by text, @project, #issueType and !status");
 }

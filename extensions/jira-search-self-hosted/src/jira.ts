@@ -3,8 +3,7 @@ import fetch, { FetchError, Response } from "node-fetch";
 import { ErrorText, PresentableError } from "./exception";
 import * as https from "https";
 
-const prefs: { domain: string; token: string; unsafeHTTPS: boolean } =
-  getPreferenceValues();
+const prefs: { domain: string; token: string; unsafeHTTPS: boolean } = getPreferenceValues();
 export const jiraUrl = `https://${prefs.domain}`;
 
 const headers = {
@@ -51,47 +50,30 @@ export async function jiraFetch(
   statusErrors?: StatusErrors
 ): Promise<Response> {
   const paramKeys = Object.keys(params);
-  const query = paramKeys
-    .map((key) => `${key}=${encodeURI(params[key])}`)
-    .join("&");
+  const query = paramKeys.map((key) => `${key}=${encodeURI(params[key])}`).join("&");
   try {
     const sanitizedPath = path.startsWith("/") ? path.substring(1) : path;
-    const url =
-      `${jiraUrl}/${sanitizedPath}` + (query.length > 0 ? `?${query}` : "");
+    const url = `${jiraUrl}/${sanitizedPath}` + (query.length > 0 ? `?${query}` : "");
     const response = await fetch(url, init);
     throwIfResponseNotOkay(response, statusErrors);
     return response;
   } catch (error) {
-    if (error instanceof FetchError)
-      throw Error("Check your network connection");
+    if (error instanceof FetchError) throw Error("Check your network connection");
     else throw error;
   }
 }
 
 const defaultStatusErrors: StatusErrors = {
-  401: ErrorText(
-    "Jira Authentication failed",
-    "Check your Jira credentials in the preferences."
-  ),
+  401: ErrorText("Jira Authentication failed", "Check your Jira credentials in the preferences."),
 };
 
-function throwIfResponseNotOkay(
-  response: Response,
-  statusErrors?: StatusErrors
-) {
+function throwIfResponseNotOkay(response: Response, statusErrors?: StatusErrors) {
   if (!response.ok) {
     const status = response.status;
-    const definedStatus = statusErrors
-      ? { ...defaultStatusErrors, ...statusErrors }
-      : defaultStatusErrors;
+    const definedStatus = statusErrors ? { ...defaultStatusErrors, ...statusErrors } : defaultStatusErrors;
     const exactStatusError = definedStatus[status];
-    if (exactStatusError)
-      throw new PresentableError(
-        exactStatusError.name,
-        exactStatusError.message
-      );
-    else if (status >= 500)
-      throw new PresentableError("Jira Error", `Server error ${status}`);
+    if (exactStatusError) throw new PresentableError(exactStatusError.name, exactStatusError.message);
+    else if (status >= 500) throw new PresentableError("Jira Error", `Server error ${status}`);
     else throw new PresentableError("Jira Error", `Request error ${status}`);
   }
 }
