@@ -75,7 +75,7 @@
     {
       "name": "itemSize",
       "type": "dropdown",
-      "description": "Set the size of the photo items.",
+      "description": "Set the size of the photo items. (Only works with Grid layout)",
       "required": false,
       "title": "Photo Item Size",
       "default": "medium",

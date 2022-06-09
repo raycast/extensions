@@ -2,7 +2,7 @@
 
 ## [Add new photo layout options] - {PR_MERGE_DATE}
 
-- Add new wallpaper layout options: List or Grid.
+- Add new photo layout options: List or Grid.
 
 ## [Add Average Color and Description for photos] - 2022-05-08
 
