@@ -49,6 +49,7 @@
     {
       "name": "action-runner-list",
       "title": "Run Draft Action",
+      "subtitle": "Drafts",
       "description": "run stored quick access actions",
       "mode": "view"
     },
