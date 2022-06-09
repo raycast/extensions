@@ -26,7 +26,8 @@
     },
     {
       "name": "create-draft-from-clipboard",
-      "title": "Create Draft from Clipboard",
+      "title": "Create Draft From Clipboard",
+      "subtitle": "Drafts",
       "description": "creates a new draft with the clipboard as content",
       "mode": "no-view"
     },
