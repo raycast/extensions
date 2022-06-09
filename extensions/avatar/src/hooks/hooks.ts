@@ -37,7 +37,7 @@ export const createAvatarURL = (avatarOptions: AvatarOptions) => {
   return { diceBearAvatarInfo: diceBearAvatarInfo, multiAvatarInfo: multiAvatarInfo, loading: loading };
 };
 
-const options = (avatarOptions: AvatarOptions) => {
+export const options = (avatarOptions: AvatarOptions) => {
   const backgroundColor =
     avatarOptions.backgroundColor === avatarInit.backgroundColor
       ? ""

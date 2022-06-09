@@ -7,6 +7,7 @@ import { ActionToMultiAvatar } from "./action-to-multi-avatar";
 import { ActionToDiceBearAvatars } from "./action-to-dice-bear-avatars";
 import { AvatarImageAction } from "./avatar-image-action";
 import { Preferences } from "../types/preferences";
+import { options } from "../hooks/hooks";
 
 export function AvatarGridLayout(props: {
   loading: boolean;
@@ -83,7 +84,8 @@ export function AvatarGridLayout(props: {
               id={value.name}
               key={value.name}
               content={{
-                value: AVATAR_URL + "/" + value.name + "/" + encodeURI(avatarOptions.seed) + ".png",
+                value:
+                  AVATAR_URL + "/" + value.name + "/" + encodeURI(avatarOptions.seed) + ".png" + options(avatarOptions),
                 tooltip: `Designer: ${value.designer}, License: ${value.license.name}`,
               }}
               title={value.name}
