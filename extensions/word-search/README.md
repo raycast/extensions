@@ -9,7 +9,7 @@ Search for synonyms, antonyms, adjectives, rhymes, and words with missing letter
 Once you've entered your text, just hit `return` on your keyboard to insert it in the foremost as well as copy it ot your clipboard.
 
 ### How to search for Words With Missing Letters
-![missing letters](./assets/missing-letters.png)
+![missing letters](media/missing-letters.png)
 
 To search for missing letters, place `?` between the letters you are unsure about. 
 For example, in the picture above, `s??a?t` means search for a word, 6 characters in length, where we don't know 3 of the letters in **those** positions where the `?` is.
@@ -20,10 +20,10 @@ Likewise, if you enter `he??o`, it will show all the combination of five-letter 
 
 ## Word Search in Action
 
-![adjective](./assets/adjective.png)
+![adjective](media/adjective.png)
 
-![antonym](./assets/antonym.png)
+![antonym](media/antonym.png)
 
-![rhyme](./assets/rhyme.png)
+![rhyme](media/rhyme.png)
 
-![synonym](./assets/synonym.png)
+![synonym](media/synonym.png)
