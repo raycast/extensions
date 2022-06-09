@@ -37,7 +37,7 @@ export default function Command() {
   if (error) return <Detail markdown={error} />;
 
   return (
-    <List isLoading={loading} navigationTitle="Account Information">
+    <List isLoading={loading}>
       <List.Item icon={Icon.Dot} key={info.id} title={"ID:"} subtitle={info.id} />
       <List.Item
         icon={Icon.Envelope}
