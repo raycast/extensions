@@ -97,7 +97,7 @@ export class TokenMatch extends AddressMatch {
   match() {
     if (!super.match()) return false;
     if (this.tokenList) {
-      const foundToken = this.tokenList.find(({ address }) => address === this.search);
+      const foundToken = this.tokenList.find(({ address }) => address.toLowerCase() === this.search.toLowerCase());
       if (foundToken) {
         this.token = foundToken;
         return true;
