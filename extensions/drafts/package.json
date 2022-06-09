@@ -14,6 +14,7 @@
     {
       "name": "create-draft-and-open",
       "title": "Create Draft",
+      "subtitle": "Drafts",
       "description": "creates a new draft in Drafts with the provided content",
       "mode": "view"
     },
