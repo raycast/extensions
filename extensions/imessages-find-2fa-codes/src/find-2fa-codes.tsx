@@ -227,6 +227,7 @@ export default function Command() {
       {Codes.map((code) => (
         <List.Item
           key={code.rowid}
+          icon={{ source: "icon.png" }}
           title={code.sender}
           subtitle={code.message}
           accessories={[
