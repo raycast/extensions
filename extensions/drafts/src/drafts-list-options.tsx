@@ -127,23 +127,23 @@ function AddDraftForm(props: { onCreate: (draft: Draft) => void }) {
     let isValidInput = true;
     let errorTitle = "";
     let errorMessage = "";
-    if(values.title.length == 0){
+    if (values.title.length == 0) {
       isValidInput = false;
-      errorTitle = "Title must not be empty!"
+      errorTitle = "Title must not be empty!";
     }
-    if(isValidInput && values.uuid.length == 0){
+    if (isValidInput && values.uuid.length == 0) {
       isValidInput = false;
-      errorTitle = "UUID must not be empty!"
-      errorMessage = "copy the UUID from an existing Draft"
+      errorTitle = "UUID must not be empty!";
+      errorMessage = "copy the UUID from an existing Draft";
     }
-    if(isValidInput){
+    if (isValidInput) {
       props.onCreate(new Draft(values.title, values.uuid, values.prefix, values.preferesPrepend));
       pop();
     } else {
       await showToast({
         style: Style.Failure,
         title: errorTitle,
-        message: errorMessage
+        message: errorMessage,
       });
     }
   }
@@ -198,7 +198,7 @@ export default function Command() {
       const drafts: Draft[] = JSON.parse(retrievedStoredDrafts);
       setDrafts(drafts);
     }
-    setIsLoading(false)
+    setIsLoading(false);
   }
   async function updateStoredDraftNames(newDrafts: Draft[]) {
     const stringifiedDrafts = JSON.stringify(newDrafts);

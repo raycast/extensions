@@ -37,14 +37,14 @@ function AddWorkspaceForm(props: { onCreate: (workspace: DraftsWorkspace) => voi
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { workspaceName: string }) {
-    if(values.workspaceName.length > 0){
+    if (values.workspaceName.length > 0) {
       props.onCreate({ workspaceName: values.workspaceName });
       pop();
     } else {
       await showToast({
         style: Style.Failure,
-        title: 'Workspace Name must not be empty!',
-        message: "copy the exact name from an existing workspace in Drafts"
+        title: "Workspace Name must not be empty!",
+        message: "copy the exact name from an existing workspace in Drafts",
       });
     }
   }
@@ -63,10 +63,9 @@ function AddWorkspaceForm(props: { onCreate: (workspace: DraftsWorkspace) => voi
 }
 
 export default function Command() {
-
   // app installation check (shows Toast if Drafts is not installed)
   checkAppInstallation();
-  
+
   const [workspaces, setWorkspaces] = useState<DraftsWorkspace[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -81,7 +80,7 @@ export default function Command() {
         })
       );
     }
-    setIsLoading(false)
+    setIsLoading(false);
   }
   async function updateStoredWorkspaceNames(newWorkspaces: DraftsWorkspace[]) {
     await LocalStorage.setItem(

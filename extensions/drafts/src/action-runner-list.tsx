@@ -65,13 +65,13 @@ function AddActionForm(props: { onCreate: (action: DraftsAction) => void }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { actionName: string; requiresInput: boolean }) {
-    if(values.actionName.length > 0){
+    if (values.actionName.length > 0) {
       props.onCreate({ actionName: values.actionName, requiresInput: values.requiresInput });
       pop();
     } else {
       await showToast({
         style: Style.Failure,
-        title: 'Action Name must not be empty!',
+        title: "Action Name must not be empty!",
       });
     }
   }
@@ -108,7 +108,7 @@ export default function Command() {
       const draftsActions: DraftsAction[] = JSON.parse(retrievedStoredActions);
       setActions(draftsActions);
     }
-    setIsLoading(false)
+    setIsLoading(false);
   }
   async function updateStoredActionNames(newActions: DraftsAction[]) {
     const stringifiedActions = JSON.stringify(newActions);
