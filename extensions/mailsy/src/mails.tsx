@@ -36,7 +36,7 @@ export default function Command() {
   if (error) return <Detail markdown={error} />;
 
   return (
-    <List isLoading={loading} navigationTitle="Mails">
+    <List isLoading={loading}>
       {messages.map((item) => (
         <List.Item
           icon={Icon.Message}
