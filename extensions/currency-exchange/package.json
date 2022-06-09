@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "currency-exchange",
   "title": "Currency Exchange",
-  "description": "Simple Currency Exchange",
+  "description": "Simple Currency Exchange, uses Exchange Rate API as the data source",
   "icon": "currency.png",
   "author": "xeric",
   "license": "MIT",
