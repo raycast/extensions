@@ -25,7 +25,7 @@
     {
       "name": "layout",
       "type": "dropdown",
-      "description": "Set the layout of the avatar items. (Only works with Grid layout)",
+      "description": "Set the layout of the avatar items.",
       "required": true,
       "title": "Avatar Layout",
       "default": "Grid",
@@ -43,7 +43,7 @@
     {
       "name": "itemSize",
       "type": "dropdown",
-      "description": "Set the size of the avatar items.",
+      "description": "Set the size of the avatar items. (Only works with Grid layout)",
       "required": false,
       "title": "Avatar Item Size",
       "default": "small",
