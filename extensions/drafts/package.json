@@ -55,6 +55,7 @@
     {
       "name": "drafts-list-options",
       "title": "Append/Prepend to Draft",
+      "subtitle": "Drafts",
       "description": "append or prepend text to Drafts",
       "mode": "view"
     },
