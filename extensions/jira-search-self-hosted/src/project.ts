@@ -21,7 +21,7 @@ export async function searchProjects(query: string): Promise<ResultItem[]> {
     url: `${jiraUrl}/browse/${project.key}`,
   });
   return result && result.length > 0
-    ? (await Promise.all(result.map(mapResult))).filter((result) => result.title.includes(query))
+    ? (await Promise.all(result.map(mapResult))).filter((result) => result.title.toString().includes(query))
     : [];
 }
 
