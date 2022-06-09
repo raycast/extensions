@@ -49,7 +49,7 @@
     {
       "name": "itemSize",
       "type": "dropdown",
-      "description": "Set the size of the wallpaper items.",
+      "description": "Set the size of the wallpaper items. (Only works with Grid layout)",
       "required": false,
       "title": "Wallpaper Item Size",
       "default": "medium",
