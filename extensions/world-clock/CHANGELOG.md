@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Add feature: adding aliases to time zones] - {PR_MERGE_DATE}
+## [Add feature: adding aliases to time zones] - 2022-06-10
 
 - Add feature: you can set aliases for starred time zones now
 - Add new preference: Hour 24
