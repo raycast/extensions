@@ -1,4 +1,4 @@
-import { Action, ActionPanel, environment, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { getData } from "./api";
 import React, { useState } from "react";
 import { Preferences } from "./interface";
@@ -109,7 +109,7 @@ export default function Countries() {
             }
             actions={
               <ActionPanel>
-                <Action title="Toggle Coat of Arms" onAction={() => setShowMarkdown(!showMarkdown)} />
+                <Action icon={Icon.Eye} title="Toggle Coat of Arms" onAction={() => setShowMarkdown(!showMarkdown)} />
                 {entry.maps.googleMaps && (
                   <Action.OpenInBrowser title="Open in Google Maps" url={entry.maps.googleMaps} />
                 )}
