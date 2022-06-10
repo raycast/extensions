@@ -30,7 +30,6 @@ export function NewFileHereItem(props: {
       keywords={fileType.keywords}
       content={{ value: fileType.icon, tooltip: fileType.name + "." + fileType.extension }}
       title={fileType.name}
-      subtitle={fileType.extension}
       actions={
         <ActionNewFileHere
           fileType={fileType}

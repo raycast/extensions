@@ -41,7 +41,6 @@ export function NewFileHereGridLayout(props: {
                 tooltip: template.name + "." + template.extension,
               }}
               title={template.name}
-              subtitle={template.extension}
               actions={
                 <ActionNewTemplateFileHere
                   template={template}
