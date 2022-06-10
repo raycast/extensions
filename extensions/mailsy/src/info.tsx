@@ -1,4 +1,4 @@
-import { List, Icon, Detail, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Detail, Action, ActionPanel, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ShowInfo } from "./utils";
 
@@ -15,13 +15,14 @@ export default function Command() {
     createdAt: "",
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     async function response() {
       const info = await ShowInfo();
 
-      !info && setError("# Create Account First");
+      if (!info) {
+        popToRoot();
+      }
 
       setInfo({
         id: info.id,
@@ -33,8 +34,6 @@ export default function Command() {
     }
     response();
   }, []);
-
-  if (error) return <Detail markdown={error} />;
 
   return (
     <List isLoading={loading}>
