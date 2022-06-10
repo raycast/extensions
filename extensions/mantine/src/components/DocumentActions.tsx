@@ -18,7 +18,7 @@ export const DocumentActions = ({ document }: Props) => {
   return (
     <ActionPanel>
       <Action.Push
-        title="Show details"
+        title="Show Details"
         icon={{
           source: {
             light: "icons/info-light.svg",
@@ -33,7 +33,10 @@ export const DocumentActions = ({ document }: Props) => {
               actions={
                 metadata.slug ? (
                   <ActionPanel>
-                    <Action.OpenInBrowser icon={Icon.Globe} url={`${MANTINE_URL}/${metadata.slug}`} />
+                    <Action.OpenInBrowser
+                      icon={Icon.Globe}
+                      url={`${MANTINE_URL}/${metadata.slug}`}
+                    />
                   </ActionPanel>
                 ) : null
               }
@@ -47,7 +50,12 @@ export const DocumentActions = ({ document }: Props) => {
                     <Action.Push
                       title="Open"
                       icon={Icon.List}
-                      target={<Detail navigationTitle={metadata.title} markdown={content} />}
+                      target={
+                        <Detail
+                          navigationTitle={metadata.title}
+                          markdown={content}
+                        />
+                      }
                     />
                     <Action.OpenInBrowser icon={Icon.Globe} url={elementLink} />
                   </ActionPanel>
@@ -56,12 +64,18 @@ export const DocumentActions = ({ document }: Props) => {
               <List.Item
                 icon={Icon.Dot}
                 title="Props"
-                detail={<PropsDetail component={metadata.title as ComponentName} />}
+                detail={
+                  <PropsDetail component={metadata.title as ComponentName} />
+                }
               />
               <List.Item
                 icon={Icon.Dot}
                 title="Styles API"
-                detail={<StylesApiDetail component={metadata.title as ComponentName} />}
+                detail={
+                  <StylesApiDetail
+                    component={metadata.title as ComponentName}
+                  />
+                }
               />
             </List>
           ) : (
@@ -70,7 +84,9 @@ export const DocumentActions = ({ document }: Props) => {
         }
       />
 
-      {metadata.slug && <Action.OpenInBrowser icon={Icon.Globe} url={elementLink} />}
+      {metadata.slug && (
+        <Action.OpenInBrowser icon={Icon.Globe} url={elementLink} />
+      )}
     </ActionPanel>
   );
 };
