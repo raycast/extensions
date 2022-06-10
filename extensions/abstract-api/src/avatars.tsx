@@ -29,8 +29,6 @@ export default function Command() {
       const url = `https://avatars.abstractapi.com/v1/?api_key=${preferences.avatarsApiKey}&name=${encodeURIComponent(
         values.name
       )}&image_format=png`;
-      const response = await axios.get(url, { responseType: 'stream' });
-      response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${values.name}.png`));
 
       toast.style = Toast.Style.Success;
       toast.title = "Avatar retrieved successfully";
@@ -38,6 +36,15 @@ export default function Command() {
         title: "Open in Browser",
         onAction: (toast) => {
           open(url);
+
+          toast.hide();
+        },
+      };
+      toast.secondaryAction = {
+        title: "Download",
+        onAction: async (toast) => {
+          const response = await axios.get(url, { responseType: 'stream' });
+          response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${values.name.split(' ').join('_')}.png`));
 
           toast.hide();
         },
