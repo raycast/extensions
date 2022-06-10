@@ -43,10 +43,22 @@ export default function Command() {
       toast.secondaryAction = {
         title: "Download",
         onAction: async (toast) => {
-          const response = await axios.get(url, { responseType: 'stream' });
-          response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${extractHostname(values.websiteUrl)}.png`));
+          toast.style = Toast.Style.Animated;
+          toast.title = "Saving screenshot";
 
-          toast.hide();
+          await axios.get(url, { responseType: 'stream' })
+            .then(response => {
+
+              const hostname = extractHostname(values.websiteUrl);
+              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
+
+              toast.style = Toast.Style.Success;
+              toast.title = "Screenshot saved successfully";
+            })
+            .catch(e => {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Unable to retrieve screenshot";
+            });
         },
       };
     } catch (e) {

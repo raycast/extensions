@@ -43,10 +43,21 @@ export default function Command() {
       toast.secondaryAction = {
         title: "Download",
         onAction: async (toast) => {
-          const response = await axios.get(url, { responseType: 'stream' });
-          response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${values.name.split(' ').join('_')}.png`));
+          toast.style = Toast.Style.Animated;
+          toast.title = "Saving avatar";
 
-          toast.hide();
+          await axios.get(url, { responseType: 'stream' })
+            .then(response => {
+              const filename = values.name.split(' ').join('_');
+              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
+
+              toast.style = Toast.Style.Success;
+              toast.title = "Avatar saved successfully";
+            })
+            .catch(e => {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Unable to retrieve avatar";
+            });
         },
       };
     } catch (e) {
