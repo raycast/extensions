@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hypersonic",
   "title": "Hypersonic",
-  "description": "The fastest Notion to-do app for Raycast",
+  "description": "Fastest Notion to-do app ever",
   "icon": "icon.png",
   "author": "reboot.studio",
   "categories": [
@@ -25,7 +25,7 @@
       "name": "database_name",
       "type": "textfield",
       "title": "Notion Page Name",
-      "description": "Notion page name to use as the database",
+      "description": "Create, filter and complete all your to-do's",
       "placeholder": "Hypersonic",
       "default": "Hypersonic"
     },
