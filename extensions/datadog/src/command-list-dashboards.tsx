@@ -1,8 +1,29 @@
-import { ActionPanel, List, OpenInBrowserAction, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, getPreferenceValues, Icon } from "@raycast/api";
 import { linkDomain } from "./util";
 import fetch from "node-fetch";
-import { DashboardSummaryDefinition } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/DashboardSummaryDefinition";
 import { useEffect, useState } from "react";
+
+export interface DashboardSummaryDefinition {
+  popularity: number;
+  tags: any[];
+  is_favorite: boolean;
+  id: string;
+  icon: null;
+  integration_id: null;
+  is_shared: boolean;
+  author: Author;
+  url: string;
+  title: string;
+  modified: Date;
+  created: Date;
+  is_read_only: boolean;
+  type: string;
+}
+
+export interface Author {
+  handle: string;
+  name: string;
+}
 
 type State = {
   dashboardsAreLoading: boolean;
@@ -61,8 +82,16 @@ export default function CommandListDashboards() {
             key={dashboard.id}
             icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
             title={dashboard.title || "No title"}
-            subtitle={dashboard.description?.replace("\n", "")}
-            accessoryTitle={dashboard.authorHandle}
+            accessories={[
+              { icon: dashboard.is_favorite ? Icon.Star : "", tooltip: "Favorite" },
+              { icon: dashboard.is_shared ? Icon.Link : "", tooltip: "Shared" },
+              { icon: Icon.Person, tooltip: dashboard.author.handle },
+              {
+                text: `${Array(dashboard.popularity + 1).join("I")}${Array(6 - dashboard.popularity).join(" ")}`,
+                icon: Icon.Eye,
+                tooltip: "Popularity",
+              },
+            ].filter(x => x.icon)}
             actions={
               <ActionPanel>
                 <OpenInBrowserAction url={`https://${linkDomain()}${dashboard.url}`} />
