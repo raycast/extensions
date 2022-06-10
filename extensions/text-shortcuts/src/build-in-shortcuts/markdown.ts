@@ -1,4 +1,4 @@
-const markdowns = [
+export const markdowns = [
   {
     info: {
       name: "Heading 1",

@@ -1,5 +1,11 @@
 # Text Shortcuts Changelog
 
+## [Add new shortcut layout options] - {PR_MERGE_DATE}
+
+- Add new shortcut layout options: List or Grid
+- Optimize shortcut icons
+- Fix text overflow bug
+
 ## [Fix Bug] - 2022-05-20
 
 - Release of Text Shortcuts version 1.3

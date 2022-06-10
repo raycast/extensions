@@ -1,4 +1,4 @@
-const coders = [
+export const coders = [
   {
     info: {
       name: "Encode Base64",

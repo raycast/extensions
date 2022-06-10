@@ -1,4 +1,4 @@
-const formats = [
+export const formats = [
   {
     info: {
       name: "Format JSON",

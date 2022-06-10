@@ -1,4 +1,4 @@
-const annotations = [
+export const annotations = [
   {
     info: {
       name: "File Head Annotation",
