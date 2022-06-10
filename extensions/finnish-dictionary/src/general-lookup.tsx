@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import WordDictionary from "./word-dictionary";
 
 const languages: Record<string, string> = {
@@ -57,13 +57,20 @@ export default function Command() {
   }, [searchText]);
 
   const selectLanguage = (lang: string) => {
-    lang = languages[lang] as string;
     setSearchText("");
     setTimeout(() => {
       if (langs.length === 0) {
-        setLangs(lang);
+        setLangs(languages[lang] as string);
+        showToast({
+          style: Toast.Style.Success,
+          title: `Defining a ${lang} word to...`,
+        });
       } else {
-        setLangs(langs + "-" + lang);
+        setLangs((langs + "-" + languages[lang]) as string);
+        showToast({
+          style: Toast.Style.Success,
+          title: `Defining a ${langs} word to ${lang}`,
+        });
       }
     }, 10);
   };
