@@ -23,7 +23,7 @@
     },
     {
       "name": "general-lookup",
-      "title": "Any Lang to Any Lang",
+      "title": "Language to Language",
       "subtitle": "Define a word to from any language",
       "description": "Define a word from any language to any language",
       "mode": "view",
