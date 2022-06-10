@@ -32,7 +32,9 @@ export const DocumentActions = ({ document }: Props) => {
               navigationTitle={metadata.title}
               actions={
                 metadata.slug ? (
-                  <Action.OpenInBrowser icon={Icon.Globe} url={`${MANTINE_URL}/${metadata.slug}`} />
+                  <ActionPanel>
+                    <Action.OpenInBrowser icon={Icon.Globe} url={`${MANTINE_URL}/${metadata.slug}`} />
+                  </ActionPanel>  
                 ) : null
               }
             >
