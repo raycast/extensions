@@ -21,7 +21,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Yes, Show Coat of Arms by default",
+      "label": "Display the Coat of Arms by default",
       "description": "Show coat of arms, looks amazing but might take some space"
     }
   ],
