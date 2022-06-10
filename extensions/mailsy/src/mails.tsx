@@ -1,4 +1,4 @@
-import { Detail, List, Icon, ActionPanel, Action } from "@raycast/api";
+import { Detail, List, Icon, ActionPanel, Action, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchMessages, openEmail } from "./utils";
 import path from "path";
@@ -18,14 +18,15 @@ interface from {
 
 export default function Command() {
   const [messages, setMessages] = useState<messages[]>([]);
-  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function response() {
       const emails = await fetchMessages();
 
-      !emails && setError("# Create Account First");
+      if (!emails) {
+        popToRoot();
+      }
 
       setMessages(emails);
       setLoading(false);
@@ -33,10 +34,8 @@ export default function Command() {
     response();
   }, []);
 
-  if (error) return <Detail markdown={error} />;
-
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} navigationTitle="Mails">
       {messages.map((item) => (
         <List.Item
           icon={Icon.Message}
