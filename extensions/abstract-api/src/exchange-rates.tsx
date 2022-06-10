@@ -32,9 +32,8 @@ export default function Command() {
     });
 
     try {
-      const url = `https://exchange-rates.abstractapi.com/v1/?api_key=${
-        preferences.exchangeRatesApiKey
-      }&base=${encodeURIComponent(values.base)}&target=${encodeURIComponent(values.target)}`;
+      const url = `https://exchange-rates.abstractapi.com/v1/live/?api_key=${preferences.exchangeRatesApiKey
+        }&base=${encodeURIComponent(values.base)}&target=${encodeURIComponent(values.target)}`;
       const { data } = await axios.get(url);
 
       toast.style = Toast.Style.Success;
