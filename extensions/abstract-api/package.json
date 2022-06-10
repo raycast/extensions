@@ -14,53 +14,52 @@
       "name": "ip-geolocation",
       "title": "IP Geolocation",
       "subtitle": "Abstract API",
-      "description": "The IP Geolocation allows you to look up the location, timezone, country details, and more of an IPv4 or IPv6 address.",
-      "mode": "view"
+      "description": "Geolocate any IP worldwide."
     }, {
       "name": "holidays",
       "title": "Holidays",
       "subtitle": "Abstract API",
-      "description": "Todo: description goes here.",
+      "description": "Get the public holidays for any country.",
       "mode": "view"
     }, {
       "name": "exchange-rates",
       "title": "Exchange Rates",
       "subtitle": "Abstract API",
-      "description": "Todo: description goes here.",
+      "description": "Get and convert exchange rates.",
       "mode": "view"
     }, {
       "name": "company-enrichment",
       "title": "Company Enrichment",
       "subtitle": "Abstract API",
-      "description": "Todo: description goes here.",
+      "description": "Get enrichment data on any domain or company.",
       "mode": "view"
     },
     {
       "name": "timezone",
       "title": "Timezone",
       "subtitle": "Abstract API",
-      "description": "The Time, Date, and Timezone API is the easiest way to find, convert, and manage time and timezone data across the world.",
+      "description": "Get and convert time globally.",
       "mode": "view"
     },
     {
       "name": "avatars",
       "title": "Avatars",
       "subtitle": "Abstract API",
-      "description": "The User Avatar API, like all of Abstract's APIs, is organized around REST. It is designed to use predictable, resource-oriented URL's and to use HTTP status codes to indicate errors.",
+      "description": "Create flexible user avatars.",
       "mode": "view"
     },
     {
       "name": "screenshot",
       "title": "Screenshot",
       "subtitle": "Abstract API",
-      "description": "Abstract's Website Screenshot API is a simple yet powerful REST API that allows you to request an image of a given URL.",
+      "description": "Get a screenshot of any URL.",
       "mode": "view"
     },
     {
       "name": "scrape",
       "title": "Scrape",
       "subtitle": "Abstract API",
-      "description": "Todo: description goes here.",
+      "description": "Extract data from any website.",
       "mode": "view"
     }
   ],
