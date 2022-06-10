@@ -108,7 +108,7 @@ export default function CreateShortcut(props: {
             <Form.Dropdown.Item
               key={value[0]}
               title={value[0]}
-              icon={{ source: "solid-circle.png", tintColor: value[1] as unknown as Color }}
+              icon={{ source: "solid-circle.png", tintColor: value[1] as Color }}
               value={value[1]}
             />
           );

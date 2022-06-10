@@ -17,7 +17,7 @@ export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
   return (
     <Grid
       itemSize={preferences.itemSize as Grid.ItemSize}
-      inset={preferences.itemInset as Grid.Inset}
+      inset={preferences.itemInset === "" ? undefined : (preferences.itemInset as Grid.Inset)}
       isLoading={loading}
       searchBarPlaceholder={"Search shortcuts"}
       searchBarAccessory={
@@ -83,7 +83,7 @@ export function GridItem(props: {
       content={{
         source: shortcut.info.icon,
         tooltip: shortcut.info.name + "\n\n" + shortcut.info.tag.join(", "),
-        tintColor: typeof shortcut.info.iconColor !== "undefined" ? shortcut.info.iconColor : "",
+        tintColor: shortcut.info.iconColor,
       }}
       title={shortcut.info.name}
       actions={(() => {

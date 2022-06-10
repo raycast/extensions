@@ -18,19 +18,7 @@ export const tags = Object.values(Tags);
 
 export const icons = Object.entries(Icon);
 
-export enum IconColor {
-  Blue = "raycast-blue",
-  Brown = "raycast-brown",
-  Green = "raycast-green",
-  Magenta = "raycast-magenta",
-  Orange = "raycast-orange",
-  Purple = "raycast-purple",
-  Red = "raycast-red",
-  Yellow = "raycast-yellow",
-  Black = "raycast-primary-text",
-}
-
-export const iconColors = Object.entries(IconColor);
+export const iconColors = Object.entries(Color);
 
 enum Cases {
   UPPER = "UPPER CASE",

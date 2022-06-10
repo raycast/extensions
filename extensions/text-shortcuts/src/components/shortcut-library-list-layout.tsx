@@ -40,7 +40,7 @@ export function ShortcutLibraryListLayout(props: { preferences: Preferences }) {
               id={index + ""}
               icon={{
                 source: value.info.icon,
-                tintColor: typeof value.info.iconColor !== "undefined" ? value.info.iconColor : "",
+                tintColor: value.info.iconColor,
               }}
               title={value.info.name}
               accessories={[
