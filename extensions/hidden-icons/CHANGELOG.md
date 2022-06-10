@@ -1,6 +1,6 @@
 # Hidden Icons Changelog
 
-## [Improve gameplay with Grid layout] - {PR_MERGE_DATE}
+## [Improve gameplay with Grid layout] - 2022-06-10
 
 - Release of Hidden Icons version 2.0
 - Improve gameplay with Grid layout
