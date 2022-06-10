@@ -1,3 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../types/preferences";
+
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
@@ -7,13 +10,15 @@ export const buildTimeByUTCTime = (dateTime: string) => {
   return dateTime.substring(0, dateTime.indexOf(".")).replace("T", " ");
 };
 
+export const hour24 = getPreferenceValues<Preferences>().hour24;
+
 export const calculateDateTimeByOffset = (offset: string) => {
-  const dt = new Date();
-  dt.setDate(dt.getUTCDate());
-  dt.setHours(dt.getUTCHours() + parseInt(offset));
+  const dateTime = new Date();
+  dateTime.setDate(dateTime.getUTCDate());
+  dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
   return {
-    date_time: dt.toLocaleTimeString(),
-    unixtime: dt.getTime(),
+    date_time: dateTime.toLocaleTimeString("en-us", { hour12: !hour24 }),
+    unixtime: dateTime.getTime(),
   };
 };
 
@@ -29,8 +34,8 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   utc.setDate(utc.getDate());
   utc.setHours(utc.getUTCHours());
   return {
-    date_time: dateTime.toLocaleString(),
-    time: dateTime.toLocaleTimeString(),
-    utc_datetime: utc.toLocaleString(),
+    time: dateTime.toLocaleTimeString("en-us", { hour12: !hour24 }),
+    dateTime: dateTime.toLocaleString("en-us", { hour12: !hour24 }),
+    utc_datetime: utc.toLocaleString("en-us", { hour12: !hour24 }),
   };
 };
