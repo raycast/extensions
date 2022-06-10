@@ -109,6 +109,7 @@
 /extensions/domainr                                  @Rawnly
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
+/extensions/drafts                                   @FlohGro-dev
 /extensions/dribbble                                 @gebeto
 /extensions/dropbox                                  @chyroc
 /extensions/eagle                                    @Yukaii
@@ -227,6 +228,7 @@
 /extensions/logseq                                   @futantan @futantan
 /extensions/lorem-ipsum                              @AntonNiklasson
 /extensions/macupdater                               @karlsander
+/extensions/mailsy                                   @BalliAsghar
 /extensions/markdown-reference                       @codedbyjordan
 /extensions/markdown-this                            @aravindballa
 /extensions/masscode-assistant                       @antonreshetov
@@ -361,7 +363,7 @@
 /extensions/system-monitor                           @hossammourad
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailscale                                @samlinville
-/extensions/tailwindcss                              @vimtor
+/extensions/tailwindcss                              @vimtor @macbookandrew
 /extensions/tapo-smart-devices                       @timrogers
 /extensions/temporary-email                          @natterstefan
 /extensions/terminalfinder                           @yedongze

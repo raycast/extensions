@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [Add new wallpaper layout options] - {PR_MERGE_DATE}
+## [Add new wallpaper layout options] - 2022-06-09
 
 - Add new wallpaper layout options: List or Grid.
 - Optimize list loading speed
