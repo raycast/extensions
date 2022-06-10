@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mantine-documentation",
   "title": "Mantine UI Documentation",
-  "description": "browse simplified documentation for Mantine or use quick links to particular pages directly through Reycast",
+  "description": "Browse simplified documentation for Mantine or use quick links to particular pages directly through Raycast",
   "icon": "logo.png",
   "author": "EmilMalanczak",
   "version": "1.0.0",
@@ -15,9 +15,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Mantine",
-      "subtitle": "v4.2.7",
-      "description": "Open Mantine Documentation",
+      "title": "Search Documentation",
+      "subtitle": "Mantine",
+      "description": "Search Mantine Documentation",
       "mode": "view"
     }
   ],
