@@ -1,7 +1,7 @@
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../types/file-type";
 import React from "react";
 import { getPreferenceValues, Grid } from "@raycast/api";
-import { isImage } from "../utils/common-utils";
+import { isEmpty, isImage } from "../utils/common-utils";
 import { parse } from "path";
 import { ActionNewTemplateFileHere } from "./action-new-template-file-here";
 import { Preferences } from "../types/preferences";
@@ -17,7 +17,7 @@ export function NewFileHereGridLayout(props: {
   const { layout, itemSize, itemInset, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   return (
     <Grid
-      inset={itemInset as Grid.Inset}
+      inset={isEmpty(itemInset) ? undefined : (itemInset as Grid.Inset)}
       itemSize={itemSize as Grid.ItemSize}
       isLoading={isLoading}
       searchBarPlaceholder={"Search and create files"}
@@ -53,7 +53,7 @@ export function NewFileHereGridLayout(props: {
           );
         })}
       </Grid.Section>
-      {showDocument && (
+      {!isLoading && showDocument && (
         <Grid.Section title={"Document"} subtitle={documentFileTypes.length + ""}>
           {documentFileTypes.map((fileType, index) => {
             return (
@@ -69,7 +69,7 @@ export function NewFileHereGridLayout(props: {
           })}
         </Grid.Section>
       )}
-      {showCode && (
+      {!isLoading && showCode && (
         <Grid.Section title={"Code"} subtitle={codeFileTypes.length + ""}>
           {codeFileTypes.map((fileType, index) => {
             return (
@@ -85,7 +85,7 @@ export function NewFileHereGridLayout(props: {
           })}
         </Grid.Section>
       )}
-      {showScript && (
+      {!isLoading && showScript && (
         <Grid.Section title={"Script"} subtitle={scriptFileTypes.length + ""}>
           {scriptFileTypes.map((fileType, index) => {
             return (

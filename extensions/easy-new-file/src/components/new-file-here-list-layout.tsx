@@ -29,28 +29,29 @@ export function NewFileHereListLayout(props: {
         setRefresh={setRefresh}
       />
       <List.Section title={"Template"}>
-        {templateFiles.map((template, index) => {
-          return (
-            <List.Item
-              id={template.path}
-              key={template.path}
-              keywords={[template.extension]}
-              icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-              title={{ value: template.name, tooltip: template.name + "." + template.extension }}
-              subtitle={template.extension.toUpperCase()}
-              actions={
-                <ActionNewTemplateFileHere
-                  template={template}
-                  index={index}
-                  templateFiles={templateFiles}
-                  setRefresh={setRefresh}
-                />
-              }
-            />
-          );
-        })}
+        {!isLoading &&
+          templateFiles.map((template, index) => {
+            return (
+              <List.Item
+                id={template.path}
+                key={template.path}
+                keywords={[template.extension]}
+                icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
+                title={{ value: template.name, tooltip: template.name + "." + template.extension }}
+                subtitle={template.extension.toUpperCase()}
+                actions={
+                  <ActionNewTemplateFileHere
+                    template={template}
+                    index={index}
+                    templateFiles={templateFiles}
+                    setRefresh={setRefresh}
+                  />
+                }
+              />
+            );
+          })}
       </List.Section>
-      {showDocument && (
+      {!isLoading && showDocument && (
         <List.Section title={"Document"}>
           {documentFileTypes.map((fileType, index) => {
             return (
@@ -66,7 +67,7 @@ export function NewFileHereListLayout(props: {
           })}
         </List.Section>
       )}
-      {showCode && (
+      {!isLoading && showCode && (
         <List.Section title={"Code"}>
           {codeFileTypes.map((fileType, index) => {
             return (

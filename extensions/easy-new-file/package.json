@@ -68,6 +68,10 @@
           "default": "md",
           "data": [
             {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
               "title": "Small",
               "value": "sm"
             },
