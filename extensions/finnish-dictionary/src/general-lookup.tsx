@@ -69,23 +69,20 @@ export default function Command() {
   };
 
   return langs.indexOf("-") === -1 ? (
-    <List
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      navigationTitle={`Define ${langs} word`}
-      searchBarPlaceholder="Select languages"
-    >
-      {filteredList.map((item) => (
-        <List.Item
-          key={item}
-          title={item}
-          actions={
-            <ActionPanel>
-              <Action title="Select" onAction={() => selectLanguage(item)} />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Select languages">
+      <List.Section title={`Define ${langs != "" ? langs : "..."} word to...`}>
+        {filteredList.map((item) => (
+          <List.Item
+            key={item}
+            title={item}
+            actions={
+              <ActionPanel>
+                <Action title="Select" onAction={() => selectLanguage(item)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   ) : (
     <WordDictionary from={langs.split("-")[0]} to={langs.split("-")[1]} />
