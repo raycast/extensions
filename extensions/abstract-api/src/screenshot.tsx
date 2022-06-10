@@ -1,5 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
+import fs from "fs";
+import { homedir } from "os";
+import { extractHostname } from './utils';
 
 interface Preferences {
   screenshotApiKey: string;
@@ -24,10 +27,8 @@ export default function Command() {
     });
 
     try {
-      const url = `https://screenshot.abstractapi.com/v1/?api_key=${
-        preferences.screenshotApiKey
-      }&url=${encodeURIComponent(values.websiteUrl)}`;
-      const { data } = await axios.get(url);
+      const url = `https://screenshot.abstractapi.com/v1/?api_key=${preferences.screenshotApiKey
+        }&url=${encodeURIComponent(values.websiteUrl)}`;
 
       toast.style = Toast.Style.Success;
       toast.title = "Screenshot retrieved successfully";
@@ -35,6 +36,15 @@ export default function Command() {
         title: "Open in Browser",
         onAction: (toast) => {
           open(url);
+
+          toast.hide();
+        },
+      };
+      toast.secondaryAction = {
+        title: "Download",
+        onAction: async (toast) => {
+          const response = await axios.get(url, { responseType: 'stream' });
+          response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${extractHostname(values.websiteUrl)}.png`));
 
           toast.hide();
         },
