@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Country Lookup",
+      "title": "Search Country",
       "description": "Quickly lookup countries",
       "mode": "view"
     }
