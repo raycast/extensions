@@ -5,44 +5,37 @@
 <h1 align="center">Hypersonic</h1>
 
 <p align="center">
-Create your to-do list with <b>Raycast</b> and synchronize with <b>Notion</b>!
+Fastest Notion to-do app ever
 </p>
 
-## 🚣‍♂️ On Boarding
+## 🚣‍♂️ Onboarding
 
-The **on boarding** process is easy to complete! Just follow the steps below:
+The **onboarding** process is easy to complete! Just follow the steps below:
 
 <img width="1920" src="https://user-images.githubusercontent.com/44324243/173044027-062e2681-7728-4820-8da8-642d2255437b.png">
 
 ### ✨ Plug & Play with Notion
 
-Copy the **Hypersonic** template to your workspace with `⌘ + U` command.
+1. Duplicate **[Hypersonic Notion template](https://reboot-studio.notion.site/b7dcfb65bd7f4dfc82e3f0d61a6232cb?v=c532a2852d3e40eb9226b744ff526e55)** into your workspace.
+2. Sign in with your Notion account
+3. Select the Hypersonic template 
 
-<img width="1920" src="https://user-images.githubusercontent.com/44324243/173071402-00a287a5-5d56-4a56-9cd0-e7a9b5311c83.png">
-
-###
-
-Connect your account with **Raycast** and select your **Hypersonic** database.
-
-<img width="1920" src="https://user-images.githubusercontent.com/44324243/173044641-c12bd3c9-2f0c-43eb-9c86-5cde42e97a97.png">
+All done! You can now start creating to-do's.
 
 <img width="1920" src="https://user-images.githubusercontent.com/44324243/173045743-e52f871a-dc24-4754-af38-ef23813fce45.png">
 
-### 🥳 Done!
+### List of commands
 
-Perfect! Now you can start creating your to-do's.
-
-Just as reminder, the commands that you can use are:
-
-- ### Daily commands
-
-  - Press `↵` to complete the current task, or create a new one if there is no any tasks on list.
-  - Press `⌘ + ↵` to postpone the current task. You are going to select when you want to complete the task.
-  - Press `⌘ + L` to change the task's label. You will be able to see the label on the list.
-
-- ### On boarding commands
-  - Press `⌘ + U` to open the **On Boarding** template for duplicate to your workspace.
-  - Press `⌘ + T` to Login to Notion.
+  - Press `↵` to complete a to-do or create a new one.
+  - Press `⌘ + ↵` to set a reminder for a to-do.
+  - Press `⌘ + L` to add a label. You will need to create the labels first on Notion.
+  - Press `⌘ + U` to open a external link.
+  - Press `⌘ + P` to copy a to-do to the clipboard.
+  - Press `⌘ + O` to open the to-do in Notion.
+  - Press `⌘ + ⌫` to delete a to-do.
+  - Press `⌘ + ↑` to move up a to-do.
+  - Press `⌘ + ↓` to move up a to-do.
+ 
 
 ---
 
