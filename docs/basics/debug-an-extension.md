@@ -24,6 +24,15 @@ For more, checkout the [Node.js documentation](https://nodejs.org/dist/latest-v1
 
 We automatically disable console logging for store extensions.
 
+## Visual Studio Code
+
+For more complex debugging you can install the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast) to be able to attach a node.js debugger to the running Raycast session.
+
+1. Activate your extension in dev mode via `npm run dev` or via the VSCode command `Raycast: Start Development Mode`
+2. Start the VSCode command `Raycast: Attach Debugger`
+3. Set your breakpoint like in any other node.js base project
+4. Activate your command
+
 ## Unhandled exceptions and Promise rejections
 
 All unhandled exceptions and Promise rejections are shown with an error overlay in Raycast.

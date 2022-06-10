@@ -4,9 +4,7 @@ import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import { Preferences } from "../types/preferences";
 import { RaycastWallpaper } from "../types/types";
-import util from "util";
-import { exec } from "child_process";
-import fetch from "node-fetch";
+import axios from "axios";
 
 export const cachePath = environment.supportPath;
 
@@ -14,7 +12,7 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const getScreenshotsDirectory = () => {
+export const getSavedDirectory = () => {
   const directoryPreference = getPreferenceValues<Preferences>().picturesDirectory;
   let actualDirectory = directoryPreference;
   if (directoryPreference.startsWith("~")) {
@@ -26,41 +24,45 @@ export const getScreenshotsDirectory = () => {
   return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
 };
 
+export const axiosGetImageArrayBuffer = async (url: string) => {
+  const res = await axios({
+    url: url,
+    method: "GET",
+    responseType: "arraybuffer",
+  });
+  return res.data;
+};
+
 export async function downloadPicture(wallpaper: { title: string; url: string }) {
   await showToast(Toast.Style.Animated, "Downloading...");
-  fetch(wallpaper.url)
-    .then(function (res) {
-      return res.arrayBuffer();
-    })
-    .then(function (buffer) {
-      const picturePath = `${getScreenshotsDirectory()}/${wallpaper.title}.png`;
-      fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-        if (error != null) {
-          await showToast(Toast.Style.Failure, String(error));
-        } else {
-          const options: Toast.Options = {
-            style: Toast.Style.Success,
-            title: "Download picture success!",
-            message: `${picturePath.replace(`${homedir()}`, "~")}`,
-            primaryAction: {
-              title: "Open picture",
-              onAction: (toast) => {
-                open(picturePath);
-                toast.hide();
-              },
-            },
-            secondaryAction: {
-              title: "Show in finder",
-              onAction: (toast) => {
-                showInFinder(picturePath);
-                toast.hide();
-              },
-            },
-          };
-          await showToast(options);
-        }
-      });
-    });
+
+  const picturePath = `${getSavedDirectory()}/${wallpaper.title}.png`;
+  await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
+    if (error != null) {
+      await showToast(Toast.Style.Failure, String(error));
+    } else {
+      const options: Toast.Options = {
+        style: Toast.Style.Success,
+        title: "Download picture success!",
+        message: `${picturePath.replace(`${homedir()}`, "~")}`,
+        primaryAction: {
+          title: "Open picture",
+          onAction: (toast) => {
+            open(picturePath);
+            toast.hide();
+          },
+        },
+        secondaryAction: {
+          title: "Show in finder",
+          onAction: (toast) => {
+            showInFinder(picturePath);
+            toast.hide();
+          },
+        },
+      };
+      await showToast(options);
+    }
+  });
 }
 
 export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
@@ -72,16 +74,13 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
   try {
     const actualPath = fixedPathName;
 
-    const command = !existsSync(actualPath)
-      ? `set cmd to "curl -o " & q_temp_folder & " " & "${wallpaper.url}"
-        do shell script cmd`
-      : "";
+    if (!existsSync(actualPath)) {
+      await cachePicture(wallpaper);
+    }
 
     const result = await runAppleScript(`
       set temp_folder to (POSIX path of "${actualPath}")
       set q_temp_folder to quoted form of temp_folder
-
-      ${command}
 
       set x to alias (POSIX file temp_folder)
 
@@ -127,19 +126,15 @@ export const buildCachePath = (raycastWallpaper: RaycastWallpaper) => {
     : `${cachePath}/${raycastWallpaper.title}.png`;
 };
 
-export const buildIconCachePath = (raycastWallpaper: RaycastWallpaper) => {
-  const outputDir = (cachePath.endsWith("/") ? cachePath : cachePath + "/") + "icon-cache";
-  return `${outputDir}/${raycastWallpaper.title}.png.png`;
-};
-
 export const checkCache = (wallpaper: RaycastWallpaper) => {
   const fixedPath = buildCachePath(wallpaper);
   return fse.pathExistsSync(fixedPath);
 };
 
-export const checkIconCache = (raycastWallpaper: RaycastWallpaper) => {
-  return fse.pathExistsSync(buildIconCachePath(raycastWallpaper));
-};
+export async function cachePicture(wallpaper: { title: string; url: string }) {
+  const picturePath = buildCachePath(wallpaper);
+  await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)));
+}
 
 export function deleteCache() {
   const pathName = environment.supportPath;
@@ -151,40 +146,3 @@ export function deleteCache() {
     });
   }
 }
-
-export function cachePicture(wallpaper: { title: string; url: string }) {
-  fetch(wallpaper.url)
-    .then(function (res) {
-      return res.arrayBuffer();
-    })
-    .then(function (buffer) {
-      const picturePath = buildCachePath(wallpaper);
-      fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-        if (error != null) {
-          console.error("error " + error);
-        }
-        await cacheIconPreview(wallpaper);
-      });
-    });
-}
-
-const execAsync = util.promisify(exec);
-
-export const cacheIconPreview = async (raycastWallpaper: RaycastWallpaper) => {
-  try {
-    const outputDir = (cachePath.endsWith("/") ? cachePath : cachePath + "/") + "icon-cache";
-    const filePath = buildCachePath(raycastWallpaper);
-
-    if (!fse.pathExistsSync(outputDir)) {
-      fse.mkdirSync(outputDir, { recursive: true });
-    }
-
-    await execAsync(`qlmanage -t -s 32 ${filePath.replaceAll(" ", `" "`)} -o ${outputDir.replaceAll(" ", `" "`)}`, {
-      timeout: 500 /* milliseconds */,
-      killSignal: "SIGKILL",
-    });
-  } catch (e) {
-    console.error(String(e));
-    return null;
-  }
-};

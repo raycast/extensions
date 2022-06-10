@@ -1,5 +1,9 @@
 # Bing Wallpaper Changelog
 
+## [Add new wallpaper layout options] - 2022-06-09
+
+- Add new wallpaper layout options: List or Grid.
+
 ## [Add downloaded wallpaper list] - 2022-05-23
 
 - Add downloaded wallpapers list in Set Bing Wallpaper command, support png, jpg, heic

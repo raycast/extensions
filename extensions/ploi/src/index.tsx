@@ -2,9 +2,16 @@ import { ServersList } from "./Server";
 import axios from "axios";
 import { PLOI_API_URL } from "./config";
 import { getHeaders } from "./helpers";
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
-const headers = getHeaders(preferences?.ploi_api_key?.value as string);
+interface Preferences {
+  ploi_api_key: string;
+  ploi_ssh_user: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+
+const headers = getHeaders(preferences.ploi_api_key);
 
 axios.defaults.baseURL = PLOI_API_URL;
 axios.defaults.headers.common["Authorization"] = headers.Authorization;
