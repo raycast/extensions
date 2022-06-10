@@ -5,17 +5,11 @@ Created by [@FlohGro](https://twitter.com/FlohGro) ([Website](https://flohgro.co
 
 It supports the following features as commands:
 
-![drafts-01](metadata/drafts-01.png)
-
 ## Create Draft
-
-![drafts-02](metadata/drafts-02.png)
 
 create drafts in a Raycast form with tags.
 
 ## Append/Prepend to Draft
-
-![drafts-03](metadata/drafts-03.png)
 
 Configure Drafts you often want to append / prepend text to.
 
@@ -35,8 +29,6 @@ Quickly create a new empty Draft and open it in Drafts app.
 
 ## Run Draft Action
 
-![drafts-05](metadata/drafts-05.png)
-
 Configure Actions you want to run from Raycast.
 
 Depending on your configuration Raycast will ask for text input you want to provide to the Drafts Action or run the Action without any text input.
@@ -54,8 +46,6 @@ In the Action Panel of each configured workspace you can also create a Raycast Q
 Open the dictation interface in Drafts to quickly create a new Draft from dictated text.
 
 ## Create Drafts Quicklink
-
-![drafts-04](metadata/drafts-04.png)
 
 This is a helper command to easily create additional Raycast Quicklinks to perform the following actions:
 
