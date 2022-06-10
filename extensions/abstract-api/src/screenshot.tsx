@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceV
 import axios from "axios";
 import fs from "fs";
 import { homedir } from "os";
-import { extractHostname } from './utils';
+import { extractHostname } from "./utils";
 
 interface Preferences {
   screenshotApiKey: string;
@@ -27,8 +27,9 @@ export default function Command() {
     });
 
     try {
-      const url = `https://screenshot.abstractapi.com/v1/?api_key=${preferences.screenshotApiKey
-        }&url=${encodeURIComponent(values.websiteUrl)}`;
+      const url = `https://screenshot.abstractapi.com/v1/?api_key=${
+        preferences.screenshotApiKey
+      }&url=${encodeURIComponent(values.websiteUrl)}`;
 
       toast.style = Toast.Style.Success;
       toast.title = "Screenshot retrieved successfully";
@@ -46,16 +47,16 @@ export default function Command() {
           toast.style = Toast.Style.Animated;
           toast.title = "Saving screenshot";
 
-          await axios.get(url, { responseType: 'stream' })
-            .then(response => {
-
+          await axios
+            .get(url, { responseType: "stream" })
+            .then((response) => {
               const hostname = extractHostname(values.websiteUrl);
               response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
 
               toast.style = Toast.Style.Success;
               toast.title = "Screenshot saved successfully";
             })
-            .catch(e => {
+            .catch((e) => {
               toast.style = Toast.Style.Failure;
               toast.title = "Unable to retrieve screenshot";
             });
@@ -71,7 +72,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Screenshot" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          <Action.SubmitForm title="Generate Screenshot" onSubmit={handleSubmit} icon={Icon.Pencil} />
         </ActionPanel>
       }
     >

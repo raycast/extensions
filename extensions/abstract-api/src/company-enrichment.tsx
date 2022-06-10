@@ -53,7 +53,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Company Enrichment" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          <Action.SubmitForm title="Get Enrichment Data" onSubmit={handleSubmit} icon={Icon.Pencil} />
         </ActionPanel>
       }
     >
