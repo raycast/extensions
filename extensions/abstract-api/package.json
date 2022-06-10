@@ -14,20 +14,24 @@
       "name": "ip-geolocation",
       "title": "IP Geolocation",
       "subtitle": "Abstract API",
-      "description": "Geolocate any IP worldwide."
-    }, {
+      "description": "Geolocate any IP worldwide.",
+      "mode": "view"
+    },
+    {
       "name": "holidays",
       "title": "Holidays",
       "subtitle": "Abstract API",
       "description": "Get the public holidays for any country.",
       "mode": "view"
-    }, {
+    },
+    {
       "name": "exchange-rates",
       "title": "Exchange Rates",
       "subtitle": "Abstract API",
       "description": "Get and convert exchange rates.",
       "mode": "view"
-    }, {
+    },
+    {
       "name": "company-enrichment",
       "title": "Company Enrichment",
       "subtitle": "Abstract API",
@@ -122,8 +126,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "axios": "^0.26.1",
-    "fs": "^0.0.1-security"
+    "axios": "^0.26.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
