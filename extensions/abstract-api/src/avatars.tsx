@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
-import { createWriteStream } from "fs";
+import fs from "fs";
 import { homedir } from 'os';
 
 interface Preferences {
@@ -29,11 +29,8 @@ export default function Command() {
       const url = `https://avatars.abstractapi.com/v1/?api_key=${preferences.avatarsApiKey}&name=${encodeURIComponent(
         values.name
       )}&image_format=png`;
-      const { data } = await axios.get(url);
-
-      const file = createWriteStream(`${homedir()}/Desktop/${values.name}.png`);
-      file.write(data);
-      file.close();
+      const response = await axios.get(url, { responseType: 'stream' });
+      response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${values.name}.png`));
 
       toast.style = Toast.Style.Success;
       toast.title = "Avatar retrieved successfully";
