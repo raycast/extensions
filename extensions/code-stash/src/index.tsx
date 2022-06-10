@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { nanoid } from "nanoid";
-import { ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { ActionPanel, Icon, List, LocalStorage, confirmAlert, Alert } from "@raycast/api";
 import { Language, CodeStash } from "./types";
 import { Preview, ViewAction, CreateAction, DeleteAction, EmptyView, CopyAction } from "./components";
 import { useCopy } from "./actions";
@@ -64,10 +64,18 @@ export default function Command() {
     [state.codeStashes, setState]
   );
 
-  function handleDelete(index: number) {
-    const newCodeStashes = [...state.codeStashes];
-    newCodeStashes.splice(index, 1);
-    setState((previous: any) => ({ ...previous, codeStashes: newCodeStashes }));
+  const deleteAlertOptions: Alert.Options = {
+    title: "Are you sure?",
+    message: "This action cannot be undone",
+    icon: Icon.Trash,
+  };
+
+  async function handleDelete(index: number) {
+    if (await confirmAlert(deleteAlertOptions)) {
+      const newCodeStashes = [...state.codeStashes];
+      newCodeStashes.splice(index, 1);
+      setState((previous: any) => ({ ...previous, codeStashes: newCodeStashes }));
+    }
   }
 
   const filterCodeStashes = useCallback(() => {

@@ -1,5 +1,5 @@
 import { useCallback, useState, useRef } from "react";
-import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
+import { Form, Action, ActionPanel, useNavigation, Toast, showToast } from "@raycast/api";
 import { Language } from "../types";
 
 import detectLang from "lang-detector";
@@ -13,9 +13,23 @@ function CreateForm(props: {
   const [detectedLanguage, setDetectedLanguage] = useState<string>("JavaScript");
   const dropdownRef = useRef<Form.Dropdown>(null);
 
+  const handleValidationError = async () => {
+    await showToast({
+      title: "There was an error",
+      message: "Title and Code must have values",
+      style: Toast.Style.Failure,
+    });
+  };
+
+  const isEmpty = (value: string) => value.trim().length === 0;
+
   const handleSubmit = useCallback(
     (values: { title: string; code: string; language: string }) => {
       const { title, code, language } = values;
+      if (isEmpty(title) || isEmpty(code)) {
+        return handleValidationError();
+      }
+
       onCreate(title, code, language);
       pop();
     },
