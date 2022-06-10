@@ -1,9 +1,10 @@
-import { getPreferenceValues, Grid, List } from "@raycast/api";
+import { getPreferenceValues, Grid, Image, List } from "@raycast/api";
 import React, { useState } from "react";
 import { getPlaceholderImages } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { PlaceholderEmptyView } from "./components/placeholder-empty-view";
 import { ActionOnPlaceholderImage } from "./components/action-on-placeholder-image";
+import Mask = Image.Mask;
 
 export default function SearchPlaceholderImages() {
   const preferences = getPreferenceValues<Preferences>();
@@ -21,8 +22,12 @@ export default function SearchPlaceholderImages() {
       {picsumImages.map((value) => {
         return (
           <List.Item
-            key={value.url}
-            icon={{ source: { light: "picsum-icon.png", dark: "picsum-icon@dark.png" } }}
+            key={value.download_url}
+            icon={{
+              source: prefix + value.id + "/64/64",
+              mask: Mask.RoundedRectangle,
+              fallback: { light: "picsum-icon.svg", dark: "picsum-icon@dark.svg" },
+            }}
             title={{ value: value.author, tooltip: "Author" }}
             detail={
               <List.Item.Detail
@@ -49,14 +54,17 @@ export default function SearchPlaceholderImages() {
       })}
     </List>
   ) : (
-    <Grid isLoading={isLoading} searchBarPlaceholder={"Search images"}>
+    <Grid itemSize={preferences.itemSize as Grid.ItemSize} isLoading={isLoading} searchBarPlaceholder={"Search images"}>
       <PlaceholderEmptyView layout={preferences.layout} />
 
       {picsumImages.map((value) => {
         return (
           <Grid.Item
-            key={value.url}
-            content={value.download_url}
+            key={value.download_url}
+            content={{
+              value: buildGridContentImageURL(preferences.itemSize as Grid.ItemSize, value.id),
+              tooltip: value.width + " ✕ " + value.height,
+            }}
             title={value.author}
             actions={
               <ActionOnPlaceholderImage picsumImage={value} preferences={preferences} page={page} setPage={setPage} />
@@ -67,3 +75,18 @@ export default function SearchPlaceholderImages() {
     </Grid>
   );
 }
+
+const prefix = "https://picsum.photos/id/";
+const buildGridContentImageURL = (itemSize: Grid.ItemSize, id: string) => {
+  switch (itemSize) {
+    case Grid.ItemSize.Large: {
+      return prefix + id + "/500";
+    }
+    case Grid.ItemSize.Medium: {
+      return prefix + id + "/300";
+    }
+    case Grid.ItemSize.Small: {
+      return prefix + id + "/200";
+    }
+  }
+};

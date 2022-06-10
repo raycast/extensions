@@ -6,7 +6,6 @@ import { ActionOpenPreferences } from "./action-open-preferences";
 import React, { Dispatch, SetStateAction } from "react";
 import { PicsumImage } from "../types/types";
 import { Preferences } from "../types/preferences";
-import { ImageDetail } from "./image-detail";
 import { RevealImageAction } from "./reveal-image-action";
 
 export function ActionOnPlaceholderImage(props: {
