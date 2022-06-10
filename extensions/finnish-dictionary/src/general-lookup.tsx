@@ -69,7 +69,12 @@ export default function Command() {
   };
 
   return langs.indexOf("-") === -1 ? (
-    <List searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Select languages">
+    <List
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Select languages"
+      isLoading={!filteredList.length}
+    >
       <List.Section title={`Define ${langs != "" ? langs : "..."} word to...`}>
         {filteredList.map((item) => (
           <List.Item
