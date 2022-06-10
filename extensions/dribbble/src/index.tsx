@@ -78,7 +78,13 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="More Info"
-                icon={{ source: "info.svg", tintColor: "#fff" }}
+                icon={{
+                  source: "info.svg",
+                  tintColor: {
+                    light: "#000",
+                    dark: "#FFF",
+                  },
+                }}
                 target={
                   <Detail
                     markdown={createShotMarkdown(item)}
