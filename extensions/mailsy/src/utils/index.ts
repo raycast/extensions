@@ -16,7 +16,7 @@ const checkLocalStorage = async () => {
 
 export const createAccount = async () => {
   if (await checkLocalStorage()) {
-    return showHUD("Account already exists");
+    return showHUD("❌ Account already exists");
   }
 
   // get the available email domains
@@ -60,7 +60,7 @@ export const createAccount = async () => {
     await Clipboard.copy(email);
 
     // show a HUD message
-    await showHUD(`Account created successfully. Email copied to clipboard.`);
+    await showHUD(`✅ Account created successfully. Email copied to clipboard.`);
   } catch (error) {
     return "Error creating account";
   }
@@ -68,8 +68,7 @@ export const createAccount = async () => {
 
 export const fetchMessages = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("No account found");
-
+    showHUD("❌ No account found. Please create one");
     return false;
   }
 
@@ -94,7 +93,7 @@ export const fetchMessages = async () => {
 };
 export const deleteAccount = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("No account found");
+    showHUD("❌ No account found. Please create one");
     return false;
   }
 
@@ -111,14 +110,14 @@ export const deleteAccount = async () => {
 
     await LocalStorage.clear();
 
-    showHUD("Account deleted successfully");
+    showHUD("✅ Account deleted successfully");
   } catch (error) {
     console.log(error);
   }
 };
 export const ShowInfo = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("No account found");
+    showHUD("❌ No account found. Please create one");
     return false;
   }
 
