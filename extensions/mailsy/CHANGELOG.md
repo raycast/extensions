@@ -1,6 +1,6 @@
 # Mailsy Changelog
 
-## [Initial Version] - 2022-06-03
+## [Initial Version] - 2022-06-10
 
 - User can create a new mail
 - User can View all received mails
