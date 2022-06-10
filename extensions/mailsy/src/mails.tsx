@@ -26,6 +26,7 @@ export default function Command() {
 
       if (!emails) {
         popToRoot();
+        return <Detail />;
       }
 
       setMessages(emails);
