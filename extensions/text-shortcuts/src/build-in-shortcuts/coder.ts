@@ -1,7 +1,7 @@
 export const coders = [
   {
     info: {
-      name: "Encode Base64",
+      name: "Base64 Encode",
       id: "build_in_1647439541774",
       icon: "terminal-16",
       source: "Build-in",
@@ -12,7 +12,7 @@ export const coders = [
   },
   {
     info: {
-      name: "Decode Base64",
+      name: "Base64 Decode",
       id: "build_in_1647439470039",
       icon: "terminal-16",
       source: "Build-in",
@@ -23,7 +23,7 @@ export const coders = [
   },
   {
     info: {
-      name: "Encode URL",
+      name: "URL Encode",
       id: "build_in_1647439572311",
       icon: "link-16",
       source: "Build-in",
@@ -34,7 +34,7 @@ export const coders = [
   },
   {
     info: {
-      name: "Decode URL",
+      name: "URL Decode",
       id: "build_in_1647439593389",
       icon: "link-16",
       source: "Build-in",
