@@ -17,14 +17,62 @@
       "title": "Search Photos",
       "subtitle": "Pexels",
       "description": "Search photos on Pexels. Download or set them as wallpaper.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-curated-photos",
       "title": "Search Curated Photos",
       "subtitle": "Pexels",
       "description": "Search curated photos on Pexels. Download or set them as wallpaper.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-collections",
@@ -33,6 +81,28 @@
       "description": "Search collections and photos on Pexels.",
       "mode": "view",
       "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
         {
           "name": "rememberTag",
           "type": "checkbox",
@@ -69,28 +139,6 @@
         {
           "title": "List",
           "value": "List"
-        }
-      ]
-    },
-    {
-      "name": "itemSize",
-      "type": "dropdown",
-      "description": "Set the size of the photo items. (Only works with Grid layout)",
-      "required": false,
-      "title": "Photo Item Size",
-      "default": "medium",
-      "data": [
-        {
-          "title": "Small",
-          "value": "small"
-        },
-        {
-          "title": "Medium",
-          "value": "medium"
-        },
-        {
-          "title": "Large",
-          "value": "large"
         }
       ]
     },

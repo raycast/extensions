@@ -50,6 +50,7 @@ export default function SearchPhotos() {
     </List>
   ) : (
     <Grid
+      itemSize={preferences.itemSize as Grid.ItemSize}
       isLoading={loading}
       searchBarPlaceholder={"Search photos"}
       onSearchTextChange={(newValue) => {

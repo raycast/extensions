@@ -35,6 +35,7 @@ export default function ViewCollectionMedias(props: { id: string; title: string 
     </List>
   ) : (
     <Grid
+      itemSize={preferences.itemSize as Grid.ItemSize}
       isLoading={loading}
       navigationTitle={title}
       searchBarPlaceholder={"Search photographers"}
