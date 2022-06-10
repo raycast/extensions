@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "abstractApi",
+  "name": "abstract-api",
   "title": "Abstract API",
   "description": "Automate routine dev work with Abstract's suite of APIs",
   "icon": "command-icon.png",
