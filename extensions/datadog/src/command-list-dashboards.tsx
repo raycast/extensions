@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 type State = {
   dashboardsAreLoading: boolean;
+  totalDashboards: number;
   dashboards: DashboardSummaryDefinition[];
 };
 
@@ -15,8 +16,9 @@ type DashboardSearchApiResponse = {
 };
 
 export default function CommandListDashboards() {
-  const [{ dashboardsAreLoading, dashboards }, setState] = useState<State>({
+  const [{ dashboardsAreLoading, dashboards, totalDashboards }, setState] = useState<State>({
     dashboards: [],
+    totalDashboards: 0,
     dashboardsAreLoading: true,
   });
   const search = (query: string) => {
@@ -34,12 +36,17 @@ export default function CommandListDashboards() {
     )
       .then(res => res.json())
       .then(data => {
-        setState(prev => ({ ...prev, dashboards: (data as DashboardSearchApiResponse).dashboards }));
+        const res = data as DashboardSearchApiResponse;
+        setState(prev => ({
+          ...prev,
+          dashboards: res.dashboards,
+          totalDashboards: res.total,
+          dashboardsAreLoading: false,
+        }));
       })
       .catch(err => {
         console.error(err);
-      })
-      .finally(() => setState(prev => ({ ...prev, dashboardsAreLoading: false })));
+      });
   };
 
   useEffect(() => {
@@ -48,20 +55,22 @@ export default function CommandListDashboards() {
 
   return (
     <List isLoading={dashboardsAreLoading} onSearchTextChange={search}>
-      {dashboards.map(dashboard => (
-        <List.Item
-          key={dashboard.id}
-          icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
-          title={dashboard.title || "No title"}
-          subtitle={dashboard.description?.replace("\n", "")}
-          accessoryTitle={dashboard.authorHandle}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}${dashboard.url}`} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section title={`Available dashboards ${totalDashboards}`}>
+        {dashboards.map(dashboard => (
+          <List.Item
+            key={dashboard.id}
+            icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
+            title={dashboard.title || "No title"}
+            subtitle={dashboard.description?.replace("\n", "")}
+            accessoryTitle={dashboard.authorHandle}
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction url={`https://${linkDomain()}${dashboard.url}`} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
