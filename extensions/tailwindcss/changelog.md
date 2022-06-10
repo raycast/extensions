@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Search Classes command & Chores] - 2022-03-12
+## [Search Classes command & Chores] - 2022-06-10
 - Update to the latest version of Raycast
 - Remove unnecessary dependencies
 - Add `Search Classes` command
