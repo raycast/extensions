@@ -7,7 +7,8 @@ export const Main = (props: {
   url: string
 }) => {
   const [state, setState]:any = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [docLoading, setDocLoading] = useState(true)
+  const [funcLoading, setFuncLoading] = useState(true)
 
   return (
     <List 
@@ -18,18 +19,17 @@ export const Main = (props: {
           storeValue={true}
           onChange={(state) => {
             setState(parseInt(state))
-            setLoading(true)
           }}
         >
           <List.Dropdown.Item title="See Full Documentation" value="1" />
           <List.Dropdown.Item title="See Member Functions" value="2" />
         </List.Dropdown>
       }
-      isLoading={loading}
+      isLoading={state === 1 ? docLoading : funcLoading}
     >
       {
-        state === 1 ? <Documentation url={props.url} setLoading={setLoading}/> :
-        state === 2 ? <MemberFunctions url={props.url} setLoading={setLoading}/> : 
+        state === 1 ? <Documentation url={props.url} setLoading={setDocLoading}/> :
+        state === 2 ? <MemberFunctions url={props.url} setLoading={setFuncLoading}/> : 
         undefined
       }
     </List>

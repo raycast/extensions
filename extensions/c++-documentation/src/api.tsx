@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio'
+import { fsync } from 'fs';
 
 export const getLinks = async () => {
     const result = await axios.get("https://en.cppreference.com/w/cpp")
@@ -175,12 +176,13 @@ export const getMemberFunctions = async (url: string) => {
     for (const element of elements) {
         const tag = element.tagName
         if (tag === "h3") {
-            if ($(element).text().trim() === "[edit] Member functions") {
+            const title = formatHeader($(element).text())
+            if (title === "Member Functions") {
                 atFunctions = true
             }
-            else if ($(element).text().trim() === "[edit] Non-member functions") {
+            else if (title === "Non-member Functions") {
                 sections.push({
-                    title: "Non-Member Functions",
+                    title: title,
                     functions: [],
                 })
             }
@@ -235,37 +237,64 @@ export const getMemberFunctions = async (url: string) => {
         }
     }
 
+    sections.map((section) => {section.functions = section.functions.filter(func => func.name)})
+
+    var start_time = new Date().getTime()
+
+    const promises = []
     for (const section of sections) {
-        section.functions = section.functions.filter(func => func.name)
+        for (const func of section.functions) {
+            promises.push(getDetails(func))
+        }
+        // promises.push(Promise.all(section.functions.map(func => {
+        //     return getDetails(func)
+        // })))
     }
-    
+
+    await Promise.all(promises.slice(0, 3))
+
+    console.log("Time: " + (new Date().getTime() - start_time) / 1000 + " seconds")
+
+
     return sections
 }
 
-const getFunctionMarkdown = async (func:any) => {
+
+export const getDetails = async (func:any) => {
     const result = await axios.get("https://en.cppreference.com" + func.url)
         .catch(err => {throw(err)})
     const html = result.data
     const $ = cheerio.load(html)
 
+    func.markdown = `# ${func.name}\n\n${func.description}`
+
     const elements = $('#mw-content-text')
 
-    const definitions = $(elements).find('.t-dcl-begin').find('.t-dcl-rev')
-    const descriptions = $(elements).find('.t-li1')
-
-    console.log(definitions.length, descriptions.length)
-
-    for (const definition of definitions) {
-        const text = "```" + $(definition).text()
-            .replaceAll(/[(].*C\+\+.*[)]/g, "")  // Remove (until/since C++..)
-            .replaceAll(/[(]\d.*[)]/g, "")       // Remove (1), (2), etc
-            .replaceAll(/\n[\n ]+/g, "\n")       // Remove extra newlines
-            .replaceAll(/\s\s+/g, " ")           // Remove extra spaces
-            .replaceAll(/[ ]([)>])/g, "$1")      // Remove space before )
-            .replaceAll(/([<(])[ ]/g, "$1")      // Remove space after (
-        + "```"
+    func.parameters = []
+    const param_list = $(elements).find('.t-par-begin').find('tr')
+    for (const param of param_list) {
+        if (param.attributes[0]?.value === "t-par-hitem") break
+        func.parameters.push($(param).text().replaceAll(/\n/g, '').replace('-', ':').trim())
     }
 
+    if (func.parameters.length === 0) 
+        func.parameters = ["This function does not take any parameters."]
+
+    // const definitions = $(elements).find('.t-dcl-begin').find('.t-dcl-rev')
+    // const descriptions = $(elements).find('.t-li1')
+
+    // console.log(definitions.length, descriptions.length)
+
+    // for (const definition of definitions) {
+    //     const text = "```" + $(definition).text()
+    //         .replaceAll(/[(].*C\+\+.*[)]/g, "")  // Remove (until/since C++..)
+    //         .replaceAll(/[(]\d.*[)]/g, "")       // Remove (1), (2), etc
+    //         .replaceAll(/\n[\n ]+/g, "\n")       // Remove extra newlines
+    //         .replaceAll(/\s\s+/g, " ")           // Remove extra spaces
+    //         .replaceAll(/[ ]([)>])/g, "$1")      // Remove space before )
+    //         .replaceAll(/([<(])[ ]/g, "$1")      // Remove space after (
+    //     + "```"
+    // }
 }
 
 
