@@ -1,63 +1,123 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, List } from "@raycast/api";
 import axios from "axios";
-import { useState } from "react";
+import { string } from "prop-types";
+import { useEffect, useState } from "react";
+import { ucfirst } from "./utils";
 
 interface Preferences {
   apiKey: string;
 }
 
-interface CommandForm {
+interface MonitorItem {
+  id: string;
+  type: string;
+  attributes: MonitorItemAttributes;
+}
+
+interface MonitorItemAttributes {
   url: string;
+  pronounceable_name: string;
+  monitor_type: string;
+  last_checked_at: string;
+  status: string;
+  check_frequency: number;
+  call: boolean;
+  sms: boolean;
+  email: boolean;
+  push: boolean;
+}
+
+interface State {
+  isLoading: boolean;
+  items: MonitorItem[];
+  error?: Error;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [output, setOutput] = useState("");
+  const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const statusMap = {
+    paused: "⏸",
+    pending: "🔍",
+    maintenance: "🚧",
+    up: "✅",
+    validating: "🤔",
+    down: "❌",
+  };
 
-  async function handleSubmit(values: CommandForm) {
-    if (values.url == "") {
-      showToast(Toast.Style.Failure, "Error", "URL is required");
-      return;
+  useEffect(() => {
+    async function fetchMonitors() {
+      setState((previous) => ({ ...previous, isLoading: true }));
+
+      try {
+        const { data } = await axios.get("https://betteruptime.com/api/v2/monitors", {
+          headers: { Authorization: `Bearer ${preferences.apiKey}` },
+        });
+
+        setState((previous) => ({ ...previous, items: data.data, isLoading: false }));
+      } catch (error) {
+        setState((previous) => ({
+          ...previous,
+          error: error instanceof Error ? error : new Error("Something went wrong"),
+          isLoading: false,
+          items: [],
+        }));
+      }
     }
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Retrieving monitors...",
-    });
-
-    try {
-      const url = `https://betteruptime.com/api/v2/monitors?url=${encodeURIComponent(values.url)}`;
-      const { data } = await axios.get(url, {
-        headers: { Authorization: `Bearer ${preferences.apiKey}` }
-      });
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Monitors retrieved successfully";
-
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve monitors";
-    }
-  }
+    fetchMonitors();
+  }, []);
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Get Monitors" onSubmit={handleSubmit} icon={Icon.Pencil} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="url" title="URL" placeholder="Enter URL" />
-      {output ? (
-        <>
-          <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
-        </>
-      ) : null}
-    </Form>
+    <List isShowingDetail>
+      {state.items?.map((item: MonitorItem, index: number) => (
+        <List.Item
+          key={index}
+          icon={statusMap[item.attributes.status] ?? "🔍"}
+          title={item.attributes.pronounceable_name}
+          accessories={[{ text: ucfirst(item.attributes.status) }]}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="General" />
+
+                  <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url} />
+                  <List.Item.Detail.Metadata.Label title="Monitor Type" text={ucfirst(item.attributes.monitor_type)} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Check Frequency"
+                    text={`${item.attributes.check_frequency} seconds`}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Last Checked At"
+                    text={item.attributes.last_checked_at.replace("T", " ")}
+                  />
+
+                  <List.Item.Detail.Metadata.Separator />
+
+                  <List.Item.Detail.Metadata.Label title="Notifications" />
+
+                  <List.Item.Detail.Metadata.Label title="Call" text={item.attributes.call ? "Yes" : "No"} />
+                  <List.Item.Detail.Metadata.Label title="SMS" text={item.attributes.sms ? "Yes" : "No"} />
+                  <List.Item.Detail.Metadata.Label title="Email" text={item.attributes.email ? "Yes" : "No"} />
+                  <List.Item.Detail.Metadata.Label title="Push" text={item.attributes.push ? "Yes" : "No"} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open in Browser"
+                onAction={() => {
+                  open("url");
+                }}
+              />
+              <Action title="Select" onAction={() => console.log(`${item.attributes.url} selected`)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
