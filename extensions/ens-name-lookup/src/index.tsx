@@ -5,8 +5,11 @@ import useSWR from "swr";
 import cheerio from "cheerio";
 
 export default function Command() {
-  const [query, setQuery] = useState('')
-  const { data: result, error } = useSWR(() => query ? `/ens-query/${query}` : null, () => performSearch(query))
+  const [query, setQuery] = useState("");
+  const { data: result, error } = useSWR(
+    () => (query ? `/ens-query/${query}` : null),
+    () => performSearch(query)
+  );
 
   useEffect(() => {
     if (error) {
@@ -16,7 +19,7 @@ export default function Command() {
 
       showToast(ToastStyle.Failure, "Could not perform search", String(error));
     }
-  }, [error])
+  }, [error]);
 
   const showEnsResult = result?.found && result.ens;
   const showAddressResult = result?.found && result.address;
@@ -42,9 +45,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {showEnsResult && (
-        <List.Section title="ENS Overview">{<EnsListItems searchResult={result} />}</List.Section>
-      )}
+      {showEnsResult && <List.Section title="ENS Overview">{<EnsListItems searchResult={result} />}</List.Section>}
 
       {showEnsResult && result.ownedEns && (
         <List.Section title="Owned Ethereum Names">
@@ -226,8 +227,8 @@ async function performSearch(searchText: string): Promise<SearchResult> {
 
     const nameCard = ensResult.find(".card").first();
 
-    const controller = nameCard.find('#ensControllerId').first().text();
-    const registrant = nameCard.find('#ensRegistrantId').first().text();
+    const controller = nameCard.find("#ensControllerId").first().text();
+    const registrant = nameCard.find("#ensRegistrantId").first().text();
     const expiration = $(nameCard.find(".row").get(1)).find(".col-md-9").text();
     const tokenId = $(nameCard.find(".row").get(3)).find(".col-md-9").text();
 
