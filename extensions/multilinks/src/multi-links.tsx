@@ -48,7 +48,7 @@ export default function () {
     >
       {links.map((link, index) => (
         <List.Item
-          key={link.name}
+          key={`${link.name}-${index}`}
           title={link.name}
           actions={
             <ActionPanel>
