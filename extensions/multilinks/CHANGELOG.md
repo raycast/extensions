@@ -1,3 +1,3 @@
 # Multi Links Changelog
 
-## [Initial Version] - 2022-06-06
+## [Initial Version] - {PR_MERGE_DATE}
