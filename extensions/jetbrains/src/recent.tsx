@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { ActionPanel, Application, List } from "@raycast/api";
 import {
   AppHistory,
@@ -16,60 +16,119 @@ import { RecentProject } from "./components/RecentProject";
 import { OpenInJetBrainsApp } from "./components/OpenInJetBrainsApp";
 import { AppDrop } from "./components/AppDrop";
 import { useFavorites, usePreferences } from "raycast-hooks";
+import { FavList } from "raycast-hooks/src/hooks/useFavorites";
 import { sortTools } from "./sortTools";
 
-interface state {
+interface State {
   loading: boolean;
-  toolboxApp: Application | undefined;
+  sortOrder: string;
+  filter: string;
+  toolboxApp?: Application;
+  history?: AppHistory[];
   appHistory: AppHistory[];
+  favourites: FavList;
+  all: recentEntry[];
+  myFavs: recentEntry[];
 }
 
+type Action =
+  | { type: "setToolboxApp"; results: Application | undefined }
+  | { type: "setHistory"; results: AppHistory[] }
+  | { type: "setEntries"; results: AppHistory[] }
+  | { type: "setSortOrder"; results: string }
+  | { type: "setFavourites"; results: FavList }
+  | { type: "setFilter"; results: string };
+
+function allReducer(results: AppHistory[]) {
+  return results.reduce((all, appHistory) => [...all, ...(appHistory?.entries ?? [])], [] as recentEntry[]);
+}
+
+function myFavReducer(favourites: FavList, all: recentEntry[]) {
+  return favourites
+    .map((path) => all.find((entry) => path === entry.path))
+    .filter((entry): entry is recentEntry => Boolean(entry));
+}
+
+function appHistorySorter(results: AppHistory[], sortOrder: string) {
+  return results.filter((app) => app.entries?.length).sort(sortTools(String(sortOrder).split(",")));
+}
+
+function projectsReducer(state: State, action: Action): State {
+  console.log(action.type, state.favourites, state.all);
+  switch (action.type) {
+    case "setToolboxApp":
+      return { ...state, toolboxApp: action.results };
+    case "setHistory":
+      return { ...state, history: action.results };
+    case "setEntries":
+      return {
+        ...state,
+        loading: false,
+        appHistory: appHistorySorter(action.results, state.sortOrder),
+        all: allReducer(action.results),
+        myFavs: myFavReducer(state.favourites, allReducer(action.results)),
+      };
+    case "setSortOrder":
+      return {
+        ...state,
+        sortOrder: action.results,
+        appHistory: appHistorySorter(state.appHistory, action.results),
+      };
+    case "setFavourites":
+      return {
+        ...state,
+        favourites: action.results,
+        myFavs: myFavReducer(action.results, state.all),
+      };
+    case "setFilter":
+      return {
+        ...state,
+        filter: action.results,
+      };
+  }
+}
+
+const initialState = {
+  loading: true,
+  appHistory: [],
+  sortOrder: "",
+  filter: "",
+  all: [],
+  favourites: [],
+  myFavs: [],
+};
+
 export default function ProjectList(): JSX.Element {
-  const [filter, setFilter] = useState<string>("");
-  const [{ loading, toolboxApp, appHistory }, setState] = useState<state>({
-    loading: true,
-    toolboxApp: undefined,
-    appHistory: [],
-  });
+  const [{ loading, toolboxApp, history, appHistory, myFavs, filter }, dispatch] = useReducer(
+    projectsReducer,
+    initialState
+  );
   const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
   const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
 
-  const myFavs = useMemo(() => {
-    const all = appHistory.reduce((all, appHistory) => [...all, ...(appHistory?.entries ?? [])], [] as recentEntry[]);
-    return favourites
-      .map((path) => all.find((entry) => path === entry.path))
-      .filter((entry): entry is recentEntry => Boolean(entry));
-  }, [favourites, appHistory, filter]);
+  useEffect(() => {
+    getJetBrainsToolboxApp().then((toolboxApp) => dispatch({ type: "setToolboxApp", results: toolboxApp }));
+    getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
+  }, []);
 
   useEffect(() => {
+    dispatch({ type: "setSortOrder", results: String(sortOrder) });
+  }, [sortOrder]);
+
+  useEffect(() => {
+    console.log({ favourites });
+    dispatch({ type: "setFavourites", results: favourites });
+  }, [favourites]);
+
+  useEffect(() => {
+    console.log("setHistories");
     setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
   }, [appHistory, filter]);
 
   useEffect(() => {
-    const setHistory = async () => {
-      setState({
-        loading: false,
-        toolboxApp: await getJetBrainsToolboxApp(),
-        appHistory: (await loadAppEntries(await getHistory()))
-          .filter((app) => app.entries?.length)
-          .sort(sortTools(String(sortOrder).split(","))),
-      });
-    };
-    setHistory().catch((err) => console.error(err));
-  }, [sortOrder]);
-
-  useEffect(() => {
-    const setHistory = async () => {
-      setState({
-        loading: false,
-        toolboxApp: await getJetBrainsToolboxApp(),
-        appHistory: (await loadAppEntries(await getHistory()))
-          .filter((app) => app.entries?.length)
-          .sort(sortTools(String(sortOrder).split(","))),
-      });
-    };
-    setHistory().catch((err) => console.error(err));
-  }, [sortOrder]);
+    if (history === undefined) return;
+    loadAppEntries(history).then((entries) => dispatch({ type: "setEntries", results: entries }));
+  }, [history]);
 
   if (loading) {
     return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
@@ -109,12 +168,17 @@ export default function ProjectList(): JSX.Element {
     </>
   );
 
-  // console.log({screenshotMode})
+  console.log({ a: myFavs.length });
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
       actions={<ActionPanel children={defaultActions} />}
-      searchBarAccessory={<AppDrop onChange={setFilter} appHistories={appHistory} />}
+      searchBarAccessory={
+        <AppDrop
+          onChange={(value) => dispatch({ type: "setFilter", results: String(value) })}
+          appHistories={appHistory}
+        />
+      }
     >
       {myFavs.length && filter === "" ? (
         <List.Section title="Favourites" subtitle={screenshotMode ? "⌘+F to remove from favorites" : undefined}>
