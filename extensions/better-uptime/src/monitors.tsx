@@ -74,8 +74,8 @@ export default function Command() {
         <List.Item
           key={index}
           icon={statusMap[item.attributes.status] ?? "🔍"}
-          title={item.attributes.pronounceable_name}
-          accessories={[{ text: ucfirst(item.attributes.status) }]}
+          title={item.attributes.url}
+          subtitle={item.attributes.pronounceable_name}
           detail={
             <List.Item.Detail
               metadata={
@@ -83,6 +83,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label title="General" />
 
                   <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url} />
+                  <List.Item.Detail.Metadata.Label title="Pronounceable Name" text={item.attributes.pronounceable_name} />
                   <List.Item.Detail.Metadata.Label title="Monitor Type" text={ucfirst(item.attributes.monitor_type)} />
                   <List.Item.Detail.Metadata.Label
                     title="Check Frequency"
