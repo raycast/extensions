@@ -13,13 +13,13 @@
         {
             "name": "multi-links",
             "title": "Multilinks",
-            "description": "List of Multilinks",
+            "description": "List of Multilinks, edit delete or open.",
             "mode": "view"
         },
         {
             "name": "create-link",
             "title": "Create MultiLink",
-            "description": "Create MultiLink",
+            "description": "Create new MultiLink",
             "mode": "view"
         }
     ],
