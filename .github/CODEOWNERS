@@ -61,6 +61,7 @@
 /extensions/clickup                                  @Ali-Parandeh
 /extensions/clockify                                 @ismamz @sxn
 /extensions/cloudflare                               @Destiner @niklaswa
+/extensions/code-stash                               @ben-greenwood
 /extensions/coffee                                   @mooxl @bibixx
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner @mike182uk
@@ -76,6 +77,7 @@
 /extensions/converter                                @koinzhang
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
+/extensions/country-lookup                           @pernielsentikaer
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/craftdocs                                @kudrykv @kudrykv
 /extensions/cratecast                                @gleich
