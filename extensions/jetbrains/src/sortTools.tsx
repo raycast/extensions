@@ -69,8 +69,20 @@ export function SortTools({
             accessories={screenshotMode ? [{ text: "k move up" }, { text: "j move down" }] : []}
             actions={
               <ActionPanel>
-                <Action icon={Icon.Checkmark} title="Save order" shortcut={{ modifiers: ["ctrl"], key: "s" }} onAction={save} />
-                {pop && <Action icon={Icon.XmarkCircle} title="Cancel" shortcut={{ modifiers: ["ctrl"], key: "c" }} onAction={pop} />}
+                <Action
+                  icon={Icon.Checkmark}
+                  title="Save order"
+                  shortcut={{ modifiers: ["ctrl"], key: "s" }}
+                  onAction={save}
+                />
+                {pop && (
+                  <Action
+                    icon={Icon.XmarkCircle}
+                    title="Cancel"
+                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
+                    onAction={pop}
+                  />
+                )}
                 <Action
                   title="Move Up"
                   icon={Icon.ChevronUp}
