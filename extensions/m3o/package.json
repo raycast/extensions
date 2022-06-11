@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "m3o",
   "title": "M3O",
-  "description": "Todo: description.",
+  "description": "Explore, discover and consume public APIs as simpler programmable building blocks.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "categories": [
@@ -11,10 +11,10 @@
   ],
   "license": "MIT",
   "commands": [{
-    "name": "avatars",
-    "title": "Avatars",
+    "name": "avatar",
+    "title": "Avatar",
     "subtitle": "M3O",
-    "description": "Todo: description.",
+    "description": "Generate an avatar.",
     "mode": "view"
   }],
   "preferences": [{
