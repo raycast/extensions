@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, getApplications, Application, useNavigation } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getApplications,
+  Application,
+  useNavigation,
+  Icon,
+} from "@raycast/api";
 import { useRef, useEffect, useState } from "react";
 import { LinkItem } from "../types";
 import Service from "./../Service";
@@ -73,7 +83,11 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`${mode === "create" ? "Create" : "Update"} Multilink`} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Checkmark}
+            title={`${mode === "create" ? "Create" : "Update"} Multilink`}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
