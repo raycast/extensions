@@ -7,7 +7,7 @@ import {
   ShowInFinderAction,
 } from "@raycast/api";
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
-import React from "react";
+import React, { useMemo } from "react";
 import { AppHistory, recentEntry } from "../util";
 import { OpenInJetBrainsAppAction } from "./OpenInJetBrainsAppAction";
 
@@ -21,11 +21,26 @@ interface RecentProjectProps {
 export function RecentProject({ app, recent, tools, toolbox }: RecentProjectProps): JSX.Element {
   const otherTools = tools.filter((tool) => tool.title !== app.title);
 
+  const keywords = useMemo(() => {
+    const splitPath = recent.path.split("/");
+    return [
+      ...new Set(
+        [
+          recent.path,
+          ...splitPath,
+          ...splitPath.map((pathSegment) => pathSegment.split("-").join(" ")),
+          ...splitPath.map((pathSegment) => pathSegment.split("_").join(" ")),
+          app.title,
+        ].filter((keyword) => !!keyword)
+      ),
+    ];
+  }, [recent.path, app.title]);
+
   return (
     <List.Item
       accessoryTitle={app.title}
       title={recent.title}
-      keywords={recent.path.split("/").concat([recent.path]).concat([app.title])}
+      keywords={keywords}
       icon={recent.icon}
       subtitle={recent.parts}
       actions={
