@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon } from "@raycast/api";
-import { Item, PasswordGeneratorOptions, Preferences } from "./types";
+import { Item, PasswordGeneratorOptions, Preferences, SendCreateOptions } from "./types";
 import { ObjectEntries } from "./types/global";
 import { URL } from "url";
 
@@ -32,6 +32,23 @@ export function titleCase(word: string) {
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
+}
+
+export function encodeSendCreateOptions(options: SendCreateOptions): string {
+  const obj = {
+    object: "send",
+    name: options.name ?? "Send name",
+    notes: options.notes ?? "Some notes about this send.",
+    type: 0,
+    file: null,
+    maxAccessCount: options.maxAccessCount,
+    expirationDate: null,
+    password: options.password,
+    disabled: false, // TODO: Add form field for this.
+    hideEmail: false, // TODO: Add form field for this.
+    ...options,
+  };
+  return btoa(JSON.stringify(obj));
 }
 
 export const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);

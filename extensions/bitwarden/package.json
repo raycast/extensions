@@ -54,6 +54,13 @@
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
       "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "Create Send",
+      "subtitle": "Create Bitwarden Send",
+      "description": "Create secret using Bitwarden's send feature.",
+      "mode": "view"
     }
   ],
   "preferences": [

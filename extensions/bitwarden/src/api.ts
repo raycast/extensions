@@ -3,8 +3,8 @@ import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { DEFAULT_SERVER_URL } from "./const";
-import { Item, PasswordGeneratorOptions, Preferences, VaultState } from "./types";
-import { getPasswordGeneratingArgs, getServerUrlPreference } from "./utils";
+import { Item, PasswordGeneratorOptions, Preferences, VaultState, SendCreateOptions, SendCreateResult } from "./types";
+import { getPasswordGeneratingArgs, encodeSendCreateOptions, getServerUrlPreference } from "./utils";
 
 export class Bitwarden {
   private env: Record<string, string>;
@@ -112,6 +112,12 @@ export class Bitwarden {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
+  }
+
+  async createSend(options: SendCreateOptions, sessionToken: string): Promise<SendCreateResult> {
+    const encodedOptions = encodeSendCreateOptions(options);
+    const { stdout } = await this.exec(["send", "create", "--session", sessionToken, encodedOptions]);
+    return JSON.parse(stdout);
   }
 
   private async exec(
