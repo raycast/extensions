@@ -14,6 +14,8 @@ interface RecentProjectProps {
   remFav?: (item: string) => Promise<void>;
   sortOrder: string;
   setSortOrder: (currentOrder: string) => void;
+  screenshotMode: boolean;
+  toggleScreenshotMode: () => void;
 }
 
 export function RecentProject({
@@ -25,6 +27,8 @@ export function RecentProject({
   remFav,
   sortOrder,
   setSortOrder,
+  screenshotMode,
+  toggleScreenshotMode,
 }: RecentProjectProps): JSX.Element {
   const { push, pop } = useNavigation();
   const otherTools = tools.filter((tool) => tool.title !== app.title);
@@ -76,8 +80,22 @@ export function RecentProject({
               title="Change Application Sort Order"
               shortcut={{ modifiers: ["ctrl"], key: "s" }}
               onAction={() =>
-                push(<SortTools sortOrder={sortOrder} saveSortOrder={setSortOrder} tools={tools} pop={pop} />)
+                push(
+                  <SortTools
+                    sortOrder={sortOrder}
+                    saveSortOrder={setSortOrder}
+                    tools={tools}
+                    pop={pop}
+                    screenshotMode={screenshotMode}
+                    toggleScreenshotMode={toggleScreenshotMode}
+                  />
+                )
               }
+            />
+            <Action
+              icon={Icon.Window}
+              title={`Toggle screenshot mode ${screenshotMode ? "off" : "on"}`}
+              onAction={toggleScreenshotMode}
             />
           </ActionPanel.Section>
         </ActionPanel>

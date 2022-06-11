@@ -1,15 +1,8 @@
-import { List, ActionPanel, Action, popToRoot, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, popToRoot, showToast, Toast, Icon } from "@raycast/api";
 import React, { useCallback, useEffect, useState } from "react";
 import { AppHistory } from "./util";
 import { usePreferences } from "raycast-hooks";
 import { loadAppEntries, getHistory } from "./util";
-
-interface SortToolsProps {
-  tools: AppHistory[];
-  sortOrder: string;
-  saveSortOrder: (currentOrder: string) => void;
-  pop?: () => void;
-}
 
 type dir = "UP" | "DOWN";
 
@@ -29,7 +22,23 @@ function move(from: number, dir: dir, list: string[]) {
     : [...list.slice(0, to), list[from], ...list.slice(to, from), ...list.slice(from + 1)];
 }
 
-export function SortTools({ tools, sortOrder, saveSortOrder, pop }: SortToolsProps): JSX.Element {
+interface SortToolsProps {
+  tools: AppHistory[];
+  sortOrder: string;
+  saveSortOrder: (currentOrder: string) => void;
+  pop?: () => void;
+  screenshotMode: boolean;
+  toggleScreenshotMode: () => void;
+}
+
+export function SortTools({
+  tools,
+  sortOrder,
+  saveSortOrder,
+  pop,
+  screenshotMode,
+  toggleScreenshotMode,
+}: SortToolsProps): JSX.Element {
   const [order, setOrder] = useState<string[]>(sortOrder.split(","));
   useEffect(() => {
     setOrder(sortOrder.split(","));
@@ -41,34 +50,44 @@ export function SortTools({ tools, sortOrder, saveSortOrder, pop }: SortToolsPro
   if (tools.length === 0) {
     return <List navigationTitle="Choose Application Sort Order" isLoading />;
   }
-  console.log({ order, sortOrder });
+
   return (
     <List
       navigationTitle="Choose Application Sort Order"
       enableFiltering={false}
-      searchBarPlaceholder="Sort and save application order"
+      searchBarPlaceholder="Sort applications"
     >
-      <List.Section title="Choose Order" subtitle={`⌃+S to save${pop ? " – ⌃+C to cancel" : ""}`}>
+      <List.Section
+        title="Choose Order"
+        subtitle={screenshotMode ? `⌃+S to save${pop ? " – ⌃+C to cancel" : ""}` : undefined}
+      >
         {tools.sort(sortTools(order)).map((tool, id) => (
           <List.Item
             key={tool.title}
             title={tool.title}
             icon={tool.icon}
-            accessories={[{ text: "k move up" }, { text: "j move down" }]}
+            accessories={screenshotMode ? [{ text: "k move up" }, { text: "j move down" }] : []}
             actions={
               <ActionPanel>
+                <Action icon={Icon.Checkmark} title="Save order" shortcut={{ modifiers: ["ctrl"], key: "s" }} onAction={save} />
+                {pop && <Action icon={Icon.XmarkCircle} title="Cancel" shortcut={{ modifiers: ["ctrl"], key: "c" }} onAction={pop} />}
                 <Action
                   title="Move Up"
+                  icon={Icon.ChevronUp}
                   shortcut={{ modifiers: [], key: "k" }}
                   onAction={() => setOrder(move(id, "UP", order))}
                 />
                 <Action
                   title="Move Down"
+                  icon={Icon.ChevronDown}
                   shortcut={{ modifiers: [], key: "j" }}
                   onAction={() => setOrder(move(id, "DOWN", order))}
                 />
-                <Action title="Save" shortcut={{ modifiers: ["ctrl"], key: "s" }} onAction={save} />
-                {pop && <Action title="Cancel" shortcut={{ modifiers: ["ctrl"], key: "c" }} onAction={pop} />}
+                <Action
+                  icon={Icon.Window}
+                  title={`Toggle screenshot mode ${screenshotMode ? "off" : "on"}`}
+                  onAction={toggleScreenshotMode}
+                />
               </ActionPanel>
             }
           />
@@ -80,18 +99,21 @@ export function SortTools({ tools, sortOrder, saveSortOrder, pop }: SortToolsPro
 
 export default function SortToolsCommand() {
   const [tools, setTools] = useState<AppHistory[]>();
-  const [{ sortOrder }, prefActions] = usePreferences({ sortOrder: "" });
+  const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
   useEffect(() => {
     const getTools = async () => {
       setTools((await loadAppEntries(await getHistory())).filter((app) => app.entries?.length));
     };
     getTools();
   }, []);
+  console.log({ screenshotMode });
   return (
     <SortTools
       tools={tools ?? []}
       sortOrder={String(sortOrder)}
       saveSortOrder={(sortOrder: string) => prefActions.update("sortOrder", sortOrder)}
+      screenshotMode={!!screenshotMode}
+      toggleScreenshotMode={() => prefActions.update("screenshotMode", !screenshotMode)}
     />
   );
 }

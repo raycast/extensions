@@ -32,7 +32,7 @@ export default function ProjectList(): JSX.Element {
     appHistory: [],
   });
   const [favourites, histories, setHistories, favActions] = useFavorites("history", []);
-  const [{ sortOrder }, prefActions] = usePreferences({ sortOrder: "" });
+  const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
 
   const myFavs = useMemo(() => {
     const all = appHistory.reduce((all, appHistory) => [...all, ...(appHistory?.entries ?? [])], [] as recentEntry[]);
@@ -109,6 +109,7 @@ export default function ProjectList(): JSX.Element {
     </>
   );
 
+  // console.log({screenshotMode})
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
@@ -116,7 +117,7 @@ export default function ProjectList(): JSX.Element {
       searchBarAccessory={<AppDrop onChange={setFilter} appHistories={appHistory} />}
     >
       {myFavs.length && filter === "" ? (
-        <List.Section title="Favourites" subtitle="⌘+F to remove from favorites">
+        <List.Section title="Favourites" subtitle={screenshotMode ? "⌘+F to remove from favorites" : undefined}>
           {myFavs.map((fav) => (
             <RecentProject
               key={fav.path}
@@ -127,6 +128,8 @@ export default function ProjectList(): JSX.Element {
               remFav={favActions.remove}
               sortOrder={String(sortOrder)}
               setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+              screenshotMode={!!screenshotMode}
+              toggleScreenshotMode={() => prefActions.update("screenshotMode", !screenshotMode)}
             />
           ))}
         </List.Section>
@@ -137,7 +140,7 @@ export default function ProjectList(): JSX.Element {
           <List.Section
             title={app.title}
             key={app.title}
-            subtitle="⌘+F to add to favorites – ⌃+S to change application order"
+            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : undefined}
           >
             {(app.entries ?? [])
               .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
@@ -152,6 +155,8 @@ export default function ProjectList(): JSX.Element {
                     addFav={favActions.add}
                     sortOrder={String(sortOrder)}
                     setSortOrder={(sortOrder) => prefActions.update("sortOrder", sortOrder)}
+                    screenshotMode={!!screenshotMode}
+                    toggleScreenshotMode={() => prefActions.update("screenshotMode", !screenshotMode)}
                   />
                 ) : null
               )}
