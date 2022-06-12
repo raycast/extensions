@@ -1,9 +1,18 @@
-import { getApplications, showToast, Toast, open, popToRoot, showHUD } from "@raycast/api";
+import {
+  getApplications,
+  showToast,
+  Toast,
+  open,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 
 async function isSipInstalled() {
   const applications = await getApplications();
   return applications.some(({ bundleId }) =>
-    bundleId ? ["io.sipapp.Sip-setapp", "io.sipapp.Sip"].includes(bundleId) : false
+    bundleId
+      ? ["io.sipapp.Sip-setapp", "io.sipapp.Sip"].includes(bundleId)
+      : false
   );
 }
 
@@ -16,7 +25,7 @@ export async function SipInstallationCheck() {
       primaryAction: {
         title: "Download information",
         onAction: (toast) => {
-          open("https://www.sip.io");
+          open("https://www.sipapp.io");
           toast.hide();
         },
       },
