@@ -1,4 +1,4 @@
-import { getApplications, showToast, Toast, open, popToRoot, showHUD } from "@raycast/api";
+import { getApplications, showToast, Toast, open } from "@raycast/api";
 
 async function isSipInstalled() {
   const applications = await getApplications();

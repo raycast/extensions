@@ -7,7 +7,7 @@ async function hexCheck(value1: string, value2: string) {
     // trim leading and trailing whitespace, remove '#' from string
     const fgColor = value1.trim().replace(/^#+/, "");
     const bgColor = value2.trim().replace(/^#+/, "");
-    var reg = /^#([0-9a-f]{3}){1,2}$/i;
+    const reg = /^#([0-9a-f]{3}){1,2}$/i;
 
     // check length of hex string
     if (fgColor.length !== 6 || bgColor.length !== 6) {

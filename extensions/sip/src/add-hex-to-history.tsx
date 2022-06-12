@@ -6,7 +6,7 @@ async function hexCheck(nameValue: string, hexValue: string) {
   if (await SipInstallationCheck()) {
     // trim leading and trailing whitespace, remove '#' from string
     const hexColor = hexValue.trim().replace(/^#+/, "");
-    var reg = /^#([0-9a-f]{3}){1,2}$/i;
+    const reg = /^#([0-9a-f]{3}){1,2}$/i;
 
     // check length of hex string
     if (hexColor.length !== 6) {
