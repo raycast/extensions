@@ -23,10 +23,6 @@ interface CodaApiResponse {
 
 type CodaApiQueryFn = (params: ListRowsParams) => Promise<CodaApiResponse>
 
-type FetchAllItemsOpts = {
-  params: ListRowsParams
-}
-
 export default class CodaApi {
   apiToken = ''
 
@@ -34,12 +30,8 @@ export default class CodaApi {
     this.apiToken = apiToken
   }
 
-  async fetchAllItems(
-    queryFn: CodaApiQueryFn,
-    { params = {} }: FetchAllItemsOpts,
-  ) {
+  async fetchAllItems(queryFn: CodaApiQueryFn) {
     const data = []
-    const limit = params.limit || 100
 
     let firstRequest = true
     let pageToken = null
@@ -47,8 +39,6 @@ export default class CodaApi {
     while (firstRequest || pageToken) {
       try {
         const res: CodaApiResponse = await queryFn({
-          ...params,
-          limit,
           pageToken,
         })
 

@@ -10,7 +10,7 @@ export default class Cache {
     this.key = `${VERSION}-${docId}-${tableName}`
   }
 
-  async getBookmarkItems() {
+  async loadBookmarkItems() {
     const jsonStr = await LocalStorage.getItem<string>(this.key)
 
     try {

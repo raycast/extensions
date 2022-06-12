@@ -10,51 +10,53 @@ interface UseBookmarkItemsOpts {
 export default function useBookmarkItems({
   onError,
 }: UseBookmarkItemsOpts = {}) {
-  const cache = useMemo(() => {
-    return new Cache('GwzNLdiC1g', 'Bookmarks')
-  }, [])
-
-  const [isLoading, setIsLoading] = useState(false)
+  const [hasLoadedFromCache, setHasLoadedFromCache] = useState(false)
+  const [isFetching, setIsFetching] = useState(false)
   const [apiItems, setApiItems] = useState<ApiItem[]>([])
+
+  const apiToken = '4c0bda5f-59ac-4983-8b53-88297c47b236'
+  const docId = 'GwzNLdiC1g'
+  const tableName = 'Bookmarks'
+
+  const cache = useMemo(() => {
+    return new Cache(docId, tableName)
+  }, [docId, tableName])
 
   useEffect(() => {
     async function loadCachedItems() {
-      const items = await cache.getBookmarkItems()
+      const items = await cache.loadBookmarkItems()
 
       if (items.length > 0) {
         setApiItems(items)
       }
+
+      setHasLoadedFromCache(true)
     }
 
     loadCachedItems()
   }, [cache])
 
   useEffect(() => {
+    if (!hasLoadedFromCache) {
+      return
+    }
+
     async function fetchItems() {
-      setIsLoading(true)
+      setIsFetching(true)
 
       try {
-        const coda = new CodaApi('4c0bda5f-59ac-4983-8b53-88297c47b236')
-
-        const items = await coda.fetchAllItems(
-          (params) => {
-            return coda.getTableRows('GwzNLdiC1g', 'Bookmarks', params)
-          },
-          {
-            params: {
-              limit: 100,
-              sortBy: 'natural',
-              useColumnNames: true,
-            },
-          },
-        )
+        const items = await fetchApiItems({
+          apiToken,
+          docId,
+          tableName,
+        })
 
         setApiItems(items)
-        setIsLoading(false)
+        setIsFetching(false)
 
         await cache.saveBookmarkItems(items)
       } catch (err) {
-        setIsLoading(false)
+        setIsFetching(false)
 
         if (onError) {
           onError(err as Error)
@@ -63,12 +65,36 @@ export default function useBookmarkItems({
     }
 
     fetchItems()
-  }, [cache, onError])
+  }, [apiItems, cache, docId, onError, tableName])
 
   return {
-    isLoading,
+    isLoading: !hasLoadedFromCache || isFetching,
+    isFetching,
     items: apiItems.map((apiItem) => {
       return translateToBookmarkItem(apiItem)
     }),
   }
+}
+
+async function fetchApiItems({
+  apiToken,
+  docId,
+  tableName,
+}: {
+  apiToken: string
+  docId: string
+  tableName: string
+}) {
+  const coda = new CodaApi(apiToken)
+
+  const items = await coda.fetchAllItems((params) => {
+    return coda.getTableRows(docId, tableName, {
+      limit: 100,
+      sortBy: 'natural',
+      useColumnNames: true,
+      ...params,
+    })
+  })
+
+  return items as ApiItem[]
 }
