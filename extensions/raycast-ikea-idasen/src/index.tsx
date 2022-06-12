@@ -1,24 +1,19 @@
-import { ActionPanel, List, Action } from '@raycast/api'
-import { useEffect, useState } from 'react'
-import sitDown from './sit-down'
-import standUp from './stand-up'
-import {
-  BrowserIcon,
-  isDeskControllerInstalled,
-  SitDownIcon,
-  StandUpIcon,
-} from './utils'
+import { ActionPanel, List, Action } from "@raycast/api";
+import { useEffect, useState } from "react";
+import sitDown from "./sit-down";
+import standUp from "./stand-up";
+import { BrowserIcon, isDeskControllerInstalled, SitDownIcon, StandUpIcon } from "./utils";
 
 export default function Command() {
-  const [isInstalled, setInstalled] = useState<boolean>(true)
+  const [isInstalled, setInstalled] = useState<boolean>(true);
 
   useEffect(() => {
     const getDektopControllerInstalledInfo = async () => {
-      setInstalled(await isDeskControllerInstalled())
-    }
+      setInstalled(await isDeskControllerInstalled());
+    };
 
-    getDektopControllerInstalledInfo()
-  }, [])
+    getDektopControllerInstalledInfo();
+  }, []);
 
   return (
     <List navigationTitle="Ikea Idasen">
@@ -48,11 +43,11 @@ export default function Command() {
             <Action
               title="SitDown"
               onAction={() => {
-                sitDown()
+                sitDown();
 
                 setTimeout(() => {
-                  standUp()
-                }, 30 * 60 * 1000)
+                  standUp();
+                }, 30 * 60 * 1000);
               }}
             />
           </ActionPanel>
@@ -70,5 +65,5 @@ export default function Command() {
         />
       )}
     </List>
-  )
+  );
 }

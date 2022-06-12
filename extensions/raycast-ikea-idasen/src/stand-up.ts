@@ -1,38 +1,38 @@
-import { open, showHUD, Toast } from '@raycast/api'
-import { runAppleScript } from 'run-applescript'
-import { appLink, fileDownload, isDeskControllerInstalled, standUp } from './utils'
+import { open, showHUD, Toast } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
+import { appLink, fileDownload, isDeskControllerInstalled, standUp } from "./utils";
 
 export default async function () {
   const toast = new Toast({
-    title: 'Stand Up',
+    title: "Stand Up",
     style: Toast.Style.Animated,
-  })
+  });
 
-  toast.show()
+  toast.show();
 
   if (await !isDeskControllerInstalled()) {
-    toast.title = 'Desk Controller not installed'
+    toast.title = "Desk Controller not installed";
     toast.message =
-      'Install it from: https://github.com/DWilliames/idasen-controller/releases/latest/download/Desk.Controller.app.zip'
-    toast.style = Toast.Style.Failure
+      "Install it from: https://github.com/DWilliames/idasen-controller/releases/latest/download/Desk.Controller.app.zip";
+    toast.style = Toast.Style.Failure;
     toast.primaryAction = {
-      title: 'Download',
+      title: "Download",
       onAction: () => {
-        open(fileDownload)
-        toast.hide()
+        open(fileDownload);
+        toast.hide();
       },
-    }
+    };
     toast.secondaryAction = {
-      title: 'Open in Browser',
+      title: "Open in Browser",
       onAction: () => {
-        open(appLink)
-        toast.hide()
+        open(appLink);
+        toast.hide();
       },
-    }
-    return
+    };
+    return;
   }
 
-  runAppleScript(standUp)
+  runAppleScript(standUp);
 
-  await showHUD('Moving desk to stand-up position')
+  await showHUD("Moving desk to stand-up position");
 }
