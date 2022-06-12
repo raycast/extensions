@@ -3,7 +3,7 @@ import { ApiItem } from './translate-to-bookmark-item'
 
 const VERSION = 'v1'
 
-export default class Cache {
+export default class CodaCache {
   key: string
 
   constructor(docId: string, tableName: string) {

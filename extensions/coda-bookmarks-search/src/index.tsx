@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast } from '@raycast/api'
 import { useCallback } from 'react'
-import useBookmarkItems from './api/use-bookmark-items'
+import useBookmarkItems from './search-bookmarks/use-bookmark-items'
 
 export default function Command() {
   const handleError = useCallback((err) => {
@@ -13,7 +13,7 @@ export default function Command() {
     })
   }, [])
 
-  const { isLoading, items } = useBookmarkItems({
+  const { isLoading, bookmarkItems } = useBookmarkItems({
     onError: handleError,
   })
 
@@ -24,23 +24,23 @@ export default function Command() {
       searchBarPlaceholder="Search bookmarks..."
     >
       <List.Section title="Bookmarks">
-        {items.map((searchResult) => (
+        {bookmarkItems.map((bookmarkITem) => (
           <List.Item
-            key={searchResult.id}
-            title={searchResult.name}
-            subtitle={searchResult.url}
+            key={bookmarkITem.id}
+            title={bookmarkITem.name}
+            subtitle={bookmarkITem.url}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     title="Open in Browser"
-                    url={searchResult.url}
+                    url={bookmarkITem.url}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy URL"
-                    content={searchResult.url}
+                    content={bookmarkITem.url}
                     shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                   />
                 </ActionPanel.Section>

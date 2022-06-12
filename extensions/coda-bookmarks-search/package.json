@@ -15,7 +15,30 @@
       "name": "index",
       "title": "Search Coda Bookmarks",
       "description": "Quickly search a coda bookmarks table and open a URL in your browser.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiToken",
+          "description": "Coda API token generated from your account settings.",
+          "type": "password",
+          "required": true,
+          "title": "API Token"
+        },
+        {
+          "name": "docId",
+          "description": "The ID of the Coda document that has the URL bookmarks table.",
+          "type": "textfield",
+          "required": true,
+          "title": "Document ID"
+        },
+        {
+          "name": "tableName",
+          "description": "The name of the bookmarks URL table.",
+          "type": "textfield",
+          "required": true,
+          "title": "Table Name"
+        }
+      ]
     }
   ],
   "scripts": {

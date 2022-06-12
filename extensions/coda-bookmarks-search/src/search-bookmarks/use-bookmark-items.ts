@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import Cache from './cache'
 import CodaApi from './coda-api'
+import CodaCache from './coda-cache'
+import getPreferences from './getPreferences'
 import translateToBookmarkItem, { ApiItem } from './translate-to-bookmark-item'
 
 interface UseBookmarkItemsOpts {
@@ -14,12 +15,10 @@ export default function useBookmarkItems({
   const [isFetching, setIsFetching] = useState(false)
   const [apiItems, setApiItems] = useState<ApiItem[]>([])
 
-  const apiToken = '4c0bda5f-59ac-4983-8b53-88297c47b236'
-  const docId = 'GwzNLdiC1g'
-  const tableName = 'Bookmarks'
+  const { apiToken, docId, tableName } = getPreferences()
 
   const cache = useMemo(() => {
-    return new Cache(docId, tableName)
+    return new CodaCache(docId, tableName)
   }, [docId, tableName])
 
   useEffect(() => {
@@ -65,12 +64,12 @@ export default function useBookmarkItems({
     }
 
     fetchItems()
-  }, [apiItems, cache, docId, onError, tableName])
+  }, [cache, docId, hasLoadedFromCache, onError, tableName])
 
   return {
     isLoading: !hasLoadedFromCache || isFetching,
     isFetching,
-    items: apiItems.map((apiItem) => {
+    bookmarkItems: apiItems.map((apiItem) => {
       return translateToBookmarkItem(apiItem)
     }),
   }
