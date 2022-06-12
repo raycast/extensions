@@ -3,7 +3,7 @@
   "name": "coda-bookmarks-search",
   "title": "Coda Bookmarks Search",
   "description": "Quickly search a coda bookmarks table and open a URL in your browser.",
-  "icon": "command-icon.png",
+  "icon": "coda-logo-512.png",
   "author": "allienx",
   "categories": [
     "Productivity",
