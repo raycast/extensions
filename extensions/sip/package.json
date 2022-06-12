@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sip",
+  "title": "Sip",
+  "description": "Accesst these Sip color management app features from Raycast: show sip color picker, open contrast checker, check contrast between two hex values, and add hex color to sip history.",
+  "icon": "sip-icon.png",
+  "author": "jameslyons",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-color-picker",
+      "title": "Show Color Picker",
+      "subtitle": "Sip",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-check-contrast",
+      "title": "Open Contrast Checker",
+      "subtitle": "Sip",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Sip",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-contrast-hex",
+      "title": "Check Contrast",
+      "subtitle": "Sip",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
