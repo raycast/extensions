@@ -5,6 +5,9 @@
   "description": "View and manage your ploi.io servers and sites",
   "icon": "ploi-icon.png",
   "author": "Cannonball",
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -36,8 +39,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "axios": "^0.24.0",
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.26.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

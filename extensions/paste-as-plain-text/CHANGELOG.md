@@ -1,5 +1,8 @@
 # Paste as Plain text Changelog
 
+## [Refactor code] - 2022-06-04
+- Refactor code
+
 ## [Update Raycast Api] - 2022-05-01
 - Update Raycast Api
 

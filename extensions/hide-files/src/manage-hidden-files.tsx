@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { isImage } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
@@ -19,9 +19,13 @@ import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
 import { copyFileByPath } from "./utils/applescript-utils";
+import { ListEmptyView } from "./components/list-empty-view";
+import { Preferences } from "./types/preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
-  const [tag, setTag] = useState<string>("All");
+  const { rememberTag } = getPreferenceValues<Preferences>();
+  const [tag, setTag] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
 
   const { localHiddenDirectory, loading } = getHiddenFiles(refresh);
@@ -32,7 +36,7 @@ export default function Command() {
       searchBarPlaceholder="Search hidden files"
       searchBarAccessory={
         localHiddenDirectory.length !== 0 ? (
-          <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
+          <List.Dropdown onChange={setTag} tooltip={"Filter Tag"} storeValue={rememberTag}>
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             {
               <List.Dropdown.Section title={"Type"}>
@@ -52,12 +56,8 @@ export default function Command() {
         ) : null
       }
     >
-      <List.EmptyView
-        key={`empty-localDirectory`}
-        title={"No Hidden Files"}
-        icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
-        description={`You can hide files via the "Hide Files" command`}
-      />
+      <ListEmptyView />
+
       {localHiddenDirectory.map(
         (value, index) =>
           (tag === "All" || value.type === tag || value.path.includes(tag)) && (
@@ -158,6 +158,8 @@ export default function Command() {
                       shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
                     />
                   </ActionPanel.Section>
+
+                  <ActionOpenCommandPreferences />
                 </ActionPanel>
               }
             />

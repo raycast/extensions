@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import GithubOcto from "../Octokit";
-import { Tree, Topic } from "../types/GithubType";
+import { Tree, Topic, Example } from "../types/GithubType";
 import path from "path";
 import fs from "fs";
 
@@ -68,6 +68,24 @@ export async function getTopicsFromCache(): Promise<string> {
   const topics: string = (await LocalStorage.getItem("topics")) || "";
   if (!topics) throw new Error("Cached results not loaded!");
   return topics;
+}
+
+/**
+ * Get the topics from cache or make an api call
+ * @returns Promise
+ */
+export async function getExamples(): Promise<Example[]> {
+  const octokit = new GithubOcto();
+  const { data } = await octokit.request("GET /repos/vercel/next.js/git/trees/canary", {
+    recursive: true,
+  });
+
+  return data.tree
+    .filter((node: Tree) => node.path.match(/^examples\/(\w|-)+$/gi))
+    .map((node: Tree) => ({
+      name: node.path.replace("examples/", ""),
+      url: `https://github.com/vercel/next.js/tree/canary/${node.path}`,
+    }));
 }
 
 /**

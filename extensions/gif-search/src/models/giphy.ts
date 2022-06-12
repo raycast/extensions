@@ -6,7 +6,7 @@ import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
-import type { APIOpt, IGif, IGifAPI } from "../models/gif";
+import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
 
 let gf: GiphyFetch;
 export async function getAPI(force?: boolean) {
@@ -43,11 +43,12 @@ export default async function giphy(force?: boolean) {
 }
 
 export function mapGiphyResponse(giphyResp: GiphyGif) {
+  const title = giphyResp.title || giphyResp.slug;
   return <IGif>{
     id: giphyResp.id,
-    title: giphyResp.title || giphyResp.slug,
+    title: title,
     url: giphyResp.url,
-    slug: giphyResp.slug,
+    slug: slugify(title),
     preview_gif_url: giphyResp.images.preview_gif.url,
     gif_url: giphyResp.images.fixed_height.url,
     metadata: {
@@ -61,7 +62,6 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
       links: [giphyResp.source && { title: "Source", text: giphyResp.source_tld, target: giphyResp.source }],
       tags: giphyResp.tags,
     },
-    attribution:
-      environment.theme === "light" ? "Poweredby_100px-White_VertLogo.png" : "Poweredby_100px-Black_VertLogo.png",
+    attribution: "giphy-logo-square-180.png",
   };
 }

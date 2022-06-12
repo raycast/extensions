@@ -11,8 +11,10 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  // query describes an entire query to replace the existing query with, or a partial
-  // addition.
+  /**
+   * query describes an entire query to replace the existing query with, or a partial
+   * query to be appended to the current query.
+   */
   query?: { addition: string } | string;
 }
 
@@ -23,7 +25,8 @@ export interface Alert {
 
 export interface Progress {
   matchCount: number;
-  duration: string;
+  durationMs: number;
+  skipped: number;
 }
 
 export interface SearchHandlers {
@@ -180,9 +183,15 @@ export async function performSearch(
         type: "progress",
         data: message.data ? JSON.parse(message.data) : {},
       };
+
+      const {
+        data: { matchCount, durationMs, skipped },
+      } = event;
+
       handlers.onProgress({
-        matchCount: event.data.matchCount,
-        duration: `${event.data.durationMs}ms`,
+        matchCount: matchCount,
+        durationMs: durationMs,
+        skipped: skipped?.length || 0,
       });
     });
 

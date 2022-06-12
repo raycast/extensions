@@ -22,6 +22,8 @@ export default function TaskEdit({ task }: TaskEditProps) {
       await todoist.updateTask(task.id, { content, description });
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       mutate(SWRKeys.tasks);
+
+      mutate([SWRKeys.task, task.id]);
       pop();
     } catch (error) {
       handleError({ error, title: "Unable to update task" });

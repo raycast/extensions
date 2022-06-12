@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Color,
-  Icon,
-  Keyboard,
-  List,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List, popToRoot } from "@raycast/api";
 import * as open from "open";
 import React from "react";
 import { getPrimaryActionPreference, gitlabgql, PrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { getVSCodeAppPath } from "../vscode";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { BranchList } from "./branch";
@@ -38,7 +27,7 @@ function CloneURLInVSCodeListItem(props: { url?: string }) {
         await open.default(vscodeurl);
       }
     } catch (e) {
-      showToast(Toast.Style.Failure, "Could not clone in VSCode", getErrorMessage(e));
+      showErrorToast(getErrorMessage(e), "Could not clone in VSCode");
     }
   };
   if (props.url && props.url.length > 0) {

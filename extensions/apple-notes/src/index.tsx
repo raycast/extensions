@@ -47,6 +47,7 @@ export default function Command() {
     let lastAccount = "";
     let lastFolder = "";
     let lastNote: Note | null = null;
+    let atLeastOneId = false;
 
     for (const line of lines) {
       const [key, ...rest] = line.split(": ");
@@ -63,6 +64,7 @@ export default function Command() {
           lastNote = {
             id: value,
           } as Note;
+          atLeastOneId = true; // to ensure any cached items have ids
           break;
         case "name":
           if (lastNote) {
@@ -84,6 +86,10 @@ export default function Command() {
       }
     }
 
+    // if our cache/results don't have ids - it is the pre-id cache, and we need to not set state.
+    if (!atLeastOneId) {
+      return;
+    }
     notes.sort((a, b) => (a.date && b.date && a.date < b.date ? 1 : -1));
     setState({ notes: notes, loading: false });
   }
@@ -137,6 +143,7 @@ export default function Command() {
 
     await setLocalStorageItem("notes", result);
   }
+
   async function openNote(number: number) {
     await closeMainWindow();
     await runAppleScript(`tell application "Notes" \nshow note "${state.notes[number].name}" \nend tell`);

@@ -5,39 +5,40 @@ import path from "path";
 import { environment, LocalStorage } from "@raycast/api";
 
 const assetPath = environment.assetsPath;
-const raycastIsLightTheme = () => {
-  return environment.theme == "light";
-};
+
 export const getDirectoryContent = (directoryPath: string) => {
-  let detailContent = "";
+  let fileContent = "";
   const parsePath = path.parse(directoryPath);
-  const previewIcon = raycastIsLightTheme() ? "folder-icon.png" : "folder-icon@dark.png";
+  let sizeTitle = "";
+  let size = "";
+  let created = "";
+  let modified = "";
+  let lastOpened = "";
   try {
     if (!isEmpty(directoryPath)) {
       const fileStat = fse.statSync(directoryPath);
       const files = fse.readdirSync(directoryPath);
       const isNormalFile = files.filter((value) => !value.startsWith("."));
-      detailContent = `![](${fileUrl(assetPath + "/" + previewIcon)})\n
-      
-------
-
-**Name**:${parsePath.name}
-
-**Where**: ${parsePath.dir}
-
-**Sub-files**: ${isNormalFile.length}
-
-**Created**: ${new Date(fileStat.birthtime).toLocaleString()}
-
-**Modified**: ${new Date(fileStat.mtime).toLocaleString()}
-
-**Last opened**: ${new Date(fileStat.atime).toLocaleString()}
-`;
+      fileContent = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${parsePath.name}" height="190" />`;
+      sizeTitle = "Sub-files";
+      size = isNormalFile.length + "";
+      created = new Date(fileStat.birthtime).toLocaleString();
+      modified = new Date(fileStat.mtime).toLocaleString();
+      lastOpened = new Date(fileStat.atime).toLocaleString();
     }
   } catch (e) {
     console.error(String(e));
   }
-  return detailContent;
+  return {
+    fileContent: fileContent,
+    name: parsePath.name,
+    where: parsePath.dir,
+    sizeTitle: sizeTitle,
+    size: size,
+    created: created,
+    modified: modified,
+    lastOpened: lastOpened,
+  };
 };
 
 export enum ShowDetailKey {

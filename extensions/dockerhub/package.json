@@ -15,7 +15,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.35.0",
     "axios": "^0.24.0"
   },
   "devDependencies": {
@@ -31,6 +31,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }
 }

@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 
@@ -31,10 +32,14 @@ export const NON_PREVIEWABLE_EXTENSIONS = [
   ".gsheet",
   ".gslides",
   ".gdraw",
+  ".sketch",
 ];
 export const MAX_RESULTS_WITHOUT_SEARCH_TEXT = 1000;
 export const MAX_RESULTS_WITH_SEARCH_TEXT = 100;
 export const MAX_TMP_FILE_PREVIEWS_LIMIT = 500; // Average size of a file preview is <20KB
+export const DEFAULT_FILE_PREVIEW_IMAGE_PATH = join(environment.assetsPath, "file.png");
+export const DEFAULT_FOLDER_PREVIEW_IMAGE_PATH = join(environment.assetsPath, "folder.png");
+export const SPINNER_GIF_PATH = join(environment.assetsPath, "loading-spinner.gif");
 export const DB_FILE_PATH = join(homedir(), ".raycast-google-drive-sqlite.db");
 export const TMP_FILE_PREVIEWS_PATH = join(tmpdir(), "raycast-google-drive-file-previews");
 export const FILES_LAST_INDEXED_AT_KEY = "filesLastIndexedAt";

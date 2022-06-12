@@ -3,9 +3,10 @@ import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { GifDetailsActions } from "./GifDetailsActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
+import { getServiceTitle, ServiceName } from "../preferences";
 
-export function GifDetails(props: { item: IGif }) {
-  const { metadata } = props.item;
+export function GifDetails(props: { item: IGif; service?: ServiceName }) {
+  const { title, metadata, attribution } = props.item;
 
   const tags = [];
   if (metadata?.tags?.length) {
@@ -29,18 +30,22 @@ export function GifDetails(props: { item: IGif }) {
   return (
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
-      actions={<GifDetailsActions item={props.item} showViewDetails={false} />}
+      actions={<GifDetailsActions item={props.item} showViewDetails={false} service={props.service} />}
       metadata={
-        metadata ? (
-          <Detail.Metadata>
-            {metadata?.width ? <Detail.Metadata.Label title="Width" text={metadata.width.toString()} /> : undefined}
-            {metadata?.height ? <Detail.Metadata.Label title="Height" text={metadata.height.toString()} /> : undefined}
-            {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
-            {labels}
-            {links}
-            {tags}
-          </Detail.Metadata>
-        ) : undefined
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Title" text={title} />
+          {metadata?.width ? (
+            <Detail.Metadata.Label title="Width" text={`${metadata.width.toString()}px`} />
+          ) : undefined}
+          {metadata?.height ? (
+            <Detail.Metadata.Label title="Height" text={`${metadata.height.toString()}px`} />
+          ) : undefined}
+          {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
+          {labels}
+          {links}
+          {tags}
+          <Detail.Metadata.Label title="Source" text={getServiceTitle(props.service)} icon={attribution} />
+        </Detail.Metadata>
       }
     />
   );

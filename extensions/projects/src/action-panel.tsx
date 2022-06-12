@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { ReactElement } from "react";
-import { CacheType, OpenWith, Preferences, ProjectType, SourceRepo } from "./types";
+import { CacheType, ListType, Preferences, SourceRepo } from "./types";
 import { ApplicationCache } from "./cache/application-cache";
+import { getOpenWith } from "./common-utils";
 
 interface SearchProjectActionPanelProps {
   repo: SourceRepo;
   preferences: Preferences;
-  pinned?: boolean;
+  listType: ListType;
   recent?: boolean;
 }
 
@@ -31,42 +32,27 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
     showToast(Toast.Style.Success, "", "Repo un-pinned.");
   }
 
-  function getOpenWith(projectType: ProjectType, preferences: Preferences): OpenWith {
-    if (projectType === ProjectType.NODE) {
-      return preferences.openNodeWith;
-    } else if (projectType === ProjectType.MAVEN) {
-      return preferences.openMavenWith;
-    } else if (projectType === ProjectType.GRADLE) {
-      return preferences.openGradleWith;
-    } else if (projectType === ProjectType.XCODE) {
-      return preferences.openXcodeWith;
-    }
-    return preferences.openNodeWith;
-  }
-
   return (
     <ActionPanel>
       <ActionPanel.Section>
         <Action.Open
-          title={`Open in ${getOpenWith(props.repo.type, props.preferences).name}`}
+          title={`Open in ${getOpenWith(props.repo.openWithKey, props.preferences).name}`}
           icon={{
-            fileIcon: getOpenWith(props.repo.type, props.preferences).path,
+            fileIcon: getOpenWith(props.repo.openWithKey, props.preferences).path,
           }}
           target={props.repo.fullPath}
-          application={getOpenWith(props.repo.type, props.preferences).bundleId}
+          application={getOpenWith(props.repo.openWithKey, props.preferences).bundleId}
           onOpen={() => addToRecentlyAccessedCache(props.repo)}
         />
 
-        {props.preferences.openWith1 && (
-          <Action.Open
-            title={`Open in ${props.preferences.openWith1.name}`}
-            icon={{ fileIcon: props.preferences.openWith1.path }}
-            target={props.repo.fullPath}
-            application={props.preferences.openWith1.bundleId}
-            shortcut={{ modifiers: ["opt"], key: "return" }}
-            onOpen={() => addToRecentlyAccessedCache(props.repo)}
-          />
-        )}
+        <Action.Open
+          title={`Open in ${props.preferences.openDefaultWith.name}`}
+          icon={{ fileIcon: props.preferences.openDefaultWith.path }}
+          target={props.repo.fullPath}
+          application={props.preferences.openDefaultWith.bundleId}
+          shortcut={{ modifiers: ["opt"], key: "return" }}
+          onOpen={() => addToRecentlyAccessedCache(props.repo)}
+        />
 
         {props.preferences.openWith2 && (
           <Action.Open
@@ -91,7 +77,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
             />
           )}
 
-        {props.pinned && (
+        {props.listType == "pinned" && (
           <Action
             icon={Icon.Pin}
             title="Unpin Project"
@@ -100,7 +86,7 @@ export function SearchProjectActionPanel(props: SearchProjectActionPanelProps): 
           />
         )}
 
-        {!props.pinned && (
+        {props.listType !== "pinned" && (
           <Action
             icon={Icon.Pin}
             title="Pin Project"
