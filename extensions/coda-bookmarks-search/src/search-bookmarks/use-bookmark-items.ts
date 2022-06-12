@@ -64,7 +64,7 @@ export default function useBookmarkItems({
     }
 
     fetchItems()
-  }, [cache, docId, hasLoadedFromCache, onError, tableName])
+  }, [apiToken, cache, docId, hasLoadedFromCache, onError, tableName])
 
   return {
     isLoading: !hasLoadedFromCache || isFetching,
