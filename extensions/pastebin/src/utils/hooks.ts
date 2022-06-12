@@ -6,7 +6,7 @@ const preferences = getPreferenceValues();
 
 export function useToken() {
   const { data } = useSWR("/login", async () => {
-    return client.login(preferences.username, preferences.password);
+    return client.login({ name: preferences.username, password: preferences.password });
   });
 
   return data;
@@ -37,7 +37,9 @@ export function usePastes() {
     try {
       const deleted = await client.deletePasteByKey({ pasteKey: id, userKey: token });
       if (!deleted) {
-        throw new Error("Paste not deleted");
+        toast.title = "Something went wrong";
+        toast.style = Toast.Style.Failure;
+        return;
       }
 
       mutate();

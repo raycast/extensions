@@ -32,7 +32,7 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "Get it on https://pastebin.com/doc_api after registering",
+      "description": "Get it on https://pastebin.com/doc_api after signing up",
       "required": true,
       "type": "password",
       "placeholder": "pxijXlZt-WictechMbx_2Hib8-uReMmL"
@@ -42,7 +42,8 @@
       "title": "Username",
       "description": "Your Pastebin username",
       "required": true,
-      "type": "textfield"
+      "type": "textfield",
+      "placeholder": "raycaster"
     },
     {
       "name": "password",
@@ -53,8 +54,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.1",
-    "pastebin-api": "^4.0.1",
+    "@raycast/api": "^1.36.0",
+    "pastebin-api": "^5.1.0",
     "swr": "^1.3.0",
     "dateformat": "^5.0.3"
   },
