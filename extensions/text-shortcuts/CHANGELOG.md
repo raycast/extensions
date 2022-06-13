@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Add new shortcut layout options] - {PR_MERGE_DATE}
+## [Add new shortcut layout options] - 2022-06-13
 
 - Add new shortcut layout options: List or Grid
 - Optimize shortcut icons
