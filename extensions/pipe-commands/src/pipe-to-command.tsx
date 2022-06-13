@@ -14,7 +14,6 @@ import {
   popToRoot,
   getSelectedText,
   environment,
-  getSelectedFinderItems,
   confirmAlert,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
@@ -24,7 +23,7 @@ import { useEffect, useState } from "react";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "text" | "clipboard" | "finder";
+type InputType = "text" | "clipboard";
 
 export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   const { inputFrom } = props;
@@ -79,13 +78,6 @@ async function getInput(inputType: InputType) {
     }
     case "text":
       return getSelectedText();
-    case "finder": {
-      const items = await getSelectedFinderItems();
-      if (!items || !items.length) {
-        throw new Error("No items selected in finder");
-      }
-      return items.map((item) => item.path).join(":");
-    }
   }
 }
 
