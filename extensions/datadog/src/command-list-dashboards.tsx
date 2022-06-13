@@ -44,6 +44,10 @@ export default function CommandListDashboards() {
   });
   const search = (query: string) => {
     console.log("searching for dashboards", query);
+    setState(prev => ({
+      ...prev,
+      dashboardsAreLoading: true,
+    }));
     fetch(
       encodeURI(
         `https://app.datadoghq.com/api/v1/dashboard_search?with_suggested=true&query=${query}&start=0&count=50&sort=`
@@ -80,16 +84,15 @@ export default function CommandListDashboards() {
         {dashboards.map(dashboard => (
           <List.Item
             key={dashboard.id}
-            icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
+            icon={dashboard.is_favorite ? Icon.Star : undefined}
             title={dashboard.title || "No title"}
             accessories={[
-              { icon: dashboard.is_favorite ? Icon.Star : "", tooltip: "Favorite" },
               { icon: dashboard.is_shared ? Icon.Link : "", tooltip: "Shared" },
               { icon: Icon.Person, tooltip: dashboard.author.handle },
               {
                 text: `${Array(dashboard.popularity + 1).join("I")}${Array(6 - dashboard.popularity).join(" ")}`,
                 icon: Icon.Eye,
-                tooltip: "Popularity",
+                tooltip: `Popularity ${dashboard.popularity}/5`,
               },
             ].filter(x => x.icon)}
             actions={
