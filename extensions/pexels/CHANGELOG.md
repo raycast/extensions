@@ -1,6 +1,6 @@
 # Pexels Changelog
 
-## [Add new photo layout options] - {PR_MERGE_DATE}
+## [Add new photo layout options] - 2022-06-13
 
 - Add new photo layout options: List or Grid.
 
