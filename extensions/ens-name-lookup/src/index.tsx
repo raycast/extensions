@@ -6,7 +6,11 @@ import cheerio from "cheerio";
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const { data: result, error } = useSWR(
+  const {
+    data: result,
+    error,
+    isValidating,
+  } = useSWR(
     () => (query ? `/ens-query/${query}` : null),
     () => performSearch(query)
   );
@@ -26,7 +30,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={!result}
+      isLoading={isValidating}
       onSearchTextChange={(value) => setQuery(value)}
       searchBarPlaceholder="Search by Ethereum name or address..."
       throttle
