@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import useSWR from "swr";
@@ -17,7 +17,7 @@ export default function Command() {
         return;
       }
 
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }, [error]);
 
@@ -91,10 +91,8 @@ function AddressActions({ address }: { address: string }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/address/${address}`} />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <CopyToClipboardAction title="Copy Address" content={address} shortcut={{ modifiers: ["cmd"], key: "." }} />
+        <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/address/${address}`} />
+        <Action.CopyToClipboard title="Copy Address" content={address} shortcut={{ modifiers: ["cmd"], key: "." }} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -104,7 +102,7 @@ function ENSActions({ ens }: { ens: string }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/enslookup-search?search=${ens}`} />
+        <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/enslookup-search?search=${ens}`} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -143,7 +141,7 @@ function TransactionListItem({ transaction }: { transaction: Transaction }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/tx/${transaction.id}`} />
+            <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/tx/${transaction.id}`} />
           </ActionPanel.Section>
         </ActionPanel>
       }
