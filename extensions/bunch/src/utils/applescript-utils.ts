@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { BunchesInfo, PreferencesInfo } from "../types/types";
+import { PreferencesInfo } from "../types/types";
 import path from "path";
 
 export const scriptToGetBunches = async () => {
@@ -35,30 +35,6 @@ export const scriptToGetTaggedBunches = async (tag: string) => {
   return bunches;
 };
 
-export const scriptToToggleBunches = async (bunches: BunchesInfo) => {
-  const script = `tell application "Bunch"
-    toggle bunch "${bunches.name}"
-end tell`;
-  try {
-    return await runAppleScript(script);
-  } catch (e) {
-    console.error(String(e));
-    return String(e);
-  }
-};
-
-export const scriptToProcessRawBunchText = async (text: string) => {
-  const script = `tell application "Bunch"
-    process text "${text}"
-end tell`;
-  try {
-    return await runAppleScript(script);
-  } catch (e) {
-    console.error(String(e));
-    return String(e);
-  }
-};
-
 export const scriptToGetPreferences = async () => {
   const script1 = `tell application "Bunch"
    get preference "Bunch Folder" 
@@ -85,30 +61,29 @@ end tell`;
     const parsedPath = path.parse(bunchFolder.startsWith("file://") ? bunchFolder.substring(7) : bunchFolder);
     preferences.push({
       title: "Bunch Folder",
-      value: parsedPath.dir + "/" + parsedPath.base,
+      subtitle: parsedPath.dir + "/" + parsedPath.base,
+      value: bunchFolder,
     });
-    preferences.push({ title: "Toggle Bunches", value: toggleBunches === "0" ? "On" : "Off" });
-    preferences.push({ title: "Single Bunch Mode", value: singleBunchMode === "0" ? "On" : "Off" });
-    preferences.push({ title: "Debug Level (0-4)", value: debugLeve });
-    preferences.push({ title: "Preserve Bunches", value: preserveBunches });
+    preferences.push({
+      title: "Toggle Bunches",
+      subtitle: toggleBunches === "0" ? "Off" : "On",
+      value: toggleBunches,
+    });
+    preferences.push({
+      title: "Single Bunch Mode",
+      subtitle: singleBunchMode === "0" ? "Off" : "On",
+      value: singleBunchMode,
+    });
+    preferences.push({
+      title: "Remember Open Bunches",
+      subtitle: preserveBunches === "0" ? "Off" : "On",
+      value: preserveBunches,
+    });
+    preferences.push({ title: "Debug Level (0-4)", subtitle: debugLeve, value: debugLeve });
   } catch (e) {
     console.error(String(e));
   }
   return preferences;
-};
-
-export const scriptToGetBunchFolder = async () => {
-  const script1 = `tell application "Bunch"
-   get preference "Bunch Folder" 
-end tell`;
-  try {
-    const bunchFolder = await runAppleScript(script1);
-    const parsedPath = path.parse(bunchFolder.startsWith("file://") ? bunchFolder.substring(7) : bunchFolder);
-    return parsedPath.dir + "/" + parsedPath.base;
-  } catch (e) {
-    console.error(String(e));
-    return String(e);
-  }
 };
 
 export const scriptToRefreshBrowsers = async () => {

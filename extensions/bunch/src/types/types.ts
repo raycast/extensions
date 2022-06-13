@@ -4,5 +4,6 @@ export interface BunchesInfo {
 }
 export interface PreferencesInfo {
   title: string;
+  subtitle: string;
   value: string;
 }

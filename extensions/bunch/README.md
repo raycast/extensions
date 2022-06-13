@@ -1,6 +1,8 @@
 # Bunch
 
-Control [Bunch](https://bunchapp.co) via Raycast
+Control [Bunch](https://bunchapp.co) via Raycast.
+
+Before using this extension, you need to install the Bunch application. [Download Bunch](https://bunchapp.co/download/).
 
 Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

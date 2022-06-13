@@ -5,7 +5,7 @@ import { ActionOnBunches } from "./components/action-on-bunches";
 import { EmptyView } from "./components/empty-view";
 import { bunchesTag } from "./utils/constants";
 
-export default function ListAllBunches() {
+export default function SearchAllBunches() {
   const [filter, setFilter] = useState<string>("");
   const [searchContent, setSearchContent] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
@@ -14,7 +14,7 @@ export default function ListAllBunches() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search bunches or tag: tag1+tag2"}
+      searchBarPlaceholder={"Search bunches name, tag:tag1+tag2, tag:tag1,tag2"}
       searchBarAccessory={
         <List.Dropdown onChange={setFilter} tooltip={"Filter Tag"} storeValue={false}>
           {bunchesTag.map((value) => {

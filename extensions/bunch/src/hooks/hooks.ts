@@ -16,23 +16,18 @@ export const getBunches = (refresh: number, tag?: string) => {
     setLoading(true);
     try {
       const openBunches = (await scriptToGetOpenBunches()).split(", ");
+      const _bunches: BunchesInfo[] = [];
+      let allBunches: string[] = [];
       if (tag?.startsWith("tag:")) {
-        console.debug(tag?.substring(4));
-        const tagBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
-        console.debug(tagBunches);
-        const _bunches: BunchesInfo[] = [];
-        tagBunches.map((value) => {
-          if (isEmpty(value)) return;
-          _bunches.push({ name: value, isOpen: openBunches.includes(value) });
-        });
-        setBunches(_bunches);
+        allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
       } else if (isEmpty(tag)) {
-        const allBunches = (await scriptToGetBunches()).split(", ");
-        const _bunches = allBunches.map((value) => {
-          return { name: value, isOpen: openBunches.includes(value) };
-        });
-        setBunches(_bunches);
+        allBunches = (await scriptToGetBunches()).split(", ");
       }
+      allBunches.map((value) => {
+        if (isEmpty(value)) return;
+        _bunches.push({ name: value, isOpen: openBunches.includes(value) });
+      });
+      setBunches(_bunches);
     } catch (e) {
       console.error(e);
     }
@@ -46,7 +41,7 @@ export const getBunches = (refresh: number, tag?: string) => {
   return { bunches: bunches, loading: loading };
 };
 
-export const getBunchPreferences = () => {
+export const getBunchPreferences = (refresh: number) => {
   const [bunchPreferences, setBunchPreferences] = useState<PreferencesInfo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -59,7 +54,7 @@ export const getBunchPreferences = () => {
       console.error(e);
     }
     setLoading(false);
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     void fetchData();

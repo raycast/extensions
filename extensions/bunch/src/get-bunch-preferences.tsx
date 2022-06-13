@@ -1,41 +1,98 @@
-import { Action, ActionPanel, Icon, List, open, showHUD } from "@raycast/api";
-import React from "react";
+import { Action, ActionPanel, Color, Icon, List, open, showHUD } from "@raycast/api";
+import React, { useState } from "react";
 import { getBunchPreferences } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
+import { spawnSync } from "child_process";
 
 export default function GetBunchPreferences() {
-  const { bunchPreferences, loading } = getBunchPreferences();
+  const [refresh, setRefresh] = useState<number>(0);
+  const { bunchPreferences, loading } = getBunchPreferences(refresh);
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search preferences"}>
       <EmptyView title={"No Preferences"} />
-
-      <List.Section title={"Closed"}>
-        {bunchPreferences.map((value, index) => {
-          return (
-            <List.Item
-              icon={Icon.Gear}
-              key={index}
-              title={value.title}
-              subtitle={value.value}
-              actions={
-                <ActionPanel>
+      {bunchPreferences.map((value, index) => {
+        return (
+          <List.Item
+            icon={buildIcon(value.value)}
+            key={index}
+            title={value.title}
+            subtitle={value.subtitle}
+            actions={
+              <ActionPanel>
+                {value.title === "Bunch Folder" && (
                   <Action
                     icon={Icon.Finder}
                     title={"Open Bunch Folder"}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     onAction={() => {
-                      open(bunchPreferences[0].value).then(() => {
-                        showHUD("Open: " + bunchPreferences[0].value).then();
+                      open(encodeURI("x-bunch://reveal")).then(() => {
+                        showHUD("Open: " + bunchPreferences[0].subtitle).then();
                       });
                     }}
                   />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                )}
+                {value.title === "Toggle Bunches" && (
+                  <Action
+                    icon={Icon.Gear}
+                    title={"Toggle Toggle Bunches"}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => {
+                      spawnSync(`open`, [`x-bunch://setPref?toggleBunches=${value.value === "0" ? "1" : "0"}`], {
+                        shell: true,
+                      });
+                      setRefresh(Date.now());
+                    }}
+                  />
+                )}
+                {value.title === "Single Bunch Mode" && (
+                  <Action
+                    icon={Icon.Gear}
+                    title={"Toggle Single Bunch Mode"}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => {
+                      spawnSync(`open`, [`x-bunch://setPref?singleBunchMode=${value.value === "0" ? "1" : "0"}`], {
+                        shell: true,
+                      });
+                      setRefresh(Date.now());
+                    }}
+                  />
+                )}
+                {value.title === "Remember Open Bunches" && (
+                  <Action
+                    icon={Icon.Gear}
+                    title={"Toggle Remember Open Bunches"}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={() => {
+                      spawnSync(`open`, [`x-bunch://setPref?preserveOpenBunches=${value.value === "0" ? "1" : "0"}`], {
+                        shell: true,
+                      });
+                      setRefresh(Date.now());
+                    }}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
+
+const buildIcon = (value: string) => {
+  switch (value) {
+    case "0":
+      return Icon.Circle;
+    case "1":
+      return { source: Icon.Checkmark, tintColor: Color.Green };
+    case "2":
+      return { source: Icon.Checkmark, tintColor: Color.Green };
+    case "3":
+      return { source: Icon.Checkmark, tintColor: Color.Green };
+    case "4":
+      return { source: Icon.Checkmark, tintColor: Color.Green };
+    default:
+      return { source: Icon.Finder, tintColor: Color.Green };
+  }
+};

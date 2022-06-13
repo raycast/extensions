@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list-all-bunches",
-      "title": "List All Bunches",
+      "name": "search-all-bunches",
+      "title": "Search All Bunches",
       "subtitle": "Bunch",
-      "description": "Search bunches, support 「 tag:tag1+tag2... 」 to search by tag.",
+      "description": "Search all bunches, support 「tag:tag1+tag2」 and 「tag:tag1,tag2」 to search by tag.",
       "mode": "view"
     },
     {
@@ -24,6 +24,13 @@
       "subtitle": "Bunch",
       "description": "View several of Bunch’s preferences.",
       "mode": "view"
+    },
+    {
+      "name": "open-bunch-preferences",
+      "title": "Open Bunch Preferences",
+      "subtitle": "Bunch",
+      "description": "Open Bunch Preferences dialog.",
+      "mode": "no-view"
     },
     {
       "name": "process-bunch-text",
