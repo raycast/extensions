@@ -1,7 +1,6 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
-import fs from "fs";
-import { homedir } from "os";
+import { useState } from "react";
 
 interface Preferences {
   apiKey: string;
@@ -14,6 +13,7 @@ interface CommandForm {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [output, setOutput] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     if (values.domain == "") {
@@ -26,27 +26,33 @@ export default function Command() {
       title: "Retrieving DNS...",
     });
 
+    const data = {
+      name: values.domain,
+      type: values.type,
+    };
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${preferences.apiKey}`,
+      },
+    };
+
     await axios
-      .post(
-        "https://api.m3o.com/v1/dns/Query",
-        {
-          domain: values.domain,
-          type: values.type,
-        },
-        { headers: { Authorization: `Bearer ${preferences.apiKey}` } }
-      )
+      .post("https://api.m3o.com/v1/dns/Query", data, options)
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "DNS retrieved successfully";
         toast.primaryAction = {
           title: "Copy to Clipboard",
           onAction: async (toast) => {
-            await Clipboard.copy(response.data);
+            await Clipboard.copy(JSON.stringify(response.data));
 
             toast.style = Toast.Style.Success;
             toast.title = "DNS copied to clipboard";
           },
         };
+
+        setOutput(JSON.stringify(response.data));
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -63,7 +69,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" placeholder="Enter name" />
+      <Form.TextField id="domain" title="Domain" placeholder="Enter domain" />
 
       <Form.Dropdown id="type" title="Select type" defaultValue="A">
         <Form.Dropdown.Item value="A" title="A" />
@@ -71,6 +77,13 @@ export default function Command() {
         <Form.Dropdown.Item value="MX" title="MX" />
         <Form.Dropdown.Item value="SRV" title="SRV" />
       </Form.Dropdown>
+
+      {output ? (
+        <>
+          <Form.Separator />
+          <Form.TextArea id="output" title="Output" value={output} />
+        </>
+      ) : null}
     </Form>
   );
 }

@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import { homedir } from "os";
@@ -27,19 +27,21 @@ export default function Command() {
       title: "Retrieving avatar...",
     });
 
+    const data = {
+      format: values.format,
+      gender: values.gender,
+      upload: true, // this is so the API returns a URL to the generated avatar
+      username: values.username,
+    };
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${preferences.apiKey}`,
+      },
+    };
+
     await axios
-      .post(
-        "https://api.m3o.com/v1/avatar/Generate",
-        {
-          format: values.format,
-          gender: values.gender,
-          upload: true, // this is so the API returns a URL to the generated avatar
-          username: values.username,
-        },
-        {
-          headers: { Authorization: `Bearer ${preferences.apiKey}` },
-        }
-      )
+      .post("https://api.m3o.com/v1/avatar/Generate", data, options)
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Avatar retrieved successfully";
