@@ -16,6 +16,12 @@
     "subtitle": "M3O",
     "description": "Generate an avatar.",
     "mode": "view"
+  }, {
+    "name": "dns",
+    "title": "DNS",
+    "subtitle": "M3O",
+    "description": "DNS over HTTPS (DoH).",
+    "mode": "view"
   }],
   "preferences": [{
     "name": "apiKey",

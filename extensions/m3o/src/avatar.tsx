@@ -79,7 +79,7 @@ export default function Command() {
       .catch((error) => {
         toast.style = Toast.Style.Failure;
         toast.title = "Unable to retrieve avatar";
-        toast.message = error.response.data.error.message ?? "";
+        toast.message = error.response.data.detail ?? "";
       });
   }
 
