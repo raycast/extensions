@@ -2,7 +2,7 @@
 
 # @raycast.title Switch to Lowercase
 # @raycast.packageName Text Actions
-# @raycast.mode replace
+# @raycast.mode fullOutput
 # @raycast.argument1 {"type": "text"}
 
 import sys

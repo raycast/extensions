@@ -38,9 +38,7 @@
         "mode": {
             "enum": [
                 "compact",
-                "copy",
                 "fullOutput",
-                "replace",
                 "silent"
             ],
             "type": "string"

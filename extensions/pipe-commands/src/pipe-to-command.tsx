@@ -102,9 +102,7 @@ export function PipeCommand(props: {
       actions={
         <ActionPanel>
           {typeof inputFrom != "undefined" ? (
-            <ActionPanel.Section>
-              <CommandAction command={command} inputFrom={inputFrom} />
-            </ActionPanel.Section>
+            <ActionPanel.Section>{CommandActions({ command, inputFrom })}</ActionPanel.Section>
           ) : null}
           {command.user ? (
             <ActionPanel.Section>
@@ -148,7 +146,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
   return stdout;
 }
 
-function CommandAction(props: { command: ScriptCommand; inputFrom: InputType }) {
+function CommandActions(props: { command: ScriptCommand; inputFrom: InputType }) {
   const { command, inputFrom } = props;
   const navigation = useNavigation();
 
@@ -189,59 +187,69 @@ function CommandAction(props: { command: ScriptCommand; inputFrom: InputType }) 
     };
   }
 
-  const copyAction = (
-    <Action title="Copy Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.copy, true)} />
-  );
-  switch (command.metadatas.mode) {
-    case "silent":
-      return <Action icon={Icon.Terminal} title="Run Script" onAction={outputHandler(showHUD, true)} />;
-    case "fullOutput":
-      return (
-        <Action
-          icon={Icon.Text}
-          title="Show Script Output"
-          onAction={outputHandler(async (output) => {
-            await navigation.push(
-              <Detail
-                markdown={codeblock(output)}
-                actions={
-                  <ActionPanel>
-                    <Action.CopyToClipboard content={output} />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        />
-      );
-    case "copy":
-      return copyAction;
-    case "replace":
-      return inputFrom == "clipboard" ? (
-        copyAction
-      ) : (
-        <Action title="Paste Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.paste, true)} />
-      );
-    case "compact":
-      return (
-        <Action
-          title="Show Script Output"
-          onAction={outputHandler(async (output) => {
-            await popToRoot();
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Script finished running",
-              message: output,
-              primaryAction: {
-                title: "Copy Script Output",
-                onAction: async (toast) => {
-                  await Clipboard.copy(output);
-                  toast.title = "Copied to clipboard";
+  const PipeAction = () => {
+    switch (command.metadatas.mode) {
+      case "silent":
+        return <Action icon={Icon.Terminal} title="Run Script" onAction={outputHandler(showHUD, true)} />;
+      case "fullOutput":
+        return (
+          <Action
+            icon={Icon.Text}
+            title="Run Script"
+            onAction={outputHandler(async (output) => {
+              await navigation.push(
+                <Detail
+                  markdown={codeblock(output)}
+                  actions={
+                    <ActionPanel>
+                      <Action.CopyToClipboard content={output} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+                      <Action.Paste content={output} shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          />
+        );
+      case "compact":
+        return (
+          <Action
+            title="Run Script"
+            onAction={outputHandler(async (output) => {
+              await popToRoot();
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Script finished running",
+                message: output,
+                primaryAction: {
+                  title: "Copy Script Output",
+                  onAction: async (toast) => {
+                    await Clipboard.copy(output);
+                    toast.title = "Copied to clipboard";
+                  },
                 },
-              },
-            });
-          })}
-        />
-      );
-  }
+              });
+            })}
+          />
+        );
+    }
+  };
+
+  return [
+    <PipeAction key="run" />,
+    <Action
+      key="copy"
+      icon={Icon.Clipboard}
+      title="Copy Script Output"
+      onAction={outputHandler((output) => Clipboard.copy(output), true)}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+    />,
+    <Action
+      key="paste"
+      icon={Icon.Clipboard}
+      title="Paste Script Output"
+      onAction={outputHandler((output) => Clipboard.paste(output), true)}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+    />,
+  ];
 }

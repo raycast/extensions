@@ -3,7 +3,7 @@
 # @raycast.title Extract Domain from URL
 # @raycast.icon 🔗
 # @raycast.packageName Developer Utils
-# @raycast.mode copy
+# @raycast.mode fullOutput
 # @raycast.argument1 {"type": "text"}
 
 from urllib.parse import urlparse
