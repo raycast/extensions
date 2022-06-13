@@ -17,6 +17,6 @@ export interface ScriptMetadatas {
 }
 
 export interface ScriptArgument {
-  type: "text";
+  type: "text" | "file";
   percentEncoded?: boolean;
 }

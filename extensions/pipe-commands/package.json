@@ -29,6 +29,13 @@
       "mode": "view"
     },
     {
+      "name": "pipe-file-to-command",
+      "title": "Pipe File to Command",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on the selected file in finder.",
+      "mode": "view"
+    },
+    {
       "name": "manage-pipe-commands",
       "title": "Manage Pipe Commands",
       "subtitle": "Pipe Commands",

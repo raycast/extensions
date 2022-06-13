@@ -14,6 +14,7 @@ import {
   popToRoot,
   getSelectedText,
   environment,
+  getSelectedFinderItems,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
@@ -22,15 +23,20 @@ import { useEffect, useState } from "react";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "selection" | "clipboard";
+type InputType = "selection" | "clipboard" | "finder";
 
 export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   const { inputFrom } = props;
-  const [parsed, setParsed] = useState<{ commands: ScriptCommand[] }>();
+  const [commands, setCommands] = useState<ScriptCommand[]>();
 
   const loadCommands = async () => {
-    const { commands } = await parseScriptCommands();
-    setParsed({ commands: await sortByAccessTime(commands) });
+    let { commands } = await parseScriptCommands();
+    if (inputFrom === "finder") {
+      commands = commands.filter((command) => command.metadatas.argument1.type == "file");
+    } else {
+      commands = commands.filter((command) => command.metadatas.argument1.type == "text");
+    }
+    setCommands(await sortByAccessTime(commands));
   };
 
   useEffect(() => {
@@ -38,8 +44,8 @@ export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
-      {parsed?.commands.map((command) => (
+    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
+      {commands?.map((command) => (
         <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
       ))}
     </List>
@@ -67,15 +73,24 @@ export function getRaycastIcon(
   return buildIcon(icon);
 }
 
-async function getInput(inputType: string) {
-  if (inputType == "clipboard") {
-    const clipboard = await Clipboard.readText();
-    if (!clipboard) {
-      throw new Error("No text in clipboard");
+async function getInput(inputType: InputType) {
+  switch (inputType) {
+    case "clipboard": {
+      const clipboard = await Clipboard.readText();
+      if (!clipboard) {
+        throw new Error("No text in clipboard");
+      }
+      return clipboard;
     }
-    return clipboard;
-  } else {
-    return getSelectedText();
+    case "selection":
+      return getSelectedText();
+    case "finder": {
+      const items = await getSelectedFinderItems();
+      if (!items || !items.length) {
+        throw new Error("No items selected in finder");
+      }
+      return items.map((item) => item.path).join(":");
+    }
   }
 }
 
@@ -148,7 +163,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
   return stdout;
 }
 
-function CommandAction(props: { command: ScriptCommand; inputFrom: "clipboard" | "selection" }) {
+function CommandAction(props: { command: ScriptCommand; inputFrom: InputType }) {
   const { command, inputFrom } = props;
   const navigation = useNavigation();
 
