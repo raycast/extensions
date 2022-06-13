@@ -73,7 +73,7 @@ export default function CommandListMonitors() {
     return ", " + response!.counts!.status!.map(x => `${x.count} ${x.name}`).join(", ");
   };
   return (
-    <List isLoading={monitorsAreLoading} onSearchTextChange={search}>
+    <List isLoading={monitorsAreLoading} onSearchTextChange={search} throttle>
       <List.Section title={`Available monitors ${response?.metadata?.totalCount}${getCountSummary()}`}>
         {response
           ? response!.monitors!.map(monitor => (

@@ -1,5 +1,5 @@
 import { ActionPanel, List, OpenInBrowserAction, getPreferenceValues, Icon } from "@raycast/api";
-import { linkDomain } from "./util";
+import { linkDomain, showError } from "./util";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
@@ -69,9 +69,7 @@ export default function CommandListDashboards() {
           dashboardsAreLoading: false,
         }));
       })
-      .catch(err => {
-        console.error(err);
-      });
+      .catch(showError);
   };
 
   useEffect(() => {
@@ -79,7 +77,7 @@ export default function CommandListDashboards() {
   }, []);
 
   return (
-    <List isLoading={dashboardsAreLoading} onSearchTextChange={search}>
+    <List isLoading={dashboardsAreLoading} onSearchTextChange={search} throttle>
       <List.Section title={`Available dashboards ${totalDashboards}`}>
         {dashboards.map(dashboard => (
           <List.Item
