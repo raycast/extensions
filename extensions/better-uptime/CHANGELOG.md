@@ -1,5 +1,5 @@
 # Better Uptime Changelog
 
-## [Added Better Uptime] - 2022-06-10
+## [Added Better Uptime] - {PR_MERGE_DATE}
 
 - Initial version code
