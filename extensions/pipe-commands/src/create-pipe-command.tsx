@@ -12,8 +12,6 @@ import {
 } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
-import { createEmojiList } from "generate-emoji-list";
-import { useEffect, useState } from "react";
 import untildify from "untildify";
 
 const languageToProperties: Record<
@@ -53,17 +51,8 @@ interface FormValues {
   title: string;
   mode: string;
   packageName?: string;
-  icon: string;
   percentEncoded: boolean;
 }
-
-type Emoji = {
-  emoji: string;
-  description: string;
-  shortCode?: string[];
-  keywords?: string[];
-  category?: string;
-};
 
 export default function PipeCommandForm(): JSX.Element {
   function onSubmit(values: FormValues) {
@@ -80,7 +69,7 @@ export default function PipeCommandForm(): JSX.Element {
     const metadataLines = [
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
       `${languageProperties.commentSign} @raycast.mode ${values.mode}`,
-      `${languageProperties.commentSign} @raycast.icon ${values.icon}`,
+      `${languageProperties.commentSign} @raycast.icon ➡️`,
       `${
         languageProperties.commentSign
       } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
@@ -100,16 +89,8 @@ export default function PipeCommandForm(): JSX.Element {
     popToRoot();
   }
 
-  const [emojis, setEmojis] = useState<Emoji[]>();
-  useEffect(() => {
-    createEmojiList().then((emojis) => setEmojis(emojis.flatMap((emoji) => emoji.emojis)));
-  }, []);
-
-  const isLoading = typeof emojis === "undefined";
-
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={onSubmit} />
@@ -133,11 +114,6 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
-      <Form.Dropdown title="Icon" id="icon" defaultValue={isLoading ? undefined : "➡️"}>
-        {emojis?.map((emoji) => (
-          <Form.Dropdown.Item key={emoji.emoji} title={`${emoji.emoji} ${emoji.description}`} value={emoji.emoji} />
-        ))}
-      </Form.Dropdown>
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Checkbox
         defaultValue={false}

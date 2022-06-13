@@ -54,7 +54,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "generate-emoji-list": "^1.1.0",
     "globby": "^13.1.1",
     "jsonschema": "^1.4.0",
     "untildify": "^4.0.0"
