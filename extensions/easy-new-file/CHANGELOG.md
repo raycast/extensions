@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Add new file layout options] - {PR_MERGE_DATE}
+## [Add new file layout options] - 2022-06-13
 
 - Add new file layout options: List or Grid
 - Optimize file icons
