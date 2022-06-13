@@ -38,7 +38,7 @@ class VariableInfo {
   }
 }
 
-export class Variable {
+export class Types {
   info: VariableInfo;
   date: VariableDate;
   input: VariableInput;
@@ -51,7 +51,7 @@ export class Variable {
 }
 
 export const variables = [
-  { title: "Variable", value: "" },
+  { title: "Types", value: "" },
 
   { title: "input.text", value: "$TEXT$" },
   { title: "input.line", value: "$LINE$" },

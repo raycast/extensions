@@ -1,4 +1,4 @@
-const cases = [
+export const cases = [
   {
     info: {
       name: "UPPER CASE",
