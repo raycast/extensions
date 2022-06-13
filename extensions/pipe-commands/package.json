@@ -29,13 +29,6 @@
       "mode": "view"
     },
     {
-      "name": "create-pipe-command",
-      "title": "Create Pipe Command",
-      "subtitle": "Pipe Commands",
-      "description": "Generate a new Pipe Command using built-in templates.",
-      "mode": "view"
-    },
-    {
       "name": "manage-pipe-commands",
       "title": "Manage Pipe Commands",
       "subtitle": "Pipe Commands",
