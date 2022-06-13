@@ -10,7 +10,6 @@ interface Preferences {
 interface CommandForm {
   format: string;
   gender: string;
-  upload: string;
   username: string;
 }
 
@@ -32,7 +31,7 @@ export default function Command() {
       const { data } = await axios.post('https://api.m3o.com/v1/avatar/Generate', {
         format: values.format,
         gender: values.gender,
-        upload: values.upload,
+        upload: true, // this is so the API returns a URL to the generated avatar
         username: values.username,
       }, {
         headers: { Authorization: `Bearer ${preferences.apiKey}` },
@@ -41,25 +40,37 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Avatar retrieved successfully";
       toast.primaryAction = {
-        title: "Copy Base64",
+        title: "Download Image",
         onAction: async (toast) => {
-          await Clipboard.copy(data.base64);
+          toast.style = Toast.Style.Animated;
+          toast.title = "Saving avatar";
 
-          toast.title = "Copied to clipboard";
-          toast.primaryAction = undefined;
+          await axios
+            .get(data.url, { responseType: "stream" })
+            .then((response) => {
+              const filename = values.username ? values.username.split(" ").join("_") : "avatar";
+              const type = values.format === "png" ? "png" : "jpeg";
+              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
+
+              toast.style = Toast.Style.Success;
+              toast.title = "Avatar saved successfully";
+            })
+            .catch((error) => {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Unable to download avatar";
+              toast.message = error.response.data.error.message ?? "";
+            });
         },
       };
-      if (values.upload === "true") {
-        toast.secondaryAction = {
-          title: "Copy URL",
-          onAction: async (toast) => {
-            await Clipboard.copy(data.url);
+      toast.secondaryAction = {
+        title: "Copy URL",
+        onAction: async (toast) => {
+          await Clipboard.copy(data.url);
 
-            toast.title = "Copied to clipboard";
-            toast.secondaryAction = undefined;
-          },
-        };
-      }
+          toast.title = "Copied to clipboard";
+          toast.secondaryAction = undefined;
+        },
+      };
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Unable to retrieve avatar";
@@ -78,14 +89,12 @@ export default function Command() {
         <Form.Dropdown.Item value="jpeg" title="JPEG" />
         <Form.Dropdown.Item value="png" title="PNG" />
       </Form.Dropdown>
+
       <Form.Dropdown id="gender" title="Select gender" defaultValue="male">
         <Form.Dropdown.Item value="male" title="Male" />
         <Form.Dropdown.Item value="female" title="Female" />
       </Form.Dropdown>
-      <Form.Dropdown id="upload" title="Select type" defaultValue="false">
-        <Form.Dropdown.Item value="false" title="Base64" />
-        <Form.Dropdown.Item value="true" title="URL" />
-      </Form.Dropdown>
+
       <Form.TextField id="username" title="Username" placeholder="Enter username" />
     </Form>
   );
