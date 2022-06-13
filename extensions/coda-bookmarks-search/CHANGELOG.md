@@ -1,3 +1,5 @@
-# Coda Bookmarks Search Changelog
+# Changelog
 
-## [Initial Version] - 2022-06-11
+## [Initial Version 🚀] - 2022-06-12
+
+- Add extension to the store
