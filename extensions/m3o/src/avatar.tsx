@@ -28,14 +28,18 @@ export default function Command() {
     });
 
     try {
-      const { data } = await axios.post('https://api.m3o.com/v1/avatar/Generate', {
-        format: values.format,
-        gender: values.gender,
-        upload: true, // this is so the API returns a URL to the generated avatar
-        username: values.username,
-      }, {
-        headers: { Authorization: `Bearer ${preferences.apiKey}` },
-      });
+      const { data } = await axios.post(
+        "https://api.m3o.com/v1/avatar/Generate",
+        {
+          format: values.format,
+          gender: values.gender,
+          upload: true, // this is so the API returns a URL to the generated avatar
+          username: values.username,
+        },
+        {
+          headers: { Authorization: `Bearer ${preferences.apiKey}` },
+        }
+      );
 
       toast.style = Toast.Style.Success;
       toast.title = "Avatar retrieved successfully";
