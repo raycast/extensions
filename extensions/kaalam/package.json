@@ -16,7 +16,7 @@
     {
       "name": "now",
       "title": "Now",
-      "description": "Get now string.",
+      "description": "Paste a formatted date into current application.",
       "mode": "no-view"
     }
   ],
