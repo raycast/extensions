@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast-ikea-idasen",
-  "title": "raycast-ikea-idasen",
-  "description": "React component for IKEA IDASEN",
+  "name": "ikea-idasen",
+  "title": "Ikea Idasen",
+  "description": "Let's you control your IKEA IDASEN from within Raycast",
   "icon": "command-icon.png",
   "author": "antoni",
   "categories": [
@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Ikea Idasen",
+      "title": "Table Control",
+      "subtitle": "Ikea Idasen",
       "description": "Control your Ikea Idasen within raycast",
       "mode": "view"
     },
@@ -30,7 +31,7 @@
     },
     {
       "name": "sit-down",
-      "title": "Sit down",
+      "title": "Sit Down",
       "subtitle": "Ikea Idasen",
       "description": "Set your Ikea Idasen to sit down position",
       "keywords": [

@@ -1,16 +1,16 @@
 import { open, showHUD, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { appLink, fileDownload, isDeskControllerInstalled, sitDown } from "./utils";
+import { appLink, fileDownload, isDeskControllerInstalled, standUp } from "./utils";
 
 export default async function () {
   const toast = new Toast({
-    title: "Sit Down",
+    title: "Stand Up",
     style: Toast.Style.Animated,
   });
 
   toast.show();
 
-  if (await !isDeskControllerInstalled()) {
+  if (!(await isDeskControllerInstalled())) {
     toast.title = "Desk Controller not installed";
     toast.message =
       "Install it from: https://github.com/DWilliames/idasen-controller/releases/latest/download/Desk.Controller.app.zip";
@@ -32,7 +32,7 @@ export default async function () {
     return;
   }
 
-  runAppleScript(sitDown);
+  runAppleScript(standUp);
 
-  await showHUD("Moving desk to sit-down position");
+  await showHUD("Moving desk to stand up position");
 }
