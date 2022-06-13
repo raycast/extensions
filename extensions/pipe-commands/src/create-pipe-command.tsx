@@ -7,12 +7,13 @@ import {
   showToast,
   Action,
   Toast,
-  Icon,
+  getPreferenceValues,
   List,
 } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
-import { scriptModes } from "./types";
+import { createEmojiList } from "generate-emoji-list";
+import { useEffect, useState } from "react";
 
 const languageToProperties: Record<
   string,
@@ -55,6 +56,14 @@ interface FormValues {
   percentEncoded: boolean;
 }
 
+type Emoji = {
+  emoji: string;
+  description: string;
+  shortCode?: string[];
+  keywords?: string[];
+  category?: string;
+};
+
 export default function PipeCommandForm(): JSX.Element {
   function onSubmit(values: FormValues) {
     console.debug(values);
@@ -64,7 +73,8 @@ export default function PipeCommandForm(): JSX.Element {
     }
     const languageProperties = languageToProperties[values.template];
     const title = values.title.trim().toLowerCase().replace(/\s+/g, "-");
-    const filepath = resolve(environment.supportPath, `${title}${languageProperties.extension}`);
+    const { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{ pipeCommandsFolder: string }>();
+    const filepath = resolve(pipeCommandsFolder, `${title}${languageProperties.extension}`);
 
     const metadataLines = [
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
@@ -79,7 +89,7 @@ export default function PipeCommandForm(): JSX.Element {
       metadataLines.push(`${languageProperties.commentSign} @raycast.packageName ${values.packageName}`);
     }
 
-    const help = `${languageProperties.commentSign} Documentation is available at https://github.com/raycast/extensions/blob/main/extensions/pipe-commands/README.md`;
+    const help = `${languageProperties.commentSign} Documentation: https://github.com/raycast/extensions/blob/main/extensions/pipe-commands/README.md`;
     const content = [languageProperties.shebang, "", help, ...metadataLines, "", languageProperties.helloWorld].join(
       "\n"
     );
@@ -89,8 +99,16 @@ export default function PipeCommandForm(): JSX.Element {
     popToRoot();
   }
 
+  const [emojis, setEmojis] = useState<Emoji[]>();
+  useEffect(() => {
+    createEmojiList().then((emojis) => setEmojis(emojis.flatMap((emoji) => emoji.emojis)));
+  }, []);
+
+  const isLoading = typeof emojis === "undefined";
+
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={onSubmit} />
@@ -103,14 +121,20 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="Mode" id="mode">
-        {scriptModes.map((mode) => (
-          <Form.Dropdown.Item key={mode} title={mode} value={mode} />
+        {[
+          ["Silent", "silent"],
+          ["Replace", "fullOutput"],
+          ["Compact", "compact"],
+          ["Replace", "replace"],
+          ["Copy", "copy"],
+        ].map(([title, value]) => (
+          <List.Dropdown.Item key={value} title={title} value={value} />
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
-      <Form.Dropdown title="Icon" id="icon" defaultValue="text-alignleft-16">
-        {Object.entries(Icon).map(([key, value]) => (
-          <Form.Dropdown.Item icon={value} key={key} title={key} value={key} />
+      <Form.Dropdown title="Icon" id="icon" defaultValue={isLoading ? undefined : "➡️"}>
+        {emojis?.map((emoji) => (
+          <Form.Dropdown.Item key={emoji.emoji} title={`${emoji.emoji} ${emoji.description}`} value={emoji.emoji} />
         ))}
       </Form.Dropdown>
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />

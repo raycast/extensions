@@ -5,7 +5,7 @@
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
   "icon": "command-icon.png",
   "author": "pomdtr",
-    "contributors": [
+  "contributors": [
     "gasolin"
   ],
   "license": "MIT",
@@ -43,10 +43,21 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "pipeCommandsFolder",
+      "title": "Pipe Commands Folder",
+      "required": false,
+      "type": "textfield",
+      "description": "The folder where your Pipe Commands are stored."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
+    "@raycast/api": "^1.36.0",
+    "generate-emoji-list": "^1.1.0",
     "globby": "^13.1.1",
-    "jsonschema": "^1.4.0"
+    "jsonschema": "^1.4.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

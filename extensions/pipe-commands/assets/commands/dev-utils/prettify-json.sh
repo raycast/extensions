@@ -2,7 +2,7 @@
 
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
-# @raycast.icon Hammer
+# @raycast.icon 🛠️
 # @raycast.mode replace
 # @raycast.argument1 {"type": "text"}
 

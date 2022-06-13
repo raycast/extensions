@@ -8,14 +8,12 @@ export interface ScriptCommand {
 export interface ScriptMetadatas {
   title: string;
   icon?: string;
+  iconDark?: string;
   argument1: ScriptArgument;
-  mode: ScriptMode;
+  mode: "silent" | "fullOutput" | "compact" |  "copy" | "replace";
   packageName?: string;
   currentDirectoryPath?: string;
 }
-
-export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
-export type ScriptMode = typeof scriptModes[number];
 
 export interface ScriptArgument {
   type: "text";

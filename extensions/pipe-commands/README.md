@@ -12,8 +12,6 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
-- The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
-- the argument1 only accepts `type` and percentEncoded fields
 - The mode field only accept the following options:
   | option    | description                                                  |
   | --------- | ------------------------------------------------------------ |
@@ -21,7 +19,8 @@ The Pipe command syntax is very similar to the [script command syntax](https://g
   | fullOuput | The entire output is presented on a separate view            |
   | copy      | The output will be copied to the clipboard                   |
   | replace   | The output will replace the input                            |
-- The `iconDark`, `needsConfirmation`, `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
+
+- The `needsConfirmation`, `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
 ## Pipe Commands Logic
 

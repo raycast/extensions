@@ -1,5 +1,22 @@
 # Pipe Commands Changelog
 
+## Improve Compatibility with Script Commands
+
+### Added
+
+- Allow the user to create a custom pipe command folder
+- Add support for `@raycast.iconDark` metadata
+- Add support for `compact` mode
+- `@raycast.icon` and `@raycast.iconDark` now support emojis, relative filepaths and remote urls
+
+### Fixed
+
+- Fix `Read Text` script
+
+### Breaking
+
+- Raycast IconSet values are no longer supported as icons (icons will be blank)
+
 ## Add `Read the Content` Command (2022.04.07)
 
 ## Fixes (2022.03.08)

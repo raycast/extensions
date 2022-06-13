@@ -13,10 +13,11 @@ import {
   closeMainWindow,
   popToRoot,
   getSelectedText,
+  environment,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
-import { chmodSync } from "fs";
-import { dirname } from "path";
+import { chmodSync, existsSync } from "fs";
+import { dirname, resolve } from "path";
 import { useEffect, useState } from "react";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
@@ -45,9 +46,25 @@ export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   );
 }
 
-export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Image.ImageLike): Image.ImageLike {
-  const icon = Icon[scriptIcon as keyof typeof Icon];
-  return icon ? icon : defaultIcon;
+export function getRaycastIcon(
+  icon: string,
+  iconDark: string | undefined,
+  scriptPath: string
+): Image.ImageLike | undefined {
+  const buildIcon = (icon: string) => {
+    if (icon.startsWith("http") || icon.startsWith("https")) {
+      return { source: icon };
+    }
+    const iconPath = resolve(dirname(scriptPath), icon);
+    if (existsSync(iconPath)) {
+      return { source: iconPath };
+    }
+    return icon;
+  };
+  if (environment.theme === "dark" && iconDark) {
+    return buildIcon(iconDark);
+  }
+  return buildIcon(icon);
 }
 
 async function getInput(inputType: string) {
@@ -73,7 +90,9 @@ export function PipeCommand(props: {
   return (
     <List.Item
       key={command.path}
-      icon={getRaycastIcon(command.metadatas.icon, Icon.Text)}
+      icon={
+        command.metadatas.icon ? getRaycastIcon(command.metadatas.icon, command.metadatas.iconDark, command.path) : "➡️"
+      }
       accessoryIcon={command.user ? Icon.Person : undefined}
       title={command.metadatas.title}
       subtitle={showContent ? undefined : command.metadatas.packageName}
@@ -191,6 +210,27 @@ function CommandAction(props: { command: ScriptCommand; inputFrom: "clipboard" |
         copyAction
       ) : (
         <Action title="Paste Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.paste, true)} />
+      );
+    case "compact":
+      return (
+        <Action
+          title="Show Script Output"
+          onAction={outputHandler(async (output) => {
+            await popToRoot();
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Script finished running",
+              message: output,
+              primaryAction: {
+                title: "Copy Script Output",
+                onAction: async (toast) => {
+                  await Clipboard.copy(output);
+                  toast.title = "Copied to clipboard";
+                },
+              },
+            });
+          })}
+        />
       );
   }
 }

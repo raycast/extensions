@@ -17,15 +17,6 @@
                 "type"
             ],
             "type": "object"
-        },
-        "ScriptMode": {
-            "enum": [
-                "copy",
-                "fullOutput",
-                "replace",
-                "silent"
-            ],
-            "type": "string"
         }
     },
     "properties": {
@@ -38,8 +29,18 @@
         "icon": {
             "type": "string"
         },
+        "iconDark": {
+            "type": "string"
+        },
         "mode": {
-            "$ref": "#/definitions/ScriptMode"
+            "enum": [
+                "compact",
+                "copy",
+                "fullOutput",
+                "replace",
+                "silent"
+            ],
+            "type": "string"
         },
         "packageName": {
             "type": "string"
