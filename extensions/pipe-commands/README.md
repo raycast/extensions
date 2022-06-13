@@ -15,11 +15,13 @@ The Pipe command syntax is very similar to the [script command syntax](https://g
 - The `inline mode` is not supported.
 - The `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
+> :information_source: Every Pipe Command is a valid Script Command, but the inverse is not true: some Script Commands cannot be used as Pipe Commands (ex: commands with an `inline` mode).
+
 ## Pipe Commands Logic
 
-The user input (selection or clipboard) will be passed as the script first argument.
+The user input (text selection or clipboard) will be passed as the script first argument.
 
-The standard output stream (`stdout`) of the script will replace the current selection, be copied to the clipboard or be passed to a another pipe command depending on the user choice. If the command does not return any output, the selection will be preserved.
+The standard output stream (`stdout`) of the script will shown, replace the current selection or be copied to the clipboard.
 
 If you want to provide a message to the user, use the standard error stream (`stderr`). It will trigger a notification on the user end.
 
