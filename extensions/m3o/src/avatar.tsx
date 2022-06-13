@@ -27,8 +27,8 @@ export default function Command() {
       title: "Retrieving avatar...",
     });
 
-    try {
-      const { data } = await axios.post(
+    await axios
+      .post(
         "https://api.m3o.com/v1/avatar/Generate",
         {
           format: values.format,
@@ -39,46 +39,48 @@ export default function Command() {
         {
           headers: { Authorization: `Bearer ${preferences.apiKey}` },
         }
-      );
+      )
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Avatar retrieved successfully";
+        toast.primaryAction = {
+          title: "Download Image",
+          onAction: async (toast) => {
+            toast.style = Toast.Style.Animated;
+            toast.title = "Saving avatar";
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Avatar retrieved successfully";
-      toast.primaryAction = {
-        title: "Download Image",
-        onAction: async (toast) => {
-          toast.style = Toast.Style.Animated;
-          toast.title = "Saving avatar";
+            await axios
+              .get(response.data.url, { responseType: "stream" })
+              .then((response) => {
+                const filename = values.username ? values.username.split(" ").join("_") : "avatar";
+                const type = values.format === "png" ? "png" : "jpeg";
+                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
 
-          await axios
-            .get(data.url, { responseType: "stream" })
-            .then((response) => {
-              const filename = values.username ? values.username.split(" ").join("_") : "avatar";
-              const type = values.format === "png" ? "png" : "jpeg";
-              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
+                toast.style = Toast.Style.Success;
+                toast.title = "Avatar saved successfully";
+              })
+              .catch((error) => {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Unable to download avatar";
+                toast.message = error.response.data.error.message ?? "";
+              });
+          },
+        };
+        toast.secondaryAction = {
+          title: "Copy URL",
+          onAction: async (toast) => {
+            await Clipboard.copy(response.data.url);
 
-              toast.style = Toast.Style.Success;
-              toast.title = "Avatar saved successfully";
-            })
-            .catch((error) => {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Unable to download avatar";
-              toast.message = error.response.data.error.message ?? "";
-            });
-        },
-      };
-      toast.secondaryAction = {
-        title: "Copy URL",
-        onAction: async (toast) => {
-          await Clipboard.copy(data.url);
-
-          toast.title = "Copied to clipboard";
-          toast.secondaryAction = undefined;
-        },
-      };
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve avatar";
-    }
+            toast.title = "Copied to clipboard";
+            toast.secondaryAction = undefined;
+          },
+        };
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve avatar";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (
