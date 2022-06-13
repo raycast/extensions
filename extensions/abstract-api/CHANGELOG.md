@@ -1,5 +1,5 @@
 # Abstract API Changelog
 
-## [Added Abstract API] - 2022-06-09
+## [Added Abstract API] - {PR_MERGE_DATE}
 
 - Initial version code
