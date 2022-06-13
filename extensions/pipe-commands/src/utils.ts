@@ -31,9 +31,10 @@ export async function parseScriptCommands(): Promise<{
   commands: ScriptCommand[];
   invalid: InvalidCommand[];
 }> {
-  const { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{ pipeCommandsFolder: string }>();
+  let { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{ pipeCommandsFolder: string }>();
+  pipeCommandsFolder = untildify(pipeCommandsFolder);
   const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
-  const userPaths = globbySync(`${untildify(pipeCommandsFolder)}/**/*`);
+  const userPaths = globbySync(`${pipeCommandsFolder}/**/*`);
   const scriptPaths = [...userPaths, ...defaultPaths].filter(
     (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
   );
@@ -54,7 +55,7 @@ export async function parseScriptCommands(): Promise<{
   for (const command of commands) {
     const res = validator.validate(command.metadatas, schema);
     if (res.valid) {
-      valids.push({ ...command, user: command.path.startsWith(environment.supportPath) });
+      valids.push({ ...command, user: command.path.startsWith(pipeCommandsFolder) });
     } else {
       invalid.push({ path: command.path, content: command.content, errors: res.errors.map((err) => err.stack) });
     }

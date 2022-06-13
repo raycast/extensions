@@ -14,6 +14,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
 import { createEmojiList } from "generate-emoji-list";
 import { useEffect, useState } from "react";
+import untildify from "untildify";
 
 const languageToProperties: Record<
   string,
@@ -74,7 +75,7 @@ export default function PipeCommandForm(): JSX.Element {
     const languageProperties = languageToProperties[values.template];
     const title = values.title.trim().toLowerCase().replace(/\s+/g, "-");
     const { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{ pipeCommandsFolder: string }>();
-    const filepath = resolve(pipeCommandsFolder, `${title}${languageProperties.extension}`);
+    const filepath = resolve(untildify(pipeCommandsFolder), `${title}${languageProperties.extension}`);
 
     const metadataLines = [
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
