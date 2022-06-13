@@ -5,7 +5,7 @@ import { resolve } from "path";
 import { Validator } from "jsonschema";
 import { globbySync } from "globby";
 import { environment, getPreferenceValues } from "@raycast/api";
-import untildify from "untildify"
+import untildify from "untildify";
 import { readFileSync } from "fs";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
@@ -31,10 +31,12 @@ export async function parseScriptCommands(): Promise<{
   commands: ScriptCommand[];
   invalid: InvalidCommand[];
 }> {
-  const { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{pipeCommandsFolder: string}>();
+  const { pipeCommandsFolder = environment.supportPath } = getPreferenceValues<{ pipeCommandsFolder: string }>();
   const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
-  const userPaths = globbySync(`${untildify(pipeCommandsFolder) }/**/*`);
-  const scriptPaths = [...userPaths, ...defaultPaths].filter((path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg")));
+  const userPaths = globbySync(`${untildify(pipeCommandsFolder)}/**/*`);
+  const scriptPaths = [...userPaths, ...defaultPaths].filter(
+    (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
+  );
 
   const commands = await Promise.all(
     scriptPaths.map(async (scriptPath) => {

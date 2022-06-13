@@ -10,7 +10,7 @@ export interface ScriptMetadatas {
   icon?: string;
   iconDark?: string;
   argument1: ScriptArgument;
-  mode: "silent" | "fullOutput" | "compact" |  "copy" | "replace";
+  mode: "silent" | "fullOutput" | "compact" | "copy" | "replace";
   packageName?: string;
   currentDirectoryPath?: string;
 }
