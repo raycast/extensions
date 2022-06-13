@@ -1,52 +1,111 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
 interface Preferences {
-  timezoneApiKey: string;
+  holidaysApiKey: string;
 }
 
 interface CommandForm {
+  country: string;
+  date: string;
+}
+
+interface HolidayItem {
+  name: string;
+  name_local: string;
+  language: string;
+  description: string;
+  country: string;
   location: string;
+  type: string;
+  date: string;
+  date_year: string;
+  date_month: string;
+  date_day: string;
+  week_day: string;
+}
+
+function HolidaysItem(props: { item: HolidayItem }) {
+  const item = props.item;
+
+  return (
+    <>
+      <Form.Description title="Name" text={`${item.name}`} />
+      <Form.Description title="Name Local" text={`${item.name_local}`} />
+      <Form.Description title="Language" text={`${item.language}`} />
+      <Form.Description title="Description" text={`${item.description}`} />
+      <Form.Description title="Country" text={`${item.country}`} />
+      <Form.Description title="Location" text={`${item.location}`} />
+      <Form.Description title="Type" text={`${item.type}`} />
+      <Form.Description title="Date" text={`${item.date}`} />
+      <Form.Description title="Date Year" text={`${item.date_year}`} />
+      <Form.Description title="Date Month" text={`${item.date_month}`} />
+      <Form.Description title="Date Day" text={`${item.date_day}`} />
+      <Form.Description title="Week Day" text={`${item.week_day}`} />
+    </>
+  );
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState([] as HolidayItem[]);
 
   async function handleSubmit(values: CommandForm) {
-    if (values.location == "") {
-      showToast(Toast.Style.Failure, "Error", "Location is required");
+    if (values.country == "") {
+      showToast(Toast.Style.Failure, "Error", "Country is required");
+      return;
+    }
+
+    if (values.date == "") {
+      showToast(Toast.Style.Failure, "Error", "Date is required");
       return;
     }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Retrieving timezone...",
+      title: "Retrieving holidays...",
     });
 
-    try {
-      const url = `https://timezone.abstractapi.com/v1/current_time/?api_key=${
-        preferences.timezoneApiKey
-      }&location=${encodeURIComponent(values.location)}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://holidays.abstractapi.com/v1";
+    const country = values.country;
+    const date = new Date(values.date);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const url = `${baseUrl}/?api_key=${preferences.holidaysApiKey}&country=${country}&year=${year}&month=${month}&day=${day}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Timezone retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Holidays retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
+        toast.secondaryAction = {
+          title: "Copy to Clipboard",
+          onAction: async (toast) => {
+            await Clipboard.copy(JSON.stringify(response.data));
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve timezone";
-    }
+            toast.title = "Holidays output copied to clipboard";
+            toast.message = undefined;
+          },
+        };
+
+        setOutput(response.data);
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve holidays";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (
@@ -57,13 +116,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="location" title="Location" placeholder="Enter location" />
-      {output ? (
+      <Form.TextField id="country" title="Country" placeholder="Enter country" />
+      <Form.DatePicker id="date" title="Date" defaultValue={new Date()} />
+      {output.length > 0 ? (
         <>
           <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
+          {output.map((item, index) => (
+            <HolidaysItem key={index} item={item} />
+          ))}
         </>
       ) : null}
     </Form>

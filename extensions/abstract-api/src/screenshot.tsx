@@ -26,46 +26,52 @@ export default function Command() {
       title: "Retrieving screenshot...",
     });
 
-    try {
-      const url = `https://screenshot.abstractapi.com/v1/?api_key=${
-        preferences.screenshotApiKey
-      }&url=${encodeURIComponent(values.websiteUrl)}`;
+    const baseUrl = "https://screenshot.abstractapi.com/v1";
+    const formUrl = encodeURIComponent(values.websiteUrl);
+    const url = `${baseUrl}/?api_key=${preferences.screenshotApiKey}&url=${formUrl}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Screenshot retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    axios
+      .get(url)
+      .then(() => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Screenshot retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
-      toast.secondaryAction = {
-        title: "Download",
-        onAction: async (toast) => {
-          toast.style = Toast.Style.Animated;
-          toast.title = "Saving screenshot";
+            toast.hide();
+          },
+        };
+        toast.secondaryAction = {
+          title: "Download",
+          onAction: async (toast) => {
+            toast.style = Toast.Style.Animated;
+            toast.title = "Saving screenshot";
 
-          await axios
-            .get(url, { responseType: "stream" })
-            .then((response) => {
-              const hostname = extractHostname(values.websiteUrl);
-              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
+            await axios
+              .get(url, { responseType: "stream" })
+              .then((response) => {
+                const hostname = extractHostname(values.websiteUrl);
+                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
 
-              toast.style = Toast.Style.Success;
-              toast.title = "Screenshot saved successfully";
-            })
-            .catch((e) => {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Unable to retrieve screenshot";
-            });
-        },
-      };
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve screenshot";
-    }
+                toast.style = Toast.Style.Success;
+                toast.title = "Screenshot saved successfully";
+              })
+              .catch((error) => {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Unable to retrieve screenshot";
+                toast.message = error.response.data.error.message ?? "";
+              });
+          },
+        };
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve screenshot";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

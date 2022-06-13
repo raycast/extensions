@@ -31,28 +31,33 @@ export default function Command() {
       title: "Retrieving exchange rates...",
     });
 
-    try {
-      const url = `https://exchange-rates.abstractapi.com/v1/live/?api_key=${
-        preferences.exchangeRatesApiKey
-      }&base=${encodeURIComponent(values.base)}&target=${encodeURIComponent(values.target)}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://exchange-rates.abstractapi.com/v1/live";
+    const base = encodeURIComponent(values.base);
+    const target = encodeURIComponent(values.target);
+    const url = `${baseUrl}/?api_key=${preferences.exchangeRatesApiKey}&base=${base}&target=${target}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Exchange rates retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Exchange rates retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve exchange rates";
-    }
+        setOutput(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve exchange rates";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

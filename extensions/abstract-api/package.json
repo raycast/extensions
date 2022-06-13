@@ -70,56 +70,48 @@
   "preferences": [{
       "name": "ipGeolocationApiKey",
       "type": "password",
-      "required": true,
       "title": "IP Geolocation API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "holidaysApiKey",
       "type": "password",
-      "required": true,
       "title": "Holidays API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "exchangeRatesApiKey",
       "type": "password",
-      "required": true,
       "title": "Exchange Rates API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "companyEnrichmentApiKey",
       "type": "password",
-      "required": true,
       "title": "Company Enrichment API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "timezoneApiKey",
       "type": "password",
-      "required": true,
       "title": "Timezone API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "avatarsApiKey",
       "type": "password",
-      "required": true,
       "title": "Avatars API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "screenshotApiKey",
       "type": "password",
-      "required": true,
       "title": "Screenshot API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     },
     {
       "name": "scrapeApiKey",
       "type": "password",
-      "required": true,
       "title": "Scrape API Key",
       "description": "You can find this API Key in the Abstract API dashboard."
     }

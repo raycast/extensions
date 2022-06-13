@@ -25,28 +25,32 @@ export default function Command() {
       title: "Retrieving scrape...",
     });
 
-    try {
-      const url = `https://scrape.abstractapi.com/v1/?api_key=${preferences.scrapeApiKey}&url=${encodeURIComponent(
-        values.url
-      )}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://scrape.abstractapi.com/v1";
+    const formUrl = encodeURIComponent(values.url);
+    const url = `${baseUrl}/?api_key=${preferences.scrapeApiKey}&url=${formUrl}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Scrape retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Scrape retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve scrape";
-    }
+        setOutput(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve scrape";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

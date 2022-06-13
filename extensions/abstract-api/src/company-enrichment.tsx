@@ -25,28 +25,32 @@ export default function Command() {
       title: "Retrieving company enrichment...",
     });
 
-    try {
-      const url = `https://companyenrichment.abstractapi.com/v1/?api_key=${
-        preferences.companyEnrichmentApiKey
-      }&domain=${encodeURIComponent(values.domain)}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://companyenrichment.abstractapi.com/v1";
+    const domain = encodeURIComponent(values.domain);
+    const url = `${baseUrl}/?api_key=${preferences.companyEnrichmentApiKey}&domain=${domain}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Company enrichment retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Company enrichment retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve company enrichment";
-    }
+        setOutput(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve company enrichment";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

@@ -25,28 +25,31 @@ export default function Command() {
       title: "Retrieving geolocation...",
     });
 
-    try {
-      const url = `https://ipgeolocation.abstractapi.com/v1/?api_key=${encodeURIComponent(
-        preferences.ipGeolocationApiKey
-      )}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://ipgeolocation.abstractapi.com/v1";
+    const url = `${baseUrl}/?api_key=${encodeURIComponent(preferences.ipGeolocationApiKey)}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Geolocation retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(`${baseUrl}/?api_key=${encodeURIComponent(preferences.ipGeolocationApiKey)}`)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Geolocation retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve geolocation";
-    }
+        setOutput(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve geolocation";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

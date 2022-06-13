@@ -25,46 +25,52 @@ export default function Command() {
       title: "Retrieving avatar...",
     });
 
-    try {
-      const url = `https://avatars.abstractapi.com/v1/?api_key=${preferences.avatarsApiKey}&name=${encodeURIComponent(
-        values.name
-      )}&image_format=png`;
+    const baseUrl = "https://avatars.abstractapi.com/v1";
+    const name = encodeURIComponent(values.name);
+    const url = `${baseUrl}/?api_key=${preferences.avatarsApiKey}&name=${name}&image_format=png`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Avatar retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    axios
+      .get(url)
+      .then(() => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Avatar retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
-      toast.secondaryAction = {
-        title: "Download",
-        onAction: async (toast) => {
-          toast.style = Toast.Style.Animated;
-          toast.title = "Saving avatar";
+            toast.hide();
+          },
+        };
+        toast.secondaryAction = {
+          title: "Download",
+          onAction: async (toast) => {
+            toast.style = Toast.Style.Animated;
+            toast.title = "Saving avatar";
 
-          await axios
-            .get(url, { responseType: "stream" })
-            .then((response) => {
-              const filename = values.name.split(" ").join("_");
-              response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
+            await axios
+              .get(url, { responseType: "stream" })
+              .then((response) => {
+                const filename = values.name.split(" ").join("_");
+                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
 
-              toast.style = Toast.Style.Success;
-              toast.title = "Avatar saved successfully";
-            })
-            .catch((e) => {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Unable to retrieve avatar";
-            });
-        },
-      };
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve avatar";
-    }
+                toast.style = Toast.Style.Success;
+                toast.title = "Avatar saved successfully";
+              })
+              .catch((error) => {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Unable to download avatar";
+                toast.message = error.response.data.error.message ?? "";
+              });
+          },
+        };
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve avatar";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (

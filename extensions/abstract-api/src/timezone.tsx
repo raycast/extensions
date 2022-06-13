@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
@@ -10,9 +10,21 @@ interface CommandForm {
   location: string;
 }
 
+interface TimezoneOutput {
+  datetime: string;
+  timezone_name: string;
+  timezone_location: string;
+  timezone_abbreviation: string;
+  gmt_offset: number;
+  is_dst: boolean;
+  requested_location: string;
+  latitude: number;
+  longitude: number;
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState({} as TimezoneOutput);
 
   async function handleSubmit(values: CommandForm) {
     if (values.location == "") {
@@ -25,28 +37,41 @@ export default function Command() {
       title: "Retrieving timezone...",
     });
 
-    try {
-      const url = `https://timezone.abstractapi.com/v1/current_time/?api_key=${
-        preferences.timezoneApiKey
-      }&location=${encodeURIComponent(values.location)}`;
-      const { data } = await axios.get(url);
+    const baseUrl = "https://timezone.abstractapi.com/v1/current_time";
+    const location = encodeURIComponent(values.location);
+    const url = `${baseUrl}/?api_key=${preferences.timezoneApiKey}&location=${location}`;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Timezone retrieved successfully";
-      toast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        toast.style = Toast.Style.Success;
+        toast.title = "Timezone retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
+        toast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(url);
 
-          toast.hide();
-        },
-      };
+            toast.hide();
+          },
+        };
+        toast.secondaryAction = {
+          title: "Copy to Clipboard",
+          onAction: async (toast) => {
+            await Clipboard.copy(JSON.stringify(response.data));
 
-      setOutput(JSON.stringify(data));
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to retrieve timezone";
-    }
+            toast.title = "Timezone output copied to clipboard";
+            toast.message = undefined;
+          },
+        };
+
+        setOutput(response.data);
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve timezone";
+        toast.message = error.response.data.error.message ?? "";
+      });
   }
 
   return (
@@ -57,13 +82,19 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="location" title="Location" placeholder="Enter location" />
-      {output ? (
+      <Form.TextField id="location" title="Location" placeholder="Enter location" defaultValue="london" />
+      {output.requested_location ? (
         <>
           <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
+          <Form.Description title="Datetime" text={output.datetime} />
+          <Form.Description title="Timezone Name" text={output.timezone_name} />
+          <Form.Description title="Timezone Location" text={output.timezone_location} />
+          <Form.Description title="Timezone Abbreviation" text={output.timezone_abbreviation} />
+          <Form.Description title="GMT Offset" text={`${output.gmt_offset}`} />
+          <Form.Description title="Daylight Saving Time" text={output.is_dst ? "Yes" : "No"} />
+          <Form.Description title="Requested Location" text={output.requested_location} />
+          <Form.Description title="Latitude" text={`${output.latitude}`} />
+          <Form.Description title="Longitude" text={`${output.longitude}`} />
         </>
       ) : null}
     </Form>
