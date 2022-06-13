@@ -15,7 +15,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    metadatas[metadataTitle] = metadataTitle == "argument1" ? JSON.parse(match[2]) : match[2];
+    metadatas[metadataTitle] = ["argument1", "needsConfirmation"].includes(metadataTitle) ? JSON.parse(match[2]) : match[2];
   }
 
   return metadatas as unknown as ScriptMetadatas;
