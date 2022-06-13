@@ -67,12 +67,13 @@ export default function PipeCommandForm(): JSX.Element {
     const filepath = resolve(untildify(pipeCommandsFolder), `${title}${languageProperties.extension}`);
 
     const metadataLines = [
+      `${languageProperties.commentSign} @raycast.schemaVersion 1`,
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
       `${languageProperties.commentSign} @raycast.mode ${values.mode}`,
       `${languageProperties.commentSign} @raycast.icon ➡️`,
       `${
         languageProperties.commentSign
-      } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
+      } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}, "placeholder": "Query"}`,
     ];
 
     if (values.description) {
