@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
@@ -29,7 +29,7 @@ export default function Command() {
     const url = `${baseUrl}/?api_key=${encodeURIComponent(preferences.ipGeolocationApiKey)}`;
 
     await axios
-      .get(`${baseUrl}/?api_key=${encodeURIComponent(preferences.ipGeolocationApiKey)}`)
+      .get(url)
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Geolocation retrieved successfully";
@@ -40,6 +40,15 @@ export default function Command() {
             open(url);
 
             toast.hide();
+          },
+        };
+        toast.secondaryAction = {
+          title: "Copy to Clipboard",
+          onAction: async (toast) => {
+            await Clipboard.copy(JSON.stringify(response.data));
+
+            toast.title = "IP geolocation output copied to clipboard";
+            toast.message = undefined;
           },
         };
 
@@ -66,7 +75,7 @@ export default function Command() {
           <Form.Separator />
           {/* spacer */}
           <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
+          <Form.TextArea id="output" title="Output" value={output} />
         </>
       ) : null}
     </Form>

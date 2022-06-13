@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
@@ -50,6 +50,15 @@ export default function Command() {
             toast.hide();
           },
         };
+        toast.secondaryAction = {
+          title: "Copy to Clipboard",
+          onAction: async (toast) => {
+            await Clipboard.copy(JSON.stringify(response.data));
+
+            toast.title = "Exchange rates output copied to clipboard";
+            toast.message = undefined;
+          },
+        };
 
         setOutput(JSON.stringify(response.data));
       })
@@ -75,7 +84,7 @@ export default function Command() {
           <Form.Separator />
           {/* spacer */}
           <Form.Description text="" />
-          <Form.Description title="Output" text={output} />
+          <Form.TextArea id="output" title="Output" value={output} />
         </>
       ) : null}
     </Form>
