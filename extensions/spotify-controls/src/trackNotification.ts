@@ -1,27 +1,27 @@
-import {getPreferenceValues} from "@raycast/api";
-import {PreferenceValues} from "@raycast/api/types/api/environment/preferences";
-import {runAppleScriptSilently} from "./utils";
+import { getPreferenceValues } from "@raycast/api";
+import { PreferenceValues } from "@raycast/api/types/api/environment/preferences";
+import { runAppleScriptSilently } from "./utils";
 
 export async function showPreviousTrackNotification() {
-    const preferences = getPreferenceValues<PreferenceValues>();
-    if (false === preferences.previousTrackNotificationEnabled) {
-        return;
-    }
+  const preferences = getPreferenceValues<PreferenceValues>();
+  if (false === preferences.previousTrackNotificationEnabled) {
+    return;
+  }
 
-    await showNotification();
+  await showNotification();
 }
 
 export async function showNextTrackNotification() {
-    const preferences = getPreferenceValues<PreferenceValues>();
-    if (false === preferences.previousTrackNotificationEnabled) {
-        return;
-    }
+  const preferences = getPreferenceValues<PreferenceValues>();
+  if (false === preferences.previousTrackNotificationEnabled) {
+    return;
+  }
 
-    await showNotification();
+  await showNotification();
 }
 
 async function showNotification() {
-    const command = `
+  const command = `
       if application "Spotify" is not running then
           return
       end if
@@ -38,5 +38,5 @@ async function showNotification() {
     
       display notification with title currentTrackArtist subtitle currentTrackName`;
 
-    await runAppleScriptSilently(command);
+  await runAppleScriptSilently(command);
 }
