@@ -46,6 +46,6 @@
     "lint": "ray lint"
   },
   "volta": {
-    "node": "14.19.3"
+    "node": "16.15.1"
   }
 }
