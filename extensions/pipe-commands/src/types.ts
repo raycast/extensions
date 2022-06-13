@@ -14,9 +14,10 @@ export interface ScriptMetadatas {
   mode: "silent" | "fullOutput" | "compact" | "copy" | "replace";
   packageName?: string;
   currentDirectoryPath?: string;
+  needsConfirmation?: boolean;
 }
 
 export interface ScriptArgument {
-  type: "text" | "file";
+  type: "text";
   percentEncoded?: boolean;
 }

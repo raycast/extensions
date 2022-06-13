@@ -19,8 +19,7 @@ The Pipe command syntax is very similar to the [script command syntax](https://g
   | fullOuput | The entire output is presented on a separate view            |
   | copy      | The output will be copied to the clipboard                   |
   | replace   | The output will replace the input                            |
-
-- The `needsConfirmation`, `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
+- The `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
 ## Pipe Commands Logic
 

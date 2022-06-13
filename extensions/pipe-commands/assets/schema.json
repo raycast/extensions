@@ -26,6 +26,9 @@
         "currentDirectoryPath": {
             "type": "string"
         },
+        "description": {
+            "type": "string"
+        },
         "icon": {
             "type": "string"
         },
@@ -41,6 +44,9 @@
                 "silent"
             ],
             "type": "string"
+        },
+        "needsConfirmation": {
+            "type": "boolean"
         },
         "packageName": {
             "type": "string"

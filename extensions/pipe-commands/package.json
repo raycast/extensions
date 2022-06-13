@@ -15,8 +15,8 @@
   ],
   "commands": [
     {
-      "name": "pipe-selection-to-command",
-      "title": "Pipe Selection to Command",
+      "name": "pipe-text-to-command",
+      "title": "Pipe Text to Command",
       "subtitle": "Pipe Commands",
       "description": "Apply a script on your selection.",
       "mode": "view"
@@ -32,7 +32,7 @@
       "name": "pipe-file-to-command",
       "title": "Pipe File to Command",
       "subtitle": "Pipe Commands",
-      "description": "Apply a script on the selected file in finder.",
+      "description": "Apply a script on the selected file(s) in finder.",
       "mode": "view"
     },
     {

@@ -15,6 +15,7 @@ import {
   getSelectedText,
   environment,
   getSelectedFinderItems,
+  confirmAlert,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
@@ -23,19 +24,14 @@ import { useEffect, useState } from "react";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "selection" | "clipboard" | "finder";
+type InputType = "text" | "clipboard" | "finder";
 
 export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   const { inputFrom } = props;
   const [commands, setCommands] = useState<ScriptCommand[]>();
 
   const loadCommands = async () => {
-    let { commands } = await parseScriptCommands();
-    if (inputFrom === "finder") {
-      commands = commands.filter((command) => command.metadatas.argument1.type == "file");
-    } else {
-      commands = commands.filter((command) => command.metadatas.argument1.type == "text");
-    }
+    const { commands } = await parseScriptCommands();
     setCommands(await sortByAccessTime(commands));
   };
 
@@ -52,25 +48,24 @@ export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   );
 }
 
-export function getRaycastIcon(
-  icon: string,
-  iconDark: string | undefined,
-  scriptPath: string
-): Image.ImageLike | undefined {
+export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
   const buildIcon = (icon: string) => {
     if (icon.startsWith("http") || icon.startsWith("https")) {
       return { source: icon };
     }
-    const iconPath = resolve(dirname(scriptPath), icon);
+    const iconPath = resolve(dirname(script.path), icon);
     if (existsSync(iconPath)) {
       return { source: iconPath };
     }
     return icon;
   };
-  if (environment.theme === "dark" && iconDark) {
-    return buildIcon(iconDark);
+  if (environment.theme === "dark" && script.metadatas.iconDark) {
+    return buildIcon(script.metadatas.iconDark);
   }
-  return buildIcon(icon);
+  if (script.metadatas.icon) {
+    return buildIcon(script.metadatas.icon);
+  }
+  return "➡️";
 }
 
 async function getInput(inputType: InputType) {
@@ -82,7 +77,7 @@ async function getInput(inputType: InputType) {
       }
       return clipboard;
     }
-    case "selection":
+    case "text":
       return getSelectedText();
     case "finder": {
       const items = await getSelectedFinderItems();
@@ -105,9 +100,7 @@ export function PipeCommand(props: {
   return (
     <List.Item
       key={command.path}
-      icon={
-        command.metadatas.icon ? getRaycastIcon(command.metadatas.icon, command.metadatas.iconDark, command.path) : "➡️"
-      }
+      icon={getRaycastIcon(command)}
       accessoryIcon={command.user ? Icon.Person : undefined}
       title={command.metadatas.title}
       subtitle={showContent ? undefined : command.metadatas.packageName}
@@ -169,6 +162,17 @@ function CommandAction(props: { command: ScriptCommand; inputFrom: InputType }) 
 
   function outputHandler(onSuccess: (output: string) => void, exitOnSuccess?: boolean) {
     return async () => {
+      if (
+        command.metadatas.needsConfirmation &&
+        !(await confirmAlert({
+          title: command.metadatas.title,
+          message: "Are you sure you want to run this script ?",
+          primaryAction: { title: "Run Script" },
+          icon: getRaycastIcon(command),
+        }))
+      ) {
+        return;
+      }
       try {
         const output = await runCommand(command, inputFrom);
         if (output) await onSuccess(output);

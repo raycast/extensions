@@ -1,12 +1,13 @@
 # Pipe Commands Changelog
 
-## Improve Compatibility with Script Commands
+## Improve Compatibility with Script Commands, Restore file argument
 
 ### Added
 
 - Allow the user to create a custom pipe command folder
 - Add support for `@raycast.iconDark` metadata
 - Add support for `compact` mode
+- Add support for `needsConfirmation` mode
 - `@raycast.icon` and `@raycast.iconDark` now support emojis, relative filepaths and remote urls
 
 ### Fixed
