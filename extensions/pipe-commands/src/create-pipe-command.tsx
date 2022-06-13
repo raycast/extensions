@@ -50,13 +50,13 @@ interface FormValues {
   template: string;
   title: string;
   mode: string;
-  packageName?: string;
   percentEncoded: boolean;
+  description?: string;
+  packageName?: string;
 }
 
 export default function PipeCommandForm(): JSX.Element {
   function onSubmit(values: FormValues) {
-    console.debug(values);
     if (!values.title) {
       showToast(Toast.Style.Failure, "Title is required!");
       return;
@@ -74,6 +74,10 @@ export default function PipeCommandForm(): JSX.Element {
         languageProperties.commentSign
       } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
+
+    if (values.description) {
+      metadataLines.push(`${languageProperties.commentSign} @raycast.description ${values.description}`);
+    }
 
     if (values.packageName) {
       metadataLines.push(`${languageProperties.commentSign} @raycast.packageName ${values.packageName}`);
@@ -114,6 +118,7 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
+      <Form.TextField title="Description" placeholder="Descriptive Summary" id="description" />
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Checkbox
         defaultValue={false}

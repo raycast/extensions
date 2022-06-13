@@ -7,6 +7,7 @@ export interface ScriptCommand {
 
 export interface ScriptMetadatas {
   title: string;
+  description?: string;
   icon?: string;
   iconDark?: string;
   argument1: ScriptArgument;
