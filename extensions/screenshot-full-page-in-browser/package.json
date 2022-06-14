@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "screenshot-full-page",
-      "title": "Screenshot full page in browser",
+      "title": "Capture Fullpage Screenshot of Website",
       "description": "This extension allows you to quickly make a screenshot of the entire page of the site and save it to your desktop just by writing the address of the site.",
       "mode": "view"
     }
