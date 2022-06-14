@@ -4,18 +4,10 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { URL } from "node:url";
-<<<<<<< HEAD
 import { useRef } from "react";
 
 export default function Command() {
   const urlWebSite = useRef<Form.TextField>(null);
-=======
-import { setTimeout } from "timers/promises";
-import { useRef } from "react";
-
-export default function Command() {
-  const URLFieldRef = useRef<Form.TextField>(null);
->>>>>>> 0e58fd31459ce3bc075e92b98a378c9662294219
 
   function ScreenshotFullPageAction() {
     async function handleSubmit(values: { website: string }) {
@@ -32,11 +24,7 @@ export default function Command() {
       try {
         let webSite;
         if (!values.website.startsWith("http")) {
-<<<<<<< HEAD
           webSite = "https://" + values.website;
-=======
-          webSite = "http://" + values.website;
->>>>>>> 0e58fd31459ce3bc075e92b98a378c9662294219
         } else {
           webSite = values.website;
         }
@@ -66,14 +54,8 @@ export default function Command() {
           },
         };
 
-<<<<<<< HEAD
-        urlWebSite.current?.reset();
         
-=======
-        URLFieldRef.current?.reset();
-        await setTimeout(2000);
-        await closeMainWindow({ clearRootSearch: true });
->>>>>>> 0e58fd31459ce3bc075e92b98a378c9662294219
+        urlWebSite.current?.reset();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed taking screenshot of website";
@@ -95,11 +77,7 @@ export default function Command() {
       <Form.TextField
         id="website"
         title="Your website"
-<<<<<<< HEAD
         ref={urlWebSite}
-=======
-        ref={URLFieldRef}
->>>>>>> 0e58fd31459ce3bc075e92b98a378c9662294219
         placeholder="Enter here the address of the site you want to screenshot..."
       />
     </Form>
