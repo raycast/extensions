@@ -12,19 +12,19 @@
   "license": "MIT",
   "commands": [{
     "name": "monitors",
-    "title": "Monitors",
+    "title": "Search Monitors",
     "subtitle": "Better Uptime",
     "description": "List all existing monitors.",
     "mode": "view"
   }, {
     "name": "incidents",
-    "title": "Incidents",
+    "title": "Search Incidents",
     "subtitle": "Better Uptime",
     "description": "List all existing incidents.",
     "mode": "view"
   }, {
     "name": "heartbeats",
-    "title": "Heartbeats",
+    "title": "Search Heartbeats",
     "subtitle": "Better Uptime",
     "description": "List all existing heartbeats.",
     "mode": "view"
