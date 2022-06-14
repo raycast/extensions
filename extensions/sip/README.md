@@ -1,4 +1,8 @@
 # Sip
 
-Accesst thes
-e Sip color management app features from Raycast: show sip color picker, open contrast checker, check contrast between two hex values, and add hex color to sip history.
+Access these Sip color management app features directly from Raycast:
+
+- Show Sip color picker
+- Open the contrast checker
+- Check the contrast between two hex values
+- Add hex color to sip history
