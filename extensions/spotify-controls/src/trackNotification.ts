@@ -13,7 +13,7 @@ export async function showPreviousTrackNotification() {
 
 export async function showNextTrackNotification() {
   const preferences = getPreferenceValues<PreferenceValues>();
-  if (false === preferences.previousTrackNotificationEnabled) {
+  if (false === preferences.nextTrackNotificationEnabled) {
     return;
   }
 
