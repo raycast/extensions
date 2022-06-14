@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Rename Extension] - {PR_MERGE_DATE}
+## [Rename Extension] - 2022-06-14
 
 - Rename Extension: Open Link in Specific Browser
 - Add new layout options: List or Grid.
