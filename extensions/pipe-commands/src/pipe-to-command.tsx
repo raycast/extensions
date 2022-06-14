@@ -184,9 +184,17 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
 
   return [
     <Action
+      key="run"
+      icon={Icon.Terminal}
+      title="Run Script"
+      onAction={outputHandler(async (output) => {
+        await showHUD(output);
+      })}
+    />,
+    <Action
       key="copy"
       icon={Icon.Clipboard}
-      title="Run and Copy"
+      title="Run Script and Copy Output"
       onAction={outputHandler(async (output) => {
         await Clipboard.copy(output);
         await showHUD("Copied to clipboard!");
@@ -194,9 +202,10 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
     />,
     <Action
       key="paste"
-      icon={Icon.Clipboard}
-      title="Run and Copy"
+      icon={Icon.Pencil}
+      title="Run Script and Paste Output"
       onAction={outputHandler((output) => Clipboard.paste(output))}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
     />,
   ];
 }
