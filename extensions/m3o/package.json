@@ -12,15 +12,15 @@
   "license": "MIT",
   "commands": [{
     "name": "avatar",
-    "title": "Avatar",
+    "title": "Generate an Avatar",
     "subtitle": "M3O",
-    "description": "Generate an avatar.",
+    "description": "Customise the output of a generated avatar via gender and format.",
     "mode": "view"
   }, {
     "name": "dns",
-    "title": "DNS",
+    "title": "Get DNS for domain",
     "subtitle": "M3O",
-    "description": "DNS over HTTPS (DoH).",
+    "description": "Retrieve DNS over HTTPS (DoH) information for a given domain.",
     "mode": "view"
   }],
   "preferences": [{

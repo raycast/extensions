@@ -45,6 +45,7 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Avatar retrieved successfully";
+        toast.message = "Hover over the toast to see available actions";
         toast.primaryAction = {
           title: "Download Image",
           onAction: async (toast) => {
