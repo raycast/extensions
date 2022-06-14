@@ -1,6 +1,6 @@
 # IATA Code Decoder Changelog
 
-## [v1.1.0] - 2022-06-13
+## [v1.1.0] - 2022-06-14
 
 * Display airline logos in the "Decode IATA Airline Code" command
 
