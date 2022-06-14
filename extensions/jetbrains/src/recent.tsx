@@ -54,7 +54,6 @@ function appHistorySorter(results: AppHistory[], sortOrder: string) {
 }
 
 function projectsReducer(state: State, action: Action): State {
-  console.log(action.type, state.favourites, state.all);
   switch (action.type) {
     case "setToolboxApp":
       return { ...state, toolboxApp: action.results };
@@ -116,12 +115,10 @@ export default function ProjectList(): JSX.Element {
   }, [sortOrder]);
 
   useEffect(() => {
-    console.log({ favourites });
     dispatch({ type: "setFavourites", results: favourites });
   }, [favourites]);
 
   useEffect(() => {
-    console.log("setHistories");
     setHistories(...appHistory.map((history) => (history?.entries ?? []).map((entry) => entry.path)));
   }, [appHistory, filter]);
 
@@ -168,7 +165,6 @@ export default function ProjectList(): JSX.Element {
     </>
   );
 
-  console.log({ a: myFavs.length });
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}

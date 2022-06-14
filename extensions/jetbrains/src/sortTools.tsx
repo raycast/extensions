@@ -131,7 +131,6 @@ export default function SortToolsCommand() {
     };
     getTools();
   }, []);
-  console.log({ screenshotMode });
   return (
     <SortTools
       tools={tools ?? []}
