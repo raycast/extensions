@@ -59,7 +59,7 @@ export default function CommandListMonitors() {
     console.log("searching for monitors", query);
     setState(prev => ({ ...prev, monitorsAreLoading: true }));
     monitorsApi
-      .searchMonitors({ query: "", page: 0, perPage: 50 })
+      .searchMonitors({ query, page: 0, perPage: 50 })
       .then(x => setState(prev => ({ ...prev, response: x, monitorsAreLoading: false })))
       .catch(showError);
   };
