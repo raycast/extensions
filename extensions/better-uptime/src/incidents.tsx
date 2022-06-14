@@ -1,25 +1,24 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { ucfirst } from "./utils";
 
 interface Preferences {
   apiKey: string;
 }
 
-interface MonitorItem {
+interface IncidentItem {
   id: string;
   type: string;
-  attributes: MonitorItemAttributes;
+  attributes: IncidentItemAttributes;
 }
 
-interface MonitorItemAttributes {
+interface IncidentItemAttributes {
+  name: string;
   url: string;
-  pronounceable_name: string;
-  monitor_type: string;
-  last_checked_at: string;
-  status: string;
-  check_frequency: number;
+  http_method: string;
+  cause: string;
+  started_at: string;
+  screenshot_url: string;
   call: boolean;
   sms: boolean;
   email: boolean;
@@ -28,28 +27,20 @@ interface MonitorItemAttributes {
 
 interface State {
   isLoading: boolean;
-  items: MonitorItem[];
+  items: IncidentItem[];
   error?: Error;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<State>({ items: [], isLoading: true });
-  const statusMap = {
-    paused: "⏸",
-    pending: "🔍",
-    maintenance: "🚧",
-    up: "✅",
-    validating: "🤔",
-    down: "❌",
-  } as { [key: string]: string };
 
   useEffect(() => {
-    async function fetchMonitors() {
+    async function fetchIncidents() {
       setState((previous) => ({ ...previous, isLoading: true }));
 
       try {
-        const { data } = await axios.get("https://betteruptime.com/api/v2/monitors", {
+        const { data } = await axios.get("https://betteruptime.com/api/v2/incidents", {
           headers: { Authorization: `Bearer ${preferences.apiKey}` },
         });
 
@@ -64,17 +55,16 @@ export default function Command() {
       }
     }
 
-    fetchMonitors();
+    fetchIncidents();
   }, []);
 
   return (
     <List isShowingDetail>
-      {state.items?.map((item: MonitorItem, index: number) => (
+      {state.items?.map((item: IncidentItem, index: number) => (
         <List.Item
           key={index}
-          icon={statusMap[item.attributes.status] ?? "🔍"}
-          title={item.attributes.url}
-          subtitle={item.attributes.pronounceable_name}
+          title={item.attributes.name}
+          subtitle={item.attributes.url}
           detail={
             <List.Item.Detail
               metadata={
@@ -82,19 +72,16 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label title="General" />
 
                   <List.Item.Detail.Metadata.Label title="ID" text={item.id} />
+                  <List.Item.Detail.Metadata.Label title="Name" text={item.attributes.name} />
                   <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url} />
                   <List.Item.Detail.Metadata.Label
-                    title="Pronounceable Name"
-                    text={item.attributes.pronounceable_name}
+                    title="HTTP Method"
+                    text={item.attributes.http_method.toUpperCase()}
                   />
-                  <List.Item.Detail.Metadata.Label title="Monitor Type" text={ucfirst(item.attributes.monitor_type)} />
+                  <List.Item.Detail.Metadata.Label title="Cause" text={item.attributes.cause} />
                   <List.Item.Detail.Metadata.Label
-                    title="Check Frequency"
-                    text={`${item.attributes.check_frequency} seconds`}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last Checked At"
-                    text={item.attributes.last_checked_at.replace("T", " ")}
+                    title="Started At"
+                    text={item.attributes.started_at.replace("T", " ")}
                   />
 
                   <List.Item.Detail.Metadata.Separator />
@@ -112,13 +99,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Copy URL"
+                title="Copy Screenshot URL"
                 onAction={async () => {
-                  await Clipboard.copy(item.attributes.url);
+                  await Clipboard.copy(item.attributes.screenshot_url);
 
                   showToast({
                     title: "Copied",
-                    message: "URL copied to clipboard",
+                    message: "Screenshot URL copied to clipboard",
                   });
                 }}
               />

@@ -1,34 +1,32 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { ucfirst } from "./utils";
 
 interface Preferences {
   apiKey: string;
 }
 
-interface MonitorItem {
+interface HeartbeatItem {
   id: string;
   type: string;
-  attributes: MonitorItemAttributes;
+  attributes: HeartbeatItemAttributes;
 }
 
-interface MonitorItemAttributes {
+interface HeartbeatItemAttributes {
   url: string;
-  pronounceable_name: string;
-  monitor_type: string;
-  last_checked_at: string;
-  status: string;
-  check_frequency: number;
+  name: string;
+  period: number;
+  grace: number;
   call: boolean;
   sms: boolean;
   email: boolean;
   push: boolean;
+  status: string;
 }
 
 interface State {
   isLoading: boolean;
-  items: MonitorItem[];
+  items: HeartbeatItem[];
   error?: Error;
 }
 
@@ -45,11 +43,11 @@ export default function Command() {
   } as { [key: string]: string };
 
   useEffect(() => {
-    async function fetchMonitors() {
+    async function fetchHeartbeats() {
       setState((previous) => ({ ...previous, isLoading: true }));
 
       try {
-        const { data } = await axios.get("https://betteruptime.com/api/v2/monitors", {
+        const { data } = await axios.get("https://betteruptime.com/api/v2/heartbeats", {
           headers: { Authorization: `Bearer ${preferences.apiKey}` },
         });
 
@@ -64,17 +62,16 @@ export default function Command() {
       }
     }
 
-    fetchMonitors();
+    fetchHeartbeats();
   }, []);
 
   return (
     <List isShowingDetail>
-      {state.items?.map((item: MonitorItem, index: number) => (
+      {state.items?.map((item: HeartbeatItem, index: number) => (
         <List.Item
           key={index}
           icon={statusMap[item.attributes.status] ?? "🔍"}
-          title={item.attributes.url}
-          subtitle={item.attributes.pronounceable_name}
+          title={item.attributes.name}
           detail={
             <List.Item.Detail
               metadata={
@@ -82,20 +79,9 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label title="General" />
 
                   <List.Item.Detail.Metadata.Label title="ID" text={item.id} />
-                  <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url} />
-                  <List.Item.Detail.Metadata.Label
-                    title="Pronounceable Name"
-                    text={item.attributes.pronounceable_name}
-                  />
-                  <List.Item.Detail.Metadata.Label title="Monitor Type" text={ucfirst(item.attributes.monitor_type)} />
-                  <List.Item.Detail.Metadata.Label
-                    title="Check Frequency"
-                    text={`${item.attributes.check_frequency} seconds`}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last Checked At"
-                    text={item.attributes.last_checked_at.replace("T", " ")}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Name" text={item.attributes.name} />
+                  <List.Item.Detail.Metadata.Label title="Period" text={`${item.attributes.period}`} />
+                  <List.Item.Detail.Metadata.Label title="Grace" text={`${item.attributes.grace}`} />
 
                   <List.Item.Detail.Metadata.Separator />
 
@@ -112,13 +98,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Copy URL"
+                title="Copy Heartbeat URL"
                 onAction={async () => {
                   await Clipboard.copy(item.attributes.url);
 
                   showToast({
                     title: "Copied",
-                    message: "URL copied to clipboard",
+                    message: "Heartbeat URL copied to clipboard",
                   });
                 }}
               />

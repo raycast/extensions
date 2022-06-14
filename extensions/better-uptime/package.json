@@ -14,7 +14,19 @@
     "name": "monitors",
     "title": "Monitors",
     "subtitle": "Better Uptime",
-    "description": "Listing all existing monitors.",
+    "description": "List all existing monitors.",
+    "mode": "view"
+  }, {
+    "name": "incidents",
+    "title": "Incidents",
+    "subtitle": "Better Uptime",
+    "description": "List all existing incidents.",
+    "mode": "view"
+  }, {
+    "name": "heartbeats",
+    "title": "Heartbeats",
+    "subtitle": "Better Uptime",
+    "description": "List all existing heartbeats.",
     "mode": "view"
   }],
   "preferences": [{
