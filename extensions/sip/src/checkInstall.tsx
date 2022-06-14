@@ -3,7 +3,7 @@ import { getApplications, showToast, Toast, open } from "@raycast/api";
 async function isSipInstalled() {
   const applications = await getApplications();
   return applications.some(({ bundleId }) =>
-    bundleId ? ["io.sipapp.Sip-setapp", "io.sipapp.Sip"].includes(bundleId) : false
+    bundleId ? ["io.sipapp.Sip-setapp", "io.sipapp.Sip", "io.sipapp.Sip-paddle"].includes(bundleId) : false
   );
 }
 
