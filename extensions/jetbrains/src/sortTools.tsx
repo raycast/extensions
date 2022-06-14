@@ -40,9 +40,22 @@ export function SortTools({
   toggleScreenshotMode,
 }: SortToolsProps): JSX.Element {
   const [order, setOrder] = useState<string[]>(sortOrder.split(","));
+
+  // update order if sortOrder changes outside
   useEffect(() => {
-    setOrder(sortOrder.split(","));
+    if (sortOrder !== order.join(",")) {
+      setOrder(sortOrder.split(","));
+    }
   }, [sortOrder]);
+
+  // if order length does not match tools length we need to fix order contents
+  useEffect(() => {
+    if (order.length !== tools.length) {
+      const defaultOrder = tools.sort(sortTools(order)).map((tool) => tool.title);
+      setOrder(defaultOrder);
+    }
+  }, []);
+
   const save = useCallback(() => {
     saveSortOrder(order.join(","));
     pop ? pop() : popToRoot().then(() => showToast(Toast.Style.Success, "Saved"));
