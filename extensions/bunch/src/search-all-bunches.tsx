@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import React, { useState } from "react";
 import { getBunches } from "./hooks/hooks";
 import { ActionOnBunches } from "./components/action-on-bunches";

@@ -2,7 +2,11 @@
 
 Control [Bunch](https://bunchapp.co) via Raycast.
 
-Before using this extension, you need to install the Bunch application. [Download Bunch](https://bunchapp.co/download/).
+**Tips:**
+
+- Before using this extension, you need to install the Bunch application. [Download Bunch](https://bunchapp.co/download/).
+- In the Search All Bunches command, you can use **tag:** followed by the tag name to search for bunches of a specific tag
+- Multiple tags can be combined using a comma (,) for OR, or a plus sign (+) for AND
 
 Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

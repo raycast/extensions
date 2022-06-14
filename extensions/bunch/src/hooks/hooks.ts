@@ -9,6 +9,7 @@ import { BunchesInfo, PreferencesInfo } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
 
 export const getBunches = (refresh: number, tag?: string) => {
+  const [allBunches, setAllBunches] = useState<string[]>([]);
   const [bunches, setBunches] = useState<BunchesInfo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -17,13 +18,18 @@ export const getBunches = (refresh: number, tag?: string) => {
     try {
       const openBunches = (await scriptToGetOpenBunches()).split(", ");
       const _bunches: BunchesInfo[] = [];
-      let allBunches: string[] = [];
+      let _allBunches: string[] = [];
       if (tag?.startsWith("tag:")) {
-        allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
-      } else if (isEmpty(tag)) {
-        allBunches = (await scriptToGetBunches()).split(", ");
+        _allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
+      } else {
+        if (allBunches.length === 0) {
+          _allBunches = (await scriptToGetBunches()).split(", ");
+          setAllBunches(_allBunches);
+        } else {
+          _allBunches = allBunches;
+        }
       }
-      allBunches.map((value) => {
+      _allBunches.map((value) => {
         if (isEmpty(value)) return;
         _bunches.push({ name: value, isOpen: openBunches.includes(value) });
       });
