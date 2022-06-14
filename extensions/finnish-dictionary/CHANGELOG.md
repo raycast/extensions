@@ -1,6 +1,6 @@
 # Finnish Dictionary Changelog
 
-## [Added any language capability] - {PR_MERGE_DATE}
+## [Added any language capability] - 2022-06-14
 
 * Add a new command to search terms in other languages
 
