@@ -15,8 +15,8 @@
   ],
   "commands": [
     {
-      "name": "pipe-text-to-command",
-      "title": "Pipe Text to Command",
+      "name": "pipe-selection-to-command",
+      "title": "Pipe Selection to Command",
       "subtitle": "Pipe Commands",
       "description": "Apply a script on your selection.",
       "mode": "view"

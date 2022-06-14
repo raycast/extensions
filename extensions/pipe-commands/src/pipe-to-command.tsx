@@ -141,7 +141,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
     throw new Error(stderr ? `⚠️ ${stderr}` : `⚠️ Process terminated with status ${status}`);
   }
 
-  return { stdout, stderr };
+  return stdout;
 }
 
 function CommandActions(props: { command: ScriptCommand; inputFrom: InputType }) {
@@ -161,9 +161,8 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         return;
       }
       try {
-        const { stdout, stderr } = await runCommand(command, inputFrom);
-        if (stdout) await onSuccess(stdout);
-        if (stderr) showHUD(stderr);
+        const output = await runCommand(command, inputFrom);
+        if (output) await onSuccess(output);
         await closeMainWindow();
         await popToRoot();
       } catch (e) {
@@ -188,7 +187,10 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
       key="copy"
       icon={Icon.Clipboard}
       title="Run and Copy"
-      onAction={outputHandler((output) => Clipboard.copy(output))}
+      onAction={outputHandler(async (output) => {
+        await Clipboard.copy(output);
+        await showHUD("Copied to clipboard!");
+      })}
     />,
     <Action
       key="paste"
