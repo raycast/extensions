@@ -69,37 +69,6 @@ export default function GetTables() {
                 };
               }
 
-              // const props: Partial<List.Item.Props> = showStats
-              //   ? {
-              //       accessories: [
-              //         { text: overall.points.toString() },
-              //         { icon },
-              //       ],
-              //       detail: (
-              //         <List.Item.Detail markdown={json2md(club(entry))} />
-              //       ),
-              //     }
-              //   : {
-              //       subtitle: team.club.abbr,
-              //       accessories: [
-              //         { text: `Played: ${overall.played}` },
-              //         { text: `Points: ${overall.points}` },
-              //       ],
-              //     };
-
-              // if (!showStats && next) {
-              //   const nextTeam =
-              //     ground.id === next.ground.id ? next.teams[1] : next.teams[0];
-
-              //   props.accessories?.push({
-              //     icon: {
-              //       source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
-              //       fallback: "default.png",
-              //     },
-              //     tooltip: `${next.teams[0].team.shortName} - ${next.teams[1].team.shortName}`,
-              //   });
-              // }
-
               return (
                 <List.Item
                   key={position}
