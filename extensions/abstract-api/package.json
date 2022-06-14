@@ -12,56 +12,56 @@
   "license": "MIT",
   "commands": [{
       "name": "ip-geolocation",
-      "title": "IP Geolocation",
+      "title": "Get IP Geolocation info for any IP",
       "subtitle": "Abstract API",
       "description": "Geolocate any IP worldwide.",
       "mode": "view"
     },
     {
       "name": "holidays",
-      "title": "Holidays",
+      "title": "Get a list of public holidays",
       "subtitle": "Abstract API",
       "description": "Get the public holidays for any country.",
       "mode": "view"
     },
     {
       "name": "exchange-rates",
-      "title": "Exchange Rates",
+      "title": "Get exchange rates for any currency",
       "subtitle": "Abstract API",
       "description": "Get and convert exchange rates.",
       "mode": "view"
     },
     {
       "name": "company-enrichment",
-      "title": "Company Enrichment",
+      "title": "Get company enrichment data",
       "subtitle": "Abstract API",
       "description": "Get enrichment data on any domain or company.",
       "mode": "view"
     },
     {
       "name": "timezone",
-      "title": "Timezone",
+      "title": "Get timezone by location",
       "subtitle": "Abstract API",
       "description": "Get and convert time globally.",
       "mode": "view"
     },
     {
       "name": "avatars",
-      "title": "Avatars",
+      "title": "Generate an avatar",
       "subtitle": "Abstract API",
       "description": "Create flexible user avatars.",
       "mode": "view"
     },
     {
       "name": "screenshot",
-      "title": "Screenshot",
+      "title": "Generate a Screenshot from a URL",
       "subtitle": "Abstract API",
       "description": "Get a screenshot of any URL.",
       "mode": "view"
     },
     {
       "name": "scrape",
-      "title": "Scrape",
+      "title": "Scrape any website",
       "subtitle": "Abstract API",
       "description": "Extract data from any website.",
       "mode": "view"
