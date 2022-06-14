@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Grid } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
 import { usePlayers, useSeasons, useTeams } from "./hooks";
@@ -77,6 +77,7 @@ function PlayerProfile(props: PlayerContent) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Nationality"
+            icon={getFlagEmoji(props.nationalTeam?.isoCode)}
             text={props.nationalTeam?.country}
           />
           <Detail.Metadata.Label
@@ -128,28 +129,28 @@ export default function Player(props: { club: Club }) {
 
   const { players, lastPage } = usePlayers(teamId, seasonId, page, terms);
 
-  const listProps: Partial<List.Props> = props.club
+  const listProps: Partial<Grid.Props> = props.club
     ? {
         navigationTitle: `Squad | ${props.club.name} | Club`,
       }
     : {
         navigationTitle: "Players",
         searchBarAccessory: (
-          <List.Dropdown
+          <Grid.Dropdown
             tooltip="Filter by Club"
             value={teamId}
             onChange={setTeam}
           >
             {teams?.map((s) => {
               return (
-                <List.Dropdown.Item
+                <Grid.Dropdown.Item
                   key={s.value}
                   value={s.value}
                   title={s.title}
                 />
               );
             })}
-          </List.Dropdown>
+          </Grid.Dropdown>
         ),
       };
 
@@ -159,15 +160,15 @@ export default function Player(props: { club: Club }) {
   }
 
   return (
-    <List throttle isLoading={!players} {...listProps}>
+    <Grid throttle isLoading={!players} {...listProps}>
       {props.club && (
-        <List.EmptyView
+        <Grid.EmptyView
           icon="empty.png"
           title="We don't have any data on this club."
         />
       )}
       {!props.club && terms.length < 3 && (
-        <List.EmptyView
+        <Grid.EmptyView
           icon="player-missing.png"
           title="Search terms length must be at least 3 characters long."
         />
@@ -175,25 +176,15 @@ export default function Player(props: { club: Club }) {
       {(!terms || terms.length >= 3) &&
         players?.map((p) => {
           return (
-            <List.Item
+            <Grid.Item
               key={p.id}
               title={p.name.display}
               subtitle={p.info.positionInfo}
               keywords={[p.info.positionInfo]}
-              icon={{
-                source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
+              content={{
+                source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${p.altIds.opta}.png`,
                 fallback: "player-missing.png",
               }}
-              accessories={[
-                {
-                  text: p.nationalTeam?.country || p.birth.country.country,
-                },
-                {
-                  icon: getFlagEmoji(
-                    p.nationalTeam?.isoCode || p.birth.country.isoCode
-                  ),
-                },
-              ]}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -215,6 +206,6 @@ export default function Player(props: { club: Club }) {
             />
           );
         })}
-    </List>
+    </Grid>
   );
 }
