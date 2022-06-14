@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 
@@ -52,8 +52,8 @@ export default function (): JSX.Element {
           title={entry}
           actions={
             <ActionPanel>
-              <Action title="Copy Password to Clipboard" onAction={() => copyPassword(entry)} />
-              <Action title="Paste Password" onAction={() => pastePassword(entry)} />
+              <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
+              <Action title="Paste Password" icon={Icon.Document} onAction={() => pastePassword(entry)} />
             </ActionPanel>
           }
         />
