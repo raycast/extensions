@@ -20,7 +20,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "@types/sql.js": "1.4.3",
     "better-sqlite3": "7.5.3",
     "node-fetch": "^3.0.0",
     "sql.js": "1.7.0"
@@ -29,7 +28,7 @@
     "@types/better-sqlite3": "7.5.0",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@types/sqlite3": "3.1.8",
+    "@types/sql.js": "1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
