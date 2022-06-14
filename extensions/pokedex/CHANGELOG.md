@@ -1,5 +1,10 @@
 # Pokédex Changelog
 
+## [Improvements] - 2022-06-14
+
+- Using new Grid layout
+- Using new list item metadata
+
 ## [Improvements] - 2022-03-12
 
 - Added type filter, split view for Moves

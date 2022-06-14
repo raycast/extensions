@@ -117,14 +117,39 @@ export default function PokemonDetail(props: { id?: number }) {
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
 
     // excluding forms that unavailable in pokemon.com
-    let forms = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
+    let pokemons = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
     let formNames: string[] = [];
+    let varieties: string[] = [];
     switch (pokemon.id) {
       case 25:
         formNames = ["pikachu", "pikachu-gmax"];
         break;
       case 555:
         formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
+        break;
+      case 666:
+        varieties = [
+          "meadow",
+          "continental",
+          "garden",
+          "elegant",
+          "marine",
+          "high-plains",
+          "river",
+        ];
+        break;
+      // case 668:
+      //   // male, female
+      //   break
+      case 670:
+        formNames = ["floette"];
+        varieties = ["red"];
+        break;
+      case 671:
+        varieties = ["red"];
+        break;
+      case 676:
+        varieties = ["natural", "heart", "star", "diamond"];
         break;
       case 744:
         formNames = ["rockruff"];
@@ -151,8 +176,28 @@ export default function PokemonDetail(props: { id?: number }) {
     }
 
     if (formNames.length) {
-      forms = forms.filter((f) => formNames.includes(f.name));
+      pokemons = pokemons.filter((p) => formNames.includes(p.name));
     }
+
+    const forms: { name: string; type: string; img: string }[] = [];
+    pokemons.forEach((p, pIdx) => {
+      let pokemonForms = p.pokemon_v2_pokemonforms;
+      if (varieties.length) {
+        pokemonForms = pokemonForms.filter((f) =>
+          varieties.includes(f.form_name)
+        );
+      }
+      pokemonForms.forEach((f, fIdx) => {
+        forms.push({
+          name:
+            f.pokemon_v2_pokemonformnames[0]?.name || nameByLang[language].name,
+          type: p.pokemon_v2_pokemontypes
+            .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
+            .join(", "),
+          img: formImg(pokemon.id, pIdx + fIdx),
+        });
+      });
+    });
 
     let gender;
     if (pokemon_v2_pokemonspecy.gender_rate === -1) {
@@ -231,28 +276,15 @@ export default function PokemonDetail(props: { id?: number }) {
         h2: forms.length > 1 ? "Forms" : "",
       },
       ...(forms.length > 1
-        ? forms.map((p, idx) => {
+        ? forms.map((f) => {
             return [
-              {
-                h3:
-                  p.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-                    ?.name || nameByLang[language].name,
-              },
-              {
-                p:
-                  "_Type:_ " +
-                  p.pokemon_v2_pokemontypes
-                    .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-                    .join(", "),
-              },
+              { h3: f.name },
+              { p: "_Type:_ " + f.type },
               {
                 img: [
                   {
-                    title:
-                      p.pokemon_v2_pokemonforms[0]
-                        .pokemon_v2_pokemonformnames[0]?.name ||
-                      nameByLang[language].name,
-                    source: formImg(pokemon.id, idx),
+                    title: f.name,
+                    source: f.img,
                   },
                 ],
               },
@@ -322,7 +354,7 @@ export default function PokemonDetail(props: { id?: number }) {
             <Detail.Metadata.Link
               title="Bulbapedia"
               text={englishName}
-              target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)}`}
+              target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)`}
             />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label
@@ -352,7 +384,9 @@ export default function PokemonDetail(props: { id?: number }) {
                   <Detail.Metadata.TagList.Item
                     key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
                     text={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
-                    color={t.is_hidden ? Color.Brown : Color.Blue}
+                    color={
+                      t.is_hidden ? Color.SecondaryText : Color.PrimaryText
+                    }
                   />
                 );
               })}
