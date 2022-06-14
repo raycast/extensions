@@ -264,7 +264,7 @@
       "type": "password",
       "required": false,
       "description": "Your Youdao App Secret",
-      "default": "6tIP98TMTJIE6HqKsLpKQxlJWfJq4wgx"
+      "default": "p1NElz2LiXJaAg2Gyvlt7MsqsMvgEoH4"
     },
     {
       "title": "Baidu App ID",
@@ -280,7 +280,7 @@
       "type": "password",
       "required": false,
       "description": "Your Baidu App Secret",
-      "default": "kiaee1BtT9d2MGJUdAMi"
+      "default": "ciqeWNRRmmd2M7vuddnO"
     },
     {
       "title": "Caiyun App Token",
