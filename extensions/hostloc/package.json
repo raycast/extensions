@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "loc",
-      "title": "Show hostloc latest 20",
+      "title": "Show Latest Posts",
       "subtitle": "hostloc",
-      "description": "Show hostloc latest 20",
+      "description": "Shows the latest 20 hostloc posts",
       "mode": "view"
     }
   ],

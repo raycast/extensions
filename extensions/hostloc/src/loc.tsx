@@ -29,7 +29,7 @@ export default function PostList() {
   }, [error]);
 
   return (
-    <List isLoading={!data && !error} searchBarPlaceholder="Filter articles by name...">
+    <List isLoading={!data && !error} searchBarPlaceholder="Filter posts by name...">
       {data?.items.map((post, index) => (
         <PostItem key={post.link} post={post} index={index} />
       ))}
@@ -47,8 +47,8 @@ const PostItem: React.FC<{ post: Post; index: number }> = ({ post, index }) => {
       accessories={[{ text: post.author, icon: Icon.Person, tooltip: new Date(post.isoDate).toString() }]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={post.link} title="浏览器打开" />
-          <Action.CopyToClipboard content={post.link} title="复制主题链接" />
+          <Action.OpenInBrowser url={post.link} />
+          <Action.CopyToClipboard content={post.link} />
         </ActionPanel>
       }
     />
