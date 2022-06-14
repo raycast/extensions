@@ -10,7 +10,7 @@ export default function GetBunchPreferences() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search preferences"}>
-      <EmptyView title={"No Preferences"} />
+      <EmptyView title={"No Preferences"} isOpenFolder={false} />
       {bunchPreferences.map((value, index) => {
         return (
           <List.Item
@@ -71,6 +71,14 @@ export default function GetBunchPreferences() {
                     }}
                   />
                 )}
+                <Action
+                  icon={Icon.Gear}
+                  title={"Open Bunch Preferences"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                  onAction={() => {
+                    open("x-bunch://prefs").then();
+                  }}
+                />
               </ActionPanel>
             }
           />

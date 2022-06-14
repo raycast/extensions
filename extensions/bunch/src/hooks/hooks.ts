@@ -9,26 +9,28 @@ import {
 import { BunchesInfo, PreferencesInfo } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
 import * as fs from "fs";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import Style = Toast.Style;
 
 export const getBunches = (refresh: number, tag?: string) => {
   const [allBunches, setAllBunches] = useState<string[]>([]);
   const [bunches, setBunches] = useState<BunchesInfo[]>([]);
+  const [openBunches, seOpentBunches] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const openBunches = (await scriptToGetOpenBunches()).split(", ");
+      const openBunches = await scriptToGetOpenBunches();
+      seOpentBunches(openBunches);
       const _bunches: BunchesInfo[] = [];
       let _allBunches: string[];
       if (tag?.startsWith("tag:")) {
         _allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
       } else {
         if (allBunches.length === 0) {
-          _allBunches = (await scriptToGetBunches()).split(", ");
+          _allBunches = await scriptToGetBunches();
           setAllBunches(_allBunches);
         } else {
           _allBunches = allBunches;
@@ -50,7 +52,7 @@ export const getBunches = (refresh: number, tag?: string) => {
     void fetchData();
   }, [fetchData]);
 
-  return { bunches: bunches, loading: loading };
+  return { bunches: bunches, openBunches: openBunches, loading: loading };
 };
 
 export const getBunchFolder = () => {
@@ -111,4 +113,28 @@ export const getIsShowDetail = (refreshDetail: number) => {
   }, [fetchData]);
 
   return { showDetail: showDetail };
+};
+
+export const alertDialog = async (
+  icon: Icon,
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction?: () => void
+) => {
+  const options: Alert.Options = {
+    icon: icon,
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

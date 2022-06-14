@@ -1,6 +1,6 @@
 export const bunchesTag = [
   { title: "All", value: "all" },
-  { title: "Open", value: "true" },
+  { title: "Running", value: "true" },
   { title: "Closed", value: "false" },
 ];
 

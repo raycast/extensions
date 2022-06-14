@@ -25,8 +25,30 @@
           "label": "Remember Filter Tag",
           "description": "Remember filter tag.",
           "default": true
+        },
+        {
+          "name": "closeMainWindow",
+          "type": "checkbox",
+          "required": false,
+          "label": "Close Main Window",
+          "description": "Whether to close the window after executing a action.",
+          "default": true
         }
       ]
+    },
+    {
+      "name": "close-all-bunches",
+      "title": "Close All Bunches",
+      "subtitle": "Bunch",
+      "description": "Close all running bunches.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-bunch-folder",
+      "title": "Open Bunch Folder",
+      "subtitle": "Bunch",
+      "description": "Open Bunch folder.",
+      "mode": "no-view"
     },
     {
       "name": "get-bunch-preferences",
@@ -47,13 +69,6 @@
       "title": "Process Bunch Text",
       "subtitle": "Bunch",
       "description": "Process raw Bunch text.",
-      "mode": "no-view"
-    },
-    {
-      "name": "open-bunch-folder",
-      "title": "Open Bunch Folder",
-      "subtitle": "Bunch",
-      "description": "Open Bunch folder.",
       "mode": "no-view"
     },
     {

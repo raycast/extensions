@@ -8,11 +8,11 @@ import { getBunchesContent } from "./utils/common-utils";
 import { Preferences } from "./types/preferences";
 
 export default function SearchAllBunches() {
-  const { rememberFilter } = getPreferenceValues<Preferences>();
+  const { rememberFilter, closeMainWindow } = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<string>("");
   const [searchContent, setSearchContent] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
-  const { bunches, loading } = getBunches(refresh, searchContent);
+  const { bunches, openBunches, loading } = getBunches(refresh, searchContent);
   const { showDetail } = getIsShowDetail(refresh);
   const { bunchFolder } = getBunchFolder();
 
@@ -31,8 +31,8 @@ export default function SearchAllBunches() {
       onSearchTextChange={setSearchContent}
       enableFiltering={!searchContent.startsWith("tag:")}
     >
-      <EmptyView title={"No Bunches"} />
-      <List.Section title={"Open"}>
+      <EmptyView title={"No Bunches"} isOpenFolder={true} />
+      <List.Section title={"Running"}>
         {bunches.map((value, index) => {
           return (
             (filter === bunchesTag[0].value || filter === value.isOpen + "") &&
@@ -42,7 +42,15 @@ export default function SearchAllBunches() {
                 key={index}
                 title={value.name}
                 detail={<List.Item.Detail markdown={`${getBunchesContent(bunchFolder, value.name)}`} />}
-                actions={<ActionOnBunches bunches={value} setRefresh={setRefresh} showDetail={showDetail} />}
+                actions={
+                  <ActionOnBunches
+                    bunches={value}
+                    openBunches={openBunches}
+                    setRefresh={setRefresh}
+                    showDetail={showDetail}
+                    closeMainWindow={closeMainWindow}
+                  />
+                }
               />
             )
           );
@@ -58,7 +66,15 @@ export default function SearchAllBunches() {
                 key={index}
                 title={value.name}
                 detail={<List.Item.Detail markdown={`${getBunchesContent(bunchFolder, value.name)}`} />}
-                actions={<ActionOnBunches bunches={value} setRefresh={setRefresh} showDetail={showDetail} />}
+                actions={
+                  <ActionOnBunches
+                    bunches={value}
+                    openBunches={openBunches}
+                    setRefresh={setRefresh}
+                    showDetail={showDetail}
+                    closeMainWindow={closeMainWindow}
+                  />
+                }
               />
             )
           );

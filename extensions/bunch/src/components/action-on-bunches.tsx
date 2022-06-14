@@ -2,16 +2,19 @@ import { Action, ActionPanel, Color, Icon, LocalStorage, open, showHUD, showToas
 import { BunchesInfo } from "../types/types";
 import { Dispatch, SetStateAction } from "react";
 import { spawnSync } from "child_process";
-import Style = Toast.Style;
 import { LocalStorageKey } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
+import { alertDialog } from "../hooks/hooks";
+import Style = Toast.Style;
 
 export function ActionOnBunches(props: {
   bunches: BunchesInfo;
+  openBunches: string[];
   setRefresh: Dispatch<SetStateAction<number>>;
   showDetail: boolean;
+  closeMainWindow: boolean;
 }) {
-  const { bunches, setRefresh, showDetail } = props;
+  const { bunches, openBunches, setRefresh, showDetail, closeMainWindow } = props;
   return (
     <ActionPanel>
       <Action
@@ -22,9 +25,14 @@ export function ActionOnBunches(props: {
         title={bunches.isOpen ? "Close" : "Open"}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
         onAction={async () => {
-          await open(encodeURI(`x-bunch://toggle/${bunches.name}`));
+          if (closeMainWindow) {
+            await open(encodeURI(`x-bunch://toggle/${bunches.name}`));
+            await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
+          } else {
+            spawnSync("open", [`x-bunch://toggle/${bunches.name}`], { shell: true });
+            await showToast(Style.Success, (bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
+          }
           setRefresh(Date.now());
-          await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
         }}
       />
       <ActionPanel.Section>
@@ -58,6 +66,31 @@ export function ActionOnBunches(props: {
             showToast(Style.Success, "Refresh folder successfully.").then();
           }}
         />
+        {openBunches.length > 0 && (
+          <Action
+            icon={Icon.XmarkCircle}
+            title={"Close All Bunches"}
+            shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
+            onAction={() => {
+              alertDialog(
+                Icon.XmarkCircle,
+                "Close All Bunches",
+                "Are you sure you want to close all bunches?",
+                "Close All",
+                async () => {
+                  if (closeMainWindow) {
+                    await open(encodeURI(`x-bunch://close/${openBunches.join(",")}`));
+                    await showHUD("Close bunches: " + openBunches.join(", "));
+                  } else {
+                    spawnSync("open", [`x-bunch://close/${openBunches.join(",")}`], { shell: true });
+                    await showToast(Style.Success, "Close bunches: " + openBunches.join(", "));
+                  }
+                  setRefresh(Date.now());
+                }
+              ).then();
+            }}
+          />
+        )}
       </ActionPanel.Section>
 
       <ActionPanel.Section>

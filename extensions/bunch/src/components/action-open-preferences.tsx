@@ -4,8 +4,8 @@ export function ActionOpenPreferences() {
   return (
     <ActionPanel.Section>
       <Action
-        icon={Icon.Sidebar}
-        title={"Open Preferences"}
+        icon={Icon.Gear}
+        title={"Open Command Preferences"}
         shortcut={{ modifiers: ["cmd"], key: "," }}
         onAction={openCommandPreferences}
       />

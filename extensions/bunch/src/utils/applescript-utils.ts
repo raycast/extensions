@@ -1,27 +1,32 @@
 import { runAppleScript } from "run-applescript";
 import { PreferencesInfo } from "../types/types";
 import path from "path";
+import { isEmpty } from "./common-utils";
 
 export const scriptToGetBunches = async () => {
   const script = `tell application "Bunch" to list bunches`;
-  let bunches = "";
   try {
-    bunches = await runAppleScript(script);
+    const bunchesStr = await runAppleScript(script);
+    if (!isEmpty(bunchesStr)) {
+      return bunchesStr.split(", ");
+    }
   } catch (e) {
     console.error(String(e));
   }
-  return bunches;
+  return [];
 };
 
 export const scriptToGetOpenBunches = async () => {
   const script = `tell application "Bunch" to list open bunches`;
-  let bunches = "";
   try {
-    bunches = await runAppleScript(script);
+    const bunchesStr = await runAppleScript(script);
+    if (!isEmpty(bunchesStr)) {
+      return bunchesStr.split(", ");
+    }
   } catch (e) {
     console.error(String(e));
   }
-  return bunches;
+  return [];
 };
 
 export const scriptToGetTaggedBunches = async (tag: string) => {
