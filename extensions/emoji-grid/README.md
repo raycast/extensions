@@ -1,7 +1,5 @@
 # Emoji Grid 🤌🏼
 
-![](./metadata/emoji-grid-2.png)
-
 Find an emoji super fast
 
 Features:
