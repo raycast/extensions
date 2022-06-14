@@ -54,7 +54,6 @@ export default function Command() {
           },
         };
 
-        
         urlWebSite.current?.reset();
       } catch (error) {
         toast.style = Toast.Style.Failure;
