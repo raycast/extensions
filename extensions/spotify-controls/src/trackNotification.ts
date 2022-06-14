@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showHUD } from "@raycast/api";
 import { PreferenceValues } from "@raycast/api/types/api/environment/preferences";
-import { runAppleScriptSilently } from "./utils";
+import { runAppleScript } from "run-applescript";
 
 export async function showPreviousTrackNotification() {
   const preferences = getPreferenceValues<PreferenceValues>();
@@ -21,22 +21,35 @@ export async function showNextTrackNotification() {
 }
 
 async function showNotification() {
-  const command = `
+  const script = `
       if application "Spotify" is not running then
-          return
+          return "Not playing"
       end if
     
       property currentTrackName : "Unknown Track"
       property currentTrackArtist : "Unknown Artist"
+      property playerState : "stopped"
     
       tell application "Spotify"
           try
               set currentTrackName to name of the current track
               set currentTrackArtist to artist of the current track
+              set playerState to player state as string
           end try
       end tell
-    
-      display notification with title currentTrackArtist subtitle currentTrackName`;
+      
+      if playerState is "playing" then
+        return currentTrackName & " by " & currentTrackArtist
+      else if playerState is "paused" then
+          return currentTrackName & " by " & currentTrackArtist & " (Paused)"
+      else
+          return "Not playing"
+      end if`;
 
-  await runAppleScriptSilently(command);
+  try {
+    const result = await runAppleScript(script);
+    await showHUD("🎧 " + result);
+  } catch (err) {
+    console.error(err);
+  }
 }
