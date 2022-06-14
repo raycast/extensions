@@ -12,7 +12,7 @@ export const getInternetWorldLocation = (): Promise<InfoType[]> => {
 
         $('tr', table)
             .filter(function () {
-                const info = $('td', this).first().text().toLowerCase().trim().replace(':', '');
+                const info: string = $('td', this).first().text().toLowerCase().trim().replace(':', '');
                 return ['country', 'state'].includes(info);
             })
             .each(function (index, item) {

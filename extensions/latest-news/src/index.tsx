@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, LocalStorage } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, LocalStorage, useNavigation } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
+import IgnoredSources from './IgnoredSources';
 import { getInternetWorldLocation, InfoType } from './getWorldLocation';
 import { getNews, NewsType } from './news';
 
@@ -14,8 +15,8 @@ function CategoryDropdown({ category, setCategory }: any) {
             tooltip="Select News Category"
             onChange={(newCat: string) => setCategory(newCat)}
             value={category}>
-            {['', 'Sport', 'Economy', 'Health', 'Crypto', 'Technology', 'Planet'].map((category, index) => (
-                <List.Dropdown.Item key={index} title={category} value={category} />
+            {['All', 'Sport', 'Economy', 'Health', 'Crypto', 'Technology', 'Planet'].map((category, index) => (
+                <List.Dropdown.Item key={index} title={category} value={category !== 'All' ? category : ''} />
             ))}
         </List.Dropdown>
     );
@@ -24,9 +25,19 @@ function CategoryDropdown({ category, setCategory }: any) {
 export default function Command() {
     const [status, setStatus] = useState<LoadingStatus>('loading');
 
+    const { push } = useNavigation();
+
     const [location, setLocation] = useState<string>('');
     const [category, setCategory] = useState<string>('');
     const [news, setNews] = useState<NewsType[]>([]);
+
+    useEffect(() => {
+        showToast({
+            style: Toast.Style.Success,
+            title: 'Your location',
+            message: location,
+        });
+    }, [location]);
 
     useEffect(() => {
         getData(category);
@@ -78,38 +89,41 @@ export default function Command() {
     };
 
     return (
-        <>
-            <List
-                navigationTitle={location}
-                searchBarPlaceholder="Search words.."
-                isLoading={status === 'loading'}
-                searchBarAccessory={<CategoryDropdown setCategory={handleChangeCategory} />}>
-                {news.map((n, i) => (
-                    <List.Section key={i} title={`[${n.timeago}]: ${n.title}`}>
-                        <List.Item
-                            icon={{ source: Icon.Circle, tintColor: Color.Red }}
-                            title={n.description}
-                            subtitle={n.author}
-                            detail={<List.Item.Detail isLoading={true} />}
-                            actions={
-                                <ActionPanel>
-                                    <Action.OpenInBrowser title="Read" url={n.url} />
-                                    <Action
-                                        icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-                                        title={`Ignore '${n.author}'`}
-                                        onAction={() => ignoreSource(n.author)}
-                                    />
-                                    <Action
-                                        icon={{ source: Icon.ChevronUp, tintColor: Color.Green }}
-                                        title="Enable all Sources"
-                                        onAction={enableSources}
-                                    />
-                                </ActionPanel>
-                            }
-                        />
-                    </List.Section>
-                ))}
-            </List>
-        </>
+        <List
+            navigationTitle="Latest News"
+            searchBarPlaceholder="Search words.."
+            isLoading={status === 'loading'}
+            searchBarAccessory={<CategoryDropdown setCategory={handleChangeCategory} />}>
+            {news.map((n, i) => (
+                <List.Section key={i} title={`[${n.timeago}]: ${n.title}`}>
+                    <List.Item
+                        icon={{ source: Icon.Circle, tintColor: Color.Red }}
+                        title={n.description}
+                        subtitle={n.author}
+                        detail={<List.Item.Detail isLoading={true} />}
+                        actions={
+                            <ActionPanel>
+                                <Action.OpenInBrowser title="Read" url={n.url} />
+                                <Action
+                                    icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+                                    title={`Ignore '${n.author}'`}
+                                    onAction={() => ignoreSource(n.author)}
+                                />
+                                <Action
+                                    icon={{ source: Icon.Clipboard, tintColor: Color.Brown }}
+                                    title={`See ignored Sources`}
+                                    onAction={() => push(<IgnoredSources />)}
+                                />
+                                <Action
+                                    icon={{ source: Icon.ChevronUp, tintColor: Color.Green }}
+                                    title="Enable all Sources"
+                                    onAction={enableSources}
+                                />
+                            </ActionPanel>
+                        }
+                    />
+                </List.Section>
+            ))}
+        </List>
     );
 }

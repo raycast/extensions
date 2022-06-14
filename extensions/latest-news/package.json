@@ -1,8 +1,8 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "latest-news",
-    "title": "Latest News",
-    "description": "See Latest News from Microsoft Bing",
+    "title": "Latest Local News",
+    "description": "Microsoft Bing",
     "icon": "command-icon.png",
     "author": "FilipeCerejo",
     "categories": [
@@ -12,8 +12,8 @@
     "commands": [
         {
             "name": "index",
-            "title": "Latest News",
-            "subtitle": "See Latest News from Microsoft Bing",
+            "title": "Latest Local News",
+            "subtitle": "Microsoft Bing",
             "description": "Get the lastest news updates on your country by Microsoft Bing",
             "mode": "view"
         }
