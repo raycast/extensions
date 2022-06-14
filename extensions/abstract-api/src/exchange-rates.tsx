@@ -82,8 +82,6 @@ export default function Command() {
       {output ? (
         <>
           <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
           <Form.TextArea id="output" title="Output" value={output} />
         </>
       ) : null}

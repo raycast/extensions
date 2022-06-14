@@ -10,9 +10,20 @@ interface CommandForm {
   domain: string;
 }
 
+interface EnrichmentItem {
+  name: string;
+  domain: string;
+  country: string;
+  locality: string;
+  employees_count: string;
+  industry: string;
+  year_founded: number;
+  linkedin_url: string;
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState({} as EnrichmentItem);
 
   async function handleSubmit(values: CommandForm) {
     if (values.domain == "") {
@@ -53,7 +64,7 @@ export default function Command() {
           },
         };
 
-        setOutput(JSON.stringify(response.data));
+        setOutput(response.data);
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -71,12 +82,17 @@ export default function Command() {
       }
     >
       <Form.TextField id="domain" title="Domain" placeholder="Enter domain" />
-      {output ? (
+      {output.name ? (
         <>
           <Form.Separator />
-          {/* spacer */}
-          <Form.Description text="" />
-          <Form.TextArea id="output" title="Output" value={output} />
+          <Form.Description title="Name" text={output.name} />
+          <Form.Description title="Domain" text={output.domain} />
+          <Form.Description title="Country" text={output.country} />
+          <Form.Description title="Locality" text={output.locality} />
+          <Form.Description title="Employees Count" text={`${output.employees_count}`} />
+          <Form.Description title="Industry" text={output.industry} />
+          <Form.Description title="Year Founded" text={`${output.year_founded}`} />
+          <Form.Description title="LinkedIn URL" text={output.linkedin_url} />
         </>
       ) : null}
     </Form>
