@@ -43,6 +43,24 @@
       "required": false,
       "type": "textfield",
       "description": "The folder where your Pipe Commands are stored."
+    },
+    {
+      "name": "pipePrimaryAction",
+      "type": "dropdown",
+      "description": "The primary action for Pipe Commands.",
+      "required": false,
+      "title": "Pipe Primary Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Paste Script Output",
+          "value": "paste"
+        },
+        {
+          "title": "Copy Script Ouput",
+          "value": "copy"
+        }
+      ]
     }
   ],
   "dependencies": {

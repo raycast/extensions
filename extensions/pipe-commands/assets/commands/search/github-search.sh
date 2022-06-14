@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Github Search
 # @raycast.packageName Web Searches
 # @raycast.icon ./icons/github.png

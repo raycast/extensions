@@ -12,18 +12,17 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
-- The `inline`, `silent` and `compact` modes are not supported.
+- The `inline`, `fullOutput` and `compact` modes are not supported.
+- A new `pipe` mode is introduced
 - The `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
-> :information_source: Every Pipe Command is a valid Script Command, but the inverse is not true: some Script Commands cannot be used as Pipe Commands (ex: commands with an `inline` mode).
+![mode illustration](./medias/modes.excalidraw.png)
 
-## Pipe Commands Logic
+## Pipe Mode Logic
 
 The user input (text selection or clipboard) will be passed as the script first argument.
 
 If it is not empty, the standard output stream of the script will be copied to the clipboard or replace the current selection depending on the user choice.
-
-If you want to provide a message to the user, use the standard error stream (`stderr`). It will trigger a notification on the user end.
 
 ## Example Commands
 
@@ -32,6 +31,7 @@ If you want to provide a message to the user, use the standard error stream (`st
 ```bash
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Google Search
 # @raycast.packageName Web Searches
 # @raycast.mode silent
@@ -47,9 +47,10 @@ open "https://www.google.com/search?q=$1"
 ```python
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
-# @raycast.mode silent
+# @raycast.mode pipe
 # @raycast.icon 🔨
 # @raycast.argument1 {"type": "text", "placeholder": "JSON to format"}
 

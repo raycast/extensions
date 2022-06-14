@@ -17,7 +17,7 @@
 ### Breaking
 
 - Raycast IconSet values are no longer supported as icons (icons will be blank)
-- deprecate `paste` and `copy` modes in favor of actions
+- deprecate `paste` and `copy` modes in favor of `pipe` mode
 
 ## [Add `Read the Content` Command] - 2022-04-07
 

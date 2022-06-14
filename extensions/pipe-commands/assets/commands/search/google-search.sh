@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Google Search
 # @raycast.packageName Web Searches
 # @raycast.icon https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg

@@ -13,6 +13,7 @@ import {
   getSelectedText,
   environment,
   confirmAlert,
+  getPreferenceValues,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
@@ -79,6 +80,8 @@ async function getInput(inputType: InputType) {
   }
 }
 
+const { pipePrimaryAction } = getPreferenceValues<{ pipePrimaryAction: "copy" | "paste" }>();
+
 export function PipeCommand(props: {
   command: ScriptCommand;
   inputFrom?: InputType;
@@ -91,7 +94,7 @@ export function PipeCommand(props: {
     <List.Item
       key={command.path}
       icon={getRaycastIcon(command)}
-      accessoryIcon={command.user ? Icon.Person : undefined}
+      accessories={[{ text: command.metadatas.mode, tooltip: "Mode" }]}
       title={command.metadatas.title}
       subtitle={showContent ? undefined : command.metadatas.packageName}
       detail={
@@ -100,7 +103,9 @@ export function PipeCommand(props: {
       actions={
         <ActionPanel>
           {typeof inputFrom != "undefined" ? (
-            <ActionPanel.Section>{CommandActions({ command, inputFrom })}</ActionPanel.Section>
+            <ActionPanel.Section>
+              <CommandActions command={command} inputFrom={inputFrom} />
+            </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -182,30 +187,35 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
     };
   }
 
-  return [
-    <Action
-      key="run"
-      icon={Icon.Terminal}
-      title="Run Script"
-      onAction={outputHandler(async (output) => {
-        await showHUD(output);
-      })}
-    />,
-    <Action
-      key="copy"
-      icon={Icon.Clipboard}
-      title="Run Script and Copy Output"
-      onAction={outputHandler(async (output) => {
-        await Clipboard.copy(output);
-        await showHUD("Copied to clipboard!");
-      })}
-    />,
-    <Action
-      key="paste"
-      icon={Icon.Pencil}
-      title="Run Script and Paste Output"
-      onAction={outputHandler((output) => Clipboard.paste(output))}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-    />,
-  ];
+  switch (command.metadatas.mode) {
+    case "silent":
+      return <Action title="Run Script" icon={Icon.Terminal} onAction={outputHandler(showHUD)} />;
+    case "pipe": {
+      const copyAction = (
+        <Action
+          key="copy"
+          icon={Icon.Terminal}
+          title="Copy Script Output"
+          onAction={outputHandler(async (output) => {
+            await Clipboard.copy(output);
+            await showHUD("Copied to clipboard!");
+          })}
+        />
+      );
+      const pasteAction = (
+        <Action
+          key="paste"
+          icon={Icon.Terminal}
+          title="Paste Script Output"
+          onAction={outputHandler(Clipboard.paste)}
+        />
+      );
+
+      return (
+        <React.Fragment>
+          {pipePrimaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
+        </React.Fragment>
+      );
+    }
+  }
 }
