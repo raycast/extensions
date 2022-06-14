@@ -15,8 +15,18 @@
       "name": "search-all-bunches",
       "title": "Search All Bunches",
       "subtitle": "Bunch",
-      "description": "Search all bunches, support 「tag:tag1+tag2」 and 「tag:tag1,tag2」 to search by tag.",
-      "mode": "view"
+      "description": "Search all bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberFilter",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
     },
     {
       "name": "get-bunch-preferences",

@@ -1,11 +1,17 @@
-import { Action, ActionPanel, Color, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import { BunchesInfo } from "../types/types";
 import { Dispatch, SetStateAction } from "react";
 import { spawnSync } from "child_process";
 import Style = Toast.Style;
+import { LocalStorageKey } from "../utils/constants";
+import { ActionOpenPreferences } from "./action-open-preferences";
 
-export function ActionOnBunches(props: { bunches: BunchesInfo; setRefresh: Dispatch<SetStateAction<number>> }) {
-  const { bunches, setRefresh } = props;
+export function ActionOnBunches(props: {
+  bunches: BunchesInfo;
+  setRefresh: Dispatch<SetStateAction<number>>;
+  showDetail: boolean;
+}) {
+  const { bunches, setRefresh, showDetail } = props;
   return (
     <ActionPanel>
       <Action
@@ -18,7 +24,7 @@ export function ActionOnBunches(props: { bunches: BunchesInfo; setRefresh: Dispa
         onAction={async () => {
           await open(encodeURI(`x-bunch://toggle/${bunches.name}`));
           setRefresh(Date.now());
-          await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunch: " + bunches.name);
+          await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
         }}
       />
       <ActionPanel.Section>
@@ -53,6 +59,19 @@ export function ActionOnBunches(props: { bunches: BunchesInfo; setRefresh: Dispa
           }}
         />
       </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Sidebar}
+          title={"Toggle Details"}
+          shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+          onAction={async () => {
+            await LocalStorage.setItem(LocalStorageKey.DETAIL_KEY, !showDetail);
+            setRefresh(Date.now());
+          }}
+        />
+      </ActionPanel.Section>
+      <ActionOpenPreferences />
     </ActionPanel>
   );
 }

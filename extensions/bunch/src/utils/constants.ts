@@ -6,4 +6,5 @@ export const bunchesTag = [
 
 export enum LocalStorageKey {
   BUNCHES_CACHE = "Bunches cache",
+  DETAIL_KEY = "Detail Key",
 }

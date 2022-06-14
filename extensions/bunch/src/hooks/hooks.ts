@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   scriptToGetBunches,
+  scriptToGetBunchFolder,
   scriptToGetOpenBunches,
   scriptToGetPreferences,
   scriptToGetTaggedBunches,
 } from "../utils/applescript-utils";
 import { BunchesInfo, PreferencesInfo } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
+import * as fs from "fs";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorageKey } from "../utils/constants";
+import Style = Toast.Style;
 
 export const getBunches = (refresh: number, tag?: string) => {
   const [allBunches, setAllBunches] = useState<string[]>([]);
@@ -18,7 +23,7 @@ export const getBunches = (refresh: number, tag?: string) => {
     try {
       const openBunches = (await scriptToGetOpenBunches()).split(", ");
       const _bunches: BunchesInfo[] = [];
-      let _allBunches: string[] = [];
+      let _allBunches: string[];
       if (tag?.startsWith("tag:")) {
         _allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
       } else {
@@ -35,6 +40,7 @@ export const getBunches = (refresh: number, tag?: string) => {
       });
       setBunches(_bunches);
     } catch (e) {
+      await showToast(Style.Failure, String(e));
       console.error(e);
     }
     setLoading(false);
@@ -45,6 +51,27 @@ export const getBunches = (refresh: number, tag?: string) => {
   }, [fetchData]);
 
   return { bunches: bunches, loading: loading };
+};
+
+export const getBunchFolder = () => {
+  const [bunchFolder, setBunchFolder] = useState<string>("");
+
+  const fetchData = useCallback(async () => {
+    try {
+      if (isEmpty(bunchFolder) || !fs.existsSync(bunchFolder)) {
+        const _bunchFolder = await scriptToGetBunchFolder();
+        setBunchFolder(_bunchFolder);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { bunchFolder: bunchFolder };
 };
 
 export const getBunchPreferences = (refresh: number) => {
@@ -67,4 +94,21 @@ export const getBunchPreferences = (refresh: number) => {
   }, [fetchData]);
 
   return { bunchPreferences: bunchPreferences, loading: loading };
+};
+
+//get if show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>(LocalStorageKey.DETAIL_KEY);
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { showDetail: showDetail };
 };

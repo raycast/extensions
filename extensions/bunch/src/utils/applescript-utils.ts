@@ -86,6 +86,20 @@ end tell`;
   return preferences;
 };
 
+export const scriptToGetBunchFolder = async () => {
+  const script1 = `tell application "Bunch"
+   get preference "Bunch Folder" 
+end tell`;
+  try {
+    const bunchFolder = await runAppleScript(script1);
+    const parsedPath = path.parse(bunchFolder.startsWith("file://") ? bunchFolder.substring(7) : bunchFolder);
+    return parsedPath.dir + "/" + parsedPath.base;
+  } catch (e) {
+    console.error(String(e));
+    return String(e);
+  }
+};
+
 export const scriptToRefreshBrowsers = async () => {
   const script = `tell application "Bunch"
     refresh browsers
