@@ -11,7 +11,7 @@ export interface ScriptMetadatas {
   icon?: string;
   iconDark?: string;
   argument1: ScriptArgument;
-  mode: "silent" | "fullOutput" | "compact";
+  mode: "silent",
   packageName?: string;
   currentDirectoryPath?: string;
   needsConfirmation?: boolean;

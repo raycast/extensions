@@ -37,8 +37,6 @@
         },
         "mode": {
             "enum": [
-                "compact",
-                "fullOutput",
                 "silent"
             ],
             "type": "string"

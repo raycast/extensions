@@ -2,7 +2,7 @@
 
 # @raycast.title Switch to Uppercase
 # @raycast.packageName Text Actions
-# @raycast.mode fullOutput
+# @raycast.mode silent
 # @raycast.argument1 {"type": "text"}
 
 import sys

@@ -7,9 +7,7 @@ import {
   Action,
   showHUD,
   showToast,
-  useNavigation,
   Image,
-  Detail,
   closeMainWindow,
   popToRoot,
   getSelectedText,
@@ -19,7 +17,7 @@ import {
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
 import { dirname, resolve } from "path";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
@@ -104,20 +102,20 @@ export function PipeCommand(props: {
           {typeof inputFrom != "undefined" ? (
             <ActionPanel.Section>{CommandActions({ command, inputFrom })}</ActionPanel.Section>
           ) : null}
-          {command.user ? (
-            <ActionPanel.Section>
-              <Action.Open title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-              <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
-              <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
-              <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
-            </ActionPanel.Section>
-          ) : null}
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Script Contents"
               shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
               content={command.content}
             />
+            {command.user ? (
+              <React.Fragment>
+                <Action.Open title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
+                <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
+                <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+              </React.Fragment>
+            ) : null}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -143,14 +141,13 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
     throw new Error(stderr ? `⚠️ ${stderr}` : `⚠️ Process terminated with status ${status}`);
   }
 
-  return stdout;
+  return { stdout, stderr };
 }
 
 function CommandActions(props: { command: ScriptCommand; inputFrom: InputType }) {
   const { command, inputFrom } = props;
-  const navigation = useNavigation();
 
-  function outputHandler(onSuccess: (output: string) => void, exitOnSuccess?: boolean) {
+  function outputHandler(onSuccess: (output: string) => void) {
     return async () => {
       if (
         command.metadatas.needsConfirmation &&
@@ -164,12 +161,11 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         return;
       }
       try {
-        const output = await runCommand(command, inputFrom);
-        if (output) await onSuccess(output);
-        if (exitOnSuccess) {
-          await closeMainWindow();
-          await popToRoot();
-        }
+        const { stdout, stderr } = await runCommand(command, inputFrom);
+        if (stdout) await onSuccess(stdout);
+        if (stderr) showHUD(stderr);
+        await closeMainWindow();
+        await popToRoot();
       } catch (e) {
         const toast = await showToast({
           title: "An error occured",
@@ -187,69 +183,18 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
     };
   }
 
-  const PipeAction = () => {
-    switch (command.metadatas.mode) {
-      case "silent":
-        return <Action icon={Icon.Terminal} title="Run Script" onAction={outputHandler(showHUD, true)} />;
-      case "fullOutput":
-        return (
-          <Action
-            icon={Icon.Text}
-            title="Run Script"
-            onAction={outputHandler(async (output) => {
-              await navigation.push(
-                <Detail
-                  markdown={codeblock(output)}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard content={output} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-                      <Action.Paste content={output} shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          />
-        );
-      case "compact":
-        return (
-          <Action
-            title="Run Script"
-            onAction={outputHandler(async (output) => {
-              await popToRoot();
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Script finished running",
-                message: output,
-                primaryAction: {
-                  title: "Copy Script Output",
-                  onAction: async (toast) => {
-                    await Clipboard.copy(output);
-                    toast.title = "Copied to clipboard";
-                  },
-                },
-              });
-            })}
-          />
-        );
-    }
-  };
-
   return [
-    <PipeAction key="run" />,
     <Action
       key="copy"
       icon={Icon.Clipboard}
-      title="Copy Script Output"
-      onAction={outputHandler((output) => Clipboard.copy(output), true)}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      title="Run and Copy"
+      onAction={outputHandler((output) => Clipboard.copy(output))}
     />,
     <Action
       key="paste"
       icon={Icon.Clipboard}
-      title="Paste Script Output"
-      onAction={outputHandler((output) => Clipboard.paste(output), true)}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      title="Run and Copy"
+      onAction={outputHandler((output) => Clipboard.paste(output))}
     />,
   ];
 }
