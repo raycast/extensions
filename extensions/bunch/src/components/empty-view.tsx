@@ -2,15 +2,15 @@ import { Action, ActionPanel, Icon, List, open, showHUD } from "@raycast/api";
 import React from "react";
 import { ActionOpenPreferences } from "./action-open-preferences";
 
-export function EmptyView(props: { title: string; isOpenFolder: boolean }) {
-  const { title, isOpenFolder } = props;
+export function EmptyView(props: { title: string; extensionPreferences: boolean }) {
+  const { title, extensionPreferences } = props;
   return (
     <List.EmptyView
       title={title}
       icon={{ source: "empty-icon.svg" }}
       actions={
         <ActionPanel>
-          {isOpenFolder && (
+          {extensionPreferences && (
             <Action
               icon={Icon.Finder}
               title={"Open Bunch Folder"}
@@ -21,7 +21,7 @@ export function EmptyView(props: { title: string; isOpenFolder: boolean }) {
               }}
             />
           )}
-          {!isOpenFolder && (
+          {!extensionPreferences && (
             <Action
               icon={Icon.Gear}
               title={"Open Bunch Preferences"}
@@ -31,7 +31,7 @@ export function EmptyView(props: { title: string; isOpenFolder: boolean }) {
               }}
             />
           )}
-          {isOpenFolder && <ActionOpenPreferences />}
+          {extensionPreferences && <ActionOpenPreferences />}
         </ActionPanel>
       }
     />

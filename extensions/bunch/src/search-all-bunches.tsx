@@ -4,8 +4,9 @@ import { getBunches, getBunchFolder, getIsShowDetail } from "./hooks/hooks";
 import { ActionOnBunches } from "./components/action-on-bunches";
 import { EmptyView } from "./components/empty-view";
 import { bunchesTag } from "./utils/constants";
-import { getBunchesContent } from "./utils/common-utils";
+import { bunchInstalled, getBunchesContent } from "./utils/common-utils";
 import { Preferences } from "./types/preferences";
+import { BunchNotInstallView } from "./components/bunch-not-install-view";
 
 export default function SearchAllBunches() {
   const { rememberFilter, closeMainWindow } = getPreferenceValues<Preferences>();
@@ -16,7 +17,7 @@ export default function SearchAllBunches() {
   const { showDetail } = getIsShowDetail(refresh);
   const { bunchFolder } = getBunchFolder();
 
-  return (
+  return bunchInstalled() ? (
     <List
       isLoading={loading}
       isShowingDetail={showDetail}
@@ -31,7 +32,7 @@ export default function SearchAllBunches() {
       onSearchTextChange={setSearchContent}
       enableFiltering={!searchContent.startsWith("tag:")}
     >
-      <EmptyView title={"No Bunches"} isOpenFolder={true} />
+      <EmptyView title={"No Bunches"} extensionPreferences={true} />
       <List.Section title={"Running"}>
         {bunches.map((value, index) => {
           return (
@@ -80,6 +81,10 @@ export default function SearchAllBunches() {
           );
         })}
       </List.Section>
+    </List>
+  ) : (
+    <List>
+      <BunchNotInstallView extensionPreferences={true} />
     </List>
   );
 }

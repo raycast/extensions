@@ -16,3 +16,12 @@ ${_bunchesContent}
     return String(e);
   }
 };
+
+export const bunchInstalled = () => {
+  try {
+    return fs.existsSync("/Applications/Bunch.app");
+  } catch (e) {
+    console.error(String(e));
+    return false;
+  }
+};

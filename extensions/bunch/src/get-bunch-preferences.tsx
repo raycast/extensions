@@ -3,14 +3,16 @@ import React, { useState } from "react";
 import { getBunchPreferences } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import { spawnSync } from "child_process";
+import { bunchInstalled } from "./utils/common-utils";
+import { BunchNotInstallView } from "./components/bunch-not-install-view";
 
 export default function GetBunchPreferences() {
   const [refresh, setRefresh] = useState<number>(0);
   const { bunchPreferences, loading } = getBunchPreferences(refresh);
 
-  return (
+  return bunchInstalled() ? (
     <List isLoading={loading} searchBarPlaceholder={"Search preferences"}>
-      <EmptyView title={"No Preferences"} isOpenFolder={false} />
+      <EmptyView title={"No Preferences"} extensionPreferences={false} />
       {bunchPreferences.map((value, index) => {
         return (
           <List.Item
@@ -84,6 +86,10 @@ export default function GetBunchPreferences() {
           />
         );
       })}
+    </List>
+  ) : (
+    <List>
+      <BunchNotInstallView extensionPreferences={false} />
     </List>
   );
 }

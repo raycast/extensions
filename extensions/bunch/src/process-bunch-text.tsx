@@ -1,8 +1,13 @@
 import { closeMainWindow, open, showHUD } from "@raycast/api";
 import { fetchItemInput } from "./utils/input-item";
-import { isEmpty } from "./utils/common-utils";
+import { bunchInstalled, isEmpty } from "./utils/common-utils";
+import { bunchNotInstallAlertDialog } from "./hooks/hooks";
 
 export default async () => {
+  if (!bunchInstalled()) {
+    await bunchNotInstallAlertDialog();
+    return;
+  }
   await closeMainWindow({ clearRootSearch: false });
   try {
     const inputItem = (await fetchItemInput()).trim();

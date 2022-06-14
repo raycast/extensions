@@ -9,21 +9,21 @@ import {
 import { BunchesInfo, PreferencesInfo } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
 import * as fs from "fs";
-import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, Icon, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import Style = Toast.Style;
 
 export const getBunches = (refresh: number, tag?: string) => {
   const [allBunches, setAllBunches] = useState<string[]>([]);
   const [bunches, setBunches] = useState<BunchesInfo[]>([]);
-  const [openBunches, seOpentBunches] = useState<string[]>([]);
+  const [openBunches, seOpenBunches] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const openBunches = await scriptToGetOpenBunches();
-      seOpentBunches(openBunches);
+      seOpenBunches(openBunches);
       const _bunches: BunchesInfo[] = [];
       let _allBunches: string[];
       if (tag?.startsWith("tag:")) {
@@ -134,6 +134,21 @@ export const alertDialog = async (
     dismissAction: {
       title: "Cancel",
       onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
+};
+
+export const bunchNotInstallAlertDialog = async () => {
+  const options: Alert.Options = {
+    icon: { source: "not-installed-icon.svg" },
+    title: "Bunch Not Installed",
+    message: "Bunch is not installed on your Mac. Please install Bunch to use this command.",
+    primaryAction: {
+      title: "Get Bunch",
+      onAction: () => {
+        open("https://bunchapp.co/download/");
+      },
     },
   };
   await confirmAlert(options);
