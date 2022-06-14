@@ -1,35 +1,23 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
 import React from "react";
-
-type Values = {
-  min_font_size: number;
-  max_font_size: number;
-  min_vw_width: number;
-  max_vw_width: number;
-  pixels_per_rem: number;
-};
-
-function parseValue(value: number) {
-  return parseFloat(value.toFixed(4));
-}
+import { calculateClamp, validateValues, Values } from "./utils";
 
 export default function Command() {
-  async function handleSubmit({ min_font_size, max_font_size, min_vw_width, max_vw_width, pixels_per_rem }: Values) {
-    const min_font_size_rem = Number(min_font_size);
-    const max_font_size_rem = Number(max_font_size);
-    const min_vw_width_rem = Number(min_vw_width) / Number(pixels_per_rem);
-    const max_vw_width_rem = Number(max_vw_width) / Number(pixels_per_rem);
+  async function handleSubmit(values: Values) {
+    try {
+      validateValues(values);
 
-    const slope = (max_font_size_rem - min_font_size_rem) / (max_vw_width_rem - min_vw_width_rem);
-    const yAxisIntersection = -min_vw_width_rem * slope + min_font_size_rem;
+      const clamp = calculateClamp(values, "rem");
+      await Clipboard.copy(clamp);
 
-    const clamp = `clamp(${parseValue(min_font_size_rem)}rem, ${parseValue(yAxisIntersection)}rem + ${parseValue(
-      slope * 100
-    )}vw, ${parseValue(max_font_size_rem)}rem)`;
-
-    await Clipboard.copy(clamp);
-
-    await showHUD("Clamp Copied 🎊");
+      await showHUD("Clamp Copied 🎊");
+    } catch (error: any) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error!",
+        message: error.message,
+      });
+    }
   }
 
   return (
