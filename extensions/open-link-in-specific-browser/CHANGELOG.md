@@ -1,4 +1,9 @@
-# Quick Surf Changelog
+# Open Link in Specific Browser Changelog
+
+## [Rename Extension] - 2022-06-14
+
+- Rename Extension: Open Link in Specific Browser
+- Add new layout options: List or Grid.
 
 ## [Updates] - 2022-04-20
 - Update Rank sorting algorithm

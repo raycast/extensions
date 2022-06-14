@@ -1,20 +1,7 @@
 import { getSelectedText, Clipboard } from "@raycast/api";
-import { isEmailGroup, isEmpty, isMailTo, isUrl, mailtoBuilder, urlIPBuilder } from "./utils";
+import { isEmailGroup, isEmpty, isMailTo, isUrl, mailtoBuilder, urlIPBuilder } from "./common-utils";
 import { isIP } from "net";
-
-export enum ItemType {
-  TEXT = "Text",
-  URL = "URL",
-  EMAIL = "Email",
-  NULL = "",
-}
-
-export enum ItemSource {
-  SELECTED = "Selected",
-  CLIPBOARD = "Clipboard",
-  ENTER = "Enter",
-  NULL = "",
-}
+import { ItemSource, ItemType } from "../types/types";
 
 export class ItemInput {
   content: string;
