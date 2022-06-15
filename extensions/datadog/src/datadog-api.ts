@@ -26,20 +26,13 @@ export type DashboardSearchAPIResponse = {
 };
 
 export type DashboardSummaryDefinition = {
-  popularity: number;
-  tags: any[];
-  is_favorite: boolean;
   id: string;
-  icon: null;
-  integration_id: null;
+  popularity: number;
+  is_favorite: boolean;
   is_shared: boolean;
   author: Author;
   url: string;
   title: string;
-  modified: Date;
-  created: Date;
-  is_read_only: boolean;
-  type: string;
 }
 
 export type Author = {
