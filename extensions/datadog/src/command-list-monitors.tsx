@@ -9,10 +9,9 @@ import {
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
 import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { monitorsApi } from "./datadog-api";
-import { MonitorSearchResponse } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResponse";
-import { showError, linkDomain } from "./util";
+import {  useState } from "react";
+import { linkDomain } from "./util";
+import {useMonitors} from "./useMonitors";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -43,40 +42,20 @@ const statusIcon = (status: MonitorOverallStates | undefined) => {
   return { light: "", dark: "" };
 };
 
-type State = {
-  monitorsAreLoading: boolean;
-  response?: MonitorSearchResponse;
-};
-
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListMonitors() {
-  const [{ monitorsAreLoading, response }, setState] = useState<State>({
-    response: undefined,
-    monitorsAreLoading: true,
-  });
-
-  const search = (query: string) => {
-    console.log("searching for monitors", query);
-    setState(prev => ({ ...prev, monitorsAreLoading: true }));
-    monitorsApi
-      .searchMonitors({ query, page: 0, perPage: 50 })
-      .then(x => setState(prev => ({ ...prev, response: x, monitorsAreLoading: false })))
-      .catch(showError);
-  };
-
-  useEffect(() => {
-    search("");
-  }, []);
+  const [query, setQuery] = useState("");
+  const {monitors, monitorsAreLoading} = useMonitors(query);
 
   const getCountSummary = () => {
-    if (!response) return "";
-    return ", " + response!.counts!.status!.map(x => `${x.count} ${x.name}`).join(", ");
+    if (!monitors) return "";
+    return ", " + monitors!.counts!.status!.map(x => `${x.count} ${x.name}`).join(", ");
   };
   return (
-    <List isLoading={monitorsAreLoading} onSearchTextChange={search} throttle>
-      <List.Section title={`Available monitors ${response?.metadata?.totalCount}${getCountSummary()}`}>
-        {response
-          ? response!.monitors!.map(monitor => (
+    <List isLoading={monitorsAreLoading} onSearchTextChange={setQuery} throttle>
+      <List.Section title={`Available monitors ${monitors?.metadata?.totalCount}${getCountSummary()}`}>
+        {monitors
+          ? monitors!.monitors!.map(monitor => (
               <List.Item
                 key={monitor.id}
                 title={monitor.name || monitor.query!}
