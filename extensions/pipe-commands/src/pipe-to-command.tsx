@@ -109,19 +109,19 @@ export function PipeCommand(props: {
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Script Contents"
-              shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
-              content={command.content}
-            />
             {command.user ? (
               <React.Fragment>
-                <Action.Open title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                <Action.Open icon={Icon.TextDocument} title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
                 <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
                 <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
               </React.Fragment>
             ) : null}
+            <Action.CopyToClipboard
+              title="Copy Script Contents"
+              shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+              content={command.content}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
