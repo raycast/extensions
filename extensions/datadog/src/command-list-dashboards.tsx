@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, Icon } from "@raycast/api";
+import { ActionPanel, List, Icon, Action } from "@raycast/api";
 import { linkDomain } from "./util";
 import { useState } from "react";
 import {useDashboards} from "./useDashboards";
@@ -27,7 +27,7 @@ export default function CommandListDashboards() {
             ].filter(x => x.icon)}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={`https://${linkDomain()}${url}`} />
+                <Action.OpenInBrowser url={`https://${linkDomain()}${url}`} />
               </ActionPanel>
             }
           />
