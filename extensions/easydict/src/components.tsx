@@ -160,7 +160,7 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
             onCopy={() => {
               console.log("copy: ", this.props.copyText);
             }}
-            title={`Copy Text:  ${this.props.copyText}`}
+            title={`Copy Text`}
             content={this.props.copyText || ""}
           />
           {this.props.isInstalledEudic && (
