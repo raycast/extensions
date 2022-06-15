@@ -7,7 +7,7 @@ import {showError} from "./util";
 
 type State = {
   monitorsAreLoading: boolean;
-  monitors?: MonitorSearchResponse;
+  monitorResponse?: MonitorSearchResponse;
 }
 
 export const useMonitors = (query: string) => {
@@ -18,7 +18,7 @@ export const useMonitors = (query: string) => {
 
     monitorsApi
       .searchMonitors({query, page: 0, perPage: 50})
-      .then(monitors => setState(prev => ({...prev, monitors, monitorsAreLoading: false})))
+      .then(monitorResponse => setState(prev => ({...prev, monitorResponse, monitorsAreLoading: false})))
       .catch(showError);
   }, [query]);
 

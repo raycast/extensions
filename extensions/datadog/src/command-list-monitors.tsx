@@ -45,17 +45,17 @@ const statusIcon = (status: MonitorOverallStates | undefined) => {
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListMonitors() {
   const [query, setQuery] = useState("");
-  const {monitors, monitorsAreLoading} = useMonitors(query);
+  const {monitorResponse, monitorsAreLoading} = useMonitors(query);
 
   const getCountSummary = () => {
-    if (!monitors || !monitors.counts || !monitors.counts.status) return "";
-    return ", " + monitors.counts.status.map(x => `${x.count} ${x.name}`).join(", ");
+    if (!monitorResponse || !monitorResponse.counts || !monitorResponse.counts.status) return "";
+    return ", " + monitorResponse.counts.status.map(x => `${x.count} ${x.name}`).join(", ");
   };
   return (
     <List isLoading={monitorsAreLoading} onSearchTextChange={setQuery} throttle>
-      <List.Section title={`Available monitors ${monitors?.metadata?.totalCount}${getCountSummary()}`}>
-        {monitors && monitors.monitors
-          ? monitors.monitors.map(monitor => (
+      <List.Section title={`Available monitors ${monitorResponse?.metadata?.totalCount}${getCountSummary()}`}>
+        {monitorResponse && monitorResponse.monitors
+          ? monitorResponse.monitors.map(monitor => (
               <List.Item
                 key={monitor.id}
                 title={monitor.name || monitor.query || query}
