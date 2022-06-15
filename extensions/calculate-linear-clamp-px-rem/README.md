@@ -1,1 +1,0 @@
-# Clamp linear (PX)
