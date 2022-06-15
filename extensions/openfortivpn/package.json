@@ -12,13 +12,15 @@
   "commands": [
     {
       "name": "connect",
-      "title": "Connect openfortivpn",
+      "title": "Connect VPN",
+      "subtitle": "openfortivpn",
       "description": "This command connects to openfortivpn based on config (requires only one time password if necessary)",
       "mode": "view"
     },
     {
       "name": "disconnect",
-      "title": "Disconnect openfortivpn",
+      "title": "Disconnect VPN",
+      "subtitle": "openfortivpn",
       "description": "This command kill openfortivpn process",
       "mode": "no-view"
     }
