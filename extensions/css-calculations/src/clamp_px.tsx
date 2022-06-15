@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
 import React from "react";
+import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
 import { calculateClamp, validateValues, Values } from "./utils";
 
 export default function Command() {
@@ -7,7 +7,7 @@ export default function Command() {
     try {
       validateValues(values);
 
-      const clamp = calculateClamp(values, "rem");
+      const clamp = calculateClamp(values, "px");
       await Clipboard.copy(clamp);
 
       await showHUD("Clamp Copied 🎊");
@@ -28,8 +28,8 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="min_font_size" title="Min Font Size" placeholder="Minimal Value In Rems" />
-      <Form.TextField id="max_font_size" title="Max Font Size" placeholder="Maximal Value In Rems" />
+      <Form.TextField id="min_font_size" title="Min Font Size" placeholder="Minimal Value In Pixels" />
+      <Form.TextField id="max_font_size" title="Max Font Size" placeholder="Maximal Value In Pixels" />
       <Form.TextField
         id="min_vw_width"
         title="Min Viewport Width"

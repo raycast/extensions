@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "calculate-linear-clamp-px-rem",
-  "title": "Calculate Linear Clamp",
-  "description": "Generate responsive linear clamp based on px or rem values",
-  "icon": "clamp.png",
+  "name": "css-calculations",
+  "title": "CSS Calculations",
+  "description": "Useful CSS Calculations in Web Development",
+  "icon": "css.png",
   "author": "teziovsky",
   "categories": [
     "Developer Tools",
@@ -12,17 +12,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "px",
-      "title": "Calculate Linear PX",
-      "subtitle": "Clamp",
-      "description": "Generate responsive linear clamp based on px values",
+      "name": "clamp_px",
+      "icon": "css_clamp.png",
+      "title": "Calculate Clamp PX",
+      "description": "Generate responsive clamp function based on px values",
       "mode": "view"
     },
     {
-      "name": "rem",
-      "title": "Calculate Linear REM",
-      "subtitle": "Clamp",
-      "description": "Generate responsive linear clamp based on rem values",
+      "name": "clamp_rem",
+      "icon": "css_clamp.png",
+      "title": "Calculate Clamp REM",
+      "description": "Generate responsive clamp function based on rem values",
       "mode": "view"
     }
   ],
