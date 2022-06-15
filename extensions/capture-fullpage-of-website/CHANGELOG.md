@@ -1,4 +1,4 @@
-# Screenshot full page in browser Changelog
+# Capture Fullpage of Website Changelog
 
 ## [Initial Version] - 2022-06-15
 
