@@ -19,7 +19,7 @@ ${_bunchesContent}
 
 export const bunchInstalled = () => {
   try {
-    return fs.existsSync("/Applications/Bunch.app");
+    return fs.existsSync("/Applications/Bunch.app") || fs.existsSync("/Applications/Bunch Beta.app");
   } catch (e) {
     console.error(String(e));
     return false;
