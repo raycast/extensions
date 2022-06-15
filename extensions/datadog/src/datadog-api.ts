@@ -33,16 +33,18 @@ export type DashboardSummaryDefinition = {
   author: Author;
   url: string;
   title: string;
-}
+};
 
 export type Author = {
   handle: string;
   name: string;
-}
+};
 
-export const apiDashboards = ({query}: {query: string}): Promise<DashboardSearchAPIResponse> =>
+export const apiDashboards = ({ query }: { query: string }): Promise<DashboardSearchAPIResponse> =>
   fetch(
-    encodeURI(`https://app.${SERVER}/api/v1/dashboard_search?with_suggested=true&query=${query}&start=0&count=50&sort=`),
+    encodeURI(
+      `https://app.${SERVER}/api/v1/dashboard_search?with_suggested=true&query=${query}&start=0&count=50&sort=`
+    ),
     params
   )
     .then(parseResponseToJSON)
