@@ -19,6 +19,7 @@ import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
 import { dirname, resolve } from "path";
 import React, { useEffect, useState } from "react";
+import untildify from "untildify";
 import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
@@ -132,10 +133,11 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
   const input = await getInput(inputType);
   const argument1 = command.metadatas.argument1.percentEncoded ? encodeURIComponent(input) : input;
   chmodSync(command.path, "755");
-  // Pass the input both to the command stdin and as command fist argument
   const { stdout, stderr, status } = spawnSync(command.path, [argument1], {
     encoding: "utf-8",
-    cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
+    cwd: command.metadatas.currentDirectoryPath
+      ? untildify(command.metadatas.currentDirectoryPath)
+      : dirname(command.path),
     env: {
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },
