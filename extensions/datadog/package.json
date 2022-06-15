@@ -7,7 +7,8 @@
   "author": "bgnfu7re",
   "contributors": [
     "rcruzper",
-    "aexvir"
+    "aexvir",
+    "albertoxamin"
   ],
   "license": "MIT",
   "commands": [
@@ -113,7 +114,7 @@
   ],
   "dependencies": {
     "@datadog/datadog-api-client": "^1.0.0-beta.7",
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.36.0",
     "node-fetch": "^3.1.1"
   },
   "devDependencies": {
