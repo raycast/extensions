@@ -11,4 +11,4 @@
 
 ## [New command] - 2022-06-15
 
-- Add Bcrypt encoding”
+- Add Bcrypt encoding
