@@ -3,11 +3,6 @@ import { linkDomain } from "./util";
 import { useState } from "react";
 import {useDashboards} from "./useDashboards";
 
-export interface Author {
-  handle: string;
-  name: string;
-}
-
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListDashboards() {
   const [query, setQuery] = useState("");
