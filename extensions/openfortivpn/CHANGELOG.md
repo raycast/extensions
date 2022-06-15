@@ -1,3 +1,3 @@
 # Openfortivpn connection Changelog
 
-## [Initial Version] - 2022-05-17
+## [Initial Version] - {PR_MERGE_DATE}
