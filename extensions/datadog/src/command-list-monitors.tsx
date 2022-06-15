@@ -48,17 +48,17 @@ export default function CommandListMonitors() {
   const {monitors, monitorsAreLoading} = useMonitors(query);
 
   const getCountSummary = () => {
-    if (!monitors) return "";
-    return ", " + monitors!.counts!.status!.map(x => `${x.count} ${x.name}`).join(", ");
+    if (!monitors || !monitors.counts || !monitors.counts.status) return "";
+    return ", " + monitors.counts.status.map(x => `${x.count} ${x.name}`).join(", ");
   };
   return (
     <List isLoading={monitorsAreLoading} onSearchTextChange={setQuery} throttle>
       <List.Section title={`Available monitors ${monitors?.metadata?.totalCount}${getCountSummary()}`}>
-        {monitors
-          ? monitors!.monitors!.map(monitor => (
+        {monitors && monitors.monitors
+          ? monitors.monitors.map(monitor => (
               <List.Item
                 key={monitor.id}
-                title={monitor.name || monitor.query!}
+                title={monitor.name || monitor.query || query}
                 subtitle={monitor.tags?.join(", ")}
                 accessoryTitle={monitor.status}
                 accessoryIcon={{ source: statusIcon(monitor.status) }}
