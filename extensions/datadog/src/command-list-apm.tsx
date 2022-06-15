@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import {Action, ActionPanel, List } from "@raycast/api";
 import { useAPM } from "./useAPM";
 import { linkDomain } from "./util";
 
@@ -14,11 +14,11 @@ export default function CommandListAPM() {
           icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
           title={name}
           subtitle={calls?.length > 0 ? `Calls ${calls.join(", ")}` : undefined}
-          accessoryTitle={env}
+          accessories={[{text: env}]}
           keywords={[env].concat(calls)}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}/apm/service/${name}?env=${env}`} />
+              <Action.OpenInBrowser url={`https://${linkDomain()}/apm/service/${name}?env=${env}`} />
             </ActionPanel>
           }
         />
