@@ -44,9 +44,8 @@
         {
           "name": "previousTrackNotificationEnabled",
           "type": "checkbox",
-          "label": "Enabled",
+          "label": "Show previous track info on change",
           "required": false,
-          "title": "Show previous track info on change",
           "description": "Show previous track info on change",
           "default": false
         }
@@ -62,9 +61,8 @@
         {
           "name": "nextTrackNotificationEnabled",
           "type": "checkbox",
-          "label": "Enabled",
+          "label": "Show next track info on change",
           "required": false,
-          "title": "Show next track info on change",
           "description": "Show next track info on change",
           "default": false
         }
