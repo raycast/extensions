@@ -45,7 +45,7 @@ export const apiDashboards = ({query}: {query: string}): Promise<DashboardSearch
     encodeURI(`https://app.${SERVER}/api/v1/dashboard_search?with_suggested=true&query=${query}&start=0&count=50&sort=`),
     params
   )
-    .then(res => res.json())
+    .then(parseResponseToJSON)
     .then(json => json as DashboardSearchAPIResponse);
 
 const parseResponseToJSON = (resp: Response) =>
