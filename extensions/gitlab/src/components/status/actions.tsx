@@ -1,7 +1,7 @@
-import { ActionPanel, Color, Icon, PushAction, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, useNavigation } from "@raycast/api";
 import { gitlab } from "../../common";
 import { Status } from "../../gitlabapi";
-import { getErrorMessage } from "../../utils";
+import { getErrorMessage, showErrorToast } from "../../utils";
 import { StatusFormPresetCreate, StatusFormPresetEdit, StatusFormSet } from "./form";
 import { wipePresets, predefinedPresets } from "./presets";
 import { clearDurations, clearDurationText, getClearDurationDate } from "./utils";
@@ -10,7 +10,7 @@ export function StatusSetCustomAction(props: {
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
 }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       title="Set Custom Status"
       icon={{ source: Icon.Document, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -33,16 +33,10 @@ export function StatusClearCurrentAction(props: {
         await gitlab.clearUserStatus();
         props.setCurrentStatus({ emoji: "", message: "" });
       } catch (error) {
-        showToast(ToastStyle.Failure, "Could not clear Status", getErrorMessage(error));
+        showErrorToast(getErrorMessage(error), "Could not clear Status");
       }
     };
-    return (
-      <ActionPanel.Item
-        title="Clear Status"
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-        onAction={handle}
-      />
-    );
+    return <Action title="Clear Status" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
   }
   return null;
 }
@@ -55,15 +49,11 @@ export function StatusPresetFactoryResetAction(props: {
       await wipePresets();
       props.setPresets(predefinedPresets());
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not reset Presets", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not reset Presets");
     }
   };
   return (
-    <ActionPanel.Item
-      title="Preset Factory Reset"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-      onAction={handle}
-    />
+    <Action title="Preset Factory Reset" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />
   );
 }
 
@@ -74,7 +64,7 @@ export function StatusPresetCreateAction(props: {
   const presets = props.presets;
   const { push, pop } = useNavigation();
   return (
-    <ActionPanel.Item
+    <Action
       title="Create Status Preset"
       icon={{ source: Icon.Document, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
@@ -105,16 +95,10 @@ export function StatusPresetSetAction(props: {
       props.status.clear_status_at = getClearDurationDate(props.status.clear_status_after);
       props.setCurrentStatus(props.status);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not set Status", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not set Status");
     }
   };
-  return (
-    <ActionPanel.Item
-      title="Set Status"
-      icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }}
-      onAction={handle}
-    />
-  );
+  return <Action title="Set Status" icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }} onAction={handle} />;
 }
 
 export function StatusPresetSetWithDurationAction(props: {
@@ -128,14 +112,14 @@ export function StatusPresetSetWithDurationAction(props: {
       newStatus.clear_status_at = getClearDurationDate(newStatus.clear_status_after);
       props.setCurrentStatus(newStatus);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not set Status", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not set Status");
     }
   };
 
   return (
     <ActionPanel.Submenu title="Set Status with Duration" icon={{ source: Icon.Clock, tintColor: Color.PrimaryText }}>
       {Object.keys(clearDurations).map((k) => (
-        <ActionPanel.Item key={k + "_"} title={clearDurationText(k)} onAction={() => handle(k)} />
+        <Action key={k + "_"} title={clearDurationText(k)} onAction={() => handle(k)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -160,12 +144,12 @@ export function StatusPresetEditAction(props: {
         throw Error("Preset index out of bounds");
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not edit Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not edit Preset");
     }
   };
   const { push, pop } = useNavigation();
   return (
-    <ActionPanel.Item
+    <Action
       title="Edit Preset"
       icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "e" }}
@@ -199,11 +183,11 @@ export function StatusPresetDeleteAction(props: {
         throw Error("Preset index out of bounds");
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not remove Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not remove Preset");
     }
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Delete Preset"
       icon={{ source: Icon.Trash, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["opt"], key: "x" }}
@@ -231,7 +215,7 @@ export function StatusPresetMoveUpAction(props: {
     props.setSelectedId(`preset_${index - 1}`);
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Move Up"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
@@ -260,7 +244,7 @@ export function StatusPresetMoveDownAction(props: {
     props.setSelectedId(`preset_${upperIndex}`);
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Move Down"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}

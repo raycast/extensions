@@ -1,5 +1,99 @@
 # Changelog
 
+## 1.36.0 – 2022-06-01
+
+### ✨ New
+
+The `<Grid />` component’s made its way to our API. It’s perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component  for smooth adoption.
+
+![](.gitbook/assets/grid.png)
+
+### 🐞 Fixes
+
+- Fixed the controlled mode for `Form.DatePicker`
+- Fixed the dynamic appearance of form item’s `info` accessory
+- Fixed the OAuth logout preference not being shown for single-command extensions
+- Fixed a bug where components that are pushed with the same properties values would not be updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1843](https://github.com/raycast/extensions/issues/1843))
+- Fixed a bug where updated list metadata items would cause unnecessary list reloading
+- Fixed an issue with tinted, resized icons appearing blurred in some cases (e.g. Alerts)
+
+## 1.35.0 – 2022-05-18
+
+### ✨ New
+
+- **List Item Metadata**: we’ve added a new `metadata` property to the `List.Item.Detail` component, allowing you to add structured metadata. The `metadata` property can be used together with `markdown`, in which case the detail view will be split horizontally, with the markdown being displayed in the top half and the metadata displayed in the bottom half (similar to the `File Search`, `Clipboard History` or `Search Contacts` commands). Alternatively, it can be used by itself, in which case the metadata will take up the entire height of the detail view.
+- **Preferences**: We’ve added two new top-level methods `openExtensionPreferences` and `openCommandPreferences` that allow you to open both extension and command preferences, for example, via an Action ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 179](https://github.com/raycast/extensions/issues/179))
+
+### 💎 Improvements
+
+- Added a new development action to clear the local storage of an extension
+
+### 🐞 Fixes
+
+- Fixed a bug where the wrong form element onChange handler would be called initially while the form was being updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1633](https://github.com/raycast/extensions/issues/1633))
+- Fixed a bug where form elements would not be re-rendered correctly ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1663](https://github.com/raycast/extensions/issues/1663))
+- Fixed a bug where a fully controlled form TextField/PasswordField behaves as stateful ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1093](https://github.com/raycast/extensions/issues/1093))
+- Fixed `EmptyView` not being displayed when it would be reused in a navigation stack
+
+## 1.34.0 – 2022-05-04
+
+### 💎 Improvements
+
+- OAuth: TokenSets are now included in the encrypted Raycast export (Raycast Preferences > Advanced > Export)
+- OAuth: The convenience method `TokenSet.isExpired()` now includes some buffer time to reduce the risk of performing requests with expired access tokens
+
+### 🐞 Fixes
+
+- Fixed an issue where updating the search bar accessory would result in the search bar text being selected
+- Forms: We’ve fixed some inconsistencies around form item properties and added new warnings (e.g. when `defaultValue` and `value` are set at the same time); this also fixes [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1104](https://github.com/raycast/extensions/issues/1104)
+- Forms: Fixed an issue where updating form items would lead to unwanted scrolling; fixed the `autoFocus` property not scrolling to the focused item
+- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it’s still mounted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1495](https://github.com/raycast/extensions/issues/1495)).
+- Fixed an issue where `adjustContrast` would not be respected for colored TagPicker items.
+
+## 1.33.0 – 2022-04-20
+
+### ✨ New
+
+- **OAuth**: we've added a new API that enables you to authorize extensions through OAuth providers such as Google, Twitter, Dropbox or Spotify ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #178](https://github.com/raycast/extensions/issues/178)). The docs contain a [new detailed guide](https://developers.raycast.com/api-reference/oauth) and we've added some integration examples to the extensions repository. (Note that we currently only support OAuth 2.0 with PKCE, more on that in the [guide](https://developers.raycast.com/api-reference/oauth).)
+- **Form Focus**: use the new imperative form API to programmatically focus form items. Want to make sure a particular input is focused on mount? Form items now accept an `autoFocus` prop! ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #66](https://github.com/raycast/extensions/issues/66))
+- **Form Reset**: use the new imperative form API to reset form items’ values to their initial values.
+- **Form Info:** Use the new `info` prop on form items to show additional information about an item, e.g. to explain what this field is used for.
+- The Raycast window opens automatically when you start a development session for an extension. You can turn the behavior off in the Advanced preferences tab.
+
+### 💎 Improvements
+
+- Improved detection of default editor when you open extensions from Raycast
+- Improved templates for list, form and detail
+- Removed `react-devtools` from `devDependencies` for newly created extensions (so that you don't have to download a big dependency that you might not use)
+
+### 🐞 Fixes
+
+- Fixed an issue where animated gifs would be incorrectly scaled when size attributes are specified in markdown.
+- Form Checkbox now returns proper boolean values on submit
+
+## 1.32.0 – 2022-04-06
+
+### ✨ New
+
+- **List Tooltips**: List items now support tooltips for the title, subtitle, icon, and each accessory item. For titles, you can use the new type `{ value: string, tooltip: string }`, for icons `{ value: Image.ImageLike, tooltip: string }`, and for accessories you just add the new property `tooltip`.
+- **Animated Gifs**: the `Detail` component now renders animated gifs defined in markdown! 🎭
+
+### 💎 Improvements
+
+- Improved recovering the Node process after a crash and logging the error to the CLI output
+- Added support for running CLI commands through `npx @raycast/api <commandName>`
+- Improved the `Create Extension` command to add `README.md` and `CHANGELOG.md` files
+
+### 🐞 Fixes
+
+- **Detail Metadata**: Fixed toggling (showing/hiding)
+- **Detail Metadata**: Fixed only one separator item getting rendered
+- **Detail Metadata**: Fixed a crash when using primary or secondary colors for tag items
+- **List Accessories**: Fixed rendering when using `undefined` for accessory values
+- **List EmptyView**: Fixed an issue where passing a `List.EmptyView` child to a `List.Section` would treat it as a `List.Item`
+- **SVG**: Fixed rendering base64 encoded SVG images
+- Fixed loading when a new command is launched by hotkey while another command is open
+
 ## 1.31.0 – 2022-03-23
 
 ### ✨ New

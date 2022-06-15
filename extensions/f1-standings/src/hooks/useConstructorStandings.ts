@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { ConstructorStanding } from "../types";
 
@@ -36,12 +36,15 @@ const useConstructorStandings = (season: string | null): [ConstructorStanding[],
           isLoading: false,
         }));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
           message: "Could not load constructor standings",
         });
-        await popToRoot({ clearSearchBar: true });
+        await popToRoot();
         setState((previous) => ({ ...previous, isLoading: false }));
       }
     }

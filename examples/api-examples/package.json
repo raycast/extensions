@@ -188,10 +188,22 @@
           }
         }
       ]
+    },
+    {
+      "name": "oauth",
+      "title": "OAuth",
+      "description": "OAuth integration",
+      "mode": "view"
+    },
+    {
+      "name": "oauth-no-view",
+      "title": "OAuth (no-view)",
+      "description": "OAuth integration with no-view mode",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.31.0",
+    "@raycast/api": "1.33.0",
     "node-fetch": "^3.0.0",
     "open": "^8.3.0"
   },

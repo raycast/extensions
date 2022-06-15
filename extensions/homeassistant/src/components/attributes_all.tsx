@@ -1,7 +1,8 @@
-import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { State } from "../haapi";
 import { useHAStates } from "../hooks";
+import { ensureCleanAccessories } from "../utils";
 
 export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
@@ -9,7 +10,11 @@ export function StatesAttributesList(): JSX.Element {
   const { states } = useSearch(searchText, allStates);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot search Home Assistant states",
+      message: error.message,
+    });
   }
 
   if (!states) {
@@ -29,19 +34,31 @@ export function StatesAttributesList(): JSX.Element {
     >
       {states.map((state: State) => (
         <List.Section key={state.entity_id} title={stateTitle(state)}>
-          <List.Item key={`${state.entity_id}_state`} title="state" accessoryTitle={`${state.state}`} />
+          <List.Item
+            key={`${state.entity_id}_state`}
+            title="state"
+            accessories={ensureCleanAccessories([
+              {
+                text: `${state.state}`,
+              },
+            ])}
+          />
           {Object.entries(state.attributes).map(([k, v]) => (
             <List.Item
               key={state.entity_id + k}
               title={k}
-              accessoryTitle={`${v}`}
               actions={
                 <ActionPanel>
-                  <CopyToClipboardAction title="Copy Value" content={`${v}`} />
-                  <CopyToClipboardAction title="Copy Name" content={`${k}`} />
-                  <CopyToClipboardAction title="Copy Entity ID" content={`${state.entity_id}`} />
+                  <Action.CopyToClipboard title="Copy Value" content={`${v}`} />
+                  <Action.CopyToClipboard title="Copy Name" content={`${k}`} />
+                  <Action.CopyToClipboard title="Copy Entity ID" content={`${state.entity_id}`} />
                 </ActionPanel>
               }
+              accessories={ensureCleanAccessories([
+                {
+                  text: `${v}`,
+                },
+              ])}
             />
           ))}
         </List.Section>

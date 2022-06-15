@@ -9,7 +9,7 @@
 </h1>
 
 <p align="center">
-  Search your code and 2M+ public repositories on <a href="https://about.sourcegraph.com">Sourcegraph</a> directly within <a href="https://www.raycast.com">Raycast</a>.
+  Search code, browse notebooks, and manage batch changes on <a href="https://about.sourcegraph.com">Sourcegraph</a> with <a href="https://www.raycast.com">Raycast</a>.
 </p>
 
 <p align="center">
@@ -21,17 +21,19 @@
   <a href="#contributing"><strong>Contributing</strong></a>
 </p>
 
-<p align="center">
-  <img src="https://github.com/bobheadxi/raycast-sourcegraph/blob/main/assets/demo.png?raw=true" alt="demo" />
-</p>
+![search demo](metadata/1-search.png)
 
 <br />
 
 ## Install
 
-To get started, install [Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
+To get started, [install Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
 
-Alternatively, you can [install this extension from source](./CONTRIBUTING.md).
+<a id="install-extension-button" title="Install Sourcegraph Raycast Extension" href="https://www.raycast.com/bobheadxi/sourcegraph#install">
+  <img style="height: 64px" src="https://assets.raycast.com/bobheadxi/sourcegraph/install_button@2x.png" height="64">
+</a>
+
+Alternatively, you can [install this extension from source](https://github.com/bobheadxi/raycast-sourcegraph/blob/main/CONTRIBUTING.md).
 
 <br />
 
@@ -64,14 +66,29 @@ Get results as you type on [code search](https://about.sourcegraph.com/code-sear
 #### Search contexts
 
 [Search contexts](https://docs.sourcegraph.com/code_search/explanations/features#search-contexts) allow you to narrow down your search to code you care about.
-To get started, you can try the [public Sourcegraph Cloud contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph Cloud account or Sourcegraph instance's "Contexts" page!
+To get started, you can try the [public Sourcegraph Cloud contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph Cloud account or self-hosted Sourcegraph instance's "Contexts" page!
 
 The Sourcegraph Raycast extension allows you to set a default context for your searches in the "Search Code" command preferences.
-To override it for a search, just include a `context:` parameter in your query.
+
+![search demo](metadata/1-search.png)
 
 ### Find Search Notebooks
 
-Browse and preview [search notebooks](https://sourcegraph.com/notebooks).
+Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
+Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
+
+To get started, you can try the [public Sourcegraph Cloud notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph Cloud account or self-hosted Sourcegraph instance!
+
+![notebooks](metadata/3-notebook-view.png)
+
+### Manage Batch Changes
+
+Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
+Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
+
+Batch changes is currently only supported on [Sourcegraph Self-Hosted](#sourcegraph-self-hosted).
+
+![notebooks](metadata/4-batch-change-manage.png)
 
 <br />
 

@@ -6,6 +6,12 @@
   "icon": "command-icon.png",
   "author": "bobheadxi",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Documentation",
+    "Web"
+  ],
   "keywords": [
     "sourcegraph",
     "search",
@@ -34,6 +40,15 @@
       "description": "Required to use the Sourcegraph Self-Hosted commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
       "required": false,
       "type": "password"
+    },
+    {
+      "name": "featureSearchPatternDropdown",
+      "title": "Experimental features",
+      "label": "Search pattern dropdown",
+      "description": "Enable the search pattern dropdown in the search command.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "commands": [
@@ -116,34 +131,57 @@
         "selfhosted"
       ],
       "preferences": []
+    },
+    {
+      "name": "manageBatchChangesSelfHosted",
+      "icon": "logo-bw.png",
+      "title": "Manage Batch Changes",
+      "subtitle": "Sourcegraph Self-Hosted",
+      "description": "Manage batch changes on a self-hosted Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "batch",
+        "changes",
+        "bc",
+        "selfhosted"
+      ],
+      "preferences": []
     }
   ],
   "dependencies": {
-    "@bobheadxi/node-eventsource-http2": "^1.1.1",
-    "@raycast/api": "^1.28.0",
-    "luxon": "^2.3.0",
-    "nanoid": "^3.2.0",
-    "node-fetch": "^3.2.0",
-    "remark": "^14.0.2",
-    "strip-markdown": "^5.0.0"
+    "@apollo/client": "^3.6.5",
+    "@raycast/api": "^1.35.2",
+    "cross-fetch": "^3.1.5",
+    "eventsource": "^2.0.2",
+    "graphql": "^14.7.0",
+    "luxon": "^2.4.0",
+    "nanoid": "^3.3.4"
   },
   "devDependencies": {
-    "@types/luxon": "^2.0.9",
+    "@graphql-codegen/cli": "2.6.2",
+    "@graphql-codegen/fragment-matcher": "3.2.1",
+    "@graphql-codegen/introspection": "2.1.1",
+    "@graphql-codegen/typescript": "2.4.11",
+    "@graphql-codegen/typescript-operations": "2.4.0",
+    "@graphql-codegen/typescript-react-apollo": "3.2.14",
+    "@types/eventsource": "^1.1.8",
+    "@types/luxon": "^2.3.1",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^17.0.38",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "~4.13.0",
-    "typescript": "^4.4.3"
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.6.1",
+    "typescript": "^4.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fmt": "ray lint --fix",
-    "raycast-publish": ".scripts/raycast-publish.sh"
+    "raycast-publish": ".scripts/raycast-publish.sh",
+    "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt"
   }
 }

@@ -1,21 +1,14 @@
-import {
-  ActionPanel,
-  Color,
-  ImageLike,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { Todo, User } from "../gitlabapi";
+import { ActionPanel, Color, Image, List } from "@raycast/api";
+import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { useState, useEffect } from "react";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
-import { now } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { useTodos } from "./todo/utils";
+import { MyProjectsDropdown } from "./project";
+import { useState } from "react";
+import { ensureCleanAccessories, showErrorToast } from "../utils";
 
-function userToIcon(user?: User): ImageLike {
+function userToIcon(user?: User): Image.ImageLike {
   let result = "";
   if (!user) {
     return "";
@@ -23,27 +16,67 @@ function userToIcon(user?: User): ImageLike {
   if (user.avatar_url) {
     result = user.avatar_url;
   }
-  return { source: result, mask: ImageMask.Circle };
+  return { source: result, mask: Image.Mask.Circle };
 }
 
-export function TodoList() {
-  const [searchText, setSearchText] = useState<string>();
-  const { todos, error, isLoading, refresh } = useSearch(searchText);
+const actionColors: Record<string, Color> = {
+  marked: Color.Green,
+  assigned: Color.Purple,
+  directly_addressed: Color.Red,
+  mentioned: Color.Green,
+};
+
+function getActionColor(actionName: string): Color {
+  if (!actionName) {
+    return Color.Green;
+  }
+  let result = actionColors[actionName];
+  if (!result) {
+    result = Color.Green;
+  }
+  return result;
+}
+
+const targetTypeSouce: Record<string, string> = {
+  mergerequest: GitLabIcons.merge_request,
+  issue: GitLabIcons.issue,
+  epic: GitLabIcons.epic,
+};
+
+function getTargetTypeSource(tt: string): string {
+  if (!tt) {
+    return GitLabIcons.todo;
+  }
+  let result = targetTypeSouce[tt.toLowerCase()];
+  if (!result) {
+    result = GitLabIcons.todo;
+  }
+  return result;
+}
+
+function getIcon(todo: Todo): Image.ImageLike {
+  const tt = todo.target_type;
+  return { source: getTargetTypeSource(tt), tintColor: getActionColor(todo.action_name) };
+}
+
+export function TodoList(): JSX.Element {
+  const [project, setProject] = useState<Project>();
+  const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
-  if (!todos) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
   return (
     <List
       searchBarPlaceholder="Filter Todos by name..."
-      onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
       {todos?.map((todo) => (
         <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
@@ -52,7 +85,7 @@ export function TodoList() {
   );
 }
 
-export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   return (
@@ -60,14 +93,13 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
       id={todo.id.toString()}
       title={todo.title}
       subtitle={subtitle}
-      accessoryTitle={todo.action_name}
-      accessoryIcon={userToIcon(todo.author)}
-      icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
+      accessories={ensureCleanAccessories([{ text: todo.action_name }, { icon: userToIcon(todo.author) }])}
+      icon={getIcon(todo)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <ShowTodoDetailsAction todo={todo} />
-            <OpenInBrowserAction url={todo.target_url} />
+            <GitLabOpenInBrowserAction url={todo.target_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CloseTodoAction todo={todo} finished={props.refreshData} />
@@ -77,59 +109,4 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
       }
     />
   );
-}
-
-export function useSearch(query: string | undefined): {
-  todos?: Todo[];
-  error?: string;
-  isLoading: boolean;
-  refresh: () => void;
-} {
-  const [todos, setTodos] = useState<Todo[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [timestamp, setTimestamp] = useState<Date>(now());
-
-  const refresh = () => {
-    setTimestamp(now());
-  };
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glTodos = await gitlab.getTodos({ search: query || "" });
-
-        if (!didUnmount) {
-          setTodos(glTodos);
-        }
-      } catch (e: any) {
-        if (!didUnmount) {
-          setError(e.message);
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, timestamp]);
-
-  return { todos, error, isLoading, refresh };
 }

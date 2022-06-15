@@ -1,11 +1,11 @@
-import { ActionPanel, ImageLike, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import Commponents from "./components";
 import { getCurrentBackendWithSecret } from "./utils";
 import { ErrorHandler } from "./utils/error";
 
 type CommponentT = {
   title: string;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
   node: JSX.Element;
 };
 
@@ -14,6 +14,11 @@ const commponents: Array<CommponentT> = [
     title: "Overview",
     icon: "overview.png",
     node: <Commponents.Overview />,
+  },
+  {
+    title: "Mode",
+    icon: "mode.png",
+    node: <Commponents.Mode />,
   },
   {
     title: "Proxies",
@@ -53,7 +58,7 @@ export default function Command() {
           icon={commponent.icon}
           actions={
             <ActionPanel>
-              <PushAction title={`Show ${commponent.title}`} target={commponent.node} />
+              <Action.Push title={`Show ${commponent.title}`} target={commponent.node} />
             </ActionPanel>
           }
         />

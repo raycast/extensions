@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  OpenInBrowserAction,
-  List,
-  Icon,
-  Color,
-  ImageLike,
-  getPreferenceValues,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Color, getPreferenceValues, Action, Image } from "@raycast/api";
 import { features, feature } from "caniuse-lite";
 import * as caniuse from "caniuse-api";
 import browserslist from "browserslist";
@@ -29,11 +20,14 @@ export default function CanIUse() {
       {Object.entries(features).map(([featureName, packedFeature]) => {
         const feat = feature(packedFeature);
 
-        let accessoryIcon: ImageLike | null = null;
+        const accessories: List.Item.Accessory[] = [{ text: statusToName[feat.status] }];
+
         if (browsers && browsers.length > 0) {
-          accessoryIcon = caniuse.isSupported(featureName, browsers)
+          const icon = caniuse.isSupported(featureName, browsers)
             ? { source: Icon.Checkmark, tintColor: Color.Green }
             : { source: Icon.XmarkCircle, tintColor: Color.Red };
+
+          accessories.push({ icon });
         }
 
         return (
@@ -41,14 +35,13 @@ export default function CanIUse() {
             key={featureName}
             title={feat.title}
             keywords={[featureName]}
-            accessoryTitle={statusToName[feat.status]}
-            {...(accessoryIcon ? { accessoryIcon } : {})}
             actions={
               <ActionPanel>
-                <PushAction title="Show details" icon={Icon.List} target={<FeatureDetail feature={featureName} />} />
-                <OpenInBrowserAction url={getCanIUseLink(featureName)} />
+                <Action.Push title="Show details" icon={Icon.List} target={<FeatureDetail feature={featureName} />} />
+                <Action.OpenInBrowser url={getCanIUseLink(featureName)} />
               </ActionPanel>
             }
+            accessories={accessories}
           />
         );
       })}

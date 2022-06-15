@@ -1,12 +1,16 @@
 # Google Translate Changelog
 
+## [Fix] - 2022-03-25
+
+Updated icon and name of zh-TW
+
 ## [Fix] - 2022-03-15
 
 🇹🇭 → 🇹🇷
 
 ## [Fix] - 2021-12-30
 
-xh-TW wrong flag
+zh-TW wrong flag
 
 ## [Fix] - 2021-12-22
 

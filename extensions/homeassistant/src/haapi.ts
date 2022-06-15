@@ -1,7 +1,11 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import urljoin from "url-join";
 import { getErrorMessage } from "./utils";
+import fs from "fs";
+import { pipeline } from "stream";
+import util from "util";
+const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
   const p: string[] = [];
@@ -88,7 +92,11 @@ export class HomeAssistant {
     try {
       await this.post(`services/${domain}/${service}`, (params = userparams));
     } catch (error) {
-      showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: getErrorMessage(error),
+      });
     }
   }
 
@@ -209,5 +217,27 @@ export class HomeAssistant {
       return result;
     }
     return items;
+  }
+
+  async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
+    const fullUrl = urljoin(this.url, "api", url);
+    console.log(`download ${url}`);
+    const response = await fetch(fullUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`unexpected response ${response.statusText}`);
+    }
+    console.log(`write ${url} to ${params.localFilepath}`);
+    await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
+    return params.localFilepath;
+  }
+
+  async getCameraProxyURL(entityID: string, localFilepath: string): Promise<void> {
+    await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath });
   }
 }

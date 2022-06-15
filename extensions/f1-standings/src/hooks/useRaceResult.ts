@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import fetch from "node-fetch";
-import { popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
-import { Race, RaceResult } from "../types";
-
-const isUpcoming = (race: Race) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return new Date(race.date) >= today;
-};
+import { showToast, Toast, useNavigation } from "@raycast/api";
+import { RaceResult } from "../types";
 
 type State = {
   isLoading: boolean;
@@ -46,9 +40,8 @@ const useRaceResult = (season: string | null, round: string | null): [RaceResult
         pop();
       }
     }
-
     fetchResults();
-  }, [cancelRef, season, round]);
+  }, [cancelRef, season, round, pop]);
 
   useEffect(() => {
     return () => {

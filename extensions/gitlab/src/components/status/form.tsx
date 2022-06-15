@@ -1,4 +1,4 @@
-import { FormValues, Form, ActionPanel, SubmitFormAction, useNavigation, showToast, ToastStyle } from "@raycast/api";
+import { Form, ActionPanel, useNavigation, Action } from "@raycast/api";
 import { isValidStatus, Status } from "../../gitlabapi";
 import {
   clearDurations,
@@ -8,11 +8,11 @@ import {
   getClearDurationDate,
 } from "./utils";
 import { gitlab } from "../../common";
-import { getErrorMessage } from "../../utils";
+import { getErrorMessage, showErrorToast } from "../../utils";
 
 export function StatusForm(props: {
   submitTitle: string;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: Form.Values) => Promise<void>;
   existingStatus?: Status | undefined;
 }): JSX.Element {
   const es = props.existingStatus;
@@ -23,7 +23,7 @@ export function StatusForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title={props.submitTitle} onSubmit={props.onSubmit} />
+          <Action.SubmitForm title={props.submitTitle} onSubmit={props.onSubmit} />
         </ActionPanel>
       }
     >
@@ -38,7 +38,7 @@ function StatusDurationDropDown(props: { id: string; defaultValue: string | unde
   return (
     <Form.Dropdown id={props.id} title="Duration" defaultValue={props.defaultValue}>
       {Object.keys(clearDurations).map((k) => (
-        <Form.DropdownItem key={k + "_"} title={clearDurationText(k)} value={k} />
+        <Form.Dropdown.Item key={k + "_"} title={clearDurationText(k)} value={k} />
       ))}
     </Form.Dropdown>
   );
@@ -47,9 +47,9 @@ function StatusDurationDropDown(props: { id: string; defaultValue: string | unde
 function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: string | undefined }): JSX.Element {
   return (
     <Form.Dropdown id={props.id} title={props.title} defaultValue={props.defaultValue}>
-      <Form.DropdownItem key="-" title="-" value="" />
+      <Form.Dropdown.Item key="-" title="-" value="" />
       {getAllEmojiSymbolAliases().map((k) => (
-        <Form.DropdownItem key={k} title={`:${k}:`} value={k} icon={emojiSymbol(k)} />
+        <Form.Dropdown.Item key={k} title={`:${k}:`} value={k} icon={emojiSymbol(k)} />
       ))}
     </Form.Dropdown>
   );
@@ -59,7 +59,7 @@ export function StatusFormSet(props: {
   setCurrentStatus?: React.Dispatch<React.SetStateAction<Status | undefined>>;
 }): JSX.Element {
   const { pop } = useNavigation();
-  const handle = async (values: FormValues) => {
+  const handle = async (values: Form.Values) => {
     try {
       const status = getValidStatusFromFormValue(values);
       await gitlab.setUserStatus(status);
@@ -68,13 +68,13 @@ export function StatusFormSet(props: {
       }
       pop();
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not set Status", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not set Status");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Set Status" />;
 }
 
-function getValidStatusFromFormValue(values: FormValues): Status {
+function getValidStatusFromFormValue(values: Form.Values): Status {
   const s: Status = {
     emoji: values.emoji,
     message: values.message,
@@ -92,12 +92,12 @@ export function StatusFormPresetCreate(props: {
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   onFinish: (status: Status) => Promise<void>;
 }): JSX.Element {
-  const handle = async (values: FormValues) => {
+  const handle = async (values: Form.Values) => {
     try {
       const status = getValidStatusFromFormValue(values);
       props.onFinish(status);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not create Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not create Preset");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Create Preset" />;
@@ -109,12 +109,12 @@ export function StatusFormPresetEdit(props: {
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   onFinish: (status: Status) => Promise<void>;
 }): JSX.Element {
-  const handle = async (values: FormValues) => {
+  const handle = async (values: Form.Values) => {
     try {
       const status = getValidStatusFromFormValue(values);
       await props.onFinish(status);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not edit Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not edit Preset");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Edit Preset" existingStatus={props.status} />;

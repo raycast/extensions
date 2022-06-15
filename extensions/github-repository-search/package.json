@@ -24,11 +24,14 @@
       "description": "Create a token with repository access"
     }
   ],
+  "contributors": [
+    "immint023"
+  ],
   "categories": [
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.31.0",
     "javascript-time-ago": "^2.3.9",
     "octokit": "^1.7.0",
     "use-debounce": "^7.0.0"
@@ -45,6 +48,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

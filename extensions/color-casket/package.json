@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "color-casket",
+  "title": "Color Casket",
+  "description": "Handy Color Utilities",
+  "icon": "command-icon.png",
+  "author": "slava.razum",
+  "categories": ["Design Tools", "Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Render Color",
+      "description": "Render color by string representation",
+      "keywords": ["color", "render", "render color", "color utilities", "color casket"],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "color-convert": "^2.0.1",
+    "is-valid-css-color": "^2.0.3",
+    "javascript-time-ago": "^2.3.13"
+  },
+  "devDependencies": {
+    "@types/color-convert": "^2.0.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

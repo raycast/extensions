@@ -9,6 +9,7 @@ import { exec } from "child_process";
 const execp = promisify(exec);
 import parseGitConfig = require("parse-git-config");
 import parseGithubURL = require("parse-github-url");
+import getDefaultBrowser from "default-browser";
 
 const CacheFile = path.join(environment.supportPath, "cache.json");
 
@@ -16,6 +17,8 @@ export interface GitRepo {
   name: string;
   fullPath: string;
   icon: string;
+  defaultBrowserId: string;
+  remotes: RemoteRepo[];
 }
 
 interface GitRemote {
@@ -29,6 +32,7 @@ export interface RemoteRepo {
 }
 
 export class Cache {
+  version = 2;
   repos: GitRepo[];
 
   constructor() {
@@ -42,7 +46,9 @@ export class Cache {
     const jsonData = fs.readFileSync(CacheFile).toString();
     if (jsonData.length > 0) {
       const cache: Cache = JSON.parse(jsonData);
-      this.repos = cache.repos;
+      if (cache.version && cache.version === this.version) {
+        this.repos = cache.repos;
+      }
     }
   }
 
@@ -108,7 +114,7 @@ export async function loadPreferences(): Promise<Preferences> {
   return getPreferenceValues<Preferences>();
 }
 
-export function gitRemotes(path: string): RemoteRepo[] {
+function gitRemotes(path: string): RemoteRepo[] {
   let repos = [] as RemoteRepo[];
   const gitConfig = parseGitConfig.sync({ cwd: path, path: ".git/config", expandKeys: true });
   if (gitConfig.remote != null) {
@@ -154,13 +160,21 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
       .map((path) => {
         const fullPath = path;
         const name = `${fullPath.split("/").pop() ?? "unknown"}`;
-        return { name: name, icon: "git-submodule-icon.png", fullPath: fullPath };
+        const remotes = gitRemotes(fullPath);
+        return {
+          name: name,
+          icon: "git-submodule-icon.png",
+          fullPath: fullPath,
+          defaultBrowserId: "",
+          remotes: remotes,
+        };
       });
   } else {
     return repoPaths.map((path) => {
       const fullPath = path.replace("/.git", "");
       const name = fullPath.split("/").pop() ?? "unknown";
-      return { name: name, icon: "git-icon.png", fullPath: fullPath };
+      const remotes = gitRemotes(fullPath);
+      return { name: name, icon: "git-icon.png", fullPath: fullPath, defaultBrowserId: "", remotes: remotes };
     });
   }
 }
@@ -215,6 +229,10 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       return 1;
     }
     return 0;
+  });
+  const defaultBrowser = await getDefaultBrowser();
+  foundRepos.map((repo) => {
+    repo.defaultBrowserId = defaultBrowser.id;
   });
   cache.setRepos(foundRepos);
   cache.save();

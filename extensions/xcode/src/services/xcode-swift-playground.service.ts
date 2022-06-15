@@ -2,11 +2,12 @@ import { XcodeSwiftPlaygroundCreationParameters } from "../models/swift-playgrou
 import { XcodeSwiftPlayground } from "../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundPlatform } from "../models/swift-playground/xcode-swift-playground-platform.model";
 import { execAsync } from "../shared/exec-async";
-import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
+import untildify from "untildify";
+import { getPreferenceValues } from "@raycast/api";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -42,19 +43,30 @@ export class XcodeSwiftPlaygroundService {
   ];
 
   /**
+   * The default location where a Swift Playground should be created
+   */
+  get defaultSwiftPlaygroundLocation(): string {
+    // Retrieve the preference values
+    const preferences = getPreferenceValues();
+    // Retrieve the excluded Xcode Project paths string from preference values
+    return preferences.playgroundDefaultLocation as string;
+  }
+
+  /**
    * Create a new Swift Playground
    * @param parameters The XcodeSwiftPlaygroundCreationParameters
+   * @param forceCreate Bool value if the creation of a Swift Playground should be enforced
    */
-  async createSwiftPlayground(parameters: XcodeSwiftPlaygroundCreationParameters): Promise<XcodeSwiftPlayground> {
-    // Initialize Playground Path
-    const playgroundPath = joinPathComponents(
-      // Replace tilde (~) with home directory
-      parameters.location.replace(/^~/, os.homedir()),
-      `${parameters.name}.playground`
+  async createSwiftPlayground(
+    parameters: XcodeSwiftPlaygroundCreationParameters,
+    forceCreate: boolean
+  ): Promise<XcodeSwiftPlayground> {
+    const playgroundPath = await XcodeSwiftPlaygroundService.makeSwiftPlaygroundPath(
+      parameters.location,
+      parameters.name,
+      forceCreate
     );
-    // Check if Playground already exists
-    if (await existsAsync(playgroundPath)) {
-      // Return existing Swift Playground
+    if (!forceCreate && (await existsAsync(playgroundPath))) {
       return {
         name: parameters.name,
         path: playgroundPath,
@@ -117,6 +129,32 @@ export class XcodeSwiftPlaygroundService {
   }
 
   /**
+   * Make a Swift Playground path for a given location and file name
+   * @param location: location in which we want to save the playground file.
+   * @param filename: filename of the created or opened playground file.
+   * @param forceCreate: define if we want to force create or not.
+   */
+  private static async makeSwiftPlaygroundPath(
+    location: string,
+    filename: string,
+    forceCreate: boolean
+  ): Promise<string> {
+    let path = "";
+    let iteration = null;
+    const targetLocation = untildify(location);
+    do {
+      const dateString = new Date().toLocaleDateString("en-CA");
+      const name =
+        iteration == null
+          ? `${filename}-${dateString}.playground`
+          : `${filename}-${dateString}-${iteration}.playground`;
+      path = joinPathComponents(targetLocation, name);
+      iteration = iteration == null ? 1 : iteration + 1;
+    } while ((await existsAsync(path)) && forceCreate);
+    return path;
+  }
+
+  /**
    * The XCPlayground contents TemplateFile
    * @param platform The XcodeSwiftPlaygroundPlatform
    * @private
@@ -145,10 +183,10 @@ export class XcodeSwiftPlaygroundService {
   private static swiftSourceContentsTemplateFile(template: XcodeSwiftPlaygroundTemplate): TemplateFile {
     let contents: string;
     switch (template) {
-      case XcodeSwiftPlaygroundTemplate.empty:
+      case XcodeSwiftPlaygroundTemplate.Empty:
         contents = "import Foundation\n\n";
         break;
-      case XcodeSwiftPlaygroundTemplate.swiftUI:
+      case XcodeSwiftPlaygroundTemplate.SwiftUI:
         contents = `
         import PlaygroundSupport
         import SwiftUI
@@ -162,6 +200,24 @@ export class XcodeSwiftPlaygroundService {
         }
         
         PlaygroundPage.current.liveView = UIHostingController(rootView: ContentView())
+        `;
+        break;
+      case XcodeSwiftPlaygroundTemplate.UIKit:
+        contents = `
+        import Foundation
+        import PlaygroundSupport
+        import UIKit
+
+        class ViewController : UIViewController {
+          override func viewDidLoad() {
+            super.viewDidLoad()
+          }
+        }
+
+        let viewController = ViewController()
+        viewController.view.frame = CGRect(x: 0, y: 0, width: 300, height: 600)
+        PlaygroundPage.current.liveView = viewController
+        PlaygroundPage.current.needsIndefiniteExecution = true
         `;
         break;
     }

@@ -63,6 +63,15 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
   });
 }
 
+export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+  return await bitbucket.pullrequests.list({
+    ...defaults,
+    repo_slug: repoSlug,
+    pagelen: 20,
+    sort: "-created_on",
+  });
+}
+
 export async function getCommitNames(repoSlug: string): Promise<any> {
   return await bitbucket.pipelines.list({
     ...defaults,

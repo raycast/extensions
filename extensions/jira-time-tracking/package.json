@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-time-tracking",
+  "title": "Jira Time Tracking",
+  "description": "Log time against Jira issues",
+  "icon": "command-icon.png",
+  "author": "niallpaterson",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Log Time",
+      "subtitle": "Jira Time Tracking",
+      "description": "Log time against a Jira issue",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Domain",
+      "description": "Jira domain name",
+      "placeholder": "your-domain.atlassian.net"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Username",
+      "description": "Jira username",
+      "placeholder": "user@domain.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Jira API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "@types/node-fetch": "^3.0.3",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -13,7 +13,7 @@
   "ca": { "code": "ca", "name": "Catalan" },
   "ceb": { "code": "ceb", "name": "Cebuano" },
   "zh-CN": { "code": "zh-CN", "name": "Chinese Simplified", "flag": "🇨🇳" },
-  "zh-TW": { "code": "zh-TW", "name": "Mandarin", "flag": "🇹🇼" },
+  "zh-TW": { "code": "zh-TW", "name": "Taiwanese Mandarin", "flag": "🇹🇼" },
   "co": { "code": "co", "name": "Corsican" },
   "hr": { "code": "hr", "name": "Croatian", "flag": "🇭🇷" },
   "cs": { "code": "cs", "name": "Czech", "flag": "🇨🇿" },

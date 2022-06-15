@@ -18,11 +18,11 @@ export function useStacks(boardId: number) {
   };
 }
 
-export async function getBoards(signal: AbortSignal): Promise<Board[]> {
+async function getBoards(signal: AbortSignal): Promise<Board[]> {
   return await jsonRequest({ signal, base: "deck/api/v1.1/boards" });
 }
 
-export async function getStacks(signal: AbortSignal, boardId: number): Promise<Stack[]> {
+async function getStacks(signal: AbortSignal, boardId: number): Promise<Stack[]> {
   return await jsonRequest({ signal, base: `deck/api/v1.1/boards/${boardId}/stacks` });
 }
 

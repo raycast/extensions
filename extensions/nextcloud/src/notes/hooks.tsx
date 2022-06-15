@@ -9,7 +9,7 @@ export function useNotes() {
   };
 }
 
-export async function getNotes(signal: AbortSignal): Promise<Note[]> {
+async function getNotes(signal: AbortSignal): Promise<Note[]> {
   return await jsonRequest({ signal, base: "notes/api/v1/notes" });
 }
 

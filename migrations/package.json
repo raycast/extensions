@@ -1,6 +1,6 @@
 {
   "name": "@raycast/migration",
-  "version": "1.31.0",
+  "version": "1.36.0",
   "description": "",
   "main": "index.js",
   "bin": "./bin/migrate.js",

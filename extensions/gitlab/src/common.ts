@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { GitLab } from "./gitlabapi";
 
-export function createGitLabClient() {
+export function createGitLabClient(): GitLab {
   const preferences = getPreferenceValues();
   const instance = (preferences.instance as string) || "https://gitlab.com";
   const token = preferences.token as string;
@@ -24,7 +24,7 @@ export class GitLabGQL {
   }
 }
 
-export function createGitLabGQLClient() {
+export function createGitLabGQLClient(): GitLabGQL {
   const preferences = getPreferenceValues();
   const instance = (preferences.instance as string) || "https://gitlab.com";
   const token = preferences.token as string;
@@ -69,4 +69,28 @@ export function getCIRefreshInterval(): number | null {
   } else {
     return sec * 1000; // ms
   }
+}
+
+export enum PrimaryAction {
+  Detail = "detail",
+  Browser = "browser",
+}
+
+export function getPrimaryActionPreference(): PrimaryAction {
+  const pref = getPreferenceValues();
+  const val = (pref.primaryaction as string) || undefined;
+  if (val !== PrimaryAction.Detail && val !== PrimaryAction.Browser) {
+    return PrimaryAction.Browser;
+  }
+  const result: PrimaryAction = val;
+  return result;
+}
+
+export function getPreferPopToRootPreference(): boolean {
+  const pref = getPreferenceValues();
+  const val = (pref.poptoroot as boolean) || false;
+  if (val === true) {
+    return true;
+  }
+  return false;
 }

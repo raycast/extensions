@@ -9,3 +9,9 @@ export interface Bookmark {
   author?: string;
   updatedAt: Date;
 }
+
+export enum ReadState {
+  All = "all",
+  Unread = "unread",
+  Archive = "archive",
+}

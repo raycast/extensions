@@ -1,22 +1,15 @@
-import {
-  ActionPanel,
-  Color,
-  ColorLike,
-  CopyToClipboardAction,
-  Icon,
-  ImageLike,
-  ImageSource,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter } from "../utils";
+import { capitalizeFirstLetter, daysInSeconds, ensureCleanAccessories, showErrorToast } from "../utils";
+import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
+import { IssueDetailFetch } from "./issues";
+import { MRDetailFetch } from "./mr";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export interface PushData {
   commit_count: number;
@@ -29,6 +22,12 @@ export interface PushData {
   ref_count?: null;
 }
 
+export interface Note {
+  noteable_iid?: number;
+  noteable_id?: number;
+  noteable_type?: string;
+}
+
 export interface Event {
   id: number;
   project_id: number;
@@ -38,15 +37,12 @@ export interface Event {
   target_type: string;
   target_title: string;
   push_data?: PushData;
+  note?: Note;
 }
 
-export function EventListItem(props: { event: Event }) {
+export function EventListItem(props: { event: Event }): JSX.Element {
   const ev = props.event;
-  const {
-    data: project,
-    error,
-    isLoading,
-  } = useCache<Project | undefined>(
+  const { data: project, error } = useCache<Project | undefined>(
     `event_project_${ev.project_id}`,
     async (): Promise<Project | undefined> => {
       const pro = await gitlab.getProject(ev.project_id);
@@ -55,10 +51,11 @@ export function EventListItem(props: { event: Event }) {
     {
       deps: [ev.project_id],
       secondsToRefetch: 15 * 60,
+      secondsToInvalid: daysInSeconds(7),
     }
   );
   let title = "";
-  let icon: ImageLike | undefined;
+  let icon: Image.ImageLike | undefined;
   const action_name = ev.action_name;
   let actionElement: JSX.Element | undefined;
   switch (action_name) {
@@ -84,7 +81,7 @@ export function EventListItem(props: { event: Event }) {
         const an = capitalizeFirstLetter(ev.action_name);
         const pd = ev.push_data;
         if (pd) {
-          let iconColor: ColorLike | undefined;
+          let iconColor: Color.ColorLike | undefined;
           switch (ev.action_name) {
             case "pushed new":
               {
@@ -102,10 +99,23 @@ export function EventListItem(props: { event: Event }) {
               }
               break;
           }
-          let iconSource: ImageSource | undefined;
+          let iconSource: Image.Source | undefined;
           if (pd.ref_type === "branch") {
-            title = `${an} branch ${pd.ref}`;
+            const ref = pd.ref;
+            title = `${an} branch ${ref}`;
             iconSource = GitLabIcons.branches;
+            if (project && !error && ev.action_name !== "deleted") {
+              actionElement = (
+                <DefaultActions
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/tree/${ref}`}
+                      title="Open Branch in Browser"
+                    />
+                  }
+                />
+              );
+            }
           } else if (pd.ref_type === "tag") {
             title = `${an} tag ${pd.ref}`;
             iconSource = GitLabIcons.tag;
@@ -122,6 +132,13 @@ export function EventListItem(props: { event: Event }) {
         icon = { source: Icon.Circle, tintColor: Color.Green };
         if (project && !error) {
           title += ` ${project.fullPath}`;
+        }
+        if (project && !error && ev.action_name !== "deleted") {
+          actionElement = (
+            <DefaultActions
+              webAction={<GitLabOpenInBrowserAction url={`${project.web_url}`} title="Open Project in Browser" />}
+            />
+          );
         }
       }
       break;
@@ -153,7 +170,23 @@ export function EventListItem(props: { event: Event }) {
                 break;
             }
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />;
+              actionElement = (
+                <DefaultActions
+                  action={
+                    <Action.Push
+                      title="Open Issue"
+                      icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+                      target={<IssueDetailFetch project={project} issueId={ev.target_iid} />}
+                    />
+                  }
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/issues/${ev.target_iid}`}
+                      title="Open Issue in Browser"
+                    />
+                  }
+                />
+              );
             }
           } else if (tt == "mergerequest") {
             switch (ev.action_name) {
@@ -180,7 +213,23 @@ export function EventListItem(props: { event: Event }) {
             }
             title = `${an} merge request !${ev.target_iid}`;
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/merge_requests/${ev.target_iid}`} />;
+              actionElement = (
+                <DefaultActions
+                  action={
+                    <Action.Push
+                      title="Open Merge Request"
+                      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+                      target={<MRDetailFetch project={project} mrId={ev.target_iid} />}
+                    />
+                  }
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/merge_requests/${ev.target_iid}`}
+                      title="Open Merge Request in Browser"
+                    />
+                  }
+                />
+              );
             }
           } else if (tt === "milestone") {
             switch (ev.action_name) {
@@ -197,7 +246,16 @@ export function EventListItem(props: { event: Event }) {
             }
             title = `${an} milestone ${ev.target_title}`;
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />;
+              actionElement = (
+                <DefaultActions
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/milestones/${ev.target_iid}`}
+                      title="Open Milestone in Browser"
+                    />
+                  }
+                />
+              );
             }
           } else if (tt === "discussionnote") {
             switch (ev.action_name) {
@@ -218,6 +276,24 @@ export function EventListItem(props: { event: Event }) {
                 break;
             }
             title = `${an} discussion note`;
+            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+              let slug = "";
+              const nt = ev.note.noteable_type.toLowerCase();
+              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              }
+              if (slug) {
+                actionElement = (
+                  <DefaultActions
+                    webAction={
+                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                    }
+                  />
+                );
+              }
+            }
           } else if (tt === "note") {
             switch (ev.action_name) {
               case "opened":
@@ -237,11 +313,62 @@ export function EventListItem(props: { event: Event }) {
                 break;
             }
             title = `${an} note`;
+            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+              let slug = "";
+              const nt = ev.note.noteable_type.toLowerCase();
+              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              }
+              if (slug) {
+                actionElement = (
+                  <DefaultActions
+                    webAction={
+                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                    }
+                  />
+                );
+              }
+            }
           } else {
             console.log(ev);
           }
         } else {
           console.log(ev);
+        }
+      }
+      break;
+    case "approved":
+      {
+        if (ev.target_type) {
+          const tt = ev.target_type.toLowerCase();
+          if (tt === "mergerequest") {
+            const target_title = ev.target_title;
+            const mrIId = ev.target_iid;
+            title = `Approved Merge Request !${mrIId} "${target_title}"`;
+            icon = { source: "approved.png", tintColor: Color.Green };
+            if (project) {
+              const slug = `/-/merge_requests/${mrIId}`;
+              actionElement = (
+                <DefaultActions
+                  action={
+                    <Action.Push
+                      title="Open Merge Request"
+                      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+                      target={<MRDetailFetch project={project} mrId={mrIId} />}
+                    />
+                  }
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}${slug}`}
+                      title="Open Merge Request in Browser"
+                    />
+                  }
+                />
+              );
+            }
+          }
         }
       }
       break;
@@ -255,7 +382,7 @@ export function EventListItem(props: { event: Event }) {
   if (!title && !icon && !actionElement) {
     title = `Unknown event: ${action_name}`;
     icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy event details" />;
+    actionElement = <Action.CopyToClipboard content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
   }
   const accessoryTitle = project && !error ? project.fullPath : undefined;
 
@@ -263,13 +390,13 @@ export function EventListItem(props: { event: Event }) {
     <List.Item
       title={title || ""}
       icon={icon}
-      accessoryTitle={accessoryTitle}
+      accessories={ensureCleanAccessories([{ text: accessoryTitle }])}
       actions={<ActionPanel>{actionElement && actionElement}</ActionPanel>}
     />
   );
 }
 
-export function EventList() {
+export function EventList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Event[]>(
     "events",
@@ -283,7 +410,7 @@ export function EventList() {
       deps: [searchText],
       secondsToRefetch: 60,
       onFilter: async (epics) => {
-        return await searchData<Event>(epics, {
+        return searchData<Event>(epics, {
           search: searchText || "",
           keys: ["action_name", "target_title"],
           limit: 50,
@@ -292,11 +419,11 @@ export function EventList() {
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Events", error);
+    showErrorToast(error, "Cannot search Events");
   }
 
   if (!data) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    return <List isLoading={true} />;
   }
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
