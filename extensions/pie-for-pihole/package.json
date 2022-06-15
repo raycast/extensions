@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "Pie for Pi-hole",
+  "name": "pie-for-pi-hole",
   "title": "Pie for Pi-hole",
   "description": "Control your Pi-hole from Raycast.",
   "icon": "command-icon.png",
