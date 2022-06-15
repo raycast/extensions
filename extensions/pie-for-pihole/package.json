@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "toggle-pihole",
-      "title": "Toggle Pi-Hole",
+      "title": "Toggle Pi-hole",
       "subtitle": "Pie for Pi-hole",
       "description": "Enable or disable your Pi-Hole, for any custom time",
       "mode": "view"
     },
     {
       "name": "query-log",
-      "title": "Query Log",
+      "title": "Get Query Logs",
       "subtitle": "Pie for Pi-hole",
       "description": "Get the query log for the last 2 hours.",
       "mode": "view"
