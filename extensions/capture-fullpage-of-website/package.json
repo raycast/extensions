@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "screenshot-full-page-in-browser",
-  "title": "Screenshot Full Page in Browser",
+  "name": "capture-fullpage-of-website",
+  "title": "Capture Fullpage of Website",
   "description": "This extension allows you to quickly make a screenshot of the entire page of the site and save it to your desktop just by writing the address of the site.",
   "icon": "command-icon.png",
   "author": "Coun1er",
