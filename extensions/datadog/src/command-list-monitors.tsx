@@ -15,6 +15,9 @@ import {useMonitors} from "./useMonitors";
 import {
   MonitorSearchResponse
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResponse";
+import {
+  MonitorSearchResult
+} from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResult";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -53,26 +56,29 @@ export default function CommandListMonitors() {
   return (
     <List isLoading={monitorsAreLoading} onSearchTextChange={setQuery} throttle>
       <List.Section title={availableMonitorsSummary(monitorResponse)}>
-        {monitorResponse && monitorResponse.monitors
-          ? monitorResponse.monitors.map(monitor => (
-              <List.Item
-                key={monitor.id}
-                title={monitor.name || monitor.query || query}
-                subtitle={monitor.tags?.join(", ")}
-                accessoryTitle={monitor.status}
-                accessoryIcon={{ source: statusIcon(monitor.status) }}
-                actions={
-                  <ActionPanel>
-                    <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${monitor.id}`} />
-                  </ActionPanel>
-                }
-              />
-            ))
-          : null}
+        {
+          monitorResponse && monitorResponse.monitors
+          ? monitorResponse.monitors.map(mapMonitor)
+          : null
+        }
       </List.Section>
     </List>
   );
 }
+
+const mapMonitor = ({id, name, query, tags, status}: MonitorSearchResult) =>
+  <List.Item
+    key={id}
+    title={name || query || ''}
+    subtitle={tags?.join(", ")}
+    accessoryTitle={status}
+    accessoryIcon={{ source: statusIcon(status) }}
+    actions={
+      <ActionPanel>
+        <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${id}`} />
+      </ActionPanel>
+    }
+  />;
 
 type OptionalMonitorSearchResponse = MonitorSearchResponse | undefined;
 
