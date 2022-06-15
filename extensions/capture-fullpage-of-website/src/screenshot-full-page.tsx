@@ -75,9 +75,9 @@ export default function Command() {
     >
       <Form.TextField
         id="website"
-        title="Your website"
+        title="Website URL"
         ref={urlWebSite}
-        placeholder="Enter here the address of the site you want to screenshot..."
+        placeholder="Enter address of the site you want to screenshot..."
       />
     </Form>
   );
