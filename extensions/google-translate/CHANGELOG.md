@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix] - 2022-06-14
+## [Fix] - 2022-06-15
 
 Fix character encoding in `TextArea` on translate form
 
