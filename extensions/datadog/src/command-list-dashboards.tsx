@@ -8,6 +8,7 @@ export interface Author {
   name: string;
 }
 
+// noinspection JSUnusedGlobalSymbols
 export default function CommandListDashboards() {
   const [query, setQuery] = useState("");
   const {dashboards, totalDashboards, dashboardsAreLoading} = useDashboards(query);

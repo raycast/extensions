@@ -10,7 +10,6 @@ v1.setServerVariables(configuration, {
   site: SERVER,
 });
 
-export const dashboardsApi = new v1.DashboardsApi(configuration);
 export const notebooksApi = new v1.NotebooksApi(configuration);
 export const monitorsApi = new v1.MonitorsApi(configuration);
 
@@ -20,6 +19,41 @@ export const apiAPM = ({ env }: { env: string }): Promise<APM[]> =>
     .then(json => json as Record<string, { calls: string[] }>)
     .then(rec => Object.entries(rec).sort(([l], [r]) => (l < r ? -1 : 1)))
     .then(entries => entries.map(([name, { calls }]) => ({ env, name, calls } as APM)));
+
+export type DashboardSearchAPIResponse = {
+  total: number;
+  dashboards: DashboardSummaryDefinition[];
+};
+
+export type DashboardSummaryDefinition = {
+  popularity: number;
+  tags: any[];
+  is_favorite: boolean;
+  id: string;
+  icon: null;
+  integration_id: null;
+  is_shared: boolean;
+  author: Author;
+  url: string;
+  title: string;
+  modified: Date;
+  created: Date;
+  is_read_only: boolean;
+  type: string;
+}
+
+export type Author = {
+  handle: string;
+  name: string;
+}
+
+export const apiDashboards = ({query}: {query: string}): Promise<DashboardSearchAPIResponse> =>
+  fetch(
+    encodeURI(`https://app.${SERVER}/api/v1/dashboard_search?with_suggested=true&query=${query}&start=0&count=50&sort=`),
+    params
+  )
+    .then(res => res.json())
+    .then(json => json as DashboardSearchAPIResponse);
 
 const parseResponseToJSON = (resp: Response) =>
   resp.json().then(json => {
