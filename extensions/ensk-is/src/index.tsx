@@ -27,8 +27,9 @@ function search(db: Database, query: string) {
     where rowid in (
       select rowid
       from dictionary_fts
-      where dictionary_fts match :query)
-    order by id limit 101
+      where dictionary_fts match :query
+      order by rank)
+    order by rowid limit 100
   `);
   stmt.bind({ ":query": `${query}*` });
   const results = [];
