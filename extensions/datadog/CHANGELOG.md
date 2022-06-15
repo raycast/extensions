@@ -1,11 +1,11 @@
 # Datadog Changelog
 
 
-## [add pagination to api] - {PR_MERGE_DATE}
+## [Add pagination to api] - {PR_MERGE_DATE}
 
 * datadog notebooks, monitors and customizable domain
 
-## [datadog notebooks, monitors and customizable domain] - 2022-02-21
+## [Datadog notebooks, monitors and customizable domain] - 2022-02-21
 
 * datadog notebooks, monitors and customizable domain
 
