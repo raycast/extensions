@@ -1,6 +1,6 @@
 # Zen Mode Changelog
 
-## [Initial Version] - 2022-05-28
+## [Initial Version] - 2022-06-15
 
 If you have the Zen Mode app, you can access it straight from Raycast.
 
