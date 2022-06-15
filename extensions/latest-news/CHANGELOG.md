@@ -1,9 +1,5 @@
 # Latest News Changelog
 
-## [Ingored Sources] - {PR_MERGE_DATE}
-
--   List of ignored sources available
-
-## [Initial Version] - 2022-06-02
+## [Initial Version] - {PR_MERGE_DATE}
 
 -   This is the first commit
