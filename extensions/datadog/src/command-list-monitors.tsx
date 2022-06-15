@@ -8,7 +8,7 @@ import {
   UNKNOWN,
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import {Action, ActionPanel, List } from "@raycast/api";
 import {  useState } from "react";
 import { linkDomain } from "./util";
 import {useMonitors} from "./useMonitors";
@@ -42,11 +42,10 @@ const mapMonitor = ({id, name, query, tags, status}: MonitorSearchResult) =>
     key={id}
     title={name || query || ''}
     subtitle={tags?.join(", ")}
-    accessoryTitle={status}
-    accessoryIcon={{ source: statusIcon(status) }}
+    accessories={[{text: status, icon: {source: statusIcon(status)}}]}
     actions={
       <ActionPanel>
-        <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${id}`} />
+        <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${id}`} />
       </ActionPanel>
     }
   />;
