@@ -11,23 +11,23 @@ export default function CommandListDashboards() {
   return (
     <List isLoading={dashboardsAreLoading} onSearchTextChange={setQuery} throttle>
       <List.Section title={`Available dashboards ${totalDashboards}`}>
-        {dashboards.map(dashboard => (
+        {dashboards.map(({id, is_favorite, title, author, is_shared, popularity, url}) => (
           <List.Item
-            key={dashboard.id}
-            icon={dashboard.is_favorite ? Icon.Star : undefined}
-            title={dashboard.title || "No title"}
+            key={id}
+            icon={is_favorite ? Icon.Star : undefined}
+            title={title || "No title"}
             accessories={[
-              { icon: dashboard.is_shared ? Icon.Link : "", tooltip: "Shared" },
-              { icon: Icon.Person, tooltip: dashboard.author.handle },
+              { icon: is_shared ? Icon.Link : "", tooltip: "Shared" },
+              { icon: Icon.Person, tooltip: author.handle },
               {
-                text: `${Array(dashboard.popularity + 1).join("I")}${Array(6 - dashboard.popularity).join(" ")}`,
+                text: `${Array(popularity + 1).join("I")}${Array(6 - popularity).join(" ")}`,
                 icon: Icon.Eye,
-                tooltip: `Popularity ${dashboard.popularity}/5`,
+                tooltip: `Popularity ${popularity}/5`,
               },
             ].filter(x => x.icon)}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={`https://${linkDomain()}${dashboard.url}`} />
+                <OpenInBrowserAction url={`https://${linkDomain()}${url}`} />
               </ActionPanel>
             }
           />
