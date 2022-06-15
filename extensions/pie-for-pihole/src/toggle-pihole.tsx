@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { SummaryInfo } from "./interfaces";
-import { cleanPiholeURL } from "./utils";
+import { cleanPiholeURL, fetchRequestTimeout } from "./utils";
 
 function piholeToggle(action: string, duration?: number) {
   const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
@@ -24,17 +24,31 @@ function piholeToggle(action: string, duration?: number) {
 export default function () {
   const { PIHOLE_URL } = getPreferenceValues();
   const [currentStatus, updateCurrentStatus] = useState<string>();
+  const [timeoutInfo, updateTimeoutInfo] = useState<string>();
 
   useEffect(() => {
     async function getStatus() {
-      const response = await fetch(`http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary`);
-      const data = (await response.json()) as SummaryInfo;
-      updateCurrentStatus(data.status);
+      const response = await fetchRequestTimeout(`http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary`);
+      if (response == "query-aborted" || response == undefined) {
+        updateTimeoutInfo("query-aborted");
+      } else {
+        const data = (await response!.json()) as SummaryInfo;
+        updateTimeoutInfo("no-timeout");
+        updateCurrentStatus(data.status);
+      }
     }
     getStatus();
   }, [currentStatus]);
-  return (
+  return timeoutInfo === "query-aborted" ? (
     <List>
+      <List.Item
+        key={"validation error"}
+        title={`Invalid Pi-Hole URL or API token has been provided`}
+        accessories={[{ text: "Please check extensions -> Pie for Pi-hole " }]}
+      />
+    </List>
+  ) : (
+    <List isLoading={currentStatus == undefined ? true : false}>
       <List.Section title="Current Pi-Hole status">
         <List.Item
           key="Current status"

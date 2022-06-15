@@ -2,45 +2,59 @@ import fetch from "node-fetch";
 import { Color, Icon, getPreferenceValues, ActionPanel, List } from "@raycast/api";
 import { QueryLogs, QueryLog, QueryBlockStatus } from "./interfaces";
 import { useEffect, useState } from "react";
-import { UNIXTimestampToTime, AddToListAction, cleanPiholeURL } from "./utils";
+import { UNIXTimestampToTime, AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 
 export default function () {
   const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
+  const [timeoutInfo, updateTimeoutInfo] = useState<string>();
   const [queryLogs, updateQueryLogs] = useState<QueryLog[]>();
   useEffect(() => {
     async function getQueryLogs() {
-      const querydata = await fetch(
+      const response = await fetchRequestTimeout(
         `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?getAllQueries=3600&auth=${API_TOKEN}`
       );
-      let { data } = (await querydata.json()) as QueryLogs;
-      data = data.reverse();
-      const queryLogsArray: QueryLog[] = [];
-      for (let i = 0; i < data.length; i++) {
-        queryLogsArray.push({
-          timestamp: UNIXTimestampToTime(parseInt(data[i][0])),
-          domain: data[i][2],
-          client: data[i][3],
-          blockStatus:
-            data[i][4] == "1"
-              ? QueryBlockStatus.Blocked
-              : data[i][4] == "3"
-              ? QueryBlockStatus.Cached
-              : data[i][4] == "4"
-              ? QueryBlockStatus.Blocked
-              : data[i][4] == "5"
-              ? QueryBlockStatus.Blocked
-              : QueryBlockStatus.NotBlocked,
-        } as QueryLog);
+      if (response == "query-aborted" || response == undefined) {
+        updateTimeoutInfo("query-aborted");
+      } else {
+        updateTimeoutInfo("no-timeout");
+        let { data } = (await response!.json()) as QueryLogs;
+        data = data.reverse();
+        const queryLogsArray: QueryLog[] = [];
+        for (let i = 0; i < data.length; i++) {
+          queryLogsArray.push({
+            timestamp: UNIXTimestampToTime(parseInt(data[i][0])),
+            domain: data[i][2],
+            client: data[i][3],
+            blockStatus:
+              data[i][4] == "1"
+                ? QueryBlockStatus.Blocked
+                : data[i][4] == "3"
+                ? QueryBlockStatus.Cached
+                : data[i][4] == "4"
+                ? QueryBlockStatus.Blocked
+                : data[i][4] == "5"
+                ? QueryBlockStatus.Blocked
+                : QueryBlockStatus.NotBlocked,
+          } as QueryLog);
+        }
+        updateQueryLogs(queryLogsArray);
       }
-      updateQueryLogs(queryLogsArray);
     }
     getQueryLogs();
   }, []);
 
-  return (
+  return timeoutInfo === "query-aborted" ? (
+    <List>
+      <List.Item
+        key={"validation error"}
+        title={`Invalid Pi-Hole URL or API token has been provided`}
+        accessories={[{ text: "Please check extensions -> Pie for Pi-hole " }]}
+      />
+    </List>
+  ) : (
     <List
-      isLoading={queryLogs?.length == 0 ? true : false}
+      isLoading={queryLogs == undefined ? true : false}
       navigationTitle="Top Queries"
       searchBarPlaceholder="Search for domains"
     >

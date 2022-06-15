@@ -49,7 +49,7 @@
     },
     {
       "name": "API_TOKEN",
-      "type": "password",
+      "type": "textfield",
       "required": true,
       "title": "API Token",
       "description": "Find this in settings > API/WEB Interface > Show API Token"

@@ -47,6 +47,7 @@ export enum QueryBlockStatus {
   NotBlocked,
   Cached,
 }
+
 export interface QueryLog {
   timestamp: string;
   domain: string;
