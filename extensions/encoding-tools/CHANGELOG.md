@@ -8,3 +8,7 @@
 - Add SHA1 sum
 - Add SHA256 sum
 - Add SHA512 sum
+
+## [New command] - 2022-06-15
+
+- Add Bcrypt encoding”
