@@ -6,10 +6,10 @@ import https from "https";
 
 export default function AppLogSession({ appId }: { appId: string }) {
   const { data, error, isValidating } = useSWR(["log-sessions", appId], () =>
-    heroku.requests.createLogDrain({ params: { appId }, body: { tail: true } }).then(simplifyCustomResponse)
+    heroku.requests.createLogDrain({ params: { appId }, body: { tail: true, lines: 50 } }).then(simplifyCustomResponse)
   );
 
-  const [content, setContent] = useState<string>('');
+  const [content, setContent] = useState<string>("");
 
   useEffect(() => {
     if (data?.logplex_url) {
@@ -18,7 +18,7 @@ export default function AppLogSession({ appId }: { appId: string }) {
       logRequest.on("response", (response) => {
         response.on("data", (chunk) => {
           const newContent = chunk.toString();
-          setContent(c => c + newContent);
+          setContent((c) => c + newContent);
         });
       });
 
@@ -36,9 +36,13 @@ export default function AppLogSession({ appId }: { appId: string }) {
     <Detail
       navigationTitle="Log Session"
       isLoading={isValidating}
-      markdown={data && !isValidating ? `\`\`\`output
+      markdown={
+        data && !isValidating
+          ? `\`\`\`output
 ${content}
-\`\`\`` : ''}
+\`\`\``
+          : ""
+      }
     />
   );
 }
