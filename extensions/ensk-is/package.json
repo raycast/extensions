@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Ensk.is",
+      "title": "English to Icelandic",
+      "subtitle": "Ensk.is",
       "description": "Find the Icelandic translation for an English word",
       "mode": "view"
     }
