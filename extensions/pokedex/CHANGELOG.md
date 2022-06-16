@@ -24,7 +24,7 @@
 
 - Added more Pokémon details: Training, Breeding, Forms
 - Added Pokémon type icon
-- Added Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
+- Added Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
 - Fixed extension icon
 
 ## [Initial Version] - 2022-02-18
