@@ -1,4 +1,3 @@
-import fetch, { AbortError } from "node-fetch";
 import { Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SummaryInfo } from "./interfaces";

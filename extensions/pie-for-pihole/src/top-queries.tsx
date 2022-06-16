@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { Color, Icon, getPreferenceValues, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TopQueries, domainDetails } from "./interfaces";
