@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -57,6 +57,16 @@ export default function Command() {
 
     fetchIncidents();
   }, []);
+
+  useEffect(() => {
+    if (state.error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading incidents",
+        message: state.error.response.data.errors,
+      });
+    }
+  }, [state.error]);
 
   return (
     <List isShowingDetail isLoading={state.isLoading}>

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -64,6 +64,16 @@ export default function Command() {
 
     fetchHeartbeats();
   }, []);
+
+  useEffect(() => {
+    if (state.error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading heartbeats",
+        message: state.error.response.data.errors,
+      });
+    }
+  }, [state.error]);
 
   return (
     <List isShowingDetail isLoading={state.isLoading}>
