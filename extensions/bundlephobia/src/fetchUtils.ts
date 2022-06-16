@@ -3,28 +3,35 @@ import fetch from "node-fetch";
 import { NpmsFetchResponse } from "./packagesResponse";
 import { PackageResultModel } from "./packageRepsonse";
 
-export const fetchSizeBundlephobia = async (packageName: string): Promise<PackageResultModel> => {
-  try {
-    const response = await fetch(`https://bundlephobia.com/api/size?package=${packageName}`);
-    const json = await response.json();
+export const fetchSizeBundlephobia = async (packageName: string, signal: AbortSignal): Promise<PackageResultModel> => {
+  const response = await fetch(`https://bundlephobia.com/api/size?package=${packageName}`, {
+    method: "get",
+    signal,
+  });
 
-    return json as PackageResultModel;
-  } catch (e: any) {
-    showToast(Toast.Style.Failure, "Could not fetch information of package");
+  const json = (await response.json()) as PackageResultModel | { code: string; message: string };
 
-    return Promise.resolve(null);
+  if (!response.ok || (json && "message" in json)) {
+    throw new Error(json && "message" in json ? json.message : response.statusText);
   }
+
+  return json as PackageResultModel;
 };
 
-export const fetchSuggestionsBunldephobia = async (packageName: string): Promise<NpmsFetchResponse> => {
-  try {
-    const response = await fetch(`https://api.npms.io/v2/search/suggestions?q=${packageName}`);
-    const json = await response.json();
+export const fetchSuggestionsBundlephobia = async (
+  packageName: string,
+  signal: AbortSignal
+): Promise<NpmsFetchResponse> => {
+  const response = await fetch(`https://api.npms.io/v2/search/suggestions?q=${packageName}`, {
+    method: "get",
+    signal,
+  });
 
-    return json as NpmsFetchResponse;
-  } catch (e: any) {
-    showToast(Toast.Style.Failure, "Could not fetch matched packages");
+  const json = (await response.json()) as NpmsFetchResponse | { code: string; message: string };
 
-    return Promise.resolve([]);
+  if (!response.ok || (json && "message" in json)) {
+    throw new Error(json && "message" in json ? json.message : response.statusText);
   }
+
+  return json as NpmsFetchResponse;
 };

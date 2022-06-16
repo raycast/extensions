@@ -1,48 +1,29 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
-import { fetchSizeBundlephobia, fetchSuggestionsBunldephobia } from "./fetchUtils";
-import { NpmsFetchResponse, Links } from "./packagesResponse";
-import { PackageResultModel } from "./packageRepsonse";
 import { formatInformationOfPackage } from "./utils";
+import { useGetDetail, useSearch } from "./hook";
+import { Links } from "./packagesResponse";
 
 export default function Command() {
-  const [results, setResults] = useState<NpmsFetchResponse>([]);
-  const [detailResult, setDetailResult] = useState<PackageResultModel>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [results, isLoading, search] = useSearch();
+  const [detail, isDetailLoading, select] = useGetDetail();
   const [links, setLinks] = useState<Links | null>(null);
 
-  const onSearchTextChange = async (text: string) => {
-    setLoading(true);
-    const response = await fetchSuggestionsBunldephobia(text);
-    setSearchTerm(text);
-    setResults(response);
-    setLoading(false);
-  };
-  const onSelectionChange = async (id = "") => {
-    const [packageName, version] = id?.split("|") || [];
-
-    if (packageName) {
-      setLoadingDetail(true);
-      const selectedPackage = results.find(
-        ({ package: packageNpm }) => packageNpm.name === packageName && packageNpm.version === version
-      );
-      if (selectedPackage) {
-        setLinks(selectedPackage?.package?.links as Links);
-      }
-      const response = await fetchSizeBundlephobia(packageName);
-      setDetailResult(response);
-      setLoadingDetail(false);
+  const callback = (packageName: string, version: string) => {
+    const selectedPackage = results?.find(
+      ({ package: packageNpm }) => packageNpm.name === packageName && packageNpm.version === version
+    );
+    if (selectedPackage) {
+      setLinks(selectedPackage?.package?.links as Links);
     }
   };
 
   const { minifiedSizeInKB, minifiedGzipSizeInKB, timeWithSlowSpeed, timeWithFastSpeed } =
-    formatInformationOfPackage(detailResult);
+    formatInformationOfPackage(detail);
   const markdown: string[] = [];
-  if (detailResult && links) {
-    markdown.push(`## ${detailResult.name} ${detailResult.version}`);
-    markdown.push(`${detailResult.description}`);
+  if (detail && links) {
+    markdown.push(`## ${detail.name} ${detail.version}`);
+    markdown.push(`${detail.description}\n`);
     markdown.push(`[Homepage](${links?.homepage})`);
     markdown.push(`[Npm](${links?.npm})`);
     markdown.push(`[Github](${links?.repository})`);
@@ -50,12 +31,12 @@ export default function Command() {
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder={`Search packages, like "react"…`}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={search}
       throttle
-      onSelectionChange={onSelectionChange}
-      isShowingDetail={!!detailResult}
+      onSelectionChange={(id) => select(id, callback)}
+      isShowingDetail={!!detail}
     >
       {!results?.length ? (
         <List.EmptyView title="Type something to search" />
@@ -69,10 +50,10 @@ export default function Command() {
               id={`${name}|${version}`}
               detail={
                 <List.Item.Detail
-                  isLoading={loadingDetail}
+                  isLoading={isDetailLoading}
                   markdown={markdown.join("\n")}
                   metadata={
-                    detailResult && links ? (
+                    detail && links ? (
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Bundle size" />
                         <List.Item.Detail.Metadata.Label title="Minified" text={`${minifiedSizeInKB.toFixed(1)}kB`} />
