@@ -1,13 +1,24 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import useSWR from "swr";
 
 import heroku, { simplifyCustomResponse } from "./heroku";
 
 import AppBuilds from "./AppBuilds";
 import ConfigVars from "./ConfigVars";
+import { useEffect } from "react";
 
 export default function Command() {
   const { data, error } = useSWR("apps", () => heroku.requests.getApps({}).then(simplifyCustomResponse));
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   if (!data) {
     return <List isLoading />;
