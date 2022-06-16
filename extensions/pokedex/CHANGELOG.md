@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Improvements] - 2022-06-14
+## [Improvements] - 2022-06-16
 
 - Using new Grid layout
 - Using new list item metadata
