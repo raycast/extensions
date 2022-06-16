@@ -16,7 +16,7 @@ export function cacheProvider() {
   let map: Map<Key, unknown>;
   try {
     const cache = readFileSync(path, { encoding: "utf-8" });
-    map = new Map(JSON.parse(cache.toString()));
+    map = new Map(cache ? JSON.parse(cache.toString()) : null);
   } catch (e) {
     console.error("Failed reading cache", e);
     map = new Map();

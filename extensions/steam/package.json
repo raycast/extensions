@@ -22,7 +22,7 @@
   "preferences": [
     {
       "name": "token",
-      "type": "textfield",
+      "type": "password",
       "title": "Steam API Key",
       "description": "Add your API key",
       "placeholder": "API Key",
