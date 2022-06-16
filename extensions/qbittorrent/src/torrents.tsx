@@ -1,4 +1,4 @@
-import { Icon, List, getPreferenceValues } from "@raycast/api";
+import { Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { QBittorrent, prettySize, RawTorrent, RawTorrentListFilter, RawTorrentState } from "qbit.js";
 
@@ -44,10 +44,18 @@ export default function Command() {
   const updateTorrents = async () => {
     +timeout && updateTimeout && clearTimeout(updateTimeout);
     setLoading(true);
-    await qbit.login(username, password);
-    const torrents = await qbit.api.getTorrents({ filter });
+    try {
+      await qbit.login(username, password);
+      const torrents = await qbit.api.getTorrents({ filter });  
+      setTorrents(torrents);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load torrents",
+        message: "Please check your preferences.",
+      });
+    }
     setLoading(false);
-    setTorrents(torrents);
     if (+timeout) {
       updateTimeout = setTimeout(() => {
         setUpdateTimestap(+new Date());

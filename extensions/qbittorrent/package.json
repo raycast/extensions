@@ -20,6 +20,7 @@
       "name": "address",
       "title": "address",
       "description": "qBitorrent webui address",
+      "placeholder": "http://example.com:8080",
       "type": "textfield",
       "required": true
     },
@@ -27,6 +28,7 @@
       "name": "username",
       "title": "username",
       "description": "qBitorrent webui username",
+      "placeholder": "admin",
       "type": "textfield",
       "required": true
     },
@@ -35,6 +37,7 @@
       "title": "password",
       "description": "qBitorrent webui password",
       "type": "password",
+      "placeholder": "adminadmin",
       "required": true
     },
     {
