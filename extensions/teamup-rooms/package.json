@@ -36,7 +36,7 @@
     {
       "name": "index",
       "title": "Check for Open Rooms",
-      "description": "Check what rooms are open right now",
+      "description": "Check what rooms are open right now and quickly book them",
       "mode": "view"
     }
   ],
