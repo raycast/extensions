@@ -35,24 +35,6 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      <List.Item
-        icon={SitDownIcon}
-        title="Sit Down for 30 minutes"
-        actions={
-          <ActionPanel>
-            <Action
-              title="SitDown"
-              onAction={() => {
-                sitDown();
-
-                setTimeout(() => {
-                  standUp();
-                }, 30 * 60 * 1000);
-              }}
-            />
-          </ActionPanel>
-        }
-      />
       {!isInstalled && (
         <List.Item
           icon={BrowserIcon}
