@@ -5,7 +5,7 @@ import heroku, { simplifyCustomResponse } from "./heroku";
 
 import AppBuilds from "./AppBuilds";
 import ConfigVars from "./ConfigVars";
-import AppLogSession from './AppLogSession'
+import AppLogSession from "./AppLogSession";
 import { useEffect } from "react";
 
 export default function Command() {
