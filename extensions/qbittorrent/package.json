@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "Qbittorrent",
-  "title": "qBitorrent",
+  "name": "QBitorrent",
+  "title": "QBitorrent",
   "description": "a qBitorrent client",
   "icon": "qbittorrent.png",
   "author": "J3n5en",
