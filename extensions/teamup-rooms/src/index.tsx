@@ -192,7 +192,6 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle={`Rooms open in the next ${timeString}`}
       searchBarPlaceholder="Filter rooms"
       isLoading={openRooms === undefined}
       searchBarAccessory={
