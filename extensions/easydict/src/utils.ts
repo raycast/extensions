@@ -1,9 +1,4 @@
-import {
-  Clipboard,
-  getApplications,
-  getPreferenceValues,
-  LocalStorage,
-} from "@raycast/api";
+import { Clipboard, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
 import { LanguageItem, MyPreferences, QueryRecoredItem } from "./types";
@@ -12,12 +7,8 @@ import { LanguageItem, MyPreferences, QueryRecoredItem } from "./types";
 export const clipboardQueryInterval = 10 * 60 * 1000;
 
 export const myPreferences: MyPreferences = getPreferenceValues();
-export const defaultLanguage1 = getLanguageItemFromList(
-  myPreferences.language1
-);
-export const defaultLanguage2 = getLanguageItemFromList(
-  myPreferences.language2
-);
+export const defaultLanguage1 = getLanguageItemFromList(myPreferences.language1);
+export const defaultLanguage2 = getLanguageItemFromList(myPreferences.language2);
 
 export function truncate(string: string, length = 40, separator = "...") {
   if (string.length <= length) return string;
@@ -27,18 +18,13 @@ export function truncate(string: string, length = 40, separator = "...") {
 export function isPreferredChinese(): boolean {
   const lanuguageIdPrefix = "zh";
   const preferences: MyPreferences = getPreferenceValues();
-  if (
-    preferences.language1.startsWith(lanuguageIdPrefix) ||
-    preferences.language2.startsWith(lanuguageIdPrefix)
-  ) {
+  if (preferences.language1.startsWith(lanuguageIdPrefix) || preferences.language2.startsWith(lanuguageIdPrefix)) {
     return true;
   }
   return false;
 }
 
-export function getLanguageItemFromList(
-  youdaoLanguageId: string
-): LanguageItem {
+export function getLanguageItemFromList(youdaoLanguageId: string): LanguageItem {
   for (const langItem of languageItemList) {
     if (langItem.youdaoLanguageId === youdaoLanguageId) {
       return langItem;
@@ -52,10 +38,7 @@ export function getLanguageItemFromList(
   };
 }
 
-function getAnotherLanguageItem(
-  from: LanguageItem,
-  to: LanguageItem
-): LanguageItem {
+function getAnotherLanguageItem(from: LanguageItem, to: LanguageItem): LanguageItem {
   const zh = "zh-CHS";
   if (from.youdaoLanguageId === zh) {
     return to;
@@ -64,45 +47,23 @@ function getAnotherLanguageItem(
   }
 }
 
-export function getEudicWebTranslateURL(
-  queryText: string,
-  from: LanguageItem,
-  to: LanguageItem
-): string {
-  const eudicWebLanguageId = getAnotherLanguageItem(
-    from,
-    to
-  ).eudicWebLanguageId;
+export function getEudicWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
+  const eudicWebLanguageId = getAnotherLanguageItem(from, to).eudicWebLanguageId;
   if (eudicWebLanguageId) {
-    return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(
-      queryText
-    )}`;
+    return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryText)}`;
   }
   return "";
 }
 
-export function getYoudaoWebTranslateURL(
-  queryText: string,
-  from: LanguageItem,
-  to: LanguageItem
-): string {
-  const youdaoWebLanguageId = getAnotherLanguageItem(
-    from,
-    to
-  ).youdaoWebLanguageId;
+export function getYoudaoWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
+  const youdaoWebLanguageId = getAnotherLanguageItem(from, to).youdaoWebLanguageId;
   if (youdaoWebLanguageId) {
-    return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(
-      queryText
-    )}`;
+    return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryText)}`;
   }
   return "";
 }
 
-export function getGoogleTranslateURL(
-  queryText: string,
-  from: LanguageItem,
-  to: LanguageItem
-): string {
+export function getGoogleTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
   const fromLanguageId = from.googleLanguageId || from.youdaoLanguageId;
   const toLanguageId = to.googleLanguageId || to.youdaoLanguageId;
   const text = encodeURI(queryText!);
@@ -110,15 +71,11 @@ export function getGoogleTranslateURL(
 }
 
 // function: query the clipboard text from LocalStorage
-export async function tryQueryClipboardText(
-  queryClipboardText: (text: string) => void
-) {
-  let text = await Clipboard.readText();
+export async function tryQueryClipboardText(queryClipboardText: (text: string) => void) {
+  const text = await Clipboard.readText();
   console.log("query clipboard text: " + text);
   if (text) {
-    const jsonString = await LocalStorage.getItem<string>(
-      clipboardQueryTextKey
-    );
+    const jsonString = await LocalStorage.getItem<string>(clipboardQueryTextKey);
     console.log("query jsonString: " + jsonString);
     if (!jsonString) {
       queryClipboardText(text);
@@ -155,10 +112,7 @@ export function saveQueryClipboardRecord(text: string) {
 
 // function: remove all punctuation from the text
 export function removeEnglishPunctuation(text: string) {
-  return text.replace(
-    /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]/g,
-    ""
-  );
+  return text.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~]/g, "");
 }
 
 // function: remove all Chinese punctuation and blank space from the text
@@ -198,14 +152,12 @@ export function getInputTextLanguageId(inputText: string): string {
   const chineseLanguageId = "zh-CHS";
   if (
     isEnglishOrNumber(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === englishLanguageId ||
-      defaultLanguage2.youdaoLanguageId === englishLanguageId)
+    (defaultLanguage1.youdaoLanguageId === englishLanguageId || defaultLanguage2.youdaoLanguageId === englishLanguageId)
   ) {
     fromLanguageId = englishLanguageId;
   } else if (
     isContainChinese(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === chineseLanguageId ||
-      defaultLanguage2.youdaoLanguageId === chineseLanguageId)
+    (defaultLanguage1.youdaoLanguageId === chineseLanguageId || defaultLanguage2.youdaoLanguageId === chineseLanguageId)
   ) {
     fromLanguageId = chineseLanguageId;
   }
@@ -215,9 +167,7 @@ export function getInputTextLanguageId(inputText: string): string {
 }
 
 // function: return and update the autoSelectedTargetLanguage according to the languageId
-export function getAutoSelectedTargetLanguageId(
-  accordingLanguageId: string
-): string {
+export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): string {
   let targetLanguageId = "auto";
   if (accordingLanguageId === defaultLanguage1.youdaoLanguageId) {
     targetLanguageId = defaultLanguage2.youdaoLanguageId;
@@ -227,15 +177,11 @@ export function getAutoSelectedTargetLanguageId(
 
   const targetLanguage = getLanguageItemFromList(targetLanguageId);
 
-  console.log(
-    `languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`
-  );
+  console.log(`languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`);
   return targetLanguage.youdaoLanguageId;
 }
 
-async function traverseAllInstalledApplications(
-  updateIsInstalledEudic: (isInstalled: boolean) => void
-) {
+async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInstalled: boolean) => void) {
   const installedApplications = await getApplications();
   LocalStorage.setItem(eudicBundleId, false);
   updateIsInstalledEudic(false);
@@ -251,9 +197,7 @@ async function traverseAllInstalledApplications(
   }
 }
 
-export function checkIsInstalledEudic(
-  updateIsInstalledEudic: (isInstalled: boolean) => void
-) {
+export function checkIsInstalledEudic(updateIsInstalledEudic: (isInstalled: boolean) => void) {
   LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
     console.log("is install: ", isInstalledEudic);
 

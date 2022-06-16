@@ -1,4 +1,4 @@
-import { Component, useState } from "react";
+import { Component } from "react";
 import { exec, execFile } from "child_process";
 import { languageItemList, SectionType, TranslationType } from "./consts";
 import { ListItemActionPanelItem, YoudaoTranslateReformatResultItem } from "./types";
@@ -119,7 +119,7 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
 
   openInEudic = (queryText?: string) => {
     const url = `eudic://dict/${queryText}`;
-    execFile("open", [url], (error, stdout, stderr) => {
+    execFile("open", [url], (error, stdout) => {
       if (error) {
         console.log("error:", error);
         LocalStorage.removeItem(eudicBundleId);

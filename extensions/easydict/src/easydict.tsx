@@ -1,17 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
-import {
-  ActionFeedback,
-  getListItemIcon,
-  getWordAccessories,
-  ListActionPanel,
-} from "./components";
+import { ActionFeedback, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import {
-  LanguageItem,
-  TranslateSourceResult,
-  TranslateDisplayResult,
-  RequestResultState,
-} from "./types";
+import { LanguageItem, TranslateSourceResult, TranslateDisplayResult, RequestResultState } from "./types";
 import {
   BaiduRequestStateCode,
   getYoudaoErrorInfo,
@@ -34,10 +24,7 @@ import {
   tryQueryClipboardText,
 } from "./utils";
 import { requestAllTranslateAPI } from "./request";
-import {
-  reformatTranslateDisplayResult,
-  reformatTranslateResult,
-} from "./dataFormat";
+import { reformatTranslateDisplayResult, reformatTranslateResult } from "./dataFormat";
 
 let requestResultState: RequestResultState;
 
@@ -62,28 +49,23 @@ export default function () {
         <List.Item
           title={"Language Conflict"}
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-          subtitle={
-            "Your first Language with second Language must be different."
-          }
+          subtitle={"Your first Language with second Language must be different."}
         />
       </List>
     );
   }
 
-  const [translateDisplayResult, updateTranslateDisplayResult] =
-    useState<TranslateDisplayResult[]>();
+  const [translateDisplayResult, updateTranslateDisplayResult] = useState<TranslateDisplayResult[]>();
 
   /**
      the language type of text, depending on the language type of the current input text, it is preferred to judge whether it is English or Chinese according to the preferred language, and then auto
      */
-  const [currentFromLanguageState, updateCurrentFromLanguageState] =
-    useState<LanguageItem>(defaultLanguage1);
+  const [currentFromLanguageState, updateCurrentFromLanguageState] = useState<LanguageItem>(defaultLanguage1);
 
   /*
     default translation language, based on user's preference language, can only defaultLanguage1 or defaultLanguage2 depending on the currentFromLanguageState. cannot be changed manually.
     */
-  const [autoSelectedTargetLanguage, updateAutoSelectedTargetLanguage] =
-    useState<LanguageItem>(defaultLanguage1);
+  const [autoSelectedTargetLanguage, updateAutoSelectedTargetLanguage] = useState<LanguageItem>(defaultLanguage1);
 
   /*
     the user selected translation language, for display, can be changed manually. default userSelectedTargetLanguage is the autoSelectedTargetLanguage.
@@ -100,10 +82,8 @@ export default function () {
         console.log("error code: ", youdaoErrorCode, baiduErrorCode);
 
         if (
-          youdaoErrorCode ===
-            YoudaoRequestStateCode.AccessFrequencyLimited.toString() ||
-          baiduErrorCode ===
-            BaiduRequestStateCode.AccessFrequencyLimited.toString()
+          youdaoErrorCode === YoudaoRequestStateCode.AccessFrequencyLimited.toString() ||
+          baiduErrorCode === BaiduRequestStateCode.AccessFrequencyLimited.toString()
         ) {
           delayUpdateTargetLanguageTimer = setTimeout(() => {
             console.log("--> error_code: ", baiduErrorCode);
@@ -138,26 +118,17 @@ export default function () {
           return;
         }
 
-        let youdaoTranslateResult = youdaoRes.data;
-        let baiduTranslateResult = baiduRes.data;
+        const youdaoTranslateResult = youdaoRes.data;
+        const baiduTranslateResult = baiduRes.data;
         let caiyunTranslateResult = undefined;
 
         console.log(`translate: ${fromLanguage} -> ${targetLanguage}`);
-        console.log(
-          "youdao result: ",
-          JSON.stringify(youdaoTranslateResult, null, 4)
-        );
-        console.log(
-          "baidu result: ",
-          JSON.stringify(baiduTranslateResult, null, 4)
-        );
+        console.log("youdao result: ", JSON.stringify(youdaoTranslateResult, null, 4));
+        console.log("baidu result: ", JSON.stringify(baiduTranslateResult, null, 4));
 
         if (caiyunRes) {
           caiyunTranslateResult = caiyunRes.data;
-          console.log(
-            "caiyun result: ",
-            JSON.stringify(caiyunRes.data, null, 4)
-          );
+          console.log("caiyun result: ", JSON.stringify(caiyunRes.data, null, 4));
         }
 
         const sourceResult: TranslateSourceResult = {
@@ -176,9 +147,7 @@ export default function () {
         }
 
         updateLoadingState(false);
-        updateTranslateDisplayResult(
-          reformatTranslateDisplayResult(reformatResult)
-        );
+        updateTranslateDisplayResult(reformatTranslateDisplayResult(reformatResult));
         updateCurrentFromLanguageState(getLanguageItemFromList(from));
 
         checkIsInstalledEudic(updateIsInstalledEudic);
@@ -207,9 +176,7 @@ export default function () {
 
       const currentLanguageId = getInputTextLanguageId(searchText);
       console.log("currentLanguageId: ", currentLanguageId);
-      updateCurrentFromLanguageState(
-        getLanguageItemFromList(currentLanguageId)
-      );
+      updateCurrentFromLanguageState(getLanguageItemFromList(currentLanguageId));
 
       // priority to use user selected target language
       let tartgetLanguageId = userSelectedTargetLanguage.youdaoLanguageId;
@@ -218,9 +185,7 @@ export default function () {
       // if conflict, use auto selected target language
       if (currentLanguageId === tartgetLanguageId) {
         tartgetLanguageId = getAutoSelectedTargetLanguageId(currentLanguageId);
-        updateAutoSelectedTargetLanguage(
-          getLanguageItemFromList(tartgetLanguageId)
-        );
+        updateAutoSelectedTargetLanguage(getLanguageItemFromList(tartgetLanguageId));
         console.log("autoSelectedTargetLanguage: ", tartgetLanguageId);
       }
       translate(currentLanguageId, tartgetLanguageId);
@@ -238,13 +203,11 @@ export default function () {
 
     const isYoudaoRequestError =
       requestResultState.type === TranslationType.Youdao &&
-      requestResultState.errorInfo.errorCode !==
-        YoudaoRequestStateCode.Success.toString();
+      requestResultState.errorInfo.errorCode !== YoudaoRequestStateCode.Success.toString();
 
     const isBaiduRequestError =
       requestResultState.type === TranslationType.Baidu &&
-      requestResultState.errorInfo.errorCode !==
-        BaiduRequestStateCode.Success.toString();
+      requestResultState.errorInfo.errorCode !== BaiduRequestStateCode.Success.toString();
 
     let errorTitle = "Network Request Error:";
     if (isYoudaoRequestError) {
@@ -258,9 +221,7 @@ export default function () {
         <List.Item
           title={errorTitle}
           subtitle={`${requestResultState.errorInfo.errorMessage}`}
-          accessories={[
-            { text: `Error Code: ${requestResultState.errorInfo.errorCode}` },
-          ]}
+          accessories={[{ text: `Error Code: ${requestResultState.errorInfo.errorCode}` }]}
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
           actions={
             <ActionPanel>
@@ -276,13 +237,13 @@ export default function () {
       );
     }
 
-    let eudicWebUrl = getEudicWebTranslateURL(
+    const eudicWebUrl = getEudicWebTranslateURL(
       searchText || "",
       currentFromLanguageState!,
       autoSelectedTargetLanguage
     );
 
-    let youdaoWebUrl = getYoudaoWebTranslateURL(
+    const youdaoWebUrl = getYoudaoWebTranslateURL(
       searchText || "",
       currentFromLanguageState!,
       autoSelectedTargetLanguage
@@ -318,10 +279,7 @@ export default function () {
                         onLanguageUpdate={(value) => {
                           updateAutoSelectedTargetLanguage(value);
                           updateUserSelectedTargetLanguage(value);
-                          translate(
-                            currentFromLanguageState!.youdaoLanguageId,
-                            value.youdaoLanguageId
-                          );
+                          translate(currentFromLanguageState!.youdaoLanguageId, value.youdaoLanguageId);
                         }}
                       />
                     }
@@ -368,10 +326,7 @@ export default function () {
         </ActionPanel>
       }
     >
-      <List.EmptyView
-        icon={Icon.TextDocument}
-        title="Type a word to look up or translate"
-      />
+      <List.EmptyView icon={Icon.TextDocument} title="Type a word to look up or translate" />
       <ListDetail />
     </List>
   );

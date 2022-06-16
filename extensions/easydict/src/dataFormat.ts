@@ -8,19 +8,15 @@ import {
 } from "./types";
 import { isPreferredChinese } from "./utils";
 
-export function reformatTranslateResult(
-  src: TranslateSourceResult
-): TranslateReformatResult {
-  let translations: TranslationItem[] = [];
+export function reformatTranslateResult(src: TranslateSourceResult): TranslateReformatResult {
+  const translations: TranslationItem[] = [];
 
-  const youdaoTranslations = src.youdaoResult.translation.map(
-    (translationText) => {
-      return {
-        type: TranslationType.Youdao,
-        text: translationText,
-      };
-    }
-  );
+  const youdaoTranslations = src.youdaoResult.translation.map((translationText) => {
+    return {
+      type: TranslationType.Youdao,
+      text: translationText,
+    };
+  });
 
   translations.push(...youdaoTranslations);
 
@@ -68,10 +64,8 @@ export function reformatTranslateResult(
   };
 }
 
-export function reformatTranslateDisplayResult(
-  reformatResult: TranslateReformatResult
-): TranslateDisplayResult[] {
-  let displayResult: Array<TranslateDisplayResult> = [];
+export function reformatTranslateDisplayResult(reformatResult: TranslateReformatResult): TranslateDisplayResult[] {
+  const displayResult: Array<TranslateDisplayResult> = [];
 
   // console.log("reformatResult: ", JSON.stringify(reformatResult));
 
@@ -82,17 +76,15 @@ export function reformatTranslateDisplayResult(
     !reformatResult.webTranslation;
 
   for (const [i, translation] of reformatResult.translations.entries()) {
-    let sectionType = isShowMultipleTranslations
-      ? translation.type
-      : SectionType.Translation;
-    let sectionTitle: any = sectionType;
+    const sectionType = isShowMultipleTranslations ? translation.type : SectionType.Translation;
+    const sectionTitle = sectionType;
     let tooltip: string = translation.type;
 
     if (isShowMultipleTranslations) {
       tooltip = "";
     }
 
-    let oneLineTranslation = translation.text.split("\n").join("");
+    const oneLineTranslation = translation.text.split("\n").join("");
 
     displayResult.push({
       type: sectionType,
@@ -115,14 +107,12 @@ export function reformatTranslateDisplayResult(
   }
 
   let hasShowDetailsSectionTitle = false;
-  let detailsSectionTitle = "Details";
+  const detailsSectionTitle = "Details";
 
   reformatResult.explanations?.forEach((explanation, i) => {
     displayResult.push({
       type: SectionType.Explanations,
-      sectionTitle: !hasShowDetailsSectionTitle
-        ? detailsSectionTitle
-        : undefined,
+      sectionTitle: !hasShowDetailsSectionTitle ? detailsSectionTitle : undefined,
       items: [
         {
           key: explanation + i,
@@ -145,9 +135,7 @@ export function reformatTranslateDisplayResult(
   if (wfsText.length) {
     displayResult.push({
       type: SectionType.Forms,
-      sectionTitle: !hasShowDetailsSectionTitle
-        ? detailsSectionTitle
-        : undefined,
+      sectionTitle: !hasShowDetailsSectionTitle ? detailsSectionTitle : undefined,
       items: [
         {
           key: wfsText,
@@ -167,9 +155,7 @@ export function reformatTranslateDisplayResult(
     const webResultValue = reformatResult.webTranslation.value.join("；");
     displayResult.push({
       type: SectionType.WebTranslation,
-      sectionTitle: !hasShowDetailsSectionTitle
-        ? detailsSectionTitle
-        : undefined,
+      sectionTitle: !hasShowDetailsSectionTitle ? detailsSectionTitle : undefined,
       items: [
         {
           key: webResultKey,
@@ -189,9 +175,7 @@ export function reformatTranslateDisplayResult(
     const phraseValue = phrase.value.join("；");
     displayResult.push({
       type: SectionType.WebPhrase,
-      sectionTitle: !hasShowDetailsSectionTitle
-        ? detailsSectionTitle
-        : undefined,
+      sectionTitle: !hasShowDetailsSectionTitle ? detailsSectionTitle : undefined,
       items: [
         {
           key: phraseKey + i,
