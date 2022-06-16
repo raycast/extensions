@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -59,7 +59,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={state.isLoading}>
       {state.items?.map((item: IncidentItem, index: number) => (
         <List.Item
           key={index}
@@ -100,6 +100,7 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Copy Screenshot URL"
+                icon={Icon.Clipboard}
                 onAction={async () => {
                   await Clipboard.copy(item.attributes.screenshot_url);
 
