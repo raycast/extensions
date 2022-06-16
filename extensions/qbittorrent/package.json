@@ -1,17 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "qbittorrent",
-  "title": "qbittorrent",
-  "description": "",
+  "name": "Qbittorrent",
+  "title": "qBitorrent",
+  "description": "a qBitorrent client",
   "icon": "qbittorrent.png",
   "author": "J3n5en",
   "license": "MIT",
   "commands": [
     {
       "name": "torrents",
-      "title": "list torrents",
+      "title": "List Torrents",
       "subtitle": "qBittorrent",
-      "description": "list qbitorrent torrents",
+      "description": "list qBitorrent torrents",
       "mode": "view"
     }
   ],
@@ -19,21 +19,21 @@
     {
       "name": "address",
       "title": "address",
-      "description": "qbitorrent webui address",
+      "description": "qBitorrent webui address",
       "type": "textfield",
       "required": true
     },
     {
       "name": "username",
       "title": "username",
-      "description": "qbitorrent webui username",
+      "description": "qBitorrent webui username",
       "type": "textfield",
       "required": true
     },
     {
       "name": "password",
       "title": "password",
-      "description": "qbitorrent webui password",
+      "description": "qBitorrent webui password",
       "type": "password",
       "required": true
     },
