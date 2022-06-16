@@ -24,24 +24,24 @@ enum GrowthRate {
 }
 
 const typeColor: { [key: string]: string } = {
-  Normal: "#a8a77a",
-  Fire: "#ee8130",
-  Water: "#6390f0",
-  Electric: "#f7d02c",
-  Grass: "#7ac74c",
-  Ice: "#96d9d6",
-  Fighting: "#c22e28",
-  Poison: "#a33ea1",
-  Ground: "#e2bf65",
-  Flying: "#a98ff3",
-  Psychic: "#f95587",
-  Bug: "#a6b91a",
-  Rock: "#b6a136",
-  Ghost: "#735797",
-  Dragon: "#6f35fc",
-  Dark: "#705746",
-  Steel: "#b7b7ce",
-  Fairy: "#d685ad",
+  normal: "#a8a77a",
+  fire: "#ee8130",
+  water: "#6390f0",
+  electric: "#f7d02c",
+  grass: "#7ac74c",
+  ice: "#96d9d6",
+  fighting: "#c22e28",
+  poison: "#a33ea1",
+  ground: "#e2bf65",
+  flying: "#a98ff3",
+  psychic: "#f95587",
+  bug: "#a6b91a",
+  rock: "#b6a136",
+  ghost: "#735797",
+  dragon: "#6f35fc",
+  dark: "#705746",
+  steel: "#b7b7ce",
+  fairy: "#d685ad",
 };
 
 function random(lower: number, upper: number) {
@@ -263,7 +263,11 @@ export default function PokemonDetail(props: { id?: number }) {
       },
       {
         p: `_Egg groups:_ ${pokemon_v2_pokemonegggroups
-          .map((g) => g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0].name)
+          .map(
+            (g) =>
+              g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0]?.name ||
+              g.pokemon_v2_egggroup.name
+          )
           .join(", ")}`,
       },
       {
@@ -316,19 +320,14 @@ export default function PokemonDetail(props: { id?: number }) {
       {
         h2: "Pokédex entries",
       },
-      ...pokemon_v2_pokemonspeciesflavortexts
-        .filter((f) => f.pokemon_v2_version.pokemon_v2_versionnames.length)
-        .map((flavor) => {
-          return {
-            p: `**${
-              flavor.pokemon_v2_version.pokemon_v2_versionnames[0].name
-            }:** ${flavor.flavor_text
-              .split("\n")
-              .join(" ")
-              .split("")
-              .join(" ")}`,
-          };
-        }),
+      ...pokemon_v2_pokemonspeciesflavortexts.map((flavor) => {
+        return {
+          p: `**${
+            flavor.pokemon_v2_version.pokemon_v2_versionnames[0]?.name ||
+            flavor.pokemon_v2_version.name
+          }:** ${flavor.flavor_text.split("\n").join(" ").split("").join(" ")}`,
+        };
+      }),
     ];
 
     return data;
@@ -371,9 +370,7 @@ export default function PokemonDetail(props: { id?: number }) {
                   <Detail.Metadata.TagList.Item
                     key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
                     text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
-                    color={
-                      typeColor[t.pokemon_v2_type.pokemon_v2_typenames[0].name]
-                    }
+                    color={typeColor[t.pokemon_v2_type.name]}
                   />
                 );
               })}

@@ -42,6 +42,14 @@
       "default": "9",
       "data": [
         {
+          "title": "Chinese (Simplified)",
+          "value": "12"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "4"
+        },
+        {
           "title": "English",
           "value": "9"
         },
