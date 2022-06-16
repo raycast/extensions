@@ -1,9 +1,9 @@
-import { preferences, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { find } from "lodash";
-import { Table } from "../types";
+import { Preferences, Table } from "../types";
 
-const apiKey = preferences.apiKey?.value as string;
+const apiKey = getPreferenceValues<Preferences>().apiKey;
 
 const endpoint = "https://api.football-data.org/v4";
 const headers = {

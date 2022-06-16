@@ -19,3 +19,7 @@ export interface Team {
   tla: string;
   crest: string;
 }
+
+export interface Preferences {
+  apiKey: string;
+}

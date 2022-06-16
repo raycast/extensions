@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "standings",
-      "title": "Standings",
+      "title": "View Standings",
       "subtitle": "Portuguese Primeira Liga",
       "description": "View the latest Portuguese Primeira Liga standings.",
       "mode": "view"
@@ -26,7 +26,6 @@
       "required": true,
       "title": "API Key",
       "description": "Your Football Data API Key",
-      "link": "https://www.football-data.org/",
       "placeholder": "Enter your Football Data API Key"
     }
   ],
