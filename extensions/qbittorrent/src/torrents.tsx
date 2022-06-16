@@ -46,7 +46,7 @@ export default function Command() {
     setLoading(true);
     try {
       await qbit.login(username, password);
-      const torrents = await qbit.api.getTorrents({ filter });  
+      const torrents = await qbit.api.getTorrents({ filter });
       setTorrents(torrents);
     } catch (error) {
       await showToast({
