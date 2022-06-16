@@ -29,7 +29,7 @@ interface MonitorItemAttributes {
 interface State {
   isLoading: boolean;
   items: MonitorItem[];
-  error?: Error;
+  error?: any;
 }
 
 export default function Command() {

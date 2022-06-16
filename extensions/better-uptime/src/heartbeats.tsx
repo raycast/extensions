@@ -27,7 +27,7 @@ interface HeartbeatItemAttributes {
 interface State {
   isLoading: boolean;
   items: HeartbeatItem[];
-  error?: Error;
+  error?: any;
 }
 
 export default function Command() {

@@ -28,7 +28,7 @@ interface IncidentItemAttributes {
 interface State {
   isLoading: boolean;
   items: IncidentItem[];
-  error?: Error;
+  error?: any;
 }
 
 export default function Command() {
