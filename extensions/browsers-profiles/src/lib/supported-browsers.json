@@ -5,42 +5,42 @@
       "type": "CHROMIUM",
       "title": "Google Chrome",
       "path": "/Library/Application Support/Google/Chrome",
-      "icon": "chrome.icns"
+      "icon": "chrome.png"
     },
     {
       "app": "Google Chrome Canary",
       "type": "CHROMIUM",
       "title": "Google Chrome Canary",
       "path": "/Library/Application Support/Google/Chrome Canary",
-      "icon": "canary.icns"
+      "icon": "canary.png"
     },
     {
       "app": "Chromium",
       "type": "CHROMIUM",
       "title": "Chromium",
       "path": "/Library/Application Support/Chromium",
-      "icon": "chromium.icns"
+      "icon": "chromium.png"
     },
     {
       "app": "Brave Browser",
       "type": "CHROMIUM",
       "title": "Brave",
       "path": "/Library/Application Support/BraveSoftware/Brave-Browser",
-      "icon": "brave.icns"
+      "icon": "brave.png"
     },
     {
       "app": "Microsoft Edge",
       "type": "CHROMIUM",
       "title": "Microsoft Edge",
       "path": "/Library/Application Support/Microsoft Edge",
-      "icon": "edge.icns"
+      "icon": "edge.png"
     },
     {
       "app": "Microsoft Edge Canary",
       "type": "CHROMIUM",
       "title": "Microsoft Edge Canary",
       "path": "/Library/Application Support/Microsoft Edge Canary",
-      "icon": "edge.icns"
+      "icon": "edge.png"
     }
   ],
   "firefox": [
@@ -49,7 +49,7 @@
       "type": "FIREFOX",
       "title": "Firefox",
       "path": "/Library/Application Support/Firefox",
-      "icon": "firefox.icns"
+      "icon": "firefox.png"
     }
   ]
 }
