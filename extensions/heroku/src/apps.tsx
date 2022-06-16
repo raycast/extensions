@@ -45,6 +45,7 @@ export default function Command() {
                     key: "b",
                   }}
                 />
+                <Action.CopyToClipboard title="Copy App Name" content={app.name} />
                 <ActionPanel.Section title="Project Settings">
                   <Action.Push
                     icon={Icon.Gear}
