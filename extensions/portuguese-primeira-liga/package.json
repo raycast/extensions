@@ -5,7 +5,6 @@
   "description": "View the latest Portuguese Primeira Liga standings.",
   "icon": "icon.png",
   "author": "danielsequeira",
-  "owner": "raycast",
   "categories": [
     "Fun"
   ],
