@@ -4,7 +4,7 @@ import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
 export default function Command() {
   const [loading, setLoading] = useState(false);
   const [gameState, setGameState] = useState("lobby");
-  const [level, setLevel] = useState(0);
+  const [level, setLevel] = useState(1);
   const [sequence, setSequence] = useState([] as string[]);
   const [humanSequence, setHumanSequence] = useState([] as string[]);
   const colourMap = {
@@ -75,9 +75,13 @@ export default function Command() {
             setHumanSequence([]);
 
             animateSequence([...sequence, nextColour]);
+          } else {
+            setGameState("win");
           }
         } else {
           console.log("fail");
+
+          setGameState("lose");
         }
       }
     }
