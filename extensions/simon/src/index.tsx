@@ -3,7 +3,7 @@ import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
 
 export default function Command() {
   const [loading, setLoading] = useState(false);
-  const [gameState, setGameState] = useState("start");
+  const [gameState, setGameState] = useState("lobby");
   const [level, setLevel] = useState(0);
   const [sequence, setSequence] = useState([] as string[]);
   const [humanSequence, setHumanSequence] = useState([] as string[]);
@@ -20,7 +20,7 @@ export default function Command() {
     { name: "Yellow", tint: Color.Yellow },
   ]);
 
-  const maxLevel = 20;
+  const maxLevel = 3;
 
   const nextLevel = () => {
     const randomIndex = Math.floor(Math.random() * colours.length);
@@ -85,15 +85,39 @@ export default function Command() {
     console.log(sequence, humanSequence);
   }, [gameState, sequence, humanSequence]);
 
-  if (gameState === "start") {
+  if (gameState === "lobby") {
     return (
       <Detail
-        markdown="Press on Start Game to start playing!"
+        markdown="Press Start Game to start playing!"
         actions={
           <ActionPanel>
             <Action.SubmitForm
               title="Start Game"
-              onSubmit={(values) => {
+              onSubmit={() => {
+                const nextColour = nextLevel();
+
+                setGameState("play");
+
+                activateColour(nextColour);
+
+                animateSequence(sequence);
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  if (gameState === "win" || gameState === "lose") {
+    return (
+      <Detail
+        markdown={gameState === "win" ? "You won, congratulations!" : "You lost, better luck next time!"}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Play Again"
+              onSubmit={() => {
                 const nextColour = nextLevel();
 
                 setGameState("play");
@@ -110,33 +134,32 @@ export default function Command() {
   }
 
   return (
-    <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Medium} isLoading={loading}>
-      {gameState === "play" &&
-        colours.map((colour, index) => (
-          <Grid.Item
-            key={colour.name}
-            content={{ value: { source: Icon.Circle, tintColor: colour.tint }, tooltip: colour.name }}
-            title={colour.name}
-            actions={
-              <ActionPanel>
-                {gameState === "play" && <Action.SubmitForm
-                  title="Select"
-                  onSubmit={(values) => {
-                    if (loading) {
-                      console.log("loading...");
+    <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Small} isLoading={loading}>
+      {colours.map((colour, index) => (
+        <Grid.Item
+          key={colour.name}
+          content={{ value: { source: Icon.Circle, tintColor: colour.tint }, tooltip: colour.name }}
+          title={colour.name}
+          actions={
+            <ActionPanel>
+              <Action.SubmitForm
+                title="Select"
+                onSubmit={() => {
+                  if (loading) {
+                    console.log("loading");
 
-                      return;
-                    }
+                    return;
+                  }
 
-                    console.log(colour.name);
+                  console.log(colour.name);
 
-                    setHumanSequence([...humanSequence, colour.name]);
-                  }}
-                />}
-              </ActionPanel>
-            }
-          />
-        ))}
+                  setHumanSequence([...humanSequence, colour.name]);
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </Grid>
   );
 }
