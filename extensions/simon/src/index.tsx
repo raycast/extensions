@@ -56,8 +56,7 @@ export default function Command() {
   };
 
   const animateSequence = (newSequence: string[]) => {
-    // newSequence.forEach((colour, index) => {
-    ["Red", "Green", "Red", "Red"].forEach((colour, index) => {
+    newSequence.forEach((colour, index) => {
       setTimeout(() => {
         activateColour(colour);
       }, (index + 1) * 800);
