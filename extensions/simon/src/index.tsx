@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
 
+interface State {
+  loading: boolean;
+  gameState: string;
+  level: number;
+  sequence: string[];
+  humanSequence: string[];
+  colours: { name: string; tint: Color }[];
+}
+
 export default function Command() {
   const maxLevel = 3;
   const colourMap = {
@@ -9,12 +18,12 @@ export default function Command() {
     Blue: Color.Blue,
     Yellow: Color.Yellow,
   } as { [key: string]: Color };
-  const [state, setState] = useState({
+  const [state, setState] = useState<State>({
     loading: false,
     gameState: "lobby",
     level: 1,
-    sequence: [] as string[],
-    humanSequence: [] as string[],
+    sequence: [],
+    humanSequence: [],
     colours: [
       { name: "Red", tint: Color.Red },
       { name: "Green", tint: Color.Green },
@@ -95,7 +104,7 @@ export default function Command() {
         }
       }
     }
-  }, [state.gameState]);
+  }, [state.gameState, state.humanSequence]);
 
   if (state.gameState === "lobby") {
     return (
@@ -130,7 +139,14 @@ export default function Command() {
             <Action.SubmitForm
               title="Play Again"
               onSubmit={() => {
-                // TODO: make it start the game fresh
+                setState((previous) => ({
+                  ...previous,
+                  loading: false,
+                  gameState: "lobby",
+                  level: 1,
+                  sequence: [],
+                  humanSequence: [],
+                }));
               }}
             />
           </ActionPanel>
