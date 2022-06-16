@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
 
 export default function Command() {
   const [loading, setLoading] = useState(false);
@@ -7,10 +7,16 @@ export default function Command() {
   const [level, setLevel] = useState(0);
   const [sequence, setSequence] = useState([] as string[]);
   const [humanSequence, setHumanSequence] = useState([] as string[]);
+  const colourMap = {
+    Red: Color.Red,
+    Green: Color.Green,
+    Blue: Color.Blue,
+    Yellow: Color.Yellow,
+  } as { [key: string]: Color };
   const [colours, setColours] = useState([
     { name: "Red", tint: Color.Red },
-    { name: "Blue", tint: Color.Blue },
     { name: "Green", tint: Color.Green },
+    { name: "Blue", tint: Color.Blue },
     { name: "Yellow", tint: Color.Yellow },
   ]);
 
@@ -26,13 +32,9 @@ export default function Command() {
   };
 
   const activateColour = (colourToActivate: string) => {
-    let tint = Color.PrimaryText;
-
     setColours((colours) =>
       colours.map((colour) => {
         if (colour.name === colourToActivate) {
-          tint = colour.tint;
-
           return { ...colour, tint: Color.PrimaryText };
         }
 
@@ -44,7 +46,7 @@ export default function Command() {
       setColours((colours) =>
         colours.map((colour) => {
           if (colour.name === colourToActivate) {
-            return { ...colour, tint: tint };
+            return { ...colour, tint: colourMap[colour.name] };
           }
 
           return colour;
@@ -54,24 +56,15 @@ export default function Command() {
   };
 
   const animateSequence = (newSequence: string[]) => {
-    newSequence.forEach((colour, index) => {
+    // newSequence.forEach((colour, index) => {
+    ["Red", "Green", "Red", "Red"].forEach((colour, index) => {
       setTimeout(() => {
         activateColour(colour);
-      }, (index + 1) * 500);
+      }, (index + 1) * 800);
     });
   };
 
   useEffect(() => {
-    if (gameState === "start") {
-      const nextColour = nextLevel();
-
-      setGameState("play");
-
-      activateColour(nextColour);
-
-      animateSequence(sequence);
-    }
-
     if (gameState === "play") {
       if (humanSequence.length === sequence.length) {
         if (humanSequence.join("") === sequence.join("")) {
@@ -91,11 +84,35 @@ export default function Command() {
     }
 
     console.log(sequence, humanSequence);
-  }, [sequence, humanSequence]);
+  }, [gameState, sequence, humanSequence]);
+
+  if (gameState === "start") {
+    return (
+      <Detail
+        markdown="Press on Start Game to start playing!"
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Start Game"
+              onSubmit={(values) => {
+                const nextColour = nextLevel();
+
+                setGameState("play");
+
+                activateColour(nextColour);
+
+                animateSequence(sequence);
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
-    <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Medium} isLoading={sequence.length <= 0}>
-      {(sequence.length > 0) &&
+    <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Medium} isLoading={loading}>
+      {gameState === "play" &&
         colours.map((colour, index) => (
           <Grid.Item
             key={colour.name}
@@ -103,7 +120,7 @@ export default function Command() {
             title={colour.name}
             actions={
               <ActionPanel>
-                <Action.SubmitForm
+                {gameState === "play" && <Action.SubmitForm
                   title="Select"
                   onSubmit={(values) => {
                     if (loading) {
@@ -116,7 +133,7 @@ export default function Command() {
 
                     setHumanSequence([...humanSequence, colour.name]);
                   }}
-                />
+                />}
               </ActionPanel>
             }
           />
