@@ -39,14 +39,34 @@
       "title": "Previous Track",
       "subtitle": "Spotify",
       "description": "Skips to the previous track in Spotify.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "previousTrackNotificationEnabled",
+          "type": "checkbox",
+          "label": "Show previous track info on change",
+          "required": false,
+          "description": "Show previous track info on change",
+          "default": false
+        }
+      ]
     },
     {
       "name": "nextTrack",
       "title": "Next Track",
       "subtitle": "Spotify",
       "description": "Skips to the next track in Spotify.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "nextTrackNotificationEnabled",
+          "type": "checkbox",
+          "label": "Show next track info on change",
+          "required": false,
+          "description": "Show next track info on change",
+          "default": false
+        }
+      ]
     },
     {
       "name": "current",

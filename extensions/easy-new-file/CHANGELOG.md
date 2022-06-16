@@ -1,5 +1,11 @@
 # Easy New File Changelog
 
+## [Add new file layout options] - 2022-06-13
+
+- Add new file layout options: List or Grid
+- Optimize file icons
+- Add three new file types
+
 ## [Add New File with Text command] - 2022-06-04
 
 - Add **New File with Text** command: Create a new file with selected or clipboard text now.

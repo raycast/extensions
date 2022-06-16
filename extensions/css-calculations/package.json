@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "css-calculations",
+  "title": "CSS Calculations",
+  "description": "Useful CSS Calculations in Web Development",
+  "icon": "css.png",
+  "author": "teziovsky",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clamp_px",
+      "icon": "css_clamp.png",
+      "title": "Calculate Clamp PX",
+      "description": "Generate responsive clamp function based on px values",
+      "mode": "view"
+    },
+    {
+      "name": "clamp_rem",
+      "icon": "css_clamp.png",
+      "title": "Calculate Clamp REM",
+      "description": "Generate responsive clamp function based on rem values",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "volta": {
+    "node": "16.15.1"
+  }
+}

@@ -12,6 +12,43 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "run-shortcut-now",
+      "icon": "run-icon-now.png",
+      "title": "Run Shortcut Now",
+      "subtitle": "Text Shortcuts",
+      "description": "Create text shortcut.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary action after running shortcut.",
+          "required": false,
+          "title": "Primary action",
+          "default": "Paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "Paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "Copy"
+            }
+          ]
+        },
+        {
+          "name": "closeMainWindow",
+          "type": "checkbox",
+          "required": false,
+          "title": "Advanced Preferences",
+          "label": "Close Main Window",
+          "description": "Close the Raycast main window after running a shortcut.",
+          "default": true
+        }
+      ]
+    },
+    {
       "name": "shortcut-library",
       "icon": "shortcut-library.png",
       "title": "Shortcut Library",
@@ -20,10 +57,102 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "rememberTag",
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the shortcut items.",
+          "required": true,
+          "title": "Shortcut Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the shortcut items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Shortcut Item Size",
+          "default": "small",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "itemInset",
+          "type": "dropdown",
+          "description": "Set the inset of the shortcut items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Shortcut Item Inset",
+          "default": "md",
+          "data": [
+            {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
+              "title": "Small",
+              "value": "sm"
+            },
+            {
+              "title": "Medium",
+              "value": "md"
+            },
+            {
+              "title": "Large",
+              "value": "lg"
+            }
+          ]
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Set the primary action after running shortcut.",
+          "required": false,
+          "title": "Primary action",
+          "default": "Paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "Paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "Copy"
+            }
+          ]
+        },
+        {
+          "name": "closeMainWindow",
           "type": "checkbox",
           "required": false,
           "title": "Advanced Preferences",
+          "label": "Close Main Window",
+          "description": "Close the Raycast main window after running a shortcut.",
+          "default": true
+        },
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
           "label": "Remember Filter Tag",
           "description": "Remember Shortcut Filter Tag.",
           "default": true
@@ -33,7 +162,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Shortcut Detail",
-          "description": "Show Shortcut's text on the right.",
+          "description": "Show Shortcut's text on the right. (Only works with Grid layout)",
           "default": true
         },
         {
@@ -70,6 +199,14 @@
           "default": true
         },
         {
+          "name": "deletion",
+          "type": "checkbox",
+          "required": false,
+          "label": "Deletion",
+          "description": "Show Deletion shortcuts.",
+          "default": true
+        },
+        {
           "name": "format",
           "type": "checkbox",
           "required": false,
@@ -102,29 +239,10 @@
       "subtitle": "Text Shortcuts",
       "description": "Create text shortcut.",
       "mode": "view"
-    },
-    {
-      "name": "run-shortcut-now",
-      "icon": "run-icon-now.png",
-      "title": "Run Shortcut Now",
-      "subtitle": "Text Shortcuts",
-      "description": "Create text shortcut.",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "closeMainWindow",
-      "type": "checkbox",
-      "required": false,
-      "title": "Advanced Preferences",
-      "label": "Close Main Window",
-      "description": "Close the Raycast main window after running a shortcut.",
-      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "^1.36.0",
     "ts-md5": "^1.2.11"
   },
   "devDependencies": {
