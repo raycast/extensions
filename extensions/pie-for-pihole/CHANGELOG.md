@@ -1,3 +1,3 @@
 # Pie for Pi-hole Changelog
 
-## [Initial Version] - 2022-06-02
+## [Initial Version] - 2022-06-16
