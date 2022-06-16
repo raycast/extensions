@@ -48,6 +48,7 @@ export default function Command() {
   const results = useMemo(() => (db && query.trim() !== "" ? search(db, query) : []), [query, db]);
   return (
     <List isLoading={!db} onSearchTextChange={setQuery} searchBarPlaceholder="Search Ensk.is...">
+      <List.EmptyView title={query.length === 0 ? "Search Word" : "No Results"} icon="no-view.png" />
       <List.Section title="Results" subtitle={results.length + ""}>
         {db && results && (results as unknown as Row[]).map((row: Row) => <SearchListItem key={row.id} row={row} />)}
       </List.Section>
@@ -64,9 +65,7 @@ function SearchListItem({ row }: { row: Row }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={`https://ensk.is/item/${row.word}`} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
+            <Action.OpenInBrowser url={`https://ensk.is/item/${row.word}`} />
             <Action.CopyToClipboard title="Copy URL" content={`https://ensk.is/item/${row.word}`} />
           </ActionPanel.Section>
         </ActionPanel>
