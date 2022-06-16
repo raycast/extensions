@@ -71,7 +71,7 @@ export default function Command() {
     <List
       isLoading={loading}
       enableFiltering
-      navigationTitle={`${filter} torrents`}
+      navigationTitle="All Torrents"
       searchBarPlaceholder="Search your torrents"
       searchBarAccessory={
         <List.Dropdown

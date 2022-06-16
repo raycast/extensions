@@ -45,6 +45,7 @@
       "title": "Refresh timeout in ms",
       "description": "Refresh timeout in ms, 0 to disable",
       "type": "textfield",
+      "placeholder": "0",
       "default": "0",
       "required": false
     }
