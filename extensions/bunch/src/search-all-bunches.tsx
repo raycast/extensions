@@ -9,11 +9,11 @@ import { Preferences } from "./types/preferences";
 import { BunchNotInstallView } from "./components/bunch-not-install-view";
 
 export default function SearchAllBunches() {
-  const { rememberFilter, closeMainWindow } = getPreferenceValues<Preferences>();
+  const { rememberFilter } = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<string>("");
   const [searchContent, setSearchContent] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
-  const { bunches, openBunches, loading } = getBunches(refresh, searchContent);
+  const { bunches, openBunches, allBunches, setAllBunches, loading } = getBunches(refresh, searchContent);
   const { showDetail } = getIsShowDetail(refresh);
   const { bunchFolder } = getBunchFolder();
 
@@ -46,10 +46,12 @@ export default function SearchAllBunches() {
                 actions={
                   <ActionOnBunches
                     bunches={value}
+                    allBunches={allBunches}
+                    setAllBunches={setAllBunches}
+                    bunchFolder={bunchFolder}
                     openBunches={openBunches}
                     setRefresh={setRefresh}
                     showDetail={showDetail}
-                    closeMainWindow={closeMainWindow}
                   />
                 }
               />
@@ -70,10 +72,12 @@ export default function SearchAllBunches() {
                 actions={
                   <ActionOnBunches
                     bunches={value}
+                    allBunches={allBunches}
+                    setAllBunches={setAllBunches}
+                    bunchFolder={bunchFolder}
                     openBunches={openBunches}
                     setRefresh={setRefresh}
                     showDetail={showDetail}
-                    closeMainWindow={closeMainWindow}
                   />
                 }
               />
