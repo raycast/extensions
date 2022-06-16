@@ -27,7 +27,10 @@ export default function Command() {
     const randomIndex = Math.floor(Math.random() * state.colours.length);
     const nextColour = state.colours[randomIndex].name;
 
-    setState({ ...state, sequence: [...state.sequence, nextColour] });
+    setState((previous) => ({
+      ...previous,
+      sequence: [...previous.sequence, nextColour],
+    }));
 
     return nextColour;
   };
@@ -74,8 +77,6 @@ export default function Command() {
     if (state.gameState === "play") {
       if (state.humanSequence.length === state.sequence.length) {
         if (state.humanSequence.join("") === state.sequence.join("")) {
-          console.log("success");
-
           if (state.level < maxLevel) {
             setState((previous) => ({
               ...previous,
@@ -90,8 +91,6 @@ export default function Command() {
             setState((previous) => ({ ...previous, gameState: "win" }));
           }
         } else {
-          console.log("fail");
-
           setState((previous) => ({ ...previous, gameState: "lose" }));
         }
       }
@@ -153,14 +152,13 @@ export default function Command() {
                 title="Select"
                 onSubmit={() => {
                   if (state.loading) {
-                    console.log("loading");
-
                     return;
                   }
 
-                  console.log(colour.name);
-
-                  setState((previous) => ({ ...previous, humanSequence: [...previous.humanSequence, colour.name] }));
+                  setState((previous) => ({
+                    ...previous,
+                    humanSequence: [...previous.humanSequence, colour.name],
+                  }));
                 }}
               />
             </ActionPanel>
