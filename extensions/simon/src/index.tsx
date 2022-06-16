@@ -53,6 +53,14 @@ export default function Command() {
     }, 500);
   };
 
+  const animateSequence = (newSequence: string[]) => {
+    newSequence.forEach((colour, index) => {
+      setTimeout(() => {
+        activateColour(colour);
+      }, (index + 1) * 500);
+    });
+  };
+
   useEffect(() => {
     if (gameState === "start") {
       const nextColour = nextLevel();
@@ -60,6 +68,8 @@ export default function Command() {
       setGameState("play");
 
       activateColour(nextColour);
+
+      animateSequence(sequence);
     }
 
     if (gameState === "play") {
@@ -69,13 +79,10 @@ export default function Command() {
 
           if (level < maxLevel) {
             setLevel(level + 1);
-            nextLevel();
+            const nextColour = nextLevel();
+            setHumanSequence([]);
 
-            sequence.forEach((colour, index) => {
-              setTimeout(() => {
-                activateColour(colour);
-              }, (index + 1) * 500);
-            });
+            animateSequence([...sequence, nextColour]);
           }
         } else {
           console.log("fail");
@@ -88,7 +95,7 @@ export default function Command() {
 
   return (
     <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Medium} isLoading={sequence.length <= 0}>
-      {sequence.length > 0 &&
+      {(sequence.length > 0) &&
         colours.map((colour, index) => (
           <Grid.Item
             key={colour.name}
