@@ -1,6 +1,6 @@
 <div align="center">
   <img
-    src="./assets/command-icon.png"
+    src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bundlephobia/assets/command-icon.png"
     width="50"
   />
 
@@ -17,5 +17,5 @@ This extension has only one feature to help you find the bundle size for npm pac
 
 
 <div align="center">
-<img width="450" alt="image" src="./assets/example.png">
+<img width="450" alt="image" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bundlephobia/assets/example.png">
 </div>
