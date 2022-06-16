@@ -5,6 +5,7 @@ import heroku, { simplifyCustomResponse } from "./heroku";
 
 import AppBuilds from "./AppBuilds";
 import ConfigVars from "./ConfigVars";
+import AppLogSession from './AppLogSession'
 import { useEffect } from "react";
 
 export default function Command() {
@@ -55,6 +56,12 @@ export default function Command() {
                     modifiers: ["cmd"],
                     key: "b",
                   }}
+                />
+                <Action.Push
+                  icon={Icon.Terminal}
+                  title="Show App Logs"
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  target={<AppLogSession appId={app.id} />}
                 />
                 <Action.CopyToClipboard title="Copy App Name" content={app.name} />
                 <ActionPanel.Section title="Project Settings">
