@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
+import { exec } from "child_process";
 
 interface State {
   loading: boolean;
@@ -97,6 +98,8 @@ export default function Command() {
 
             animateSequence([...state.sequence, nextColour]);
           } else {
+            exec("open raycast://confetti");
+
             setState((previous) => ({ ...previous, gameState: "win" }));
           }
         } else {
@@ -167,11 +170,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.SubmitForm
-                title="Select"
+                title="Select Colour"
                 onSubmit={() => {
                   if (state.loading) {
                     return;
                   }
+
+                  activateColour(colour.name);
 
                   setState((previous) => ({
                     ...previous,
