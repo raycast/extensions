@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SWRConfig } from "swr";
 import { cacheProvider } from "./lib/cache";
@@ -66,7 +66,7 @@ const App = () => {
               icon={{ source: "command-icon.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View My Games" target={<MyGames />} />
+                  <Action.Push icon={Icon.List} title="View My Games" target={<MyGames />} />
                   <DefaultActions />
                 </ActionPanel>
               }
@@ -78,7 +78,7 @@ const App = () => {
               icon={{ source: "command-icon.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Search Steam Games" target={<Search />} />
+                  <Action.Push icon={Icon.Binoculars} title="Search Steam Games" target={<Search />} />
                   <DefaultActions />
                 </ActionPanel>
               }

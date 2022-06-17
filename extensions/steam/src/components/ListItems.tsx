@@ -54,7 +54,7 @@ export const DynamicGameListItem = ({
       accessories={[{ text: notFound ? "Game not found" : gameData?.release_date?.date }]}
       actions={
         <ActionPanel>
-          <Action.Push title="View Game Details" target={<GameDetails game={game} />} />
+          <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
           <LaunchActions appid={game?.appid} />
           <DefaultActions />
         </ActionPanel>
@@ -73,7 +73,7 @@ export const MyGamesListType = ({ game }: { game: GameDataSimple }) => (
     accessories={[{ text: game?.playtime_forever ? "Played for " + humanTime(game.playtime_forever) : undefined }]}
     actions={
       <ActionPanel>
-        <Action.Push title="View Game Details" target={<GameDetails game={game} />} />
+        <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
         <LaunchActions appid={game?.appid} />
         <DefaultActions />
       </ActionPanel>
