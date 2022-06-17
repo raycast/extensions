@@ -31,6 +31,26 @@ const times: TimeObject[] = [
   },
 ];
 
+// Error is transformed and message is left off to make up for limited space in the toast
+const getErrorMessage = (errorId: string, errorTitle?: string) => {
+  switch (errorId) {
+    case "invalid_api_key":
+      return {
+        title: "Invalid API Key",
+        message: "You can update your API key in the extension settings.",
+      };
+    case "event_overlapping":
+      return {
+        title: "Scheduling Conflict",
+        message: "This room is already booked.",
+      };
+    default:
+      return {
+        title: errorTitle || "An error occured",
+      };
+  }
+};
+
 const createAuth = (authValues: AuthValues) => {
   const apiRoot = `https://api.teamup.com/${authValues.calendar}`;
   const headers = {
@@ -41,10 +61,30 @@ const createAuth = (authValues: AuthValues) => {
 };
 
 const getCalendar = async (auth: GotConfig) => {
-  const { body } = await got(`${auth.apiRoot}/events`, {
+  return await got(`${auth.apiRoot}/events`, {
     headers: { ...auth.headers },
-  });
-  return body;
+  })
+    .then((res) => {
+      return JSON.parse(res.body);
+    })
+    .catch((err) => {
+      const errorBody = JSON.parse(err.response.body).error;
+      const error: ToastError = getErrorMessage(errorBody.id, errorBody.title);
+      throw error;
+    });
+};
+
+const getSubcalendars = async (auth: GotConfig) => {
+  return await got(`${auth.apiRoot}/subcalendars`, {
+    headers: { ...auth.headers },
+  })
+    .then((res) => {
+      return JSON.parse(res.body);
+    })
+    .catch((err) => {
+      const error: ToastError = getErrorMessage(JSON.parse(err.response.body).error.id);
+      throw error;
+    });
 };
 
 const bookRoom = async (auth: GotConfig, roomId: Room["id"], duration: number, title: string, start?: Date) => {
@@ -64,24 +104,9 @@ const bookRoom = async (auth: GotConfig, roomId: Room["id"], duration: number, t
       return JSON.parse(res.body);
     })
     .catch((err) => {
-      if (err.code === "ERR_NON_2XX_3XX_RESPONSE" && JSON.parse(err.response?.body).error) {
+      if (JSON.parse(err?.response?.body).error) {
         const { id, title } = JSON.parse(err.response?.body).error;
-        return (() => {
-          switch (id) {
-            case "event_overlapping":
-              return {
-                error: {
-                  title: "Scheduling Conflict",
-                  message: "This room is already booked.",
-                },
-              };
-
-            default:
-              return {
-                error: { title },
-              };
-          }
-        })();
+        return { error: getErrorMessage(id, title) };
       } else
         return {
           error: {
@@ -91,14 +116,6 @@ const bookRoom = async (auth: GotConfig, roomId: Room["id"], duration: number, t
     });
 
   return event;
-};
-
-const getSubcalendars = async (auth: GotConfig) => {
-  const { body } = await got(`${auth.apiRoot}/subcalendars`, {
-    headers: { ...auth.headers },
-  });
-
-  return body;
 };
 
 function TimeDropdown(props: { onTimeChange: (x: TimeObject) => void }) {
@@ -121,9 +138,9 @@ function TimeDropdown(props: { onTimeChange: (x: TimeObject) => void }) {
 
 export default function Command() {
   const [openRooms, setOpenRooms] = useState<any>(undefined);
-  const [timeString, setTimeString] = useState<string>("30 minutes");
   const [minutesString, setMinutesString] = useState<string>("30");
   const [minutes, setMinutes] = useState<number>(30);
+  const [loadingError, setLoadingError] = useState<ToastError | undefined>(undefined);
 
   const startDt = new Date();
   const endDt = new Date(startDt.getTime() + minutes * 60000);
@@ -132,6 +149,15 @@ export default function Command() {
 
   const auth = createAuth({ calendar, token });
 
+  useEffect(() => {
+    setOpenRooms(undefined);
+    loadRooms();
+  }, [minutes]);
+
+  useEffect(() => {
+    if (minutesString) setMinutes(parseInt(minutesString));
+  }, [minutesString]);
+
   const quickAddEvent = async (roomId: Room["id"]) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -139,6 +165,7 @@ export default function Command() {
     });
 
     const event: any = await bookRoom(auth, roomId, minutes, defaultTitle);
+    console.log("event", event);
 
     if (event.error) {
       toast.style = Toast.Style.Failure;
@@ -156,8 +183,23 @@ export default function Command() {
     let rooms: any;
     const occupiedRooms: any = [];
 
-    await getCalendar(auth).then((res) => (events = JSON.parse(res).events));
-    await getSubcalendars(auth).then((res) => (rooms = JSON.parse(res).subcalendars));
+    setLoadingError(undefined);
+
+    await getCalendar(auth)
+      .then((res) => (events = res.events))
+      .catch((err: ToastError) => {
+        events = [];
+        setLoadingError(err);
+      });
+    await getSubcalendars(auth)
+      .then((res) => (rooms = res.subcalendars))
+      .catch((err: ToastError) => {
+        rooms = [];
+        setLoadingError(err);
+      });
+
+    console.log("events", events);
+    console.log("rooms", rooms);
 
     events = events
       .map((event: any) => {
@@ -181,15 +223,6 @@ export default function Command() {
     setOpenRooms(rooms);
   };
 
-  useEffect(() => {
-    setOpenRooms(undefined);
-    loadRooms();
-  }, [minutes]);
-
-  useEffect(() => {
-    if (minutesString) setMinutes(parseInt(minutesString));
-  }, [minutesString]);
-
   return (
     <List
       searchBarPlaceholder="Filter rooms"
@@ -198,15 +231,19 @@ export default function Command() {
         <TimeDropdown
           onTimeChange={(time: TimeObject) => {
             setMinutesString(time.minutes);
-            setTimeString(time.text);
           }}
         />
       }
     >
       {openRooms?.length === 0 ? (
         <List.EmptyView
-          title="No rooms are open"
-          description="If your schedule permits, try checking for rooms available for a shorter amount of time."
+          title={loadingError ? loadingError.title : "No rooms are open"}
+          description={
+            loadingError
+              ? loadingError.message
+              : "If your schedule permits, try checking for rooms available for a shorter amount of time."
+          }
+          icon={loadingError ? Icon.ExclamationMark : undefined}
         />
       ) : (
         openRooms?.map((room: Room) => (
@@ -251,3 +288,13 @@ interface TimeObject {
   text: string;
   minutes: string;
 }
+
+interface ToastError {
+  title: string;
+  message?: string;
+}
+
+// interface TeamupEvent {
+//   id: number | string;
+//   sub
+// }
