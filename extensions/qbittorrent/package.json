@@ -42,8 +42,8 @@
     },
     {
       "name": "timeout",
-      "title": "Refresh timeout in ms",
-      "description": "Refresh timeout in ms, 0 to disable",
+      "title": "Refresh timeout in seconds",
+      "description": "Refresh timeout in seconds, 0 to disable",
       "type": "textfield",
       "placeholder": "0",
       "default": "0",
