@@ -38,6 +38,12 @@ const getErrorMessage = (errorId: string, errorTitle?: string) => {
         title: "Invalid API Key",
         message: "You can update your API key in the extension settings.",
       };
+    case "auth_required":
+      return {
+        title: "Password Required",
+        message:
+          "This calendar is password protected. Check that you have provided the correct password in the extension settings.",
+      };
     case "event_overlapping":
       return {
         title: "Scheduling Conflict",
@@ -60,6 +66,7 @@ const createAuth = (authValues: AuthValues) => {
   const apiRoot = `https://api.teamup.com/${authValues.calendar}`;
   const headers = {
     "Teamup-Token": authValues.token,
+    "Teamup-Password": authValues.calendar_password,
   };
 
   return { apiRoot, headers };
@@ -156,9 +163,9 @@ export default function Command() {
   const startDt = new Date();
   const endDt = new Date(startDt.getTime() + minutes * 60000);
 
-  const { calendar, token, default_title: defaultTitle } = getPreferenceValues<Preferences>();
+  const { calendar, token, calendar_password, default_title: defaultTitle } = getPreferenceValues<Preferences>();
 
-  const auth = createAuth({ calendar, token });
+  const auth = createAuth({ calendar, token, calendar_password });
 
   useEffect(() => {
     setOpenRooms(undefined);
@@ -282,6 +289,7 @@ type MinuteString = "15" | "30" | "45" | "60" | "90" | "180" | string;
 interface AuthValues {
   calendar: string;
   token: string;
+  calendar_password?: string;
 }
 
 interface Preferences extends AuthValues {

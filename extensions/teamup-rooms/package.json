@@ -30,6 +30,13 @@
       "type": "textfield",
       "required": true,
       "title": "Default Event Title"
+    },
+    {
+      "name": "calendar_password",
+      "description": "The password for the calendar, if required",
+      "type": "password",
+      "required": false,
+      "title": "Calendar Password"
     }
   ],
   "commands": [
