@@ -1,6 +1,6 @@
 # Bibmanager
 
-Extension for quickly accessing your bibmanager database from Raycast. Search the database and open the pdf or the ADS link for your bibmanager entries.
+Extension for quickly accessing your bibmanager database from Raycast. Search the database (by bibkey, author, title or year) and open or download the pdf or open the ADS link for your bibmanager entries.
 Make sure to explore available actions in the action panel (⌘ + K).
 
 ## How to setup the Location of the python bin
