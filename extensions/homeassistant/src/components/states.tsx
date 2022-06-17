@@ -230,10 +230,21 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: weatherConditionToIcon(state.state) };
   } else if (e.startsWith("fan")) {
     let source = "fan.png";
-    if (state.attributes.percentage == 0) {
-      source = "fan-off.png";
+    let tintColor: Color.ColorLike = PrimaryIconColor;
+
+    switch (state.state.toLocaleLowerCase()) {
+      case "on":
+        tintColor = Color.Yellow;
+        break;
+      case "off":
+        source = "fan-off.png";
+        break;
+      case "unavailable":
+        tintColor = UnavailableColor;
+        break;
     }
-    return { source: source, tintColor: PrimaryIconColor };
+
+    return { source: source, tintColor: tintColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -297,11 +308,8 @@ export function StateListItem(props: { state: State }): JSX.Element {
     } else if (state.entity_id.startsWith("fan")) {
       // Speed as a percentage
       const p = state.attributes.percentage || undefined;
-      if (p !== undefined) {
-        const pv = parseInt(p);
-        if (!isNaN(pv)) {
-          return `${pv}%`;
-        }
+      if (!isNaN(p)) {
+        return `${p}%`;
       }
     } else if (state.entity_id.startsWith("sensor")) {
       const unit = (state.attributes.unit_of_measurement as string) || undefined;
