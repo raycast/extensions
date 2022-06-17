@@ -43,6 +43,7 @@
     {
       "name": "index",
       "title": "Check for Open Rooms",
+      "subtitle": "Teamup",
       "description": "Check what rooms are open right now and quickly book them",
       "mode": "view"
     }

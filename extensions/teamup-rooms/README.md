@@ -10,7 +10,7 @@ This script is currently limited to one calendar. To configure, you must add val
 - **Teamup Calendar ID**: This should be the ID calendar you wish to check for open rooms on. It can be found in the url of your calendar's shareable webpage. ( https\://teamup.com/**CALENDAR_ID** ).
   - This is _not_ the url you see when managing a calendar on your account. If the url starts with _https\://teamup.com/**c**/..._, you're on the wrong page. The Teamup knowledgebase has information on how to share your calendar or find your sharing link at [https://calendar.teamup.com/kb/how-to-share-your-teamup-calendar-users-groups-links/](https://calendar.teamup.com/kb/how-to-share-your-teamup-calendar-users-groups-links/).
   - Your calendar URL will look like this: <br />
-    ![Screenshot of Teamup calendar URL](teamup_calendar_url.png)
+    ![Screenshot of Teamup calendar URL](https://raw.githubusercontent.com/raycast/extensions/3403bebc084d4bd41adfcd957c0e374a4029fd53/extensions/teamup-rooms/media/teamup_calendar_url.png)
 - **Default Event Title**: When creating an event, the extension will use this as the event title. This will be customizable on a per-event basis in a later release.
 
 ### Optional Preferences
