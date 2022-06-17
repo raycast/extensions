@@ -10,6 +10,7 @@ interface Item {
   link: string;
   pdf: string;
   year: string;
+  authors: [];
 }
 
 export function ListBibmItem(props: { item: Item; index: number }) {
@@ -32,6 +33,7 @@ export function ListBibmItem(props: { item: Item; index: number }) {
       subtitle={props.item.title}
       accessories={state.accessories}
       actions={<Actions item={props.item} />}
+      keywords={[props.item.year.toString(), ...props.item.authors]}
     />
   );
 }

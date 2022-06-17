@@ -8,11 +8,12 @@ if __name__ == "__main__":
     output = {'items':[]}
 
     for bib in bibs:
+        authors = [author.last.replace('{','').replace('}','') for author in bib.authors]
         dict_of_bib = {'title':bib.title,
                        'uid':bib.key,
                        'link': bib.adsurl,
-                       'year': bib.year}
-
+                       'year': bib.year,
+                       'authors': authors}
         if bib.pdf is not None:
             dict_of_bib['pdf'] = u.BM_PDF() + bib.pdf
 
