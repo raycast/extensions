@@ -2,7 +2,6 @@ import { ActionPanel, List, Action, getPreferenceValues, Icon, showHUD, showToas
 import { useEffect, useState } from "react";
 import got from "got";
 import { getColor } from "./colors";
-import { Room } from "./types";
 
 const times: TimeObject[] = [
   {
@@ -87,7 +86,13 @@ const getSubcalendars = async (auth: GotConfig) => {
     });
 };
 
-const bookRoom = async (auth: GotConfig, roomId: Room["id"], duration: number, title: string, start?: Date) => {
+const bookRoom = async (
+  auth: GotConfig,
+  roomId: TeamupSubcalendar["id"],
+  duration: number,
+  title: string,
+  start?: Date
+) => {
   const start_dt = start || new Date();
   const end_dt = new Date(start_dt.getTime() + duration * 60000);
   const event = await got
@@ -137,9 +142,9 @@ function TimeDropdown(props: { onTimeChange: (x: TimeObject) => void }) {
 }
 
 export default function Command() {
-  const [openRooms, setOpenRooms] = useState<any>(undefined);
-  const [minutesString, setMinutesString] = useState<string>("30");
-  const [minutes, setMinutes] = useState<number>(30);
+  const [openRooms, setOpenRooms] = useState<TeamupSubcalendar[] | undefined>(undefined);
+  const [minutesString, setMinutesString] = useState<MinuteString>("30");
+  const [minutes, setMinutes] = useState<MinuteNumber>(30);
   const [loadingError, setLoadingError] = useState<ToastError | undefined>(undefined);
 
   const startDt = new Date();
@@ -158,30 +163,29 @@ export default function Command() {
     if (minutesString) setMinutes(parseInt(minutesString));
   }, [minutesString]);
 
-  const quickAddEvent = async (roomId: Room["id"]) => {
+  const quickAddEvent = async (roomId: TeamupSubcalendar["id"]) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Booking room",
     });
 
-    const event: any = await bookRoom(auth, roomId, minutes, defaultTitle);
-    console.log("event", event);
+    const event: TeamupEvent | WrappedError = await bookRoom(auth, roomId, minutes, defaultTitle);
 
-    if (event.error) {
+    if (isError(event)) {
       toast.style = Toast.Style.Failure;
       toast.title = event.error.title;
       toast.message = event.error.message;
     } else {
       toast.hide();
-      setOpenRooms(openRooms.filter((room: Room) => room.id !== roomId));
+      setOpenRooms(openRooms?.filter((room: TeamupSubcalendar) => room.id !== roomId));
       await showHUD("🗓️ Room booked");
     }
   };
 
   const loadRooms = async () => {
-    let events: any;
-    let rooms: any;
-    const occupiedRooms: any = [];
+    let events: TeamupEvent[] = [];
+    let rooms: TeamupSubcalendar[] = [];
+    const occupiedRooms: number[] = [];
 
     setLoadingError(undefined);
 
@@ -202,21 +206,21 @@ export default function Command() {
     console.log("rooms", rooms);
 
     events = events
-      .map((event: any) => {
+      .map((event: TeamupEvent) => {
         return {
           ...event,
           start_dt: new Date(event.start_dt),
           end_dt: new Date(event.end_dt),
         };
       })
-      .filter((event: any) => event.start_dt < endDt)
-      .filter((event: any) => event.end_dt > startDt);
+      .filter((event: TeamupEvent) => event.start_dt < endDt)
+      .filter((event: TeamupEvent) => event.end_dt > startDt);
 
     for (const ev in events) {
       occupiedRooms.push(events[ev].subcalendar_id);
     }
 
-    rooms = rooms.filter((room: any) => {
+    rooms = rooms.filter((room: TeamupSubcalendar) => {
       return occupiedRooms.indexOf(room.id) === -1;
     });
 
@@ -246,7 +250,7 @@ export default function Command() {
           icon={loadingError ? Icon.ExclamationMark : undefined}
         />
       ) : (
-        openRooms?.map((room: Room) => (
+        openRooms?.map((room: TeamupSubcalendar) => (
           <List.Item
             key={room.id}
             title={room.name}
@@ -265,6 +269,9 @@ export default function Command() {
     </List>
   );
 }
+
+type MinuteNumber = 15 | 30 | 45 | 60 | 90 | 180 | number;
+type MinuteString = "15" | "30" | "45" | "60" | "90" | "180" | string;
 
 interface AuthValues {
   calendar: string;
@@ -294,7 +301,37 @@ interface ToastError {
   message?: string;
 }
 
-// interface TeamupEvent {
-//   id: number | string;
-//   sub
-// }
+interface WrappedError {
+  error: ToastError;
+}
+
+interface TeamupEvent {
+  id: string;
+  subcalendar_id: number;
+  subcalendar_ids: number[];
+  all_day?: boolean;
+  rrule?: string;
+  title?: string;
+  who?: string;
+  location?: string;
+  notes?: string;
+  readonly?: boolean;
+  start_dt: Date;
+  end_dt: Date;
+  creation_dt: Date;
+}
+
+interface TeamupSubcalendar {
+  id: number;
+  name: string;
+  active?: boolean;
+  color?: number;
+  overlap?: boolean;
+  readonly?: boolean;
+  creation_dt?: Date;
+  update_dt?: Date;
+}
+
+function isError(event: WrappedError | TeamupEvent): event is WrappedError {
+  return "error" in event;
+}
