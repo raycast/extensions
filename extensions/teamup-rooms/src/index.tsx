@@ -147,9 +147,11 @@ function TimeDropdown(props: { onTimeChange: (x: TimeObject) => void }) {
         onTimeChange(times.filter((time) => time.minutes === minutes)[0]);
       }}
     >
-      {times.map((time) => (
-        <List.Dropdown.Item key={time.minutes} title={time.text} value={time.minutes} />
-      ))}
+      <List.Dropdown.Section title="Booking Duration">
+        {times.map((time) => (
+          <List.Dropdown.Item key={time.minutes} title={time.text} value={time.minutes} />
+        ))}
+      </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
@@ -214,9 +216,6 @@ export default function Command() {
         rooms = [];
         setLoadingError(err);
       });
-
-    console.log("events", events);
-    console.log("rooms", rooms);
 
     events = events
       .map((event: TeamupEvent) => {
