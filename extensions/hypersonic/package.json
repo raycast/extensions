@@ -25,16 +25,20 @@
       "name": "database_name",
       "type": "textfield",
       "title": "Notion Page Name",
+      "label": "Notion Page Name",
       "description": "Create, filter and complete all your to-do's",
       "placeholder": "Hypersonic",
-      "default": "Hypersonic"
+      "default": "Hypersonic",
+      "required": false
     },
     {
       "name": "open_in_native_app",
       "type": "checkbox",
       "title": "Open links in the desktop app",
+      "label": "Open links in the desktop app",
       "description": "Set true if you want to open links in desktop app instead of browser",
-      "default": true
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
