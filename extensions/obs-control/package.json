@@ -16,6 +16,13 @@
       "subtitle": "OBS Control",
       "description": "Set Current Scene",
       "mode": "view"
+    },
+    {
+      "name": "toggle-stream",
+      "title": "Toggle Stream",
+      "subtitle": "OBS Control",
+      "description": "Toggle Stream",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

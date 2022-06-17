@@ -6,6 +6,7 @@ const obs = new OBSWebSocket();
 
 export default function SetScene() {
   const { data, mutate } = useSWR("/api/scenes", async () => {
+    // TODO: read this from preference
     await obs.connect("ws://localhost:4455");
 
     return await obs.call("GetSceneList");
