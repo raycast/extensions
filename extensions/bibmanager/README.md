@@ -9,7 +9,7 @@ In order for Raycast to find bibmanager, you need to provide the location of the
 
 1. Open the terminal
 2. Check that you are able to use bibmanager: `bibm -v`
-3. run `which bibm` 
+3. run `which python` 
 4. Select the path and copy it
 5. Paste the path into the preference field for the python bin
 
