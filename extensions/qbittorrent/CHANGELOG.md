@@ -1,3 +1,3 @@
-# qbittorrent Changelog
+# qBittorrent Changelog
 
-## [Initial Version] - 2022-06-15
+## [Initial Version] - 2022-06-17
