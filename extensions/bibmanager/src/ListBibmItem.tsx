@@ -62,6 +62,7 @@ export function DownloadPDF(key: string) {
   const toastsuccess = new Toast({
     style: ToastStyle.Success,
     title: "Download succeeded",
+    message: "Rerun to open",
   });
   const toastfail = new Toast({
     style: ToastStyle.Failure,

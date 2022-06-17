@@ -8,9 +8,11 @@ if __name__ == "__main__":
     bibm.load()
     bib = bibm.find(key=key)
     if bib is not None and bib.bibcode is not None:
-        pdf.fetch(bib.bibcode)
+        pdf.fetch(bib.bibcode, replace=False)
     else:
         raise ValueError('Could not fetch pdf')
 
+    bibm.load()
+    bib = bibm.find(key=key)
     if bib.pdf is None:
         raise ValueError('Could not fetch pdf')
