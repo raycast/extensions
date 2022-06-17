@@ -59,7 +59,7 @@ export default function Command() {
     if (+timeout) {
       updateTimeout = setTimeout(() => {
         setUpdateTimestap(+new Date());
-      }, +timeout*1000);
+      }, +timeout * 1000);
     }
   };
 
