@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, environment, preferences } from "@raycast/api";
+import { List, environment, preferences, showToast, ToastStyle } from "@raycast/api";
 import { ListBibmItem } from "./ListBibmItem";
 import { spawn } from "child_process";
 import { join } from "path";
@@ -18,9 +18,13 @@ export default function Command() {
   useEffect(() => {
     async function loadItems() {
       const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_list.py"), "-u"]);
-      python.on("error", (error) => {
-        console.log(error);
-        setState((previous) => ({ ...previous, isLocked: true, isLoading: false }));
+      python.on("error", () => {
+        showToast(
+          ToastStyle.Failure,
+          "bibmanager, where are you?",
+          "Update the location of the python bin in the preferences"
+        );
+        return;
       });
       let itemsString = "";
       python.stdout.on("data", (data) => {
@@ -37,10 +41,6 @@ export default function Command() {
   }, []);
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
-      <List.EmptyView
-        title="bibmanager, where are you?"
-        description="Please check that bibmanager is installed correctly and that the location of the corresponding python bin is set correctly!"
-      />
       {state.items?.map((item, index) => (
         <ListBibmItem key={index} item={item} index={index} />
       ))}
