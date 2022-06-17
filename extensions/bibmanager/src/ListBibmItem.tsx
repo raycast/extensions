@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, List, Toast, ToastStyle } from "@raycast/api";
+import { spawn } from "child_process";
+import { join } from "path";
+import { pythonbin } from "./index";
 
 interface Item {
   uid: string;
@@ -40,28 +43,43 @@ function Actions(props: { item: Item }) {
         {props.item.pdf && (
           <Action.OpenWith path={props.item.pdf} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
         )}
-        {props.item.link && (
-          <Action.OpenInBrowser
-            url={props.item.link}
-            title="Open ADS Link in Browser"
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
+        {props.item.link && <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" />}
+        {!props.item.pdf && (
+          <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
-        {props.item.link && (
-          <Action.CopyToClipboard
-            content={props.item.link}
-            title="Copy ADS Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        )}
-        {props.item.uid && (
-          <Action.CopyToClipboard
-            content={props.item.uid}
-            title="Copy ADS key"
-            shortcut={{ modifiers: ["cmd", "opt"], key: "." }}
-          />
-        )}
+        {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
+        {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
       </ActionPanel.Section>
     </ActionPanel>
   );
+}
+
+export function DownloadPDF(key: string) {
+  const toastload = new Toast({
+    style: ToastStyle.Animated,
+    title: "Downloading PDF",
+  });
+  const toastsuccess = new Toast({
+    style: ToastStyle.Success,
+    title: "Download succeeded",
+  });
+  const toastfail = new Toast({
+    style: ToastStyle.Failure,
+    title: "Download error",
+    message: "Try manually with bibmanager CLI",
+  });
+
+  const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
+  toastload.show();
+  python.on("close", (code) => {
+    if (code === 0) {
+      toastsuccess.show();
+    } else {
+      toastfail.show();
+    }
+  });
+  python.on("error", () => {
+    toastfail.show();
+    return;
+  });
 }

@@ -17,6 +17,7 @@ export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true });
   useEffect(() => {
     async function loadItems() {
+      showToast(ToastStyle.Animated, "Browsing bibmanager");
       const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_list.py"), "-u"]);
       python.on("error", () => {
         showToast(
@@ -32,6 +33,7 @@ export default function Command() {
       });
       python.on("close", (code) => {
         if (code === 0) {
+          showToast(ToastStyle.Success, "Done");
           const items = JSON.parse(itemsString);
           setState((previous) => ({ ...previous, items: items.items, isLoading: false }));
         }
