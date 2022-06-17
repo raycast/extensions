@@ -39,7 +39,7 @@
   ],
   "dependencies": {
     "@notionhq/client": "^1.0.4",
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "^1.36.1",
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {
