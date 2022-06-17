@@ -1,6 +1,6 @@
 # Teamup Rooms Changelog
 
-## [Improved booking UI] - 2022-06-14
+## [Improved booking UI] - 2022-06-17
 
 - 🎨 Room list now shows visual feedback when switching times and reloading rooms
 - 🎨 A relevant error message is shown if no rooms are available
