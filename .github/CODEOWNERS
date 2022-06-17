@@ -42,7 +42,6 @@
 /extensions/buildkite                                @mskelton
 /extensions/bunch                                    @koinzhang
 /extensions/bundesliga                               @anhthang
-/extensions/bundlephobia                             @thuutri2710
 /extensions/bundlephobia-search                      @dgrzedzielski
 /extensions/cache-control-builder                    @rkusa
 /extensions/calendar                                 @fuksman
@@ -121,6 +120,7 @@
 /extensions/dropbox                                  @chyroc
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
+/extensions/easydict                                 @tisfeng
 /extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
@@ -297,6 +297,7 @@
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/port-manager                             @lucaschultz
+/extensions/portuguese-primeira-liga                 @danielsequeira
 /extensions/premier-league                           @anhthang
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
