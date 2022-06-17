@@ -20,7 +20,6 @@ export default async () => {
     const filePaths: string[] = [];
     fileSystemItems.forEach((value) => {
       const extname = path.extname(value.path);
-      console.debug(extname);
       if (archiveFormat.includes(extname)) {
         filePaths.push(value.path);
       }

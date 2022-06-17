@@ -1,10 +1,13 @@
 # BetterZip
 
-Compress, extract with BetterZip via Raycast.
+Compress and extract selected items in Finder with BetterZip via Raycast.
 
-**TODO:**
+To use this command you need to have BetterZip installed on your Mac. [Download BetterZip](https://macitbetter.com).
 
-- More Commands
+**TODO:** More commands
+
+- Compress With Presets
+- Extract With Presets
 
 Want more Productivity extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 
