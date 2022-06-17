@@ -83,10 +83,10 @@ export default function Command() {
 
                   <List.Item.Detail.Metadata.Label title="ID" text={item.id} />
                   <List.Item.Detail.Metadata.Label title="Name" text={item.attributes.name} />
-                  <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url ?? '-'} />
+                  <List.Item.Detail.Metadata.Label title="URL" text={item.attributes.url ?? "-"} />
                   <List.Item.Detail.Metadata.Label
                     title="HTTP Method"
-                    text={item.attributes.http_method ? item.attributes.http_method.toUpperCase() : '-'}
+                    text={item.attributes.http_method ? item.attributes.http_method.toUpperCase() : "-"}
                   />
                   <List.Item.Detail.Metadata.Label title="Cause" text={item.attributes.cause} />
                   <List.Item.Detail.Metadata.Label
@@ -108,22 +108,23 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              {item.attributes.screenshot_url && <Action.OpenInBrowser
-                title="Open Screenshot in Browser"
-                url={item.attributes.screenshot_url}
-              />}
-              {item.attributes.screenshot_url && <Action
-                title="Copy Screenshot URL"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await Clipboard.copy(item.attributes.screenshot_url);
+              {item.attributes.screenshot_url && (
+                <Action.OpenInBrowser title="Open Screenshot in Browser" url={item.attributes.screenshot_url} />
+              )}
+              {item.attributes.screenshot_url && (
+                <Action
+                  title="Copy Screenshot URL"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    await Clipboard.copy(item.attributes.screenshot_url);
 
-                  showToast({
-                    title: "Copied",
-                    message: "Screenshot URL copied to clipboard",
-                  });
-                }}
-              />}
+                    showToast({
+                      title: "Copied",
+                      message: "Screenshot URL copied to clipboard",
+                    });
+                  }}
+                />
+              )}
             </ActionPanel>
           }
         />

@@ -121,10 +121,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open URL in Browser"
-                url={item.attributes.url}
-              />
+              <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
               <Action
                 title="Copy URL"
                 icon={Icon.Clipboard}

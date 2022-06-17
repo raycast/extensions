@@ -107,10 +107,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Heartbeat URL in Browser"
-                url={item.attributes.url}
-              />
+              <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
               <Action
                 title="Copy Heartbeat URL"
                 icon={Icon.Clipboard}
