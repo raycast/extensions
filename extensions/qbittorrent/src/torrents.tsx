@@ -90,7 +90,7 @@ export default function Command() {
         return (
           <List.Item
             icon={iconMap[torrent.state]}
-            title={`${index + 1}.${torrent.name} (${prettySize(torrent.size)})`}
+            title={`${torrent.name} (${prettySize(torrent.size)})`}
             key={torrent.infohash_v1}
             accessories={[
               {
