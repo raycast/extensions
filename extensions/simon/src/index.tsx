@@ -12,7 +12,7 @@ interface State {
 }
 
 export default function Command() {
-  const maxLevel = 3;
+  const maxLevel = 20;
   const colourMap = {
     Red: Color.Red,
     Green: Color.Green,
