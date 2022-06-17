@@ -113,6 +113,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
+              icon={Icon.Star}
               title="Start Game"
               onSubmit={() => {
                 setState((previous) => ({ ...previous, gameState: "play" }));
@@ -137,6 +138,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.SubmitForm
+              icon={Icon.Star}
               title="Play Again"
               onSubmit={() => {
                 setState((previous) => ({
