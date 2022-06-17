@@ -43,6 +43,12 @@ const getErrorMessage = (errorId: string, errorTitle?: string) => {
         title: "Scheduling Conflict",
         message: "This room is already booked.",
       };
+    case "calendar_not_found":
+      return {
+        title: "Calendar Not Found",
+        message:
+          "The calendar you selected does not exist. Check that you have the proper API key configured in the extension settings.",
+      };
     default:
       return {
         title: errorTitle || "An error occured",
