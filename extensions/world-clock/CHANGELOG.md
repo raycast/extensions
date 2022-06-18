@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Fix 24hour bug] - {PR_MERGE_DATE}
+## [Fix 24hour bug] - 2022-06-18
 
 - Fix 24hour bug
 - Add new action for Query World Time: Toggle Details
