@@ -25,6 +25,24 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "obs-url",
+      "description": "OBS Websocket URL",
+      "title": "OBS Websocket URL",
+      "type": "textfield",
+      "default": "ws://localhost:4455",
+      "required": false
+    },
+    {
+      "name": "obs-password",
+      "description": "OBS Websocket Password",
+      "title": "OBS Websocket Password",
+      "type": "password",
+      "default": "",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.36.1",
     "obs-websocket-js": "^5.0.0-beta.1",

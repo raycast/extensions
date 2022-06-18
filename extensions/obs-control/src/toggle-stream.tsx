@@ -4,9 +4,6 @@ import { showHUD }  from '@raycast/api'
 export default async function main () {
   const obs = await getObs()
 
-  // TODO: read this from preference
-  await obs.connect("ws://localhost:4455");
-
   const { outputActive } = await obs.call('ToggleStream')
 
   if (outputActive) {

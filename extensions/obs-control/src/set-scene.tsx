@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import OBSWebSocket from "obs-websocket-js";
 import useSWR from "swr";
+import { getObs } from "./lib/obs";
 
-const obs = new OBSWebSocket();
+let obs: OBSWebSocket;
 
 export default function SetScene() {
   const { data, mutate } = useSWR("/api/scenes", async () => {
-    // TODO: read this from preference
-    await obs.connect("ws://localhost:4455");
+    obs = await getObs();
 
     return await obs.call("GetSceneList");
   });
@@ -23,8 +23,8 @@ export default function SetScene() {
             key={scene.sceneIndex}
             accessories={[
               {
-                icon: isCurrent ? Icon.Checkmark : null,
-                tooltip: isCurrent ? "Current Scene" : null,
+                icon: isCurrent ? { source: Icon.Checkmark, tintColor: Color.Green } : null,
+                tooltip: isCurrent ? "Current Program Scene" : null,
               }
             ]}
             actions={
