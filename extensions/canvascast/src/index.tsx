@@ -6,13 +6,19 @@ import {
   CopyToClipboardAction,
   PasteAction,
   ActionPanel,
+  ActionPanelItem,
   showToast,
+  showHUD,
   ToastStyle,
   Icon,
   Color,
+  Detail
 } from "@raycast/api";
 import { api as getApi } from "./api";
 import { useEffect, useState } from "react";
+import open from 'open'
+import TurndownService from "turndown";
+
 
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
 
@@ -76,6 +82,7 @@ interface announcement {
   color: string;
   course: string;
   id: number;
+  message: string;
 }
 
 export default function main() {
@@ -86,6 +93,8 @@ export default function main() {
   const [announcements, setAnnouncements] = useState<announcement[]>();
 
   const [loading, setLoading] = useState(true);
+
+  const service = new TurndownService();
 
   useEffect(() => {
     api["courses?state=available&enrollment_state=active"]
@@ -146,6 +155,7 @@ export default function main() {
                           ],
                         course: courses.filter((course) => course.id == a.context_code.substring(7))[0].name,
                         id: a.id,
+                        message: `# ${a.title}\n\n` + service.turndown(a.message),
                       }))
                     );
                   })
@@ -181,7 +191,7 @@ export default function main() {
                   title="See Modules"
                   icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
                   target={
-                    <ModulePage id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
+                    <Modules id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
                   }
                 />
                 <OpenInBrowserAction title="Open in Browser" url={`https://${preferences.domain}/courses/${item.id}`} />
@@ -200,14 +210,7 @@ export default function main() {
             actions={
               <ActionPanel title="Title">
                 <OpenInBrowserAction
-                  url={
-                    "https://" +
-                    preferences.domain +
-                    "/courses/" +
-                    assignment.course_id +
-                    "/assignments/" +
-                    assignment.id
-                  }
+                  url={`https://${preferences.domain}/courses/${assignment.course_id}/discussion_topics/${assignment.id}`}
                 />
               </ActionPanel>
             }
@@ -223,15 +226,25 @@ export default function main() {
             icon={{ source: Icons["Announcement"], tintColor: announcement.color }}
             actions={
               <ActionPanel title="Title">
-                <OpenInBrowserAction
-                  url={
-                    "https://" +
-                    preferences.domain +
-                    "/courses/" +
-                    announcement.course_id +
-                    "/discussion_topics/" +
-                    announcement.id
+                <PushAction
+                  title="View Announcement"
+                  icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
+                  target={
+                    <Detail 
+                      markdown={announcement.message}
+                      actions={
+                        <ActionPanel>
+                          <OpenInBrowserAction
+                            url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
+                          />
+                        </ActionPanel>
+                      }
+                    />
                   }
+                />
+                <CopyToClipboardAction content={announcement.message} />
+                <OpenInBrowserAction
+                  url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
                 />
               </ActionPanel>
             }
@@ -242,7 +255,7 @@ export default function main() {
   );
 }
 
-const ModulePage = (props: { id: any; url: string; api: any }) => {
+const Modules = (props: { id: any; url: string; api: any }) => {
   const [modules, setModules]: any = useState();
   const [isLoading, setIsLoading]: any = useState(true);
 
@@ -334,9 +347,13 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
                 <ActionPanel>
                   <OpenInBrowserAction title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
                   {element.download && (
-                    <OpenInBrowserAction
+                    <ActionPanelItem
                       title="Download File"
-                      url={element.download}
+                      onAction={async () => {
+                        showToast(ToastStyle.Success, "Downloading File...");
+                        await open(element.download, {background: true});
+                        showToast(ToastStyle.Success, "File Downloaded");
+                      }}
                       icon={{ source: Icon.Download }}
                     />
                   )}
@@ -368,3 +385,4 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
     </List>
   );
 };
+
