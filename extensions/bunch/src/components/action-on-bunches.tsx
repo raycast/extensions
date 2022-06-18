@@ -1,20 +1,23 @@
-import { Action, ActionPanel, Color, Icon, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LocalStorage, open, showHUD, showToast, Toast, trash } from "@raycast/api";
 import { BunchesInfo } from "../types/types";
 import { Dispatch, SetStateAction } from "react";
 import { spawnSync } from "child_process";
 import { LocalStorageKey } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { alertDialog } from "../hooks/hooks";
+import { ActionOpenFolder } from "./action-open-folder";
 import Style = Toast.Style;
 
 export function ActionOnBunches(props: {
   bunches: BunchesInfo;
+  allBunches: string[];
+  setAllBunches: Dispatch<SetStateAction<string[]>>;
+  bunchFolder: string;
   openBunches: string[];
   setRefresh: Dispatch<SetStateAction<number>>;
   showDetail: boolean;
-  closeMainWindow: boolean;
 }) {
-  const { bunches, openBunches, setRefresh, showDetail, closeMainWindow } = props;
+  const { bunches, allBunches, setAllBunches, bunchFolder, openBunches, setRefresh, showDetail } = props;
   return (
     <ActionPanel>
       <Action
@@ -25,13 +28,8 @@ export function ActionOnBunches(props: {
         title={bunches.isOpen ? "Close" : "Open"}
         shortcut={{ modifiers: ["cmd"], key: "b" }}
         onAction={async () => {
-          if (closeMainWindow) {
-            await open(encodeURI(`x-bunch://toggle/${bunches.name}`));
-            await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
-          } else {
-            spawnSync("open", [`x-bunch://toggle/${bunches.name}`], { shell: true });
-            await showToast(Style.Success, (bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
-          }
+          await open(encodeURI(`x-bunch://toggle/${bunches.name}`));
+          await showHUD((bunches.isOpen ? "Close " : "Open ") + "bunches: " + bunches.name);
           setRefresh(Date.now());
         }}
       />
@@ -45,15 +43,7 @@ export function ActionOnBunches(props: {
             await showHUD("Edit bunches: " + bunches.name);
           }}
         />
-        <Action
-          icon={Icon.Finder}
-          title={"Open Bunch Folder"}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
-          onAction={async () => {
-            await open(encodeURI("x-bunch://reveal"));
-            await showHUD("Open Bunch Folder");
-          }}
-        />
+        <ActionOpenFolder />
         <Action
           icon={Icon.TwoArrowsClockwise}
           title={"Refresh Bunch Folder"}
@@ -78,13 +68,8 @@ export function ActionOnBunches(props: {
                 "Are you sure you want to close all bunches?",
                 "Close All",
                 async () => {
-                  if (closeMainWindow) {
-                    await open(encodeURI(`x-bunch://close/${openBunches.join(",")}`));
-                    await showHUD("Close bunches: " + openBunches.join(", "));
-                  } else {
-                    spawnSync("open", [`x-bunch://close/${openBunches.join(",")}`], { shell: true });
-                    await showToast(Style.Success, "Close bunches: " + openBunches.join(", "));
-                  }
+                  await open(encodeURI(`x-bunch://close/${openBunches.join(",")}`));
+                  await showHUD("Close bunches: " + openBunches.join(", "));
                   setRefresh(Date.now());
                 }
               ).then();
@@ -92,7 +77,37 @@ export function ActionOnBunches(props: {
           />
         )}
       </ActionPanel.Section>
+      {!bunches.isOpen && (
+        <ActionPanel.Section>
+          <Action
+            icon={Icon.Trash}
+            title={"Remove Bunches"}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={async () => {
+              alertDialog(
+                Icon.Trash,
+                `Remove ${bunches.name}`,
+                `Are you sure you want to remove bunches ${bunches.name}?`,
+                "Remove",
+                async () => {
+                  try {
+                    await trash(bunchFolder + "/" + bunches.name + ".bunch");
 
+                    const _allBunches = [...allBunches];
+                    _allBunches.splice(_allBunches.indexOf(bunches.name), 1);
+                    console.debug("Remove bunch: " + JSON.stringify(_allBunches));
+                    setAllBunches(_allBunches);
+                    setRefresh(Date.now());
+                    await showToast(Style.Success, "Remove bunches: " + bunches.name);
+                  } catch (e) {
+                    await showToast(Style.Failure, String(e));
+                  }
+                }
+              ).then();
+            }}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         <Action
           icon={Icon.Sidebar}
