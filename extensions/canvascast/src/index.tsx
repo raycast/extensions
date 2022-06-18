@@ -1,18 +1,13 @@
 import {
   getPreferenceValues,
   List,
-  PushAction,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  PasteAction,
   ActionPanel,
-  ActionPanelItem,
+  Action,
   showToast,
-  showHUD,
-  ToastStyle,
+  Toast,
   Icon,
   Color,
-  Detail
+  Detail,
 } from "@raycast/api";
 import { api as getApi } from "./api";
 import { useEffect, useState } from "react";
@@ -29,6 +24,8 @@ const Icons = {
   Course: "../assets/course.png",
   ExternalUrl: Icon.Link,
   File: Icon.TextDocument,
+  InvalidAPIKey: "../assets/invalid-api-key.png",
+  InvalidDomain: "../assets/invalid-domain.png",
   Modules: "../assets/see-modules.png",
   Page: "../assets/page.png",
   Passcode: "../assets/check-lock.png",
@@ -88,11 +85,12 @@ interface announcement {
 export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const api = getApi(preferences.token, preferences.domain);
-  const [items, setItems] = useState<course[]>();
+  const [courses, setCourses] = useState<course[]>();
   const [assignments, setAssignments] = useState<assignment[]>();
   const [announcements, setAnnouncements] = useState<announcement[]>();
 
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(true); 
 
   const service = new TurndownService();
 
@@ -100,23 +98,18 @@ export default function main() {
     api["courses?state=available&enrollment_state=active"]
       .get()
       .then((json: any) => {
-        if (json.stauts == "unauthenticated" || !(json instanceof Array))
-          setAssignments([
-            {
-              name: "Invalid API key",
-              course: "CanvasCast",
-              course_id: 0,
-              id: 0,
-              color: "Green",
-            },
-          ]);
+        if (json.status == "unauthenticated" || !(json instanceof Array)) {
+          setCourses(null)
+          setIsLoading(false)
+          setError(true)
+          return
+        }
         api.users.self.favorites["courses?state=available&enrollment_state=active"]
           .get()
           .then((favorites: any) => {
-            let courses = json;
             const ids = favorites.map((favorite) => favorite.id);
-            courses = courses.filter((course) => ids.includes(course.id));
-            setItems(
+            const courses = json.filter((course) => ids.includes(course.id));
+            setCourses(
               courses.map((a: any) => ({
                 name: a.name,
                 code: a.course_code,
@@ -158,99 +151,109 @@ export default function main() {
                         message: `# ${a.title}\n\n` + service.turndown(a.message),
                       }))
                     );
+                    setIsLoading(false);
                   })
                   .catch((err: any) => {
-                    showToast(ToastStyle.Failure, `Error: ${err.message}`);
+                    showToast(Toast.Style.Failure, `Error: ${err.message}`);
                   });
-                setLoading(false);
               })
               .catch((err: any) => {
-                showToast(ToastStyle.Failure, `Error: ${err.message}`);
+                showToast(Toast.Style.Failure, `Error: ${err.message}`);
               });
           })
           .catch((err: any) => {
-            showToast(ToastStyle.Failure, `Error: ${err.message}`);
+            showToast(Toast.Style.Failure, `Error: ${err.message}`);
           });
       })
       .catch((err: any) => {
-        showToast(ToastStyle.Failure, `Error: ${err.message}`);
+        setCourses(null)
+        setIsLoading(false)
+        setError(false)
       });
   }, []);
 
   return (
-    <List isLoading={loading}>
-      <List.Section title="Courses">
-        {items?.map((item, index) => (
-          <List.Item
-            key={index}
-            title={item.name}
-            icon={{ source: Icons["Course"], tintColor: Color[Colors[index % Colors.length]] }}
-            actions={
-              <ActionPanel>
-                <PushAction
-                  title="See Modules"
-                  icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
-                  target={
-                    <Modules id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
-                  }
-                />
-                <OpenInBrowserAction title="Open in Browser" url={`https://${preferences.domain}/courses/${item.id}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Assignments">
-        {assignments?.map((assignment, index) => (
-          <List.Item
-            key={index}
-            title={assignment.name}
-            subtitle={assignment.course}
-            icon={{ source: Icons["Assignment"], tintColor: assignment.color }}
-            actions={
-              <ActionPanel title="Title">
-                <OpenInBrowserAction
-                  url={`https://${preferences.domain}/courses/${assignment.course_id}/discussion_topics/${assignment.id}`}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Announcements">
-        {announcements?.map((announcement, index) => (
-          <List.Item
-            key={index}
-            title={announcement.title}
-            subtitle={announcement.course}
-            icon={{ source: Icons["Announcement"], tintColor: announcement.color }}
-            actions={
-              <ActionPanel title="Title">
-                <PushAction
-                  title="View Announcement"
-                  icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
-                  target={
-                    <Detail 
-                      markdown={announcement.message}
-                      actions={
-                        <ActionPanel>
-                          <OpenInBrowserAction
-                            url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
-                          />
-                        </ActionPanel>
-                      }
-                    />
-                  }
-                />
-                <CopyToClipboardAction content={announcement.message} />
-                <OpenInBrowserAction
-                  url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+    <List isLoading={isLoading}>
+      {courses !== null ? (<>
+        <List.Section title="Courses">
+          {courses?.map((item, index) => (
+            <List.Item
+              key={index}
+              title={item.name}
+              icon={{ source: Icons["Course"], tintColor: Color[Colors[index % Colors.length]] }}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="See Modules"
+                    icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
+                    target={
+                      <Modules id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
+                    }
+                  />
+                  <Action.OpenInBrowser title="Open in Browser" url={`https://${preferences.domain}/courses/${item.id}`} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+        <List.Section title="Assignments">
+          {assignments?.map((assignment, index) => (
+            <List.Item
+              key={index}
+              title={assignment.name}
+              subtitle={assignment.course}
+              icon={{ source: Icons["Assignment"], tintColor: assignment.color }}
+              actions={
+                <ActionPanel title="Title">
+                  <Action.OpenInBrowser
+                    url={`https://${preferences.domain}/courses/${assignment.course_id}/discussion_topics/${assignment.id}`}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+        <List.Section title="Announcements">
+          {announcements?.map((announcement, index) => (
+            <List.Item
+              key={index}
+              title={announcement.title}
+              subtitle={announcement.course}
+              icon={{ source: Icons["Announcement"], tintColor: announcement.color }}
+              actions={
+                <ActionPanel title="Title">
+                  <Action.Push
+                    title="View Announcement"
+                    icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
+                    target={
+                      <Detail 
+                        markdown={announcement.message}
+                        actions={
+                          <ActionPanel>
+                            <Action.OpenInBrowser
+                              url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
+                            />
+                          </ActionPanel>
+                        }
+                      />
+                    }
+                  />
+                  <Action.CopyToClipboard content={announcement.message} />
+                  <Action.OpenInBrowser
+                    url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      </>) : (
+        <List.EmptyView 
+          icon={{ source: error ? Icons["InvalidAPIKey"] : Icons["InvalidDomain"] }}
+          title={ error ? "Invalid API Key" : "Invalid Domain"}
+          description={`Please check your ${error ? "API key" : "domain"} and try again.`}
+        />
+      )}
     </List>
   );
 }
@@ -311,7 +314,7 @@ const Modules = (props: { id: any; url: string; api: any }) => {
         });
       })
       .catch((err: any) => {
-        showToast(ToastStyle.Failure, `Error: ${err.message}`);
+        showToast(Toast.Style.Failure, `Error: ${err.message}`);
       });
   }, []);
 
@@ -345,21 +348,21 @@ const Modules = (props: { id: any; url: string; api: any }) => {
               }}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
+                  <Action.OpenInBrowser title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
                   {element.download && (
-                    <ActionPanelItem
+                    <Action
                       title="Download File"
                       onAction={async () => {
-                        showToast(ToastStyle.Success, "Downloading File...");
+                        // showToast(Toast.Style.Success, "Downloading File...");
                         await open(element.download, {background: true});
-                        showToast(ToastStyle.Success, "File Downloaded");
+                        // showToast(Toast.Style.Success, "File Downloaded");
                       }}
                       icon={{ source: Icon.Download }}
                     />
                   )}
-                  {element.passcode && <CopyToClipboardAction title="Copy Passcode" content={element.passcode} />}
+                  {element.passcode && <Action.CopyToClipboard title="Copy Passcode" content={element.passcode} />}
                   {element.passcode && (
-                    <PasteAction
+                    <Action.Paste
                       title="Paste Passcode"
                       content={element.passcode}
                       shortcut={{ modifiers: ["cmd"], key: "p" }}
@@ -377,7 +380,7 @@ const Modules = (props: { id: any; url: string; api: any }) => {
           icon={{ source: Icon.Link }}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction title="Open in Browser" url={props.url} icon={{ source: Icon.Link }} />
+              <Action.OpenInBrowser title="Open in Browser" url={props.url} icon={{ source: Icon.Link }} />
             </ActionPanel>
           }
         />

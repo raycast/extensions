@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "@api-blueprints/pathmaker": "^1.0.0",
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.36.1",
     "axios": "^0.27.2",
     "js-file-download": "^0.4.12",
     "node-fetch": "^3.0.0",
