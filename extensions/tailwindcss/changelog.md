@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Search Colors and Components command] - 2022-06-18
+- Add `Search Colors` command
+- Add `Search Components` command
+
 ## [Search Classes command & Chores] - 2022-06-10
 - Update to the latest version of Raycast
 - Remove unnecessary dependencies
