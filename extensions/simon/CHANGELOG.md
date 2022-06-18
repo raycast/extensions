@@ -1,3 +1,5 @@
 # Simon Changelog
 
-## [Initial Version] - 2022-06-15
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Initial version code
