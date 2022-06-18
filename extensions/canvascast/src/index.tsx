@@ -244,46 +244,35 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
   const [isLoading, setIsLoading]: any = useState(true);
 
   useEffect(() => {
-    props.api.courses[props.id].modules
+    props.api.courses[props.id].modules["?include=items"]
       .get()
       .then((json: any) => {
-        const promises = json
-          .map((module: any) => module.id)
-          .map((id: any) => {
-            return props.api.courses[props.id].modules[id].items
-              .get()
-              .then((items: any) => {
-                items = items.filter((item: any) => item.type !== "SubHeader");
-                return items.map((item: any) => ({
-                  name: item.title
-                    .replace(/\s\(.*/g, "")
-                    .replace(/\s?:.*/g, "")
-                    .replace(/PM/g, "pm"),
-                  passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
-                  type: item.type,
-                  url: item.html_url,
-                }));
-              })
-              .catch((err: any) => {
-                showToast(ToastStyle.Failure, `Error: ${err.message}`);
-              });
-          });
-        Promise.all(promises)
-          .then((items: any) => {
-            const modules = json.map((module: any, index: number) => {
-              return {
-                name: module.name,
-                id: module.id,
-                url: module.url,
-                items: items[index],
-              };
-            });
-            setModules(modules);
-            setIsLoading(false);
-          })
-          .catch((err: any) => {
-            showToast(ToastStyle.Failure, `Error: ${err.message}`);
-          });
+        for (const item of json) {
+          console.log(item)
+          console.log(item.items.length)
+        }
+        const modules = json.map((module: any) => {
+          const items = module.items
+            .filter((item: any) => item.type !== "SubHeader")
+            .map((item: any) => ({
+              name: item.title
+                .replace(/\s\(.*/g, "")
+                .replace(/\s?:.*/g, "")
+                .replace(/PM/g, "pm"),
+              passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
+              type: item.type,
+              url: item.html_url,
+            }))
+          
+          return {
+            name: module.name,
+            id: module.id,
+            url: module.url,
+            items: items,
+          };
+        })
+        setModules(modules);
+        setIsLoading(false);
       })
       .catch((err: any) => {
         showToast(ToastStyle.Failure, `Error: ${err.message}`);
