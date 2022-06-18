@@ -63,14 +63,18 @@ interface course {
   name: string;
   code: string;
   id: number;
+  color: Color;
+  assignments: assignment[];
 }
 
 interface assignment {
   name: string;
-  color: string;
-  course_id: number;
   id: number;
+  description: string;
+  date: any; 
   course: string;
+  course_id: number; 
+  color: Color;
 }
 
 interface announcement {
@@ -79,15 +83,16 @@ interface announcement {
   color: string;
   course: string;
   id: number;
-  message: string;
+  markdown: string;
+  date: any
 }
 
 export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const api = getApi(preferences.token, preferences.domain);
-  const [courses, setCourses] = useState<course[]>();
-  const [assignments, setAssignments] = useState<assignment[]>();
-  const [announcements, setAnnouncements] = useState<announcement[]>();
+  const [courses, setCourses] = useState<course[]>([]);
+  const [assignments, setAssignments] = useState<assignment[]>([]);
+  const [announcements, setAnnouncements] = useState<announcement[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(true); 
@@ -108,32 +113,42 @@ export default function main() {
           .get()
           .then((favorites: any) => {
             const ids = favorites.map((favorite) => favorite.id);
-            const courses = json.filter((course) => ids.includes(course.id));
-            setCourses(
-              courses.map((a: any) => ({
+            const courses = json.filter((course) => ids.includes(course.id))
+              .map((a: any, i: number) => ({
                 name: a.name,
                 code: a.course_code,
                 id: a.id,
+                color: Color[Colors[i % Colors.length]],
+                assignments: []
               }))
-            );
-            api.users.self.todo
-              .get()
-              .then((json: any[]) => {
-                setAssignments(
-                  json.map((a) => ({
-                    name: a.assignment.name,
-                    course: courses.filter((course: any) => course.id == a.course_id)[0].name,
-                    course_id: a.course_id,
-                    id: a.assignment.id,
-                    color:
-                      Color[
-                        Colors[courses.indexOf(courses.filter((course) => course.id == a.course_id)[0]) % Colors.length]
-                      ],
-                  }))
-                );
+            const promises = courses.map((course: any, i: number) => {
+              return api.courses[course.id].assignments["?order_by=due_at"]
+                .get()
+                .then((json: any) => {
+                  return json.filter((a: any) => a.due_at && new Date(a.due_at).getTime() > Date.now())
+                    .map((a: any) => ({
+                      name: a.name,
+                      id: a.id,
+                      description: service.turndown(a.description),
+                      date: new Date(a.created_at).toString().split(' ').slice(0, 4).join(' '),
+                      course: course.name,
+                      course_id: course.id,
+                      color: Color[Colors[i % Colors.length]], 
+                    }))
+                })
+                .catch((err: any) => {
+                  showToast(Toast.Style.Failure, `Error: ${err.message}`);
+                });
+              })
+            Promise.all(promises)
+              .then((assignments) => {
+                courses.forEach((course: any, i: number) => {
+                  course.assignments = assignments[i]
+                })
+                setCourses(courses)
                 api["announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&")]
                   .get()
-                  .then((json: any[]) => {
+                  .then((json: any) => {
                     setAnnouncements(
                       json.map((a) => ({
                         title: a.title,
@@ -148,7 +163,8 @@ export default function main() {
                           ],
                         course: courses.filter((course) => course.id == a.context_code.substring(7))[0].name,
                         id: a.id,
-                        message: `# ${a.title}\n\n` + service.turndown(a.message),
+                        markdown: `# ${a.title}\n\n` + service.turndown(a.message),
+                        date: new Date(a.created_at).toString().split(' ').slice(0, 4).join(' ')
                       }))
                     );
                     setIsLoading(false);
@@ -159,7 +175,7 @@ export default function main() {
               })
               .catch((err: any) => {
                 showToast(Toast.Style.Failure, `Error: ${err.message}`);
-              });
+              })
           })
           .catch((err: any) => {
             showToast(Toast.Style.Failure, `Error: ${err.message}`);
@@ -176,75 +192,19 @@ export default function main() {
     <List isLoading={isLoading}>
       {courses !== null ? (<>
         <List.Section title="Courses">
-          {courses?.map((item, index) => (
-            <List.Item
-              key={index}
-              title={item.name}
-              icon={{ source: Icons["Course"], tintColor: Color[Colors[index % Colors.length]] }}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="See Modules"
-                    icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
-                    target={
-                      <Modules id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
-                    }
-                  />
-                  <Action.OpenInBrowser title="Open in Browser" url={`https://${preferences.domain}/courses/${item.id}`} />
-                </ActionPanel>
-              }
-            />
+          {!isLoading && courses?.map((course, index) => (
+            <ModuleItem key={index} course={course} preferences={preferences} api={api} />
           ))}
         </List.Section>
         <List.Section title="Assignments">
-          {assignments?.map((assignment, index) => (
-            <List.Item
-              key={index}
-              title={assignment.name}
-              subtitle={assignment.course}
-              icon={{ source: Icons["Assignment"], tintColor: assignment.color }}
-              actions={
-                <ActionPanel title="Title">
-                  <Action.OpenInBrowser
-                    url={`https://${preferences.domain}/courses/${assignment.course_id}/discussion_topics/${assignment.id}`}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {!isLoading && courses?.map((course: any) => course.assignments.map((assignment: any) => 
+              <Assignment key={assignment.id} assignment={assignment} preferences={preferences} />
+            )
+          )}
         </List.Section>
         <List.Section title="Announcements">
-          {announcements?.map((announcement, index) => (
-            <List.Item
-              key={index}
-              title={announcement.title}
-              subtitle={announcement.course}
-              icon={{ source: Icons["Announcement"], tintColor: announcement.color }}
-              actions={
-                <ActionPanel title="Title">
-                  <Action.Push
-                    title="View Announcement"
-                    icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
-                    target={
-                      <Detail 
-                        markdown={announcement.message}
-                        actions={
-                          <ActionPanel>
-                            <Action.OpenInBrowser
-                              url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
-                            />
-                          </ActionPanel>
-                        }
-                      />
-                    }
-                  />
-                  <Action.CopyToClipboard content={announcement.message} />
-                  <Action.OpenInBrowser
-                    url={`https://${preferences.domain}/courses/${announcement.course_id}/discussion_topics/${announcement.id}`}
-                  />
-                </ActionPanel>
-              }
-            />
+          {!isLoading && announcements?.map((announcement, index) => (
+            <Announcement key={index} announcement={announcement} preferences={preferences} />
           ))}
         </List.Section>
       </>) : (
@@ -389,3 +349,114 @@ const Modules = (props: { id: any; url: string; api: any }) => {
   );
 };
 
+const ModuleItem = (props: { course: course, preferences: any, api: any }) => {
+  return (
+    <List.Item
+      title={props.course.name}
+      icon={{ source: Icons["Course"], tintColor: props.course.color }}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="See Modules"
+            icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
+            target={
+              <Modules 
+                id={props.course.id} 
+                url={`https://${props.preferences.domain}/courses/${props.course.id}`} 
+                api={props.api} 
+              />
+            }
+          />
+          <Action.OpenInBrowser 
+            title="Open in Browser"
+            url={`https://${props.preferences.domain}/courses/${props.course.id}`} 
+          />
+          <Action.Push
+            title="See Assignments"
+            icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ['cmd'], key: 'l' }}
+            target={
+              <List>
+                {props.course.assignments.map((assignment: any, index: number) => (
+                  <Assignment key={assignment.id} assignment={assignment} preferences={props.preferences} />
+                ))}
+              </List>
+            }
+          />
+        </ActionPanel>
+      }
+    />
+  )
+}
+
+const Assignment = (props: { assignment: assignment, preferences: any }) => {
+  return (
+    <List.Item
+      title={props.assignment.name}
+      subtitle={props.assignment.course}
+      icon={{ source: Icons["Assignment"], tintColor: props.assignment.color }}
+      actions={
+        <ActionPanel>
+          <Action.Push 
+            title="View Description"
+            icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
+            target={
+              <Detail 
+                markdown={props.assignment.description} 
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      url={`https://${props.preferences.domain}/courses/${props.assignment.course_id}/discussion_topics/${props.assignment.id}`}
+                    />
+                  </ActionPanel>
+                }
+              />
+            }
+          />
+          <Action.OpenInBrowser
+            url={`https://${props.preferences.domain}/courses/${props.assignment.course_id}/discussion_topics/${props.assignment.id}`}
+          />
+        </ActionPanel>
+      }
+      accessories={[
+        { text: props.assignment.date, icon: Icon.Calendar },
+      ]}
+    />
+  )
+}
+
+const Announcement = (props: { announcement: announcement, preferences: any }) => {
+  return (
+    <List.Item
+      title={props.announcement.title}
+      subtitle={props.announcement.course}
+      icon={{ source: Icons["Announcement"], tintColor: props.announcement.color }}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="View Announcement"
+            icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
+            target={
+              <Detail 
+                markdown={props.announcement.markdown}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      url={`https://${props.preferences.domain}/courses/${props.announcement.course_id}/discussion_topics/${props.announcement.id}`}
+                    />
+                  </ActionPanel>
+                }
+              />
+            }
+          />
+          <Action.OpenInBrowser
+            url={`https://${props.preferences.domain}/courses/${props.announcement.course_id}/discussion_topics/${props.announcement.id}`}
+          />
+        </ActionPanel>
+      }
+      accessories={[
+        { text: props.announcement.date, icon: Icon.Calendar },
+      ]}
+    />
+  )
+}
