@@ -119,7 +119,7 @@ export default function main() {
                     .map((a: any) => ({
                       name: a.name,
                       id: a.id,
-                      description: service.turndown(a.description),
+                      description: `# ${a.name}\n\n` + service.turndown(a.description),
                       date: new Date(a.created_at).toString().split(" ").slice(0, 4).join(" "),
                       course: course.name,
                       course_id: course.id,
