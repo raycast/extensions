@@ -16,6 +16,13 @@
       "subtitle": "Portuguese Primeira Liga",
       "description": "View the latest Portuguese Primeira Liga standings.",
       "mode": "view"
+    },
+    {
+      "name": "newspapers",
+      "title": "View Newspapers",
+      "subtitle": "Portuguese Primeira Liga",
+      "description": "View today's newspapers covers.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -30,11 +37,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
+    "@types/cheerio": "^0.22.31",
     "axios": "^0.26.0",
+    "cheerio": "^1.0.0-rc.10",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
+    "@types/node": "^18.0.0",
     "@types/react": "^18.0.12",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -1,3 +1,5 @@
+import { Url } from "url";
+
 export interface Table {
   position: number;
   team: Team;
@@ -22,4 +24,11 @@ export interface Team {
 
 export interface Preferences {
   apiKey: string;
+}
+
+export interface Newspaper {
+  title: string | undefined;
+  cover: string | undefined;
+  url: string | undefined;
+  name: string | undefined;
 }
