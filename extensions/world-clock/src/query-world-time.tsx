@@ -1,6 +1,6 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import React, { useState } from "react";
-import { getAllTimezones, getRegionTime } from "./hooks/hooks";
+import { getAllTimezones, getIsShowDetail, getRegionTime } from "./hooks/hooks";
 import { ListEmptyView } from "./components/list-empty-view";
 import { isEmpty } from "./utils/common-utils";
 import { StarredTimeZoneListItem, TimeZoneListItem } from "./components/time-zone-list-item";
@@ -13,12 +13,14 @@ export default function QueryWorldTime() {
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
+  const [refreshDetail, setRefreshDetail] = useState<number>(0);
+  const { showDetail } = getIsShowDetail(refreshDetail);
   const { starTimezones, timezones, loading } = getAllTimezones(refresh, region);
   const { timeInfo, detailLoading } = getRegionTime(region);
 
   return (
     <List
-      isShowingDetail={timezones.length !== 0}
+      isShowingDetail={showDetail && timezones.length !== 0}
       isLoading={loading || (starTimezones.length !== 0 && tag === "")}
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
@@ -50,6 +52,8 @@ export default function QueryWorldTime() {
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
                 setRefresh={setRefresh}
+                setRefreshDetail={setRefreshDetail}
+                showDetail={showDetail}
               />
             );
           })}
@@ -66,6 +70,8 @@ export default function QueryWorldTime() {
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
                 setRefresh={setRefresh}
+                setRefreshDetail={setRefreshDetail}
+                showDetail={showDetail}
               />
             );
           })}
