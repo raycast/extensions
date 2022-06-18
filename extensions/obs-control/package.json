@@ -3,7 +3,7 @@
   "name": "obs-control",
   "title": "OBS Control",
   "description": "Control OBS Studio with websocket API",
-  "icon": "command-icon.png",
+  "icon": "obs-control.png",
   "author": "Yukai",
   "categories": [
     "Productivity"
