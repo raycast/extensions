@@ -1,19 +1,8 @@
-import {
-  getPreferenceValues,
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  Color,
-  Detail,
-} from "@raycast/api";
+import { getPreferenceValues, List, ActionPanel, Action, showToast, Toast, Icon, Color, Detail } from "@raycast/api";
 import { api as getApi } from "./api";
 import { useEffect, useState } from "react";
-import open from 'open'
+import open from "open";
 import TurndownService from "turndown";
-
 
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
 
@@ -71,9 +60,9 @@ interface assignment {
   name: string;
   id: number;
   description: string;
-  date: any; 
+  date: any;
   course: string;
-  course_id: number; 
+  course_id: number;
   color: Color;
 }
 
@@ -84,18 +73,17 @@ interface announcement {
   course: string;
   id: number;
   markdown: string;
-  date: any
+  date: any;
 }
 
 export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const api = getApi(preferences.token, preferences.domain);
   const [courses, setCourses] = useState<course[]>([]);
-  const [assignments, setAssignments] = useState<assignment[]>([]);
   const [announcements, setAnnouncements] = useState<announcement[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(true); 
+  const [error, setError] = useState(true);
 
   const service = new TurndownService();
 
@@ -104,48 +92,50 @@ export default function main() {
       .get()
       .then((json: any) => {
         if (json.status == "unauthenticated" || !(json instanceof Array)) {
-          setCourses(null)
-          setIsLoading(false)
-          setError(true)
-          return
+          setCourses(null);
+          setIsLoading(false);
+          setError(true);
+          return;
         }
         api.users.self.favorites["courses?state=available&enrollment_state=active"]
           .get()
           .then((favorites: any) => {
             const ids = favorites.map((favorite) => favorite.id);
-            const courses = json.filter((course) => ids.includes(course.id))
+            const courses = json
+              .filter((course) => ids.includes(course.id))
               .map((a: any, i: number) => ({
                 name: a.name,
                 code: a.course_code,
                 id: a.id,
                 color: Color[Colors[i % Colors.length]],
-                assignments: []
-              }))
+                assignments: [],
+              }));
             const promises = courses.map((course: any, i: number) => {
               return api.courses[course.id].assignments["?order_by=due_at"]
                 .get()
                 .then((json: any) => {
-                  return json.filter((a: any) => a.due_at && new Date(a.due_at).getTime() > Date.now())
+                  return json
+                    .filter((a: any) => a.due_at && new Date(a.due_at).getTime() > Date.now())
                     .map((a: any) => ({
                       name: a.name,
                       id: a.id,
                       description: service.turndown(a.description),
-                      date: new Date(a.created_at).toString().split(' ').slice(0, 4).join(' '),
+                      date: new Date(a.created_at).toString().split(" ").slice(0, 4).join(" "),
                       course: course.name,
                       course_id: course.id,
-                      color: Color[Colors[i % Colors.length]], 
-                    }))
+                      color: Color[Colors[i % Colors.length]],
+                    }));
                 })
                 .catch((err: any) => {
                   showToast(Toast.Style.Failure, `Error: ${err.message}`);
                 });
-              })
+            });
             Promise.all(promises)
               .then((assignments) => {
                 courses.forEach((course: any, i: number) => {
-                  course.assignments = assignments[i]
-                })
-                setCourses(courses)
+                  course.assignments = assignments[i];
+                });
+                setCourses(courses);
                 api["announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&")]
                   .get()
                   .then((json: any) => {
@@ -164,7 +154,7 @@ export default function main() {
                         course: courses.filter((course) => course.id == a.context_code.substring(7))[0].name,
                         id: a.id,
                         markdown: `# ${a.title}\n\n` + service.turndown(a.message),
-                        date: new Date(a.created_at).toString().split(' ').slice(0, 4).join(' ')
+                        date: new Date(a.created_at).toString().split(" ").slice(0, 4).join(" "),
                       }))
                     );
                     setIsLoading(false);
@@ -175,42 +165,54 @@ export default function main() {
               })
               .catch((err: any) => {
                 showToast(Toast.Style.Failure, `Error: ${err.message}`);
-              })
+              });
           })
           .catch((err: any) => {
             showToast(Toast.Style.Failure, `Error: ${err.message}`);
           });
       })
       .catch((err: any) => {
-        setCourses(null)
-        setIsLoading(false)
-        setError(false)
+        setCourses(null);
+        setIsLoading(false);
+        setError(false);
       });
   }, []);
 
   return (
     <List isLoading={isLoading}>
-      {courses !== null ? (<>
-        <List.Section title="Courses">
-          {!isLoading && courses?.map((course, index) => (
-            <ModuleItem key={index} course={course} preferences={preferences} api={api} />
-          ))}
-        </List.Section>
-        <List.Section title="Assignments">
-          {!isLoading && courses?.map((course: any) => course.assignments.map((assignment: any) => 
-              <Assignment key={assignment.id} assignment={assignment} preferences={preferences} />
-            )
-          )}
-        </List.Section>
-        <List.Section title="Announcements">
-          {!isLoading && announcements?.map((announcement, index) => (
-            <Announcement key={index} announcement={announcement} preferences={preferences} />
-          ))}
-        </List.Section>
-      </>) : (
-        <List.EmptyView 
+      {courses !== null ? (
+        <>
+          <List.Section title="Courses">
+            {!isLoading &&
+              courses?.map((course, index) => (
+                <ModuleItem
+                  key={index}
+                  course={course}
+                  announcements={announcements}
+                  preferences={preferences}
+                  api={api}
+                />
+              ))}
+          </List.Section>
+          <List.Section title="Assignments">
+            {!isLoading &&
+              courses?.map((course: any) =>
+                course.assignments.map((assignment: any) => (
+                  <Assignment key={assignment.id} assignment={assignment} preferences={preferences} />
+                ))
+              )}
+          </List.Section>
+          <List.Section title="Announcements">
+            {!isLoading &&
+              announcements?.map((announcement, index) => (
+                <Announcement key={index} announcement={announcement} preferences={preferences} />
+              ))}
+          </List.Section>
+        </>
+      ) : (
+        <List.EmptyView
           icon={{ source: error ? Icons["InvalidAPIKey"] : Icons["InvalidDomain"] }}
-          title={ error ? "Invalid API Key" : "Invalid Domain"}
+          title={error ? "Invalid API Key" : "Invalid Domain"}
           description={`Please check your ${error ? "API key" : "domain"} and try again.`}
         />
       )}
@@ -314,7 +316,7 @@ const Modules = (props: { id: any; url: string; api: any }) => {
                       title="Download File"
                       onAction={async () => {
                         // showToast(Toast.Style.Success, "Downloading File...");
-                        await open(element.download, {background: true});
+                        await open(element.download, { background: true });
                         // showToast(Toast.Style.Success, "File Downloaded");
                       }}
                       icon={{ source: Icon.Download }}
@@ -349,7 +351,7 @@ const Modules = (props: { id: any; url: string; api: any }) => {
   );
 };
 
-const ModuleItem = (props: { course: course, preferences: any, api: any }) => {
+const ModuleItem = (props: { course: course; announcements: announcement[]; preferences: any; api: any }) => {
   return (
     <List.Item
       title={props.course.name}
@@ -360,36 +362,52 @@ const ModuleItem = (props: { course: course, preferences: any, api: any }) => {
             title="See Modules"
             icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
             target={
-              <Modules 
-                id={props.course.id} 
-                url={`https://${props.preferences.domain}/courses/${props.course.id}`} 
-                api={props.api} 
+              <Modules
+                id={props.course.id}
+                url={`https://${props.preferences.domain}/courses/${props.course.id}`}
+                api={props.api}
               />
             }
           />
-          <Action.OpenInBrowser 
+          <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://${props.preferences.domain}/courses/${props.course.id}`} 
+            url={`https://${props.preferences.domain}/courses/${props.course.id}`}
           />
-          <Action.Push
-            title="See Assignments"
-            icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
-            shortcut={{ modifiers: ['cmd'], key: 'l' }}
-            target={
-              <List>
-                {props.course.assignments.map((assignment: any, index: number) => (
-                  <Assignment key={assignment.id} assignment={assignment} preferences={props.preferences} />
-                ))}
-              </List>
-            }
-          />
+          <ActionPanel.Section>
+            <Action.Push
+              title="See Assignments"
+              icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              target={
+                <List>
+                  {props.course.assignments.map((assignment: any, index: number) => (
+                    <Assignment key={index} assignment={assignment} preferences={props.preferences} />
+                  ))}
+                </List>
+              }
+            />
+            <Action.Push
+              title="See Announcements"
+              icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+              target={
+                <List>
+                  {props.announcements
+                    .filter((announcement: any) => announcement.course_id === props.course.id)
+                    .map((announcement: any, index: number) => (
+                      <Announcement key={index} announcement={announcement} preferences={props.preferences} />
+                    ))}
+                </List>
+              }
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
-  )
-}
+  );
+};
 
-const Assignment = (props: { assignment: assignment, preferences: any }) => {
+const Assignment = (props: { assignment: assignment; preferences: any }) => {
   return (
     <List.Item
       title={props.assignment.name}
@@ -397,12 +415,12 @@ const Assignment = (props: { assignment: assignment, preferences: any }) => {
       icon={{ source: Icons["Assignment"], tintColor: props.assignment.color }}
       actions={
         <ActionPanel>
-          <Action.Push 
+          <Action.Push
             title="View Description"
             icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
             target={
-              <Detail 
-                markdown={props.assignment.description} 
+              <Detail
+                markdown={props.assignment.description}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
@@ -418,14 +436,12 @@ const Assignment = (props: { assignment: assignment, preferences: any }) => {
           />
         </ActionPanel>
       }
-      accessories={[
-        { text: props.assignment.date, icon: Icon.Calendar },
-      ]}
+      accessories={[{ text: props.assignment.date, icon: Icon.Calendar }]}
     />
-  )
-}
+  );
+};
 
-const Announcement = (props: { announcement: announcement, preferences: any }) => {
+const Announcement = (props: { announcement: announcement; preferences: any }) => {
   return (
     <List.Item
       title={props.announcement.title}
@@ -437,7 +453,7 @@ const Announcement = (props: { announcement: announcement, preferences: any }) =
             title="View Announcement"
             icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
             target={
-              <Detail 
+              <Detail
                 markdown={props.announcement.markdown}
                 actions={
                   <ActionPanel>
@@ -454,9 +470,7 @@ const Announcement = (props: { announcement: announcement, preferences: any }) =
           />
         </ActionPanel>
       }
-      accessories={[
-        { text: props.announcement.date, icon: Icon.Calendar },
-      ]}
+      accessories={[{ text: props.announcement.date, icon: Icon.Calendar }]}
     />
-  )
-}
+  );
+};

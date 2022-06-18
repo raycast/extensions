@@ -20,7 +20,7 @@
       "required": true,
       "title": "Domain",
       "placeholder": "canvas.instructure.com",
-      "description": "Domain for your canvas LMS. Do not include URL; just the domain."
+      "description": "Just the domain for your canvas LMS (Do not include the URL)"
     }
   ],
   "commands": [
@@ -28,7 +28,7 @@
       "name": "index",
       "title": "My Courses",
       "subtitle": "Canvas",
-      "description": "View the Canvas dashboard",
+      "description": "See the modules, assignments, and announcements for your courses.",
       "mode": "view"
     }
   ],
