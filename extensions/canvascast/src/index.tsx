@@ -184,10 +184,7 @@ export default function main() {
                     <ModulePage id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
                   }
                 />
-                <OpenInBrowserAction 
-                  title="Open in Browser"
-                  url={`https://${preferences.domain}/courses/${item.id}`}
-                />
+                <OpenInBrowserAction title="Open in Browser" url={`https://${preferences.domain}/courses/${item.id}`} />
               </ActionPanel>
             }
           />
@@ -253,14 +250,11 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
     props.api.courses[props.id].modules["?include=items"]
       .get()
       .then((json: any) => {
-        for (const item of json) {
-          console.log(item)
-          console.log(item.items.length)
-        }
         const modules = json.map((module: any) => {
-          const items = module.items
+          let items = module.items
             .filter((item: any) => item.type !== "SubHeader")
             .map((item: any) => ({
+              id: item.content_id,
               name: item.title
                 .replace(/\s\(.*/g, "")
                 .replace(/\s?:.*/g, "")
@@ -268,17 +262,40 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
               passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
               type: item.type,
               url: item.html_url,
-            }))
-          
+            }));
+
           return {
             name: module.name,
             id: module.id,
             url: module.url,
             items: items,
           };
-        })
-        setModules(modules);
-        setIsLoading(false);
+        });
+        const promises = [];
+        modules.map((module) => {
+          module.items
+            .filter((item) => item.type === "File")
+            .map((item) => {
+              promises.push(
+                props.api.courses[props.id].files[item.id].get().then((json: any) => {
+                  return json.url;
+                })
+              );
+            });
+        });
+        Promise.all(promises).then((urls: any) => {
+          let i = 0;
+          modules.map((module) => {
+            module.items.map((item) => {
+              if (item.type === "File") {
+                item.download = urls[i];
+                i++;
+              }
+            });
+          });
+          setModules(modules);
+          setIsLoading(false);
+        });
       })
       .catch((err: any) => {
         showToast(ToastStyle.Failure, `Error: ${err.message}`);
@@ -316,6 +333,13 @@ const ModulePage = (props: { id: any; url: string; api: any }) => {
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
+                  {element.download && (
+                    <OpenInBrowserAction
+                      title="Download File"
+                      url={element.download}
+                      icon={{ source: Icon.Download }}
+                    />
+                  )}
                   {element.passcode && <CopyToClipboardAction title="Copy Passcode" content={element.passcode} />}
                   {element.passcode && (
                     <PasteAction
