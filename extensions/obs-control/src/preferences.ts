@@ -1,4 +1,4 @@
 export type Preference = {
-  ['obs-url']?: string,
-  ['obs-password']?: string,
-}
+  ["obs-url"]?: string;
+  ["obs-password"]?: string;
+};

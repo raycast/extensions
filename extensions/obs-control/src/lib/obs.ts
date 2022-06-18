@@ -4,10 +4,10 @@ import { Preference } from "../preferences";
 
 const values = getPreferenceValues<Preference>();
 
-export async function getObs () {
+export async function getObs() {
   const obs = new OBSWebSocket();
 
   await obs.connect(values["obs-url"], values["obs-password"]);
 
-  return obs
+  return obs;
 }

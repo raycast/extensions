@@ -25,14 +25,14 @@ export default function SetScene() {
               {
                 icon: isCurrent ? { source: Icon.Checkmark, tintColor: Color.Green } : null,
                 tooltip: isCurrent ? "Current Program Scene" : null,
-              }
+              },
             ]}
             actions={
               <ActionPanel>
                 <Action
                   title="Switch to Scene"
                   onAction={async () => {
-                    await obs.call("SetCurrentProgramScene", { sceneName: scene.sceneName })
+                    await obs.call("SetCurrentProgramScene", { sceneName: scene.sceneName });
                     mutate();
                   }}
                 />
