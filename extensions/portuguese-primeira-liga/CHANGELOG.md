@@ -2,7 +2,8 @@
 
 ## [New Additions] - 2022-06-18
 
-Added new screenshots
+- Removed inset from Grid
+- Added new screenshots
 
 ## [New Additions] - 2022-06-17
 

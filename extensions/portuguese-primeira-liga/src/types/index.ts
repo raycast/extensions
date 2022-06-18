@@ -1,5 +1,3 @@
-import { Url } from "url";
-
 export interface Table {
   position: number;
   team: Team;
