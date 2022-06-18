@@ -1,6 +1,6 @@
 # Bunch Changelog
 
-## [Add new command: Create Bunches] - {PR_MERGE_DATE}
+## [Add new command: Create Bunches] - 2022-06-18
 
 - Add new command: Create Bunches.
 
