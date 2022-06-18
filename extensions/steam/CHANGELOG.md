@@ -1,5 +1,5 @@
 # Steam Changelog
 
-## [Added Steam] - 2022-05-30
+## [Added Steam] - {PR_MERGE_DATE}
 
 Initial version code
