@@ -23,6 +23,7 @@ const Icons = {
   Course: "../assets/course.png",
   ExternalUrl: Icon.Link,
   File: Icon.TextDocument,
+  Modules: "../assets/see-modules.png",
   Page: "../assets/page.png",
   Passcode: "../assets/check-lock.png",
   Quiz: "../assets/quiz.png",
@@ -178,9 +179,14 @@ export default function main() {
               <ActionPanel>
                 <PushAction
                   title="See Modules"
+                  icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
                   target={
                     <ModulePage id={item.id} url={`https://${preferences.domain}/courses/${item.id}`} api={api} />
                   }
+                />
+                <OpenInBrowserAction 
+                  title="Open in Browser"
+                  url={`https://${preferences.domain}/courses/${item.id}`}
                 />
               </ActionPanel>
             }
