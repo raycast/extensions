@@ -5,19 +5,48 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-export const buildTimeByUTCTime = (dateTime: string) => {
-  if (isEmpty(dateTime)) return "";
-  return dateTime.substring(0, dateTime.indexOf(".")).replace("T", " ");
+export const hour24 = getPreferenceValues<Preferences>().hour24;
+
+const build2DigitTime = (num: string | number) => {
+  const numStr = num + "";
+  return numStr.length <= 1 ? "0" + numStr : numStr;
 };
 
-export const hour24 = getPreferenceValues<Preferences>().hour24;
+const buildHour24Time = (date: Date) => {
+  return (
+    build2DigitTime(date.getHours()) +
+    ":" +
+    build2DigitTime(date.getMinutes()) +
+    ":" +
+    build2DigitTime(date.getSeconds())
+  );
+};
+
+export const buildHour24DateTime = (date: Date) => {
+  return (
+    date.toLocaleDateString() +
+    " " +
+    build2DigitTime(date.getHours()) +
+    ":" +
+    build2DigitTime(date.getMinutes()) +
+    ":" +
+    build2DigitTime(date.getSeconds())
+  );
+};
 
 export const calculateDateTimeByOffset = (offset: string) => {
   const dateTime = new Date();
   dateTime.setDate(dateTime.getUTCDate());
   dateTime.setHours(dateTime.getUTCHours() + parseInt(offset));
   return {
-    date_time: dateTime.toLocaleTimeString("en-us", { hour12: !hour24 }),
+    date_time: hour24
+      ? buildHour24Time(dateTime)
+      : dateTime.toLocaleTimeString("en-US", {
+          hour12: true,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
     unixtime: dateTime.getTime(),
   };
 };
@@ -33,9 +62,33 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
   const utc = new Date(parseInt(unixtimeStr));
   utc.setDate(utc.getDate());
   utc.setHours(utc.getUTCHours());
+
+  let time = dateTime.toLocaleTimeString("en-US", {
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  let _datetime = dateTime.toLocaleString("en-US", {
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  let _utcDatetime = utc.toLocaleString("en-us", {
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  if (hour24) {
+    time = buildHour24Time(dateTime);
+    _datetime = dateTime.toLocaleDateString() + " " + time;
+    _utcDatetime = utc.toLocaleDateString() + " " + buildHour24Time(utc);
+  }
   return {
-    time: dateTime.toLocaleTimeString("en-us", { hour12: !hour24 }),
-    dateTime: dateTime.toLocaleString("en-us", { hour12: !hour24 }),
-    utc_datetime: utc.toLocaleString("en-us", { hour12: !hour24 }),
+    time: time,
+    dateTime: _datetime,
+    utc_datetime: _utcDatetime,
   };
 };

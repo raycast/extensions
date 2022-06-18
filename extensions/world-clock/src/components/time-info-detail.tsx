@@ -1,16 +1,18 @@
 import { Image, List } from "@raycast/api";
 import React from "react";
-import { TimeInfo } from "../types/types";
+import { TimeInfo, Timezone } from "../types/types";
 import Mask = Image.Mask;
 import { weeks } from "../utils/costants";
+import { isEmpty } from "../utils/common-utils";
 
-export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boolean }) {
-  const { detailLoading, timeInfo } = props;
+export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boolean; timezone?: Timezone }) {
+  const { timezone, detailLoading, timeInfo } = props;
   return (
     <List.Item.Detail
       isLoading={detailLoading}
       metadata={
-        typeof timeInfo.datetime !== "undefined" && (
+        typeof timeInfo.datetime !== "undefined" &&
+        !detailLoading && (
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label
               title="Timezone"
@@ -38,6 +40,13 @@ export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boole
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Client IP" text={timeInfo.client_ip} />
             <List.Item.Detail.Metadata.Separator />
+
+            {!isEmpty(timezone?.memo) && (
+              <>
+                <List.Item.Detail.Metadata.Label title="Memo" icon={timezone?.memoIcon} text={timezone?.memo} />
+                <List.Item.Detail.Metadata.Separator />
+              </>
+            )}
           </List.Item.Detail.Metadata>
         )
       }
