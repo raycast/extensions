@@ -6,7 +6,7 @@ import { ActionOpenFolder } from "./components/action-open-folder";
 import { getBunchesPreview } from "./hooks/hooks-create-bunches";
 import { bunchesShortcuts } from "./utils/constants";
 
-export default function CreateBunches() {
+export default function CreateBunch() {
   const [title, setTitle] = useState<string>("");
   const [tags, setTags] = useState<string>("");
   const [shortcut, setShortcut] = useState<string>("");
@@ -19,7 +19,7 @@ export default function CreateBunches() {
         <ActionPanel>
           <Action
             icon={Icon.TextDocument}
-            title={"Create Bunches"}
+            title={"Create Bunch"}
             onAction={() => {
               createBunchesByContent(title, tags, content, bunchesPreview).then((result) => {
                 if (result) pop();
@@ -66,7 +66,7 @@ export default function CreateBunches() {
       />
       <Form.Dropdown id={"Shortcut"} title={"Shortcut"} value={shortcut} info={"Optional."} onChange={setShortcut}>
         {bunchesShortcuts.map((value) => {
-          return <Form.DropdownItem value={value.value} title={value.title} />;
+          return <Form.DropdownItem key={value.value} value={value.value} title={value.title} />;
         })}
       </Form.Dropdown>
       <Form.TextArea

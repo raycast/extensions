@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-all-bunches",
-      "title": "Search All Bunches",
+      "name": "search-bunches",
+      "title": "Search Bunches",
       "subtitle": "Bunch",
-      "description": "Search all bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
+      "description": "Search bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
       "mode": "view",
       "preferences": [
         {
@@ -36,10 +36,10 @@
       "mode": "no-view"
     },
     {
-      "name": "create-bunches",
-      "title": "Create Bunches",
+      "name": "create-bunch",
+      "title": "Create Bunch",
       "subtitle": "Bunch",
-      "description": "Create a bunches.",
+      "description": "Create a bunch.",
       "mode": "view"
     },
     {

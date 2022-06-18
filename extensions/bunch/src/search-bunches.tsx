@@ -8,7 +8,7 @@ import { bunchInstalled, getBunchesContent } from "./utils/common-utils";
 import { Preferences } from "./types/preferences";
 import { BunchNotInstallView } from "./components/bunch-not-install-view";
 
-export default function SearchAllBunches() {
+export default function SearchBunches() {
   const { rememberFilter } = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<string>("");
   const [searchContent, setSearchContent] = useState<string>("");
