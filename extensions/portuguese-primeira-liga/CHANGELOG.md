@@ -1,5 +1,9 @@
 # Portuguese Primeira Liga Changelog
 
+## [New Additions] - 2022-06-18
+
+Added new screenshots
+
 ## [New Additions] - 2022-06-17
 
 - Added View Newspapers command to view today's newspapers covers
