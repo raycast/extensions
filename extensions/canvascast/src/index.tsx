@@ -2,7 +2,7 @@ import { getPreferenceValues, List, ActionPanel, Action, showToast, Toast, Icon,
 import { api as getApi } from "./api";
 import { useEffect, useState } from "react";
 import open from "open";
-import TurndownService from "turndown";
+import TurndownService from "turndown-rn";
 
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
 
@@ -76,16 +76,22 @@ interface announcement {
   date: any;
 }
 
+enum ERROR {
+  INVALID_API_KEY = 0,
+  INVALID_DOMAIN = 1,
+}
+
+const service = new TurndownService();
+
 export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const api = getApi(preferences.token, preferences.domain);
+
   const [courses, setCourses] = useState<course[]>([]);
   const [announcements, setAnnouncements] = useState<announcement[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(true);
-
-  const service = new TurndownService();
+  const [error, setError] = useState(ERROR.INVALID_API_KEY);
 
   useEffect(() => {
     api["courses?state=available&enrollment_state=active"]
@@ -94,7 +100,7 @@ export default function main() {
         if (json.status == "unauthenticated" || !(json instanceof Array)) {
           setCourses(null);
           setIsLoading(false);
-          setError(true);
+          setError(ERROR.INVALID_API_KEY);
           return;
         }
         api.users.self.favorites["courses?state=available&enrollment_state=active"]
@@ -174,7 +180,7 @@ export default function main() {
       .catch((err: any) => {
         setCourses(null);
         setIsLoading(false);
-        setError(false);
+        setError(ERROR.INVALID_DOMAIN);
       });
   }, []);
 
@@ -211,9 +217,28 @@ export default function main() {
         </>
       ) : (
         <List.EmptyView
-          icon={{ source: error ? Icons["InvalidAPIKey"] : Icons["InvalidDomain"] }}
-          title={error ? "Invalid API Key" : "Invalid Domain"}
-          description={`Please check your ${error ? "API key" : "domain"} and try again.`}
+          icon={{
+            source:
+              error === ERROR.INVALID_API_KEY
+                ? Icons["InvalidAPIKey"]
+                : error === ERROR.INVALID_DOMAIN
+                ? Icons["InvalidDomain"]
+                : Icon.ExclamationMark,
+          }}
+          title={
+            error === ERROR.INVALID_API_KEY
+              ? "Invalid API Key"
+              : error === ERROR.INVALID_DOMAIN
+              ? "Invalid Domain"
+              : "Error"
+          }
+          description={`Please check your ${
+            error === ERROR.INVALID_API_KEY
+              ? "API key"
+              : error === ERROR.INVALID_DOMAIN
+              ? "domain"
+              : "API key or domain"
+          } and try again.`}
         />
       )}
     </List>
