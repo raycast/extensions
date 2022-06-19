@@ -254,7 +254,7 @@ const Modules = (props: { id: any; url: string; api: any }) => {
       .get()
       .then((json: any) => {
         const modules = json.map((module: any) => {
-          let items = module.items
+          const items = module.items
             .filter((item: any) => item.type !== "SubHeader")
             .map((item: any) => ({
               id: item.content_id,
