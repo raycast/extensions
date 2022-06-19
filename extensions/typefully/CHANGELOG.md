@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Updated Command Functionality] - 2022-06-19
+
+- Updated Open Typefully command to use default browser
+
 ## [Initial Version] - 2022-06-19
 
 - Add required preferences
