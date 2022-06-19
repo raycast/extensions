@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Improve] - 2022-06-16
+
+- The Task detail view can show more information.
+
 ## [Added] - 2022-03-31
 
 - Support List-detail view for better user experience.

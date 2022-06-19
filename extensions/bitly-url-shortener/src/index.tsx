@@ -1,12 +1,23 @@
-import { getPreferenceValues, showHUD, copyTextToClipboard } from "@raycast/api";
+import { copyTextToClipboard, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fetch, { Headers } from "node-fetch";
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+async function reportError({ message }: { message: string }) {
+  await showToast(ToastStyle.Failure, "Error", message.toString());
+}
 
 export default async function () {
   try {
     const { accessToken } = getPreferenceValues();
     const clipboard = await runAppleScript("the clipboard");
-    if (clipboard.length === 0) throw new Error("Clipboard is empty");
+    if (clipboard.length === 0) {
+      return await reportError(new Error("Clipboard is empty"));
+    }
 
     //validate url or error out early.
     new URL(clipboard);
@@ -24,12 +35,12 @@ export default async function () {
 
     const { errors, link } = (await response.json()) as { link: string; errors?: [] };
     if (errors) {
-      throw new Error("Invalid URL String");
+      return await reportError(new Error("Invalid URL String"));
     }
 
     await copyTextToClipboard(link);
-    await showHUD("Copied shortened URL to clipboard");
-  } catch (error: any) {
-    await showHUD(error.toString());
+    await showToast(ToastStyle.Success, "Success", "Copied shortened URL to clipboard");
+  } catch (error: unknown) {
+    await reportError({ message: getErrorMessage(error) });
   }
 }

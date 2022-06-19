@@ -6,6 +6,9 @@
   "description": "Manage Docker with Raycast",
   "icon": "docker-icon.png",
   "author": "priithaamer",
+  "contributors": [
+    "gebeto"
+  ],
   "license": "MIT",
   "commands": [
     {
