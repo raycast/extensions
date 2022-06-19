@@ -69,6 +69,7 @@ For example, if you input a sentence arbitrarily, it will be translated into the
 In order to better match the automatic clipboard query feature, it is a good idea to set a hotkey for `Easydic`, such as `Shift` + `Cmd ` + `E`, so that after copying the text, you can directly query words through the hotkey, which is very smooth and elegant. 
 In addition, to avoid frequently querying the same clipboard words, we set a `10 minute` limit, that is, if the latest word on the clipboard is automatically queried only once within 10 minutes, of course, you can manually paste and query at any time.
 </details>
+
 ### Select Target Translation Language
 
 <details>

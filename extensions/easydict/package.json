@@ -26,8 +26,41 @@
     "youdao",
     "eudic",
     "baidu",
+    "tencent",
     "caiyun"
   ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "axios": "^0.25.0",
+    "crypto-js": "^4.1.1",
+    "play-sound": "^1.1.5",
+    "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "@types/node": "~16.10.0",
+    "@types/play-sound": "^1.1.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "eslint": "eslint src --fix --ext .ts,.tsx",
+    "fix": "prettier --write ."
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && eslint --fix && prettier --write ."
+    }
+  },
   "preferences": [
     {
       "title": "First Language",
@@ -235,11 +268,19 @@
     },
     {
       "title": "Switch Boxes",
-      "name": "isAutomaticQueryClipboard",
+      "name": "isAutomaticQuerySelectedText",
       "type": "checkbox",
-      "label": "Automatic Query Clipboard",
+      "label": "Automatic Query Selected Text",
       "required": false,
-      "description": "Automatic query clipboard text when you first enter the extension",
+      "description": "Automatic query selected text of the frontmost application",
+      "default": true
+    },
+    {
+      "name": "isAutomaticPlayWordAudio",
+      "type": "checkbox",
+      "label": "Automatic Play Word Audio",
+      "required": false,
+      "description": "Automatic play audio after looking up a word",
       "default": true
     },
     {
@@ -247,69 +288,89 @@
       "type": "checkbox",
       "label": "Select Target Translation Language",
       "required": false,
-      "description": "Allow manual selection of target translation language in action panel",
+      "description": "Select target translation language in action panel manually",
+      "default": false
+    },
+    {
+      "title": "Translation Services",
+      "name": "enableBaiduTranslate",
+      "type": "checkbox",
+      "label": "Baidu Translate",
+      "required": false,
+      "description": "Turn on/off Baidu Translate",
+      "default": true
+    },
+    {
+      "name": "enableTencentTranslate",
+      "type": "checkbox",
+      "label": "Tencent Translate",
+      "required": false,
+      "description": "Turn on/off Tencent Translate",
+      "default": true
+    },
+    {
+      "name": "enableCaiyunTranslate",
+      "type": "checkbox",
+      "label": "Caiyun Translate",
+      "required": false,
+      "description": "Turn on/off Caiyun Translate",
       "default": false
     },
     {
       "title": "Youdao App ID",
       "name": "youdaoAppId",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "description": "Your Youdao App ID",
-      "default": "17555d7e1ec6fdce"
+      "default": ""
     },
     {
       "title": "Youdao App Secret",
       "name": "youdaoAppSecret",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "description": "Your Youdao App Secret",
-      "default": "p1NElz2LiXJaAg2Gyvlt7MsqsMvgEoH4"
+      "default": ""
     },
     {
       "title": "Baidu App ID",
       "name": "baiduAppId",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "description": "Your Baidu App ID",
-      "default": "20220428001194113"
+      "default": ""
     },
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "description": "Your Baidu App Secret",
-      "default": "ciqeWNRRmmd2M7vuddnO"
+      "default": ""
     },
     {
-      "title": "Caiyun App Token",
-      "name": "caiyunAppToken",
-      "type": "password",
+      "title": "Tencent SecretId",
+      "name": "tencentSecretId",
+      "type": "textfield",
       "required": false,
-      "description": "Your Caiyun App Token",
-      "default": "izz99g9m50n4hpi71oke"
+      "description": "Your Tencent SecretId",
+      "default": ""
+    },
+    {
+      "title": "Tencent SecretKey",
+      "name": "tencentSecretKey",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Tencent SecretKey",
+      "default": ""
+    },
+    {
+      "title": "Caiyun Token",
+      "name": "caiyunToken",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Caiyun Token",
+      "default": ""
     }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.35.1",
-    "axios": "^0.25.0"
-  },
-  "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-react-hooks": "^4.5.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "lint": "ray lint",
-    "fix": "prettier --write ."
-  }
+  ]
 }
