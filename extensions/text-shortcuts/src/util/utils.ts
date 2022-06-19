@@ -1,20 +1,4 @@
-import { Form } from "@raycast/api";
-import Values = Form.Values;
-
 export const regexPunctuation = /\p{Z}|\p{P}|\p{S}/gu;
-
-export interface Preference extends Values {
-  closeMainWindow: boolean;
-  annotation: string;
-  caser: string;
-  coder: string;
-  format: string;
-  markdown: string;
-  time: string;
-  rememberTag: boolean;
-  showDetail: boolean;
-  showTag: boolean;
-}
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);

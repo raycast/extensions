@@ -1,50 +1,67 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
+import useSWR from "swr";
 import cheerio from "cheerio";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [query, setQuery] = useState("");
+  const {
+    data: result,
+    error,
+    isValidating,
+  } = useSWR(
+    () => (query ? `/ens-query/${query}` : null),
+    () => performSearch(query)
+  );
 
-  const showEnsResult = state.result?.found && state.result.ens;
-  const showAddressResult = state.result?.found && state.result.address;
+  useEffect(() => {
+    if (error) {
+      if (error instanceof AbortError) {
+        return;
+      }
+
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
+    }
+  }, [error]);
+
+  const showEnsResult = result?.found && result.ens;
+  const showAddressResult = result?.found && result.address;
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
+      isLoading={isValidating}
+      onSearchTextChange={(value) => setQuery(value)}
       searchBarPlaceholder="Search by Ethereum name or address..."
       throttle
     >
       {showAddressResult && (
-        <List.Section title={`Overview of ${state.searchText}`}>
-          {<AddressListItems searchResult={state.result!} searchText={state.searchText} />}
+        <List.Section title={`Overview of ${query}`}>
+          {<AddressListItems searchResult={result} searchText={query} />}
         </List.Section>
       )}
 
-      {showAddressResult && state.result?.transactions && (
+      {showAddressResult && result?.transactions && (
         <List.Section title="Transactions">
-          {state.result.transactions.map((transaction) => (
+          {result.transactions.map((transaction) => (
             <TransactionListItem key={transaction.id} transaction={transaction} />
           ))}
         </List.Section>
       )}
 
-      {showEnsResult && (
-        <List.Section title="ENS Overview">{<EnsListItems searchResult={state.result!} />}</List.Section>
-      )}
+      {showEnsResult && <List.Section title="ENS Overview">{<EnsListItems searchResult={result} />}</List.Section>}
 
-      {showEnsResult && state.result?.ownedEns && (
+      {showEnsResult && result.ownedEns && (
         <List.Section title="Owned Ethereum Names">
-          {state.result.ownedEns.map((data) => (
+          {result.ownedEns.map((data) => (
             <EnsItem key={data.ens} ens={data.ens} expiration={data.expiration} />
           ))}
         </List.Section>
       )}
 
-      {showEnsResult && state.result?.forwardedEns && (
+      {showEnsResult && result.forwardedEns && (
         <List.Section title="Forward Resolved Names">
-          {state.result.forwardedEns.map((data) => (
+          {result.forwardedEns.map((data) => (
             <EnsItem key={data} ens={data} />
           ))}
         </List.Section>
@@ -78,10 +95,8 @@ function AddressActions({ address }: { address: string }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/address/${address}`} />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <CopyToClipboardAction title="Copy Address" content={address} shortcut={{ modifiers: ["cmd"], key: "." }} />
+        <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/address/${address}`} />
+        <Action.CopyToClipboard title="Copy Address" content={address} shortcut={{ modifiers: ["cmd"], key: "." }} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -91,7 +106,7 @@ function ENSActions({ ens }: { ens: string }) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/enslookup-search?search=${ens}`} />
+        <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/enslookup-search?search=${ens}`} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -130,7 +145,7 @@ function TransactionListItem({ transaction }: { transaction: Transaction }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/tx/${transaction.id}`} />
+            <Action.OpenInBrowser title="View on Etherscan" url={`https://etherscan.io/tx/${transaction.id}`} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -138,57 +153,12 @@ function TransactionListItem({ transaction }: { transaction: Transaction }) {
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ searchText: "", result: null, isLoading: false });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    if (!searchText) {
-      setState({ searchText, result: null, isLoading: false });
-      return;
-    }
-
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const result = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        result,
-        isLoading: false,
-        searchText,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
-    }
-  }
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult> {
+async function performSearch(searchText: string): Promise<SearchResult> {
   const params = new URLSearchParams();
 
   params.append("search", searchText);
 
-  const response = await fetch(`https://etherscan.io/enslookup-search?${params.toString()}`, { signal });
+  const response = await fetch(`https://etherscan.io/enslookup-search?${params.toString()}`);
 
   if (!response.ok) {
     return Promise.reject(response.statusText);
@@ -255,13 +225,13 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   }
 
   if (ensResult.length > 0) {
-    const address = ensResult.find(".alert a").first().text();
+    const address = ensResult.find("#ContentPlaceHolder1_divResolvedAddress #txtEthereumAddress").first().text();
 
     const nameCard = ensResult.find(".card").first();
 
-    const controller = $(nameCard.find(".row").get(0)).find("a").first().text();
-    const registrant = $(nameCard.find(".row").get(1)).find("a").first().text();
-    const expiration = $(nameCard.find(".row").get(2)).find(".col-md-9").text();
+    const controller = nameCard.find("#ensControllerId").first().text();
+    const registrant = nameCard.find("#ensRegistrantId").first().text();
+    const expiration = $(nameCard.find(".row").get(1)).find(".col-md-9").text();
     const tokenId = $(nameCard.find(".row").get(3)).find(".col-md-9").text();
 
     const transactionCard = ensResult.find(".card").last();

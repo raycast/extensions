@@ -66,9 +66,7 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Toast.Options](#toast.options)</code> | Yes      | The options used to create the Toast. |
+<FunctionParametersTableFromJSDoc name="showToast" />
 
 #### Return
 

@@ -6284,5 +6284,54 @@
     "types": ["Psychic", "Grass"],
     "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/898.png",
     "generation": "Generation VIII"
+  },
+  {
+    "id": 899,
+    "name": "Wyrdeer",
+    "types": ["Normal", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/899.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 900,
+    "name": "Kleavor",
+    "types": ["Bug", "Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/900.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 901,
+    "name": "Ursaluna",
+    "types": ["Ground", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/901.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 902,
+    "name": "Basculegion",
+    "types": ["Water", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/902.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 903,
+    "name": "Sneasler",
+    "types": ["Fighting", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/903.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 904,
+    "name": "Overqwil",
+    "types": ["Dark", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/904.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 905,
+    "name": "Enamorus",
+    "types": ["Fairy", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/905.png",
+    "generation": "Generation VIII"
   }
 ]

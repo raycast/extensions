@@ -93,6 +93,8 @@ export default function main() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(ERROR.INVALID_API_KEY);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     api["courses?state=available&enrollment_state=active"]
       .get()
@@ -168,6 +170,7 @@ export default function main() {
                   .catch((err: any) => {
                     showToast(Toast.Style.Failure, `Error: ${err.message}`);
                   });
+                setLoading(false);
               })
               .catch((err: any) => {
                 showToast(Toast.Style.Failure, `Error: ${err.message}`);

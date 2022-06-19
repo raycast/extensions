@@ -1,5 +1,9 @@
 # IATA Code Decoder Changelog
 
+## [v1.1.0] - 2022-06-14
+
+* Display airline logos in the "Decode IATA Airline Code" command
+
 ## [v1.0.1] - 2022-05-15
 
 * Bump minimist from 1.2.5 to 1.2.6 by @dependabot in https://github.com/timrogers/raycast-iata-code-decoder/pull/1

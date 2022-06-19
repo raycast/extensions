@@ -12,6 +12,46 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "layout",
+      "type": "dropdown",
+      "description": "Set the layout of the wallpaper items.",
+      "required": true,
+      "title": "Wallpaper Layout",
+      "default": "Grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "Grid"
+        },
+        {
+          "title": "List",
+          "value": "List"
+        }
+      ]
+    },
+    {
+      "name": "itemSize",
+      "type": "dropdown",
+      "description": "Set the size of the wallpaper items. (Only works with Grid layout)",
+      "required": false,
+      "title": "Wallpaper Item Size",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
       "name": "applyTo",
       "title": "Apply Wallpaper To",
       "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
@@ -87,7 +127,7 @@
       "name": "set-bing-wallpaper",
       "icon": "bing-wallpaper-icon.png",
       "title": "Set Bing Wallpaper",
-      "description": "Get, set, auto-download Bing wallpapers within 15 days.",
+      "description": "Get, set, auto-download Bing wallpapers to explore the world.",
       "mode": "view"
     },
     {
@@ -99,7 +139,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.36.0",
     "fs-extra": "^10.0.1",
     "node-fetch": "^3.2.3",
     "run-applescript": "^6.0.0",

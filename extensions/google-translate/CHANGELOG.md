@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2022-06-15
+
+Fix character encoding in `TextArea` on translate form
+
 ## [Fix] - 2022-03-25
 
 Updated icon and name of zh-TW
