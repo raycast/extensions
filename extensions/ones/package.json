@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ones",
   "title": "ONES",
-  "description": "Raycast Extensions for ones.ai",
+  "description": "Raycast Extension for ONES",
   "icon": "command-icon-black.png",
   "author": "k8scat",
   "license": "MIT",
@@ -20,51 +20,51 @@
   "commands": [
     {
       "name": "search-project-task",
-      "title": "Search Tasks",
+      "title": "Search Task",
       "subtitle": "ONES Project",
-      "description": "Search tasks in ONES Project, open task in browser, record manhour in task",
+      "description": "Search task in ONES Project, open task in browser, record manhour in task",
       "mode": "view"
     },
     {
       "name": "search-project-project",
-      "title": "Search Projects",
+      "title": "Search Project",
       "subtitle": "ONES Project",
-      "description": "Search projects in ONES Project, open project in browser",
+      "description": "Search project in ONES Project, open project in browser",
       "mode": "view"
     },
     {
       "name": "search-project-resource",
-      "title": "Search Project Resources",
+      "title": "Search Resource",
       "subtitle": "ONES Project",
-      "description": "Search resources in ONES Project, open resource in browser",
+      "description": "Search resource in ONES Project, open resource in browser",
       "mode": "view"
     },
     {
       "name": "search-project-sprint",
-      "title": "Search Sprints",
+      "title": "Search Sprint",
       "subtitle": "ONES Project",
-      "description": "Search sprints in ONES Project, open sprint in browser",
+      "description": "Search sprint in ONES Project, open sprint in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-space",
-      "title": "Search Spaces",
+      "title": "Search Space",
       "subtitle": "ONES Wiki",
-      "description": "Search spaces in ONES Wiki, open space in browser",
+      "description": "Search space in ONES Wiki, open space in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-page",
-      "title": "Search Pages",
+      "title": "Search Page",
       "subtitle": "ONES Wiki",
-      "description": "Search pages in ONES Wiki, open page in browser",
+      "description": "Search page in ONES Wiki, open page in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-resource",
-      "title": "Search Wiki Resources",
+      "title": "Search Resource",
       "subtitle": "ONES Wiki",
-      "description": "Search resources in ONES Wiki, open resource in browser",
+      "description": "Search resource in ONES Wiki, open resource in browser",
       "mode": "view"
     },
     {
@@ -147,7 +147,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.36.1",
     "axios": "^0.24.0",
     "moment": "^2.29.1"
   },
@@ -163,6 +163,10 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "migrate": "ray migrate",
+    "pc": "prettier --check .",
+    "pw": "prettier --write ."
   }
 }
