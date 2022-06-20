@@ -1,21 +1,12 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  List,
-  OpenAction,
-  OpenInBrowserAction,
-  PushAction,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { getPrimaryActionPreference, PrimaryAction, Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
-import { ChannelListItemDetailFetched } from "./channel";
+import { ChannelItemDetailFetched } from "./channel";
+import { getViewLayout } from "./listgrid";
 import fs from "fs";
+import he from "he";
 
 function videoUrl(videoId: string | null | undefined): string | undefined {
   if (videoId) {
@@ -28,7 +19,7 @@ function CopyVideoUrlAction(props: { videoId: string | null | undefined }): JSX.
   const url = videoUrl(props.videoId);
   if (url) {
     return (
-      <CopyToClipboardAction title="Copy Video URL" content={url} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy Video URL" content={url} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
     );
   }
   return null;
@@ -37,7 +28,7 @@ function CopyVideoUrlAction(props: { videoId: string | null | undefined }): JSX.
 function OpenVideoInBrowser(props: { videoId: string | null | undefined }): JSX.Element | null {
   const videoId = props.videoId;
   if (videoId) {
-    return <OpenInBrowserAction title="Open Video in Browser" url={`https://youtube.com/watch?v=${videoId}`} />;
+    return <Action.OpenInBrowser title="Open Video in Browser" url={`https://youtube.com/watch?v=${videoId}`} />;
   }
   return null;
 }
@@ -48,7 +39,7 @@ function OpenWithIINAAction(props: { videoId: string | null | undefined }): JSX.
     const appPath = "/Applications/IINA.app";
     if (fs.existsSync(appPath)) {
       return (
-        <OpenAction
+        <Action.Open
           title="Open with IINA"
           target={url}
           application="iina"
@@ -67,9 +58,9 @@ function OpenWithIINAAction(props: { videoId: string | null | undefined }): JSX.
 function ShowVideoDetails(props: { video: Video }): JSX.Element {
   const video = props.video;
   return (
-    <PushAction
+    <Action.Push
       title="Show Details"
-      target={<VideoListItemDetail video={video} />}
+      target={<VideoItemDetail video={video} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
     />
   );
@@ -79,9 +70,9 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
   const cid = props.channelId;
   if (cid) {
     return (
-      <PushAction
+      <Action.Push
         title="Show Channel"
-        target={<ChannelListItemDetailFetched channelId={cid} />}
+        target={<ChannelItemDetailFetched channelId={cid} />}
         icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       />
@@ -90,7 +81,7 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
   return null;
 }
 
-export function VideoListItemDetail(props: { video: Video }): JSX.Element {
+export function VideoItemDetail(props: { video: Video }): JSX.Element {
   const video = props.video;
   const videoId = video.id;
   const desc = video.description || "<no description>";
@@ -116,17 +107,17 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
   );
 }
 
-export function VideoListItem(props: { video: Video }): JSX.Element {
+export function VideoItem(props: { video: Video }): JSX.Element {
   const video = props.video;
   const videoId = video.id;
   let parts: string[] = [];
   if (video.statistics) {
-    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} 👀`];
+    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${formatDate(video.publishedAt)}`];
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
   const maxLength = 70;
-  const rawTitle = video.title;
+  const rawTitle = he.decode(video.title);
   const title = rawTitle.slice(0, maxLength) + (rawTitle.length > maxLength ? " ..." : "");
 
   const mainActions = () => {
@@ -150,12 +141,27 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
     }
   };
 
-  return (
+  return getViewLayout() === "list" ? (
     <List.Item
       key={videoId}
       title={title}
+      accessories={[{ text: parts.join(" ") }]}
       icon={{ source: thumbnail }}
-      accessoryTitle={parts.join(" ")}
+      actions={
+        <ActionPanel>
+          {mainActions()}
+          <ShowChannelAction channelId={video.channelId} />
+          <CopyVideoUrlAction videoId={videoId} />
+          <OpenWithIINAAction videoId={videoId} />
+        </ActionPanel>
+      }
+    />
+  ) : (
+    <Grid.Item
+      key={videoId}
+      title={title}
+      subtitle={parts.join(" ")}
+      content={{ source: thumbnail }}
       actions={
         <ActionPanel>
           {mainActions()}

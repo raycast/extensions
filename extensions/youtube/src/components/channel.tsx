@@ -1,10 +1,12 @@
-import { ActionPanel, Color, Detail, Icon, ImageMask, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, Image, List, Grid, Action, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
+import { getViewLayout } from "./listgrid";
+import he from "he";
 
-export function ChannelListItemDetail(props: {
+export function ChannelItemDetail(props: {
   channel: Channel | undefined;
   isLoading?: boolean | undefined;
 }): JSX.Element {
@@ -20,11 +22,11 @@ export function ChannelListItemDetail(props: {
     if (thumbnailUrl) {
       mdParts.push(`![thumbnail](${thumbnailUrl})`);
     }
-    const meta: string[] = [`- Channelname: ${channel.title}  `, `- Published: ${formatDate(channel.publishedAt)}`];
+    const meta: string[] = [`* Channelname: ${channel.title}  `, `* Published: ${formatDate(channel.publishedAt)}`];
     mdParts = mdParts.concat([desc, meta.join("\n")]);
     if (channel.statistics) {
       const cs = channel.statistics;
-      const stats = [`- Videos: ${cs.videoCount}`, `- Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
+      const stats = [`* Videos: ${cs.videoCount}`, `* Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
       mdParts.push(`## Statistics\n\n ${stats.join("\n")}`);
     }
   } else {
@@ -49,20 +51,25 @@ export function ChannelListItemDetail(props: {
   );
 }
 
-export function ChannelListItem(props: { channel: Channel }): JSX.Element {
+export function ChannelItem(props: { channel: Channel }): JSX.Element {
   const channel = props.channel;
   const channelId = channel.id;
+  const title = he.decode(channel.title);
   let parts: string[] = [];
   if (channel.statistics) {
-    parts = [`${compactNumberFormat(parseInt(channel.statistics.subscriberCount))} 🧑`];
+    parts = [
+      `${compactNumberFormat(parseInt(channel.statistics.subscriberCount))} subs · ${compactNumberFormat(
+        parseInt(channel.statistics.viewCount)
+      )} views`,
+    ];
   }
   const thumbnail = channel.thumbnails?.high?.url || "";
 
   const mainActions = (): JSX.Element => {
     const showDetail = (
-      <PushAction
+      <Action.Push
         title="Show Details"
-        target={<ChannelListItemDetail channel={channel} />}
+        target={<ChannelItemDetail channel={channel} />}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       />
     );
@@ -85,12 +92,29 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
     }
   };
 
-  return (
+  return getViewLayout() === "list" ? (
     <List.Item
       key={channelId}
-      title={channel.title}
-      icon={{ source: thumbnail, mask: ImageMask.Circle }}
-      accessoryTitle={parts.join(" ")}
+      title={title}
+      icon={{ source: thumbnail, mask: Image.Mask.Circle }}
+      accessories={[{ text: parts.join(" ") }]}
+      actions={
+        <ActionPanel>
+          {mainActions()}
+          <SearchChannelVideosAction channelId={channelId} />
+          <ShowRecentPlaylistVideosAction
+            title="Show Recent Channel Videos"
+            playlistId={channel.relatedPlaylists?.uploads}
+          />
+        </ActionPanel>
+      }
+    />
+  ) : (
+    <Grid.Item
+      key={channelId}
+      title={title}
+      content={{ source: thumbnail, mask: Image.Mask.Circle }}
+      subtitle={parts.join(" ")}
       actions={
         <ActionPanel>
           {mainActions()}
@@ -105,7 +129,7 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
   );
 }
 
-export function ChannelListItemDetailFetched(props: { channelId: string }): JSX.Element {
+export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Element {
   const channelId = props.channelId;
   const { data, error, isLoading } = useRefresher<Channel | undefined>(async () => {
     if (channelId) {
@@ -114,7 +138,7 @@ export function ChannelListItemDetailFetched(props: { channelId: string }): JSX.
     return undefined;
   }, [channelId]);
   if (error) {
-    showToast(ToastStyle.Failure, "Error fetching channel info", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Error fetching channel info", getErrorMessage(error));
   }
-  return <ChannelListItemDetail channel={data} isLoading={isLoading} />;
+  return <ChannelItemDetail channel={data} isLoading={isLoading} />;
 }

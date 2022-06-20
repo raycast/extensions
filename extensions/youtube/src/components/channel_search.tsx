@@ -1,9 +1,10 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { Grid, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";
-import { ChannelListItem } from "./channel";
+import { ChannelItem } from "./channel";
 import { RecentSearchesList, useRecentSearch } from "./search";
+import { getViewLayout, ListOrGrid } from "./listgrid";
 
 export function SearchChannelList() {
   const [searchText, setSearchText] = useState<string>();
@@ -20,15 +21,24 @@ export function SearchChannelList() {
     return undefined;
   }, [searchText]);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search channels", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could not search channels", getErrorMessage(error));
   }
+  const layout = getViewLayout();
   if (data) {
     return (
-      <List isLoading={isLoading} onSearchTextChange={appendRecentSearches} throttle={true}>
+      <ListOrGrid
+        layout={layout}
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={(search: string) => {
+          if (layout === "list" || search) appendRecentSearches(search);
+        }}
+        throttle={true}
+      >
         {data?.map((c) => (
-          <ChannelListItem key={c.id} channel={c} />
+          <ChannelItem key={c.id} channel={c} />
         ))}
-      </List>
+      </ListOrGrid>
     );
   } else {
     const isLoadingTotal = !searchText ? rc === undefined : true;

@@ -1,9 +1,10 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { Grid, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { searchVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { RecentSearchesList, useRecentSearch } from "./search";
-import { VideoListItem } from "./video";
+import { VideoItem } from "./video";
+import { getViewLayout, ListOrGrid } from "./listgrid";
 
 export function SearchVideoList(props: { channedId?: string | undefined }) {
   const [searchText, setSearchText] = useState<string>();
@@ -20,15 +21,24 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
     return undefined;
   }, [searchText]);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search videos", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
   }
-  if (data) {
+  const layout = getViewLayout();
+  if (searchText) {
     return (
-      <List isLoading={isLoading} onSearchTextChange={appendRecentSearches} throttle={true}>
+      <ListOrGrid
+        layout={layout}
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={(search: string) => {
+          if (layout === "list" || search) appendRecentSearches(search);
+        }}
+        throttle={true}
+      >
         {data?.map((v) => (
-          <VideoListItem key={v.id} video={v} />
+          <VideoItem key={v.id} video={v} />
         ))}
-      </List>
+      </ListOrGrid>
     );
   } else {
     const isLoadingTotal = !searchText ? rc === undefined : true;
