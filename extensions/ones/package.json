@@ -20,58 +20,58 @@
   "commands": [
     {
       "name": "search-project-task",
-      "title": "Search Task",
+      "title": "Search Tasks",
       "subtitle": "ONES Project",
-      "description": "Search task in ONES Project, open task in browser, record manhour in task",
+      "description": "Search tasks in ONES Project, open task in browser, record manhour in task",
       "mode": "view"
     },
     {
       "name": "search-project-project",
-      "title": "Search Project",
+      "title": "Search Projects",
       "subtitle": "ONES Project",
-      "description": "Search project in ONES Project, open project in browser",
+      "description": "Search projects in ONES Project, open project in browser",
       "mode": "view"
     },
     {
       "name": "search-project-resource",
-      "title": "Search Resource",
+      "title": "Search Project Resources",
       "subtitle": "ONES Project",
-      "description": "Search resource in ONES Project, open resource in browser",
+      "description": "Search resources in ONES Project, open resource in browser",
       "mode": "view"
     },
     {
       "name": "search-project-sprint",
-      "title": "Search Sprint",
+      "title": "Search Sprints",
       "subtitle": "ONES Project",
-      "description": "Search sprint in ONES Project, open sprint in browser",
+      "description": "Search sprints in ONES Project, open sprint in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-space",
-      "title": "Search Space",
+      "title": "Search Spaces",
       "subtitle": "ONES Wiki",
-      "description": "Search space in ONES Wiki, open space in browser",
+      "description": "Search spaces in ONES Wiki, open space in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-page",
-      "title": "Search Page",
+      "title": "Search Pages",
       "subtitle": "ONES Wiki",
-      "description": "Search page in ONES Wiki, open page in browser",
+      "description": "Search pages in ONES Wiki, open page in browser",
       "mode": "view"
     },
     {
       "name": "search-wiki-resource",
-      "title": "Search Resource",
+      "title": "Search Wiki Resources",
       "subtitle": "ONES Wiki",
-      "description": "Search resource in ONES Wiki, open resource in browser",
+      "description": "Search resources in ONES Wiki, open resource in browser",
       "mode": "view"
     },
     {
       "name": "manage-manhour",
       "title": "Manage Manhour",
       "subtitle": "ONES Project",
-      "description": "Query manhour, record manhour, modify manhour and delete manhour in ONES Project",
+      "description": "Query, record, modify or delete manhour in ONES Project",
       "mode": "view"
     }
   ],
