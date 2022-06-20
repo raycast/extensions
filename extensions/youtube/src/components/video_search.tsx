@@ -1,10 +1,10 @@
-import { Grid, List, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { searchVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { RecentSearchesList, useRecentSearch } from "./search";
 import { VideoItem } from "./video";
-import { getViewLayout, ListOrGrid } from "./listgrid";
+import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
 
 export function SearchVideoList(props: { channedId?: string | undefined }) {
   const [searchText, setSearchText] = useState<string>();
@@ -28,10 +28,10 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
     return (
       <ListOrGrid
         layout={layout}
+        itemSize={getGridItemSize()}
         isLoading={isLoading}
-        searchText={searchText}
         onSearchTextChange={(search: string) => {
-          if (layout === "list" || search) appendRecentSearches(search);
+          appendRecentSearches(search);
         }}
         throttle={true}
       >

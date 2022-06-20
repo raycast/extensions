@@ -57,6 +57,28 @@
       "description": "Set the default view"
     },
     {
+      "name": "griditemsize",
+      "type": "dropdown",
+      "title": "Grid Item Size",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ],
+      "description": "Set the default grid item size"
+    },
+    {
       "name": "primaryaction",
       "type": "dropdown",
       "title": "Primary Action",

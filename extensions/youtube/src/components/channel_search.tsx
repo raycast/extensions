@@ -4,7 +4,7 @@ import { getErrorMessage, getUuid } from "../lib/utils";
 import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";
 import { ChannelItem } from "./channel";
 import { RecentSearchesList, useRecentSearch } from "./search";
-import { getViewLayout, ListOrGrid } from "./listgrid";
+import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
 
 export function SearchChannelList() {
   const [searchText, setSearchText] = useState<string>();
@@ -28,6 +28,7 @@ export function SearchChannelList() {
     return (
       <ListOrGrid
         layout={layout}
+        itemSize={getGridItemSize()}
         isLoading={isLoading}
         searchText={searchText}
         onSearchTextChange={(search: string) => {
