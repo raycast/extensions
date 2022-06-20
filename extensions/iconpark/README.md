@@ -15,13 +15,3 @@ No API key and network required. Install and use.
 | ✅Distribution   | ❌Warranty      |                                |
 | ✅Patent use     |                 |                                |
 | ✅Private use    |                 |                                |
-
-Want more **Design Tools** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
-
-<a title="Install Avatar Raycast Extension" href="https://www.raycast.com/koinzhang/avatar#install">
-<img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/avatar/install_button@2x.png">
-</a><a title="Install Placeholder Raycast Extension" href="https://www.raycast.com/koinzhang/placeholder#install">
- <img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/placeholder/install_button@2x.png">
-</a><a title="Install Pexels Raycast Extension" href="https://www.raycast.com/koinzhang/pexels#install">
- <img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/pexels/install_button@2x.png">
-</a>
