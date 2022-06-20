@@ -158,7 +158,13 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
     .sort((a: Note, b: Note) => {
       const aTitle = a.title;
       const bTitle = b.title;
-      return aTitle.length - bTitle.length;
+      if (aTitle > bTitle){
+        return 1;
+      } else if (aTitle < bTitle){
+        return -1;
+      } else {
+        return 0;
+      }
     });
 }
 
