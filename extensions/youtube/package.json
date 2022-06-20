@@ -101,6 +101,7 @@
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
     "@raycast/api": "^1.36.1",
+    "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
     "javascript-time-ago": "^2.3.10",
     "node-fetch": "^3.0.0",

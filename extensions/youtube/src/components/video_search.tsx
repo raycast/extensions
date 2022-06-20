@@ -30,8 +30,9 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
         layout={layout}
         itemSize={getGridItemSize()}
         isLoading={isLoading}
+        searchText={searchText}
         onSearchTextChange={(search: string) => {
-          appendRecentSearches(search);
+          if (layout === "list" || search) appendRecentSearches(search);
         }}
         throttle={true}
       >

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD, Image } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { getPrimaryActionPreference, PrimaryAction, Video } from "../lib/youtubeapi";
@@ -112,7 +112,7 @@ export function VideoItem(props: { video: Video }): JSX.Element {
   const videoId = video.id;
   let parts: string[] = [];
   if (video.statistics) {
-    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${formatDate(video.publishedAt)}`];
+    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${video.publishedAt}`];
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
