@@ -24,7 +24,7 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
     showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
   }
   const layout = getViewLayout();
-  if (searchText) {
+  if (data) {
     return (
       <ListOrGrid
         layout={layout}
