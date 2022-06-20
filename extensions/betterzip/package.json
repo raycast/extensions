@@ -13,19 +13,22 @@
   "commands": [
     {
       "name": "compress-with-betterzip",
-      "title": "Compress With BetterZip",
+      "title": "Compress Files",
+      "subtitle": "BetterZip",
       "description": "Compress selected files with BetterZip.",
       "mode": "no-view"
     },
     {
       "name": "extract-with-betterzip",
-      "title": "Extract With BetterZip",
+      "title": "Extract Files",
+      "subtitle": "BetterZip",
       "description": "Extract selected archives with BetterZip.",
       "mode": "no-view"
     },
     {
       "name": "open-with-betterzip",
-      "title": "Open With BetterZip",
+      "title": "Open Files",
+      "subtitle": "BetterZip",
       "description": "Open selected items with BetterZip.",
       "mode": "no-view"
     }
