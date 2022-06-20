@@ -11,7 +11,7 @@
       "name": "easydict",
       "title": "Search Word",
       "subtitle": "Easy Dictionary",
-      "description": "Easy to look up words or translate text, support Youdao, Baidu and Caiyun translation API.",
+      "description": "Easy to look up words or translate text, support Youdao, Tencent, Baidu and Caiyun translation API.",
       "mode": "view"
     }
   ],
@@ -24,10 +24,10 @@
     "dictionary",
     "translate",
     "youdao",
-    "eudic",
     "baidu",
     "tencent",
-    "caiyun"
+    "caiyun",
+    "eudic"
   ],
   "dependencies": {
     "@raycast/api": "^1.35.1",
@@ -281,7 +281,7 @@
       "label": "Automatic Play Word Audio",
       "required": false,
       "description": "Automatic play audio after looking up a word",
-      "default": true
+      "default": false
     },
     {
       "name": "isDisplayTargetTranslationLanguage",
