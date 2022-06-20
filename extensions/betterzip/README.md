@@ -6,5 +6,5 @@ To use this command you need to have BetterZip installed on your Mac. [Download 
 
 **TODO:** More commands
 
-- Compress With Presets
-- Extract With Presets
+- Compress Files With Presets
+- Extract Files With Presets
