@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Add tags in Grid Layout] - {PR_MERGE_DATE}
+## [Add tags in Grid Layout] - 2022-06-20
 
 - Add tags in Grid Layout
 
