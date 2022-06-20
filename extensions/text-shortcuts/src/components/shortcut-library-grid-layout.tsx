@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Shortcut, ShortcutSource, tags } from "../util/shortcut";
-import { ActionPanel, Color, Grid } from "@raycast/api";
+import { ActionPanel, Grid } from "@raycast/api";
 import { ActionEditShortcut } from "./action-edit-shortcut";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { Preferences } from "../types/preferences";
@@ -82,9 +82,9 @@ export function GridItem(props: {
       keywords={shortcut.info.tag}
       content={{
         source: shortcut.info.icon,
-        tooltip: shortcut.info.name + "\n\n" + shortcut.info.tag.join(", "),
         tintColor: shortcut.info.iconColor,
       }}
+      subtitle={shortcut.info.tag.join(", ")}
       title={shortcut.info.name}
       actions={(() => {
         return (
