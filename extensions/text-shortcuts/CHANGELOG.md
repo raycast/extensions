@@ -1,5 +1,9 @@
 # Text Shortcuts Changelog
 
+## [Add tags in Grid Layout] - 2022-06-20
+
+- Add tags in Grid Layout
+
 ## [Add new shortcut layout options] - 2022-06-13
 
 - Add new shortcut layout options: List or Grid
