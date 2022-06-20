@@ -8,8 +8,6 @@
 
 [Raycast](https://www.raycast.com/) extension for [ONES](https://ones.ai).
 
-[English Doc](./README.md)
-
 ## 安装
 
 ### 通过 [源码](https://github.com/k8scat/raycast-extension-ones)
