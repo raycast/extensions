@@ -1,5 +1,5 @@
 # Chinese Character Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2022-06-20
 
 - Chinese character conversion tools.
