@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-system-monitor",
-  "title": "raycast-system-monitor",
+  "title": "System Monitor",
   "description": "Show CPU and memory usage",
   "icon": "command-icon.png",
   "author": "hossammourad",
