@@ -1,1 +1,1 @@
-declare module 'duration-iso-8601';
+declare module "duration-iso-8601";

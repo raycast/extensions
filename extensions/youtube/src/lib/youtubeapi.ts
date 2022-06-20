@@ -147,7 +147,7 @@ export interface Video {
   id: string;
   title: string;
   description?: string;
-  duration?: string | undefined; 
+  duration?: string | undefined;
   publishedAt: string;
   thumbnails: Thumbnails;
   statistics?: VideoStatistics;
