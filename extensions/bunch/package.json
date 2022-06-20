@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bunch",
   "title": "Bunch",
-  "description": "Control Bunch via Raycast.",
+  "description": "Control Bunch via Raycast. Bunch is a Mac automation tool.",
   "icon": "bunch.png",
   "author": "koinzhang",
   "categories": [
@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-all-bunches",
-      "title": "Search All Bunches",
+      "name": "search-bunches",
+      "title": "Search Bunches",
       "subtitle": "Bunch",
-      "description": "Search all bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
+      "description": "Search bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
       "mode": "view",
       "preferences": [
         {
@@ -24,14 +24,6 @@
           "required": false,
           "label": "Remember Filter Tag",
           "description": "Remember filter tag.",
-          "default": true
-        },
-        {
-          "name": "closeMainWindow",
-          "type": "checkbox",
-          "required": false,
-          "label": "Close Main Window",
-          "description": "Whether to close the window after executing a action.",
           "default": true
         }
       ]
@@ -42,6 +34,13 @@
       "subtitle": "Bunch",
       "description": "Close all running bunches.",
       "mode": "no-view"
+    },
+    {
+      "name": "create-bunch",
+      "title": "Create Bunch",
+      "subtitle": "Bunch",
+      "description": "Create a bunch.",
+      "mode": "view"
     },
     {
       "name": "open-bunch-folder",

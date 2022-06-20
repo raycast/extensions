@@ -30,6 +30,7 @@ export const getBunches = (refresh: number, tag?: string) => {
         _allBunches = (await scriptToGetTaggedBunches(tag?.substring(4))).split(", ");
       } else {
         if (allBunches.length === 0) {
+          setBunches([]);
           _allBunches = await scriptToGetBunches();
           setAllBunches(_allBunches);
         } else {
@@ -52,7 +53,13 @@ export const getBunches = (refresh: number, tag?: string) => {
     void fetchData();
   }, [fetchData]);
 
-  return { bunches: bunches, openBunches: openBunches, loading: loading };
+  return {
+    bunches: bunches,
+    openBunches: openBunches,
+    allBunches: allBunches,
+    setAllBunches: setAllBunches,
+    loading: loading,
+  };
 };
 
 export const getBunchFolder = () => {

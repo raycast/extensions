@@ -23,6 +23,7 @@
 /extensions/base64                                   @DanielSinclair
 /extensions/bazinga-tools                            @luin
 /extensions/bear                                     @hmarr @ron-myers
+/extensions/better-uptime                            @andreaselia
 /extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/biaodian                                 @gasolin
 /extensions/bible                                    @josmithua
@@ -127,6 +128,7 @@
 /extensions/emoji                                    @FezVrasta
 /extensions/encoding-tools                           @eth-p
 /extensions/ens-name-lookup                          @Yukaii
+/extensions/ensk-is                                  @jokull
 /extensions/envato                                   @Slllava
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
@@ -303,6 +305,7 @@
 /extensions/producthunt                              @ragnorc
 /extensions/projects                                 @ajaypremshankar
 /extensions/px-to-rem-converter                      @raulanatol
+/extensions/qbittorrent                              @J3n5en
 /extensions/qq-music-controls                        @jwickers
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
@@ -369,6 +372,7 @@
 /extensions/spotify-player                           @mattisssa @dillionverma @andreaselia
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
+/extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
 /extensions/stripe                                   @pradeepb28
 /extensions/supabase-docs                            @Isaiah-Hamilton
@@ -381,6 +385,7 @@
 /extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor @macbookandrew
 /extensions/tapo-smart-devices                       @timrogers
+/extensions/teamup-rooms                             @drewwatkins11
 /extensions/temporary-email                          @natterstefan
 /extensions/terminalfinder                           @yedongze
 /extensions/text-shortcuts                           @koinzhang

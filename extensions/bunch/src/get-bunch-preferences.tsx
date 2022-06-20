@@ -5,6 +5,7 @@ import { EmptyView } from "./components/empty-view";
 import { spawnSync } from "child_process";
 import { bunchInstalled } from "./utils/common-utils";
 import { BunchNotInstallView } from "./components/bunch-not-install-view";
+import { ActionOpenFolder } from "./components/action-open-folder";
 
 export default function GetBunchPreferences() {
   const [refresh, setRefresh] = useState<number>(0);
@@ -22,18 +23,7 @@ export default function GetBunchPreferences() {
             subtitle={value.subtitle}
             actions={
               <ActionPanel>
-                {value.title === "Bunch Folder" && (
-                  <Action
-                    icon={Icon.Finder}
-                    title={"Open Bunch Folder"}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    onAction={() => {
-                      open(encodeURI("x-bunch://reveal")).then(() => {
-                        showHUD("Open: " + bunchPreferences[0].subtitle).then();
-                      });
-                    }}
-                  />
-                )}
+                {value.title === "Bunch Folder" && <ActionOpenFolder />}
                 {value.title === "Toggle Bunches" && (
                   <Action
                     icon={Icon.Gear}

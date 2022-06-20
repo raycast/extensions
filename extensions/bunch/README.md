@@ -1,15 +1,15 @@
 # Bunch
 
-Control [Bunch](https://bunchapp.co) via Raycast.
+Control [Bunch](https://bunchapp.co) via Raycast. **Bunch** is a Mac automation tool from [Brett Terpstra](https://brettterpstra.com)
 
 **Tips:**
 
-- Before using this extension, you need to install the Bunch application ([Download Bunch](https://bunchapp.co/download/))
+- Before using this extension, you need to install the Bunch application ([Download Bunch](https://bunchapp.co/download/)), **Bunch Beta** is not supported
 - Please make sure Bunch is located in the Applications folder (/Applications/Bunch.app)
 - In the Search All Bunches command, you can use **tag:** followed by the tag name to search for bunches of a specific tag
 - Multiple tags can be combined using a comma (,) for OR, or a plus sign (+) for AND
 
-**Bunch**: Your new favorite Mac automation tool
+**More details about Bunch**: Your new favorite Mac automation tool
 
 > Bunch is a macOS automation tool that takes a folder of plain text files containing lists of apps and commands to launch and provides an easy-to-use menu for triggering them.
 >

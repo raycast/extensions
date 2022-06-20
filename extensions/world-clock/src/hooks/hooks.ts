@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { IP_GEOLOCATION_API, LOCALSTORAGE_KEY, TIMEZONE_BASE_URL } from "../utils/costants";
+import { IP_GEOLOCATION_API, localStorageKey, TIMEZONE_BASE_URL } from "../utils/costants";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { IPGeolocation, TimeInfo, Timezone } from "../types/types";
 import { calculateDateTimeByOffset, calculateTimeInfoByOffset, isEmpty } from "../utils/common-utils";
@@ -27,7 +27,7 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
     }
     setLoading(true);
 
-    const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY.TIMEZONE_CACHE);
+    const _localStorage = await LocalStorage.getItem<string>(localStorageKey.TIMEZONE_CACHE);
     const _timezoneCache = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as string[]);
 
     if (_timezoneCache.length === 0) {
@@ -37,23 +37,22 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
         url: TIMEZONE_BASE_URL,
       })
         .then(async (axiosResponse) => {
-          const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY.STAR_TIMEZONE);
+          const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
           const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
 
           setStarTimezones(_starTimezones);
           setTimezones(await buildStarTimezone(axiosResponse.data as string[]));
           setLoading(false);
 
-          await LocalStorage.setItem(LOCALSTORAGE_KEY.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
         })
         .catch((reason) => {
           showToast(Style.Failure, String(reason));
           setLoading(false);
         });
     } else {
-      const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY.STAR_TIMEZONE);
+      const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
       const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
-
       setStarTimezones(_starTimezones);
       setTimezones(await buildStarTimezone(_timezoneCache));
       setLoading(false);
@@ -64,7 +63,7 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
         url: TIMEZONE_BASE_URL,
       })
         .then(async (axiosResponse) => {
-          await LocalStorage.setItem(LOCALSTORAGE_KEY.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
         })
         .catch((reason) => {
           console.error(String(reason));
@@ -80,7 +79,7 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
 };
 
 const buildStarTimezone = async (allTimezone: string[]) => {
-  const _localStorage = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY.STAR_TIMEZONE);
+  const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
   const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
 
   _starTimezones.forEach((value) => {
@@ -123,6 +122,22 @@ export const getRegionTime = (timezone: string) => {
   }, [fetchData]);
 
   return { timeInfo: timeInfo, detailLoading: loading };
+};
+//get if show detail
+export const getIsShowDetail = (refreshDetail: number) => {
+  const [showDetail, setShowDetail] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const localStorage = await LocalStorage.getItem<boolean>(localStorageKey.SHOW_DETAILS);
+    const _showDetailKey = typeof localStorage === "undefined" ? true : localStorage;
+    setShowDetail(_showDetailKey);
+  }, [refreshDetail]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { showDetail: showDetail };
 };
 
 export const getIpTime = (searchContent: string) => {
