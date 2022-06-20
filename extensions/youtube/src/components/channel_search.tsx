@@ -1,4 +1,4 @@
-import { Grid, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";

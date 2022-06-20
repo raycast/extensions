@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD, Image } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { getPrimaryActionPreference, PrimaryAction, Video } from "../lib/youtubeapi";

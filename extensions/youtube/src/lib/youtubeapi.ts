@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
 import { GaxiosResponse } from "googleapis-common";
-const convertYouTubeDuration = require("duration-iso-8601")
+import { convertYouTubeDuration } from "duration-iso-8601";
 
 function createClient(): youtube_v3.Youtube {
   const pref = getPreferenceValues();

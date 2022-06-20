@@ -1,4 +1,4 @@
-import { showToast, Toast, Grid } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { getErrorMessage } from "../lib/utils";
 import { getPlaylistVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoItem } from "./video";
