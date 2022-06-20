@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "hossammourad",
   "license": "MIT",
+  "contributors": [
+    "Crayon144",
+    "pernielsentikaer"
+  ],
   "commands": [
     {
       "name": "system-monitor",
