@@ -29,7 +29,7 @@
       "name": "recent", 
       "type": "checkbox", 
       "required": false, 
-      "title": "Show Recent Module Items", 
+      "label": "Show Recent Module Items", 
       "default": true, 
       "description": "Show the recently used module items"
     },
