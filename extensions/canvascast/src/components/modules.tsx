@@ -1,124 +1,78 @@
-import { List, Action, ActionPanel, Icon, Toast, showToast, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Preferences } from "../utils/types";
+import { HomePage } from "./home-page";
+import { getModules } from "../api";
+import { modulesection, moduleitem } from "../utils/types";
 import { Icons, getIsCodeFile } from "../utils/utils";
-import { api as getApi } from "../api";
-import open from "open"
+import open from "open";
 
-export const Modules = (props: { id: any; url: string }) => {
-  const preferences: Preferences = getPreferenceValues();
-  const api = getApi(preferences.token, preferences.domain);
-
-  const [modules, setModules]: any = useState();
-  const [isLoading, setIsLoading]: any = useState(true);
+export const Modules = (props: { id: number; url: string }) => {
+  const [modules, setModules] = useState<modulesection[]>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    api.courses[props.id].modules["?include=items"]
-      .get()
-      .then((json: any) => {
-        const modules = json.map((module: any) => {
-          const items = module.items
-            .filter((item: any) => item.type !== "SubHeader")
-            .map((item: any) => ({
-              id: item.content_id,
-              name: item.title
-                .replace(/\s\(.*/g, "")
-                .replace(/\s?:.*/g, "")
-                .replace(/PM/g, "pm"),
-              passcode: item.title.match(/Passcode: \S{9,10}/g)?.[0].substring(10),
-              type: item.type,
-              url: item.html_url,
-            }));
-
-          return {
-            name: module.name,
-            id: module.id,
-            url: module.url,
-            items: items,
-          };
-        });
-        const promises = [];
-        modules.map((module) => {
-          module.items
-            .filter((item) => item.type === "File")
-            .map((item) => {
-              promises.push(
-                api.courses[props.id].files[item.id].get().then((json: any) => {
-                  return json.url;
-                })
-              );
-            });
-        });
-        Promise.all(promises).then((urls: any) => {
-          let i = 0;
-          modules.map((module) => {
-            module.items.map((item) => {
-              if (item.type === "File") {
-                item.download = urls[i];
-                i++;
-              }
-            });
-          });
-          setModules(modules);
-          setIsLoading(false);
-        });
-      })
-      .catch((err: any) => {
-        showToast(Toast.Style.Failure, `Error: ${err.message}`);
-      });
+    const getItems = async () => {
+      try {
+        const modules = await getModules(props.id);
+        setModules(modules);
+        setIsLoading(false);
+      } catch {
+        setModules(null);
+        setIsLoading(false);
+      }
+    };
+    getItems();
   }, []);
 
   return (
     <List isLoading={isLoading}>
-      {modules?.map((module: any, index: number) => (
-        <List.Section title={module.name} key={index}>
-          {module.items?.map((element: any, key: number) => (
-            <List.Item
-              title={element.name}
-              key={key}
-              icon={{
-                source: getIsCodeFile(element.name)
-                  ? Icons["Code"]
-                  : element.passcode
-                  ? Icons["Passcode"]
-                  : element.type in Icons
-                  ? Icons[element.type]
-                  : Icon.ExclamationMark,
-              }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Browser" url={element.url} icon={{ source: Icon.Link }} />
-                  {element.download && (
-                    <Action
-                      title="Download File"
-                      onAction={async () => await open(element.download, { background: true })}
-                      icon={{ source: Icon.Download }}
-                    />
-                  )}
-                  {element.passcode && <Action.CopyToClipboard title="Copy Passcode" content={element.passcode} />}
-                  {element.passcode && (
-                    <Action.Paste
-                      title="Paste Passcode"
-                      content={element.passcode}
-                      shortcut={{ modifiers: ["cmd"], key: "p" }}
-                    />
-                  )}
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+      {modules !== null ? (
+        modules?.map((module: modulesection, index: number) => (
+          <List.Section title={module.name} key={index}>
+            {module.items?.map((item: moduleitem, index: number) => (
+              <List.Item
+                title={item.name}
+                key={index}
+                icon={{
+                  source: getIsCodeFile(item.name)
+                    ? Icons["Code"]
+                    : item.passcode
+                    ? Icons["Passcode"]
+                    : item.type in Icons
+                    ? Icons[item.type]
+                    : Icon.ExclamationMark,
+                }}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser title="Open in Browser" url={item.url} icon={{ source: Icon.Link }} />
+                    {item.download && (
+                      <Action
+                        title="Download File"
+                        onAction={async () => await open(item.download, { background: true })}
+                        icon={{ source: Icon.Download }}
+                      />
+                    )}
+                    {item.passcode && (
+                      <ActionPanel.Section title="Passcode">
+                        <Action.CopyToClipboard title="Copy Passcode" content={item.passcode} />
+                        <Action.Paste
+                          title="Paste Passcode"
+                          content={item.passcode}
+                          shortcut={{ modifiers: ["cmd"], key: "p" }}
+                        />
+                      </ActionPanel.Section>
+                    )}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
+      ) : (
+        <HomePage url={props.url} description={"Error fetching the course modules."} />
+      )}
       {!isLoading && (modules?.length === 0 || modules[0].items?.length === 0) && (
-        <List.Item
-          title="Open Home Page"
-          icon={{ source: Icon.Link }}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open in Browser" url={props.url} icon={{ source: Icon.Link }} />
-            </ActionPanel>
-          }
-        />
+        <HomePage url={props.url} description={"This course does not have any modules."} />
       )}
     </List>
   );

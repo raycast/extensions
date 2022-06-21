@@ -1,4 +1,4 @@
-import { Color } from '@raycast/api';
+import { Color } from "@raycast/api";
 
 export interface course {
   name: string;
@@ -26,6 +26,20 @@ export interface announcement {
   id: number;
   markdown: string;
   date: any;
+}
+
+export interface modulesection {
+  name: string;
+  items: moduleitem[];
+}
+
+export interface moduleitem {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  passcode?: string;
+  download?: string;
 }
 
 export interface Preferences {

@@ -5,7 +5,7 @@ import { Assignment } from "./assignment";
 import { Announcement } from "./announcement";
 import { Icons } from "../utils/utils";
 
-export const ModulesItem = (props: { course: course; announcements: announcement[]; }) => {
+export const ModulesItem = (props: { course: course; announcements: announcement[] }) => {
   const preferences: Preferences = getPreferenceValues();
 
   return (
@@ -17,12 +17,7 @@ export const ModulesItem = (props: { course: course; announcements: announcement
           <Action.Push
             title="See Modules"
             icon={{ source: Icons["Modules"], tintColor: Color.PrimaryText }}
-            target={
-              <Modules
-                id={props.course.id}
-                url={`https://${preferences.domain}/courses/${props.course.id}`}
-              />
-            }
+            target={<Modules id={props.course.id} url={`https://${preferences.domain}/courses/${props.course.id}`} />}
           />
           <Action.OpenInBrowser
             title="Open in Browser"
@@ -36,7 +31,7 @@ export const ModulesItem = (props: { course: course; announcements: announcement
               target={
                 <List>
                   {props.course.assignments.map((assignment: any, index: number) => (
-                    <Assignment key={index} {...assignment}/>
+                    <Assignment key={index} {...assignment} />
                   ))}
                 </List>
               }

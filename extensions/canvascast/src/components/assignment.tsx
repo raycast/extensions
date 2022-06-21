@@ -1,4 +1,4 @@
-import { List, Detail, Action, ActionPanel, Icon, Color,  getPreferenceValues } from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { assignment, Preferences } from "../utils/types";
 import { Icons } from "../utils/utils";
 

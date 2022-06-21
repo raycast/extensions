@@ -8,7 +8,7 @@ export const EmptyView = (props: { error: Error }) => {
     <List.EmptyView
       title={getErrorTitle(error)}
       description={getErrorMessage(error)}
-      icon={{source: getErrorIcon(error)}}
+      icon={{ source: getErrorIcon(error) }}
     />
-  )
-}
+  );
+};
