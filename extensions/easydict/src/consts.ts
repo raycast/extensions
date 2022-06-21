@@ -13,10 +13,16 @@ export enum SectionType {
   WebPhrase = "Web Phrase",
 }
 
-export enum TranslationType {
+export enum TranslateType {
   Youdao = "Youdao Translate",
   Baidu = "Baidu Translate",
+  Tencent = "Tencent Translate",
   Caiyun = "Caiyun Translate",
+}
+
+export enum DicionaryType {
+  Youdao = "Youdao Dictionary",
+  Iciba = "Iciba Dictionary",
 }
 
 export enum YoudaoRequestStateCode {
@@ -34,13 +40,8 @@ export enum BaiduRequestStateCode {
   TargetLanguageNotSupported = "58001",
 }
 
-export const requestStateCodeLinkMap = new Map([
-  [
-    TranslationType.Youdao,
-    "https://ai.youdao.com/DOCSIRMA/html/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E7%BF%BB%E8%AF%91/API%E6%96%87%E6%A1%A3/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1-API%E6%96%87%E6%A1%A3.html#section-11",
-  ],
-  [TranslationType.Baidu, "https://fanyi-api.baidu.com/doc/21"],
-]);
+export const youdaoErrorCodeLink =
+  "https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html#section-11";
 
 export const youdaoErrorList: RequestErrorInfo[] = [
   {
@@ -65,7 +66,7 @@ export function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
   return (
     youdaoErrorList.find((item) => item.errorCode === errorCode) || {
       errorCode,
-      errorMessage: "null",
+      errorMessage: "",
     }
   );
 }
@@ -73,6 +74,8 @@ export function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
 export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "auto",
+    aliyunLanguageId: "auto",
+    tencentLanguageId: "auto",
     baiduLanguageId: "auto",
     caiyunLanguageId: "auto",
     googleLanguageId: "auto",
@@ -81,6 +84,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "zh-CHS",
+    aliyunLanguageId: "zh",
+    tencentLanguageId: "zh",
     baiduLanguageId: "zh",
     caiyunLanguageId: "zh",
     googleLanguageId: "zh-CN",
@@ -89,6 +94,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "zh-CHT",
+    aliyunLanguageId: "zh-tw",
+    tencentLanguageId: "zh-TW",
     baiduLanguageId: "cht",
     caiyunLanguageId: "zh",
     googleLanguageId: "zh-TW",
@@ -97,28 +104,21 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "en",
+    aliyunLanguageId: "en",
+    tencentLanguageId: "en",
     youdaoWebLanguageId: "eng",
     eudicWebLanguageId: "en",
     baiduLanguageId: "en",
     caiyunLanguageId: "en",
     googleLanguageId: "en",
     languageTitle: "English",
-    languageVoice: [
-      "Samantha",
-      "Alex",
-      "Fred",
-      "Victoria",
-      "Daniel",
-      "Karen",
-      "Moira",
-      "Rishi",
-      "Tessa",
-      "Veena",
-      "Fiona",
-    ],
+    languageVoice: ["Samantha", "Alex"],
   },
   {
     youdaoLanguageId: "ja",
+    aliyunLanguageId: "ja",
+    tencentDetectLanguageId: "jp",
+    tencentLanguageId: "ja",
     youdaoWebLanguageId: "jap",
     baiduLanguageId: "jp",
     caiyunLanguageId: "ja",
@@ -127,6 +127,9 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "ko",
+    aliyunLanguageId: "ko",
+    tencentDetectLanguageId: "kr",
+    tencentLanguageId: "ko",
     youdaoWebLanguageId: "ko",
     baiduLanguageId: "kor",
     languageTitle: "Korean",
@@ -134,6 +137,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "fr",
+    aliyunLanguageId: "fr",
+    tencentLanguageId: "fr",
     youdaoWebLanguageId: "fr",
     eudicWebLanguageId: "fr",
     baiduLanguageId: "fra",
@@ -142,104 +147,130 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "es",
+    aliyunLanguageId: "es",
+    tencentLanguageId: "es",
     eudicWebLanguageId: "es",
     baiduLanguageId: "spa",
     languageTitle: "Spanish",
     languageVoice: ["Jorge", "Juan", "Diego", "Monica", "Paulina"],
   },
   {
-    youdaoLanguageId: "pt",
-    baiduLanguageId: "pt",
-    languageTitle: "Portuguese",
-    languageVoice: ["Joana", "Luciana"],
-  },
-  {
     youdaoLanguageId: "it",
+    aliyunLanguageId: "it",
+    tencentLanguageId: "it",
     baiduLanguageId: "it",
     languageTitle: "Italian",
     languageVoice: ["Alice", "Luca"],
   },
   {
-    youdaoLanguageId: "ru",
-    baiduLanguageId: "ru",
-    languageTitle: "Russian",
-    languageVoice: ["Milena", "Yuri"],
-  },
-  {
     youdaoLanguageId: "de",
+    aliyunLanguageId: "de",
+    tencentLanguageId: "de",
     eudicWebLanguageId: "de",
     baiduLanguageId: "de",
     languageTitle: "German",
     languageVoice: ["Anna"],
   },
   {
+    youdaoLanguageId: "pt",
+    aliyunLanguageId: "pt",
+    tencentLanguageId: "pt",
+    baiduLanguageId: "pt",
+    languageTitle: "Portuguese",
+    languageVoice: ["Joana", "Luciana"],
+  },
+
+  {
+    youdaoLanguageId: "ru",
+    aliyunLanguageId: "ru",
+    tencentLanguageId: "ru",
+    baiduLanguageId: "ru",
+    languageTitle: "Russian",
+    languageVoice: ["Milena", "Yuri"],
+  },
+
+  {
     youdaoLanguageId: "ar",
+    aliyunLanguageId: "ar",
+    tencentLanguageId: "ar",
     baiduLanguageId: "ara",
     languageTitle: "Arabic",
     languageVoice: ["Maged"],
   },
   {
+    youdaoLanguageId: "th",
+    aliyunLanguageId: "th",
+    tencentLanguageId: "th",
+    baiduLanguageId: "th",
+    languageTitle: "Thai",
+    languageVoice: ["Kanya"],
+  },
+  {
     youdaoLanguageId: "sv",
+    aliyunLanguageId: "sv",
     baiduLanguageId: "swe",
     languageTitle: "Swedish",
     languageVoice: ["Alva"],
   },
   {
     youdaoLanguageId: "nl",
+    aliyunLanguageId: "nl",
     baiduLanguageId: "nl",
     languageTitle: "Dutch",
     languageVoice: ["Ellen", "Xander"],
   },
   {
     youdaoLanguageId: "ro",
+    aliyunLanguageId: "ro",
     baiduLanguageId: "rom",
     languageTitle: "Romanian",
     languageVoice: ["Ioana"],
   },
   {
-    youdaoLanguageId: "th",
-    baiduLanguageId: "th",
-    languageTitle: "Thai",
-    languageVoice: ["Kanya"],
-  },
-  {
     youdaoLanguageId: "sk",
+    aliyunLanguageId: "sk",
     baiduLanguageId: "slo",
     languageTitle: "Slovak",
     languageVoice: ["Laura"],
   },
   {
     youdaoLanguageId: "hu",
+    aliyunLanguageId: "hu",
     baiduLanguageId: "hu",
     languageTitle: "Hungarian",
     languageVoice: ["Mariska"],
   },
   {
     youdaoLanguageId: "el",
+    aliyunLanguageId: "el",
     baiduLanguageId: "el",
     languageTitle: "Greek",
     languageVoice: ["Melina"],
   },
   {
     youdaoLanguageId: "da",
+    aliyunLanguageId: "da",
     baiduLanguageId: "dan",
     languageTitle: "Danish",
     languageVoice: ["Sara"],
   },
   {
     youdaoLanguageId: "fi",
+    aliyunLanguageId: "fi",
     baiduLanguageId: "fin",
     languageTitle: "Finnish",
     languageVoice: ["Satu"],
   },
   {
     youdaoLanguageId: "pl",
+    aliyunLanguageId: "pl",
     baiduLanguageId: "pl",
     languageTitle: "Polish",
     languageVoice: ["Zosia"],
   },
   {
     youdaoLanguageId: "cs",
+    aliyunLanguageId: "cs",
     baiduLanguageId: "cs",
     languageTitle: "Czech",
     languageVoice: ["Zuzana"],
