@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { ModulesItem } from "./components/modules-item";
+import { Course } from "./components/course";
 import { Assignment } from "./components/assignment";
 import { Announcement } from "./components/announcement";
 import { EmptyView } from "./components/error-view";
-import { checkApi, getCourses, getAssignments, getAnnouncements } from "./api";
+import { checkApi, getCourses, getAssignments, getAnnouncements } from "./utils/api";
 import { course, announcement } from "./utils/types";
 import { Error } from "./utils/utils";
 
@@ -12,7 +12,7 @@ export default function main() {
   const [courses, setCourses] = useState<course[]>();
   const [announcements, setAnnouncements] = useState<announcement[]>();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState(Error.INVALID_API_KEY);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function main() {
         <React.Fragment>
           <List.Section title="Courses">
             {!isLoading &&
-              courses.map((course, index) => <ModulesItem key={index} course={course} announcements={announcements} />)}
+              courses.map((course, index) => <Course key={index} course={course} announcements={announcements} />)}
           </List.Section>
           <List.Section title="Assignments">
             {!isLoading &&

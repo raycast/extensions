@@ -5,7 +5,7 @@ import { Assignment } from "./assignment";
 import { Announcement } from "./announcement";
 import { Icons } from "../utils/utils";
 
-export const ModulesItem = (props: { course: course; announcements: announcement[] }) => {
+export const Course = (props: { course: course; announcements: announcement[] }) => {
   const preferences: Preferences = getPreferenceValues();
 
   return (

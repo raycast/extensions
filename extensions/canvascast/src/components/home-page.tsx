@@ -6,7 +6,7 @@ export const HomePage = (props: { url: string; description: string }) => {
     <List.EmptyView
       title="Open Home Page in Browser"
       description={props.description}
-      icon={{ source: Icons["Home"] }}
+      icon={{ source: Icons["HomePage"] }}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={props.url} />

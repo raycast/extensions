@@ -1,7 +1,7 @@
 import API from "@api-blueprints/pathmaker";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, course, assignment, announcement, modulesection, moduleitem } from "./utils/types";
-import { Colors, formatModuleItemTitle, formatModuleItemPasscode } from "./utils/utils";
+import { Preferences, course, assignment, announcement, modulesection, moduleitem } from "./types";
+import { Colors, formatModuleItemTitle, formatModuleItemPasscode } from "./utils";
 import TurndownService from "turndown-rn";
 
 export function getApi(token: string, domain: string) {

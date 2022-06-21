@@ -24,6 +24,44 @@
       "title": "Domain",
       "placeholder": "canvas.instructure.com",
       "description": "Just the domain for your canvas LMS (Do not include the URL)"
+    }, 
+    {
+      "name": "recent", 
+      "type": "checkbox", 
+      "required": false, 
+      "title": "Show Recent Module Items", 
+      "default": true, 
+      "description": "Show the recently used module items"
+    },
+    {
+      "name": "numRecent", 
+      "type": "dropdown", 
+      "required": false, 
+      "title": "Number of Recent Items", 
+      "default": "4", 
+      "description": "Number of recently used module items shown",
+      "data": [
+        {
+          "value": "1",
+          "title": "1"
+        },
+        {
+          "value": "2",
+          "title": "2"
+        },
+        {
+          "value": "3",
+          "title": "3"
+        },
+        {
+          "value": "4",
+          "title": "4"
+        },
+        {
+          "value": "5",
+          "title": "5"
+        }
+      ]
     }
   ],
   "commands": [

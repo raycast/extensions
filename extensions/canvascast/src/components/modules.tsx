@@ -1,16 +1,24 @@
-import { List, Action, ActionPanel, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { ModuleItem } from "./module-item";
 import { HomePage } from "./home-page";
-import { getModules } from "../api";
+import { getModules } from "../utils/api";
 import { modulesection, moduleitem } from "../utils/types";
-import { Icons, getIsCodeFile } from "../utils/utils";
-import open from "open";
+import { getShowRecents, getRecentModuleItems } from "../utils/recent";
 
 export const Modules = (props: { id: number; url: string }) => {
+  const [searchText, setSearchText] = useState<string>();
   const [modules, setModules] = useState<modulesection[]>();
+  const [recentItems, setRecentItems] = useState<moduleitem[]>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const show: boolean = getShowRecents() && recentItems?.length > 0 && !searchText;
+
   useEffect(() => {
+    const getRecentItems = async () => {
+      const items = await getRecentModuleItems(props.id);
+      setRecentItems(items);
+    };
     const getItems = async () => {
       try {
         const modules = await getModules(props.id);
@@ -21,50 +29,24 @@ export const Modules = (props: { id: number; url: string }) => {
         setIsLoading(false);
       }
     };
+    getRecentItems();
     getItems();
   }, []);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} enableFiltering={true}>
+      {show ? (
+        <List.Section title="Recent">
+          {recentItems?.map((item: moduleitem, index: number) => (
+            <ModuleItem key={index} {...props} item={item} show={show} />
+          ))}
+        </List.Section>
+      ) : null}
       {modules !== null ? (
         modules?.map((module: modulesection, index: number) => (
           <List.Section title={module.name} key={index}>
             {module.items?.map((item: moduleitem, index: number) => (
-              <List.Item
-                title={item.name}
-                key={index}
-                icon={{
-                  source: getIsCodeFile(item.name)
-                    ? Icons["Code"]
-                    : item.passcode
-                    ? Icons["Passcode"]
-                    : item.type in Icons
-                    ? Icons[item.type]
-                    : Icon.ExclamationMark,
-                }}
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser title="Open in Browser" url={item.url} icon={{ source: Icon.Link }} />
-                    {item.download && (
-                      <Action
-                        title="Download File"
-                        onAction={async () => await open(item.download, { background: true })}
-                        icon={{ source: Icon.Download }}
-                      />
-                    )}
-                    {item.passcode && (
-                      <ActionPanel.Section title="Passcode">
-                        <Action.CopyToClipboard title="Copy Passcode" content={item.passcode} />
-                        <Action.Paste
-                          title="Paste Passcode"
-                          content={item.passcode}
-                          shortcut={{ modifiers: ["cmd"], key: "p" }}
-                        />
-                      </ActionPanel.Section>
-                    )}
-                  </ActionPanel>
-                }
-              />
+              <ModuleItem key={index} {...props} item={item} show={show} />
             ))}
           </List.Section>
         ))
