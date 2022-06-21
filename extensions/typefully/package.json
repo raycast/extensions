@@ -28,7 +28,7 @@
     },
     {
       "name": "open-dashboard",
-      "title": "Open Typefully",
+      "title": "Open Dashboard",
       "subtitle": "Typefully",
       "icon": "command-icon.png",
       "description": "Open the Typefully website",
