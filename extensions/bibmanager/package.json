@@ -29,9 +29,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "bibtex-js-parser": "^1.1.5",
-    "citation-js": "^0.6.2"
+    "@raycast/api": "^1.36.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
