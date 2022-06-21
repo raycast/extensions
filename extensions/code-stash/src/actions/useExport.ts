@@ -41,7 +41,7 @@ const useExport = () => {
     archive.finalize();
 
     output.on("close", async () => {
-      await showHUD(`Export successful!`);
+      await showHUD(`Exported successfully to Downloads folder`);
     });
   }, []);
 
