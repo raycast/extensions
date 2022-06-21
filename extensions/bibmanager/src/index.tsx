@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, environment, preferences, showToast, ToastStyle } from "@raycast/api";
+import { List, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ListBibmItem } from "./ListBibmItem";
 import { spawn } from "child_process";
 import { join } from "path";
@@ -11,17 +11,22 @@ interface State {
   error?: Error;
 }
 
-export const pythonbin = String(preferences["python"].value || preferences["python"].default).replace("~", homedir());
+interface Preferences {
+  python: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+export const pythonbin = preferences["python"].replace("~", homedir());
 
 export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true });
   useEffect(() => {
     async function loadItems() {
-      showToast(ToastStyle.Animated, "Browsing bibmanager");
+      showToast(Toast.Style.Animated, "Browsing bibmanager");
       const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_list.py"), "-u"]);
       python.on("error", () => {
         showToast(
-          ToastStyle.Failure,
+          Toast.Style.Failure,
           "bibmanager, where are you?",
           "Update the location of the python bin in the preferences"
         );
@@ -33,7 +38,7 @@ export default function Command() {
       });
       python.on("close", (code) => {
         if (code === 0) {
-          showToast(ToastStyle.Success, "Done");
+          showToast(Toast.Style.Success, "Done");
           const items = JSON.parse(itemsString);
           setState((previous) => ({ ...previous, items: items.items, isLoading: false }));
         }

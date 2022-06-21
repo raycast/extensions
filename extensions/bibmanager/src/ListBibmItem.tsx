@@ -1,4 +1,4 @@
-import { Action, ActionPanel, environment, Icon, List, Toast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, List, Toast } from "@raycast/api";
 import { spawn } from "child_process";
 import { join } from "path";
 import { pythonbin } from "./index";
@@ -39,9 +39,9 @@ function Actions(props: { item: Item }) {
         {!props.item.pdf && (
           <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
-        {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
         {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
         {props.item.content && <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" />}
+        {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -50,14 +50,19 @@ function Actions(props: { item: Item }) {
 function getItemDetail(item: Item): string {
   return `## ${item.title}
 
-${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-
-${item.year && item.month ? "**Publication Date:** " + monthMap.get(item.month) + " " + item.year.toString() : ""}
-
 ${item.authors_string ? "**Authors:** " + item.authors_string : ""}
 
-${item.tags ? "**Tags:** " + item.tags.join(", ") : ""}
+${item.year && item.month ? "**Publication Date:** " + getMonth(item.month) + " " + item.year.toString() : ""}
+
+${item.tags.length > 0 ? "**Tags:** " + item.tags.join(", ") : ""}
+
+${item.link ? "[Open in ADS](" + item.link + ")" : ""}
+
 `;
+}
+
+function getMonth(key: number) {
+  return monthMap.get(key) || "";
 }
 
 const monthMap = new Map<number, string>([
@@ -77,16 +82,16 @@ const monthMap = new Map<number, string>([
 
 export function DownloadPDF(key: string) {
   const toastload = new Toast({
-    style: ToastStyle.Animated,
+    style: Toast.Style.Animated,
     title: "Downloading PDF",
   });
   const toastsuccess = new Toast({
-    style: ToastStyle.Success,
+    style: Toast.Style.Success,
     title: "Download succeeded",
     message: "Rerun to open",
   });
   const toastfail = new Toast({
-    style: ToastStyle.Failure,
+    style: Toast.Style.Failure,
     title: "Download error",
     message: "Try manually with bibmanager CLI",
   });
