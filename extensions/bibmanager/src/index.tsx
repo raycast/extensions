@@ -42,7 +42,7 @@ export default function Command() {
     loadItems();
   }, []);
   return (
-    <List isLoading={(!state.items && !state.error) || state.isLoading}>
+    <List isShowingDetail isLoading={(!state.items && !state.error) || state.isLoading}>
       {state.items?.map((item, index) => (
         <ListBibmItem key={index} item={item} index={index} />
       ))}

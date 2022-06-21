@@ -1,39 +1,29 @@
-import { useEffect, useState } from "react";
 import { Action, ActionPanel, environment, Icon, List, Toast, ToastStyle } from "@raycast/api";
 import { spawn } from "child_process";
 import { join } from "path";
 import { pythonbin } from "./index";
 
 interface Item {
-  uid: string;
   title: string;
+  uid: string;
   link: string;
+  year: number;
+  month: number;
+  content: string;
+  tags: [];
+  authors_tag: [];
+  authors_string: string;
   pdf: string;
-  year: string;
-  authors: [];
 }
 
 export function ListBibmItem(props: { item: Item; index: number }) {
-  const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
-    icon: Icon.Dot,
-    accessories: [],
-  });
-  useEffect(() => {
-    const accessories = [];
-    accessories.push({ icon: Icon.Clock, text: props.item.year.toString() });
-    const icon = Icon.Dot;
-
-    setState({ icon, accessories });
-  }, [props.item, props.index]);
-
   return (
     <List.Item
-      icon={state.icon}
+      icon={Icon.Dot}
       title={props.item.uid ?? "No title"}
-      subtitle={props.item.title}
-      accessories={state.accessories}
       actions={<Actions item={props.item} />}
-      keywords={[props.item.year.toString(), props.item.title, ...props.item.authors]}
+      keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
+      detail={<List.Item.Detail markdown={getItemDetail(props.item)} />}
     />
   );
 }
@@ -51,10 +41,39 @@ function Actions(props: { item: Item }) {
         )}
         {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
         {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
+        {props.item.content && <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" />}
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
+
+function getItemDetail(item: Item): string {
+  return `## ${item.title}
+
+${item.link ? "[Open in ADS](" + item.link + ")" : ""}
+
+${item.year && item.month ? "**Publication Date:** " + monthMap.get(item.month) + " " + item.year.toString() : ""}
+
+${item.authors_string ? "**Authors:** " + item.authors_string : ""}
+
+${item.tags ? "**Tags:** " + item.tags.join(", ") : ""}
+`;
+}
+
+const monthMap = new Map<number, string>([
+  [1, "January"],
+  [2, "February"],
+  [3, "March"],
+  [4, "April"],
+  [5, "May"],
+  [6, "June"],
+  [7, "July"],
+  [8, "August"],
+  [9, "September"],
+  [10, "October"],
+  [11, "November"],
+  [12, "December"],
+]);
 
 export function DownloadPDF(key: string) {
   const toastload = new Toast({

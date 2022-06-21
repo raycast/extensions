@@ -1,7 +1,7 @@
 # Bibmanager
 
-Extension for quickly accessing your bibmanager database from Raycast. Search the database (by bibkey, author, title or year) and open or download the pdf or open the ADS link for your bibmanager entries.
-Make sure to explore available actions in the action panel (⌘ + K).
+Extension for quickly accessing your [bibmanager](https://bibmanager.readthedocs.io/en/latest/) database from Raycast. Search the database (by bibkey, author, title, year or tags) and quickly access entries by opening or downloading the pdf.
+You can also open or copy the ADS link and copy the bibtex entry. Make sure to explore available actions in the action panel (⌘ + K).
 
 ## How to setup the Location of the python bin
 
