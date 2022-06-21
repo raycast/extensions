@@ -30,7 +30,7 @@ const iconMap = {
   [RawTorrentState.unknown]: undefined,
 };
 
-export default function Command() {
+export default function Torrents() {
   const [filter, setFilter] = useState<RawTorrentListFilter>();
   const [torrents, setTorrents] = useState<RawTorrent[]>([]);
   const [loading, setLoading] = useState(false);
