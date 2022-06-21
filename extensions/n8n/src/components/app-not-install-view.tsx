@@ -8,7 +8,7 @@ export function AppNotInstallView(props: { extensionPreferences: boolean }) {
     <List.EmptyView
       title={"n8n Not Installed"}
       description={"n8n is not installed on your Mac. Please install n8n to use this command."}
-      icon={{ source: "n8n.png" }}
+      icon={{ source: "app-not-install-icon.png" }}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

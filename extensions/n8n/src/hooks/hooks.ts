@@ -1,6 +1,6 @@
 //get if show detail
 import { useCallback, useEffect, useState } from "react";
-import { LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage, open } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import { getAllWorkFlowsCLI } from "../utils/n8n-cli-utils";
 import { Workflow } from "../types/types";
@@ -37,4 +37,19 @@ export const getAllWorkflows = (refresh: number) => {
   }, [fetchData]);
 
   return { workflows: workflows, loading: loading };
+};
+
+export const appNotInstallAlertDialog = async () => {
+  const options: Alert.Options = {
+    icon: { source: "app-not-install-icon.png" },
+    title: "n8n Not Installed",
+    message: "n8n is not installed on your Mac. Please install n8n to use this command.",
+    primaryAction: {
+      title: "Get n8n",
+      onAction: () => {
+        open("https://n8n.io/get-started/");
+      },
+    },
+  };
+  await confirmAlert(options);
 };
