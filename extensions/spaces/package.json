@@ -15,7 +15,7 @@
       "name": "create-space",
       "title": "Create Space",
       "subtitle": "Spaces",
-      "description": "It opens a window to create a new workspace.",
+      "description": "Opens a window to create a new workspace.",
       "mode": "no-view"
     }
   ],
