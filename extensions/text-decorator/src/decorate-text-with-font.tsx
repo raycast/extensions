@@ -25,7 +25,10 @@ export default function DecorateTextWithFont() {
             icon={{ source: "list-icons/" + value.icon }}
             title={
               starTextFont === value.value
-                ? "*" + utd.decorate(value.title, fontFamily[0].value, { fallback: true })
+                ? {
+                    value: "*" + utd.decorate(value.title, fontFamily[0].value, { fallback: true }),
+                    tooltip: "Default font of 𝐃𝐞𝐜𝐨𝐫𝐚𝐭𝐞 𝐓𝐞𝐱𝐭 command",
+                  }
                 : value.title
             }
             subtitle={utd.decorate("Unicode", value.value, { fallback: true })}
