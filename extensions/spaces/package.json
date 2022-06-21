@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "create-space",
-      "title": "Create",
+      "title": "Create Space",
       "subtitle": "Spaces",
       "description": "It opens a window to create a new workspace.",
       "mode": "no-view"
