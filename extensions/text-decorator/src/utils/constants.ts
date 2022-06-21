@@ -2,6 +2,7 @@ import { DecorationFont } from "../types/types";
 
 export enum LocalStorageKey {
   STAR_TEXT_FONT = "Star text font",
+  DETAIL_KEY = "Detail Key",
 }
 export const fontFamily: DecorationFont[] = [
   { title: "Bold serif", value: "bold_serif", icon: "bold_serif.svg" },

@@ -2,7 +2,7 @@
 // @ts-ignore
 import utd from "unicode-text-decorator";
 import { fetchInputItem } from "./utils/input-item";
-import { Clipboard, getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
 import { Preferences } from "./types/preferences";
 import { fontFamily, LocalStorageKey } from "./utils/constants";
 
@@ -11,6 +11,7 @@ export default async () => {
   const _starTextFont = typeof localStorage === "undefined" ? fontFamily[0].value : localStorage;
 
   await decorateText(_starTextFont);
+  await closeMainWindow({ clearRootSearch: true });
 };
 
 export const decorateText = async (textFont: string) => {
