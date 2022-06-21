@@ -1,7 +1,8 @@
-import { Action, ActionPanel, List, environment } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, environment, List } from "@raycast/api";
 import { readFileSync } from "fs";
+import Fuse from "fuse.js";
 import * as path from "path";
+import { useEffect, useMemo, useState } from "react";
 
 import initSqlJs, { Database } from "sql.js";
 
@@ -35,7 +36,20 @@ function search(db: Database, query: string) {
   const results = [];
   while (stmt.step()) results.push(stmt.getAsObject());
   stmt.free();
-  return results;
+  const fuse = new Fuse(results, {
+    keys: ["word"],
+    findAllMatches: true,
+    includeScore: true,
+  })
+    .search(query)
+    .map(({ item }) => item);
+  return [
+    // Prioritize fuse results because it's good at fuzzy ranking, giving whole word results better
+    // scores
+    ...fuse,
+    // ... but also include the rest of the SQLite FTS results
+    ...results.filter((row) => !fuse.find(({ id }) => id === row.id)),
+  ];
 }
 
 export default function Command() {
