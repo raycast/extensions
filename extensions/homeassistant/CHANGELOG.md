@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Fan entity support] - 2022-06-18
+- Adds support for Fan entities
+
 ## [Weather entity support] - 2022-05-03
 - Add support for weather entities (daily and hourly)
 

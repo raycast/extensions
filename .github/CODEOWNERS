@@ -25,6 +25,7 @@
 /extensions/bear                                     @hmarr @ron-myers
 /extensions/better-uptime                            @andreaselia
 /extensions/betterdiscord-search                     @TheCommieAxolotl
+/extensions/betterzip                                @koinzhang
 /extensions/biaodian                                 @gasolin
 /extensions/bible                                    @josmithua
 /extensions/binance                                  @grzegorzkrukowski
@@ -56,6 +57,7 @@
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/cheatsheets                              @Destiner
 /extensions/chess-com                                @joshfarrant
+/extensions/chinese-character                        @koinzhang
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/citation-generator                       @AbhinavPalacharla
@@ -188,7 +190,7 @@
 /extensions/hide-files                               @koinzhang
 /extensions/hide-mail                                @Flatroy
 /extensions/holodex                                  @uetchy
-/extensions/homeassistant                            @tonka3000 @altrdev
+/extensions/homeassistant                            @tonka3000 @altrdev @rspeicher
 /extensions/hostloc                                  @J3n5en
 /extensions/how-long-to-beat                         @Cronos87
 /extensions/http-status-codes                        @AlexVanderbist
@@ -262,7 +264,7 @@
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner
 /extensions/nextcloud                                @uetchy
-/extensions/nextjs-docs                              @PrasadChinwal @vimtor
+/extensions/nextjs-docs                              @PrasadChinwal
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits
@@ -380,7 +382,7 @@
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
 /extensions/switchhosts                              @tiancheng92
-/extensions/system-monitor                           @hossammourad
+/extensions/system-monitor                           @hossammourad @pernielsentikaer @pernielsentikaer
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor @macbookandrew

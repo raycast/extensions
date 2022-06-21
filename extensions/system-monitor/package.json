@@ -1,11 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-system-monitor",
-  "title": "raycast-system-monitor",
+  "title": "System Monitor",
   "description": "Show CPU and memory usage",
   "icon": "command-icon.png",
   "author": "hossammourad",
   "license": "MIT",
+  "contributors": [
+    "Crayon144",
+    "pernielsentikaer"
+  ],
   "commands": [
     {
       "name": "system-monitor",
@@ -15,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.36.0",
     "os-utils": "0.0.14"
   },
   "devDependencies": {

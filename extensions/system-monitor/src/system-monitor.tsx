@@ -22,5 +22,5 @@ export default function SystemMonitor() {
     );
   };
 
-  return <List>{render()}</List>;
+  return <>{render()}</>;
 }

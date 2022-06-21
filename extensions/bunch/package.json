@@ -29,18 +29,18 @@
       ]
     },
     {
-      "name": "close-all-bunches",
-      "title": "Close All Bunches",
-      "subtitle": "Bunch",
-      "description": "Close all running bunches.",
-      "mode": "no-view"
-    },
-    {
       "name": "create-bunch",
       "title": "Create Bunch",
       "subtitle": "Bunch",
       "description": "Create a bunch.",
       "mode": "view"
+    },
+    {
+      "name": "close-all-bunches",
+      "title": "Close All Bunches",
+      "subtitle": "Bunch",
+      "description": "Close all running bunches.",
+      "mode": "no-view"
     },
     {
       "name": "open-bunch-folder",
@@ -62,6 +62,13 @@
       "subtitle": "Bunch",
       "description": "Open Bunch Preferences dialog.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-bunch-references",
+      "title": "Search Bunch References",
+      "subtitle": "Bunch",
+      "description": "Search Bunch syntax references.",
+      "mode": "view"
     },
     {
       "name": "process-bunch-text",
