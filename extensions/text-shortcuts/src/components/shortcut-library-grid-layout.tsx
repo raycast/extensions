@@ -83,8 +83,13 @@ export function GridItem(props: {
       content={{
         source: shortcut.info.icon,
         tintColor: shortcut.info.iconColor,
+        tooltip:
+          shortcut.info.name +
+          "\n" +
+          "_".repeat(shortcut.info.name.length) +
+          "\n\nTag: " +
+          shortcut.info.tag.join(", "),
       }}
-      subtitle={shortcut.info.tag.join(", ")}
       title={shortcut.info.name}
       actions={(() => {
         return (
