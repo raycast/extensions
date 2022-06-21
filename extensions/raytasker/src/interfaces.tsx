@@ -1,4 +1,3 @@
-
 export interface TaskLists {
   kind: string;
   etag: string;
@@ -49,7 +48,7 @@ export interface DDProps {
   lists: TaskList[];
   chosenList: string;
   filterTasks: (id: string) => void;
-  chooseList: (id: string) => void
+  chooseList: (id: string) => void;
 }
 
 export interface FormProps {

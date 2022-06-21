@@ -71,8 +71,7 @@ export default function Command() {
       message,
       primaryAction: {
         title: primaryTitle,
-        style: Alert.ActionStyle.Destructive,
-        onAction: () => { },
+        style: Alert.ActionStyle.Destructive
       },
     }
     return await confirmAlert(options)
@@ -116,7 +115,7 @@ export default function Command() {
 
   async function editTask(task: Task, ind: number) {
     // optimistic edit
-    let newTasks = [...allTasks]
+    const newTasks = [...allTasks]
     newTasks[ind] = Object.assign(allTasks[ind], task)
     console.log(newTasks[ind])
     console.log(task)
@@ -187,7 +186,7 @@ export default function Command() {
 
                     const patchTask = { completed: new Date().toISOString() } as Task
                     const res = await google.patchTask(task.id, task.list, patchTask)
-                    if (res.status = 204) {
+                    if (res.status == 204) {
                       showToast({ style: Toast.Style.Success, title: "Deleted" })
                       await editTask(patchTask, i)
                     } else {
@@ -237,7 +236,7 @@ export default function Command() {
                   if (await sendAlert("Delete the task?", "You will not be able to recover it later", "Delete")) {
                     setIsLoading(true)
                     const res = await google.deleteTask(task.list, task.id)
-                    if (res.status = 204) {
+                    if (res.status == 204) {
                       showToast({ style: Toast.Style.Success, title: "Deleted" })
                       await removeTask(task.id)
                     } else {
