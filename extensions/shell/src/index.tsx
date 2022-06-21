@@ -160,6 +160,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action.Push
                     title="Execute"
+                    icon={Icon.List}
                     onPush={() => addToRecentlyUsed(command)}
                     target={<Result cmd={command} />}
                   />

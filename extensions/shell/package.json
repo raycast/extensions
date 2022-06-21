@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast-shell",
-  "title": "Raycast Shell",
+  "name": "shell",
+  "title": "Shell",
   "description": "Run shell commands from Raycast",
   "icon": "bash-icon.png",
   "author": "asubbotin",
