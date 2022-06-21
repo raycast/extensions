@@ -81,8 +81,7 @@ export function GridItem(props: {
     <Grid.Item
       keywords={shortcut.info.tag}
       content={{
-        source: shortcut.info.icon,
-        tintColor: shortcut.info.iconColor,
+        value: { source: shortcut.info.icon, tintColor: shortcut.info.iconColor },
         tooltip:
           shortcut.info.name +
           "\n" +
