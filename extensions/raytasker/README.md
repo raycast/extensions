@@ -13,7 +13,7 @@ Raytasker lets you CRUD your Google Tasks within [Raycast](https://raycast.com/)
 
 ![Header](assets/preview.png)
 
---------
+---
 
 ## How it works
 
@@ -31,7 +31,6 @@ The following commands are available:
 - `cmd + enter` : Create new task
 - `cmd + n` : Create new task
 - `opt + e` : Edit selected task
-  
 - `cmd + p` : Dropdown list selection
   - `up` / `down` + `enter` : Open selected list
 
@@ -41,7 +40,7 @@ The following commands are available:
 
 Simple as that!
 
---------
+---
 
 ## Issues & updates
 
