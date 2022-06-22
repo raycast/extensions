@@ -22,6 +22,7 @@
   "dependencies": {
     "@raycast/api": "^1.36.0",
     "better-sqlite3": "7.5.3",
+    "fuse.js": "6.6.2",
     "node-fetch": "^3.0.0",
     "sql.js": "1.7.0"
   },
