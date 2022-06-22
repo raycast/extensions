@@ -19,20 +19,20 @@ function retrieveSpaces() {
   const spaces: Space[] = [];
 
   for (const spaceItem of spacesItems) {
-    let space = new Space();
+    const space = new Space();
 
     if (spaceItem.startsWith("(\n")) {
-      let filteredSpaceItem = spaceItem.replace("(\n", "").trim().replaceAll('"', "");
+      const filteredSpaceItem = spaceItem.replace("(\n", "").trim().replaceAll('"', "");
 
       space.name = filteredSpaceItem;
       space.url = "spaces://" + filteredSpaceItem.replace(/ /g, "").toLowerCase();
     } else if (spaceItem.endsWith("\n)")) {
-      let filteredSpaceItem = spaceItem.replace("\n)", "").replace("\n", "").trim();
+      const filteredSpaceItem = spaceItem.replace("\n)", "").replace("\n", "").trim().replaceAll('"', "");
 
       space.name = filteredSpaceItem;
       space.url = "spaces://" + filteredSpaceItem.replace(/ /g, "").toLowerCase();
     } else {
-      let filteredSpaceItem = spaceItem.replace("\n", "").trim().replaceAll('"', "");
+      const filteredSpaceItem = spaceItem.replace("\n", "").trim().replaceAll('"', "");
 
       space.name = filteredSpaceItem;
       space.url = "spaces://" + filteredSpaceItem.replace(/ /g, "").toLowerCase();
