@@ -135,9 +135,12 @@ export default function Command() {
   }
 
   if (state.gameState === "win" || state.gameState === "lose") {
+    const won = `You won, congratulations on making it the full ${maxLevel} levels!`;
+    const lost = `You lost, but at least you made it to level ${state.sequence.length}. Better luck next time!`;
+
     return (
       <Detail
-        markdown={state.gameState === "win" ? "You won, congratulations!" : "You lost, better luck next time!"}
+        markdown={state.gameState === "win" ? won : lost}
         actions={
           <ActionPanel>
             <Action.SubmitForm
