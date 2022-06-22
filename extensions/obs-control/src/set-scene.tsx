@@ -2,15 +2,33 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import OBSWebSocket from "obs-websocket-js";
 import useSWR from "swr";
 import { getObs } from "./lib/obs";
+import { appInstalled, appNotInstallAlertDialog, showWebsocketConnectionErrorToast } from "./lib/utils";
 
 let obs: OBSWebSocket;
 
 export default function SetScene() {
-  const { data, mutate } = useSWR("/api/scenes", async () => {
-    obs = await getObs();
+  const { data: isAppInstalled } = useSWR("appInstalled", async () => {
+    const installed = await appInstalled();
 
-    return await obs.call("GetSceneList");
+    if (!installed) {
+      await appNotInstallAlertDialog();
+    }
+
+    return installed;
   });
+
+  const { data, mutate, error } = useSWR(
+    () => (isAppInstalled ? "/api/scenes" : null),
+    async () => {
+      obs = await getObs();
+
+      return await obs.call("GetSceneList");
+    }
+  );
+
+  if (error) {
+    showWebsocketConnectionErrorToast();
+  }
 
   return (
     <List>
