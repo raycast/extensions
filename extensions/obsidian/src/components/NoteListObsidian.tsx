@@ -1,11 +1,13 @@
-import { showToast, Toast, Action, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showToast, Toast, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import fs from "fs";
 
 import NoteLoader from "../utils/NoteLoader";
-import { Note } from "../utils/interfaces";
+import { Note, SearchNotePreferences } from "../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { unpinNote } from "../utils/PinNoteUtils";
+import { filterNotes } from "../utils/utils";
+import { MAX_RENDERED_NOTES } from "../utils/constants";
 
 export function NoteListObsidian(props: { vaultPath: string }) {
   function unpinNoteAction(note: Note) {
@@ -21,8 +23,13 @@ export function NoteListObsidian(props: { vaultPath: string }) {
     );
   }
 
+  const pref: SearchNotePreferences = getPreferenceValues();
+
   const vaultPath = props.vaultPath;
   const [notes, setNotes] = useState<Note[]>([]);
+  const [input, setInput] = useState<string>("");
+  const list = useMemo(() => filterNotes(notes, input, pref.searchContent), [notes, input]);
+
   useEffect(() => {
     async function fetch() {
       try {
@@ -42,5 +49,12 @@ export function NoteListObsidian(props: { vaultPath: string }) {
     fetch();
   }, []);
 
-  return <NoteList notes={notes} vaultPath={props.vaultPath} action={unpinNoteAction} />;
+  return (
+    <NoteList
+      notes={list.slice(0, MAX_RENDERED_NOTES)}
+      vaultPath={props.vaultPath}
+      action={unpinNoteAction}
+      onSearchChange={setInput}
+    />
+  );
 }

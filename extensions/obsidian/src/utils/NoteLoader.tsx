@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 
 import { SearchNotePreferences, Note } from "./interfaces";
+import { getNoteFileContent } from "./utils";
 
 class NoteLoader {
   vaultPath: string;
@@ -27,9 +28,11 @@ class NoteLoader {
         title: name,
         key: ++key,
         path: f,
+        content: getNoteFileContent(f),
       };
       notes.push(note);
     }
+    // console.log("Loaded " + notes.length + " notes.");
     return notes;
   }
 

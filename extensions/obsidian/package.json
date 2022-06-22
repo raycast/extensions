@@ -14,7 +14,7 @@
       "type": "textfield",
       "placeholder": "path/to/vault",
       "title": "Path to Vault",
-      "required": true,
+      "required": false,
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
     }
   ],
@@ -71,6 +71,24 @@
           "required": false,
           "description": "Show the notes content in a detail view",
           "default": true
+        },
+        {
+          "name": "showMetadata",
+          "type": "checkbox",
+          "label": "Show Metadata",
+          "title": "Show Metadata",
+          "required": false,
+          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
+          "default": false
+        },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "label": "Search Content",
+          "title": "Search Content",
+          "required": false,
+          "description": "Use the content of notes for searching",
+          "default": false
         },
         {
           "name": "primaryAction",
@@ -210,6 +228,24 @@
           "default": true
         },
         {
+          "name": "showMetadata",
+          "type": "checkbox",
+          "label": "Show Metadata",
+          "title": "Show Metadata",
+          "required": false,
+          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
+          "default": false
+        },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "label": "Search Content",
+          "title": "Search Content",
+          "required": false,
+          "description": "Use the content of notes for searching",
+          "default": false
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -231,7 +267,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.36.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
