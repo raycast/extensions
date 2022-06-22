@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Image } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 
@@ -16,9 +16,9 @@ function retrieveSpaces() {
 
   const spacesItems = result.split(",");
 
-  let spaces: Space[] = [];
+  const spaces: Space[] = [];
 
-  for (let spaceItem of spacesItems) {
+  for (const spaceItem of spacesItems) {
     let space = new Space();
 
     if (spaceItem.startsWith("(\n")) {
