@@ -26,6 +26,46 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "itemLayout",
+          "type": "dropdown",
+          "description": "Set the layout of the timezone items.",
+          "required": true,
+          "title": "Timezone Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the timezone items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Timezone Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
           "name": "rememberTag",
           "type": "checkbox",
           "required": false,
