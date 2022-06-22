@@ -1,5 +1,10 @@
 # World Clock Changelog
 
+## [Add Grid layout] - {PR_MERGE_DATE}
+
+- Add Grid layout for Query World Time command
+- Add more time info, like how many hours ago, day or night
+
 ## [Fix 24hour bug] - 2022-06-18
 
 - Fix 24hour bug

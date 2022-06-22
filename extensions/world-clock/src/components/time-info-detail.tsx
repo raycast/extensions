@@ -3,7 +3,7 @@ import React from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import Mask = Image.Mask;
 import { weeks } from "../utils/costants";
-import { isEmpty } from "../utils/common-utils";
+import { buildDayAndNightIcon, isEmpty } from "../utils/common-utils";
 
 export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boolean; timezone?: Timezone }) {
   const { timezone, detailLoading, timeInfo } = props;
@@ -19,12 +19,21 @@ export function TimeInfoDetail(props: { timeInfo: TimeInfo; detailLoading: boole
               icon={{
                 source: `https://avatars.dicebear.com/api/initials/${timeInfo.timezone}.png`,
                 mask: Mask.Circle,
-                fallback: { light: "world-clock.png", dark: "world-clock@dark.png" },
+                fallback: "world-clock.png",
               }}
               text={timeInfo.timezone}
             />
             <List.Item.Detail.Metadata.Separator />
-            <List.Item.Detail.Metadata.Label title="Date Time" text={timeInfo.datetime} />
+            <List.Item.Detail.Metadata.Label
+              icon={{
+                source: {
+                  light: buildDayAndNightIcon(timeInfo.datetime, true),
+                  dark: buildDayAndNightIcon(timeInfo.datetime, false),
+                },
+              }}
+              title="Date Time"
+              text={timeInfo.datetime}
+            />
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="UTC Time" text={timeInfo.utc_datetime} />
             <List.Item.Detail.Metadata.Separator />
