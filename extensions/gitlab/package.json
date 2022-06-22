@@ -195,7 +195,7 @@
       "label": "Ignore Certificate Errors (not recommended)",
       "required": false,
       "default": false,
-      "title": "Certificate errors",
+      "title": "Certificate Errors",
       "description": "Ignore SSL Errors",
       "placeholder": "Ignore Certificates"
     },
