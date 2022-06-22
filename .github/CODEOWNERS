@@ -354,6 +354,7 @@
 /extensions/sentry                                   @thomaspaulmann @mattisssa
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/sf-symbols-search                        @peteschaffner
+/extensions/shell                                    @KELiON
 /extensions/shopify-developer-changelog              @sandypockets
 /extensions/signal                                   @leeraymond78
 /extensions/simple-youdao                            @xeric
@@ -368,6 +369,7 @@
 /extensions/social-network-trends                    @koinzhang
 /extensions/solana-explorer                          @TrGiLong
 /extensions/sourcegraph                              @bobheadxi
+/extensions/spaces                                   @pradeepb28
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7
@@ -414,6 +416,7 @@
 /extensions/twitter-trendscast                       @pradeepb28
 /extensions/two-factor-authentication-code-generator @cjdenio
 /extensions/typeform-navigator                       @jdvr
+/extensions/typefully                                @DanielFerguson
 /extensions/typescript-documentation-search          @chezhe
 /extensions/typographer                              @mikeozornin
 /extensions/ulysses                                  @praveenjuge

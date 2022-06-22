@@ -1,4 +1,19 @@
-import { SectionType, TranslationType } from "./consts";
+import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
+import { DicionaryType, SectionType, TranslateType } from "./consts";
+import { IcibaDictionaryResult } from "./dict/iciba/interface";
+
+export interface TranslateTypeResult {
+  type: TranslateType | DicionaryType;
+  result:
+    | YoudaoTranslateResult
+    | BaiduTranslateResult
+    | TencentTranslateResult
+    | CaiyunTranslateResult
+    | IcibaDictionaryResult
+    | YoudaoDictionaryResult
+    | null;
+  errorInfo?: RequestErrorInfo;
+}
 
 export interface YoudaoTranslateResult {
   l: string;
@@ -9,10 +24,28 @@ export interface YoudaoTranslateResult {
   web?: TranslateResultKeyValueItem[];
   basic?: YoudaoTranslateResultBasicItem;
   isWord: boolean;
+  speakUrl: string;
 }
+
+export type YoudaoDictionaryResult = YoudaoTranslateResult;
+
+export interface QueryWordInfo {
+  word: string;
+  phonetic?: string;
+  speech?: string;
+  fromLanguage: string;
+  toLanguage: string;
+  isWord: boolean;
+  examTypes?: string[];
+  audioPath?: string;
+  speechUrl: string; // youdao tts url
+}
+
 export interface YoudaoTranslateResultBasicItem {
   explains: string[];
-  phonetic?: string;
+  "us-phonetic"?: string; // American phonetic
+  "us-speech"?: string;
+  phonetic?: string; // Chinese word phonetic
   exam_type?: string[];
   wfs?: YoudaoTranslateResultBasicFormsItem[];
 }
@@ -34,6 +67,7 @@ export interface YoudaoTranslateReformatResultItem {
   copyText: string;
   subtitle?: string;
   phonetic?: string;
+  speech?: string;
   examTypes?: string[];
 }
 
@@ -44,9 +78,16 @@ export interface MyPreferences {
   youdaoAppSecret: string;
   baiduAppId: string;
   baiduAppSecret: string;
-  caiyunAppToken: string;
-  isAutomaticQueryClipboard: boolean;
+  caiyunToken: string;
+  tencentSecretId: string;
+  tencentSecretKey: string;
+  tencentProjectId: string;
+  isAutomaticQuerySelectedText: boolean;
+  isAutomaticPlayWordAudio: boolean;
   isDisplayTargetTranslationLanguage: boolean;
+  enableBaiduTranslate: boolean;
+  enableTencentTranslate: boolean;
+  enableCaiyunTranslate: boolean;
 }
 
 export interface ListItemActionPanelItem {
@@ -55,16 +96,12 @@ export interface ListItemActionPanelItem {
   eudicWebUrl: string;
   isShowOpenInYoudaoWeb: boolean;
   youdaoWebUrl: string;
-  copyText?: string;
-  queryText?: string;
-  currentFromLanguage?: LanguageItem;
-  currentTargetLanguage?: LanguageItem;
+  copyText: string;
+  queryText: string;
+  queryWordInfo: QueryWordInfo;
+  currentFromLanguage: LanguageItem;
+  currentTargetLanguage: LanguageItem;
   onLanguageUpdate: (language: LanguageItem) => void;
-}
-
-export interface RequestResultState {
-  type: TranslationType;
-  errorInfo: RequestErrorInfo;
 }
 
 export interface RequestErrorInfo {
@@ -74,56 +111,64 @@ export interface RequestErrorInfo {
 
 export interface LanguageItem {
   youdaoLanguageId: string;
-  youdaoWebLanguageId?: string;
-  eudicWebLanguageId?: string;
+  aliyunLanguageId: string;
+  tencentDetectLanguageId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
+  tencentLanguageId?: string;
   baiduLanguageId?: string;
   caiyunLanguageId?: string;
   languageTitle: string;
   languageVoice: string[];
   googleLanguageId?: string;
+  youdaoWebLanguageId?: string;
+  eudicWebLanguageId?: string;
 }
 
 export interface BaiduTranslateResult {
-  from: string;
-  to: string;
-  trans_result: BaiduTranslateItem[];
+  from?: string;
+  to?: string;
+  trans_result?: BaiduTranslateItem[];
+  error_code?: string;
+  error_msg?: string;
 }
 export interface BaiduTranslateItem {
   src: string;
   dst: string;
 }
 
+export type TencentTranslateResult = TextTranslateResponse;
+
+// export interface TencentTranslateResult {
+//   TargetText: string;
+//   Source: string;
+//   Target: string;
+//   RequestId: string;
+// }
+
 export interface CaiyunTranslateResult {
   rc: string;
-  target: string;
+  target: string[];
   confidence: number;
 }
 
 export interface TranslateSourceResult {
   youdaoResult: YoudaoTranslateResult;
-  baiduResult: BaiduTranslateResult;
+  baiduResult?: BaiduTranslateResult;
+  tencentResult?: TencentTranslateResult;
   caiyunResult?: CaiyunTranslateResult;
+  icibaResult?: IcibaDictionaryResult;
 }
 
-export interface TranslateReformatResult {
-  queryTextInfo: QueryTextInfo;
-  translations: TranslationItem[];
+export interface TranslateFormatResult {
+  queryWordInfo: QueryWordInfo;
+  translations: TranslateItem[];
   explanations?: string[];
   forms?: YoudaoTranslateResultBasicFormsItem[];
   webTranslation?: TranslateResultKeyValueItem;
   webPhrases?: TranslateResultKeyValueItem[];
 }
 
-export interface QueryTextInfo {
-  query: string;
-  phonetic?: string;
-  from: string;
-  to: string;
-  isWord: boolean;
-  examTypes?: string[];
-}
-export interface TranslationItem {
-  type: TranslationType;
+export interface TranslateItem {
+  type: TranslateType;
   text: string;
 }
 export interface TranslateResultKeyValueItem {
@@ -132,8 +177,8 @@ export interface TranslateResultKeyValueItem {
 }
 
 export interface TranslateDisplayResult {
-  type: SectionType | TranslationType;
-  sectionTitle?: SectionType | TranslationType | string;
+  type: SectionType | TranslateType;
+  sectionTitle?: SectionType | TranslateType | string;
   items?: TranslateDisplayItem[];
 }
 export interface TranslateDisplayItem {
@@ -142,9 +187,11 @@ export interface TranslateDisplayItem {
   copyText: string;
   tooltip?: string;
   subtitle?: string;
+  queryWordInfo: QueryWordInfo;
   phonetic?: string;
+  speech?: string;
   examTypes?: string[];
-  translationType?: TranslationType;
+  translationMarkdown?: string;
 }
 
 export interface ClipboardRecoredItem {
