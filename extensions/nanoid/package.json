@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "Nanoid",
+      "name": "nanoid",
       "title": "Nanoid",
       "description": "Copy a new nanoid",
       "mode": "no-view"
