@@ -8,12 +8,12 @@ interface State {
   level: number;
   sequence: string[];
   humanSequence: string[];
-  colours: { name: string; tint: Color }[];
+  colors: { name: string; tint: Color }[];
 }
 
 export default function Command() {
   const maxLevel = 20;
-  const colourMap = {
+  const colorMap = {
     Red: Color.Red,
     Green: Color.Green,
     Blue: Color.Blue,
@@ -25,7 +25,7 @@ export default function Command() {
     level: 1,
     sequence: [],
     humanSequence: [],
-    colours: [
+    colors: [
       { name: "Red", tint: Color.Red },
       { name: "Green", tint: Color.Green },
       { name: "Blue", tint: Color.Blue },
@@ -34,38 +34,38 @@ export default function Command() {
   });
 
   const nextLevel = () => {
-    const randomIndex = Math.floor(Math.random() * state.colours.length);
-    const nextColour = state.colours[randomIndex].name;
+    const randomIndex = Math.floor(Math.random() * state.colors.length);
+    const nextColor = state.colors[randomIndex].name;
 
     setState((previous) => ({
       ...previous,
-      sequence: [...previous.sequence, nextColour],
+      sequence: [...previous.sequence, nextColor],
     }));
 
-    return nextColour;
+    return nextColor;
   };
 
-  const activateColour = (colourToActivate: string) => {
+  const activateColor = (colorToActivate: string) => {
     setState((previous) => ({
       ...previous,
-      colours: previous.colours.map((colour) => {
-        if (colour.name === colourToActivate) {
-          return { ...colour, tint: Color.PrimaryText };
+      colors: previous.colors.map((color) => {
+        if (color.name === colorToActivate) {
+          return { ...color, tint: Color.PrimaryText };
         }
 
-        return colour;
+        return color;
       }),
     }));
 
     setTimeout(() => {
       setState((previous) => ({
         ...previous,
-        colours: previous.colours.map((colour) => {
-          if (colour.name === colourToActivate) {
-            return { ...colour, tint: colourMap[colour.name] };
+        colors: previous.colors.map((color) => {
+          if (color.name === colorToActivate) {
+            return { ...color, tint: colorMap[color.name] };
           }
 
-          return colour;
+          return color;
         }),
       }));
     }, 500);
@@ -74,9 +74,9 @@ export default function Command() {
   const animateSequence = (newSequence: string[]) => {
     setState((previous) => ({ ...previous, loading: true }));
 
-    newSequence.forEach((colour, index) => {
+    newSequence.forEach((color, index) => {
       setTimeout(() => {
-        activateColour(colour);
+        activateColor(color);
       }, (index + 1) * 800);
     });
 
@@ -94,9 +94,9 @@ export default function Command() {
               humanSequence: [],
             }));
 
-            const nextColour = nextLevel();
+            const nextColor = nextLevel();
 
-            animateSequence([...state.sequence, nextColour]);
+            animateSequence([...state.sequence, nextColor]);
           } else {
             exec("open raycast://confetti");
 
@@ -121,9 +121,9 @@ export default function Command() {
               onSubmit={() => {
                 setState((previous) => ({ ...previous, gameState: "play" }));
 
-                const nextColour = nextLevel();
+                const nextColor = nextLevel();
 
-                activateColour(nextColour);
+                activateColor(nextColor);
 
                 animateSequence(state.sequence);
               }}
@@ -165,25 +165,25 @@ export default function Command() {
 
   return (
     <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Small} isLoading={state.loading}>
-      {state.colours.map((colour, index) => (
+      {state.colors.map((color, index) => (
         <Grid.Item
-          key={colour.name}
-          content={{ value: { source: Icon.Circle, tintColor: colour.tint }, tooltip: colour.name }}
-          title={colour.name}
+          key={color.name}
+          content={{ value: { source: Icon.Circle, tintColor: color.tint }, tooltip: color.name }}
+          title={color.name}
           actions={
             <ActionPanel>
               <Action.SubmitForm
-                title="Select Colour"
+                title="Select Color"
                 onSubmit={() => {
                   if (state.loading) {
                     return;
                   }
 
-                  activateColour(colour.name);
+                  activateColor(color.name);
 
                   setState((previous) => ({
                     ...previous,
-                    humanSequence: [...previous.humanSequence, colour.name],
+                    humanSequence: [...previous.humanSequence, color.name],
                   }));
                 }}
               />
