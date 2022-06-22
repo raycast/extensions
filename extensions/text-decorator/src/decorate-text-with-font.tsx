@@ -58,7 +58,12 @@ export default function DecorateTextWithFont() {
             content={{
               value: {
                 source: "grid-icons/" + value.icon,
-                tintColor: starTextFont === value.value ? Color.Yellow : undefined,
+                tintColor:
+                  value.value !== "regional_indicator"
+                    ? starTextFont === value.value
+                      ? Color.Yellow
+                      : Color.PrimaryText
+                    : undefined,
               },
               tooltip: starTextFont === value.value ? "Default font of 𝐃𝐞𝐜𝐨𝐫𝐚𝐭𝐞 𝐓𝐞𝐱𝐭 command" : "",
             }}
