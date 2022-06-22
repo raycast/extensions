@@ -168,12 +168,13 @@ export default function Command() {
       {state.colors.map((color, index) => (
         <Grid.Item
           key={color.name}
-          content={{ value: { source: Icon.Circle, tintColor: color.tint }, tooltip: color.name }}
+          content={{ source: Icon.Circle, tintColor: color.tint }}
           title={color.name}
           actions={
             <ActionPanel>
               <Action.SubmitForm
-                title="Select Color"
+                title="Select Colour"
+                icon={Icon.Dot}
                 onSubmit={() => {
                   if (state.loading) {
                     return;
