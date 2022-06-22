@@ -16,10 +16,10 @@ function retrieveSpaces() {
 
   const spacesItems = result.split(",");
 
-  var spaces: Space[] = [];
+  let spaces: Space[] = [];
 
-  for (var spaceItem of spacesItems) {
-    var space = new Space();
+  for (let spaceItem of spacesItems) {
+    let space = new Space();
 
     if (spaceItem.startsWith("(\n")) {
       let filteredSpaceItem = spaceItem.replace("(\n", "").trim().replaceAll('"', "");
