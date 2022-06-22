@@ -1,6 +1,6 @@
 # Text Decorator Changelog
 
-## [Fix Dark theme bug] - {PR_MERGE_DATE}
+## [Fix Dark theme bug] - 2022-06-22
 
 - Fix the bug of unclear text display in Grid layout under the dark theme
 
