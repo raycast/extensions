@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "nanoid",
-      "title": "Nanoid",
+      "title": "Generate Nanoid",
       "description": "Copy a new nanoid",
       "mode": "no-view"
     }
