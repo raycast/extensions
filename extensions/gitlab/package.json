@@ -196,8 +196,7 @@
       "required": false,
       "default": false,
       "title": "Certificate Errors",
-      "description": "Ignore SSL Errors",
-      "placeholder": "Ignore Certificates"
+      "description": "Ignore SSL Errors"
     },
     {
       "name" : "customcacert",
@@ -253,7 +252,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
-    "lint": "ray lint ",
+    "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "fix-prettier": "prettier --write src"
   }

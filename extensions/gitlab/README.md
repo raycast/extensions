@@ -86,7 +86,7 @@ the `api` scope.
 ## Self-hosted instance
 
 If you use a self hosted instance make sure that you set your custom CA certificate in the preferences.
-This can be a tricky process and you need to make sure that you use the right certificate otherwise you get an error. The extension use your certificate and pass it directly to nodejs network stack. If you have troubles checkout various nodejs guides around the internet.
+This can be a tricky process and you need to make sure that you use the right certificate otherwise you get an error. The extension use your certificate and pass it directly to nodejs network stack. If you have troubles checkout various nodejs guides around the internet or checkout the [official nodejs documentation](https://nodejs.org/api/https.html#httpscreateserveroptions-requestlistener).
 
 You can disable certificate errors, but this is not recommended for security reasons ⚠️.
 
