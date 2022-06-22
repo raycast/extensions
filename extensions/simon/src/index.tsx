@@ -168,7 +168,7 @@ export default function Command() {
       {state.colours.map((colour, index) => (
         <Grid.Item
           key={colour.name}
-          content={{ value: { source: Icon.Circle, tintColor: colour.tint }, tooltip: colour.name }}
+          content={{ source: Icon.Circle, tintColor: colour.tint }}
           title={colour.name}
           actions={
             <ActionPanel>
