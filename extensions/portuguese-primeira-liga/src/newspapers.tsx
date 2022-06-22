@@ -22,18 +22,15 @@ export default function GetNewspapers() {
                     <Detail
                       markdown={`![](${paper.cover})`}
                       navigationTitle={paper.title}
-                      metadata={
-                        <Detail.Metadata>
-                          <Detail.Metadata.Link
-                            title={paper.name || ""}
-                            target={paper.url || ""}
-                            text="Go to website"
-                          />
-                        </Detail.Metadata>
+                      actions={
+                        <ActionPanel>
+                          <Action.OpenInBrowser url={paper.url || ""} />
+                        </ActionPanel>
                       }
                     />
                   }
                 />
+                <Action.OpenInBrowser url={paper.url || ""} />
               </ActionPanel>
             }
           />
