@@ -17,11 +17,19 @@
       "subtitle": "Spaces",
       "description": "Opens a window to create a new workspace.",
       "mode": "no-view"
+    },
+    {
+      "name": "show-my-spaces",
+      "title": "Show My Spaces",
+      "subtitle": "Spaces",
+      "description": "It shows list of spaces available from your spaces app.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.36.1",
-    "open": "^8.4.0"
+    "open": "^8.4.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
