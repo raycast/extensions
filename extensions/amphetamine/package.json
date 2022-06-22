@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amphetamine",
   "title": "Amphetamine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Controls Amphetamine using Raycast",
   "icon": "icon.png",
   "author": "gstvds",
@@ -34,6 +34,34 @@
         "amp end",
         "amphetamine",
         "ampend"
+      ]
+    },
+    {
+      "name": "remaining",
+      "title": "Get Remaining Time",
+      "subtitle": "Amphetamine",
+      "description": "Get current session remaining time",
+      "mode": "no-view",
+      "keywords": [
+        "remaining",
+        "amp",
+        "amp remaining",
+        "amphetamine"
+      ]
+    },
+    {
+      "name": "amp-duration",
+      "title": "Start New Session with Duration",
+      "subtitle": "Amphetamine",
+      "description": "Start a new Session with a Duration",
+      "mode": "view",
+      "keywords": [
+        "interval",
+        "amp",
+        "amp interval",
+        "amphetamine",
+        "duration",
+        "amp duration"
       ]
     }
   ],
