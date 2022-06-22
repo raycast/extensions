@@ -12,7 +12,6 @@
   "commands": [{
     "name": "index",
     "title": "Play Simon",
-    "subtitle": "Simon",
     "description": "Play a game of Simon.",
     "mode": "view"
   }],
