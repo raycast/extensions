@@ -174,6 +174,7 @@ export default function Command() {
             <ActionPanel>
               <Action.SubmitForm
                 title="Select Colour"
+                icon={Icon.Dot}
                 onSubmit={() => {
                   if (state.loading) {
                     return;
