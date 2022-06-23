@@ -38,10 +38,14 @@ export const shortenLinkWithSlug = async (domain: string, originalURL: string, s
         },
       };
 
-      const updateShortLinkResponse = (
-        await axios.post(SHORTEN_LINK_API + "/" + shortLinkResponse.idString, data, options)
-      ).data as ShortLink;
-      return { success: true, message: "", shortLink: updateShortLinkResponse.shortURL };
+      return await axios
+        .post(SHORTEN_LINK_API + "/" + shortLinkResponse.idString, data, options)
+        .then(function (response) {
+          return { success: true, message: "", shortLink: response.data.shortURL };
+        })
+        .catch(function (response) {
+          return { success: false, message: String(response), shortLink: shortLinkResponse.shortURL };
+        });
     }
   } catch (e) {
     console.error(String(e));
