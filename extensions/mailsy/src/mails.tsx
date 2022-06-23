@@ -83,7 +83,7 @@ function Email({ id }: { id: string }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${dir}/assets/email.html`} />
-          <Action title="Delete Email" onAction={async () => await deleteMessage(id)}></Action>
+          <Action title="Delete Email" onAction={async () => await deleteMessage(id)} icon={Icon.Trash}></Action>
         </ActionPanel>
       }
     ></Detail>
