@@ -29,6 +29,6 @@ export const clearRecentModuleItems = async (id: number): Promise<void> => {
   await LocalStorage.setItem(`${id}-recent-modules`, JSON.stringify([]));
 };
 
-export const removeModuleItem = (array: any[], item: any): any[] => {
-  return array.filter(i => i.id !== item.id);
+export const removeModuleItem = (array: moduleitem[], item: moduleitem): moduleitem[] => {
+  return array.filter((i: moduleitem) => i.id !== item.id);
 };

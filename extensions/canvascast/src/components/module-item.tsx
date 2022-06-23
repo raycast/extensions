@@ -4,7 +4,13 @@ import { appendRecentModuleItem, clearRecentModuleItems } from "../utils/recent"
 import { Icons, getIsCodeFile } from "../utils/utils";
 import open from "open";
 
-export const ModuleItem = (props: { id: number; url: string; item: moduleitem; show: boolean, getRecentItems: () => Promise<void>  }) => {
+export const ModuleItem = (props: {
+  id: number;
+  url: string;
+  item: moduleitem;
+  show: boolean;
+  getRecentItems: () => Promise<void>;
+}) => {
   const append = async () => await appendRecentModuleItem(props.id, props.item);
   const { pop } = useNavigation();
 
@@ -22,10 +28,14 @@ export const ModuleItem = (props: { id: number; url: string; item: moduleitem; s
       }}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={props.item.url} icon={{ source: Icon.Link }} onOpen={async () => {
-            await append();
-            await props.getRecentItems();
-          }} />
+          <Action.OpenInBrowser
+            url={props.item.url}
+            icon={{ source: Icon.Link }}
+            onOpen={async () => {
+              await append();
+              await props.getRecentItems();
+            }}
+          />
           {props.item.download && (
             <Action
               title="Download File"
@@ -39,10 +49,14 @@ export const ModuleItem = (props: { id: number; url: string; item: moduleitem; s
           )}
           {props.item.passcode && (
             <ActionPanel.Section title="Passcode">
-              <Action.CopyToClipboard title="Copy Passcode" content={props.item.passcode} onCopy={async () => {
-                await append();
-                await props.getRecentItems();
-              }} />
+              <Action.CopyToClipboard
+                title="Copy Passcode"
+                content={props.item.passcode}
+                onCopy={async () => {
+                  await append();
+                  await props.getRecentItems();
+                }}
+              />
               <Action.Paste
                 title="Paste Passcode"
                 content={props.item.passcode}
