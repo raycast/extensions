@@ -88,7 +88,7 @@ export const getDefaultDomain = (paraDomain: string) => {
   return { defaultDomain: domain, domainLoading: loading };
 };
 
-export const getShortLinks = () => {
+export const getShortLinks = (refresh: number) => {
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -129,13 +129,13 @@ export const getShortLinks = () => {
       setShortLinks(listLinksResponse.links);
     }
     setLoading(false);
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return { shortLinks: shortLinks, loading: loading };
+  return { shortLinks: shortLinks, setShortLinks: setShortLinks, loading: loading };
 };
 
 export const alertDialog = async (

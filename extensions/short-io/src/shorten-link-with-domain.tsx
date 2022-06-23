@@ -20,12 +20,15 @@ export default function ShortenLinkWithDomain() {
       isShowingDetail={domains.length !== 0 && true}
       searchBarPlaceholder={"Search domains, ☆ is default domain of  𝐒𝐡𝐨𝐫𝐭𝐞𝐧 𝐋𝐢𝐧𝐤 and 𝐒𝐞𝐚𝐫𝐜𝐡 𝐋𝐢𝐧𝐤𝐬 command"}
     >
-      <ListEmptyView title={"No Domain"} icon={"empty-domain-icon.svg"} />
+      <ListEmptyView
+        title={"No Domain"}
+        icon={{ source: { light: "empty-domain-icon.svg", dark: "empty-domain-icon@dark.svg" } }}
+      />
       {domains.map((value, index) => {
         return (
           <List.Item
             key={index}
-            icon={"domain-icon.svg"}
+            icon={{ source: { light: "domain-icon.svg", dark: "domain-icon@dark.svg" } }}
             title={value.hostname}
             accessories={[
               value.hostname === defaultDomain || (defaultDomain === "" && index === 0)

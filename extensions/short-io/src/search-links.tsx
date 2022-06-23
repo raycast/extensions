@@ -1,21 +1,30 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import React from "react";
-import { getShortLinks } from "./hooks/hooks";
+import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
+import React, { useState } from "react";
+import { alertDialog, getShortLinks } from "./hooks/hooks";
 import { isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import { ListEmptyView } from "./components/list-empty-view";
+import { deleteShortLink } from "./utils/axios-utils";
+import Style = Toast.Style;
+import EditLink from "./edit-link";
+import { ShortLink } from "./types/types";
 
-export default function ShortenLinkWithDomain() {
-  const { shortLinks, loading } = getShortLinks();
+export default function SearchLinks() {
+  const [refresh, setRefresh] = useState<number>(0);
+  const { shortLinks, setShortLinks, loading } = getShortLinks(refresh);
+
   return (
     <List isLoading={loading} isShowingDetail={shortLinks.length !== 0 && true} searchBarPlaceholder={"Search links"}>
-      <ListEmptyView title={"No Link"} icon={"empty-link-icon.svg"} />
+      <ListEmptyView
+        title={"No Link"}
+        icon={{ source: { light: "empty-link-icon.svg", dark: "empty-link-icon@dark.svg" } }}
+      />
       {shortLinks.map((value, index) => {
         return (
           <List.Item
             key={index}
-            icon={"link-icon.svg"}
+            icon={{ source: { light: "link-icon.svg", dark: "link-icon@dark.svg" } }}
             title={value.shortURL}
             detail={
               <List.Item.Detail
@@ -51,6 +60,39 @@ export default function ShortenLinkWithDomain() {
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Link"} content={value.shortURL} />
                 <Action.OpenInBrowser title={"Open Link"} url={value.shortURL} />
+                <ActionPanel.Section>
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title={"Edit Link"}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={<EditLink shortLink={value} setRefresh={setRefresh} />}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title={"Delete Link"}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={async () => {
+                      await alertDialog(
+                        Icon.Trash,
+                        "Delete Link",
+                        `Are you sure you want to delete ${value.shortURL}?`,
+                        "Delete",
+                        async () => {
+                          await showToast(Style.Animated, "Deleting...");
+                          const deleteResult = await deleteShortLink(value.idString);
+                          if (deleteResult.success) {
+                            const _shortLinks = [...shortLinks];
+                            _shortLinks.splice(index, 1);
+                            setShortLinks(_shortLinks);
+                            await showToast(Style.Success, "Success.", "Link deleted successfully");
+                          } else {
+                            await showToast(Style.Failure, "Error.", deleteResult.message);
+                          }
+                        }
+                      );
+                    }}
+                  />
+                </ActionPanel.Section>
                 <ActionGoShortIo />
                 <ActionOpenPreferences />
               </ActionPanel>

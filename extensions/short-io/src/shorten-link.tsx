@@ -12,6 +12,7 @@ export default function ShortenLink(props: { paraDomain?: string }) {
 
   const [originalLink, setOriginalLink] = useState<string>("");
   const [slug, setSlug] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
   const [shortLink, setShortLink] = useState<string>("");
 
   const { defaultDomain, domainLoading } = getDefaultDomain(paraDomain);
@@ -26,9 +27,9 @@ export default function ShortenLink(props: { paraDomain?: string }) {
             title={"Shorten Link"}
             onAction={async () => {
               if (isEmpty(defaultDomain)) {
-                alertDialog(Icon.Globe, "No domain found.", "Please add a domain first.", "Add Domain", () => {
+                await alertDialog(Icon.Globe, "No domain found.", "Please add a domain first.", "Add Domain", () => {
                   open("https://app.short.io/domains/connect").then();
-                }).then();
+                });
                 return;
               }
               if (isEmpty(originalLink)) {
@@ -36,7 +37,7 @@ export default function ShortenLink(props: { paraDomain?: string }) {
                 return;
               }
               await showToast(Style.Animated, "Shortening...");
-              const _shortLink = await shortenLinkWithSlug(defaultDomain + "", originalLink, slug);
+              const _shortLink = await shortenLinkWithSlug(defaultDomain + "", originalLink, slug, title);
               if (_shortLink.success) {
                 setShortLink(_shortLink.shortLink);
                 await Clipboard.copy(_shortLink.shortLink);
@@ -70,6 +71,7 @@ export default function ShortenLink(props: { paraDomain?: string }) {
       <Form.Description title={"Domain"} text={defaultDomain} />
       <Form.TextField id={"Original Link"} title={"Original Link"} value={originalLink} onChange={setOriginalLink} />
       <Form.TextField id={"Slug"} title={"Slug"} placeholder={"Optional"} value={slug} onChange={setSlug} />
+      <Form.TextField id={"Title"} title={"Title"} placeholder={"Optional"} value={title} onChange={setTitle} />
       {!isEmpty(shortLink) && <Form.Description title={"Short Link"} text={shortLink} />}
     </Form>
   );
