@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spaces",
+  "title": "Spaces",
+  "description": "It's time to reclaim your workspace on macOS",
+  "icon": "spaces-icon.png",
+  "author": "pradeepb28",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-space",
+      "title": "Create Space",
+      "subtitle": "Spaces",
+      "description": "Opens a window to create a new workspace.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-my-spaces",
+      "title": "Show My Spaces",
+      "subtitle": "Spaces",
+      "description": "It shows list of spaces available from your spaces app.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "open": "^8.4.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

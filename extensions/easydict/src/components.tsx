@@ -1,9 +1,11 @@
 import { Component } from "react";
-import { exec, execFile } from "child_process";
-import { languageItemList, SectionType, TranslationType } from "./consts";
+import { execFile } from "child_process";
+import { languageItemList, SectionType, TranslateType } from "./consts";
 import { ListItemActionPanelItem, YoudaoTranslateReformatResultItem } from "./types";
 import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { getGoogleTranslateURL, myPreferences, truncate } from "./utils";
+import { getGoogleWebTranslateURL, myPreferences } from "./utils";
+import { getWordAudioPath, playWordAudio, sayTruncateCommand } from "./audio";
+import fs from "fs";
 
 export const eudicBundleId = "com.eusoft.freeeudic";
 
@@ -15,18 +17,22 @@ export function playSoundIcon(lightTintColor: string) {
 }
 
 // function: Returns the corresponding ImageLike based on the SectionType type
-export function getListItemIcon(sectionType: SectionType | TranslationType): Image.ImageLike {
+export function getListItemIcon(sectionType: SectionType | TranslateType): Image.ImageLike {
   let dotColor: Color.ColorLike = Color.PrimaryText;
   switch (sectionType) {
-    case TranslationType.Youdao: {
+    case TranslateType.Youdao: {
       dotColor = Color.Red;
       break;
     }
-    case TranslationType.Baidu: {
+    case TranslateType.Baidu: {
       dotColor = "#4169E1";
       break;
     }
-    case TranslationType.Caiyun: {
+    case TranslateType.Tencent: {
+      dotColor = Color.Purple;
+      break;
+    }
+    case TranslateType.Caiyun: {
       dotColor = Color.Green;
       break;
     }
@@ -61,12 +67,12 @@ export function getListItemIcon(sectionType: SectionType | TranslationType): Ima
 
 // function: return List.Item.Accessory[] based on the SectionType type
 export function getWordAccessories(
-  sectionType: SectionType | TranslationType,
+  sectionType: SectionType | TranslateType,
   item: YoudaoTranslateReformatResultItem
 ): List.Item.Accessory[] {
   let wordExamTypeAccessory = [];
   let pronunciationAccessory = [];
-  let wordAccessories: any[] = [];
+  let wordAccessories: List.Item.Accessory[] = [];
   if (sectionType === SectionType.Translation) {
     if (item.examTypes) {
       wordExamTypeAccessory = [
@@ -103,21 +109,16 @@ export function ActionFeedback() {
 }
 
 export class ListActionPanel extends Component<ListItemActionPanelItem> {
-  onPlaySound(text?: string, language?: string) {
-    if (language && text) {
-      const voiceIndex = 0;
-      for (const LANG of languageItemList) {
-        if (language === LANG.youdaoLanguageId) {
-          const truncateText = truncate(text).replace(/"/g, " ");
-          const sayCommand = `say -v ${LANG.languageVoice[voiceIndex]} '${truncateText}'`;
-          console.log(sayCommand);
-          LANG.languageVoice.length > 0 && exec(sayCommand);
-        }
-      }
+  onPlaySound(text: string, language: string) {
+    const wordAudioPath = getWordAudioPath(text);
+    if (fs.existsSync(wordAudioPath)) {
+      playWordAudio(text);
+    } else {
+      sayTruncateCommand(text, language);
     }
   }
 
-  openInEudic = (queryText?: string) => {
+  openInEudic = (queryText: string) => {
     const url = `eudic://dict/${queryText}`;
     execFile("open", [url], (error, stdout) => {
       if (error) {
@@ -137,13 +138,6 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Action.CopyToClipboard
-            onCopy={() => {
-              console.log("copy: ", this.props.copyText);
-            }}
-            title={`Copy Text`}
-            content={this.props.copyText || ""}
-          />
           {this.props.isInstalledEudic && (
             <Action
               icon={Icon.MagnifyingGlass}
@@ -151,6 +145,13 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
               onAction={() => this.openInEudic(this.props.queryText)}
             />
           )}
+          <Action.CopyToClipboard
+            onCopy={() => {
+              console.log("copy: ", this.props.copyText);
+            }}
+            title={`Copy Text`}
+            content={this.props.copyText || ""}
+          />
         </ActionPanel.Section>
 
         <ActionPanel.Section title="Search Query Text Online">
@@ -164,10 +165,10 @@ export class ListActionPanel extends Component<ListItemActionPanelItem> {
           <Action.OpenInBrowser
             icon={Icon.Link}
             title="See Google Translate Results"
-            url={getGoogleTranslateURL(
-              this.props.queryText!,
-              this.props.currentFromLanguage!,
-              this.props.currentTargetLanguage!
+            url={getGoogleWebTranslateURL(
+              this.props.queryText,
+              this.props.currentFromLanguage,
+              this.props.currentTargetLanguage
             )}
           />
         </ActionPanel.Section>

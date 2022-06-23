@@ -162,7 +162,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Shortcut Detail",
-          "description": "Show Shortcut's text on the right. (Only works with Grid layout)",
+          "description": "Show Shortcut's text on the right. (Only works with List layout)",
           "default": true
         },
         {
@@ -170,7 +170,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Shortcut Tag",
-          "description": "Show Shortcut's first tag on the right.",
+          "description": "Show Shortcut's first tag on the right. (Only works with List layout)",
           "default": true
         },
         {
@@ -242,7 +242,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.36.1",
     "ts-md5": "^1.2.11"
   },
   "devDependencies": {

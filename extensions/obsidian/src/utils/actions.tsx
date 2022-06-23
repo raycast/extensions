@@ -14,7 +14,6 @@ import React, { useState } from "react";
 
 import { AppendNoteForm } from "../components/AppendNoteForm";
 import { SearchNotePreferences, Note } from "./interfaces";
-import { getNoteContent } from "./utils";
 import { isNotePinned, pinNote, unpinNote } from "./PinNoteUtils";
 
 enum PrimaryAction {
@@ -47,10 +46,9 @@ async function appendSelectedTextTo(note: Note) {
 
 function NoteQuickLook(props: { note: Note; vaultPath: string }) {
   const note = props.note;
-  const content = getNoteContent(note);
   return (
     <Detail
-      markdown={content}
+      markdown={note.content}
       actions={
         <ActionPanel>
           <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
@@ -67,6 +65,13 @@ export function NoteActions(props: { note: Note; vaultPath: string; onPin: () =>
 
   return (
     <React.Fragment>
+      <Action.ShowInFinder
+        title="Show in Finder"
+        icon={Icon.Finder}
+        path={note.path}
+        shortcut={{ modifiers: ["opt"], key: "enter" }}
+      />
+
       <Action.Push
         title="Append to Note"
         target={<AppendNoteForm note={note} />}
@@ -85,15 +90,11 @@ export function NoteActions(props: { note: Note; vaultPath: string; onPin: () =>
 
       <Action.CopyToClipboard
         title="Copy Note Content"
-        content={getNoteContent(note)}
+        content={note.content}
         shortcut={{ modifiers: ["opt"], key: "c" }}
       />
 
-      <Action.Paste
-        title="Paste Note Content"
-        content={getNoteContent(note)}
-        shortcut={{ modifiers: ["opt"], key: "v" }}
-      />
+      <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />
 
       <Action.CopyToClipboard
         title="Copy Markdown Link"
@@ -143,7 +144,11 @@ export function OpenNoteActions(props: { note: Note; vaultPath: string }) {
   );
 
   const obsidian = (
-    <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
+    <Action.Open
+      title="Open in Obsidian"
+      target={"obsidian://open?path=" + encodeURIComponent(note.path)}
+      icon={Icon.TextDocument}
+    />
   );
 
   if (primaryAction == PrimaryAction.QuickLook) {

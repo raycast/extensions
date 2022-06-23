@@ -16,11 +16,3 @@ Control [Bunch](https://bunchapp.co) via Raycast. **Bunch** is a Mac automation 
 > Its intuitive syntax makes it easy to get started, and its array of features allows you to automate everything you need to work smarter and faster. Build “contexts” of apps and settings for your different modes of work and play, and switch between them with a couple of keystrokes.
 >
 > It’s just plain text, but with Bunch it’s a powerful automation tool. I think you’ll like it. [Learn more](https://bunchapp.co/docs/).
-
-Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
-
-<a title="Install Dock Tinker Raycast Extension" href="https://www.raycast.com/koinzhang/dock-tinker#install">
-<img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/dock-tinker/install_button@2x.png" alt="">
-</a><a title="Install Hide Files Raycast Extension" href="https://www.raycast.com/koinzhang/hide-files#install">
-<img height="64" style="height: 64px" src="https://assets.raycast.com/koinzhang/hide-files/install_button@2x.png" alt="">
-</a>

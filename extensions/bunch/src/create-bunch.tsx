@@ -5,6 +5,8 @@ import { BunchNotInstallView } from "./components/bunch-not-install-view";
 import { ActionOpenFolder } from "./components/action-open-folder";
 import { getBunchesPreview } from "./hooks/hooks-create-bunches";
 import { bunchesShortcuts } from "./utils/constants";
+import { ActionOpenSyntaxReference } from "./components/action-open-syntax-reference";
+import SearchBunchReferences from "./search-bunch-references";
 
 export default function CreateBunch() {
   const [title, setTitle] = useState<string>("");
@@ -26,6 +28,12 @@ export default function CreateBunch() {
               });
             }}
           />
+          <Action.Push
+            icon={Icon.List}
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            title={"Quick Reference"}
+            target={<SearchBunchReferences isPopup={true} />}
+          />
           <Action
             icon={Icon.Trash}
             title={"Clear All Info"}
@@ -38,12 +46,7 @@ export default function CreateBunch() {
           />
           <ActionOpenFolder />
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={Icon.List}
-              title={"Quick Reference"}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "s" }}
-              url={"https://bunchapp.co/docs/bunch-files/quick-reference/#quick-reference"}
-            />
+            <ActionOpenSyntaxReference />
           </ActionPanel.Section>
         </ActionPanel>
       }
