@@ -1,6 +1,6 @@
 import { Detail, List, Icon, ActionPanel, Action, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchMessages, openEmail } from "./utils";
+import { fetchMessages, openEmail, deleteMessage } from "./utils";
 import path from "path";
 
 interface messages {
@@ -83,6 +83,7 @@ function Email({ id }: { id: string }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${dir}/assets/email.html`} />
+          <Action title="Delete Email" onAction={async () => await deleteMessage(id)}></Action>
         </ActionPanel>
       }
     ></Detail>

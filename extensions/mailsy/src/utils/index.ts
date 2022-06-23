@@ -166,3 +166,24 @@ export const openEmail = async (id: string) => {
     console.log(error);
   }
 };
+
+export const deleteMessage = async (id: string) => {
+  // get all the items from local storage
+  const storage = await LocalStorage.allItems();
+  // parse storage
+  const account = JSON.parse(storage.account);
+
+  const { token } = account;
+
+  try {
+    await axios.delete(`https://api.mail.tm/messages/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    showHUD("✅ Message deleted successfully");
+  } catch (error) {
+    console.log(error);
+  }
+};
