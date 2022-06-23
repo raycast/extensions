@@ -1,16 +1,8 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import got from "got";
 
-type Preferences = {
-  token: string;
-};
+import Preferences from "./interfaces/preferences";
 
 type Values = {
   content: string;
@@ -24,10 +16,7 @@ const Command = () => {
   const [shareOptions, setShareOptions] = useState<string>();
 
   async function handleSubmit(values: Values) {
-    showToast({
-      title: "Submitting to Typefully",
-      message: "We've submitted your draft to Typefully.",
-    });
+    showToast({ title: "Submitting to Typefully", message: "We've submitted your draft to Typefully." });
 
     const data: Record<string, any> = {
       content: values.content,
@@ -43,7 +32,7 @@ const Command = () => {
     }
 
     try {
-      const response = await got
+      await got
         .post("https://api.typefully.com/v1/drafts/", {
           json: data,
           headers: {
@@ -51,19 +40,11 @@ const Command = () => {
           },
         })
         .json();
-
-      // TODO Handle errors here too.
     } catch (error) {
-      showToast({
-        title: "Whoops!",
-        message: "Something went wrong while submitting to Typefully.",
-      });
+      showToast({ title: "Whoops!", message: "Something went wrong while submitting to Typefully." });
     }
 
-    showToast({
-      title: "Submitted to Typefully",
-      message: "Your draft made it to Typefully! 🥳",
-    });
+    showToast({ title: "Submitted to Typefully", message: "Your draft made it to Typefully! 🥳" });
   }
 
   return (
@@ -82,17 +63,10 @@ const Command = () => {
         storeValue
       />
       <Form.Separator />
-      <Form.Dropdown
-        id="share_options"
-        title="Schedule"
-        onChange={setShareOptions}
-      >
+      <Form.Dropdown id="share_options" title="Schedule" onChange={setShareOptions}>
         <Form.Dropdown.Item value="save-as-draft" title="Save as draft" />
         <Form.Dropdown.Item value="schedule-share" title="Schedule" />
-        <Form.Dropdown.Item
-          value="schedule-next-free-slot"
-          title="Schedule to next free slot"
-        />
+        <Form.Dropdown.Item value="schedule-next-free-slot" title="Schedule to next free slot" />
       </Form.Dropdown>
       <Form.Checkbox
         id="threadify"
@@ -101,11 +75,7 @@ const Command = () => {
         storeValue
       />
       {shareOptions == "schedule-share" && (
-        <Form.DatePicker
-          type={Form.DatePicker.Type.DateTime}
-          id="schedule_date"
-          title="Date picker"
-        />
+        <Form.DatePicker type={Form.DatePicker.Type.DateTime} id="schedule_date" title="Date picker" />
       )}
     </Form>
   );

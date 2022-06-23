@@ -1,5 +1,10 @@
 # Typefully Changelog
 
+## [Added Commands] - 2022-06-22
+
+- Add ability to view scheduled drafts
+- Add ability to view posted drafts
+
 ## [Updated Command Functionality] - 2022-06-19
 
 - Updated Open Typefully command to use default browser
