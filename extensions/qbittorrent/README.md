@@ -6,4 +6,4 @@
 
 - [x] list torrents
 - [x] add torrents
-- [ ] pause and resume torrents
+- [x] pause and resume torrents
