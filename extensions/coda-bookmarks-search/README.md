@@ -28,8 +28,12 @@ Follow this [link](https://coda.io/developers/apis/v1#section/Using-the-API/Reso
 
 ### Copy Table ID
 
+Go to your [coda account settings](https://coda.io/account) and enable developer mode to easily copy the table ID.
+
 <details>
   <summary>View</summary>
+
+  ![Enable developer mode](./_media/enable-developer-mode.png)
 
   ![Copy table ID](./_media/copy-table-id.png)
 </details>
