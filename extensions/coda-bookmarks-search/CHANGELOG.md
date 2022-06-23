@@ -1,5 +1,5 @@
 # Changelog
 
-## [Initial Version 🚀] - {PR_MERGE_DATE}
+## [Initial Version 🚀] - 2022-06-23
 
 - Add extension to the store
