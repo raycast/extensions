@@ -23,7 +23,7 @@ export function ListBibmItem(props: { item: Item; index: number }) {
       title={props.item.uid ?? "No title"}
       actions={<Actions item={props.item} />}
       keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
-      detail={<List.Item.Detail markdown={getItemDetail(props.item)} />}
+      detail={getItemDetail(props.item)}
     />
   );
 }
@@ -47,18 +47,32 @@ function Actions(props: { item: Item }) {
   );
 }
 
-function getItemDetail(item: Item): string {
+function getItemDetail(item: Item) {
+  return (
+    <List.Item.Detail
+      markdown={getMarkdown(item)}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Tags" text={`${item.tags.length > 0 ? item.tags.join(", ") : ""}`} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Publication Date"
+            text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
+          />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+function getMarkdown(item: Item) {
   return `## ${item.title}
-
-${item.authors_string ? "**Authors:** " + item.authors_string : ""}
-
-${item.year && item.month ? "**Publication Date:** " + getMonth(item.month) + " " + item.year.toString() : ""}
-
-${item.tags.length > 0 ? "**Tags:** " + item.tags.join(", ") : ""}
-
-${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-
-`;
+  
+  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
+  
+  **Authors**: ${item.authors_string ? item.authors_string : ""}
+  
+  `;
 }
 
 function getMonth(key: number) {
@@ -81,32 +95,28 @@ const monthMap = new Map<number, string>([
 ]);
 
 export function DownloadPDF(key: string) {
-  const toastload = new Toast({
+  const toast = new Toast({
     style: Toast.Style.Animated,
     title: "Downloading PDF",
   });
-  const toastsuccess = new Toast({
-    style: Toast.Style.Success,
-    title: "Download succeeded",
-    message: "Rerun to open",
-  });
-  const toastfail = new Toast({
-    style: Toast.Style.Failure,
-    title: "Download error",
-    message: "Try manually with bibmanager CLI",
-  });
+  toast.show();
 
   const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
-  toastload.show();
   python.on("close", (code) => {
     if (code === 0) {
-      toastsuccess.show();
+      toast.style = Toast.Style.Success;
+      toast.title = "Download succeeded";
+      toast.message = "Rerun to open";
     } else {
-      toastfail.show();
+      toast.style = Toast.Style.Failure;
+      toast.title = "Download error";
+      toast.message = "Try manually with bibmanager CLI";
     }
   });
   python.on("error", () => {
-    toastfail.show();
+    toast.style = Toast.Style.Failure;
+    toast.title = "Download error";
+    toast.message = "Try manually with bibmanager CLI";
     return;
   });
 }
