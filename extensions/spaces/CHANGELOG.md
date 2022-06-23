@@ -1,6 +1,6 @@
 # Spaces Changelog
 
-## [New Additions] - 2022-6-23
+## [New Additions] - 2022-06-23
 
 In this extension, a new command has been introduced that allows you to access all of your workspaces created from the app directly in Raycast.
 
