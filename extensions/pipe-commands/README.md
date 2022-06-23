@@ -2,7 +2,7 @@
 
 ## Using Pipe Commands
 
-Select / Copy a some text, an url or a file and use the `Pipe [Selection, Clipboard] to Command` command.
+Select / Copy some text and use the `Pipe [Selection, Clipboard] to Command` command.
 
 Depending on the input type, different actions will be shown.
 
@@ -13,20 +13,14 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
 - The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
-- The argument1 object only accept some fields:
-
-  | field          | description                                | values       | required |
-  | -------------- | ------------------------------------------ | ------------ | -------- |
-  | type           | What type of input the pipe command handle | text or file | ✅        |
-  | percentEncoded | useful for query strings                   | boolean      | ❌        |
-
-- The mode field only accept some options:
-  | option    | description                                                         |
-  | --------- | ------------------------------------------------------------------- |
-  | silent    | The last line (if it exists) will be shown in overlaying HUD        |
-  | fullOuput | The entire output is presented on a separate view                   |
-  | copy      | The output will be copied to the clipboard                          |
-  | replace   | The output will replace the input (incompatible with file argument) |
+- the argument1 only accepts `type` and percentEncoded fields
+- The mode field only accept the following options:
+  | option    | description                                                  |
+  | --------- | ------------------------------------------------------------ |
+  | silent    | The last line (if it exists) will be shown in overlaying HUD |
+  | fullOuput | The entire output is presented on a separate view            |
+  | copy      | The output will be copied to the clipboard                   |
+  | replace   | The output will replace the input                            |
 - The `iconDark`, `needsConfirmation`, `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
 ## Pipe Commands Logic

@@ -5,6 +5,7 @@
   "description": "Collection of utils for Ethereum and EVM-compatible chain development",
   "icon": "icon.png",
   "author": "destiner",
+  "categories": ["Data", "Developer Tools", "Web"],
   "license": "MIT",
   "commands": [
     {

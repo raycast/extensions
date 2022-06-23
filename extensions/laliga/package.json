@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laliga",
+  "title": "LaLiga",
+  "description": "All the information of LaLiga Santander, LaLiga SmartBank, and Primera División Femenina: schedules, results, standings, news, statistics, and much more",
+  "icon": "icon.png",
+  "author": "anhthang",
+  "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
+  "commands": [
+    {
+      "name": "standing",
+      "title": "Standings",
+      "subtitle": "LaLiga",
+      "description": "Discover the standing table of the LaLiga competitons. Find out the ranking of your favorite team this season.",
+      "mode": "view"
+    },
+    {
+      "name": "result",
+      "title": "Fixtures & Results",
+      "subtitle": "LaLiga",
+      "description": "Find out the results of the last round of LaLiga and the previous ones of LaLiga.",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "subtitle": "LaLiga",
+      "description": "Clubs and Teams of LaLiga.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.26.0",
+    "date-fns": "^2.28.0",
+    "json2md": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/json2md": "^1.5.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

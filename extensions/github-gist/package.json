@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-gist",
+  "title": "GitHub Gist",
+  "description": "Create, search and display GitHub Gist.",
+  "icon": "github.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "access-token",
+      "type": "password",
+      "required": true,
+      "title": "Personal access tokens",
+      "description": "GitHub personal access tokens.",
+      "default": ""
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-gist",
+      "title": "Search Gist",
+      "subtitle": "GitHub",
+      "description": "Search and display GitHub Gist.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "remember-tag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember Gist Filter Tag.",
+          "default": false
+        },
+        {
+          "name": "detail",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Gist Content",
+          "description": "Show Gist Content on the right.",
+          "default": true
+        },
+        {
+          "name": "perPage",
+          "type": "dropdown",
+          "description": "Number of gist loaded per page.",
+          "required": false,
+          "title": "Per Page",
+          "default": "30",
+          "data": [
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            },
+            {
+              "title": "80",
+              "value": "80"
+            },
+            {
+              "title": "100",
+              "value": "100"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create-gist",
+      "title": "Create Gist",
+      "subtitle": "GitHub",
+      "description": "Create GitHub Gist from selection or clipboard.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@octokit/core": "^3.6.0",
+    "@raycast/api": "^1.34.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

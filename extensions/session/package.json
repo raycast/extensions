@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "session",
+  "title": "Session - Pomodoro Focus Timer",
+  "description": "Control Session pomodoro timers. Requires v2.1.6 or later installed: www.stayinsession.com",
+  "icon": "session.png",
+  "author": "jameslyons",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "session-start-new",
+      "title": "Start New Session",
+      "description": "Starts a focus session in Session app",
+      "mode": "no-view"
+    },
+    {
+      "name": "session-start-previous",
+      "title": "Start Previous Session",
+      "description": "Starts a focus session in Session app with the previous intent and duration",
+      "mode": "no-view"
+    },
+    {
+      "name": "session-pause",
+      "title": "Pause Session",
+      "description": "Pauses a focus session in Session app",
+      "mode": "no-view"
+    },
+    {
+      "name": "session-finish",
+      "title": "Finish Session",
+      "description": "Finishes a focus session in Session app",
+      "mode": "no-view"
+    },
+    {
+      "name": "session-abandon",
+      "title": "Abandon Session",
+      "description": "Abandons a focus session in Session app",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

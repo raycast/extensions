@@ -5,7 +5,14 @@
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
   "icon": "command-icon.png",
   "author": "pomdtr",
+    "contributors": [
+    "gasolin"
+  ],
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "pipe-selection-to-command",
@@ -37,8 +44,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
-    "globby": "^13.1.1"
+    "@raycast/api": "^1.30.0",
+    "globby": "^13.1.1",
+    "jsonschema": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -49,9 +57,11 @@
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "typescript-json-schema": "^0.53.0"
   },
   "scripts": {
+    "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"

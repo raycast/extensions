@@ -6,4 +6,3 @@ export default function Command() {
   const preferences = getPreferenceValues();
   return preferences.airplay ? <AirPlaySelector /> : <DeviceList type="output" />;
 }
-<DeviceList type="output" />;

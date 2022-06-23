@@ -12,6 +12,11 @@ interface Difference {
   unit: Intl.RelativeTimeFormatUnit;
 }
 
+export interface DateValidationError {
+  field: 'year' | 'month' | 'day' | 'hours' | 'minutes' | 'seconds';
+  error: 'not-a-number' | 'negative' | 'out-of-bounds';
+}
+
 function getMultiplier(): number {
   const { format } = getPreferenceValues<Preferences>();
   const multiplierMap: Record<TimestampFormat, number> = {
@@ -89,6 +94,122 @@ export function getRelativeTime(oldDate: Date, newDate: Date): string {
   const formatter = new Intl.RelativeTimeFormat('en-US', { style: 'narrow' });
   const relativeTime = formatter.format(value, unit);
   return relativeTime;
+}
+
+export function validateDateInput(
+  year: number,
+  month: number,
+  day: number,
+  hours: number,
+  minutes: number,
+  seconds: number,
+): DateValidationError | null {
+  if (isNaN(year)) {
+    return {
+      field: 'year',
+      error: 'not-a-number',
+    };
+  }
+  if (isNaN(month)) {
+    return {
+      field: 'month',
+      error: 'not-a-number',
+    };
+  }
+  if (isNaN(day)) {
+    return {
+      field: 'day',
+      error: 'not-a-number',
+    };
+  }
+  if (isNaN(hours)) {
+    return {
+      field: 'hours',
+      error: 'not-a-number',
+    };
+  }
+  if (isNaN(minutes)) {
+    return {
+      field: 'minutes',
+      error: 'not-a-number',
+    };
+  }
+  if (isNaN(seconds)) {
+    return {
+      field: 'seconds',
+      error: 'not-a-number',
+    };
+  }
+
+  if (year < 0) {
+    return {
+      field: 'year',
+      error: 'negative',
+    };
+  }
+  if (month < 0) {
+    return {
+      field: 'month',
+      error: 'negative',
+    };
+  }
+  if (day < 0) {
+    return {
+      field: 'day',
+      error: 'negative',
+    };
+  }
+  if (hours < 0) {
+    return {
+      field: 'hours',
+      error: 'negative',
+    };
+  }
+  if (minutes < 0) {
+    return {
+      field: 'minutes',
+      error: 'negative',
+    };
+  }
+  if (seconds < 0) {
+    return {
+      field: 'seconds',
+      error: 'negative',
+    };
+  }
+
+  if (month > 12) {
+    return {
+      field: 'month',
+      error: 'out-of-bounds',
+    };
+  }
+  if (day > 31) {
+    return {
+      field: 'day',
+      error: 'out-of-bounds',
+    };
+  }
+  if (hours >= 24) {
+    return {
+      field: 'hours',
+      error: 'out-of-bounds',
+    };
+  }
+  if (minutes >= 60) {
+    return {
+      field: 'minutes',
+      error: 'out-of-bounds',
+    };
+  }
+  if (seconds >= 60) {
+    return {
+      field: 'seconds',
+      error: 'out-of-bounds',
+    };
+  }
+
+  return null;
 }
 
 function getDifference(oldTimestamp: number, newTimestamp: number): Difference {

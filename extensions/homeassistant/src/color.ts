@@ -1,4 +1,4 @@
-import { ColorLike } from "@raycast/api";
+import { Color } from "@raycast/api";
 
 export class RGB {
   r = 0;
@@ -73,12 +73,12 @@ export function KToRGB(temp: number): RGB {
   return result;
 }
 
-export function KtoColorLike(K: number): ColorLike {
+export function KtoColorLike(K: number): Color.ColorLike {
   const rgb = KToRGB(K);
   return RGBtoColorLike(rgb);
 }
 
-export function RGBtoColorLike(rgb: RGB): ColorLike {
+export function RGBtoColorLike(rgb: RGB): Color.ColorLike {
   return RGBtoString(rgb);
 }
 

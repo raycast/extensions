@@ -1,5 +1,6 @@
-import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Detail, Image, List, showToast, Toast } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
+import { shouldShowListWithDetails } from "../common";
 import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
 import { compactNumberFormat, padStart } from "../utils";
 import {
@@ -25,8 +26,10 @@ export function TweetListItem(props: {
   maxCommentDigits?: number;
   maxFavDigits?: number;
   millifyState?: boolean;
+  withDetail?: boolean;
 }) {
   const t = props.tweet;
+  const withDetail = props.withDetail;
   const fetcher = props.fetcher;
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
 
@@ -36,7 +39,7 @@ export function TweetListItem(props: {
 
   const imgUrl = t.user.profile_image_url_https;
   const icon: Image | undefined = imgUrl
-    ? { source: t.user.profile_image_url_https, mask: ImageMask.Circle }
+    ? { source: t.user.profile_image_url_https, mask: Image.Mask.Circle }
     : undefined;
 
   const ownFavoriteCount = t.favorited && textRaw.startsWith("RT @") ? 1 : 0;
@@ -75,18 +78,21 @@ export function TweetListItem(props: {
     states = ["🖼️", ...states];
   }
 
+  const accessories: List.Item.Accessory[] = [{ text: states.join("  ") }];
+
   return (
     <List.Item
       id={t.id_str}
       key={t.id_str}
       title={text}
       icon={icon}
-      accessoryTitle={states.join("  ")}
+      accessories={!withDetail ? accessories : undefined}
+      detail={withDetail ? <List.Item.Detail markdown={getMarkdownFromTweet(t)} /> : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Tweet">
             <ShowTweetAction tweet={t} />
-            <OpenInBrowserAction url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
+            <Action.OpenInBrowser url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
             <LikeAction tweet={t} fetcher={fetcher} />
             <ReplyTweetAction tweet={t} />
             <RetweetAction tweet={t} fetcher={fetcher} />
@@ -108,6 +114,45 @@ export function TweetListItem(props: {
   );
 }
 
+function getCleanTweetText(tweet: TweetV1): string | undefined {
+  if (tweet.full_text === undefined) {
+    return undefined;
+  }
+  if (isRetweet(tweet)) {
+    const i = tweet.full_text.indexOf(":");
+    if (i !== undefined && i > 0) {
+      return tweet.full_text.substring(i + 1).trimStart();
+    }
+  }
+  return tweet.full_text;
+}
+
+function isRetweet(tweet: TweetV1): boolean {
+  if (tweet.full_text && tweet.full_text.startsWith("RT @")) {
+    return true;
+  }
+  return false;
+}
+
+function getMarkdownFromTweet(tweet: TweetV1): string {
+  const t = tweet;
+  const ownFavoriteCount = t.favorited && isRetweet(t) ? 1 : 0;
+  const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
+  const imgUrl = getPhotoUrlFromTweet(t);
+  const retweetedText = isRetweet(t) ? " retweeted" : "";
+  const parts = [
+    `## ${t.user.name} \`@${t.user.screen_name}\`${retweetedText}`,
+    getCleanTweetText(t) || "",
+    `\`${t.created_at}\``,
+  ];
+  if (imgUrl) {
+    parts.push(`![${imgUrl}](${imgUrl})`);
+  }
+  parts.push(states.join("   "));
+  const md = parts.join("\n\n");
+  return md;
+}
+
 export function TweetDetail(props: { tweet: TweetV1 }) {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1 | undefined>(
     async (): Promise<TweetV1 | undefined> => {
@@ -119,18 +164,10 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Error", error);
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   const t = data || props.tweet;
-  const ownFavoriteCount = t.favorited && t.full_text && t.full_text.startsWith("RT @") ? 1 : 0;
-  const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
-  const imgUrl = getPhotoUrlFromTweet(t);
-  const parts = [`## ${t.user.name} \`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
-  if (imgUrl) {
-    parts.push(`![${imgUrl}](${imgUrl})`);
-  }
-  parts.push(states.join("   "));
-  const md = parts.join("\n\n");
+  const md = getMarkdownFromTweet(t);
   return (
     <Detail
       isLoading={isLoading}
@@ -142,7 +179,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
             <LikeAction tweet={t} fetcher={fetcher} />
             <RetweetAction tweet={t} fetcher={fetcher} />
             <ShowUserTweetsAction username={t.user.screen_name} />
-            <OpenInBrowserAction url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
+            <Action.OpenInBrowser url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <OpenAuthorProfileAction tweet={t} />
@@ -166,6 +203,7 @@ export function TweetList(props: {
   millifyState?: boolean;
 }) {
   const tweets = props.tweets;
+  const isShowingDetail = shouldShowListWithDetails();
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
   let maxFavDigits = 1;
   let maxRTDigits = 1;
@@ -194,8 +232,9 @@ export function TweetList(props: {
       }
     }
   }
+
   return (
-    <List isLoading={props.isLoading} searchBarPlaceholder="Filter Tweets by name...">
+    <List isLoading={props.isLoading} searchBarPlaceholder="Filter Tweets by name..." isShowingDetail={isShowingDetail}>
       {tweets?.map((tweet) => (
         <TweetListItem
           key={tweet.id_str}
@@ -205,6 +244,7 @@ export function TweetList(props: {
           maxFavDigits={maxFavDigits}
           maxRTDigits={maxRTDigits}
           millifyState={millifyState}
+          withDetail={isShowingDetail}
         />
       ))}
     </List>

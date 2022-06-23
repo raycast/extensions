@@ -1,7 +1,8 @@
 import { closeMainWindow } from "@raycast/api";
-import * as playerControls from "./util/controls";
+import * as music from "./util/scripts";
+import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
   await closeMainWindow();
-  await playerControls.togglePlay();
+  await handleTaskEitherError(music.player.togglePlay)();
 };

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wrike",
+  "title": "Wrike",
+  "description": "Interact with Wrike",
+  "icon": "wrike_logo.png",
+  "author": "Slus",
+  "owner": "Slus",
+  "license": "MIT",
+  "categories": ["Productivity", "Web"],
+  "preferences": [
+    {
+      "name": "token",
+      "required": true,
+      "type":"password",
+      "title": "Wrike Permanent Token",
+      "description": "Create a permanent token using the following link https://www.wrike.com/frontend/apps/index.html#/api"
+    }
+  ],
+  "access": "public",
+  "keywords": ["Wrike"],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "Wrike",
+      "description": "Search Wrike tasks by name",
+      "mode": "view",
+      "icon": "wrike_logo.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "node-fetch": "^3.0.0",
+    "node-html-markdown": "^1.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

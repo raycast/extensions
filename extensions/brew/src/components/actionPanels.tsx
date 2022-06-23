@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  OpenInBrowserAction,
-  PushAction,
-  ShowInFinderAction,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { brewIsInstalled, brewInstallPath } from "../brew";
 import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
@@ -24,23 +17,23 @@ export function CaskActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           {props.showDetails && (
-            <PushAction
+            <Action.Push
               title="Show Details"
               icon={Icon.Document}
               target={<CaskInfo cask={cask} onAction={props.onAction} />}
             />
           )}
-          <ShowInFinderAction path={brewInstallPath(cask)} />
-          <CopyToClipboardAction
+          <Action.ShowInFinder path={brewInstallPath(cask)} />
+          <Action.CopyToClipboard
             title="Copy Cask Name"
             content={cask.token}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          <CopyToClipboardAction title="Copy Tap Name" content={cask.tap} />
+          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <OpenInBrowserAction url={cask.homepage} />
-          <CopyToClipboardAction title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
@@ -55,23 +48,23 @@ export function CaskActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           {props.showDetails && (
-            <PushAction
+            <Action.Push
               title="Show Details"
               icon={Icon.Document}
               target={<CaskInfo cask={cask} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             title="Copy Cask Name"
             content={cask.token}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          <CopyToClipboardAction title="Copy Tap Name" content={cask.tap} />
+          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <OpenInBrowserAction url={cask.homepage} />
-          <CopyToClipboardAction title="Copy URL" content={cask.homepage} />
+          <Action.OpenInBrowser url={cask.homepage} />
+          <Action.CopyToClipboard title="Copy URL" content={cask.homepage} />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -96,22 +89,22 @@ export function FormulaActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           {props.showDetails && (
-            <PushAction
+            <Action.Push
               title="Show Details"
               icon={Icon.Document}
               target={<FormulaInfo formula={formula} onAction={props.onAction} />}
             />
           )}
-          <ShowInFinderAction path={brewInstallPath(formula)} />
-          <CopyToClipboardAction
+          <Action.ShowInFinder path={brewInstallPath(formula)} />
+          <Action.CopyToClipboard
             title="Copy Formula Name"
             content={formula.name}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <OpenInBrowserAction url={formula.homepage} />
-          <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
@@ -127,22 +120,22 @@ export function FormulaActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           {props.showDetails && (
-            <PushAction
+            <Action.Push
               title="Show Details"
               icon={Icon.Document}
               target={<FormulaInfo formula={formula} onAction={props.onAction} />}
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             title="Copy Formula Name"
             content={formula.name}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <OpenInBrowserAction url={formula.homepage} />
-          <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+          <Action.OpenInBrowser url={formula.homepage} />
+          <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
         </ActionPanel.Section>
       </ActionPanel>
     );

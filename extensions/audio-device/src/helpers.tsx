@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Clipboard,
   closeMainWindow,
   Color,
   Icon,
@@ -78,6 +79,16 @@ export function DeviceList({ type }: DeviceListProps) {
             actions={
               <ActionPanel>
                 <SetAudioDeviceAction device={d} type={type} />
+                <ActionPanel.Item
+                  title={`Copy Device Name to Clipboard`}
+                  onAction={async () => {
+                    await Clipboard.copy(d.name);
+                    await showToast({
+                      style: ToastStyle.Success,
+                      title: "Device name copied to the clipboard",
+                    });
+                  }}
+                />
               </ActionPanel>
             }
           />
@@ -100,10 +111,14 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
           await (type === "input" ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
-          showHUD(`Active audio device set to ${device.name}`);
+          showHUD(`Active ${type} audio device set to ${device.name}`);
         } catch (e) {
           console.log(e);
-          showToast(ToastStyle.Failure, `Error!`, `There was an error setting the audio device to ${device.name}`);
+          showToast(
+            ToastStyle.Failure,
+            `Error!`,
+            `There was an error setting the active ${type} audio device to ${device.name}`
+          );
         }
       }}
     />

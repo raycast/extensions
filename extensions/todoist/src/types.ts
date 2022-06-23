@@ -3,6 +3,7 @@ import { Task } from "@doist/todoist-api-typescript";
 export enum ViewMode {
   project,
   date,
+  search,
 }
 
 export interface SectionWithTasks {
@@ -13,8 +14,10 @@ export interface SectionWithTasks {
 export enum SWRKeys {
   projects = "projects",
   tasks = "tasks",
+  task = "task",
   labels = "labels",
   sections = "sections",
+  comments = "comments",
 }
 
 export enum TodayGroupBy {

@@ -1,4 +1,4 @@
-import { getSelectedText, copyTextToClipboard, ToastStyle, showToast, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import got from "got";
 
 interface Preferences {
@@ -16,18 +16,18 @@ const translate = async (target: string) => {
         `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${text}&target_lang=${target}`
       );
       const translation = JSON.parse(response.body).translations[0].text;
-      copyTextToClipboard(translation);
-      await showToast(ToastStyle.Success, "The translation was copied to your clipboard.");
+      await Clipboard.copy(translation);
+      await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
     } catch (e) {
       console.log(e);
       await showToast(
-        ToastStyle.Failure,
+        Toast.Style.Failure,
         "Something went wrong",
         "Check your internet connection, API key, or you've maxed out the API."
       );
     }
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Please select the text to be translated");
+    await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
 };
 

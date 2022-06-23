@@ -53,9 +53,7 @@ export default function Command() {
       // coins that have the same / very similar symbols). Keeping the list to 2000
       // feels like a good compromise between functionality and performance.
       try {
-        const coins = await service.getTop2000CoinList(
-          selectedCurrency.current,
-        );
+        const coins = await service.getTopCoins(selectedCurrency.current, 2000);
         setCoins(coins);
       } catch (err) {
         await showToast({

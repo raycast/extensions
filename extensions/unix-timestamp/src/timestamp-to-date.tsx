@@ -42,10 +42,24 @@ function ConvertAction() {
       return;
     }
     const value = parseInt(timestamp);
-    if (isNaN(value) || value < 0) {
+    if (isNaN(value)) {
       showToast({
         style: Toast.Style.Failure,
-        title: 'Invalid timestamp',
+        title: 'Invalid value',
+      });
+      return;
+    }
+    if (value < 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Negative value',
+      });
+      return;
+    }
+    if (value > 8640000000000) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'The value is too high',
       });
       return;
     }

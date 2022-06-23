@@ -29,6 +29,10 @@
       "mode": "no-view"
     }
   ],
+  "categories": [
+    "Web",
+    "News"
+  ],
   "dependencies": {
     "@raycast/api": "^1.27.1",
     "swr": "^1.0.1",

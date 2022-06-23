@@ -6,24 +6,27 @@
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
   "commands": [
     {
       "name": "pokemon",
-      "title": "Search Pokémon",
+      "title": "Pokémon",
       "subtitle": "Pokédex",
       "description": "Search for a Pokémon by name or using its National Pokédex number.",
       "mode": "view"
     },
     {
       "name": "ability",
-      "title": "Search Abilities",
+      "title": "Abilities",
       "subtitle": "Pokédex",
       "description": "An Ability is a game mechanic introduced in Generation III that provides a passive effect in battle or in the overworld.",
       "mode": "view"
     },
     {
       "name": "move",
-      "title": "Search Moves",
+      "title": "Moves",
       "subtitle": "Pokédex",
       "description": "A move, also known as an attack or technique, is the skill Pokémon primarily use in battle.",
       "mode": "view"
@@ -33,11 +36,19 @@
     {
       "name": "language",
       "title": "Language",
-      "description": "Your prefered language",
+      "description": "Your prefered language. Supporting Pokémon command only.",
       "required": false,
       "type": "dropdown",
       "default": "9",
       "data": [
+        {
+          "title": "Chinese (Simplified)",
+          "value": "12"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "4"
+        },
         {
           "title": "English",
           "value": "9"
@@ -67,20 +78,11 @@
           "value": "7"
         }
       ]
-    },
-    {
-      "name": "showPreview",
-      "title": "Preview",
-      "description": "Show preview in the right side of the Pokémon list",
-      "label": "Show preview",
-      "required": false,
-      "type": "checkbox",
-      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.1",
-    "axios": "^0.26.0",
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.27.2",
     "json2md": "^1.12.0",
     "lodash.groupby": "^4.6.0"
   },

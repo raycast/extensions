@@ -10,7 +10,6 @@
     {
       "name": "index",
       "title": "Generate QR Code",
-      "subtitle": "",
       "description": "Generate a QR code from a URL in PNG format that will be automatically opened.",
       "mode": "view"
     }

@@ -5,6 +5,7 @@
   "description": "View your Render services, deploys, and custom domains",
   "icon": "icon.png",
   "author": "destiner",
+  "categories": ["Developer Tools", "Web"],
   "license": "MIT",
   "commands": [
     {
