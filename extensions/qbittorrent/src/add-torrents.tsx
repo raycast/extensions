@@ -32,14 +32,14 @@ export default function AddTorrents() {
   const [preferences, setPreferences] = useState<RawPreference>();
   const [categories, setCategories] = useState<string[]>();
 
-  const prefillTorrents = async () => {
+  const prefillTorrentFilePaths = async () => {
     try {
       const selectedItems = await getSelectedFinderItems();
       setSelectedTorrents(selectedItems.map((item) => item.path));
       await showToast({
         style: Toast.Style.Success,
-        title: `Detected ${selectedItems.length} Torrents`,
-        message: "Please select the torrents that wants to sub.",
+        title: `Detected ${selectedItems.length} Torrents fron Finder`,
+        message: "Please select the torrents that wants to submit.",
       });
     } catch (error) {
       console.log(error);
@@ -58,7 +58,7 @@ export default function AddTorrents() {
 
   useEffect(() => {
     loginAndInitPreferences();
-    prefillTorrents();
+    prefillTorrentFilePaths();
   }, []);
 
   const submitTorrents = async (values: Values) => {
@@ -102,7 +102,7 @@ export default function AddTorrents() {
         placeholder="Torrent paths"
         id="torrentPaths"
         title="Torrent Files"
-        info="list torrents that selected in finder"
+        info="list torrents that selected in Finder"
       >
         {selectedTorrents.map((torrentPath) => (
           <Form.TagPicker.Item value={torrentPath} title={torrentPath} key={torrentPath} />

@@ -1,4 +1,4 @@
-import { Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { QBittorrent, prettySize, RawTorrent, RawTorrentListFilter, RawTorrentState } from "qbit.js";
 
@@ -13,17 +13,17 @@ const iconMap = {
   [RawTorrentState.uploading]: "../assets/uploading.svg",
   [RawTorrentState.error]: "../assets/error.svg",
   [RawTorrentState.missingFiles]: "../assets/error.svg",
-  [RawTorrentState.pausedUP]: "../assets/stalledUP.svg",
+  [RawTorrentState.pausedUP]: "../assets/completed.svg",
   [RawTorrentState.queuedUP]: "../assets/stalledUP.svg",
   [RawTorrentState.stalledUP]: "../assets/stalledUP.svg",
   [RawTorrentState.checkingUP]: "../assets/stalledUP.svg",
   [RawTorrentState.forcedUP]: "../assets/stalledUP.svg",
   [RawTorrentState.allocating]: "../assets/checking.svg",
   [RawTorrentState.metaDL]: "../assets/downloading.svg",
-  [RawTorrentState.pausedDL]: "../assets/stalledDL.svg",
+  [RawTorrentState.pausedDL]: "../assets/paused.svg",
   [RawTorrentState.queuedDL]: "../assets/stalledDL.svg",
   [RawTorrentState.stalledDL]: "../assets/stalledDL.svg",
-  [RawTorrentState.checkingDL]: "../assets/stalledDL.svg",
+  [RawTorrentState.checkingDL]: "../assets/checking.svg",
   [RawTorrentState.forcedDL]: "../assets/stalledDL.svg",
   [RawTorrentState.checkingResumeData]: "../assets/checking.svg",
   [RawTorrentState.moving]: "../assets/checking.svg",
@@ -34,7 +34,7 @@ export default function Torrents() {
   const [filter, setFilter] = useState<RawTorrentListFilter>();
   const [torrents, setTorrents] = useState<RawTorrent[]>([]);
   const [loading, setLoading] = useState(false);
-  const [updateTimestap, setUpdateTimestap] = useState(+new Date());
+  const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   let updateTimeout: NodeJS.Timeout;
 
   const { address, username, password, timeout } = getPreferenceValues<Preferences>();
@@ -58,14 +58,14 @@ export default function Torrents() {
     setLoading(false);
     if (+timeout) {
       updateTimeout = setTimeout(() => {
-        setUpdateTimestap(+new Date());
+        setUpdateTimestamp(+new Date());
       }, +timeout * 1000);
     }
   };
 
   useEffect(() => {
     updateTorrents();
-  }, [updateTimestap, filter]);
+  }, [updateTimestamp, filter]);
 
   return (
     <List
@@ -77,7 +77,7 @@ export default function Torrents() {
           value={filter}
           tooltip="Filter by state"
           onChange={(newFilter) => {
-            setFilter(newFilter as any);
+            setFilter(newFilter as RawTorrentListFilter);
           }}
         >
           {Object.keys(RawTorrentListFilter).map((key) => (
@@ -86,7 +86,7 @@ export default function Torrents() {
         </List.Dropdown>
       }
     >
-      {torrents.map((torrent, index) => {
+      {torrents.map((torrent) => {
         return (
           <List.Item
             icon={iconMap[torrent.state]}
@@ -100,6 +100,14 @@ export default function Torrents() {
                 text: `↓${prettySize(torrent.dlspeed)}/s`,
               },
             ]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Torrent Magnet Link" content={torrent.magnet_uri} />
+                <Action title="Resume Torrent" onAction={() => qbit.api.resumeTorrents(torrent.infohash_v1)} />
+                <Action title="Pause Torrent" onAction={() => qbit.api.pauseTorrents(torrent.infohash_v1)} />
+                <Action title="Delete Torrent" onAction={() => qbit.api.deleteTorrents(torrent.infohash_v1)} />
+              </ActionPanel>
+            }
           />
         );
       })}
