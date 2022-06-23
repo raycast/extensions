@@ -18,9 +18,10 @@ export const getRecentModuleItems = async (id: number): Promise<moduleitem[]> =>
 
 export const appendRecentModuleItem = async (id: number, item: moduleitem): Promise<void> => {
   const json: string = (await LocalStorage.getItem(`${id}-recent-modules`)) || JSON.stringify([]);
-  const items = JSON.parse(json);
-  remove(items, item);
-  if (items.length < getNumRecents()) items.unshift(item);
+  let items = JSON.parse(json);
+  items = removeModuleItem(items, item);
+  items.unshift(item);
+  if (items.length > getNumRecents()) items.pop();
   await LocalStorage.setItem(`${id}-recent-modules`, JSON.stringify(items));
 };
 
@@ -28,10 +29,6 @@ export const clearRecentModuleItems = async (id: number): Promise<void> => {
   await LocalStorage.setItem(`${id}-recent-modules`, JSON.stringify([]));
 };
 
-export const remove = (array: any[], element: any): any[] => {
-  const index = array.indexOf(element);
-  if (index !== -1) {
-    array.splice(index, 1);
-  }
-  return array;
+export const removeModuleItem = (array: any[], item: any): any[] => {
+  return array.filter(i => i.id !== item.id);
 };

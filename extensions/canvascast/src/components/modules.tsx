@@ -14,11 +14,12 @@ export const Modules = (props: { id: number; url: string }) => {
 
   const show: boolean = getShowRecents() && recentItems?.length > 0 && !searchText;
 
+  const getRecentItems = async (): Promise<void> => {
+    const items = await getRecentModuleItems(props.id);
+    setRecentItems(items);
+  };
+
   useEffect(() => {
-    const getRecentItems = async () => {
-      const items = await getRecentModuleItems(props.id);
-      setRecentItems(items);
-    };
     const getItems = async () => {
       try {
         const modules = await getModules(props.id);
@@ -38,7 +39,7 @@ export const Modules = (props: { id: number; url: string }) => {
       {show ? (
         <List.Section title="Recent">
           {recentItems?.map((item: moduleitem, index: number) => (
-            <ModuleItem key={index} {...props} item={item} show={show} />
+            <ModuleItem key={index} {...props} item={item} show={show} getRecentItems={getRecentItems} />
           ))}
         </List.Section>
       ) : null}
@@ -46,7 +47,7 @@ export const Modules = (props: { id: number; url: string }) => {
         modules?.map((module: modulesection, index: number) => (
           <List.Section title={module.name} key={index}>
             {module.items?.map((item: moduleitem, index: number) => (
-              <ModuleItem key={index} {...props} item={item} show={show} />
+              <ModuleItem key={index} {...props} item={item} show={show} getRecentItems={getRecentItems} />
             ))}
           </List.Section>
         ))
