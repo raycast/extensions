@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Custom Certs] - 2022-06-22
+## [Custom Certs] - 2022-06-23
 - Add support for custom certificates
 - Add support for ignoring SSL errors
 
