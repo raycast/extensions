@@ -36,8 +36,6 @@ export default function Command() {
                     title="Open in Browser"
                     url={bookmarkITem.url}
                   />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy URL"
                     content={bookmarkITem.url}
