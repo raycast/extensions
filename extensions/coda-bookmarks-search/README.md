@@ -23,7 +23,7 @@ Follow this [link](https://coda.io/developers/apis/v1#section/Using-the-API/Reso
 <details>
   <summary>View</summary>
 
-  ![Copy document ID](./metadata/copy-doc-id.png)  
+  ![Copy document ID](./_media/copy-doc-id.png)  
 </details>
 
 ### Copy Table ID
@@ -31,7 +31,7 @@ Follow this [link](https://coda.io/developers/apis/v1#section/Using-the-API/Reso
 <details>
   <summary>View</summary>
 
-  ![Copy table ID](./metadata/copy-table-id.png)
+  ![Copy table ID](./_media/copy-table-id.png)
 </details>
 
 ## Resources
