@@ -68,9 +68,9 @@ function getItemDetail(item: Item) {
 function getMarkdown(item: Item) {
   return `## ${item.title}
   
-  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-  
   **Authors**: ${item.authors_string ? item.authors_string : ""}
+  
+  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
   
   `;
 }
