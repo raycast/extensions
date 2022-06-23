@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import * as iconPark from "@icon-park/svg";
-import { setConfig } from "@icon-park/svg";
+import { setConfig, Home as iconParkHome } from "@icon-park/svg";
 import * as fs from "fs";
 import { environment, LocalStorage } from "@raycast/api";
 import { IconInfo } from "../types/types";
@@ -18,7 +17,7 @@ export const getIconInfos = () => {
       const data = fs.readFileSync(environment.assetsPath + "/icons.json", "utf8");
 
       const _iconInfos: IconInfo[] = JSON.parse(data);
-      iconPark.Home({ theme: "multi-color" });
+      iconParkHome({ theme: "multi-color" });
       setIconInfos(_iconInfos);
     } catch (e) {
       console.error(e);
@@ -30,7 +29,7 @@ export const getIconInfos = () => {
     void fetchData();
   }, [fetchData]);
 
-  return { iconInfos: iconInfos, iconLoading: loading };
+  return { iconInfos, iconLoading: loading };
 };
 
 export const getIconConfig = (refresh: number) => {
@@ -99,5 +98,5 @@ export const getIconConfig = (refresh: number) => {
     void fetchData();
   }, [fetchData]);
 
-  return { iconConfig: iconConfig, iconBase: iconBase, configLoading: loading };
+  return { iconConfig, iconBase, configLoading: loading };
 };

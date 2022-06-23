@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Grid, Icon, open, showInFinder, showToast, Toast } from "@raycast/api";
+import * as iconPark from "@icon-park/svg";
 import { getIconConfig, getIconInfos } from "./hooks/hooks";
 import { kebabToOtherCase, toBase64 } from "./utils/common-utils";
 import { iconParkCategory } from "./utils/constants";
-import React, { useState } from "react";
+import { useState } from "react";
 import { homedir } from "os";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import * as fs from "fs";
@@ -39,7 +40,8 @@ export default function SearchIcons() {
           category === categoryValue && (
             <Grid.Section key={categoryValue} title={categoryValue}>
               {iconInfos.map((value) => {
-                const svgCode = eval(`iconPark.${kebabToOtherCase(value.name, "")}(${iconBase})`);
+                // @ts-expect-error a bit too dynamic for TS
+                const svgCode = iconPark[kebabToOtherCase(value.name, "")](JSON.parse(iconBase));
 
                 return (
                   value.category === categoryValue && (
