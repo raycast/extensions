@@ -6,6 +6,41 @@ import util from "util";
 import fs from "fs";
 import { pipeline } from "stream";
 const streamPipeline = util.promisify(pipeline);
+import https from "https";
+import { getPreferenceValues } from "@raycast/api";
+
+function readCACertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read CA cert file ${filename}`);
+  }
+}
+
+function readCertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read cert file ${filename}`);
+  }
+}
+
+export function getHttpAgent(): https.Agent | undefined {
+  let agent: https.Agent | undefined;
+  const preferences = getPreferenceValues();
+  const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
+  const customcacert = (preferences.customcacert as string) || "";
+  const customcert = (preferences.customcert as string) || "";
+  if (ignoreCertificates || customcacert.length > 0 || customcert.length > 0) {
+    const ca = customcacert.length > 0 ? readCACertFileSync(customcacert) : undefined;
+    const cert = customcert.length > 0 ? readCertFileSync(customcert) : undefined;
+    const opt: https.AgentOptions = { rejectUnauthorized: !ignoreCertificates, ca: ca, cert: cert };
+    agent = new https.Agent(opt);
+  }
+  return agent;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -304,12 +339,14 @@ export class GitLab {
       const ps = paramString(pagedParams);
       const fullUrl = this.url + "/api/v4/" + url + ps;
       logAPI(`send GET request: ${fullUrl}`);
+      const agent = getHttpAgent();
       const response = await fetch(fullUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           "PRIVATE-TOKEN": this.token,
         },
+        agent: agent,
       });
       return response;
     };

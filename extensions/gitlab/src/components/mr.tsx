@@ -1,7 +1,7 @@
 import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
@@ -157,7 +157,7 @@ function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_MR_DETAIL,
           variables: { id: `gid://gitlab/MergeRequest/${issueID}` },
         });
