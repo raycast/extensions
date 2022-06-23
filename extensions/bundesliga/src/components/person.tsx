@@ -2,7 +2,7 @@ import { Detail } from "@raycast/api";
 import json2md from "json2md";
 import { usePerson } from "../hooks";
 import { Name } from "../types";
-import { positionMap } from "../utils";
+import { positionMap, getFlagEmoji } from "../utils";
 
 export default function Person(props: Name) {
   const player = usePerson(props.slugifiedFull);
@@ -33,7 +33,8 @@ export default function Person(props: Name) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Nationality"
-            text={player.birth.country}
+            icon={getFlagEmoji(player.nationality.firstNationalityCode)}
+            text={player.nationality.firstNationality}
           />
           <Detail.Metadata.Label
             title="Date of Birth"

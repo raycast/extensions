@@ -59,7 +59,11 @@ export default function Fixture() {
                 <List.Item
                   key={match.id}
                   title={time || "TBC"}
-                  subtitle={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
+                  subtitle={
+                    match.status === "L"
+                      ? `${match.teams[0].team.name} ${match.teams[0].score} - ${match.teams[1].score} ${match.teams[1].team.name}`
+                      : `${match.teams[0].team.name} - ${match.teams[1].team.name}`
+                  }
                   icon={Icon.Clock}
                   accessories={[
                     { text: `${match.ground.name}, ${match.ground.city}` },

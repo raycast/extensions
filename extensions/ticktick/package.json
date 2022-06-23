@@ -32,7 +32,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.36.0",
     "moment": "^2.29.1",
     "run-applescript": "^6.0.0"
   },

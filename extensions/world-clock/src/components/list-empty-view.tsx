@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import React from "react";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
@@ -7,7 +7,7 @@ export function ListEmptyView(props: { title: string; command: boolean; extensio
   return (
     <List.EmptyView
       title={title}
-      icon={Icon.Clock}
+      icon={{ source: { light: "timezone-empty-icon.svg", dark: "timezone-empty-icon@dark.svg" } }}
       actions={
         <ActionPanel>
           <ActionOpenCommandPreferences command={command} extension={extension} />

@@ -1,5 +1,9 @@
 # Placeholder Changelog
 
+## [Add new image layout options] - {PR_MERGE_DATE}
+
+- Add new image layout options: List or Grid.
+
 ## [Fix text error] - 2022-06-04
 
 - Fix text error

@@ -24,8 +24,24 @@ jobs:
         run: gh pr checkout ${{ github.event.inputs.pr_number }}
       - name: Update CHANGELOG.md
         run: |
-          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep CHANGELOG.md)
-          echo $changelogs | xargs sed -i "s/{PR_MERGE_DATE}/$(date '+%Y-%m-%d')/g"
+          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md)
+          for changelog in $changelogs
+          do
+              echo "$changelog:"
+              if [[ -f "$changelog" ]]; then
+                  pattern="{PR_MERGE_DATE}"
+                  replacement=$(date '+%Y-%m-%d')
+                  if grep -q $pattern $changelog; then
+                      echo "  pattern found"
+                      sed -i "s/$pattern/$replacement/g" $changelog
+                      echo "  updated to $replacement"
+                  else
+                      echo "  pattern not found - skipping"
+                  fi
+              else
+                  echo "  skipping (file not existing)"
+              fi
+          done
       - name: Commit changes
         id: commit_changes
         run: |

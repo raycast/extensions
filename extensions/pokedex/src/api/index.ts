@@ -42,6 +42,7 @@ export const getPokemon = async (
         }
         pokemon_v2_pokemontypes {
           pokemon_v2_type {
+            name
             pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
               name
             }
@@ -71,10 +72,10 @@ export const getPokemon = async (
           }
           pokemon_v2_pokemonegggroups {
             pokemon_v2_egggroup {
+              name
               pokemon_v2_egggroupnames(where: {language_id: {_eq: $language_id}}) {
                 name
               }
-              name
             }
           }
           pokemon_v2_pokemons(order_by: {id: asc}, where: {pokemon_v2_pokemonforms: {form_name: {_nin: ["totem", "starter"]}}}) {
@@ -89,6 +90,7 @@ export const getPokemon = async (
             }
             pokemon_v2_pokemontypes {
               pokemon_v2_type {
+                name
                 pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
                   name
                 }

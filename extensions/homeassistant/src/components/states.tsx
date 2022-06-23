@@ -19,6 +19,7 @@ import {
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
 } from "./mediaplayer";
+import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan";
 import {
   BrightnessControlAction,
   BrightnessDownAction,
@@ -227,6 +228,23 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("weather")) {
     return { source: weatherConditionToIcon(state.state) };
+  } else if (e.startsWith("fan")) {
+    let source = "fan.png";
+    let tintColor: Color.ColorLike = PrimaryIconColor;
+
+    switch (state.state.toLocaleLowerCase()) {
+      case "on":
+        tintColor = Color.Yellow;
+        break;
+      case "off":
+        source = "fan-off.png";
+        break;
+      case "unavailable":
+        tintColor = UnavailableColor;
+        break;
+    }
+
+    return { source: source, tintColor: tintColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -286,6 +304,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
           const percent = (bv / 255) * 100;
           return `${Math.round(percent)}%`;
         }
+      }
+    } else if (state.entity_id.startsWith("fan")) {
+      // Speed as a percentage
+      const p = state.attributes.percentage || undefined;
+      if (!isNaN(p)) {
+        return `${p}%`;
       }
     } else if (state.entity_id.startsWith("sensor")) {
       const unit = (state.attributes.unit_of_measurement as string) || undefined;
@@ -452,6 +476,44 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="Attribtues">
             <ShowAttributesAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "fan": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <Action
+              title="Toggle"
+              onAction={async () => await ha.toggleFan(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <Action
+              title="Turn On"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.turnOnFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Green }}
+            />
+            <Action
+              title="Turn Off"
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => await ha.turnOffFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Red }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Speed">
+            <FanSpeedControlAction state={state} />
+            <FanSpeedUpAction state={state} />
+            <FanSpeedDownAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Values">
             <CopyEntityIDAction state={state} />
