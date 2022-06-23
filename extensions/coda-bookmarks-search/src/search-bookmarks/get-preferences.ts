@@ -3,7 +3,7 @@ import { getPreferenceValues } from '@raycast/api'
 interface Preferences {
   apiToken: string
   docId: string
-  tableName: string
+  tableId: string
 }
 
 export default function getPreferences() {
@@ -12,6 +12,6 @@ export default function getPreferences() {
   return {
     apiToken: preferences.apiToken,
     docId: preferences.docId,
-    tableName: preferences.tableName,
+    tableId: preferences.tableId,
   }
 }

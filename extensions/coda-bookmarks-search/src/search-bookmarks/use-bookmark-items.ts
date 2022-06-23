@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import CodaApi from './coda-api'
 import CodaCache from './coda-cache'
-import getPreferences from './getPreferences'
+import getPreferences from './get-preferences'
 import translateToBookmarkItem, { ApiItem } from './translate-to-bookmark-item'
 
 interface UseBookmarkItemsOpts {
@@ -15,11 +15,11 @@ export default function useBookmarkItems({
   const [isFetching, setIsFetching] = useState(false)
   const [apiItems, setApiItems] = useState<ApiItem[]>([])
 
-  const { apiToken, docId, tableName } = getPreferences()
+  const { apiToken, docId, tableId } = getPreferences()
 
   const cache = useMemo(() => {
-    return new CodaCache(docId, tableName)
-  }, [docId, tableName])
+    return new CodaCache(docId, tableId)
+  }, [docId, tableId])
 
   useEffect(() => {
     async function loadCachedItems() {
@@ -47,7 +47,7 @@ export default function useBookmarkItems({
         const items = await fetchApiItems({
           apiToken,
           docId,
-          tableName,
+          tableId,
         })
 
         setApiItems(items)
@@ -64,7 +64,7 @@ export default function useBookmarkItems({
     }
 
     fetchItems()
-  }, [apiToken, cache, docId, hasLoadedFromCache, onError, tableName])
+  }, [apiToken, cache, docId, hasLoadedFromCache, onError, tableId])
 
   return {
     isLoading: !hasLoadedFromCache || isFetching,
@@ -78,16 +78,16 @@ export default function useBookmarkItems({
 async function fetchApiItems({
   apiToken,
   docId,
-  tableName,
+  tableId,
 }: {
   apiToken: string
   docId: string
-  tableName: string
+  tableId: string
 }) {
   const coda = new CodaApi(apiToken)
 
   const items = await coda.fetchAllItems((params) => {
-    return coda.getTableRows(docId, tableName, {
+    return coda.getTableRows(docId, tableId, {
       limit: 100,
       sortBy: 'natural',
       useColumnNames: true,

@@ -32,11 +32,11 @@
           "title": "Document ID"
         },
         {
-          "name": "tableName",
-          "description": "The name of the bookmarks URL table.",
+          "name": "tableId",
+          "description": "The ID of the bookmarks URL table.",
           "type": "textfield",
           "required": true,
-          "title": "Table Name"
+          "title": "Table ID"
         }
       ]
     }

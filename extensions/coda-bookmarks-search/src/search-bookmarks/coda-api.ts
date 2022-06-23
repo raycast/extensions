@@ -57,8 +57,8 @@ export default class CodaApi {
     return data
   }
 
-  async getTableRows(docId: string, tableName: string, params = {}) {
-    const url = `https://coda.io/apis/v1/docs/${docId}/tables/${tableName}/rows`
+  async getTableRows(docId: string, tableIdOrName: string, params = {}) {
+    const url = `https://coda.io/apis/v1/docs/${docId}/tables/${tableIdOrName}/rows`
     const headers = {
       Authorization: `Bearer ${this.apiToken}`,
     }

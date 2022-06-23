@@ -10,10 +10,29 @@ Quickly find and open your bookmarked URLs stored in a [coda](https://coda.io) t
 ## Configuration
 
 1. Create a coda table with `name` and `url` columns. [Copy this sample doc](https://coda.io/d/Coda-Bookmarks-Search_deQgjTgGDJe/Bookmarks-URLs_suHbk#Bookmarks_tu76f) for the quickest setup.
+   1. The columns name _must_ be `name` and `url` (case-sensitive).
 2. Create an API token in your [coda account settings](https://coda.io/account) (be sure to save this for later).
-3. Find your [coda document ID](https://coda.io/developers/apis/v1#section/Using-the-API/Resource-IDs-and-Links).
-4. Make note of your table name (`Bookmarks` if using the sample doc).
+3. Find and copy your [coda document ID](#copy-document-id).
+4. Find and copy your [coda table ID](#copy-table-id).
 5. Enjoy 🍻
+
+### Copy Document ID
+
+Follow this [link](https://coda.io/developers/apis/v1#section/Using-the-API/Resource-IDs-and-Links) and use the "Doc ID Extractor" by pasting your doc URL.
+
+<details>
+  <summary>View</summary>
+
+  ![Copy document ID](./metadata/copy-doc-id.png)  
+</details>
+
+### Copy Table ID
+
+<details>
+  <summary>View</summary>
+
+  ![Copy table ID](./metadata/copy-table-id.png)
+</details>
 
 ## Resources
 

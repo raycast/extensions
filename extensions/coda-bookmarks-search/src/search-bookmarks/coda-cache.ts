@@ -6,8 +6,8 @@ const VERSION = 'v1'
 export default class CodaCache {
   key: string
 
-  constructor(docId: string, tableName: string) {
-    this.key = `${VERSION}-${docId}-${tableName}`
+  constructor(docId: string, tableId: string) {
+    this.key = `${VERSION}-${docId}-${tableId}`
   }
 
   async loadBookmarkItems() {
