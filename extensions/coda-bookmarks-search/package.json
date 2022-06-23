@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Coda Bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Coda",
       "description": "Quickly find and open your bookmarked URLs stored in a coda table.",
       "mode": "view",
       "preferences": [

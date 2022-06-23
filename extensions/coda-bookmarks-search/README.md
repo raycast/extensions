@@ -5,7 +5,7 @@
 
 Quickly find and open your bookmarked URLs stored in a [coda](https://coda.io) table.
 
-![coda-bookmarks-search](./metadata/screenshot-01.png)
+![coda-bookmarks-search](./media/screenshot-01.png)
 
 ## Configuration
 
@@ -23,7 +23,7 @@ Follow this [link](https://coda.io/developers/apis/v1#section/Using-the-API/Reso
 <details>
   <summary>View</summary>
 
-  ![Copy document ID](./_media/copy-doc-id.png)  
+  ![Copy document ID](./media/copy-doc-id.png)  
 </details>
 
 ### Copy Table ID
@@ -33,9 +33,9 @@ Go to your [coda account settings](https://coda.io/account) and enable developer
 <details>
   <summary>View</summary>
 
-  ![Enable developer mode](./_media/enable-developer-mode.png)
+  ![Enable developer mode](./media/enable-developer-mode.png)
 
-  ![Copy table ID](./_media/copy-table-id.png)
+  ![Copy table ID](./media/copy-table-id.png)
 </details>
 
 ## Resources
