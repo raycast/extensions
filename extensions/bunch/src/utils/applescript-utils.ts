@@ -1,10 +1,10 @@
 import { runAppleScript } from "run-applescript";
 import { PreferencesInfo } from "../types/types";
 import path from "path";
-import { isEmpty } from "./common-utils";
+import { bunchAppName, isEmpty } from "./common-utils";
 
 export const scriptToGetBunches = async () => {
-  const script = `tell application "Bunch" to list bunches`;
+  const script = `tell application "${bunchAppName()}" to list bunches`;
   try {
     const bunchesStr = await runAppleScript(script);
     if (!isEmpty(bunchesStr)) {
@@ -17,7 +17,7 @@ export const scriptToGetBunches = async () => {
 };
 
 export const scriptToGetOpenBunches = async () => {
-  const script = `tell application "Bunch" to list open bunches`;
+  const script = `tell application "${bunchAppName()}" to list open bunches`;
   try {
     const bunchesStr = await runAppleScript(script);
     if (!isEmpty(bunchesStr)) {
@@ -30,7 +30,7 @@ export const scriptToGetOpenBunches = async () => {
 };
 
 export const scriptToGetTaggedBunches = async (tag: string) => {
-  const script = `tell application "Bunch" to list bunches tagged "${tag}"`;
+  const script = `tell application "${bunchAppName()}" to list bunches tagged "${tag}"`;
   let bunches = "";
   try {
     bunches = await runAppleScript(script);
@@ -41,19 +41,19 @@ export const scriptToGetTaggedBunches = async (tag: string) => {
 };
 
 export const scriptToGetPreferences = async () => {
-  const script1 = `tell application "Bunch"
+  const script1 = `tell application "${bunchAppName()}"
    get preference "Bunch Folder" 
 end tell`;
-  const script2 = `tell application "Bunch"
+  const script2 = `tell application "${bunchAppName()}"
    get preference "Toggle Bunches"
 end tell`;
-  const script3 = `tell application "Bunch"
+  const script3 = `tell application "${bunchAppName()}"
    get preference "Single Bunch Mode"
 end tell`;
-  const script4 = `tell application "Bunch"
+  const script4 = `tell application "${bunchAppName()}"
    get preference "Debug Level (0-4)"
 end tell`;
-  const script5 = `tell application "Bunch"
+  const script5 = `tell application "${bunchAppName()}"
    get preference "Preserve Bunches"
 end tell`;
   const preferences: PreferencesInfo[] = [];
@@ -92,7 +92,7 @@ end tell`;
 };
 
 export const scriptToGetBunchFolder = async () => {
-  const script1 = `tell application "Bunch"
+  const script1 = `tell application "${bunchAppName()}"
    get preference "Bunch Folder" 
 end tell`;
   try {
@@ -106,20 +106,8 @@ end tell`;
 };
 
 export const scriptToRefreshBrowsers = async () => {
-  const script = `tell application "Bunch"
+  const script = `tell application "${bunchAppName()}"
     refresh browsers
-end tell`;
-  try {
-    return await runAppleScript(script);
-  } catch (e) {
-    console.error(String(e));
-    return String(e);
-  }
-};
-
-export const scriptToRefreshBrowsersByName = async (name: string) => {
-  const script = `tell application "Bunch"
-    refresh browsers for bunch "${name}"
 end tell`;
   try {
     return await runAppleScript(script);

@@ -1,5 +1,9 @@
 # Bunch Changelog
 
+## [Support Bunch Beta] - {PR_MERGE_DATE}
+
+- Support Bunch Beta
+
 ## [Add new command: Search Bunch References] - 2022-06-20
 
 - Add new command: Search Bunch References

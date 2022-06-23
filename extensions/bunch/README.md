@@ -4,7 +4,7 @@ Control [Bunch](https://bunchapp.co) via Raycast. **Bunch** is a Mac automation 
 
 **Tips:**
 
-- Before using this extension, you need to install the Bunch application ([Download Bunch](https://bunchapp.co/download/)), **Bunch Beta** is not supported
+- Before using this extension, you need to install the Bunch or Bunch Beta application ([Download Bunch](https://bunchapp.co/download/))
 - Please make sure Bunch is located in the Applications folder (/Applications/Bunch.app)
 - In the Search All Bunches command, you can use **tag:** followed by the tag name to search for bunches of a specific tag
 - Multiple tags can be combined using a comma (,) for OR, or a plus sign (+) for AND
