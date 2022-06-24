@@ -23,7 +23,6 @@ export default function Main() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [showingDetail, setShowingDetail] = useState(true);
 
   useEffect(() => {
     async function fetchCoins() {
@@ -64,7 +63,7 @@ export default function Main() {
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={showingDetail}
+      isShowingDetail={true}
       enableFiltering={true}
       navigationTitle="Coinpaprika Cryptocurrencies"
       searchBarPlaceholder="Search for crypto name"
@@ -128,7 +127,6 @@ function ListItemCoin({coinId, coin, isFavorite, onFavoriteToggle }: ListItemPro
         <ActionPanel>
           <FavoriteAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
           <Action.OpenInBrowser url={WEBSERVICE_URL + coin.id} />
-          {/*<Action title="Toggle Detail" icon={Icon.EyeSlash} onAction={() => setShowingDetail(!showingDetail)} />*/}
         </ActionPanel>
       }
     />
