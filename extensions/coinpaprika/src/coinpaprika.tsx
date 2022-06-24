@@ -4,7 +4,7 @@ import { getCoins } from "./api";
 import { Coin } from "./types/coin";
 import { FetchCoinDetails } from "./utils/coinDetails";
 import { WEBSERVICE_URL } from "./enum";
-import { addFavorite, getFavorites, removeFavorite } from "./favorites";
+import { addFavorite, getFavorites, removeFavorite } from "./utils/favorites";
 
 
 interface ListItemProps {
@@ -85,7 +85,7 @@ export default function Main() {
               coin={singleCoin}
               isFavorite={true}
               onFavoriteToggle={() => toggleFavorite(id, true)}
-             />
+            />
           );
 
         })}
@@ -104,7 +104,7 @@ export default function Main() {
               coin={coin}
               isFavorite={false}
               onFavoriteToggle={() => toggleFavorite(coin.id, isFavorite)}
-             />
+            />
           );
 
         })}
@@ -114,13 +114,16 @@ export default function Main() {
 }
 
 
-function ListItemCoin({coinId, coin, isFavorite, onFavoriteToggle }: ListItemProps) {
+function ListItemCoin({ coinId, coin, isFavorite, onFavoriteToggle }: ListItemProps) {
 
   return (
     <List.Item
       key={coinId}
       title={"#" + coin.rank + " | " + coin.name}
-      icon={{ source: Icon.ArrowRight, tintColor: Color.SecondaryText }}
+      icon={{
+        source: isFavorite ? Icon.Star : Icon.ArrowRight,
+        tintColor: isFavorite ? Color.Yellow : Color.SecondaryText
+      }}
       subtitle={coin.symbol.toUpperCase()}
       detail={<FetchCoinDetails coinId={coin.id} />}
       actions={
