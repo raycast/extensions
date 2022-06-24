@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-  LocalStorage,
-  showToast,
-  Toast,
-  trash,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, FileInfo, FileType } from "./types/types";
@@ -23,12 +13,13 @@ import {
   localDirectoryWithFiles,
   refreshNumber,
 } from "./hooks/hooks";
-import { ActionRemoveAllDirectories, PrimaryActionOnFile } from "./components/ui-components";
+import { ActionRemoveAllDirectories, ActionsOnFile } from "./components/action-on-files";
 import { Preferences } from "./types/preferences";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { QuickAccessEmptyView } from "./components/quick-access-empty-view";
+import { ItemDetail } from "./components/item-detail";
 
-export default function Command() {
+export default function SearchPinnedDirectories() {
   const { primaryAction, rememberTag, autoCopyLatestFile } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
@@ -106,40 +97,14 @@ export default function Command() {
                         isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }
                       }
                       title={fileValue.name}
-                      detail={
-                        <List.Item.Detail
-                          isLoading={isDetailLoading}
-                          markdown={fileContentInfo.fileContent}
-                          metadata={
-                            !isDetailLoading && (
-                              <List.Item.Detail.Metadata>
-                                <List.Item.Detail.Metadata.Label title="Name" text={fileContentInfo.name} />
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.Label title="Where" text={fileContentInfo.where} />
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.Label
-                                  title={fileContentInfo.sizeTitle}
-                                  text={fileContentInfo.size}
-                                />
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.Label title="Created" text={fileContentInfo.created} />
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.Label title="Modified" text={fileContentInfo.modified} />
-                                <List.Item.Detail.Metadata.Separator />
-                                <List.Item.Detail.Metadata.Label
-                                  title="Last opened"
-                                  text={fileContentInfo.lastOpened}
-                                />
-                              </List.Item.Detail.Metadata>
-                            )
-                          }
-                        />
-                      }
+                      detail={<ItemDetail isDetailLoading={isDetailLoading} fileContentInfo={fileContentInfo} />}
                       actions={
                         <ActionPanel>
                           <ActionsOnFile
+                            isTopFolder={true}
                             primaryAction={primaryAction}
-                            fileInfo={fileValue}
+                            name={fileValue.name}
+                            path={fileValue.path}
                             index={directoryIndex}
                             setRefresh={setRefresh}
                           />
@@ -236,63 +201,6 @@ export default function Command() {
           )
       )}
     </List>
-  );
-}
-
-function ActionsOnFile(props: {
-  primaryAction: string;
-  fileInfo: FileInfo;
-  index: number;
-  setRefresh: React.Dispatch<React.SetStateAction<number>>;
-}) {
-  const { primaryAction, fileInfo, index, setRefresh } = props;
-  return (
-    <>
-      <PrimaryActionOnFile primaryAction={primaryAction} fileInfo={fileInfo} index={index} setRefresh={setRefresh} />
-
-      <ActionPanel.Section>
-        <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={fileInfo.path} />
-        <Action.ShowInFinder
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
-          path={fileInfo.path}
-          onShow={async () => await upRank(index, setRefresh)}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          title={"Copy Name"}
-          content={fileInfo.name}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
-        />
-        <Action.CopyToClipboard
-          title={"Copy Path"}
-          content={fileInfo.path}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Trash}
-          title={"Move to trash"}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () => {
-            await alertDialog(
-              Icon.Trash,
-              "Move to Trash",
-              `Are you sure you want to move ${fileInfo.name} to the trash?`,
-              "Move to trash",
-              async () => {
-                await trash(fileInfo.path);
-                setRefresh(refreshNumber);
-                await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} is moved to the trash.`);
-              }
-            );
-          }}
-        />
-      </ActionPanel.Section>
-    </>
   );
 }
 
