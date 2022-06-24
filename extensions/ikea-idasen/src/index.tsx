@@ -5,8 +5,8 @@ import standUp from "./stand-up";
 import { isDeskControllerInstalled } from "./utils";
 import setDeskToPosition from "./set-desk-to";
 
-export default function Command () {
-  const [searchText, setSearchText] = useState<string>('');
+export default function Command() {
+  const [searchText, setSearchText] = useState<string>("");
   const [deskHeight, setDeskHeight] = useState<number>(80);
   const [isInstalled, setInstalled] = useState<boolean>(true);
 
@@ -18,18 +18,17 @@ export default function Command () {
     getDesktopControllerInstalledInfo();
   }, []);
 
-
   return (
     <List
       searchText={searchText}
       onSearchTextChange={(n) => {
-        setDeskHeight(Number(n.match(/\d+/)?.[0] ?? 80))
+        setDeskHeight(Number(n.match(/\d+/)?.[0] ?? 80));
         setSearchText(n);
       }}
-      searchBarPlaceholder='Set desk to 120cm'
+      searchBarPlaceholder="Set desk to 120cm"
       navigationTitle="Ikea Idasen"
     >
-      {!searchText &&
+      {!searchText && (
         <List.Item
           icon={Icon.ChevronUp}
           title="Stand Up"
@@ -39,8 +38,8 @@ export default function Command () {
             </ActionPanel>
           }
         />
-      }
-      {!searchText &&
+      )}
+      {!searchText && (
         <List.Item
           icon={Icon.ChevronDown}
           title="Sit Down"
@@ -50,15 +49,18 @@ export default function Command () {
             </ActionPanel>
           }
         />
-      }
+      )}
       <List.Item
         icon={Icon.Pencil}
-        title={`Set desk to ${ deskHeight }cm`}
+        title={`Set desk to ${deskHeight}cm`}
         actions={
           <ActionPanel>
-            <Action title="Set Position" onAction={() => {
-              setDeskToPosition(deskHeight)
-            }} />
+            <Action
+              title="Set Position"
+              onAction={() => {
+                setDeskToPosition(deskHeight);
+              }}
+            />
           </ActionPanel>
         }
       />
