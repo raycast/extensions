@@ -43,7 +43,8 @@
   "preferences": [
     {
       "name": "apiToken",
-      "description": "Enter your API token from Fathom Analytics.",
+      "description": "API token for Fathom Analytics.",
+      "placeholder": "Enter your API token from Fathom Analytics.",
       "type": "password",
       "required": true,
       "title": "API Token"
