@@ -1,6 +1,6 @@
 # Bunch Changelog
 
-## [Support Bunch Beta] - {PR_MERGE_DATE}
+## [Support Bunch Beta] - 2022-06-24
 
 - Support Bunch Beta
 
