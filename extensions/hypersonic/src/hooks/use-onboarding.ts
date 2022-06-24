@@ -1,3 +1,4 @@
+import { templateUrl } from '@/constants/template-url'
 import { Tag } from '@/types/tag'
 import { Todo } from '@/types/todo'
 import { Color } from '@raycast/api'
@@ -34,12 +35,11 @@ const ONBOARDING_DATA: Todo[] = [
     isCompleted: false,
     tag: null,
     url: '',
-    contentUrl:
-      'https://reboot-studio.notion.site/b7dcfb65bd7f4dfc82e3f0d61a6232cb?v=c532a2852d3e40eb9226b744ff526e55',
+    contentUrl: templateUrl,
   },
   {
     id: '5',
-    title: '👤️ Press ⌘ + T and Log into your Notion account',
+    title: '👤️ Press ⌘ + S and Log into your Notion account',
     isCompleted: false,
     tag: null,
     url: '',

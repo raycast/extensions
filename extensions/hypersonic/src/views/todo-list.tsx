@@ -33,6 +33,7 @@ export function ToDoList() {
     handleDelete,
     handleMoveUp,
     handleMoveDown,
+    getInitialData,
   } = useTodos()
 
   return (
@@ -137,7 +138,7 @@ export function ToDoList() {
           ))
         : null}
       {data && data.length === 0 ? (
-        <EmptyList notionDbUrl={notionDbUrl} />
+        <EmptyList notionDbUrl={notionDbUrl} getInitialData={getInitialData} />
       ) : (
         <TransparentEmpty />
       )}

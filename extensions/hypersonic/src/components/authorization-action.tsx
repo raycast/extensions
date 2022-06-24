@@ -18,7 +18,7 @@ export function AuthorizationAction() {
       icon={Icon.Person}
       title={'Authorize'}
       onAction={handleAuthorize}
-      shortcut={{ modifiers: ['cmd'], key: 't' }}
+      shortcut={{ modifiers: ['cmd'], key: 's' }}
     />
   )
 }

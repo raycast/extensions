@@ -1,15 +1,24 @@
+import { templateUrl } from '@/constants/template-url'
 import {
   loadHasDoneToday,
   loadTodayCoin,
   storeTodayCoin,
 } from '@/services/storage'
-import { ActionPanel, List } from '@raycast/api'
-import { useEffect, useState } from 'react'
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+} from '@raycast/api'
+import { useEffect, useMemo, useState } from 'react'
 import { OpenNotionAction } from './open-notion-action'
+import { ReauthorizeAction } from './reauthorize-action'
 import { WhatHaveIDoneAction } from './what-have-i-done-action'
 
 type EmptyListProps = {
   notionDbUrl: string
+  getInitialData: () => void
 }
 
 const dark = 'empty-dark.gif'
@@ -51,8 +60,9 @@ async function getCoin(): Promise<string> {
   return coin
 }
 
-export function EmptyList({ notionDbUrl }: EmptyListProps) {
+export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
   const [coin, setCoin] = useState('')
+  const databaseName = useMemo(() => getPreferenceValues().database_name, [])
 
   const handleStart = async () => {
     const someDone = await loadHasDoneToday()
@@ -67,6 +77,28 @@ export function EmptyList({ notionDbUrl }: EmptyListProps) {
     handleStart()
   }, [])
 
+  console.log('notionUrl', notionDbUrl)
+
+  if (!notionDbUrl) {
+    return (
+      <List.EmptyView
+        title={`We couldn't find ${databaseName} database.`}
+        description="Make sure to duplicate the template (⌘ + U) and grant permission (⌘ + S)"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
+              title="View Link"
+              icon={Icon.Link}
+              url={templateUrl}
+              shortcut={{ modifiers: ['cmd'], key: 'u' }}
+            />
+            <ReauthorizeAction getInitialData={getInitialData} />
+          </ActionPanel>
+        }
+      />
+    )
+  }
+
   return (
     <List.EmptyView
       icon={{
@@ -75,6 +107,7 @@ export function EmptyList({ notionDbUrl }: EmptyListProps) {
       actions={
         <ActionPanel>
           <WhatHaveIDoneAction />
+          <ReauthorizeAction />
           <OpenNotionAction notionDbUrl={notionDbUrl} />
         </ActionPanel>
       }

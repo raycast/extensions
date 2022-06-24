@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Hypersonic",
-      "subtitle": "Reboot Studio",
+      "title": "My Todos",
+      "subtitle": "Hypersonic",
       "description": "The fastest Notion to-do app for Raycast",
       "mode": "view"
     }
@@ -36,7 +36,7 @@
       "type": "checkbox",
       "title": "Open links in the desktop app",
       "label": "Open links in the desktop app",
-      "description": "Set true if you want to open links in desktop app instead of browser",
+      "description": "Enable if you want to open links in the desktop app instead of the browser",
       "default": true,
       "required": false
     }
