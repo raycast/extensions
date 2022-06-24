@@ -23,10 +23,20 @@ ${_bunchesContent}
 
 export const bunchInstalled = () => {
   try {
-    return fs.existsSync("/Applications/Bunch.app");
+    return fs.existsSync("/Applications/Bunch.app") || fs.existsSync("/Applications/Bunch Beta.app");
   } catch (e) {
     console.error(String(e));
     return false;
+  }
+};
+
+export const bunchAppName = () => {
+  try {
+    if (fs.existsSync("/Applications/Bunch.app")) return "Bunch";
+    if (fs.existsSync("/Applications/Bunch Beta.app")) return "Bunch Beta";
+  } catch (e) {
+    console.error(String(e));
+    return "Bunch";
   }
 };
 
