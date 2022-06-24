@@ -24,7 +24,6 @@ export default function SearchImages() {
           message: (err as Error).message,
         });
       } finally {
-        console.log("finally");
         setLoading(false);
       }
     };
