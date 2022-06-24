@@ -30,7 +30,6 @@ export function useTodos() {
 
   const getInitialData = async () => {
     try {
-      console.log('EEEEEe')
       const localTodos = await loadTodos()
       setData(localTodos)
       const localTags = await loadTags()
@@ -38,8 +37,6 @@ export function useTodos() {
 
       const { tags, databaseId, databaseUrl } = await getDatabase()
       const fetchedTodos = await getTodos(databaseId, localTodos)
-
-      console.log('EEEEEe', formatNotionUrl(databaseUrl))
 
       setTags(tags)
       setNotionDbUrl(formatNotionUrl(databaseUrl))

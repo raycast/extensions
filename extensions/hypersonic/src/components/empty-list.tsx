@@ -77,8 +77,6 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
     handleStart()
   }, [])
 
-  console.log('notionUrl', notionDbUrl)
-
   if (!notionDbUrl) {
     return (
       <List.EmptyView
