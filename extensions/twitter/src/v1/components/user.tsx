@@ -1,6 +1,6 @@
 import { ActionPanel, Image, List } from "@raycast/api";
 import { UserV1 } from "twitter-api-v2";
-import { compactNumberFormat } from "../utils";
+import { compactNumberFormat } from "../../utils";
 import { ShowUserTweetsAction } from "./user_actions";
 
 export function UserListItem(props: { user: UserV1 }) {

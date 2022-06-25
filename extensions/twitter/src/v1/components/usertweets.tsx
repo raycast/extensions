@@ -1,12 +1,13 @@
 import { showToast, Toast } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { TweetList } from "../components/tweet";
-import { loggedInUserAccount, refreshTweets, twitterClient, useRefresher } from "../twitterapi";
+import { TweetList } from "./tweet";
+import { refreshTweets, twitterClient, useRefresher } from "../lib/twitterapi";
 
-export default function MyTweetList() {
+export default function UserTweetList(props: { username: string }) {
+  const username = props.username;
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
     async (updateInline): Promise<TweetV1[] | undefined> => {
-      return updateInline ? await refreshTweets(data) : await getMyTweets();
+      return updateInline ? await refreshTweets(data) : await getTweets(username);
     }
   );
   if (error) {
@@ -15,11 +16,10 @@ export default function MyTweetList() {
   return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
 }
 
-async function getMyTweets(): Promise<TweetV1[]> {
-  const account = await loggedInUserAccount();
-  const mytweets = await twitterClient.v1.userTimelineByUsername(account.screen_name);
+async function getTweets(username: string): Promise<TweetV1[]> {
+  const usertweets = await twitterClient.v1.userTimelineByUsername(username);
   const tweets: TweetV1[] = [];
-  for (const t of mytweets.tweets) {
+  for (const t of usertweets.tweets) {
     tweets.push(t);
   }
   return tweets;

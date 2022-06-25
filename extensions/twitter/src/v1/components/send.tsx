@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { Fragment, ReactElement, useState } from "react";
 import { TweetV1 } from "twitter-api-v2";
-import { twitterClient } from "../twitterapi";
-import { getErrorMessage } from "../utils";
+import { twitterClient } from "../lib/twitterapi";
+import { getErrorMessage } from "../../utils";
 
 interface TweetFormValues {
   text: string;
@@ -212,7 +212,7 @@ export function TweetSendThreadForm(): ReactElement {
       }
     >
       {tweets.map((t, index) => (
-        <TweetFragment index={index} content={t} onTextChange={updateTweet} />
+        <TweetFragment key={index} index={index} content={t} onTextChange={updateTweet} />
       ))}
     </Form>
   );

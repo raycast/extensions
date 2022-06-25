@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Detail, Image, List, showToast, Toast } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { shouldShowListWithDetails } from "../common";
-import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
-import { compactNumberFormat, padStart } from "../utils";
+import { shouldShowListWithDetails } from "../../common";
+import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../lib/twitterapi";
+import { compactNumberFormat, padStart } from "../../utils";
 import {
   DeleteTweetAction,
   LikeAction,

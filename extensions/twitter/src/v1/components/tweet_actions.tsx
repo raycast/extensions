@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Icon, Image, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TweetV1 } from "twitter-api-v2";
-import { loggedInUserAccount, twitterClient, Fetcher } from "../twitterapi";
-import { getErrorMessage } from "../utils";
+import { loggedInUserAccount, twitterClient, Fetcher } from "../lib/twitterapi";
+import { getErrorMessage } from "../../utils";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
 import UserTweetList from "./usertweets";

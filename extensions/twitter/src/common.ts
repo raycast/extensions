@@ -8,3 +8,11 @@ export function shouldShowListWithDetails(): boolean {
   }
   return val;
 }
+
+export function useV2(): boolean {
+  const pref = getPreferenceValues();
+  if (pref.oauthclientid && pref.oauthclientid.length > 0) {
+    return true;
+  }
+  return false;
+}
