@@ -5,7 +5,7 @@ import { loggedInUserAccount, twitterClient, Fetcher } from "../lib/twitterapi";
 import { getErrorMessage } from "../../utils";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
-import UserTweetList from "./usertweets";
+import { UserTweetList } from "./usertweets";
 
 export function ShowTweetAction(props: { tweet: TweetV1 }) {
   return (

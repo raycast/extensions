@@ -28,6 +28,6 @@ export function HomeTimelineList() {
   return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
 }
 
-export default function HomeTimelineRoot(): ReactElement {
+export function HomeTimelineRoot(): ReactElement {
   return <HomeTimelineList />;
 }

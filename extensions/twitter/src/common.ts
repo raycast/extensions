@@ -11,8 +11,14 @@ export function shouldShowListWithDetails(): boolean {
 
 export function useV2(): boolean {
   const pref = getPreferenceValues();
-  if (pref.oauthclientid && pref.oauthclientid.length > 0) {
-    return true;
+  const appKey = (pref.appkey as string) || "";
+  const appSecret = (pref.appsecret as string) || "";
+  const accessToken = (pref.accesstoken as string) || "";
+  const accessSecret = (pref.accesssecret as string) || "";
+  if (appKey.length > 0 || appSecret.length > 0 || accessToken.length > 0 || accessSecret.length > 0) {
+    console.log("use v1");
+    return false;
   }
-  return false;
+  console.log("use v2");
+  return true;
 }

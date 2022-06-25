@@ -3,7 +3,7 @@ import { TweetV1 } from "twitter-api-v2";
 import { TweetList } from "./tweet";
 import { loggedInUserAccount, refreshTweets, twitterClient, useRefresher } from "../lib/twitterapi";
 
-export default function MyTweetList() {
+export function MyTweetList() {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
     async (updateInline): Promise<TweetV1[] | undefined> => {
       return updateInline ? await refreshTweets(data) : await getMyTweets();

@@ -38,6 +38,6 @@ export function UserList() {
   );
 }
 
-export default function UserSearchRoot(): ReactElement {
+export function UserSearchRoot(): ReactElement {
   return <UserList />;
 }

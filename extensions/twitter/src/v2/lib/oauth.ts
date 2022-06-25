@@ -1,4 +1,4 @@
-import { getPreferenceValues, OAuth } from "@raycast/api";
+import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
 // Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
@@ -8,9 +8,7 @@ import fetch from "node-fetch";
 // For the website URL enter: https://raycast.com
 
 export function getClientId(): string {
-  const pref = getPreferenceValues();
-  const oauthclientid = (pref.oauthclientid as string) || "";
-  return oauthclientid;
+  return "aHB6TFU2T3hid2stVjdFZ2ljanM6MTpjaQ";
 }
 
 const oauthClient = new OAuth.PKCEClient({
