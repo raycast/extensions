@@ -32,6 +32,9 @@ async function runTerminal(item: ISSHConnection) {
     end tell
   `;
   const script_iterm = `
+    -- Set this property to true to open in a new window instead of a new tab
+    property open_in_new_window : false
+    
     on new_window()
     	tell application "iTerm" to create window with default profile
     end new_window
@@ -94,13 +97,11 @@ async function runTerminal(item: ISSHConnection) {
   if (use_iterm) {
     try {
       await runAppleScript(script_iterm);
-    }
-    catch (error) {
+    } catch (error) {
       await runAppleScript(script_terminal);
-      console.log(error)
+      console.log(error);
     }
-  }
-  else {
+  } else {
     await runAppleScript(script_terminal);
   }
 
