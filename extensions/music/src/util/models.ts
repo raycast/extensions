@@ -5,11 +5,12 @@ export enum PlayerState {
 }
 
 export interface Track {
-  id?: string;
+  id: string;
   name: string;
   artist: string;
   album: string;
   duration: string;
+  trackImage?: string; 
   state?: PlayerState;
 }
 
