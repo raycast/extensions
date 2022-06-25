@@ -6,6 +6,17 @@
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "license": "MIT",
+  "preferences": [
+    {
+    "name": "iterm",
+    "type": "checkbox",
+    "required": false,
+    "title": "Use iTerm instead of Terminal",
+    "description": "If iTerm is available, try to use iTerm instead of Terminal.",
+    "default": false,
+    "label": "Use iTerm"
+  }
+  ],
   "commands": [
     {
       "name": "create",
