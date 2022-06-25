@@ -74,6 +74,7 @@ export default function Command() {
   };
 
   const animateSequence = (newSequence: string[]) => {
+    // TODO: these actually do nothing in preventing the user in playing whilst the sequence is playing
     setState((previous) => ({ ...previous, loading: true }));
 
     newSequence.forEach((color, index) => {
@@ -82,6 +83,7 @@ export default function Command() {
       }, (index + 1) * 800);
     });
 
+    // TODO: these actually do nothing in preventing the user in playing whilst the sequence is playing
     setState((previous) => ({ ...previous, loading: false }));
   };
 
