@@ -20,7 +20,7 @@ export default function Command() {
     Yellow: Color.Yellow,
   } as { [key: string]: Color };
   const [state, setState] = useState<State>({
-    loading: false,
+    loading: true,
     gameState: "lobby",
     level: 1,
     sequence: [],
@@ -74,17 +74,15 @@ export default function Command() {
   };
 
   const animateSequence = (newSequence: string[]) => {
-    // TODO: these actually do nothing in preventing the user in playing whilst the sequence is playing
-    setState((previous) => ({ ...previous, loading: true }));
-
     newSequence.forEach((color, index) => {
       setTimeout(() => {
         activateColor(color);
       }, (index + 1) * 800);
     });
 
-    // TODO: these actually do nothing in preventing the user in playing whilst the sequence is playing
-    setState((previous) => ({ ...previous, loading: false }));
+    setTimeout(() => {
+      setState((previous) => ({ ...previous, loading: false }));
+    }, (newSequence.length + 1) * 800);
   };
 
   useEffect(() => {
@@ -96,6 +94,7 @@ export default function Command() {
               ...previous,
               level: state.level + 1,
               humanSequence: [],
+              loading: true,
             }));
 
             setTimeout(() => {
@@ -180,22 +179,20 @@ export default function Command() {
           title={color.name}
           actions={
             <ActionPanel>
-              <Action.SubmitForm
-                title="Select Color"
-                icon={Icon.Dot}
-                onSubmit={() => {
-                  if (state.loading) {
-                    return;
-                  }
+              {!state.loading && (
+                <Action.SubmitForm
+                  title="Select Color"
+                  icon={Icon.Dot}
+                  onSubmit={() => {
+                    activateColor(color.name);
 
-                  activateColor(color.name);
-
-                  setState((previous) => ({
-                    ...previous,
-                    humanSequence: [...previous.humanSequence, color.name],
-                  }));
-                }}
-              />
+                    setState((previous) => ({
+                      ...previous,
+                      humanSequence: [...previous.humanSequence, color.name],
+                    }));
+                  }}
+                />
+              )}
             </ActionPanel>
           }
         />
