@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail, environment } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
-
-interface State {
-  loading: boolean;
-  gameState: string;
-  level: number;
-  sequence: string[];
-  humanSequence: string[];
-  colors: { name: string; tint: Color }[];
-}
+import { Preferences, State } from "./interface";
+import { colorMap, maxLevel } from "./constants";
 
 export default function Command() {
-  const maxLevel = 20;
-  const colorMap = {
-    Red: Color.Red,
-    Green: Color.Green,
-    Blue: Color.Blue,
-    Yellow: Color.Yellow,
-  } as { [key: string]: Color };
+  const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<State>({
     loading: true,
     gameState: "lobby",
@@ -50,7 +37,9 @@ export default function Command() {
       ...previous,
       colors: previous.colors.map((color) => {
         if (color.name === colorToActivate) {
-          exec(`afplay "${environment.assetsPath}/sound${color.name}.mp3"`);
+          if (preferences.enableSounds) {
+            exec(`afplay "${environment.assetsPath}/sound${color.name}.mp3"`);
+          }
 
           return { ...color, tint: Color.PrimaryText };
         }
