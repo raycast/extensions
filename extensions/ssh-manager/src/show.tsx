@@ -8,7 +8,7 @@ interface Preferences {
   iterm: string;
 }
 const preferences = getPreferenceValues<Preferences>();
-export const use_iterm = preferences["iterm"];
+export const useIterm = preferences["iterm"];
 
 async function runTerminal(item: ISSHConnection) {
   let identity = "";
@@ -17,7 +17,7 @@ async function runTerminal(item: ISSHConnection) {
   }
   const command = `ssh ${identity} ${item.user}@${item.address}`;
 
-  const script_terminal = `
+  const scriptTerminal = `
     tell application "Terminal"
       do script ""  
       activate
@@ -31,7 +31,7 @@ async function runTerminal(item: ISSHConnection) {
         if result is not {} then perform action "AXRaise" of item 1 of result
     end tell
   `;
-  const script_iterm = `
+  const scriptIterm = `
     -- Set this property to true to open in a new window instead of a new tab
     property open_in_new_window : false
     
@@ -94,15 +94,15 @@ async function runTerminal(item: ISSHConnection) {
     call_forward()
   `;
 
-  if (use_iterm) {
+  if (useIterm) {
     try {
-      await runAppleScript(script_iterm);
+      await runAppleScript(scriptIterm);
     } catch (error) {
-      await runAppleScript(script_terminal);
+      await runAppleScript(scriptTerminal);
       console.log(error);
     }
   } else {
-    await runAppleScript(script_terminal);
+    await runAppleScript(scriptTerminal);
   }
 
   await showHUD("Success ✅");
