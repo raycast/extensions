@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail, environment } from "@raycast/api";
 import { exec } from "child_process";
 
 interface State {
@@ -50,6 +50,8 @@ export default function Command() {
       ...previous,
       colors: previous.colors.map((color) => {
         if (color.name === colorToActivate) {
+          exec(`afplay "${environment.assetsPath}/sound${color.name}.mp3"`);
+
           return { ...color, tint: Color.PrimaryText };
         }
 
@@ -85,7 +87,7 @@ export default function Command() {
 
   useEffect(() => {
     if (state.gameState === "play") {
-      if (state.humanSequence.length === state.sequence.length) {
+      if (state.sequence.length > 0 && state.humanSequence.length === state.sequence.length) {
         if (state.humanSequence.join("") === state.sequence.join("")) {
           if (state.level < maxLevel) {
             setState((previous) => ({
@@ -94,9 +96,11 @@ export default function Command() {
               humanSequence: [],
             }));
 
-            const nextColor = nextLevel();
+            setTimeout(() => {
+              const nextColor = nextLevel();
 
-            animateSequence([...state.sequence, nextColor]);
+              animateSequence([...state.sequence, nextColor]);
+            }, 800);
           } else {
             exec("open raycast://confetti");
 
@@ -121,11 +125,13 @@ export default function Command() {
               onSubmit={() => {
                 setState((previous) => ({ ...previous, gameState: "play" }));
 
-                const nextColor = nextLevel();
+                setTimeout(() => {
+                  const nextColor = nextLevel();
 
-                activateColor(nextColor);
+                  activateColor(nextColor);
 
-                animateSequence(state.sequence);
+                  animateSequence(state.sequence);
+                }, 500);
               }}
             />
           </ActionPanel>
