@@ -212,7 +212,7 @@ export function TweetSendThreadForm(): ReactElement {
       }
     >
       {tweets.map((t, index) => (
-        <TweetFragment index={index} content={t} onTextChange={updateTweet} />
+        <TweetFragment key={index} index={index} content={t} onTextChange={updateTweet} />
       ))}
     </Form>
   );

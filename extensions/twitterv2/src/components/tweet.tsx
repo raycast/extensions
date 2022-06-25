@@ -119,7 +119,6 @@ export function TweetListItem(props: {
   const [showMeta, setShowMeta] = useState<boolean>(true);
 
   const text = getCleanTweetText(t);
-  console.log("text: ", text);
 
   const imgUrl = t.user.profile_image_url;
   const icon: Image.ImageLike | undefined = imgUrl ? { source: imgUrl, mask: Image.Mask.Circle } : undefined;
