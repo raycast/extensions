@@ -1,5 +1,5 @@
 import { Grid } from "@raycast/api";
-import { getGridItemSize, showImageTitle } from "./functions/gridItemSize"
+import { getGridItemSize, showImageTitle } from "./functions/gridItemSize";
 
 // Hooks
 import { useLikes } from "./hooks/useLikes";
