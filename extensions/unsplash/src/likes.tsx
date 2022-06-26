@@ -1,4 +1,4 @@
-import { List, Icon, ImageMask } from "@raycast/api";
+import { Grid } from "@raycast/api";
 
 // Hooks
 import { useLikes } from "./hooks/useLikes";
@@ -15,13 +15,13 @@ const Unsplash: React.FC = () => {
   const { loading, likes } = useLikes();
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search your likes...">
-      <List.Section title="Results" subtitle={String(likes?.length)}>
+    <Grid isLoading={loading} searchBarPlaceholder="Search your likes...">
+      <Grid.Section title="Results" subtitle={String(likes?.length)}>
         {likes?.map((like) => (
           <SearchListItem key={like.id} item={like} />
         ))}
-      </List.Section>
-    </List>
+      </Grid.Section>
+    </Grid>
   );
 };
 
@@ -39,13 +39,7 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ item }) => {
   };
 
   return (
-    <List.Item
-      title={title}
-      icon={image}
-      accessoryTitle={item.user.name}
-      accessoryIcon={{ source: avatar || Icon.Person, mask: ImageMask.Circle }}
-      actions={<Actions item={mimicItem} details />}
-    />
+    <Grid.Item title={title} content={image} subtitle={item.user.name} actions={<Actions item={mimicItem} details />} />
   );
 };
 

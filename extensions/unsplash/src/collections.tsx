@@ -1,4 +1,4 @@
-import { List, Icon, ImageMask } from "@raycast/api";
+import { Grid } from "@raycast/api";
 
 // Hooks
 import { useSearch } from "./hooks/useSearch";
@@ -15,13 +15,13 @@ const UnsplashCollections: React.FC = () => {
   const { state, search } = useSearch("collections");
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search collections..." throttle>
-      <List.Section title="Results" subtitle={String(state?.results?.length)}>
+    <Grid isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search collections..." throttle>
+      <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
         {state.results.map((result) => (
           <SearchListItem key={result.id} searchResult={result} />
         ))}
-      </List.Section>
-    </List>
+      </Grid.Section>
+    </Grid>
   );
 };
 
@@ -36,14 +36,7 @@ const SearchListItem: React.FC<CollectionListItemProps> = ({ searchResult }) => 
   ];
 
   return (
-    <List.Item
-      title={title}
-      subtitle={description}
-      icon={image}
-      accessoryTitle={searchResult.user.name}
-      accessoryIcon={{ source: avatar || Icon.Person, mask: ImageMask.Circle }}
-      actions={<Actions item={searchResult} details />}
-    />
+    <Grid.Item title={title} subtitle={description} content={image} actions={<Actions item={searchResult} details />} />
   );
 };
 

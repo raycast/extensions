@@ -156,7 +156,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.36.1",
     "node-fetch": "^3.0.0",
     "run-applescript": "^6.0.0",
     "swr": "^1.2.0"
