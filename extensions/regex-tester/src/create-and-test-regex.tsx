@@ -98,7 +98,7 @@ const Details: React.FC<Values> = ({ text, pattern, flags }) => {
     <Detail
       markdown={markdown}
       isLoading={isLoading}
-      navigationTitle="Result"
+      navigationTitle="Result Details"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Go Back" onSubmit={pop} />
