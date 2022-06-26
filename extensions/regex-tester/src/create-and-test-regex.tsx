@@ -46,7 +46,7 @@ export default function Command() {
     if (error) return;
     if (!pattern) return showToast({ title: "Empty field", message: "Missing expression", style: Toast.Style.Failure });
     if (!text) return showToast({ title: "Empty field", message: "Missing text", style: Toast.Style.Failure });
-    push(<Result {...values} />);
+    push(<Details {...values} />);
   };
 
   return (
@@ -70,7 +70,7 @@ export default function Command() {
   );
 }
 
-const Result: React.FC<Values> = ({ text, pattern, flags }) => {
+const Details: React.FC<Values> = ({ text, pattern, flags }) => {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [markdown, setMarkdown] = useState("");
