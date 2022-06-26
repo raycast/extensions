@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Update List layout] - {PR_MERGE_DATE}
+
+- Update List layout: Add clock image in List Detail
+
 ## [Add Grid layout] - 2022-06-22
 
 - Add Grid layout for Query World Time command
