@@ -9,6 +9,7 @@ import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
 export function SearchVideoList(props: { channedId?: string | undefined }) {
   const [searchText, setSearchText] = useState<string>();
   const [uuid] = useState<string>(getUuid());
+  const [throttle, setThrottle] = useState<number | null>(null);
   const {
     data: rc,
     appendRecentSearches,
@@ -23,18 +24,25 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
   if (error) {
     showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
   }
-  const layout = getViewLayout();
+  const throttleSearch = (search: string) => {
+    if (search) {
+      setSearchText(search)
+      const time = new Date().getTime();
+      setThrottle(time);
+      if (throttle && time - throttle > 1000) {
+        appendRecentSearches(search);
+      }
+    }
+  }
   if (data) {
     return (
       <ListOrGrid
-        layout={layout}
+        layout={getViewLayout()}
         itemSize={getGridItemSize()}
         isLoading={isLoading}
         searchText={searchText}
-        onSearchTextChange={(search: string) => {
-          if (layout === "list" || search) appendRecentSearches(search);
-        }}
-        throttle={true}
+        onSearchTextChange={throttleSearch}
+        throttle={false}
       >
         {data?.map((v) => (
           <VideoItem key={v.id} video={v} />
@@ -47,7 +55,7 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
       <RecentSearchesList
         recentSearches={rc}
         isLoading={isLoadingTotal}
-        setRootSearchText={appendRecentSearches}
+        setRootSearchText={throttleSearch}
         clearAll={clearAllRecentSearches}
       />
     );

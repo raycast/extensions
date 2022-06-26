@@ -85,7 +85,7 @@ function NoSearchItem(props: { recentQueries: RecentSearch[] | undefined }): JSX
   if (rq && rq.length > 0) {
     return null;
   } else {
-    return <List.Item title="No Recent Searches" />;
+    return <List.EmptyView title="No Recent Searches" />;
   }
 }
 
@@ -113,7 +113,7 @@ function SearchItem(props: {
           />
           {props.clearAll && (
             <Action
-              title="Clear old Searches"
+              title="Clear Old Searches"
               icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
               onAction={handleClear}
             />
@@ -137,9 +137,9 @@ export function RecentSearchesList(props: {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
   return (
-    <List onSearchTextChange={setRootSearchText} isLoading={isLoading} throttle={true}>
+    <List onSearchTextChange={setRootSearchText} isLoading={isLoading} throttle={false}>
+      <NoSearchItem recentQueries={rq} />
       <List.Section title="Recently Searched">
-        <NoSearchItem recentQueries={rq} />
         {rq?.map((q) => (
           <SearchItem
             key={`${q.timestamp.toLocaleString()} ${q.text} ${q.uuid}`}
