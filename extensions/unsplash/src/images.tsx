@@ -1,10 +1,12 @@
 import { Grid } from "@raycast/api";
+import { getGridItemSize, showImageTitle } from "./functions/gridItemSize"
 
 // Hooks
 import { useSearch } from "./hooks/useSearch";
 
 // Components
 import Actions from "./components/Actions";
+import { useEffect } from "react";
 
 // Types
 interface SearchListItemProps {
@@ -15,7 +17,7 @@ const Unsplash: React.FC = () => {
   const { state, search } = useSearch("photos");
 
   return (
-    <Grid isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search wallpapers..." throttle>
+    <Grid isLoading={state.isLoading} itemSize={getGridItemSize()} onSearchTextChange={search} searchBarPlaceholder="Search wallpapers..." throttle>
       <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
         {state.results.map((result) => (
           <SearchListItem key={result.id} searchResult={result} />
@@ -33,8 +35,13 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
     searchResult?.user?.profile_image?.small,
   ];
 
+  useEffect(() => {
+    console.log(title)
+    console.log(description)
+  }, []);
+
   return (
-    <Grid.Item title={title} content={image} subtitle={description} actions={<Actions item={searchResult} details />} />
+    <Grid.Item content={image} title={showImageTitle() ? title : ""} actions={<Actions item={searchResult} details />} />
   );
 };
 

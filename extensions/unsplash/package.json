@@ -58,6 +58,36 @@
       "required": false
     },
     {
+      "name": "gridItemSize",
+      "title": "Grid Item Size",
+      "description": "The size of the grid items.",
+      "type": "dropdown",
+      "default": "medium",
+      "required": false,
+      "data": [
+        {
+          "value": "small",
+          "title": "Small"
+        },
+        {
+          "value": "medium",
+          "title": "Medium"
+        },
+        {
+          "value": "large",
+          "title": "Large"
+        }
+      ]
+    },
+    {
+      "name": "showImageTitle",
+      "label": "Show Image Title",
+      "description": "Show the image title in the grid view.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "orientation",
       "title": "Image Orientation",
       "description": "The orientation of images that will be displayed as result.",
