@@ -18,13 +18,20 @@ function createClient(): TwitterApi {
   return client;
 }
 
-export const twitterClient = createClient();
+let _twitterClient: TwitterApi | null = null;
+
+export function twitterClient(): TwitterApi {
+  if (!_twitterClient) {
+    _twitterClient = createClient();
+  }
+  return _twitterClient;
+}
 
 let activeAccount: AccountSettingsV1 | undefined;
 
 export async function loggedInUserAccount(): Promise<AccountSettingsV1> {
   if (!activeAccount) {
-    const account = await twitterClient.v1.accountSettings();
+    const account = await twitterClient().v1.accountSettings();
     activeAccount = account;
   }
   return activeAccount;
@@ -33,7 +40,7 @@ export async function loggedInUserAccount(): Promise<AccountSettingsV1> {
 export async function refreshTweets(tweets?: TweetV1[]): Promise<TweetV1[] | undefined> {
   if (tweets) {
     const tweetIds = tweets.map((t) => t.id_str);
-    const unorderedFreshTweets = await twitterClient.v1.tweets(tweetIds);
+    const unorderedFreshTweets = await twitterClient().v1.tweets(tweetIds);
 
     const freshTweets: TweetV1[] = [];
     for (const tid of tweetIds) {

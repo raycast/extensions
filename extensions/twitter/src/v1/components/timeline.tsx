@@ -5,7 +5,7 @@ import { TweetList } from "./tweet";
 import { refreshTweets, twitterClient, useRefresher } from "../lib/twitterapi";
 
 async function getHomeTimelineTweets(): Promise<TweetV1[]> {
-  const homeTimeline = await twitterClient.v1.homeTimeline({
+  const homeTimeline = await twitterClient().v1.homeTimeline({
     exclude_replies: true,
   });
   const tweets: TweetV1[] = [];

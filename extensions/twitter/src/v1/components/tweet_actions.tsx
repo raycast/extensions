@@ -48,7 +48,7 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
       if (account.screen_name !== t.user.screen_name) {
         throw Error("You can only delete your own Tweets");
       }
-      await twitterClient.v1.deleteTweet(t.id_str);
+      await twitterClient().v1.deleteTweet(t.id_str);
       showToast({ style: Toast.Style.Success, title: "Tweet deleted", message: "Tweet deletion successful" });
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Could not delete Tweet", message: getErrorMessage(error) });
@@ -72,7 +72,7 @@ export function RetweetAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
     : { source: "retweet.png", tintColor: Color.PrimaryText };
   const retweet = async () => {
     try {
-      await twitterClient.v1.post(`statuses/${cmd}/${t.id_str}.json`);
+      await twitterClient().v1.post(`statuses/${cmd}/${t.id_str}.json`);
       showToast({ style: Toast.Style.Success, title: "Retweet successful", message: "Retweet creation successful" });
       if (props.fetcher) {
         await props.fetcher.updateInline();
@@ -93,7 +93,7 @@ export function LikeAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
     : { source: "heart_empty.png", tintColor: Color.PrimaryText };
   const retweet = async () => {
     try {
-      await twitterClient.v1.post(`favorites/${cmd}.json`, { id: t.id_str });
+      await twitterClient().v1.post(`favorites/${cmd}.json`, { id: t.id_str });
       showToast({ style: Toast.Style.Success, title: `${title} successful`, message: `${title} operation successful` });
       if (props.fetcher) {
         await props.fetcher.updateInline();

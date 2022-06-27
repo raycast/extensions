@@ -17,7 +17,7 @@ export function MyTweetList() {
 
 async function getMyTweets(): Promise<TweetV1[]> {
   const account = await loggedInUserAccount();
-  const mytweets = await twitterClient.v1.userTimelineByUsername(account.screen_name);
+  const mytweets = await twitterClient().v1.userTimelineByUsername(account.screen_name);
   const tweets: TweetV1[] = [];
   for (const t of mytweets.tweets) {
     tweets.push(t);

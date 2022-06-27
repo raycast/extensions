@@ -18,14 +18,14 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
       throw Error("Tweet text could not be longer than 280 characters");
     }
     if (replyTweet) {
-      await twitterClient.v1.reply(text, replyTweet.id_str);
+      await twitterClient().v1.reply(text, replyTweet.id_str);
       await showToast({
         style: Toast.Style.Success,
         title: "Tweet created",
         message: "Reply Tweet creation successful",
       });
     } else {
-      await twitterClient.v1.tweet(text);
+      await twitterClient().v1.tweet(text);
       await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
     }
     popToRoot();
@@ -120,12 +120,12 @@ async function submitTweets(tweets: TweetContent[]) {
     }
     if (tweets.length === 1) {
       const t = tweets[0];
-      await twitterClient.v1.tweet(t.text);
+      await twitterClient().v1.tweet(t.text);
       await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
       popToRoot();
     } else {
       const tweetTexts: string[] = tweets.map((t) => t.text);
-      await twitterClient.v1.tweetThread(tweetTexts);
+      await twitterClient().v1.tweetThread(tweetTexts);
       await showToast({ style: Toast.Style.Success, title: "Thread created", message: "Thread creation successful" });
       popToRoot();
     }

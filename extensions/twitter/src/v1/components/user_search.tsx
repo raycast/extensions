@@ -11,7 +11,7 @@ export function UserList() {
     UserV1[] | undefined
   > => {
     if (query && query.length > 0 && query !== "@") {
-      const userdata = await twitterClient.v1.searchUsers(query);
+      const userdata = await twitterClient().v1.searchUsers(query);
       const users: UserV1[] = [];
       for (const u of userdata) {
         users.push(u);
