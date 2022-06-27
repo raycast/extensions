@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { QBittorrent, prettySize, RawTorrent, RawTorrentListFilter, RawTorrentState } from "qbit.js";
 
@@ -103,9 +103,21 @@ export default function Torrents() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Torrent Magnet Link" content={torrent.magnet_uri} />
-                <Action title="Resume Torrent" onAction={() => qbit.api.resumeTorrents(torrent.infohash_v1)} />
-                <Action title="Pause Torrent" onAction={() => qbit.api.pauseTorrents(torrent.infohash_v1)} />
-                <Action title="Delete Torrent" onAction={() => qbit.api.deleteTorrents(torrent.infohash_v1)} />
+                <Action
+                  icon="../assets/resumed.svg"
+                  title="Resume Torrent"
+                  onAction={() => qbit.api.resumeTorrents(torrent.infohash_v1)}
+                />
+                <Action
+                  icon="../assets/paused.svg"
+                  title="Pause Torrent"
+                  onAction={() => qbit.api.pauseTorrents(torrent.infohash_v1)}
+                />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Torrent"
+                  onAction={() => qbit.api.deleteTorrents(torrent.infohash_v1)}
+                />
               </ActionPanel>
             }
           />
