@@ -49,7 +49,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title={"Open Email"} target={<Email id={item.id} />} />
+              <Action.Push title={"Open Email"} icon={Icon.Envelope} target={<Email id={item.id} />} />
             </ActionPanel>
           }
         />
