@@ -1,6 +1,5 @@
 import axios from "axios";
-import { LocalStorage } from "@raycast/api";
-import { Clipboard, showHUD } from "@raycast/api";
+import { LocalStorage, popToRoot, Clipboard, showHUD } from "@raycast/api";
 import path from "path";
 import fs from "fs/promises";
 
@@ -183,6 +182,7 @@ export const deleteMessage = async (id: string) => {
     });
 
     showHUD("✅ Message deleted successfully");
+    popToRoot();
   } catch (error) {
     console.log(error);
   }
