@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Update List layout] - {PR_MERGE_DATE}
+## [Update List layout] - 2022-06-27
 
 - Update List layout: Add clock image in List Detail
 
