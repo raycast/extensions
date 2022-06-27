@@ -38,7 +38,7 @@ export default function AddTorrents() {
       setSelectedTorrents(selectedItems.map((item) => item.path));
       await showToast({
         style: Toast.Style.Success,
-        title: `Detected ${selectedItems.length} Torrents fron Finder`,
+        title: `Detected ${selectedItems.length} Torrents from Finder`,
         message: "Please select the torrents that wants to submit.",
       });
     } catch (error) {
@@ -74,6 +74,7 @@ export default function AddTorrents() {
         title: "Failed to submit torrents",
         message: "Please select torrents or fill some urls.",
       });
+      return;
     }
     setLoading(true);
     const options = Object.fromEntries(Object.entries(opts).filter(([_, value]) => value !== ""));
