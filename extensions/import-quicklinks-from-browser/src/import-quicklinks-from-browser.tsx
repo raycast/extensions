@@ -154,9 +154,15 @@ export default function ListSearchEngine() {
         />
       }
     >
-      <List.EmptyView icon={Icon.MagnifyingGlass} description="No custom search engine found." actions={<ActionPanel>
-        <Action title="Open Preferences" onAction={openCommandPreferences}/>
-      </ActionPanel>}/>
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        description="No custom search engine found."
+        actions={
+          <ActionPanel>
+            <Action title="Open Preferences" onAction={openCommandPreferences} />
+          </ActionPanel>
+        }
+      />
       <List.Section title="Custom">
         {state.searchEngines
           ?.filter((se) => se.is_active)
