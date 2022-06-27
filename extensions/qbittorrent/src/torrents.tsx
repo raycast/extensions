@@ -30,6 +30,12 @@ const iconMap = {
   [RawTorrentState.unknown]: undefined,
 };
 
+enum TorrentActionType {
+  RESUME,
+  PAUSE,
+  DELETE,
+}
+
 export default function Torrents() {
   const [filter, setFilter] = useState<RawTorrentListFilter>();
   const [torrents, setTorrents] = useState<RawTorrent[]>([]);
@@ -39,9 +45,8 @@ export default function Torrents() {
 
   const { address, username, password, timeout } = getPreferenceValues<Preferences>();
 
-  const qbit = new QBittorrent(address);
-
   const updateTorrents = async () => {
+    const qbit = new QBittorrent(address);
     +timeout && updateTimeout && clearTimeout(updateTimeout);
     setLoading(true);
     try {
@@ -60,6 +65,34 @@ export default function Torrents() {
       updateTimeout = setTimeout(() => {
         setUpdateTimestamp(+new Date());
       }, +timeout * 1000);
+    }
+  };
+
+  const torrentAction = async (actionType: TorrentActionType, hash: string) => {
+    try {
+      const qbit = new QBittorrent(address);
+      await qbit.login(username, password);
+      switch (actionType) {
+        case TorrentActionType.RESUME:
+          await qbit.api.resumeTorrents(hash);
+          break;
+        case TorrentActionType.PAUSE:
+          await qbit.api.pauseTorrents(hash);
+          break;
+        case TorrentActionType.DELETE:
+          await qbit.api.deleteTorrents(hash);
+          break;
+        default:
+          break;
+      }
+      await updateTorrents();
+    } catch (error) {
+      console.log(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Somethong wrong",
+        message: "Please try again later.",
+      });
     }
   };
 
@@ -106,17 +139,17 @@ export default function Torrents() {
                 <Action
                   icon="../assets/resumed.svg"
                   title="Resume Torrent"
-                  onAction={() => qbit.api.resumeTorrents(torrent.infohash_v1)}
+                  onAction={() => torrentAction(TorrentActionType.RESUME, torrent.infohash_v1)}
                 />
                 <Action
                   icon="../assets/paused.svg"
                   title="Pause Torrent"
-                  onAction={() => qbit.api.pauseTorrents(torrent.infohash_v1)}
+                  onAction={() => torrentAction(TorrentActionType.PAUSE, torrent.infohash_v1)}
                 />
                 <Action
                   icon={Icon.Trash}
                   title="Delete Torrent"
-                  onAction={() => qbit.api.deleteTorrents(torrent.infohash_v1)}
+                  onAction={() => torrentAction(TorrentActionType.DELETE, torrent.infohash_v1)}
                 />
               </ActionPanel>
             }
