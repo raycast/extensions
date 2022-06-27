@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Search Colors and Components command] - 2022-06-18
+## [Search Colors and Components command] - 2022-06-27
 - Add `Search Colors` command
 - Add `Search Components` command
 
