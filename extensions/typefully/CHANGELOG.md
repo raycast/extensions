@@ -1,6 +1,6 @@
 # Typefully Changelog
 
-## [Added Commands] - 2022-06-22
+## [Added Commands] - 2022-06-27
 
 - Add ability to view scheduled drafts
 - Add ability to view posted drafts
