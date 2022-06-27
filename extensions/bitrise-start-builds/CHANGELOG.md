@@ -1,3 +1,3 @@
 # Bitrise Start Builds Changelog
 
-## [Initial Version] - 2022-05-16
+## [Initial Version] - 2022-06-27
