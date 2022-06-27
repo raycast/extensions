@@ -28,7 +28,7 @@ export default function AddTorrents() {
   const torrentFilesRef = useRef<Form.TagPicker>(null);
   const torrentURLsRef = useRef<Form.TextArea>(null);
   const [selectedTorrents, setSelectedTorrents] = useState<string[]>([]);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [preferences, setPreferences] = useState<RawPreference>();
   const [categories, setCategories] = useState<string[]>();
 

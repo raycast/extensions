@@ -33,7 +33,7 @@ const iconMap = {
 export default function Torrents() {
   const [filter, setFilter] = useState<RawTorrentListFilter>();
   const [torrents, setTorrents] = useState<RawTorrent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   let updateTimeout: NodeJS.Timeout;
 
