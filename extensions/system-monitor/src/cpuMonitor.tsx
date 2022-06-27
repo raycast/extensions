@@ -5,7 +5,7 @@ import { loadavg } from "os";
 
 export default function CpuMonitor() {
   const [cpu, setcpu] = useState(0);
-  const [avgLoad, setAvgLoad] = useState([]);
+  const [avgLoad, setAvgLoad] = useState(["0", "0", "0"]);
 
   useEffect(() => {
     let monitorInterval = setInterval(() => {
@@ -38,9 +38,9 @@ export default function CpuMonitor() {
                 <List.Item.Detail.Metadata.Label title="Usage" text={cpu + " %"} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Average Load" />
-                <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad[0] ? avgLoad[0] : "0"} />
-                <List.Item.Detail.Metadata.Label title="5 min" text={avgLoad[1] ? avgLoad[1] : "0"} />
-                <List.Item.Detail.Metadata.Label title="15 min" text={avgLoad[2] ? avgLoad[2] : "0"} />
+                <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad[0]} />
+                <List.Item.Detail.Metadata.Label title="5 min" text={avgLoad[1]} />
+                <List.Item.Detail.Metadata.Label title="15 min" text={avgLoad[2]} />
               </List.Item.Detail.Metadata>
             }
           />
