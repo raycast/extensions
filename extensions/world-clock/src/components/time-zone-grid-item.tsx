@@ -1,5 +1,5 @@
 import { Grid } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import { buildFullDateTime, buildIntervalTime, isEmpty } from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";

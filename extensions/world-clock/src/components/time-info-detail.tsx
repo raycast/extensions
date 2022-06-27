@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, Image, List } from "@raycast/api";
-import React from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import Mask = Image.Mask;
 import { weeks } from "../utils/costants";
