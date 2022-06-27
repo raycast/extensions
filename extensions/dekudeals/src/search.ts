@@ -34,8 +34,7 @@ export interface DealDetails {
 }
 
 const extractImageURL = (html?: HTMLElement): DealDetails["imageURL"] =>
-  html?.querySelector("img.responsive-img.shadow-img.shadow-img-large")
-    ?.attributes["src"];
+  html?.querySelector("img.responsive-img.shadow-img.shadow-img-large")?.attributes["src"];
 const extractDescription = (html?: HTMLElement): DealDetails["description"] =>
   html?.querySelector(".description")?.textContent;
 const extractPrices = (html?: HTMLElement): DealDetails["prices"] => {
@@ -55,18 +54,14 @@ const extractMetadata = (html?: HTMLElement): DealDetails["metadata"] => {
   const entries = el?.querySelectorAll("li.list-group-item");
   const mapped = entries
     ?.flatMap((e) => {
-      const [key, ...children] = e.childNodes.filter(
-        (n) => !!n.innerText.trim()
-      );
+      const [key, ...children] = e.childNodes.filter((n) => !!n.innerText.trim());
       if (!key || !children) return;
 
       let value: string | string[];
 
       const childrenStr = children.toString().trim() ?? "";
       if (children.length > 1 || childrenStr.startsWith("<ul")) {
-        value = children.flatMap((c) =>
-          c.childNodes.map((cc) => cc.innerText.trim())
-        );
+        value = children.flatMap((c) => c.childNodes.map((cc) => cc.innerText.trim()));
       } else if (children.length == 1) {
         const string = children[0].innerText.trim();
         const split = string.split(", ");
@@ -121,10 +116,7 @@ export async function getDetails(deal: Deal): Promise<DealDetails> {
   };
 }
 
-export async function performSearch(
-  searchText: string,
-  signal: AbortSignal
-): Promise<Deal[]> {
+export async function performSearch(searchText: string, signal: AbortSignal): Promise<Deal[]> {
   const preferences = getPreferenceValues();
   const token = preferences["token"];
   if (!token) throw Error("No API token!");
@@ -132,16 +124,13 @@ export async function performSearch(
   const params = new URLSearchParams();
   params.append("term", searchText);
 
-  const response = await fetch(
-    "https://www.dekudeals.com/autocomplete" + "?" + params.toString(),
-    {
-      method: "get",
-      signal: signal,
-      headers: {
-        Cookie: `rack.session=${token}`,
-      },
-    }
-  );
+  const response = await fetch("https://www.dekudeals.com/autocomplete" + "?" + params.toString(), {
+    method: "get",
+    signal: signal,
+    headers: {
+      Cookie: `rack.session=${token}`,
+    },
+  });
   const setCookie = response.headers.get("Set-Cookie");
   if (setCookie) {
     const entries = setCookie.split("; ").map((k) => k.split("="));

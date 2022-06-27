@@ -1,5 +1,5 @@
 # DekuDeals Changelog
 
-## [Initial Version] - 2022-05-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release 🥳

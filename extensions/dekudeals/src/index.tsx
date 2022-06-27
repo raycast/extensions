@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Detail,
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Detail, Icon } from "@raycast/api";
 import { AbortError } from "node-fetch";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -31,8 +24,7 @@ interface DetailState {
   metadata?: JSX.Element;
 }
 
-const getEntryURL = (entry: Deal): string =>
-  `https://www.dekudeals.com${entry.url}`;
+const getEntryURL = (entry: Deal): string => `https://www.dekudeals.com${entry.url}`;
 
 const useSearch = () => {
   const [state, setState] = useState<SearchState>({
@@ -62,10 +54,7 @@ const useSearch = () => {
         isLoading: true,
       }));
       try {
-        const results = await performSearch(
-          searchText,
-          cancelRef.current.signal
-        );
+        const results = await performSearch(searchText, cancelRef.current.signal);
         setState((oldState) => ({
           ...oldState,
           results: results,
@@ -112,25 +101,15 @@ ${details?.description ?? ""}
 `;
 
 const MetadataPriceEntry = (price: DealDetailsPrice): JSX.Element => {
-  const title = price.version
-    ? `${price.store} (${price.version})`
-    : price.store;
-  return (
-    <Detail.Metadata.Label key={price.store} title={title} text={price.price} />
-  );
+  const title = price.version ? `${price.store} (${price.version})` : price.store;
+  return <Detail.Metadata.Label key={price.store} title={title} text={price.price} />;
 };
 
 const MetadataEntry = (metadata: DealDetailsMetadata): JSX.Element => {
   switch (typeof metadata.value) {
     case "string": {
       const text = metadata.value as string;
-      return (
-        <Detail.Metadata.Label
-          key={metadata.key}
-          title={metadata.key}
-          text={text}
-        />
-      );
+      return <Detail.Metadata.Label key={metadata.key} title={metadata.key} text={text} />;
     }
     case "object": {
       const values = metadata.value as string[];
@@ -149,10 +128,7 @@ const MetadataDLCEntry = (dlc: DealDetailsDLC): JSX.Element => (
   <Detail.Metadata.Label key={dlc.name} title={dlc.name} text={dlc.price} />
 );
 
-const DealMetadata = (
-  deal: Deal,
-  details?: DealDetails
-): JSX.Element | undefined => {
+const DealMetadata = (deal: Deal, details?: DealDetails): JSX.Element | undefined => {
   if (!details) return;
   return (
     <Detail.Metadata>
@@ -203,13 +179,8 @@ const SearchListItem = ({ searchResult }: { searchResult: Deal }) => (
     actions={
       <ActionPanel>
         <ActionPanel.Section>
-          <Action.Push title="Show details" target={Details(searchResult)} />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action.OpenInBrowser
-            url={getEntryURL(searchResult)}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
+          <Action.OpenInBrowser url={getEntryURL(searchResult)} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+          <Action.Push title="Show Details" icon={Icon.Sidebar} target={Details(searchResult)} />
         </ActionPanel.Section>
       </ActionPanel>
     }
@@ -220,23 +191,12 @@ const Command = (): JSX.Element => {
   const { state, search } = useSearch();
 
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search DekuDeals..."
-      throttle
-    >
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search DekuDeals..." throttle>
       {state.results.map((searchResult) => (
         <SearchListItem key={searchResult.name} searchResult={searchResult} />
       ))}
       <List.EmptyView
-        title={
-          state.query == ""
-            ? "Search for something"
-            : state.isLoading
-            ? "Loading..."
-            : "No results"
-        }
+        title={state.query == "" ? "Search for something" : state.isLoading ? "Loading..." : "No results"}
       />
     </List>
   );
