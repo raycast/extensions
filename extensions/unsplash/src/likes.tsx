@@ -1,5 +1,5 @@
 import { Grid } from "@raycast/api";
-import { getGridItemSize, showImageTitle } from "./functions/gridItemSize";
+import { getGridItemSize, showImageTitle, toTitleCase } from "./functions/utils";
 
 // Hooks
 import { useLikes } from "./hooks/useLikes";
@@ -14,9 +14,10 @@ interface SearchListItemProps {
 
 const Unsplash: React.FC = () => {
   const { loading, likes } = useLikes();
+  const itemSize = getGridItemSize();
 
   return (
-    <Grid isLoading={loading} itemSize={getGridItemSize()} searchBarPlaceholder="Search your likes...">
+    <Grid isLoading={loading} itemSize={itemSize} searchBarPlaceholder="Search your likes...">
       <Grid.Section title="Results" subtitle={String(likes?.length)}>
         {likes?.map((like) => (
           <SearchListItem key={like.id} item={like} />
@@ -39,8 +40,10 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ item }) => {
     alt_description: "",
   };
 
+  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
+
   return (
-    <Grid.Item content={image} title={showImageTitle() ? title : ""} actions={<Actions item={mimicItem} details />} />
+    <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={mimicItem} details />} />
   );
 };
 

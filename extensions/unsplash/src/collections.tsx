@@ -1,5 +1,5 @@
 import { Grid } from "@raycast/api";
-import { getGridItemSize, showImageTitle } from "./functions/gridItemSize";
+import { getGridItemSize, showImageTitle, toTitleCase } from "./functions/utils";
 
 // Hooks
 import { useSearch } from "./hooks/useSearch";
@@ -14,11 +14,12 @@ interface CollectionListItemProps {
 
 const UnsplashCollections: React.FC = () => {
   const { state, search } = useSearch("collections");
+  const itemSize = getGridItemSize(); 
 
   return (
     <Grid
       isLoading={state.isLoading}
-      itemSize={getGridItemSize()}
+      itemSize={itemSize}
       onSearchTextChange={search}
       searchBarPlaceholder="Search collections..."
       throttle
@@ -42,10 +43,12 @@ const SearchListItem: React.FC<CollectionListItemProps> = ({ searchResult }) => 
     searchResult?.user?.profile_image?.small,
   ];
 
+  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
+
   return (
     <Grid.Item
       content={image}
-      title={showImageTitle() ? title : ""}
+      title={gridItemTitle}
       actions={<Actions item={searchResult} details />}
     />
   );
