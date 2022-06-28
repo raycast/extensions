@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vercel-project-explorer",
+  "title": "Vercel Project Explorer",
+  "description": "An extension for viewing and modifying Vercel projects and deployments.",
+  "icon": "icon.png",
+  "author": "MaxLeiter",
+  "license": "MIT",
+  "access": "public",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Explore Vercel Projects",
+      "description": "Interact with your Vercel projects and deployments",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Vercel access token",
+      "placeholder": "Enter your Access Token",
+      "link": "https://vercel.com/account/tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "node-fetch": "^3.1.0",
+    "vc": "^0.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
