@@ -38,7 +38,7 @@ export enum MRState {
 }
 
 const GET_MR_DETAIL = gql`
-  query GetMRDetail($id: ID!) {
+  query GetMRDetail($id: MergeRequestID!) {
     mergeRequest(id: $id) {
       description
       project {
