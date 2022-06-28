@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Bugfixes] - 2022-06-28
+- Fix an error when viewing Merge Request details:
+  `Could not get Merge Request Details: Type mismatch on variable $id and argument id (ID! / MergeRequestID!)`
+
 ## [Custom Certs] - 2022-06-23
 - Add support for custom certificates
 - Add support for ignoring SSL errors
