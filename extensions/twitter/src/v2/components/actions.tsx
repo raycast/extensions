@@ -1,4 +1,4 @@
-import { Action, Color, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, Alert, Color, confirmAlert, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import { Tweet, User } from "../lib/twitter";
 import { resetOAuthTokens } from "../lib/oauth";
@@ -118,16 +118,29 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
       if (account.username !== t.user.username) {
         throw Error("You can only delete your own Tweets");
       }
-      await clientV2.deleteTweet(t);
-      showToast({ style: Toast.Style.Success, title: "Tweet deleted", message: "Tweet deletion successful" });
-      popToRoot();
+      if (
+        await confirmAlert({
+          title: "Delete the Tweet?",
+          icon: "🗑️",
+          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        })
+      ) {
+        await clientV2.deleteTweet(t);
+        showToast({ style: Toast.Style.Success, title: "Tweet deleted", message: "Tweet deletion successful" });
+        popToRoot();
+      }
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Could not delete Tweet", message: getErrorMessage(error) });
     }
   };
   if (user === t.user.username) {
     return (
-      <Action title="Delete Tweet" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={deleteTweet} />
+      <Action
+        title="Delete Tweet"
+        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        onAction={deleteTweet}
+      />
     );
   } else {
     return null;
