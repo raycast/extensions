@@ -95,8 +95,6 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   }
 
   const md = lines.join("  \n");
-  const author = mr.author ? `${mr.author.name}` : "<no author>";
-  const milestone = mr.milestone ? mr.milestone.title : "<no milestone>";
 
   return (
     <Detail
@@ -113,31 +111,33 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(mr.state)}
-              color={stateColor(mr.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(mr.state)} color={stateColor(mr.state)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.TagList title="Assignee">
-            {mr.assignees.map((a) => (
-              <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
-            ))}
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.TagList title="Reviewer">
-            {mr.reviewers.map((a) => (
-              <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
-            ))}
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Milestone" text={milestone} />
-          <Detail.Metadata.TagList title="Labels">
-            {mr.labels.map((m) => (
-              <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {mr.author && <Detail.Metadata.Label title="Author" text={mr.author.name} />}
+          {!!mr.assignees.length && (
+            <Detail.Metadata.TagList title="Assignee">
+              {mr.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {!!mr.reviewers.length && (
+            <Detail.Metadata.TagList title="Reviewer">
+              {mr.reviewers.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.milestone && <Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+          {!!mr.labels.length && (
+            <Detail.Metadata.TagList title="Labels">
+              {mr.labels.map((m) => (
+                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />
