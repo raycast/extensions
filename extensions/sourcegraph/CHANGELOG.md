@@ -1,5 +1,11 @@
 # Changelog
 
+## [Improved revision search and result tooltips](https://github.com/raycast/extensions/pull/2108) - 2022-06-27
+
+- **search**: Results from revision matches (e.g. with `repo:sourcegraph@3.41`) now annotate results with which revision the match was on, and drilldowns (<kbd>Tab</kbd> on a result) now more consistently apply the appropriate revision to generated searches.
+- **search**: Repository results with long names and long descriptions that are at risk of getting their names cut off are now hoverable for the full name of the repository.
+- **search**: Repository results with short descriptions no longer have hover text.
+
 ## [Search performance improvements](https://github.com/raycast/extensions/pull/1844) - 2022-05-29
 
 - **search**: The drilldown action shortcut is now <kbd>Tab</kbd>, to align the shortcut for selecting suggestions in the Sourcegraph web application. For example, on a repository result, <kbd>Tab</kbd> will start a search with the `repo:` filter.
