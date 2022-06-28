@@ -116,7 +116,11 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
-          {mr.author && <Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />}
+          {mr.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={mr.author.name} icon={userIcon(mr.author)} />
+            </Detail.Metadata.TagList>
+          )}
           {mr.assignees.length > 0 && (
             <Detail.Metadata.TagList title="Assignee">
               {mr.assignees.map((a) => (
