@@ -123,7 +123,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
               ))}
             </Detail.Metadata.TagList>
           )}
-          {!!mr.reviewers.length && (
+          {mr.reviewers.length > 0 && (
             <Detail.Metadata.TagList title="Reviewer">
               {mr.reviewers.map((a) => (
                 <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
