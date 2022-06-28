@@ -124,18 +124,18 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           <Detail.Metadata.Label title="Author" text={author} />
           <Detail.Metadata.TagList title="Assignee">
             {mr.assignees.map((a) => (
-              <Detail.Metadata.TagList.Item text={a.name} icon={a.avatar_url} />
+              <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Reviewer">
             {mr.reviewers.map((a) => (
-              <Detail.Metadata.TagList.Item text={a.name} icon={a.avatar_url} />
+              <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Milestone" text={milestone} />
           <Detail.Metadata.TagList title="Labels">
             {mr.labels.map((m) => (
-              <Detail.Metadata.TagList.Item text={m.name} color={m.color} />
+              <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
             ))}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
