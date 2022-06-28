@@ -31,7 +31,3 @@ Now you should be able to manage your Envoyer projects with Raycast 🚀.
 For all read only commands no scopes are needed. If you want to start new deployments you should
 allow `deployments:create` scope.
 
-## Showcases
-
-![envoyer-01](metadata/envoyer-01.png)
-![envoyer-02](metadata/envoyer-02.png)
