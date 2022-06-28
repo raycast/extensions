@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action, environment, Icon } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import PackageDetail from "./components/package-detail";
-import { searchNuget } from './nuget-client';
+import { searchNuget } from "./nuget-client";
 import { NugetPackage } from "./NugetPackage";
 import { GetCommandForCli, humanizeNumber, randomString } from "./utils";
 import { join } from "path";
@@ -25,23 +25,24 @@ export default function Command(): JSX.Element {
 
     fetchId.current = newId;
 
-    searchNuget(state.query, newId)
-      .then((res) => {
-        const _fetchid = res.fetchId;
-        if (fetchId.current === _fetchid) {
-          setState((oldState) => ({ ...oldState, isLoading: false, items: res.data }));
-        }
-      })
+    searchNuget(state.query, newId).then((res) => {
+      const _fetchid = res.fetchId;
+      if (fetchId.current === _fetchid) {
+        setState((oldState) => ({ ...oldState, isLoading: false, items: res.data }));
+      }
+    });
   }, [state]);
 
   return (
-    <List onSearchTextChange={(query: string) => {
-      // Perhaps query should be another useState??
-      setState((oldState) => ({ ...oldState, query: query, isLoading: true }));
-    }}
+    <List
+      onSearchTextChange={(query: string) => {
+        // Perhaps query should be another useState??
+        setState((oldState) => ({ ...oldState, query: query, isLoading: true }));
+      }}
       isLoading={state.isLoading}
     >
-      {!state.isLoading && state.items &&
+      {!state.isLoading &&
+        state.items &&
         state.items.map((item) => {
           return (
             <List.Item
@@ -51,24 +52,27 @@ export default function Command(): JSX.Element {
               accessories={[
                 {
                   text: humanizeNumber(item.totalDownloads),
-                  icon: Icon.Download
+                  icon: Icon.Download,
                 },
                 {
                   text: item.version,
-                  icon: Icon.Eye
-                }
+                  icon: Icon.Eye,
+                },
               ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard content={GetCommandForCli(item)} />
                   <Action.Push title="Show Details" target={<PackageDetail package={item} />} icon={Icon.Eye} />
-                  <Action.Paste title="Paste to front-most" content={GetCommandForCli(item)} shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }} />
+                  <Action.Paste
+                    title="Paste to front-most"
+                    content={GetCommandForCli(item)}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+                  />
                 </ActionPanel>
               }
             />
-          )
-        })
-      }
+          );
+        })}
       {/* {state.isLoading &&
         <List.Item
           title={"Searching " + state.query}
