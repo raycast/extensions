@@ -81,7 +81,6 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
     lines.push(optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
   }
   const md = lines.join("  \n");
-  const author = issue.author ? `${issue.author.name}` : "<no author>";
 
   return (
     <Detail
@@ -98,19 +97,24 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(issue.state)}
-              color={stateColor(issue.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.Label title="Milestone" text={issue.milestone?.title || "<no milestone>"} />
-          <Detail.Metadata.TagList title="Labels">
-            {issue.labels.map((i) => (
-              <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {issue.author && <Detail.Metadata.Label title="Author" text={issue.author.name} />}
+          {issue.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {issue.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
+          {issue.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {issue.labels.map((i) => (
+                <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />

@@ -129,6 +129,7 @@ export function jsonDataToIssue(issue: any): Issue {
     state: issue.state,
     updated_at: issue.updated_at,
     author: maybeUserFromJson(issue.author),
+    assignees: issue.assignees.map(userFromJson),
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
     labels: issue.labels as Label[],
@@ -209,6 +210,7 @@ export class Issue {
   public reference_full = "";
   public state = "";
   public author: User | undefined;
+  public assignees: User[] = [];
   public updated_at = "";
   public project_id = 0;
   public milestone?: Milestone = undefined;
