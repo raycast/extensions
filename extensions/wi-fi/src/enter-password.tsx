@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Form, LocalStorage, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  LocalStorage,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import wifi, { WiFiNetwork } from "node-wifi";
 import Style = Toast.Style;
@@ -12,7 +23,6 @@ export default function EnterPassword(props: {
 }) {
   const { wifiPassword, wifiNetWork, setRefresh } = props;
   const [password, setPassword] = useState<string>("");
-  const { pop } = useNavigation();
 
   return (
     <Form
@@ -42,7 +52,7 @@ export default function EnterPassword(props: {
                   await LocalStorage.setItem(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
                   await showHUD(`Connected to ${wifiNetWork.ssid} successfully`);
                   await toast.hide();
-                  pop();
+                  await popToRoot();
                 } else {
                   await showToast(Style.Failure, "Failure to connect");
                 }

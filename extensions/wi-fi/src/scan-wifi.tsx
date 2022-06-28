@@ -1,25 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  Icon,
-  List,
-  LocalStorage,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { getWifiList } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import EnterPassword from "./enter-password";
-import wifi from "node-wifi";
 import { WifiPassword } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
-import Style = Toast.Style;
+import { PrimaryActions } from "./components/primary-actions";
 
 export default function SearchAllBunches() {
   const { push } = useNavigation();
@@ -58,41 +44,12 @@ export default function SearchAllBunches() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
-                    title={"Connect Wi-Fi"}
-                    onAction={async () => {
-                      if (curWifi[0].ssid === value.ssid) {
-                        return;
-                      }
-                      const toast = await showToast(Style.Animated, "Connecting...");
-                      wifi.connect(
-                        {
-                          ssid: value.ssid,
-                          password: value.password,
-                        },
-                        async () => {
-                          setRefresh(Date.now());
-                          const curWifi = await wifi.getCurrentConnections();
-                          if (curWifi[0].ssid === value.ssid) {
-                            await showHUD(`Connected to ${value.ssid} successfully`);
-                            await toast.hide();
-                          } else {
-                            await showToast(Style.Failure, "Failure to connect");
-                          }
-                        }
-                      );
-                    }}
-                  />
+                  <PrimaryActions wifiNetwork={value} curWifi={curWifi} setRefresh={setRefresh} />
+
                   <ActionPanel.Section>
                     <Action.CopyToClipboard
-                      title={"Copy Wi-FI"}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
-                      content={value.ssid}
-                    />
-                    <Action.CopyToClipboard
                       title={"Copy Password"}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
                       content={value.password}
                     />
                   </ActionPanel.Section>
@@ -166,11 +123,7 @@ export default function SearchAllBunches() {
                       push(<EnterPassword wifiPassword={wifiPassword} wifiNetWork={value} setRefresh={setRefresh} />);
                     }}
                   />
-                  <Action.CopyToClipboard
-                    title={"Copy Wi-FI"}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
-                    content={value.ssid}
-                  />
+                  <Action.CopyToClipboard title={"Copy Wi-FI"} content={value.ssid} />
                 </ActionPanel>
               }
             />
@@ -189,15 +142,18 @@ export default function SearchAllBunches() {
               key={index}
               title={value.ssid}
               subtitle={{ value: value.security, tooltip: value.security_flags.join(", ") }}
+              accessories={[
+                {
+                  icon: {
+                    source: Icon.LevelMeter,
+                    tintColor: value.quality < 40 ? Color.Red : value.quality < 70 ? Color.Orange : Color.Green,
+                  },
+                  tooltip: value.quality + "%",
+                },
+              ]}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.CopyToClipboard
-                      title={"Copy Wi-FI"}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
-                      content={value.ssid}
-                    />
-                  </ActionPanel.Section>
+                  <PrimaryActions wifiNetwork={{ ...value, password: "" }} curWifi={curWifi} setRefresh={setRefresh} />
                 </ActionPanel>
               }
             />
