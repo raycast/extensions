@@ -137,7 +137,7 @@ export function RecentSearchesList(props: {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
   return (
-    <List onSearchTextChange={setRootSearchText} isLoading={isLoading} throttle={false}>
+    <List onSearchTextChange={setRootSearchText} isLoading={isLoading} throttle={true}>
       <NoSearchItem recentQueries={rq} />
       <List.Section title="Recently Searched">
         {rq?.map((q) => (

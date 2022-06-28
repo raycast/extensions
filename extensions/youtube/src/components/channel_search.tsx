@@ -32,7 +32,7 @@ export function SearchChannelList() {
         isLoading={isLoading}
         searchText={searchText}
         onSearchTextChange={(search: string) => {
-          if (layout === "list" || search) appendRecentSearches(search);
+          if (search) appendRecentSearches(search);
         }}
         throttle={true}
       >
