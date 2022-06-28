@@ -99,7 +99,9 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
           </Detail.Metadata.TagList>
-          {issue.author && <Detail.Metadata.Label title="Author" text={issue.author.name} />}
+          {issue.author && (
+            <Detail.Metadata.Label title="Author" text={issue.author.name} icon={issue.author.avatar_url} />
+          )}
           {issue.assignees.length > 0 && (
             <Detail.Metadata.TagList title="Assignee">
               {issue.assignees.map((a) => (
