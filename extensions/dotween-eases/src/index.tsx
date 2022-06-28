@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, Detail, environment } from "@raycast/api";
+import { ActionPanel, Action, Grid, Detail, environment, Image } from "@raycast/api";
 import { join } from "path";
 
 const eases = [
@@ -49,7 +49,7 @@ export default function Command() {
         return (
           <Grid.Item
             key={ease}
-            content={`${ease}.gif`}
+            content={{ source: `${ease}.gif`, mask: Image.Mask.RoundedRectangle }}
             title={ease}
             actions={
               <ActionPanel>
