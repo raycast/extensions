@@ -3,9 +3,14 @@ import { useOneTimePasswordHistoryWarning, usePasswordGenerator } from "./hooks"
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise } from "./utils";
-import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
-import { debounce } from "throttle-debounce";
+import {
+  PasswordGeneratorOptions as PassGenOptions,
+  PasswordOptionField,
+  PasswordOptionsToFieldEntries,
+  PasswordType,
+} from "./types";
 import { TroubleshootingGuide } from "./components";
+import { useRef, useState } from "react";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -24,28 +29,6 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   useOneTimePasswordHistoryWarning();
 
   if (!options) return <Detail isLoading />;
-
-  const showDebouncedToast = debounce(1000, showToast);
-
-  const handlePasswordTypeChange = (type: string) => {
-    setOption("passphrase", type === "passphrase");
-  };
-
-  const handleFieldChange =
-    <O extends keyof PasswordGeneratorOptions>(field: O, errorMessage?: string) =>
-    async (value: PasswordGeneratorOptions[O]) => {
-      if (isValidFieldValue(field, value)) {
-        showDebouncedToast.cancel();
-        setOption(field, value);
-        return;
-      }
-
-      if (errorMessage) {
-        showDebouncedToast(Toast.Style.Failure, errorMessage);
-      }
-    };
-
-  const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";
 
   return (
     <Form
@@ -83,29 +66,65 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
       <Form.Description title="🔑  Password" text={password ?? "Generating..."} />
       <FormSpace />
       <Form.Separator />
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        value={passwordType}
-        onChange={handlePasswordTypeChange}
-        defaultValue="password"
-      >
+      <OptionForm options={options} onOptionChange={setOption} />
+    </Form>
+  );
+}
+
+type OptionFormProps = {
+  options: PassGenOptions;
+  onOptionChange: ReturnType<typeof usePasswordGenerator>["setOption"];
+};
+
+function OptionForm({ options, onOptionChange: saveOption }: OptionFormProps) {
+  const [formOptions, setFormOptions] = useState(options);
+  const validationToastRef = useRef<Toast>();
+
+  const updateFormOptions = <O extends keyof PassGenOptions>(option: O, value: PassGenOptions[O]) => {
+    const newFormOptions = { ...formOptions, [option]: value };
+    setFormOptions(newFormOptions);
+  };
+
+  const handlePasswordTypeChange = (type: string) => {
+    const isPassphrase = type === "passphrase";
+    updateFormOptions("passphrase", isPassphrase);
+    saveOption("passphrase", isPassphrase);
+  };
+
+  const handleFieldChange = <O extends keyof PassGenOptions>(field: O, errorMessage?: string) => {
+    return async (value: PassGenOptions[O]) => {
+      updateFormOptions(field, value);
+
+      if (isValidFieldValue(field, value)) {
+        validationToastRef.current?.hide();
+        saveOption(field, value);
+      } else if (errorMessage) {
+        validationToastRef.current = await showToast(Toast.Style.Failure, errorMessage);
+      }
+    };
+  };
+
+  const passwordType: PasswordType = formOptions?.passphrase ? "passphrase" : "password";
+
+  return (
+    <>
+      <Form.Dropdown id="type" title="Type" value={passwordType} onChange={handlePasswordTypeChange} autoFocus>
         {Object.keys(PASSWORD_OPTIONS_MAP).map((key) => (
           <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
         ))}
       </Form.Dropdown>
       {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
-        ([option, optionField]: PasswordOptionsToFieldEntries) => (
+        ([optionType, optionField]: PasswordOptionsToFieldEntries) => (
           <OptionField
-            key={option}
-            option={option}
+            key={optionType}
+            option={optionType}
             field={optionField}
-            currentOptions={options}
-            handleFieldChange={handleFieldChange(option, optionField.errorMessage)}
+            currentOptions={formOptions}
+            handleFieldChange={handleFieldChange(optionType, optionField.errorMessage)}
           />
         )
       )}
-    </Form>
+    </>
   );
 }
 
@@ -115,7 +134,7 @@ async function clearStorage() {
   }
 }
 
-function isValidFieldValue<O extends keyof PasswordGeneratorOptions>(field: O, value: PasswordGeneratorOptions[O]) {
+function isValidFieldValue<O extends keyof PassGenOptions>(field: O, value: PassGenOptions[O]) {
   if (field === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
   if (field === "separator") return (value as string).length === 1;
   if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
@@ -124,9 +143,9 @@ function isValidFieldValue<O extends keyof PasswordGeneratorOptions>(field: O, v
 
 type OptionFieldProps = {
   field: PasswordOptionField;
-  option: keyof PasswordGeneratorOptions;
-  currentOptions: PasswordGeneratorOptions | undefined;
-  handleFieldChange: (value: PasswordGeneratorOptions[keyof PasswordGeneratorOptions]) => Promise<void>;
+  option: keyof PassGenOptions;
+  currentOptions: PassGenOptions | undefined;
+  handleFieldChange: (value: PassGenOptions[keyof PassGenOptions]) => Promise<void>;
 };
 
 function OptionField({ option, currentOptions, handleFieldChange, field }: OptionFieldProps) {
