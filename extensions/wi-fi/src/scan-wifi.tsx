@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   List,
   LocalStorage,
@@ -22,7 +24,7 @@ import Style = Toast.Style;
 export default function SearchAllBunches() {
   const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
-  const { wifiPassword, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
+  const { wifiPassword, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
@@ -39,6 +41,13 @@ export default function SearchAllBunches() {
               title={value.ssid}
               subtitle={{ value: value.security, tooltip: value.security_flags.join(", ") }}
               accessories={[
+                {
+                  icon: {
+                    source: "password.svg",
+                    tintColor: Color.Brown,
+                  },
+                  tooltip: value.password,
+                },
                 {
                   icon: {
                     source: Icon.LevelMeter,
@@ -75,21 +84,49 @@ export default function SearchAllBunches() {
                       );
                     }}
                   />
-                  <Action
-                    icon={Icon.Trash}
-                    title={"Remove Wi-Fi"}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={async () => {
-                      const newWifiWithPasswordLis: WifiPassword[] = [];
-                      wifiWithPasswordList.forEach((w) => {
-                        if (w.ssid !== value.ssid) {
-                          newWifiWithPasswordLis.push(w);
-                        }
-                      });
-                      await LocalStorage.setItem(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPasswordLis));
-                      setRefresh(Date.now());
-                    }}
-                  />
+                  <ActionPanel.Section>
+                    <Action.CopyToClipboard
+                      title={"Copy Wi-FI"}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      content={value.ssid}
+                    />
+                    <Action.CopyToClipboard
+                      title={"Copy Password"}
+                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                      content={value.password}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.Trash}
+                      title={"Remove Wi-Fi"}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      onAction={async () => {
+                        const options: Alert.Options = {
+                          icon: Icon.Trash,
+                          title: "Remove Wi-Fi",
+                          message: `Are you sure you want to remove ${value.ssid}?`,
+                          primaryAction: {
+                            title: "Remove",
+                            onAction: () => {
+                              const newWifiWithPasswordLis: WifiPassword[] = [];
+                              wifiWithPasswordList.forEach((w) => {
+                                if (w.ssid !== value.ssid) {
+                                  newWifiWithPasswordLis.push(w);
+                                }
+                              });
+                              LocalStorage.setItem(
+                                LocalStorageKey.WIFI_PASSWORD,
+                                JSON.stringify(newWifiWithPasswordLis)
+                              );
+                              setRefresh(Date.now());
+                            },
+                          },
+                        };
+                        await confirmAlert(options);
+                      }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -129,6 +166,38 @@ export default function SearchAllBunches() {
                       push(<EnterPassword wifiPassword={wifiPassword} wifiNetWork={value} setRefresh={setRefresh} />);
                     }}
                   />
+                  <Action.CopyToClipboard
+                    title={"Copy Wi-FI"}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    content={value.ssid}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+
+      <List.Section title={"Public"}>
+        {publicWifi.map((value, index) => {
+          return (
+            <List.Item
+              icon={{
+                source: "wifi-icon.svg",
+                tintColor: curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
+              }}
+              key={index}
+              title={value.ssid}
+              subtitle={{ value: value.security, tooltip: value.security_flags.join(", ") }}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.CopyToClipboard
+                      title={"Copy Wi-FI"}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      content={value.ssid}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
