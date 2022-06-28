@@ -13,7 +13,6 @@
     "required": false,
     "title": "Decide which Terminal Application you want to use",
     "description": "If iTerm is available, you can use iTerm instead of Terminal.",
-    "label": "Use iTerm",
     "data": [{
         "title": "Terminal",
         "value": "Terminal"
