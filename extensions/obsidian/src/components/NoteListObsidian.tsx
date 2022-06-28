@@ -1,4 +1,4 @@
-import { showToast, Toast, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import fs from "fs";
 

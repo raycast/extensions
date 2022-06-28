@@ -1,4 +1,4 @@
-import { List, ActionPanel, getPreferenceValues, useNavigation } from "@raycast/api";
+import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
 
 import { Note, Vault, SearchNotePreferences } from "../utils/interfaces";
@@ -23,7 +23,7 @@ export function NoteListItem(props: {
   function reloadContent() {
     const newContent = getNoteFileContent(note.path);
     note.content = newContent;
-    setContent((content) => newContent);
+    setContent(newContent);
   }
 
   function actionCallback(action: NoteAction) {

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";

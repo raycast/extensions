@@ -1,9 +1,9 @@
-import { showToast, Toast, confirmAlert, Icon, open, getPreferenceValues, Clipboard } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Icon, open } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 
 import { NoteFormPreferences, FormValue, Vault } from "./interfaces";
-import { monthMapping, dayMapping, applyTemplates } from "./utils";
+import { applyTemplates } from "./utils";
 
 class NoteCreator {
   vaultPath: string;

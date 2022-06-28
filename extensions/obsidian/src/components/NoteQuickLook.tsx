@@ -1,4 +1,4 @@
-import { Detail, Action, ActionPanel, useNavigation } from "@raycast/api";
+import { Detail, ActionPanel, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
 import { Note, Vault } from "../utils/interfaces";
@@ -18,7 +18,7 @@ export function NoteQuickLook(props: { note: Note; vault: Vault; actionCallback:
   function reloadContent() {
     const newContent = getNoteFileContent(note.path);
     note.content = newContent;
-    setContent((content) => newContent);
+    setContent(newContent);
   }
 
   function actionCallback(action: NoteAction, value: any = undefined) {

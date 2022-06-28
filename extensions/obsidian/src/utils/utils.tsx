@@ -1,4 +1,4 @@
-import { getPreferenceValues, Clipboard, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import { getPreferenceValues, Clipboard, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 
 import fs from "fs";
 import fsPath from "path";
@@ -45,7 +45,7 @@ function filterContent(content: string) {
   return content;
 }
 
-export function getNoteFileContent(path: string, filter: boolean = true) {
+export function getNoteFileContent(path: string, filter = true) {
   let content = "";
 
   try {

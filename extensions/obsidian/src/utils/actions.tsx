@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-  getSelectedText,
-  Color,
-} from "@raycast/api";
+import { Action, getPreferenceValues, Icon, showToast, Toast, getSelectedText, Color } from "@raycast/api";
 
 import fs from "fs";
 import React, { useState } from "react";
@@ -70,7 +60,7 @@ export function NoteActions(props: { note: Note; vault: Vault; actionCallback: (
 
       <Action.Push
         title="Append to Note"
-        target={<AppendNoteForm note={note} actionCallback={actionCallback}/>}
+        target={<AppendNoteForm note={note} actionCallback={actionCallback} />}
         shortcut={{ modifiers: ["opt"], key: "a" }}
         icon={Icon.Pencil}
       />
