@@ -5,10 +5,10 @@ import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
 
 interface Preferences {
-  iterm: string;
+  terminal: string;
 }
 const preferences = getPreferenceValues<Preferences>();
-export const useIterm = preferences["iterm"];
+export const terminal = preferences["terminal"];
 
 async function runTerminal(item: ISSHConnection) {
   let identity = "";
@@ -94,7 +94,7 @@ async function runTerminal(item: ISSHConnection) {
     call_forward()
   `;
 
-  if (useIterm) {
+  if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
     } catch (error) {
