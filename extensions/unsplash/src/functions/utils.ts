@@ -5,7 +5,6 @@ const preferences: any = getPreferenceValues();
 export const getGridItemSize = (): Grid.ItemSize => {
   const { gridItemSize } = preferences;
   if (gridItemSize == "small") return Grid.ItemSize.Small;
-  else if (gridItemSize == "medium") return Grid.ItemSize.Medium;
   else if (gridItemSize == "large") return Grid.ItemSize.Large;
   else return Grid.ItemSize.Medium;
 };
