@@ -7,7 +7,7 @@ import { getViewLayout } from "./listgrid";
 import he from "he";
 
 export function ChannelItemDetail(props: {
-  channel: Channel | undefined;
+  channel: Channel;
   isLoading?: boolean | undefined;
 }): JSX.Element {
   const channel = props.channel;
@@ -40,18 +40,19 @@ export function ChannelItemDetail(props: {
       actions={
         <ActionPanel>
           <ShowRecentPlaylistVideosAction
+            channel={channel}
             title="Show Recent Channel Videos"
             playlistId={channel?.relatedPlaylists?.uploads}
           />
-          <SearchChannelVideosAction channelId={channelId} />
-          <OpenChannelInBrowser channelId={channelId} />
+          <SearchChannelVideosAction channel={channel} />
+          <OpenChannelInBrowser channelId={channel.id} channel={channel} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function ChannelItem(props: { channel: Channel }): JSX.Element {
+export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | undefined }): JSX.Element {
   const channel = props.channel;
   const channelId = channel.id;
   const title = he.decode(channel.title);
@@ -73,7 +74,7 @@ export function ChannelItem(props: { channel: Channel }): JSX.Element {
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       />
     );
-    const openBrowser = <OpenChannelInBrowser channelId={channelId} />;
+    const openBrowser = <OpenChannelInBrowser channelId={channel.id} channel={channel} />;
 
     if (getPrimaryActionPreference() === PrimaryAction.Browser) {
       return (
@@ -92,22 +93,32 @@ export function ChannelItem(props: { channel: Channel }): JSX.Element {
     }
   };
 
+  const Actions = (): JSX.Element => {
+    return (
+      <ActionPanel>
+        <ActionPanel.Section>{mainActions()}</ActionPanel.Section>
+        <ActionPanel.Section>
+          <SearchChannelVideosAction channel={channel} />
+          <ShowRecentPlaylistVideosAction
+            channel={channel}
+            title="Show Recent Channel Videos"
+            playlistId={channel.relatedPlaylists?.uploads}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          {props.actions}
+        </ActionPanel.Section>
+      </ActionPanel>
+    )
+  }
+
   return getViewLayout() === "list" ? (
     <List.Item
       key={channelId}
       title={title}
       icon={{ source: thumbnail, mask: Image.Mask.Circle }}
       accessories={[{ text: parts.join(" ") }]}
-      actions={
-        <ActionPanel>
-          {mainActions()}
-          <SearchChannelVideosAction channelId={channelId} />
-          <ShowRecentPlaylistVideosAction
-            title="Show Recent Channel Videos"
-            playlistId={channel.relatedPlaylists?.uploads}
-          />
-        </ActionPanel>
-      }
+      actions={<Actions />}
     />
   ) : (
     <Grid.Item
@@ -115,21 +126,12 @@ export function ChannelItem(props: { channel: Channel }): JSX.Element {
       title={title}
       content={{ source: thumbnail, mask: Image.Mask.Circle }}
       subtitle={parts.join(" ")}
-      actions={
-        <ActionPanel>
-          {mainActions()}
-          <SearchChannelVideosAction channelId={channelId} />
-          <ShowRecentPlaylistVideosAction
-            title="Show Recent Channel Videos"
-            playlistId={channel.relatedPlaylists?.uploads}
-          />
-        </ActionPanel>
-      }
+      actions={<Actions />}
     />
   );
 }
 
-export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Element {
+export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Element | null {
   const channelId = props.channelId;
   const { data, error, isLoading } = useRefresher<Channel | undefined>(async () => {
     if (channelId) {
@@ -140,5 +142,5 @@ export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Elem
   if (error) {
     showToast(Toast.Style.Failure, "Error fetching channel info", getErrorMessage(error));
   }
-  return <ChannelItemDetail channel={data} isLoading={isLoading} />;
+  return data ? <ChannelItemDetail channel={data} isLoading={isLoading} /> : null; 
 }

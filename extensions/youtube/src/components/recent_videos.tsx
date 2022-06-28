@@ -1,0 +1,216 @@
+import { LocalStorage, Action, Toast, showToast, Icon, Color } from "@raycast/api";
+import React, { useState, useEffect } from "react";
+import { VideoItem } from "./video";
+import { Video } from "../lib/youtubeapi";
+import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
+
+export const getRecentVideos = async (): Promise<Video[] | undefined> => {
+  return getVideos("recent-videos");
+};
+
+export const getPinnedVideos = async (): Promise<Video[] | undefined> => {
+  return getVideos("pinned-videos");
+};
+
+export const getVideos = async (key: string): Promise<Video[] | undefined> => {
+  try {
+    const res = await LocalStorage.getItem(key);
+    if (!res) return;
+    const videos = JSON.parse(res.toString());
+    return videos;
+  } catch {
+    // ignore error
+  }
+  return [];
+};
+
+export const addRecentVideo = async (video: Video): Promise<void> => {
+  try {
+    const res = await LocalStorage.getItem("recent-videos");
+    if (!res) {
+      await LocalStorage.setItem("recent-videos", JSON.stringify([video]));
+    } else {
+      const videos = JSON.parse(res.toString());
+      videos.unshift(video);
+      videos.splice(15);
+      await LocalStorage.setItem("recent-videos", JSON.stringify(videos));
+    }
+  } catch {
+    // ignore error
+  }
+};
+
+export const addPinnedVideo = async (video: Video): Promise<void> => {
+  try {
+    // if in the recent videos, remove it
+    removeRecentVideo(video.id);
+    const res = await LocalStorage.getItem("pinned-videos");
+    if (!res) {
+      await LocalStorage.setItem("pinned-videos", JSON.stringify([video]));
+    } else {
+      const videos = JSON.parse(res.toString());
+      videos.unshift(video);
+      await LocalStorage.setItem("pinned-videos", JSON.stringify(videos));
+    }
+  } catch {
+    // ignore error
+  }
+};
+
+export function PinVideo(props: { video: Video, refresh?: boolean, setRefresh?: any }): JSX.Element | null {
+  return (
+    <Action
+      title="Pin Video"
+      icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      onAction={async () => {
+        await addPinnedVideo(props.video); 
+        if (props.setRefresh) props.setRefresh(!props.refresh);
+        showToast(Toast.Style.Success, "Pinned Video");
+      }}
+    />
+  );
+}
+
+export const removeVideo = async (key: string, id: string) => {
+  try {
+    const res = await LocalStorage.getItem(key);
+    if (!res) return;
+    let videos = JSON.parse(res.toString());
+    videos = videos.filter((v: Video) => v.id !== id);
+    await LocalStorage.setItem(key, JSON.stringify(videos));
+  } catch {
+    // ignore error
+  }
+};
+
+export const clearRecentVideos = async (): Promise<void> => {
+  await LocalStorage.removeItem("recent-videos");
+};
+
+export const removeRecentVideo = async (id: string) => {
+  removeVideo("recent-videos", id);
+};
+
+export const RecentVideoActions = (props: { video: Video, refresh: boolean, setRefresh: any }): JSX.Element => {
+  return (
+    <React.Fragment>
+      <PinVideo video={props.video} refresh={props.refresh} setRefresh={props.setRefresh} />
+      <Action
+        title="Remove From Recent Videos"
+        onAction={async () => {
+          await removeRecentVideo(props.video.id);
+          props.setRefresh(!props.refresh);
+          showToast(Toast.Style.Success, "Removed From Recent Videos");
+        }}
+        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+      />
+      <Action
+        title="Clear All Recent Videos"
+        onAction={async () => {
+          await clearRecentVideos();
+          props.setRefresh(!props.refresh);
+          showToast(Toast.Style.Success, "Cleared All Recent Videos");
+        }}
+        icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      />
+    </React.Fragment>
+  );
+};
+
+export const clearPinnedVideos = async (): Promise<void> => {
+  await LocalStorage.removeItem("pinned-videos");
+};
+
+export const removePinnedVideo = async (id: string) => {
+  removeVideo("pinned-videos", id);
+};
+
+export const PinnedVideoActions = (props: { video: Video, refresh: boolean, setRefresh: any }): JSX.Element => {
+  return (
+    <React.Fragment>
+      <Action
+        title="Remove From Pinned Videos"
+        onAction={async () => {
+          await removePinnedVideo(props.video.id);
+          props.setRefresh(!props.refresh);
+          showToast(Toast.Style.Success, "Removed From Pinned Videos");
+        }}
+        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+      />
+      <Action
+        title="Clear All Pinned Videos"
+        onAction={async () => {
+          await clearPinnedVideos();
+          props.setRefresh(!props.refresh);
+          showToast(Toast.Style.Success, "Cleared All Pinned Videos");
+        }}
+        icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      />
+    </React.Fragment>
+  );
+};
+
+function NoSearchView(props: { recentQueries: Video[] | undefined }): JSX.Element | null {
+  const rq = props.recentQueries;
+  const layout = getViewLayout();
+  if (rq && rq.length > 0) {
+    return null;
+  } else {
+    return <ListOrGridEmptyView layout={layout} title="No Pinned or Recent Videos" />;
+  }
+}
+
+export function RecentVideos(props: {
+  setRootSearchText: (text: string) => void;
+  isLoading?: boolean | undefined;
+}): JSX.Element {
+  const setRootSearchText = props.setRootSearchText;
+  const [pinnedVideos, setPinnedVideos] = useState<Video[] | undefined>();
+  const [recentVideos, setRecentVideos] = useState<Video[] | undefined>();
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const getVideos = async () => {
+      setPinnedVideos(await getPinnedVideos());
+      setRecentVideos(await getRecentVideos());
+    };
+    getVideos();
+    return () => {
+      setPinnedVideos(undefined);
+      setRecentVideos(undefined);
+    };
+  }, [refresh]);
+
+  const isLoading = props.isLoading;
+  const layout = getViewLayout();
+  const itemSize = getGridItemSize();
+  if (isLoading && !pinnedVideos && !recentVideos) {
+    return <ListOrGrid isLoading={true} layout={layout} itemSize={itemSize} searchBarPlaceholder="Loading..." />;
+  }
+  return (
+    <ListOrGrid
+      layout={layout}
+      itemSize={itemSize}
+      onSearchTextChange={setRootSearchText}
+      isLoading={isLoading}
+      throttle={true}
+    >
+      <NoSearchView recentQueries={recentVideos} />
+      <ListOrGridSection title="Pinned Videos" layout={layout}>
+        {pinnedVideos?.map((v: Video) => (
+          <VideoItem key={v.id} video={v} actions={<PinnedVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
+        ))}
+      </ListOrGridSection>
+      <ListOrGridSection title="Recent Videos" layout={layout}>
+        {recentVideos?.map((v: Video) => (
+          <VideoItem key={v.id} video={v} actions={<RecentVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
+        ))}
+      </ListOrGridSection>
+    </ListOrGrid>
+  );
+}

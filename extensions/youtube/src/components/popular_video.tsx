@@ -3,6 +3,7 @@ import { getErrorMessage } from "../lib/utils";
 import { getPopularVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoItem } from "./video";
 import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
+import { PinVideo } from "./recent_videos";
 
 export function PopularVideoList() {
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
@@ -14,7 +15,7 @@ export function PopularVideoList() {
   return (
     <ListOrGrid layout={getViewLayout()} itemSize={getGridItemSize()} isLoading={isLoading}>
       {data?.map((v) => (
-        <VideoItem key={v.id} video={v} />
+        <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
       ))}
     </ListOrGrid>
   );
