@@ -1,6 +1,6 @@
-import {ActionPanel, List, Action, LocalStorage, getPreferenceValues, open, closeMainWindow} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, LocalStorage, open } from "@raycast/api";
 import fetch from "node-fetch";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 interface Preferences {
   envoyer_api_key: string;
@@ -43,11 +43,8 @@ export default function Command() {
           subtitle={project.last_deployment_timestamp}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Show Details"
-                target={<ProjectDetails project={project}/>}
-              />
-              <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`}/>
+              <Action.Push title="Show Details" target={<ProjectDetails project={project} />} />
+              <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`} />
             </ActionPanel>
           }
         />
@@ -56,7 +53,7 @@ export default function Command() {
   );
 }
 
-function ProjectDetails({project}: { project: Project }) {
+function ProjectDetails({ project }: { project: Project }) {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -66,7 +63,7 @@ function ProjectDetails({project}: { project: Project }) {
         icon="command-icon.png"
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`}/>
+            <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`} />
           </ActionPanel>
         }
       />
@@ -86,21 +83,24 @@ function ProjectDetails({project}: { project: Project }) {
         icon="command-icon.png"
         actions={
           <ActionPanel>
-            <Action title="Start New Deployment" onAction={async () => {
-              setLoading(true);
-              await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
-                },
-              });
-              await open(`https://envoyer.io/projects/${project.id}`);
-              await closeMainWindow()
-              setLoading(false);
-            }}/>
+            <Action
+              title="Start New Deployment"
+              onAction={async () => {
+                setLoading(true);
+                await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
+                  },
+                });
+                await open(`https://envoyer.io/projects/${project.id}`);
+                await closeMainWindow();
+                setLoading(false);
+              }}
+            />
           </ActionPanel>
         }
       />
     </List>
-  )
+  );
 }
