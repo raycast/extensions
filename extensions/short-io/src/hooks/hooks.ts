@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-
 import axios from "axios";
 import { DOMAINS_API, LIST_LINK_API, LocalStorageKey } from "../utils/constants";
 import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";

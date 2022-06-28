@@ -1,21 +1,33 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, open, showToast, Toast } from "@raycast/api";
-import React, { useState } from "react";
+import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, open, showToast, Toast } from "@raycast/api";
+import React, { useEffect, useState } from "react";
 import { shortenLinkWithSlug } from "./utils/axios-utils";
 import { alertDialog, getDefaultDomain } from "./hooks/hooks";
 import { isEmpty } from "./utils/common-utils";
-import Style = Toast.Style;
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
+import { fetchLink } from "./utils/input-item";
+import Style = Toast.Style;
+import { Preferences } from "./types/preferences";
 
 export default function ShortenLink(props: { paraDomain?: string }) {
   const paraDomain = typeof props.paraDomain !== "undefined" ? props.paraDomain : "";
+  const { authFetchLink } = getPreferenceValues<Preferences>();
+  const { defaultDomain, domainLoading } = getDefaultDomain(paraDomain);
 
   const [originalLink, setOriginalLink] = useState<string>("");
   const [slug, setSlug] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [shortLink, setShortLink] = useState<string>("");
 
-  const { defaultDomain, domainLoading } = getDefaultDomain(paraDomain);
+  useEffect(() => {
+    async function _fetchPath() {
+      if (authFetchLink) {
+        setOriginalLink(await fetchLink());
+      }
+    }
+
+    _fetchPath().then();
+  }, []);
 
   return (
     <Form

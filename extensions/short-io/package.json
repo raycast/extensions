@@ -44,6 +44,15 @@
       "title": "API Secret key",
       "description": "Short.io API secret key.",
       "default": ""
+    },
+    {
+      "name": "authFetchLink",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced Preference",
+      "label": "Auto Fetch Link",
+      "description": "Automatically fetch and fill in link form the selection or clipboard.",
+      "default": true
     }
   ],
   "dependencies": {
