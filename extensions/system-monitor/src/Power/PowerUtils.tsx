@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { ExecError } from "./PowerInterfaces";
+import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
@@ -87,7 +87,7 @@ const getMaxBatteryCapacity = async () => {
 
 const getBatteryTime = async () => {
   try {
-    const output = await execp("pmset -g ps | sed -n 2p | awk '{print $5}'");
+    const output = await execp("/usr/bin/pmset -g ps | sed -n 2p | awk '{print $5}'");
     console.log(output.stdout);
     return output.stdout.trim();
   } catch (err) {
