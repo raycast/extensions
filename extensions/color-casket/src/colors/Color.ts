@@ -12,6 +12,8 @@ export class InvalidColor extends Error {}
 export type AvailableColor = HSLColor | RGBColor | HEXColor | KeywordColor;
 
 export default abstract class Color<T> {
+  public abstract type: string;
+
   public static validator: (value: string) => boolean;
 
   public static prepareValue: <T>(value: string) => T;
@@ -25,10 +27,6 @@ export default abstract class Color<T> {
   abstract get alternatives(): AvailableColor[];
 
   abstract stringValue(): string;
-
-  public get type() {
-    return this.constructor.name.replace("Color", "");
-  }
 
   public serialize() {
     return { value: this.stringValue() };
