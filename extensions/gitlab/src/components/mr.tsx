@@ -20,6 +20,7 @@ import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -115,18 +116,18 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
-          {mr.author && <Detail.Metadata.Label title="Author" text={mr.author.name} icon={mr.author.avatar_url} />}
+          {mr.author && <Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />}
           {mr.assignees.length > 0 && (
             <Detail.Metadata.TagList title="Assignee">
               {mr.assignees.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
               ))}
             </Detail.Metadata.TagList>
           )}
           {mr.reviewers.length > 0 && (
             <Detail.Metadata.TagList title="Reviewer">
               {mr.reviewers.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
               ))}
             </Detail.Metadata.TagList>
           )}

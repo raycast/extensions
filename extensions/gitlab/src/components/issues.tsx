@@ -17,6 +17,7 @@ import {
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -100,12 +101,12 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
             <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
           </Detail.Metadata.TagList>
           {issue.author && (
-            <Detail.Metadata.Label title="Author" text={issue.author.name} icon={issue.author.avatar_url} />
+            <Detail.Metadata.Label title="Author" text={issue.author.name} icon={userIcon(issue.author)} />
           )}
           {issue.assignees.length > 0 && (
             <Detail.Metadata.TagList title="Assignee">
               {issue.assignees.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={a.avatar_url} />
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
               ))}
             </Detail.Metadata.TagList>
           )}
