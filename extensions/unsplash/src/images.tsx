@@ -44,13 +44,7 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
 
   const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
 
-  return (
-    <Grid.Item
-      content={image}
-      title={gridItemTitle}
-      actions={<Actions item={searchResult} details />}
-    />
-  );
+  return <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={searchResult} details />} />;
 };
 
 export default Unsplash;

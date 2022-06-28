@@ -14,7 +14,7 @@ interface CollectionListItemProps {
 
 const UnsplashCollections: React.FC = () => {
   const { state, search } = useSearch("collections");
-  const itemSize = getGridItemSize(); 
+  const itemSize = getGridItemSize();
 
   return (
     <Grid
@@ -45,13 +45,7 @@ const SearchListItem: React.FC<CollectionListItemProps> = ({ searchResult }) => 
 
   const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
 
-  return (
-    <Grid.Item
-      content={image}
-      title={gridItemTitle}
-      actions={<Actions item={searchResult} details />}
-    />
-  );
+  return <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={searchResult} details />} />;
 };
 
 export default UnsplashCollections;
