@@ -43,11 +43,6 @@ export default function Command() {
       </List>
     );
   } else {
-    showToast({
-      title: "Path Error",
-      message: "Something went wrong with your vault path. There are no paths to select from.",
-      style: Toast.Style.Failure,
-    });
     return <List />;
   }
 }

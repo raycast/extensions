@@ -1,24 +1,23 @@
 import { ActionPanel, Form, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import fs from "fs";
-
-interface Note {
-  title: string;
-  key: number;
-  path: string;
-}
+import { NoteAction } from "../utils/constants";
+import { Note } from "../utils/interfaces";
+import { applyTemplates } from "../utils/utils";
 
 interface FormValue {
   content: string;
 }
 
-export function AppendNoteForm(props: { note: Note }) {
+export function AppendNoteForm(props: { note: Note; actionCallback: (action: NoteAction) => void }) {
   const note = props.note;
   const { pop } = useNavigation();
 
-  function addTextToNote(text: FormValue) {
-    fs.appendFileSync(note.path, "\n" + text.content);
+  async function addTextToNote(text: FormValue) {
+    const content = await applyTemplates(text.content);
+    fs.appendFileSync(note.path, "\n" + content);
     showToast({ title: "Added text to note", style: Toast.Style.Success });
     pop();
+    props.actionCallback(NoteAction.Append);
   }
 
   return (
