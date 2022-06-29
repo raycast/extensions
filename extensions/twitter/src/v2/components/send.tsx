@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Color, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { Fragment, ReactElement, useState } from "react";
-import { TweetV1 } from "twitter-api-v2";
-import { twitterClient } from "../twitterapi";
-import { getErrorMessage } from "../utils";
+import { Tweet } from "../lib/twitter";
+import { clientV2 } from "../lib/twitterapi_v2";
+import { getErrorMessage } from "../../utils";
 
 interface TweetFormValues {
   text: string;
 }
 
-async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined) {
+async function submit(values: TweetFormValues, replyTweet: Tweet | undefined) {
   try {
     const text = values.text;
     if (text.length <= 0) {
@@ -18,15 +18,12 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
       throw Error("Tweet text could not be longer than 280 characters");
     }
     if (replyTweet) {
-      await twitterClient.v1.reply(text, replyTweet.id_str);
+      await clientV2.replyTweet(text, replyTweet);
       await showToast({
         style: Toast.Style.Success,
         title: "Tweet created",
         message: "Reply Tweet creation successful",
       });
-    } else {
-      await twitterClient.v1.tweet(text);
-      await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
     }
     popToRoot();
   } catch (error) {
@@ -40,7 +37,7 @@ function TweetLengthCounter(props: { text: string }): ReactElement | null {
   return <Form.Description text={`${t.length}/280 ${isValid ? "✅" : "❌"}`} />;
 }
 
-export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
+export function TweetSendForm(props: { replyTweet: Tweet | undefined }) {
   const rt = props.replyTweet;
   const submitText = rt ? "Send Reply" : "Send Tweet";
   const fromTitle = rt ? "Reply" : "Tweet";
@@ -51,7 +48,10 @@ export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
       actions={
         <ActionPanel>
           {text.length > 0 && text.length <= 280 && (
-            <Action.SubmitForm title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
+            <Action.SubmitForm
+              title={submitText}
+              onSubmit={(values: TweetFormValues) => submit(values, props.replyTweet)}
+            />
           )}
         </ActionPanel>
       }
@@ -120,12 +120,12 @@ async function submitTweets(tweets: TweetContent[]) {
     }
     if (tweets.length === 1) {
       const t = tweets[0];
-      await twitterClient.v1.tweet(t.text);
+      await clientV2.sendTweet(t.text);
       await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
       popToRoot();
     } else {
       const tweetTexts: string[] = tweets.map((t) => t.text);
-      await twitterClient.v1.tweetThread(tweetTexts);
+      await clientV2.sendThread(tweetTexts);
       await showToast({ style: Toast.Style.Success, title: "Thread created", message: "Thread creation successful" });
       popToRoot();
     }
@@ -134,7 +134,7 @@ async function submitTweets(tweets: TweetContent[]) {
   }
 }
 
-export function TweetSendThreadForm(): ReactElement {
+export function TweetSendThreadFormV2(): ReactElement {
   const [tweets, setTweets] = useState<TweetContent[]>([{ text: "" }]);
   const addTweet = () => {
     const nt = [...tweets, { text: "" }];
@@ -212,7 +212,7 @@ export function TweetSendThreadForm(): ReactElement {
       }
     >
       {tweets.map((t, index) => (
-        <TweetFragment index={index} content={t} onTextChange={updateTweet} />
+        <TweetFragment key={index} index={index} content={t} onTextChange={updateTweet} />
       ))}
     </Form>
   );
