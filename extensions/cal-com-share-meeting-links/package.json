@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cal-com-share-meeting-links",
+  "title": "Cal.com Share Meeting Links",
+  "description": "Quickly share your Calendly meeting links",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Share Meeting Link",
+      "subtitle": "Cal.com",
+      "description": "Copy Meeting URL",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Cal.com API Key",
+      "link": "https://app.cal.com/settings/developer",
+      "placeholder": "Calendly API Key"
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy Meeting Link",
+          "value": "meeting"
+        },
+        {
+          "title": "Copy Single Use Link",
+          "value": "one-time"
+        }
+      ],
+      "title": "Default Action",
+      "description": "The action to use by default",
+      "required": false,
+      "default": "meeting",
+      "value": "meeting"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "dayjs": "^1.11.3",
+    "node-fetch": "^3.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
