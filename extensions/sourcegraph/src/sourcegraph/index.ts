@@ -97,17 +97,26 @@ export function sourcegraphSelfHosted(): Sourcegraph | null {
   };
 }
 
-/**
- * newURL sets up a URL to the given path for this Sourcegraph instance, and adds some UTM
- * parameters.
- */
-export function newURL(src: Sourcegraph, path: string, params?: URLSearchParams): string {
-  const parsed = new URL(`${src.instance}${path.startsWith("/") ? path : `/${path}`}`);
-  parsed.searchParams.set("utm_source", "raycast-sourcegraph");
-  params?.forEach((v, k) => {
-    parsed.searchParams.set(k, v);
-  });
-  return parsed.toString();
+export class LinkBuilder {
+  private command: string;
+
+  constructor(command: string) {
+    this.command = command;
+  }
+
+  /**
+   * new sets up a URL to the given path for this Sourcegraph instance and command context,
+   * and adds some UTM parameters.
+   */
+  new(src: Sourcegraph, path: string, params?: URLSearchParams): string {
+    const parsed = new URL(`${src.instance}${path.startsWith("/") ? path : `/${path}`}`);
+    parsed.searchParams.set("utm_source", "raycast-sourcegraph");
+    parsed.searchParams.set("utm_campaign", this.command);
+    params?.forEach((v, k) => {
+      parsed.searchParams.set(k, v);
+    });
+    return parsed.toString();
+  }
 }
 
 interface ExtensionFeatureFlags {

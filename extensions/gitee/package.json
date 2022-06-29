@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitee",
+  "title": "Gitee",
+  "description": "Work with issues, search repositories and stay on top of notifications.",
+  "icon": "gitee-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-issues",
+      "title": "My Issues",
+      "subtitle": "Gitee",
+      "description": "List issues assigned to you or created by you.",
+      "mode": "view"
+    },
+    {
+      "name": "my-repositories",
+      "title": "My Repositories",
+      "subtitle": "Gitee",
+      "description": "List your public or private repositories by name.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Gitee",
+      "description": "List inbox notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "subtitle": "Gitee",
+      "description": "Search public repositories globally in Gitee.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal access tokens",
+      "description": "Gitee personal access tokens.",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.34.1",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

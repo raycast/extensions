@@ -9,6 +9,11 @@ export interface ErrorLike {
 
 // Copied from https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12&subtree=true
 
+// The latest supported version of our search syntax. Users should never be able to determine the search version.
+// The version is set based on the release tag of the instance. Anything before 3.9.0 will not pass a version parameter,
+// and will therefore default to V1.
+export const LATEST_VERSION = "V2";
+
 export type SearchEvent =
   | { type: "matches"; data: SearchMatch[] }
   | { type: "progress"; data: Progress }

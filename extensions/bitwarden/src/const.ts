@@ -2,6 +2,8 @@ import { PasswordOptionField, PasswordOptions, PassphraseOptions, PasswordGenera
 
 export const SESSION_KEY = "sessionToken";
 
+export const DEFAULT_SERVER_URL = "https://bitwarden.com";
+
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   lowercase: true,
   uppercase: true,

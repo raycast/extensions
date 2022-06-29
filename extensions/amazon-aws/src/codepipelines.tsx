@@ -2,6 +2,9 @@ import { getPreferenceValues, ActionPanel, List, OpenInBrowserAction, Detail } f
 import { useState, useEffect } from "react";
 import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
+import setupAws from "./util/setupAws";
+
+setupAws();
 
 const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
   new Promise<AWS.CodePipeline.PipelineExecutionSummary | null>((resolve, reject) => {
@@ -29,7 +32,6 @@ type PipelineSummary = AWS.CodePipeline.PipelineSummary & {
 
 export default function DescribeInstances() {
   const preferences: Preferences = getPreferenceValues();
-  AWS.config.update({ region: preferences.region });
   const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{

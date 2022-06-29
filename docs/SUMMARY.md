@@ -19,6 +19,12 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 
+## Teams (Beta)
+
+- [Getting Started](teams/getting-started.md)
+- [Publish a Private Extension](teams/publish-a-private-extension.md)
+- [Collaborate on Private Extensions](teams/collaborate-on-private-extensions.md)
+
 ## Examples
 
 - [Doppler Share Secrets](examples/doppler.md)
@@ -46,6 +52,7 @@
   - [HUD](api-reference/feedback/hud.md)
   - [Toast](api-reference/feedback/toast.md)
 - [Keyboard](api-reference/keyboard.md)
+- [OAuth](api-reference/oauth.md)
 - [Preferences](api-reference/preferences.md)
 - [Storage](api-reference/storage.md)
 - [User Interface](api-reference/user-interface/README.md)

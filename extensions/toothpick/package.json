@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Connect/Disconnect Bluetooth Devices",
+      "title": "Manage Bluetooth Connections",
+      "subtitle": "Toothpick",
       "description": "Connect to or disconnect from bluetooth devices",
       "mode": "view"
     }

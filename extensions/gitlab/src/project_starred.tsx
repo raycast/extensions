@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { ProjectList } from "./components/project";
 
-render(<ProjectList starred={true} />);
+export default function MyStarredProjectsRoot(): JSX.Element {
+  return <ProjectList starred={true} />;
+}

@@ -41,7 +41,7 @@ export default function SurfWithSpecificBrowser() {
       const localBrowsers = await LocalStorage.getItem<string>("boards");
       let _browsers = [];
       if (typeof localBrowsers == "string") {
-        _browsers = JSON.parse(localBrowsers);
+        _browsers = JSON.parse(localBrowsers) as SurfApplication[];
         setBrowsers(boardsSort(_browsers, itemInput));
       }
     }
@@ -137,7 +137,7 @@ function MoreBoards(props: { setBrowsers: any }) {
     <List.Item
       id="MoreBoards"
       title={"More Boards"}
-      icon={{ source: { light: "more-board.png", dark: "more-board@dark.png" }, mask: Image.Mask.RoundedRectangle }}
+      icon={{ source: "more-board.png", mask: Image.Mask.RoundedRectangle }}
       accessories={[{ icon: Icon.ArrowRight }]}
       actions={
         <ActionPanel>
@@ -333,6 +333,13 @@ async function upBrowserRank(itemInput: ItemInput, browser: SurfApplication, bro
     if (val.name == browser.name) {
       switch (itemInput.type) {
         case ItemType.TEXT: {
+          //Prevent excessive rank growth
+          const moreHighRank = browsers.filter((value) => {
+            return value.path !== browser.path && value.rankText >= browser.rankText;
+          });
+          if (moreHighRank.length == 0) {
+            break;
+          }
           let allTextRank = 0;
           browsers.forEach((value) => [(allTextRank = allTextRank + value.rankText)]);
           browsers[index].rankText =
@@ -340,6 +347,13 @@ async function upBrowserRank(itemInput: ItemInput, browser: SurfApplication, bro
           break;
         }
         case ItemType.EMAIL: {
+          //Prevent excessive rank growth
+          const moreHighRank = browsers.filter((value) => {
+            return value.path !== browser.path && value.rankEmail >= browser.rankEmail;
+          });
+          if (moreHighRank.length == 0) {
+            break;
+          }
           let allEmailRank = 0;
           browsers.forEach((value) => [(allEmailRank = allEmailRank + value.rankEmail)]);
           browsers[index].rankEmail =
@@ -347,6 +361,13 @@ async function upBrowserRank(itemInput: ItemInput, browser: SurfApplication, bro
           break;
         }
         case ItemType.URL: {
+          //Prevent excessive rank growth
+          const moreHighRank = browsers.filter((value) => {
+            return value.path !== browser.path && value.rankURL >= browser.rankURL;
+          });
+          if (moreHighRank.length == 0) {
+            break;
+          }
           let allURLRank = 0;
           browsers.forEach((value) => [(allURLRank = allURLRank + value.rankURL)]);
           browsers[index].rankURL =

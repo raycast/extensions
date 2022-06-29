@@ -1,16 +1,4 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  CopyToClipboardAction,
-  Detail,
-  environment,
-  getPreferenceValues,
-  List,
-  OpenAction,
-  OpenWithAction,
-  ShowInFinderAction,
-  TrashAction,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
 import { existsSync, lstatSync, readFileSync } from "fs";
 import open from "open";
 import { homedir } from "os";
@@ -42,7 +30,7 @@ function getProjectEntries(): ProjectEntry[] {
   const savedProjectsFile = `${storagePath}/projects.json`;
   const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
 
-  const projectEntries: ProjectEntry[] = [];
+  let projectEntries: ProjectEntry[] = [];
   if (existsSync(savedProjectsFile)) {
     const savedProjects: ProjectEntry[] = JSON.parse(readFileSync(savedProjectsFile).toString());
     projectEntries.push(...savedProjects);
@@ -56,6 +44,10 @@ function getProjectEntries(): ProjectEntry[] {
       });
     }
   });
+
+  if (preferences.hideProjectsWithoutTag) {
+    projectEntries = projectEntries.filter(({ tags }) => Array.isArray(tags) && tags.length);
+  }
 
   return projectEntries;
 }
@@ -152,9 +144,9 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
+            <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             {terminalInstalled && (
-              <ActionPanel.Item
+              <Action
                 title="Open in Terminal"
                 key="terminal"
                 onAction={() => {
@@ -166,7 +158,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
               />
             )}
             {gitClientInstalled && isGitRepo(path) && (
-              <ActionPanel.Item
+              <Action
                 title="Open in Git client"
                 key="git-client"
                 onAction={() => {
@@ -177,19 +169,19 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
               />
             )}
-            <ShowInFinderAction path={path} />
-            <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.ShowInFinder path={path} />
+            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard
               title="Copy Path"
               content={prettyPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <TrashAction paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+            <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
@@ -201,14 +193,14 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
 function DevelopmentActionSection() {
   return environment.isDevelopment ? (
     <ActionPanel.Section title="Development">
-      <OpenAction
+      <Action.Open
         title="Open projects.json File in Code"
         icon="command-icon.png"
         target={STORAGE}
         application="Visual Studio Code"
       />
-      <ShowInFinderAction title="Show projects.json File in Finder" path={STORAGE} />
-      <CopyToClipboardAction title="Copy projects.json File Path" content={STORAGE} />
+      <Action.ShowInFinder title="Show projects.json File in Finder" path={STORAGE} />
+      <Action.CopyToClipboard title="Copy projects.json File Path" content={STORAGE} />
     </ActionPanel.Section>
   ) : null;
 }

@@ -24,24 +24,25 @@ on:
 
 jobs:
   extensions_build_publish:
+    if: github.repository == 'raycast/extensions'
     name: Extensions Build & Publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: raycast/github-actions/git-checkout@v1.7.0
+        uses: raycast/github-actions/git-checkout@v1.9.0
       # This makes sure that the problems found while validating the extensions are shown in the PR diff
       - name: Register Problem Matcher for Ray CLI
         run: echo "##[add-matcher].github/ray.matcher.json"
       - name: Run Ray CLI
         id: ray_cli
-        uses: raycast/github-actions/ray@v1.7.0
+        uses: raycast/github-actions/ray@v1.9.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           command: "${{ github.event.inputs.command }}"
           paths: "${{ github.event.inputs.paths }}"
           cli_version: "${{ github.event.inputs.cli_version }}"
       - name: Post Store URLs
-        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.7.0
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.9.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

@@ -74,7 +74,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.32.1"
   },
   "resolutions": {
     "react-devtools-core": "4.23.0"

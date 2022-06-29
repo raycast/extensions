@@ -5,6 +5,7 @@
   "description": "Add notes quickly in Logseq",
   "icon": "command-icon.png",
   "author": "futantan",
+  "contributors": ["sawhney17"],
   "license": "MIT",
   "preferences": [
     {
@@ -14,6 +15,15 @@
       "title": "Path to Graph",
       "required": true,
       "description": "Specify the path to your notes graph location"
+    },
+    {
+      "name": "smartSearch",
+      "type": "checkbox",
+      "default": true,
+      "title": "Smart Search Enabled?",
+      "required": true,
+      "description": "Would you like to enable smart search or use simple search?",
+      "label": "Smart Search"
     }
   ],
   "commands": [
@@ -23,12 +33,25 @@
       "subtitle": "Logseq",
       "description": "Add notes to Logseq quickly",
       "mode": "view"
+    },
+    {
+      "name": "logsearch",
+      "title": "LogSearch",
+      "subtitle": "Logseq Search",
+      "description": "Search Your Logseq Database",
+      "mode": "view"
     }
   ],
+  "engines": {
+    "node": ">=16.10"
+  },
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "dayjs": "^1.11.0",
-    "ramda": "^0.28.0"
+    "edn-data": "^0.2.0",
+    "minisearch": "^4.0.3",
+    "ramda": "^0.28.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

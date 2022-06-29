@@ -2,11 +2,12 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
-import { isRecurring, displayDueDate, isExactTimeTask } from "../utils";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers";
 import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
 import TaskActions from "./TaskActions";
+import CreateTask from "../create-task";
 
 interface TaskListItemProps {
   task: Task;
@@ -18,20 +19,21 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
   const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[]; accessories: List.Item.Accessory[] } =
     { keywords: [], accessories: [] };
 
-  switch (mode) {
-    case ViewMode.project:
-      if (task.due?.date) {
-        additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+  if (mode === ViewMode.date || mode === ViewMode.search) {
+    if (projects && projects.length > 0) {
+      const project = projects.find((project) => project.id === task.projectId);
+
+      if (project) {
+        additionalListItemProps.accessories.push({ text: project.name });
+        additionalListItemProps.keywords.push(project.name);
       }
-      break;
-    case ViewMode.date:
-      if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.projectId);
-        if (project) {
-          additionalListItemProps.accessories.push({ text: project.name });
-          additionalListItemProps.keywords.push(project.name);
-        }
-      }
+    }
+  }
+
+  if (mode === ViewMode.project || mode === ViewMode.search) {
+    if (task.due?.date) {
+      additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+    }
   }
 
   if (isExactTimeTask(task)) {
@@ -50,6 +52,10 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
     additionalListItemProps.accessories.push({ icon: { source: "tag.svg", tintColor: Color.SecondaryText } });
   }
 
+  if (task.commentCount > 0) {
+    additionalListItemProps.accessories.push({ icon: Icon.Bubble });
+  }
+
   const priority = priorities.find((p) => p.value === task.priority);
 
   if (priority) {
@@ -65,11 +71,18 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
-          </ActionPanel.Section>
+          <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
 
           <TaskActions task={task} />
+
+          {mode === ViewMode.project ? (
+            <Action.Push
+              title="Add New Task"
+              target={<CreateTask fromProjectId={task.projectId} />}
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

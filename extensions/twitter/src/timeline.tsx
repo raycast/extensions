@@ -1,4 +1,5 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
+import { ReactElement } from "react";
 import { TweetV1 } from "twitter-api-v2";
 import { TweetList } from "./components/tweet";
 import { refreshTweets, twitterClient, useRefresher } from "./twitterapi";
@@ -15,14 +16,18 @@ async function getHomeTimelineTweets(): Promise<TweetV1[]> {
   return tweets;
 }
 
-export default function HomeTimelineList() {
+export function HomeTimelineList() {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
     async (updateInline): Promise<TweetV1[] | undefined> => {
       return updateInline ? await refreshTweets(data) : await getHomeTimelineTweets();
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Error", error);
+    showToast(Toast.Style.Failure, "Error", error);
   }
   return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
+}
+
+export default function HomeTimelineRoot(): ReactElement {
+  return <HomeTimelineList />;
 }

@@ -8,7 +8,9 @@
   "contributors": [
     "Hodglim",
     "JonathanWbn",
-    "gebeto"
+    "gebeto",
+    "mommertf",
+    "duboiss"
   ],
   "categories": [
     "Developer Tools",
@@ -50,6 +52,13 @@
       "subtitle": "Amazon AWS",
       "description": "List All your CloudFormation Stacks",
       "mode": "view"
+    },
+    {
+      "name": "dynamodb",
+      "title": "DynamoDB Tables",
+      "subtitle": "Amazon AWS",
+      "description": "List All your DynamoDB Tables",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -60,6 +69,14 @@
       "title": "AWS Region",
       "description": "The Region Were You Have All Your Instances",
       "placeholder": "eu-central-1"
+    },
+    {
+      "name": "aws_profile",
+      "type": "textfield",
+      "required": true,
+      "title": "AWS Profile",
+      "description": "set aws profile name",
+      "placeholder": "default"
     }
   ],
   "dependencies": {

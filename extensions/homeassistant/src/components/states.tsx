@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Icon, List, popToRoot, showToast, Action, Image, Toast } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
+import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
 import {
@@ -15,6 +16,8 @@ import {
   SelectSourceAction,
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
+  MediaPlayerTurnOnAction,
+  MediaPlayerTurnOffAction,
 } from "./mediaplayer";
 import {
   BrightnessControlAction,
@@ -49,6 +52,8 @@ import { InputSelectOptionSelectAction } from "./input_select";
 import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
+import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
+import { ShowWeatherAction, weatherConditionToIcon, weatherStatusToIcon } from "./weather";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -120,6 +125,11 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
       const source = state.state === "on" ? "power-plug.png" : "power-plug-off.png";
       const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "door") {
+      const source = state.state === "on" ? "door-open.png" : "door-closed.png";
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -153,6 +163,12 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
     return { source: "person.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("update")) {
+    const ep = (state.attributes.entity_picture as string) || undefined;
+    if (ep) {
+      return ep.startsWith("/") ? ha.urlJoin(ep) : ep;
+    }
+    return { source: "update.png", tintColor: state.state === "on" ? Color.Yellow : PrimaryIconColor };
   } else if (e.startsWith("cover")) {
     const source = coverStateIconSource[`${state.state}`] || coverStateIconSource.open;
     return { source: source, tintColor: PrimaryIconColor };
@@ -209,6 +225,8 @@ function getIcon(state: State): Image.ImageLike | undefined {
       source = "clock-time-four.png";
     }
     return { source: source, tintColor: PrimaryIconColor };
+  } else if (e.startsWith("weather")) {
+    return { source: weatherConditionToIcon(state.state) };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -320,11 +338,35 @@ export function StateListItem(props: { state: State }): JSX.Element {
               return "Up To Date";
             }
           }
+        } else if (dc === "door") {
+          switch (state.state) {
+            case "on": {
+              return "Open";
+            }
+            case "off": {
+              return "Closed";
+            }
+          }
         }
       }
       return state.state;
     } else if (state.entity_id.startsWith("input_button")) {
       return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+    } else if (state.entity_id.startsWith("update")) {
+      if (state.attributes.in_progress === true) {
+        return "in progress 🔄";
+      }
+      const iv = state.attributes.installed_version;
+      const lv = state.attributes.latest_version;
+      if (state.state === "on" && lv) {
+        if (iv) {
+          return `${iv} => ${lv}`;
+        }
+        return lv;
+      } else if (state.state === "off") {
+        return "✅";
+      }
+      return state.state;
     }
     return state.state;
   };
@@ -507,6 +549,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.previousMedia(entityID)}
               icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Volume">
             <Action
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
@@ -528,6 +572,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             />
             <SelectSourceAction state={state} />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Power">
+            <MediaPlayerTurnOnAction state={state} />
+            <MediaPlayerTurnOffAction state={state} />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={state} />
           </ActionPanel.Section>
@@ -544,19 +592,23 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       );
     }
     case "climate": {
+      const tempStep = state.attributes.target_temp_step ?? 0.5;
+      const minAllowedTemp = state.attributes.min_temp ?? 7;
+      const maxAllowedTemp = state.attributes.max_temp ?? 35;
+      // Sometimes, min_temp and max_temp are not multiples of tempStep.
+      // Set the actual min and max to the nearest valid multiple of tempStep for consistency and display niceness.
+      const minNormalizedTemp = Math.ceil(minAllowedTemp / tempStep) * tempStep;
+      const maxNormalizedTemp = Math.floor(maxAllowedTemp / tempStep) * tempStep;
       const changeTempAllowed =
         state.state === "heat" || state.state === "cool" || state.state === "heat_cool" || state.state == "auto"
           ? true
           : false;
       const currentTempValue: number | undefined = state.attributes.temperature || undefined;
       const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
-      const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
-      const lowerTemp = currentTemp ? currentTemp - 0.5 : undefined;
+      const upperTemp = currentTemp ? currentTemp + tempStep : undefined;
+      const lowerTemp = currentTemp ? currentTemp - tempStep : undefined;
 
-      const temps: number[] = [];
-      for (let i = 26; i > 16; i--) {
-        temps.push(i);
-      }
+      const temps: number[] = range(minNormalizedTemp, maxNormalizedTemp, tempStep);
 
       const currentPresetMode = state.attributes.preset_mode ? state.attributes.preset_mode : "None";
       const preset_modes = state.attributes.preset_modes;
@@ -622,7 +674,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
 
             {upperTemp && changeTempAllowed && (
               <Action
-                title={`Increase Temp. 0.5`}
+                title={`Increase Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "+" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, upperTemp);
@@ -633,7 +685,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             )}
             {lowerTemp && changeTempAllowed && (
               <Action
-                title={`Decrease Temp. 0.5`}
+                title={`Decrease Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, lowerTemp);
@@ -956,6 +1008,55 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <InputDateTimeSetValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "update": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <UpdateShowChangelog state={state} />
+            <UpdateOpenInBrowser state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Install">
+            <UpdateInstallAction state={state} />
+            <UpdateSkipVersionAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "weather": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ShowWeatherAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Install">
+            <UpdateInstallAction state={state} />
+            <UpdateSkipVersionAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />

@@ -8,13 +8,11 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
+import setupAws from "./util/setupAws";
+import { Preferences } from "./types";
 
-interface Preferences {
-  region: string;
-}
-
+setupAws();
 const preferences: Preferences = getPreferenceValues();
-AWS.config.update({ region: preferences.region });
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
@@ -89,10 +87,10 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
   const subtitle =
     attr !== undefined
       ? "📨 " + attr.ApproximateNumberOfMessages + "  ✈️ " + attr.ApproximateNumberOfMessagesNotVisible
-      : "";
+      : "📨 ...  ✈️ ...️";
 
   const accessoryTitle =
-    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "";
+    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...";
 
   const path =
     "https://" +

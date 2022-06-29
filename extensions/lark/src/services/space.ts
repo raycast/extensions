@@ -1,4 +1,4 @@
-import { showToast, setLocalStorageItem, getLocalStorageItem, ToastStyle } from '@raycast/api';
+import { LocalStorage, Toast, showToast } from '@raycast/api';
 import axios, { AxiosResponse } from 'axios';
 import { stringify } from 'querystring';
 import { API_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
@@ -14,37 +14,21 @@ export type UserID = string;
 export type NodeID = string;
 
 export const enum NodeType {
-  /**
-   * Wiki
-   */
+  /** Wiki */
   Wik = 16,
-  /**
-   * Docs
-   */
+  /** Docs */
   Doc = 2,
-  /**
-   * Docx
-   */
+  /** Docx */
   Dox = 22,
-  /**
-   * Sheet
-   */
+  /** Sheet */
   Sht = 3,
-  /**
-   * Bitable
-   */
+  /** Bitable */
   Bas = 8,
-  /**
-   * Slides
-   */
+  /** Slides */
   Sld = 15,
-  /**
-   * MindNotes
-   */
+  /** MindNotes */
   Bmn = 11,
-  /**
-   * Local files
-   */
+  /** Local files */
   Box = 12,
 }
 
@@ -113,9 +97,17 @@ export interface ObjEntity {
   subtype: string;
   user_edit_time: number;
   share_version: number;
-  wiki_infos: null;
+  wiki_infos: null | WikiEntity[];
   owner_type: number;
   container_type: number;
+}
+
+export interface WikiEntity {
+  main_path: string;
+  space_id: string;
+  wiki_token: string;
+  wiki_url: string;
+  wiki_version: string;
 }
 
 export interface RecentListResponse {
@@ -184,7 +176,7 @@ export async function fetchRecentList(length = preference.recentListCount): Prom
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -215,6 +207,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
         title: trimTagsAndDecodeEntities(objEntity.title),
         preview: trimTagsAndDecodeEntities(objEntity.preview),
         url: computeRedirectedUrl(objEntity),
+        type: computeType(objEntity),
       };
     });
     return data;
@@ -226,7 +219,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -240,6 +233,14 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
 }
 
 const computeRedirectedUrl = (objEntity: ObjEntity) => {
+  if (!objEntity.url) {
+    if (!objEntity.wiki_infos) {
+      return '';
+    }
+
+    return objEntity.wiki_infos[0].wiki_url;
+  }
+
   return objEntity.url
     .replace(/\/space\/doc\//, '/docs/')
     .replace(/\/space\/sheet\//, '/sheets/')
@@ -248,14 +249,22 @@ const computeRedirectedUrl = (objEntity: ObjEntity) => {
     .replace(/\/space\//, '/');
 };
 
+const computeType = (objEntity: ObjEntity) => {
+  if (objEntity.wiki_infos) {
+    return NodeType.Wik;
+  }
+
+  return objEntity.type;
+};
+
 const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
 
 export function setRecentListCache(recentList: RecentListResponse): Promise<void> {
-  return setLocalStorageItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
+  return LocalStorage.setItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
 }
 
 export async function getRecentListCache(): Promise<RecentListResponse | null> {
-  const cache = await getLocalStorageItem(CACHE_DOCS_RECENT_LIST);
+  const cache = await LocalStorage.getItem(CACHE_DOCS_RECENT_LIST);
   if (typeof cache === 'string') {
     return JSON.parse(cache) as RecentListResponse;
   }
@@ -280,7 +289,7 @@ export async function removeRecentDocument(objToken: string): Promise<boolean> {
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return false;
   }
 }

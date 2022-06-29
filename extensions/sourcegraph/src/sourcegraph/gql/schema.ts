@@ -269,10 +269,12 @@ export interface GetFileContents_repository_commit_blob {
 }
 
 export interface GetFileContents_repository_commit {
+  id: string; // The globally addressable ID for this commit.
   blob: GetFileContents_repository_commit_blob | null; // The Git blob in this commit at the given path.
 }
 
 export interface GetFileContents_repository {
+  id: string; // The repository's unique ID.
   commit: GetFileContents_repository_commit | null; // Returns information about the given commit in the repository, or null if no commit exists with the given rev.
 }
 
@@ -527,15 +529,18 @@ export enum ExternalServiceKind {
   AWSCODECOMMIT = "AWSCODECOMMIT",
   BITBUCKETCLOUD = "BITBUCKETCLOUD",
   BITBUCKETSERVER = "BITBUCKETSERVER",
+  GERRIT = "GERRIT",
   GITHUB = "GITHUB",
   GITLAB = "GITLAB",
   GITOLITE = "GITOLITE",
+  GOMODULES = "GOMODULES",
   JVMPACKAGES = "JVMPACKAGES",
   NPMPACKAGES = "NPMPACKAGES",
   OTHER = "OTHER",
   PAGURE = "PAGURE",
   PERFORCE = "PERFORCE",
   PHABRICATOR = "PHABRICATOR",
+  PYTHONPACKAGES = "PYTHONPACKAGES",
 }
 
 // The review state of a changeset.

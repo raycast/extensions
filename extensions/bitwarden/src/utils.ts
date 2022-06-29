@@ -1,9 +1,20 @@
-import { Icon } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
+import { Item, PasswordGeneratorOptions, Preferences } from "./types";
+import { ObjectEntries } from "./types/global";
 import { URL } from "url";
-import { Item, PasswordGeneratorOptions } from "./types";
+
+Object.typedEntries = <T>(obj: T) => Object.entries(obj) as ObjectEntries<T>;
 
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
+}
+
+export function getServerUrlPreference(): string {
+  const { serverUrl } = getPreferenceValues<Preferences>();
+  if (serverUrl === "" || serverUrl === "bitwarden.com" || serverUrl === "https://bitwarden.com") {
+    return "";
+  }
+  return serverUrl;
 }
 
 export function faviconUrl(url: string): string {
@@ -18,12 +29,6 @@ export function faviconUrl(url: string): string {
 export function titleCase(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
-
-type ObjectEntries<Obj> = { [Key in keyof Obj]: [Key, Obj[Key]] }[keyof Obj][];
-/** `Object.entries` that preserves the type of the object keys */
-export const objectEntries = <Obj>(obj: Obj) => {
-  return Object.entries(obj) as ObjectEntries<Obj>;
-};
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));

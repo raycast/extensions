@@ -68,12 +68,21 @@
       "required": true,
       "default": "",
       "description": "Twitter API access secret"
+    },
+    {
+      "name": "listwithdetail",
+      "type": "checkbox",
+      "label": "Show Tweets inside a Tweets List",
+      "required": false,
+      "default": true,
+      "title": "List Behavior",
+      "description": "Show Tweets inside a Tweets List directly"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.33.0",
     "node-fetch": "^3.0.0",
-    "twitter-api-v2": "^1.6.1"
+    "twitter-api-v2": "^1.12.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -87,6 +96,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

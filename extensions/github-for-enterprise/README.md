@@ -58,3 +58,8 @@ When launching a command, you'll be presented with a configuration screen asking
 ![Configuration](https://user-images.githubusercontent.com/6590356/140934002-081ed77e-6fe2-4b5a-aadc-feb662db6407.png)
 
 Once this information has been filled in, you should have access to manage your issues and pull requests.
+
+### Unsafe HTTPS
+
+In the event your GitHub enterprise server has a self-hosted certificate, this extension may not work right away. Try enabling "unsafe HTTPS" if
+everything else looks correct.

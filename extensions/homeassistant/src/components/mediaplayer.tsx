@@ -80,3 +80,43 @@ export function CopyTrackToClipboard(props: { state: State }): JSX.Element | nul
   }
   return null;
 }
+
+export function MediaPlayerTurnOnAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const handle = async () => {
+    await ha.callService("media_player", "turn_on", { entity_id: state.entity_id });
+  };
+  const s = state.state;
+  if (s !== "off" && s !== "standby") {
+    return null;
+  }
+
+  return (
+    <Action
+      title="Turn On"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+    />
+  );
+}
+
+export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const handle = async () => {
+    await ha.callService("media_player", "turn_off", { entity_id: state.entity_id });
+  };
+  const s = state.state;
+  if (s === "off") {
+    return null;
+  }
+
+  return (
+    <Action
+      title="Turn Off"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+    />
+  );
+}

@@ -7,6 +7,7 @@ on:
 
 jobs:
   notify-contributors-on-pr:
+    if: github.repository == 'raycast/extensions'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: raycast/github-actions/setup-node@master
 
-      - name: Get changed files in the docs folder
+      - name: Get changed files
         id: changed-files
         uses: Ana06/get-changed-files@v2.1.0
         with:
