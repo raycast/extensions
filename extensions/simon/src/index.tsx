@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues, List } from "@raycast/api";
 import { exec } from "child_process";
 import { Preferences, State } from "./interface";
 import { colorMap, maxLevel } from "./constants";
@@ -106,7 +106,7 @@ export default function Command() {
   if (state.gameState === "lobby") {
     return (
       <Detail
-        markdown="Press Start Game to start playing!"
+        markdown={`![](file://${environment.assetsPath}/game-${environment.theme}.png)`}
         actions={
           <ActionPanel>
             <Action.SubmitForm
@@ -160,7 +160,13 @@ export default function Command() {
   }
 
   return (
-    <Grid itemSize={Grid.ItemSize.Medium} inset={Grid.Inset.Small} isLoading={state.loading}>
+    <Grid
+      searchBarPlaceholder="Select the right colors..."
+      itemSize={Grid.ItemSize.Medium}
+      inset={Grid.Inset.Small}
+      isLoading={state.loading}
+    >
+      <Grid.EmptyView title="Don't Search" description="It's a game, sillyhead!" />
       {state.colors.map((color, index) => (
         <Grid.Item
           key={color.name}
@@ -171,7 +177,7 @@ export default function Command() {
               {!state.loading && (
                 <Action.SubmitForm
                   title="Select Color"
-                  icon={Icon.Dot}
+                  icon={{ source: Icon.Dot, tintColor: color.tint }}
                   onSubmit={() => {
                     activateColor(color.name);
 
