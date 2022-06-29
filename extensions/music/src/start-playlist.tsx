@@ -119,7 +119,7 @@ export default function PlaySelected() {
                     key={playlist.id}
                     title={playlist.name}
                     content={artworks[playlist.id] || ""}
-                    subtitle={"Duration: " + playlist.duration}
+                    subtitle={displayDuration(parseInt(playlist.duration))}
                     actions={<Actions playlist={playlist} pop={pop} />}
                   />
                 ) : (
