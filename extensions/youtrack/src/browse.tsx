@@ -2,28 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { ReducedIssue, Youtrack } from "youtrack-rest-client";
+import { Youtrack } from "youtrack-rest-client";
 import { IssueListItem } from "./components";
-
-interface Preferences {
-  instance: string;
-  token: string;
-  query: string;
-  maxIssues: string;
-}
-
-interface State {
-  isLoading: boolean;
-  items: ReducedIssue[];
-  project: string | null;
-  error?: Error;
-  yt: Youtrack | null;
-}
+import { fetchIssues, getEmptyIssue, loadCache, saveCache } from "./utils";
+import { Preferences, State } from "./interfaces";
 
 // noinspection JSUnusedGlobalSymbols
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
-  const query = prefs.query;
 
   const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
 
@@ -36,20 +22,25 @@ export default function Command() {
         ...previous,
         error: error instanceof Error ? error : new Error("Something went wrong"),
         isLoading: false,
-        items: [],
+        items: [getEmptyIssue()],
       }));
     }
   }, [prefs.instance, prefs.token]);
 
   useEffect(() => {
-    async function fetchIssues() {
+    async function fetchItems() {
       if (state.yt === null) {
         return;
       }
       setState((previous) => ({ ...previous, isLoading: true }));
+      const cache = await loadCache();
+      if (cache) {
+        setState((previous) => ({ ...previous, items: cache, isLoading: true }));
+      }
       try {
-        const feed = await state.yt.issues.search(query, { $top: Number(prefs.maxIssues) });
+        const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
         setState((previous) => ({ ...previous, items: feed, isLoading: false }));
+        await saveCache(feed);
       } catch (error) {
         setState((previous) => ({
           ...previous,
@@ -59,8 +50,7 @@ export default function Command() {
         }));
       }
     }
-
-    fetchIssues();
+    fetchItems();
   }, [state.yt]);
 
   useEffect(() => {
