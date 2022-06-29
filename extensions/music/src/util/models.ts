@@ -10,7 +10,6 @@ export interface Track {
   artist: string;
   album: string;
   duration: string;
-  trackImage?: string; 
   state?: PlayerState;
 }
 
