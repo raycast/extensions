@@ -30,7 +30,7 @@ export enum FilterType {
   COMMUNITY = "community",
 }
 
-export interface Image {
+export interface DockerImage {
   id: string;
   name: string;
   slug: string;
@@ -47,7 +47,7 @@ export interface Image {
   logo_url: LogoUrl;
   certification_status: string;
   star_count: number;
-  pull_count: number;
+  pull_count: string;
   filter_type: FilterType;
   url?: string;
   from?: string;
@@ -55,7 +55,7 @@ export interface Image {
 
 export interface SearchImageResult {
   count: number;
-  summaries?: Image[];
+  summaries?: DockerImage[];
   page: number;
   page_size: number;
   next: string;

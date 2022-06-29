@@ -34,7 +34,7 @@ export enum IssueState {
 }
 
 const GET_ISSUE_DETAIL = gql`
-  query GetIssueDetail($id: ID!) {
+  query GetIssueDetail($id: IssueID!) {
     issue(id: $id) {
       description
       webUrl

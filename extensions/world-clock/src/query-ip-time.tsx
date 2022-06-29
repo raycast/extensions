@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
-import React, { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
 import { buildDayAndNightIcon, isEmpty } from "./utils/common-utils";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";

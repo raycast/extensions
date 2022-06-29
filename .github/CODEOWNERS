@@ -163,7 +163,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
-/extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss
+/extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5
 /extensions/gitmoji                                  @ricoberger
 /extensions/go-package-search                        @bstncartwright
 /extensions/google-books                             @Ali-Parandeh
@@ -341,6 +341,7 @@
 /extensions/reddit-search                            @ewlcheng
 /extensions/redmine                                  @jwickers
 /extensions/refresh-wifi                             @natterstefan
+/extensions/regex-tester                             @allenan
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
@@ -456,6 +457,7 @@
 /extensions/world-clock                              @koinzhang
 /extensions/wrike                                    @suarez-agu
 /extensions/xcode                                    @SvenTiigi @qeude
+/extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/yandex-music                             @AlexStrNik
 /extensions/youdao-translate                         @tiancheng92
