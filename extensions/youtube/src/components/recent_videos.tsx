@@ -1,8 +1,8 @@
 import { Action, Toast, showToast, Icon, Color, LocalStorage, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect } from "react";
+import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
 import { VideoItem } from "./video";
 import { Video } from "../lib/youtubeapi";
-import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
 
 const preferences = getPreferenceValues();
 const { showRecentVideos } = preferences;
@@ -29,15 +29,19 @@ export const getVideos = async (key: string): Promise<Video[] | undefined> => {
 
 export const addRecentVideo = async (video: Video): Promise<void> => {
   try {
-    const res = await LocalStorage.getItem("recent-videos");
-    if (!res) {
-      await LocalStorage.setItem("recent-videos", JSON.stringify([video]));
+    // do not add recent channel if it is already pinned
+    const pinned = await getPinnedVideos();
+    if (pinned && pinned.find((v: Video) => v.id === video.id)) {
+      return;
+    }
+    let recent = await getRecentVideos();
+    if (recent) {
+      recent = recent.filter((v: Video) => v.id !== video.id);
+      recent.unshift(video);
+      recent.splice(15);
+      await LocalStorage.setItem("recent-videos", JSON.stringify(recent));
     } else {
-      let videos = JSON.parse(res.toString());
-      videos = videos.filter((v: Video) => v.id !== video.id);
-      videos.unshift(video);
-      videos.splice(15);
-      await LocalStorage.setItem("recent-videos", JSON.stringify(videos));
+      await LocalStorage.setItem("recent-videos", JSON.stringify([video]));
     }
   } catch {
     // ignore error
@@ -46,16 +50,15 @@ export const addRecentVideo = async (video: Video): Promise<void> => {
 
 export const addPinnedVideo = async (video: Video): Promise<void> => {
   try {
-    // if in the recent videos, remove it
+    // if in the recent channels, remove it
     removeRecentVideo(video.id);
-    const res = await LocalStorage.getItem("pinned-videos");
-    if (!res) {
-      await LocalStorage.setItem("pinned-videos", JSON.stringify([video]));
+    let pinned = await getPinnedVideos();
+    if (pinned) {
+      pinned = pinned.filter((v: Video) => v.id !== video.id);
+      pinned.unshift(video);
+      await LocalStorage.setItem("pinned-videos", JSON.stringify(pinned));
     } else {
-      let videos = JSON.parse(res.toString());
-      videos = videos.filter((v: Video) => v.id !== video.id);
-      videos.unshift(video);
-      await LocalStorage.setItem("pinned-videos", JSON.stringify(videos));
+      await LocalStorage.setItem("pinned-videos", JSON.stringify([video]));
     }
   } catch {
     // ignore error
@@ -67,7 +70,7 @@ export function PinVideo(props: { video: Video; refresh?: boolean; setRefresh?: 
     <Action
       title="Pin Video"
       icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={async () => {
         await addPinnedVideo(props.video);
         if (props.setRefresh) props.setRefresh(!props.refresh);
@@ -172,7 +175,8 @@ function NoSearchView(props: { recentQueries: Video[] | undefined }): JSX.Elemen
 
 export function RecentVideos(props: {
   setRootSearchText: (text: string) => void;
-  isLoading?: boolean | undefined;
+  isLoading: boolean | undefined;
+  channelId?: string | undefined;
 }): JSX.Element {
   const setRootSearchText = props.setRootSearchText;
   const [pinnedVideos, setPinnedVideos] = useState<Video[] | undefined>();
@@ -181,8 +185,16 @@ export function RecentVideos(props: {
 
   useEffect(() => {
     const getVideos = async () => {
-      setPinnedVideos(await getPinnedVideos());
-      setRecentVideos(await getRecentVideos());
+      let pinned = await getPinnedVideos();
+      if (pinned && props.channelId) {
+        pinned = pinned.filter((v: Video) => v.channelId === props.channelId);
+      }
+      setPinnedVideos(pinned);
+      let recent = await getRecentVideos();
+      if (recent && props.channelId) {
+        recent = recent.filter((v: Video) => v.channelId === props.channelId);
+      }
+      setRecentVideos(recent);
     };
     getVideos();
     return () => {

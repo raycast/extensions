@@ -12,8 +12,10 @@ export function PopularVideoList() {
   if (error) {
     showToast(Toast.Style.Failure, "Could not search popular Videos", getErrorMessage(error));
   }
+  const layout = getViewLayout();
+  const itemSize = getGridItemSize();
   return (
-    <ListOrGrid layout={getViewLayout()} itemSize={getGridItemSize()} isLoading={isLoading}>
+    <ListOrGrid layout={layout} itemSize={itemSize} isLoading={isLoading}>
       {data?.map((v) => (
         <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
       ))}

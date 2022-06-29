@@ -13,14 +13,14 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
   let mdParts = [];
   if (channel) {
     channelId = channel.id;
-    const desc = channel.description || "<no description>";
+    const desc = channel.description || "No description";
     const title = channel.title;
     const thumbnailUrl = channel.thumbnails?.default?.url || undefined;
-    mdParts = [`# Channel: ${title}`];
+    mdParts = [`# ${title}`];
     if (thumbnailUrl) {
       mdParts.push(`![thumbnail](${thumbnailUrl})`);
     }
-    const meta: string[] = [`* Channelname: ${channel.title}  `, `* Published: ${formatDate(channel.publishedAt)}`];
+    const meta: string[] = [`* Channel Name: ${channel.title}  `, `* Published: ${formatDate(channel.publishedAt)}`];
     mdParts = mdParts.concat([desc, meta.join("\n")]);
     if (channel.statistics) {
       const cs = channel.statistics;

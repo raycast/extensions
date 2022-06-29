@@ -1,8 +1,8 @@
 import { Action, Toast, showToast, Icon, Color, LocalStorage, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect } from "react";
+import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
 import { ChannelItem } from "./channel";
 import { Channel } from "../lib/youtubeapi";
-import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
 
 const preferences = getPreferenceValues();
 const { showRecentChannels } = preferences;
@@ -18,7 +18,7 @@ export const getPinnedChannels = async (): Promise<Channel[] | undefined> => {
 export const getChannels = async (key: string): Promise<Channel[] | undefined> => {
   try {
     const res = await LocalStorage.getItem(key);
-    if (!res) return;
+    if (!res) return undefined;
     const channels = JSON.parse(res.toString());
     return channels;
   } catch {
@@ -29,15 +29,19 @@ export const getChannels = async (key: string): Promise<Channel[] | undefined> =
 
 export const addRecentChannel = async (channel: Channel): Promise<void> => {
   try {
-    const res = await LocalStorage.getItem("recent-channels");
-    if (!res) {
-      await LocalStorage.setItem("recent-channels", JSON.stringify([channel]));
+    // do not add recent channel if it is already pinned
+    const pinned = await getPinnedChannels();
+    if (pinned && pinned.find((c: Channel) => c.id === channel.id)) {
+      return;
+    }
+    let recent = await getRecentChannels();
+    if (recent) {
+      recent = recent.filter((c: Channel) => c.id !== channel.id);
+      recent.unshift(channel);
+      recent.splice(15);
+      await LocalStorage.setItem("recent-channels", JSON.stringify(recent));
     } else {
-      let channels = JSON.parse(res.toString());
-      channels = channels.filter((c: Channel) => c.id !== channel.id);
-      channels.unshift(channel);
-      channels.splice(15);
-      await LocalStorage.setItem("recent-channels", JSON.stringify(channels));
+      await LocalStorage.setItem("recent-channels", JSON.stringify([channel]));
     }
   } catch {
     // ignore error
@@ -48,14 +52,13 @@ export const addPinnedChannel = async (channel: Channel): Promise<void> => {
   try {
     // if in the recent channels, remove it
     removeRecentChannel(channel.id);
-    const res = await LocalStorage.getItem("pinned-channels");
-    if (!res) {
-      await LocalStorage.setItem("pinned-channels", JSON.stringify([channel]));
+    let pinned = await getPinnedChannels();
+    if (pinned) {
+      pinned = pinned.filter((c: Channel) => c.id !== channel.id);
+      pinned.unshift(channel);
+      await LocalStorage.setItem("pinned-channels", JSON.stringify(pinned));
     } else {
-      let channels = JSON.parse(res.toString());
-      channels = channels.filter((c: Channel) => c.id !== channel.id);
-      channels.unshift(channel);
-      await LocalStorage.setItem("pinned-channels", JSON.stringify(channels));
+      await LocalStorage.setItem("pinned-channels", JSON.stringify([channel]));
     }
   } catch {
     // ignore error
@@ -67,7 +70,7 @@ export const PinChannel = (props: { channel: Channel; refresh?: boolean; setRefr
     <Action
       title="Pin Channel"
       icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={async () => {
         await addPinnedChannel(props.channel);
         if (props.setRefresh) props.setRefresh(!props.refresh);

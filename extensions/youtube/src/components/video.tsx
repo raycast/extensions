@@ -97,7 +97,6 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
 
 export function VideoItemDetail(props: { video: Video }): JSX.Element {
   const video = props.video;
-  const videoId = video.id;
   const desc = video.description || "No description";
   const title = video.title;
   const thumbnailUrl = video.thumbnails?.high?.url || undefined;

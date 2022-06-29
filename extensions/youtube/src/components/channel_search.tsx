@@ -18,11 +18,12 @@ export function SearchChannelList() {
     showToast(Toast.Style.Failure, "Could not search channels", getErrorMessage(error));
   }
   const layout = getViewLayout();
+  const itemSize = getGridItemSize();
   if (data) {
     return (
       <ListOrGrid
         layout={layout}
-        itemSize={getGridItemSize()}
+        itemSize={itemSize}
         isLoading={isLoading}
         onSearchTextChange={setSearchText}
         throttle={true}

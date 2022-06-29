@@ -17,11 +17,13 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
   if (error) {
     showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
   }
+  const layout = getViewLayout();
+  const itemSize = getGridItemSize();
   if (data) {
     return (
       <ListOrGrid
-        layout={getViewLayout()}
-        itemSize={getGridItemSize()}
+        layout={layout}
+        itemSize={itemSize}
         isLoading={isLoading}
         onSearchTextChange={setSearchText}
         throttle={true}
@@ -32,6 +34,6 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
       </ListOrGrid>
     );
   } else {
-    return <RecentVideos setRootSearchText={setSearchText} isLoading={isLoading} />;
+    return <RecentVideos setRootSearchText={setSearchText} isLoading={isLoading} channelId={props.channedId} />;
   }
 }
