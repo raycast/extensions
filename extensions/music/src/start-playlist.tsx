@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  ListOrGrid,
+  ListOrGridDropdown,
+  ListOrGridDropdownItem,
+  ListOrGridSection,
+  getViewLayout,
+  getMaxNumberOfResults,
+  getGridItemSize,
+} from "./util/listorgrid";
+import { getArtworkByIds } from "./util/scripts/playlists";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
@@ -6,6 +16,7 @@ import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
+import { displayDuration } from "./util/utils";
 
 enum PlaylistKind {
   ALL = "all",
@@ -29,7 +40,11 @@ const kindToString = (kind: PlaylistKind) => {
 export default function PlaySelected() {
   const [playlistKind, setPlaylistKind] = useState<PlaylistKind>(PlaylistKind.ALL);
   const [playlists, setPlaylists] = useState<PlaylistSections | null>(null);
+  const [artworks, setArtworks] = useState<any>(null);
   const { pop } = useNavigation();
+  const layout = getViewLayout();
+  const numResults = getMaxNumberOfResults();
+  const gridItemSize = getGridItemSize();
 
   useEffect(() => {
     pipe(
@@ -42,46 +57,84 @@ export default function PlaySelected() {
       TE.map(
         flow(
           parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
+          (data) => {
+            data = data.filter((playlist) => playlist.name !== "Library" && playlist.name !== "Music");
+            return A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data);
+          },
           setPlaylists
         )
       )
     )();
   }, [playlistKind]);
 
+  useEffect(() => {
+    const getArtworks = async () => {
+      if (playlists) {
+        const ids = Object.entries(playlists)
+          .map(([_, data]) => data.map((playlist) => playlist.id))
+          .reduce((acc, curr) => acc.concat(curr), [])
+          .slice(0, numResults);
+        if (ids !== null && ids.length > 0) {
+          try {
+            const artworks = await getArtworkByIds(ids);
+            setArtworks(artworks);
+          } catch {
+            showToast(Toast.Style.Failure, "Error: Failed to get track artworks");
+          }
+        } else setArtworks([]);
+      }
+    };
+    getArtworks();
+    return () => {
+      setArtworks(null);
+    };
+  }, [playlists]);
+
   return (
-    <List
-      isLoading={playlists === null}
+    <ListOrGrid
+      itemSize={gridItemSize}
+      isLoading={artworks === null}
       searchBarPlaceholder="Search A Playlist"
       searchBarAccessory={
-        <List.Dropdown
+        <ListOrGridDropdown
           tooltip="Playlist Kind"
           value={playlistKind}
           defaultValue={PlaylistKind.ALL}
           onChange={(s) => setPlaylistKind(s as PlaylistKind)}
         >
-          <List.Dropdown.Item title="All" value={PlaylistKind.ALL} />
-          <List.Dropdown.Item title="User" value={PlaylistKind.USER} />
-          <List.Dropdown.Item title="Apple Music" value={PlaylistKind.SUBSCRIPTION} />
-        </List.Dropdown>
+          <ListOrGridDropdownItem title="All Playlists" value={PlaylistKind.ALL} />
+          <ListOrGridDropdownItem title="User Playlists" value={PlaylistKind.USER} />
+          <ListOrGridDropdownItem title="Apple Music" value={PlaylistKind.SUBSCRIPTION} />
+        </ListOrGridDropdown>
       }
     >
-      {Object.entries(playlists ?? {})
-        .filter(([section]) => section !== "library")
-        .map(([section, data]) => (
-          <List.Section title={kindToString(section as PlaylistKind)} key={section}>
-            {data.map((playlist) => (
-              <List.Item
-                key={playlist.id}
-                title={playlist.name}
-                accessoryTitle={`🎧 ${playlist.count}  ⏱ ${Math.floor(Number(playlist.duration) / 60)} min`}
-                icon={{ source: "../assets/icon.png" }}
-                actions={<Actions playlist={playlist} pop={pop} />}
-              />
-            ))}
-          </List.Section>
+      {artworks &&
+        Object.entries(playlists ?? {}).map(([section, data]) => (
+          <ListOrGridSection title={kindToString(section as PlaylistKind)} key={section}>
+            {data
+              .filter((playlist) => playlist.name !== "Music")
+              .map((playlist) =>
+                layout === "grid" ? (
+                  <Grid.Item
+                    key={playlist.id}
+                    title={playlist.name}
+                    content={artworks[playlist.id] || ""}
+                    subtitle={displayDuration(parseInt(playlist.duration))}
+                    actions={<Actions playlist={playlist} pop={pop} />}
+                  />
+                ) : (
+                  <List.Item
+                    key={playlist.id}
+                    title={playlist.name}
+                    icon={artworks[playlist.id] || ""}
+                    accessories={[{ text: displayDuration(parseInt(playlist.duration)) }]}
+                    actions={<Actions playlist={playlist} pop={pop} />}
+                  />
+                )
+              )}
+          </ListOrGridSection>
         ))}
-    </List>
+    </ListOrGrid>
   );
 }
 
