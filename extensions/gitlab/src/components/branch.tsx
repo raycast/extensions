@@ -1,4 +1,4 @@
-import { ActionPanel, List, Image, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Project } from "../gitlabapi";
 import { gitlab } from "../common";
@@ -7,7 +7,7 @@ import { CreateMRAction, ShowBranchCommitsAction } from "./branch_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusIcon } from "./jobs";
-import { ensureCleanAccessories } from "../utils";
+import { ensureCleanAccessories, showErrorToast } from "../utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -55,7 +55,7 @@ export function BranchList(props: { project: Project }) {
   const [query, setQuery] = useState<string>("");
   const { branches, error, isLoading } = useSearch(query, props.project);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search branches", error);
+    showErrorToast(error, "Cannot search Branches");
   }
 
   return (
@@ -77,7 +77,7 @@ export function useSearch(
 } {
   const [branches, setBranches] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

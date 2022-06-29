@@ -1,8 +1,8 @@
-import { ActionPanel, List, showToast, Color, Toast, Image } from "@raycast/api";
+import { ActionPanel, List, Color, Image } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
-import { daysInSeconds, ensureCleanAccessories, toDateString } from "../utils";
+import { daysInSeconds, ensureCleanAccessories, showErrorToast, toDateString } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
 import { getCIJobStatusEmoji } from "./jobs";
@@ -16,7 +16,7 @@ export function ReviewList(): JSX.Element {
   const { mrs, error, isLoading } = useMyReviews(project);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Reviews", error);
+    showErrorToast(error, "Cannot search Reviews");
   }
 
   if (isLoading === undefined) {

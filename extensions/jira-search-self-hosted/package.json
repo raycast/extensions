@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "emanguy",
   "contributors": [
-    "sven"
+    "sven",
+    "koseduhemak"
   ],
   "license": "MIT",
   "commands": [
@@ -59,7 +60,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.36.0",
     "node-fetch": "^3.1.0"
   },
   "devDependencies": {
@@ -70,12 +71,14 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "prettier": "^2.5.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "node publish.mjs"
   }
 }

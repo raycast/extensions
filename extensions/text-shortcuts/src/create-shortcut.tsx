@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import {
   cases,
   checkAffix,
   checkInfo,
   coders,
   createShortcut,
+  iconColors,
   icons,
   Shortcut,
   ShortcutInfo,
-  ShortcutSource,
   Taction,
   TactionType,
   tags,
   transforms,
 } from "./util/shortcut";
-import { variables } from "./util/variable";
+import { variables } from "./types/types";
+import { shortcutTips } from "./util/constants";
+import { ActionOnTactions } from "./components/action-on-tactions";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateShortcut(props: {
   shortcut: Shortcut | undefined;
-  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const _editShortcut = props.shortcut;
-  const [updateList, setUpdateList] =
-    typeof props.updateListUseState == "undefined" ? useState<number[]>([0]) : props.updateListUseState;
+  const setRefresh =
+    typeof props.setRefresh == "undefined"
+      ? () => {
+          return;
+        }
+      : props.setRefresh;
   const editShortcut = typeof _editShortcut == "undefined" ? new Shortcut() : _editShortcut;
   const [localShortcuts, setLocalShortcuts] = useState<Shortcut[]>([]);
-  const [info, setInfo] = useState<ShortcutInfo>({
-    name: "",
-    id: "",
-    icon: icons[0],
-    source: ShortcutSource.USER,
-    visibility: true,
-    tag: [],
-  });
+  const [info, setInfo] = useState<ShortcutInfo>(editShortcut.info);
   const [tactions, setTactions] = useState<Taction[]>([]);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function CreateShortcut(props: {
           tactions={tactions}
           localShortcuts={localShortcuts}
           setTactions={setTactions}
-          updateListUseState={[updateList, setUpdateList]}
+          setRefresh={setRefresh}
         />
       }
     >
@@ -73,27 +73,57 @@ export default function CreateShortcut(props: {
         }}
       />
       <Form.Dropdown
-        id={"icons"}
+        id={"icon"}
         title={"Icon"}
-        defaultValue={editShortcut.info.icon}
+        value={info.icon}
         onChange={(newValue) => {
-          info.icon = newValue as Icon;
-          setInfo(info);
+          const _info = { ...info };
+          _info.icon = newValue as Icon;
+          setInfo(_info);
         }}
       >
         {icons.map((value) => {
-          return <Form.Dropdown.Item key={value} title={" "} icon={value} value={value} />;
+          return (
+            <Form.Dropdown.Item
+              key={value[0]}
+              title={value[0]}
+              icon={{ source: value[1] as Icon, tintColor: info.iconColor }}
+              value={value[1]}
+            />
+          );
+        })}
+      </Form.Dropdown>
+      <Form.Dropdown
+        id={"iconColor"}
+        title={"Color"}
+        value={info.iconColor}
+        onChange={(newValue) => {
+          const _info = { ...info };
+          _info.iconColor = newValue as Color;
+          setInfo(_info);
+        }}
+      >
+        {iconColors.map((value) => {
+          return (
+            <Form.Dropdown.Item
+              key={value[0]}
+              title={value[0]}
+              icon={{ source: "solid-circle.png", tintColor: value[1] as Color }}
+              value={value[1]}
+            />
+          );
         })}
       </Form.Dropdown>
 
       <Form.TagPicker
         id={"tags"}
         title={"Tag"}
-        defaultValue={editShortcut.info.tag}
+        value={info.tag}
         placeholder={"Shortcut tags"}
         onChange={(newValue) => {
-          info.tag = newValue;
-          setInfo(info);
+          const _info = { ...info };
+          _info.tag = newValue;
+          setInfo(_info);
         }}
       >
         {tags.map((value) => {
@@ -103,8 +133,8 @@ export default function CreateShortcut(props: {
 
       {tactionForms(tactions, setTactions)}
 
-      <Form.Description text={"  ⌘D       ⌘E       ⌘N        ⌘R            ⌘T              ⌘L"} />
-      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
+      <Form.Description text={shortcutTips.key} />
+      <Form.Description text={shortcutTips.action} />
     </Form>
   );
 }
@@ -120,7 +150,13 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"delete" + index}
               key={"delete" + index}
               title={TactionType.DELETE + " " + (index + 1)}
-              placeholder={"Delete word"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Delete all numbers: /\\d/g\n" +
+                "Delete all Blank characters: /\\s/g\n" +
+                "Delete all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
                 const _tactions = [...tactions];
@@ -139,20 +175,30 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
               id={"replace" + index}
               key={"replace" + index}
               title={TactionType.REPLACE + " " + (index + 1)}
-              placeholder={"Replace"}
+              placeholder={"Strings or Regular Expressions"}
+              info={
+                "Support regular expressions with // and modifiers.\n" +
+                "Replace all numbers: /\\d/g\n" +
+                "Replace all Blank characters: /\\s/g\n" +
+                "Replace all letter, number and underline: /\\w/g"
+              }
               value={array[index].content[0]}
               onChange={(newValue) => {
-                tactions[index].content[0] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[0] = newValue;
+                setTactions(_tactions);
               }}
             />
             <Form.TextField
               id={"replace_with" + index}
               key={"replace_with" + index}
               title={""}
-              placeholder={"with"}
+              placeholder={"with string"}
               value={array[index].content[1]}
               onChange={(newValue) => {
-                tactions[index].content[1] = newValue;
+                const _tactions = [...tactions];
+                _tactions[index].content[1] = newValue;
+                setTactions(_tactions);
               }}
             />
           </React.Fragment>
@@ -256,15 +302,11 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
 function CreateShortcutActions(props: {
   info: ShortcutInfo;
   tactions: Taction[];
-  localShortcuts: Shortcut[];
   setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
-  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
+  localShortcuts: Shortcut[];
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const info = props.info;
-  const tactions = props.tactions;
-  const localShortcuts = props.localShortcuts;
-  const setTactions = props.setTactions;
-  const [updateList, setUpdateList] = props.updateListUseState;
+  const { info, tactions, setTactions, localShortcuts, setRefresh } = props;
   const { pop } = useNavigation();
   return (
     <ActionPanel>
@@ -293,102 +335,25 @@ function CreateShortcutActions(props: {
           } else {
             await createShortcut(info, tactions, localShortcuts);
             pop();
-            const _updateList = [...updateList];
-            _updateList[0]++;
-            setUpdateList(_updateList);
+            setRefresh(Date.now());
             await showToast(Toast.Style.Success, `Create shortcut success!`);
           }
         }}
       />
-      <TactionActions tactions={tactions} setTactions={setTactions} />
+      <ActionOnTactions tactions={tactions} setTactions={setTactions} />
+
+      <ActionOpenPreferences />
     </ActionPanel>
   );
 }
 
-export function TactionActions(props: {
-  tactions: Taction[];
-  setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
-}) {
-  const tactions = props.tactions;
-  const setTactions = props.setTactions;
-  return (
-    <>
-      <ActionPanel.Section title="Add Action">
-        <Action
-          title={TactionType.DELETE}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.DELETE, content: [""] }]);
-          }}
-        />
-        <Action
-          title={TactionType.CODER}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.CODER, content: [""] }]);
-          }}
-        />
-        <Action
-          title={TactionType.CASE}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.CASE, content: [""] }]);
-          }}
-        />
-        <Action
-          title={TactionType.REPLACE}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.REPLACE, content: [""] }]);
-          }}
-        />
-        <Action
-          title={TactionType.TRANSFORM}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.TRANSFORM, content: [""] }]);
-          }}
-        />
-        <Action
-          title={TactionType.AFFIX}
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "l" }}
-          onAction={async () => {
-            setTactions([...tactions, { type: TactionType.AFFIX, content: [""] }]);
-          }}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section title="Remove Action">
-        <Action
-          title="Remove Last Action"
-          icon={Icon.Trash}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-          onAction={async () => {
-            const _tactions = [...tactions];
-            _tactions.pop();
-            setTactions(_tactions);
-          }}
-        />
-        <Action
-          title="Remove All Actions"
-          icon={Icon.ExclamationMark}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
-          onAction={async () => {
-            setTactions([]);
-          }}
-        />
-      </ActionPanel.Section>
-    </>
-  );
-}
-
-function updateTactionContent(content: string, index: number, taction: Taction[], setTactions: any, contentIndex = 0) {
+function updateTactionContent(
+  content: string,
+  index: number,
+  taction: Taction[],
+  setTactions: React.Dispatch<React.SetStateAction<Taction[]>>,
+  contentIndex = 0
+) {
   taction[index].content[contentIndex] = content;
   setTactions(taction);
 }

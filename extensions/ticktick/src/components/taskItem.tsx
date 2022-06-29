@@ -9,16 +9,17 @@ const TaskItem: React.FC<{
   title: Task["title"];
   priority: Task["priority"];
   projectId: Task["projectId"];
+  tags: Task["tags"];
   actionType: "today" | "week" | "project";
   detailMarkdown: string;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, detailMarkdown } = props;
+  const { id, title, priority, projectId, actionType, detailMarkdown, tags } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
   }, [projectId]);
 
-  const getCheckboxColor = useCallback((priority: Task["priority"]) => {
+  const checkboxColor = useMemo(() => {
     switch (priority) {
       case 0:
         return Color.PrimaryText;
@@ -31,7 +32,21 @@ const TaskItem: React.FC<{
       default:
         return Color.PrimaryText;
     }
-  }, []);
+  }, [priority]);
+
+  const priorityText = useMemo(() => {
+    switch (priority) {
+      case 1:
+        return "Low";
+      case 3:
+        return "Medium";
+      case 5:
+        return "High";
+      case 0:
+      default:
+        return "None";
+    }
+  }, [priority]);
 
   const target = useMemo(() => {
     if (actionType === "project") {
@@ -43,7 +58,7 @@ const TaskItem: React.FC<{
   return (
     <List.Item
       title={title || "Untitled"}
-      icon={{ source: Icon.Circle, tintColor: getCheckboxColor(priority) }}
+      icon={{ source: Icon.Circle, tintColor: checkboxColor }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
@@ -52,7 +67,29 @@ const TaskItem: React.FC<{
         </ActionPanel>
       }
       accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}
-      detail={<List.Item.Detail markdown={detailMarkdown} />}
+      detail={
+        <List.Item.Detail
+          markdown={detailMarkdown}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="List" text={addSpaceBetweenEmojiAndText(projectName)} />
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="Priority"
+                text={priorityText}
+                icon={{ source: Icon.Dot, tintColor: checkboxColor }}
+              />
+              <List.Item.Detail.Metadata.Separator />
+              {tags.length ? (
+                <>
+                  <List.Item.Detail.Metadata.Label title="Tags" text={tags.join(", ")} />
+                  <List.Item.Detail.Metadata.Separator />
+                </>
+              ) : null}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
     />
   );
 };

@@ -18,6 +18,7 @@ export default function ProjectListItem({
       title={project?.name || "No project"}
       subtitle={subtitle}
       accessoryTitle={accessoryTitle}
+      keywords={subtitle?.split(" ") || []}
       actions={
         <ActionPanel>
           <PushAction

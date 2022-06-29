@@ -1,5 +1,19 @@
 # Todoist Changelog
 
+## [New tasks from projects and task actions in detail] - 2022-05-13
+
+- Added the ability to add a new task from a project
+- Shared the task actions between the task detail and the task list item
+- Add flag icon for priorities in the detail view as well as in the action panel
+
+## [Edit your projects] - 2022-04-30
+
+- Added a new action on projects to edit them
+- Added a new action on projects to add/remove them to/from favorites
+- Added the project's color on the Search Projects command
+- Removed the custom ordering of the tasks since Todoist already performs them
+- Displayed the sub-tasks back in the project view
+
 ## [Add support for comments] - 2022-04-23
 
 - Added support for comments on each task. It's now possible to add a new comment, edit it, delete it, or search through every comment's content.

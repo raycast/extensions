@@ -1,0 +1,65 @@
+fragment BatchChange on BatchChange {
+  id
+  url
+  namespace {
+    id
+    namespaceName
+  }
+  name
+  description
+  creator {
+    username
+    displayName
+  }
+  state
+  updatedAt
+  changesetsStats {
+    total
+    merged
+    open
+    closed
+    failed
+    unpublished
+    draft
+  }
+}
+
+query GetBatchChanges {
+  batchChanges(first: 100) {
+    nodes {
+      ...BatchChange
+    }
+  }
+}
+
+fragment Changeset on Changeset {
+  __typename
+
+  id
+  state
+  updatedAt
+
+  ... on ExternalChangeset {
+    repository {
+      name
+    }
+    externalURL {
+      url
+      serviceKind
+    }
+    externalID
+    title
+    reviewState
+    checkState
+  }
+}
+
+query GetChangesets($namespace: ID!, $name: String!) {
+  batchChange(namespace: $namespace, name: $name) {
+    changesets {
+      nodes {
+        ...Changeset
+      }
+    }
+  }
+}

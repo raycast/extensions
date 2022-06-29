@@ -1,6 +1,156 @@
 # Form
 
+Our `Form` component provides great user experience to collect some data from a user and submit it for extensions needs.
+
 ![](../../.gitbook/assets/example-doppler-share-secrets.png)
+
+### Two Types of Items: Controlled vs. Uncontrolled
+
+Items in React can be one of two types: controlled or uncontrolled.
+
+An uncontrolled item is the simpler of the two. It’s the closest to a plain HTML input. React puts it on the page, and Raycast keeps track of the rest. Uncontrolled inputs require less code, but make it harder to do certain things.
+
+With a controlled item, YOU explicitly control the `value` that the item displays. You have to write code to respond to changes with defining `onChange` callback, store the current `value` somewhere, and pass that value back to the item to be displayed. It’s a feedback loop with your code in the middle. It’s more manual work to wire these up, but they offer the most control.
+
+You can take look at these two styles below under each of the supported items.
+
+## Validation
+
+Before submitting data, it is important to ensure all required form controls are filled out, in the correct format.
+
+In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value.
+
+![](../../.gitbook/assets/form-validation.png)
+
+{% hint style="info" %}
+Keep in mind that if the Form has any errors, the [`Action.SubmitForm`](./actions.md#action.submitform) `onSubmit` callback won't be triggered.
+{% endhint %}
+
+#### Example
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
+
+  function dropNameErrorIfNeeded() {
+    if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+
+  function dropPasswordErrorIfNeeded() {
+    if (passwordError && passwordError.length > 0) {
+      setPasswordError(undefined);
+    }
+  }
+
+  return (
+    <Form>
+      <Form.TextField
+        id="nameField"
+        title="Full Name"
+        placeholder="Enter your name"
+        error={nameError}
+        onChange={dropNameErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setNameError("The field should't be empty!");
+          } else {
+            dropNameErrorIfNeeded();
+          }
+        }}
+      />
+      <Form.PasswordField
+        id="password"
+        title="New Password"
+        error={passwordError}
+        onChange={dropPasswordErrorIfNeeded}
+        onBlur={(event) => {
+          const value = event.target.value;
+          if (value && value.length > 0) {
+            if (!validatePassword(value)) {
+              setPasswordError("Password should be at least 8 characters!");
+            } else {
+              dropPasswordErrorIfNeeded();
+            }
+          } else {
+            setPasswordError("The field should't be empty!");
+          }
+        }}
+      />
+      <Form.TextArea id="bioTextArea" title="Add Bio" placeholder="Describe who you are" />
+      <Form.DatePicker id="birthDate" title="Date of Birth" />
+    </Form>
+  );
+}
+
+function validatePassword(value: string): boolean {
+  return value.length >= 8;
+}
+```
+
+### Drafts
+
+Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the top-level props `draftValues`.
+
+<InterfaceTableFromJSDoc name="FormLaunchProps" />
+
+![](../../.gitbook/assets/form-drafts.png)
+
+{% hint style="info" %}
+
+- Drafts for forms nested in navigation is not supported yet. In this case you will see a warning about it.
+- Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
+- Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
+- If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
+
+{% endhint %}
+
+#### Example
+
+```typescript
+import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { useState } from "react";
+
+interface TodoValues {
+  title: string;
+  description?: string;
+  dueDate?: Date;
+}
+
+export default function Command(props: { draftValues?: TodoValues }) {
+  const { draftValues } = props;
+
+  function handleSubmit(values: TodoValues) {
+    console.log("onSubmit", values);
+    popToRoot();
+  }
+
+  return (
+    <Form
+      enableDrafts
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={(values: TodoValues) => {
+              handleSubmit(values);
+              popToRoot();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" defaultValue={draftValues?.title} />
+      <Form.TextArea id="description" title="Description" defaultValue={draftValues?.description} />
+      <Form.DatePicker id="dueDate" title="Due Date" defaultValue={draftValues?.dueDate} />
+    </Form>
+  );
+}
+```
 
 ## API Reference
 
@@ -10,12 +160,7 @@ Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Fo
 
 #### Props
 
-| Prop            | Type                                                                                                                | Required | Default       | Description                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- | -------- | ------------- | ------------------------------------------------------------------------------ |
-| actions         | `null` or [`ActionPanel`](action-panel.md#actionpanel)                                                              | No       | -             | A reference to an [ActionPanel](action-panel.md#actionpanel).                  |
-| children        | `null` or `ReactElement<Form.ItemProps<FormValue>, string>` or `ReactElement<Form.ItemProps<Form.Value>, string>[]` | No       | -             | The Form.Item elements of the form.                                            |
-| isLoading       | `boolean`                                                                                                           | No       | false         | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | `string`                                                                                                            | No       | Command title | The main title for that view displayed in Raycast                              |
+<PropsTableFromJSDoc component="Form" />
 
 ### Form.TextField
 
@@ -36,10 +181,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -64,10 +206,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -82,24 +221,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TextField" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
-
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.PasswordField
 
@@ -120,10 +249,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Password"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Password" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -148,18 +274,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Password"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Password" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.PasswordField
-        id="password"
-        value={password}
-        onChange={setPassword}
-      />
+      <Form.PasswordField id="password" value={password} onChange={setPassword} />
     </Form>
   );
 }
@@ -170,23 +289,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.PasswordField" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.TextArea
 
@@ -210,10 +320,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Description"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Description" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -238,18 +345,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Description"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Description" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="description"
-        value={description}
-        onChange={setDescription}
-      />
+      <Form.TextArea id="description" value={description} onChange={setDescription} />
     </Form>
   );
 }
@@ -260,23 +360,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | --------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `string`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | `boolean`                               | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| autofocus    | `boolean`                               | No       | -       | Indicates whether the item should be focused automatically once the form is rendered.                                                                                                                             |
-| title        | `string`                                | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TextArea" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.Checkbox
 
@@ -297,10 +388,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -325,19 +413,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.Checkbox
-        id="answer"
-        label="Do you like orange juice?"
-        value={checked}
-        onChange={setChecked}
-      />
+      <Form.Checkbox id="answer" label="Do you like orange juice?" value={checked} onChange={setChecked} />
     </Form>
   );
 }
@@ -348,22 +428,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                     | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `boolean`                                | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                 | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| label        | `string`                                 | Yes      | -       | The label displayed on the right side of the checkbox.                                                                                                                                                            |
-| storeValue   | `boolean`                                | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                 | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `boolean`                                | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: boolean) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.Checkbox" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.DatePicker
 
@@ -384,18 +456,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        id="dateOfBirth"
-        title="Date of Birth"
-        defaultValue={new Date(1955, 1, 24)}
-      />
+      <Form.DatePicker id="dateOfBirth" title="Date of Birth" defaultValue={new Date(1955, 1, 24)} />
     </Form>
   );
 }
@@ -416,19 +481,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        id="launchDate"
-        title="Launch Date"
-        value={date}
-        onChange={setDate}
-      />
+      <Form.DatePicker id="launchDate" title="Launch Date" value={date} onChange={setDate} />
     </Form>
   );
 }
@@ -439,31 +496,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                       | Required | Default                         | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------------------------- | -------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `Date`                                                     | No       | -                               | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                   | Yes      | -                               | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| storeValue   | `boolean`                                                  | No       | -                               | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                   | No       | -                               | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `Date`                                                     | No       | -                               | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: Date) => void</code>                      | No       | -                               |                                                                                                                                                                                                                   |
-| type         | <code>[Form.DatePicker.Type](#form.datepicker.type]</code> | No       | `Form.DatePicker.Type.DateTime` | Indicates what types of date components can be picked                                                                                                                                                             |
+<PropsTableFromJSDoc component="Form.DatePicker" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
-
-#### Form.DatePicker.Type
-
-The types of date components the user can pick with a \`Form.DatePicker
-
-| Name     | Description                                                      |
-| -------- | ---------------------------------------------------------------- |
-| DateTime | Hour and second can be picked in addition to year, month and day |
-| Date     | Only year, month, and day can be picked                          |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.Dropdown
 
@@ -484,21 +524,14 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
       <Form.Dropdown id="emoji" title="Favorite Emoji" defaultValue="lol">
         <Form.Dropdown.Item value="poop" title="Pile of poop" icon="💩" />
         <Form.Dropdown.Item value="rocket" title="Rocket" icon="🚀" />
-        <Form.Dropdown.Item
-          value="lol"
-          title="Rolling on the floor laughing face"
-          icon="🤣"
-        />
+        <Form.Dropdown.Item value="lol" title="Rolling on the floor laughing face" icon="🤣" />
       </Form.Dropdown>
     </Form>
   );
@@ -514,17 +547,13 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [programmingLanguage, setProgrammingLanguage] =
-    useState<string>("typescript");
+  const [programmingLanguage, setProgrammingLanguage] = useState<string>("typescript");
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -551,22 +580,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                                                                                                                                                                                                                                                       | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| children     | `null` or <code>[Form.Dropdown.Section](form.md#form.dropdown.section)</code> or <code>[Form.Dropdown.Section](form.md#form.dropdown.section)[]</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)[]</code> | No       | -       | Sections or items. If [Form.Dropdown.Item](form.md#form.dropdown.item) elements are specified, a default section is automatically created.                                                                        |
-| defaultValue | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                                                                                                                                                                                                                                                   | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| storeValue   | `boolean`                                                                                                                                                                                                                                                                                  | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string`                                                                                                                                                                                                                                                                                   | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code>                                                                                                                                                                                                                                                    | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.Dropdown" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.Dropdown.Item
 
@@ -582,10 +603,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Icon"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Icon" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -599,11 +617,7 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type                                                    | Required | Default | Description                                                                                                                 |
-| ----- | ------------------------------------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| icon  | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No       | -       | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
-| title | `string`                                                | Yes      | -       | The title displayed for the item.                                                                                           |
-| value | `string`                                                | Yes      | -       | Value of the dropdown item. Make sure to assign each unique value for each item.                                            |
+<PropsTableFromJSDoc component="Form.Dropdown.Item" />
 
 ### Form.Dropdown.Section
 
@@ -621,10 +635,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -645,10 +656,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                                                                                       | Required | Default | Description                       |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | --------------------------------- |
-| children | `null` or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)</code> or <code>[Form.Dropdown.Item](form.md#form.dropdown.item)[]</code> | No       | -       | The item elements of the section. |
-| title    | `string`                                                                                                                                   | No       | -       | Title displayed above the section |
+<PropsTableFromJSDoc component="Form.Dropdown.Section" />
 
 ### Form.TagPicker
 
@@ -669,18 +677,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="sports"
-        title="Favorite Sports"
-        defaultValue={["football"]}
-      >
+      <Form.TagPicker id="sports" title="Favorite Sports" defaultValue={["football"]}>
         <Form.TagPicker.Item value="basketball" title="Basketball" icon="🏀" />
         <Form.TagPicker.Item value="football" title="Football" icon="⚽️" />
         <Form.TagPicker.Item value="tennis" title="Tennis" icon="🎾" />
@@ -705,19 +706,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Countries"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Countries" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="countries"
-        title="Visited Countries"
-        value={countries}
-        onChange={setCountries}
-      >
+      <Form.TagPicker id="countries" title="Visited Countries" value={countries} onChange={setCountries}>
         <Form.TagPicker.Item value="ger" title="Germany" icon="🇩🇪" />
         <Form.TagPicker.Item value="ind" title="India" icon="🇮🇳" />
         <Form.TagPicker.Item value="ned" title="Netherlands" icon="🇳🇱" />
@@ -736,23 +729,14 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                                                                                                           | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| children     | `null` or <code>[Form.TagPicker.Item](form.md#form.tagpicker.item)</code> or <code>[Form.TagPicker.Item](form.md#form.tagpicker.item)[]</code> | No       | -       | The list of tag picker's items.                                                                                                                                                                                   |
-| defaultValue | `string[]`                                                                                                                                     | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                                                                                                                                       | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| placeholder  | `string`                                                                                                                                       | No       | -       | Placeholder text shown in the token field.                                                                                                                                                                        |
-| storeValue   | `boolean`                                                                                                                                      | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                                                                                                                                       | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `string[]`                                                                                                                                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string[]) => void</code>                                                                                                      | No       | -       |                                                                                                                                                                                                                   |
+<PropsTableFromJSDoc component="Form.TagPicker" />
 
 #### Methods (Imperative API)
 
-| Name  | Signature               | Description                                                                                                                            |
-| ----- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| focus | <code>() => void</code> | Makes the item request focus.                                                                                                          |
-| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified.                                                             |
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
 ### Form.TagPicker.Item
 
@@ -768,29 +752,14 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Color"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Color" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
       <Form.TagPicker id="color" title="Color">
-        <Form.TagPicker.Item
-          value="red"
-          title="Red"
-          icon={{ source: Icon.Circle, tintColor: Color.Red }}
-        />
-        <Form.TagPicker.Item
-          value="green"
-          title="Green"
-          icon={{ source: Icon.Circle, tintColor: Color.Green }}
-        />
-        <Form.TagPicker.Item
-          value="blue"
-          title="Blue"
-          icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-        />
+        <Form.TagPicker.Item value="red" title="Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+        <Form.TagPicker.Item value="green" title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
+        <Form.TagPicker.Item value="blue" title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
       </Form.TagPicker>
     </Form>
   );
@@ -799,11 +768,7 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type                                                    | Required | Default | Description                                                                   |
-| ----- | ------------------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------- |
-| icon  | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No       | -       | An icon to show in the token.                                                 |
-| title | `string`                                                | Yes      | -       | The display title of the token.                                               |
-| value | `string`                                                | Yes      | -       | Value of the tag picker item. Make sure to assign unique value for each item. |
+<PropsTableFromJSDoc component="Form.TagPicker.Item" />
 
 ### Form.Separator
 
@@ -821,10 +786,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -854,10 +816,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -872,14 +831,48 @@ export default function Command() {
 
 #### Props
 
-| Prop  | Type     | Required | Default | Description                                                   |
-| ----- | -------- | -------- | ------- | ------------------------------------------------------------- |
-| title | `string` | No       | -       | The display title of the left side from the description item. |
-| text  | `string` | Yes      | -       | Text that will be displayed in the middle.                    |
+<PropsTableFromJSDoc component="Form.Description" />
 
 ## Types
 
-### Values
+#### Form.Event
+
+Some Form.Item callbacks (like `onFocus` and `onBlur`) can return a `Form.Event` object that you can use in a different ways.
+
+<InterfaceTableFromJSDoc name="Form.Event" />
+
+#### Example
+
+```typescript
+export default function Main() {
+  return (
+    <Form>
+      <Form.TextField id="textField" title="Text Field" onBlur={logEvent} onFocus={logEvent} />
+      <Form.TextArea id="textArea" title="Text Area" onBlur={logEvent} onFocus={logEvent} />
+      <Form.Dropdown id="dropdown" title="Dropdown" onBlur={logEvent} onFocus={logEvent}>
+        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+          <Form.Dropdown.Item value={String(num)} title={String(num)} key={num} />
+        ))}
+      </Form.Dropdown>
+      <Form.TagPicker id="tagPicker" title="Tag Picker" onBlur={logEvent} onFocus={logEvent}>
+        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+          <Form.TagPicker.Item value={String(num)} title={String(num)} key={num} />
+        ))}
+      </Form.TagPicker>
+    </Form>
+  );
+}
+
+function logEvent(event: Form.Event) {
+  console.log(`Event '${event.type}' has happened for '${event.target.id}'. Current 'value': '${event.target.value}'`);
+}
+```
+
+#### Form.Event.Type
+
+The different types of [`Form.Event`](form.md#form.event). Can be `"focus"` or `"blur"`.
+
+### Form.Values
 
 Values of items in the form.
 
@@ -921,11 +914,26 @@ export default function Command() {
 | ----------------- | ----- | -------- | ------------------------------- |
 | \[itemId: string] | `any` | Yes      | The form value of a given item. |
 
+### Form.DatePicker.Type
+
+The types of date components the user can pick with a `Form.DatePicker`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |
+
 ---
 
 ## Imperative API
 
 You can use React's [useRef](https://reactjs.org/docs/hooks-reference.html#useref) hook to create variables which have access to imperative APIs (such as `.focus()` or `.reset()`) exposed by the native form items.
+
+{% hint style="info" %}
+The imperative APIs require version 1.33.0 or higher of the `@raycast/api` package.
+{% endhint %}
 
 ```typescript
 import { useRef } from "react";

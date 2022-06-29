@@ -16,6 +16,7 @@ export interface Preferences {
   terminalAppPath: string;
   gitClientAppPath: string;
   build: VSCodeBuild;
+  hideProjectsWithoutTag: boolean;
 }
 
 export enum VSCodeBuild {

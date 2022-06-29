@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Icon, List, popToRoot, showToast, Action, Image, Toast } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
+import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
 import {
@@ -18,6 +19,7 @@ import {
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
 } from "./mediaplayer";
+import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan";
 import {
   BrightnessControlAction,
   BrightnessDownAction,
@@ -52,6 +54,7 @@ import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
+import { ShowWeatherAction, weatherConditionToIcon, weatherStatusToIcon } from "./weather";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -223,6 +226,25 @@ function getIcon(state: State): Image.ImageLike | undefined {
       source = "clock-time-four.png";
     }
     return { source: source, tintColor: PrimaryIconColor };
+  } else if (e.startsWith("weather")) {
+    return { source: weatherConditionToIcon(state.state) };
+  } else if (e.startsWith("fan")) {
+    let source = "fan.png";
+    let tintColor: Color.ColorLike = PrimaryIconColor;
+
+    switch (state.state.toLocaleLowerCase()) {
+      case "on":
+        tintColor = Color.Yellow;
+        break;
+      case "off":
+        source = "fan-off.png";
+        break;
+      case "unavailable":
+        tintColor = UnavailableColor;
+        break;
+    }
+
+    return { source: source, tintColor: tintColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -282,6 +304,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
           const percent = (bv / 255) * 100;
           return `${Math.round(percent)}%`;
         }
+      }
+    } else if (state.entity_id.startsWith("fan")) {
+      // Speed as a percentage
+      const p = state.attributes.percentage || undefined;
+      if (!isNaN(p)) {
+        return `${p}%`;
       }
     } else if (state.entity_id.startsWith("sensor")) {
       const unit = (state.attributes.unit_of_measurement as string) || undefined;
@@ -460,6 +488,44 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         </ActionPanel>
       );
     }
+    case "fan": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <Action
+              title="Toggle"
+              onAction={async () => await ha.toggleFan(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <Action
+              title="Turn On"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.turnOnFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Green }}
+            />
+            <Action
+              title="Turn Off"
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => await ha.turnOffFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Red }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Speed">
+            <FanSpeedControlAction state={state} />
+            <FanSpeedUpAction state={state} />
+            <FanSpeedDownAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
     case "light": {
       return (
         <ActionPanel>
@@ -588,19 +654,23 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       );
     }
     case "climate": {
+      const tempStep = state.attributes.target_temp_step ?? 0.5;
+      const minAllowedTemp = state.attributes.min_temp ?? 7;
+      const maxAllowedTemp = state.attributes.max_temp ?? 35;
+      // Sometimes, min_temp and max_temp are not multiples of tempStep.
+      // Set the actual min and max to the nearest valid multiple of tempStep for consistency and display niceness.
+      const minNormalizedTemp = Math.ceil(minAllowedTemp / tempStep) * tempStep;
+      const maxNormalizedTemp = Math.floor(maxAllowedTemp / tempStep) * tempStep;
       const changeTempAllowed =
         state.state === "heat" || state.state === "cool" || state.state === "heat_cool" || state.state == "auto"
           ? true
           : false;
       const currentTempValue: number | undefined = state.attributes.temperature || undefined;
       const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
-      const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
-      const lowerTemp = currentTemp ? currentTemp - 0.5 : undefined;
+      const upperTemp = currentTemp ? currentTemp + tempStep : undefined;
+      const lowerTemp = currentTemp ? currentTemp - tempStep : undefined;
 
-      const temps: number[] = [];
-      for (let i = 26; i > 16; i--) {
-        temps.push(i);
-      }
+      const temps: number[] = range(minNormalizedTemp, maxNormalizedTemp, tempStep);
 
       const currentPresetMode = state.attributes.preset_mode ? state.attributes.preset_mode : "None";
       const preset_modes = state.attributes.preset_modes;
@@ -666,7 +736,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
 
             {upperTemp && changeTempAllowed && (
               <Action
-                title={`Increase Temp. 0.5`}
+                title={`Increase Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "+" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, upperTemp);
@@ -677,7 +747,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             )}
             {lowerTemp && changeTempAllowed && (
               <Action
-                title={`Decrease Temp. 0.5`}
+                title={`Decrease Temp. ${tempStep}`}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}
                 onAction={async () => {
                   await ha.setClimateTemperature(entityID, lowerTemp);
@@ -1021,6 +1091,30 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <UpdateShowChangelog state={state} />
             <UpdateOpenInBrowser state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Install">
+            <UpdateInstallAction state={state} />
+            <UpdateSkipVersionAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "weather": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ShowWeatherAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Install">
             <UpdateInstallAction state={state} />

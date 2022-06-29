@@ -1,32 +1,24 @@
-import { Icon, LocalStorage } from "@raycast/api";
-import { calculateCharacter, isEmpty, regexPunctuation } from "./utils";
+import { Color, Icon, LocalStorage } from "@raycast/api";
+import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
 import { Md5 } from "ts-md5/dist/md5";
 
 enum Tags {
   ANNOTATION = "Annotation",
   CASE = "Case",
   CODER = "Coder",
+  DELETION = "Deletion",
   FORMAT = "Format",
   MARKDOWN = "Markdown",
+  REPLACEMENT = "Replacement",
   TIME = "Time",
-  UNKNOWN = "Unknown",
+  OTHER = "Other",
 }
 
 export const tags = Object.values(Tags);
 
-export const icons = [
-  Icon.TextDocument,
-  Icon.Calendar,
-  Icon.Clock,
-  Icon.Envelope,
-  Icon.Globe,
-  Icon.Link,
-  Icon.List,
-  Icon.Pencil,
-  Icon.Star,
-  Icon.Terminal,
-  Icon.Trash,
-];
+export const icons = Object.entries(Icon);
+
+export const iconColors = Object.entries(Color);
 
 enum Cases {
   UPPER = "UPPER CASE",
@@ -36,7 +28,10 @@ enum Cases {
   PASCAL = "PascalCase",
   SNAKE = "snake_case",
   KEBAB = "kebab-case",
+  CAMEL_TO_SNAKE = "camelCase to snake_case",
+  CAMEL_TO_KEBAB = "camelCase to kebab-case",
 }
+
 export const cases = Object.values(Cases);
 
 enum Coders {
@@ -50,6 +45,7 @@ enum Coders {
   ENCODER_ESCAPE = "Encoder Escape",
   DECODER_ESCAPE = "Decoder Escape",
 }
+
 export const coders = Object.values(Coders);
 
 enum Transform {
@@ -66,12 +62,14 @@ export interface ShortcutInfo {
   name: string;
   id: string;
   icon: Icon;
+  iconColor?: Color;
   source: ShortcutSource; //0 from default, 1 from user
   visibility: boolean;
   tag: string[];
 }
+
 export enum ShortcutSource {
-  buildIn = "Build-in",
+  BUILD_IN = "Build-in",
   USER = "User",
 }
 
@@ -83,6 +81,7 @@ export enum TactionType {
   CASE = "Name Case",
   TRANSFORM = "Transform",
 }
+
 export interface Taction {
   type: TactionType;
   content: string[];
@@ -93,7 +92,14 @@ export class Shortcut {
   tactions: Taction[];
 
   constructor(
-    info = { name: "", id: "", icon: icons[0], source: ShortcutSource.USER, visibility: true, tag: [] as string[] },
+    info = {
+      name: "",
+      id: "",
+      icon: icons[0][1],
+      source: ShortcutSource.USER,
+      visibility: true,
+      tag: [] as string[],
+    },
     tactions: Taction[] = []
   ) {
     this.info = info;
@@ -143,10 +149,10 @@ export function checkAffix(affix: Taction[]) {
 
 export async function createShortcut(info: ShortcutInfo, tactions: Taction[], shortcuts: Shortcut[]) {
   if (info.tag.length == 0) {
-    info.tag = [tags[tags.length - 1]];
+    info.tag = [Tags.OTHER];
   }
   tactions = handleLiveTemplate(tactions);
-  if (info.id.length > 0) {
+  if (!isEmpty(info.id) && info.id.length > 0) {
     shortcuts.map((value, index) => {
       if (value.info.id == info.id) {
         shortcuts[index] = new Shortcut(info, tactions);
@@ -157,7 +163,7 @@ export async function createShortcut(info: ShortcutInfo, tactions: Taction[], sh
     info.id = "user_" + new Date().getTime();
     info.source = ShortcutSource.USER;
     const _shortcut = new Shortcut(info, tactions);
-    shortcuts.push(_shortcut);
+    shortcuts.unshift(_shortcut);
   }
   await LocalStorage.setItem("shortcuts", JSON.stringify(shortcuts));
 }
@@ -180,11 +186,23 @@ export function runShortcut(input: string, tactions: Taction[]) {
     tactions.map((value) => {
       switch (value.type) {
         case TactionType.DELETE: {
-          output = output.replaceAll(value.content[0], "");
+          const searchValue = buildRegexp(value.content[0]);
+          if (typeof searchValue == "string") {
+            output = output.replaceAll(searchValue, "");
+          } else {
+            output = output.replace(searchValue, "");
+          }
+          output = output.length === 0 ? " " : output;
           break;
         }
         case TactionType.REPLACE: {
-          output = output.replaceAll(value.content[0], value.content[1]);
+          const searchValue = buildRegexp(value.content[0]);
+          if (typeof searchValue == "string") {
+            output = output.replaceAll(searchValue, isEmpty(value.content[1]) ? "" : value.content[1]);
+          } else {
+            output = output.replace(searchValue, isEmpty(value.content[1]) ? "" : value.content[1]);
+          }
+          output = output.length === 0 ? " " : output;
           break;
         }
         case TactionType.AFFIX: {
@@ -207,6 +225,7 @@ export function runShortcut(input: string, tactions: Taction[]) {
     });
     return output;
   } catch (e) {
+    console.error("runShortcut " + String(e));
     return input;
   }
 }
@@ -351,6 +370,12 @@ function tactionCase(input: string, taction: Taction) {
       }
       return outputArray.join("-");
     }
+    case Cases.CAMEL_TO_SNAKE: {
+      return camelCaseToOtherCase(input, "_");
+    }
+    case Cases.CAMEL_TO_KEBAB: {
+      return camelCaseToOtherCase(input, "-");
+    }
     default:
       return input;
   }
@@ -394,8 +419,7 @@ function tactionTransform(input: string, taction: Taction) {
   switch (taction.content[0]) {
     case Transform.STAMP_TO_TIME_LOCAL: {
       if (/^[0-9]*$/.test(input)) {
-        const timeT = new Date(Number(input)).toLocaleString().slice(0, 19);
-        return timeT.replace("T", " ").replaceAll("/", "-");
+        return new Date(Number(input)).toLocaleString();
       } else {
         return input;
       }

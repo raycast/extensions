@@ -1,21 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryWithFileInfo, FileInfo } from "../utils/directory-info";
+import { DirectoryWithFileInfo, FileInfo, FolderPageItem } from "../types/types";
 import {
   checkDirectoryValid,
-  commonPreferences,
   getDirectoryFiles,
   getFileShowNumber,
   getLocalStorage,
+  isDirectory,
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { copyFileByPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
+import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
+import { Preferences } from "../types/preferences";
+import fse from "fs-extra";
 
 //for refresh useState
 export const refreshNumber = () => {
-  return new Date().getTime();
+  return Date.now();
 };
 
 //get is show detail
@@ -40,7 +43,7 @@ export const localDirectoryWithFiles = (refresh: number) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
-  const { fileShowNumber, sortBy } = commonPreferences();
+  const { fileShowNumber, sortBy } = getPreferenceValues<Preferences>();
 
   const fetchData = useCallback(async () => {
     const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
@@ -93,19 +96,22 @@ export const localDirectoryWithFiles = (refresh: number) => {
 
 //get file or folder info
 export const getFileInfoAndPreview = (fileInfo: FileInfo, updateDetail = 0) => {
-  const [directoryInfo, setDirectoryInfo] = useState<string>("");
+  const [fileContentInfo, setFileContentInfo] = useState<FileContentInfo>(fileContentInfoInit);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(true);
   const fetchData = useCallback(async () => {
     if (isEmpty(fileInfo.path)) {
       return;
     }
-    setDirectoryInfo(await getFileContent(fileInfo));
+    setIsDetailLoading(true);
+    setFileContentInfo(await getFileContent(fileInfo));
+    setIsDetailLoading(false);
   }, [updateDetail, fileInfo]);
 
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  return directoryInfo;
+  return { fileContentInfo: fileContentInfo, isDetailLoading: isDetailLoading };
 };
 
 //get local directory with files
@@ -133,6 +139,29 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
     void fetchData();
   }, [fetchData]);
 };
+
+export function getFolderByPath(folderPath: string) {
+  const [folders, setFolders] = useState<FolderPageItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const fetchData = useCallback(async () => {
+    const files = fse.readdirSync(folderPath);
+    const _folders: FolderPageItem[] = [];
+    files.forEach((value) => {
+      if (!value.startsWith(".")) {
+        _folders.push({ name: value, isFolder: isDirectory(folderPath + "/" + value) });
+      }
+    });
+    setFolders(_folders);
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { folders: folders, loading: loading };
+}
 
 export const alertDialog = async (
   icon: Icon,

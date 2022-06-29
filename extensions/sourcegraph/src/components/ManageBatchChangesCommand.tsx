@@ -2,31 +2,25 @@ import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, sh
 import { useState, Fragment, useMemo } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
-import { useMutation, useQuery } from "@apollo/client";
 
-import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
+import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
 import {
-  BatchChangeFields as BatchChange,
-  ChangesetFields as Changeset,
-  GetChangesets,
-  GetChangesetsVariables,
-  GetBatchChanges,
-  MergeChangeset,
-  MergeChangesetVariables,
-  ReenqueueChangeset,
-  ReenqueueChangesetVariables,
-  PublishChangesetVariables,
-  PublishChangeset,
-} from "../sourcegraph/gql/schema";
+  BatchChangeFragment as BatchChange,
+  ChangesetFragment as Changeset,
+  useGetBatchChangesQuery,
+  useGetChangesetsQuery,
+  useMergeChangesetMutation,
+  usePublishChangesetMutation,
+  useReenqueueChangesetMutation,
+} from "../sourcegraph/gql/operations";
+
 import { copyShortcut, refreshShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
 import ExpandableErrorToast from "./ExpandableErrorToast";
 import { propsToKeywords } from "./keywords";
-import { GET_BATCH_CHANGES, GET_CHANGESETS } from "../sourcegraph/gql/queries";
-import {
-  MERGE_CHANGESET,
-  PUBLISH_CHANGEST as PUBLISH_CHANGESET,
-  REENQUEUE_CHANGEST as REENQUEUE_CHANGESET,
-} from "../sourcegraph/gql/mutations";
+
+import { sentenceCase } from "../text";
+
+const link = new LinkBuilder("batch-changes");
 
 /**
  * ManageBatchChanges is the shared batch changes command implementation.
@@ -41,9 +35,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
    */
   const [searchText, setSearchText] = useState("");
 
-  const { loading, error, data, refetch } = useQuery<GetBatchChanges>(GET_BATCH_CHANGES, {
-    client: src.client,
-  });
+  const { loading, error, data, refetch } = useGetBatchChangesQuery({ client: src.client });
   const refresh = async () => {
     await refetch();
   };
@@ -70,7 +62,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, "/batch-changes/create")} />
+                <Action.OpenInBrowser title="Create in Browser" url={link.new(src, "/batch-changes/create")} />
               </ActionPanel>
             }
           />
@@ -135,26 +127,29 @@ function BatchChangeItem({
     accessories.push({
       icon: { tintColor: Color.Green, source: Icon.Circle },
       text: `${changesetsStats.open}`,
+      tooltip: "Open changesets",
     });
   }
   if (changesetsStats.merged) {
     accessories.push({
       icon: { tintColor: Color.Purple, source: Icon.Checkmark },
       text: `${changesetsStats.merged}`,
+      tooltip: "Merged changesets",
     });
   }
   if (changesetsStats.draft || changesetsStats.unpublished) {
     accessories.push({
       icon: { tintColor: Color.SecondaryText, source: Icon.Document },
       text: `${changesetsStats.draft + changesetsStats.unpublished}`,
+      tooltip: "Unpublished changesets",
     });
   }
 
-  const url = newURL(src, batchChange.url);
+  const url = link.new(src, batchChange.url);
   return (
     <List.Item
       id={id}
-      icon={icon}
+      icon={{ value: icon, tooltip: sentenceCase(batchChange.state) }}
       title={`${batchChange.namespace.namespaceName} / ${batchChange.name}`}
       subtitle={updated ? `by ${author}, updated ${updated}` : author}
       accessories={accessories}
@@ -184,7 +179,7 @@ function BatchChangeItem({
           <Action.OpenInBrowser
             key={nanoid()}
             title="Open Batch Changes in Browser"
-            url={newURL(src, "/batch-changes")}
+            url={link.new(src, "/batch-changes")}
             shortcut={tertiaryActionShortcut}
           />
         </ActionPanel>
@@ -194,8 +189,8 @@ function BatchChangeItem({
 }
 
 function BatchChangeView({ batchChange, src }: { batchChange: BatchChange; src: Sourcegraph }) {
-  const { loading, error, data, refetch } = useQuery<GetChangesets, GetChangesetsVariables>(GET_CHANGESETS, {
-    client: src.client,
+  const { loading, error, data, refetch } = useGetChangesetsQuery({
+    ...src,
     variables: {
       namespace: batchChange.namespace.id,
       name: batchChange.name,
@@ -267,7 +262,7 @@ function ChangesetItem({
   }
   const url =
     (changeset.__typename === "ExternalChangeset" && changeset.externalURL?.url) ||
-    newURL(src, batchChange.url, new URLSearchParams({ status: changeset.state }));
+    link.new(src, batchChange.url, new URLSearchParams({ status: changeset.state }));
 
   const { push } = useNavigation();
   async function delayedRefreshChangesets() {
@@ -280,26 +275,16 @@ function ChangesetItem({
     toast.hide();
   }
 
-  const [mergeChangeset, { error: mergeError }] = useMutation<MergeChangeset, MergeChangesetVariables>(
-    MERGE_CHANGESET,
-    {
-      client: src.client,
-    }
-  );
-  const [reenqueueChangeset, { error: reenqueueError }] = useMutation<ReenqueueChangeset, ReenqueueChangesetVariables>(
-    REENQUEUE_CHANGESET,
-    { client: src.client }
-  );
-  const [publishChangeset, { error: publishError }] = useMutation<PublishChangeset, PublishChangesetVariables>(
-    PUBLISH_CHANGESET,
-    { client: src.client }
-  );
+  const [mergeChangeset, { error: mergeError }] = useMergeChangesetMutation(src);
+  const [reenqueueChangeset, { error: reenqueueError }] = useReenqueueChangesetMutation(src);
+  const [publishChangeset, { error: publishError }] = usePublishChangesetMutation(src);
   const error = mergeError || publishError || reenqueueError;
   if (error) {
     ExpandableErrorToast(push, "Unexpected error", "Changeset operation failed", error.message).show();
   }
 
   const icon: Image.ImageLike = { source: Icon.Circle };
+  const tooltipDetails: string[] = [changeset.state];
   let secondaryAction = <></>;
   let subtitle = changeset.state.toLowerCase();
   switch (changeset.state) {
@@ -312,6 +297,9 @@ function ChangesetItem({
       }
 
       subtitle = changeset.reviewState?.toLocaleLowerCase() || "";
+      if (changeset.reviewState) {
+        tooltipDetails.push(changeset.reviewState);
+      }
       switch (changeset.reviewState) {
         case "APPROVED":
           icon.source = Icon.Checkmark;
@@ -428,8 +416,10 @@ function ChangesetItem({
 
   let title = "";
   let props = {};
+  let subtitleTooltip: string | null | undefined = null;
   if (changeset.__typename === "ExternalChangeset") {
     title = `${changeset.repository.name}`;
+    subtitleTooltip = changeset.title;
     if (changeset.externalID) {
       subtitle = `#${changeset.externalID} ${subtitle}`;
     }
@@ -447,9 +437,9 @@ function ChangesetItem({
 
   return (
     <List.Item
-      icon={icon}
+      icon={{ value: icon, tooltip: sentenceCase(tooltipDetails.join(", ")) }}
       title={title}
-      subtitle={subtitle}
+      subtitle={subtitleTooltip ? { value: subtitle, tooltip: subtitleTooltip } : subtitle}
       accessories={updated ? [{ text: updated }] : undefined}
       keywords={propsToKeywords(props)}
       actions={
@@ -468,7 +458,7 @@ function ChangesetItem({
           <Action.OpenInBrowser
             key={nanoid()}
             title="Open Changesets in Browser"
-            url={newURL(src, batchChange.url)}
+            url={link.new(src, batchChange.url)}
             shortcut={tertiaryActionShortcut}
           />
         </ActionPanel>
