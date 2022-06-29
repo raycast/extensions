@@ -17,6 +17,48 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
+  "preferences": [
+    {
+      "name": "layoutType",
+      "type": "dropdown",
+      "title": "View Layout",
+      "description": "The view layout for displaying tracks, albums, and playlists.",
+      "default": "grid",
+      "required": false,
+      "data": [
+        {
+          "value": "grid",
+          "title": "Grid"
+        },
+        {
+          "value": "list",
+          "title": "List"
+        }
+      ]
+    },
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "title": "Grid Item Size",
+      "description": "The size of the grid items.",
+      "default": "medium",
+      "required": false,
+      "data": [
+        {
+          "value": "small",
+          "title": "Small"
+        },
+        {
+          "value": "medium",
+          "title": "Medium"
+        },
+        {
+          "value": "large",
+          "title": "Large"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "toggle-play-pause",
@@ -136,6 +178,7 @@
     "pngjs": "^6.0.0",
     "resize-image-buffer": "^1.0.0",
     "run-applescript": "^6.0.0",
+    "seconds-formater": "^1.2.0",
     "stream": "^0.0.2"
   },
   "devDependencies": {

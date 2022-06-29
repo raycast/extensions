@@ -17,7 +17,7 @@ export const getAll = runScript(`
 				set artistName to the artist of aTrack
 				set output to output & ${createQueryString({
           id: "trackId",
-          name: "albumName",
+          album: "albumName",
           artist: "artistName",
           count: "trackCount",
         })} & "\n"

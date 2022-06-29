@@ -2,6 +2,9 @@ import * as TE from "fp-ts/TaskEither";
 import { tell, runScript, createQueryString } from "../apple-script";
 import { pipe } from "fp-ts/lib/function";
 import { general } from ".";
+import { runAppleScript } from "run-applescript";
+import resizeImg from "resize-image-buffer";
+import { getViewLayout, getImageSize } from "../listorgrid";
 
 const outputQuery = createQueryString({
   id: "pId",
@@ -56,3 +59,38 @@ export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =
         end tell
 	return output
 `);
+
+export const getArtworkByIds = async (ids: string[]) => {
+  const result: any = {};
+  const layout = getViewLayout();
+  const size = getImageSize();
+  const num = ids.length;
+  const promises = ids.map(async (id) => {
+    const res = await runAppleScript(`
+      tell application "Music"
+        set playlistArtwork to first artwork of first playlist of (every playlist whose id is ${id})
+        set playlistImage to data of playlistArtwork
+      end tell
+      return playlistImage
+    `);
+    let binary = null;
+    try {
+      const image_type = res.slice(6, 10);
+      if (image_type == "JPEG") {
+        binary = res.split("JPEG")[1].slice(0, -1);
+        let image = Buffer.from(binary, "hex");
+        if (layout == "list" || num > 10) image = await resizeImg(image, size);
+        result[id] = "data:image/jpeg;base64," + image.toString("base64");
+      } else if (image_type == "tdta") {
+        binary = res.split("tdta")[1].slice(0, -1);
+        let image = Buffer.from(binary, "hex");
+        if (layout == "list" || num > 10) image = await resizeImg(image, size);
+        result[id] = "data:image/png;base64," + image.toString("base64");
+      }
+    } catch (err) {
+      result[id] = "";
+    }
+  });
+  await Promise.all(promises);
+  return result;
+};
