@@ -1,8 +1,11 @@
-import { LocalStorage, Action, Toast, showToast, Icon, Color } from "@raycast/api";
+import { Action, Toast, showToast, Icon, Color, LocalStorage, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import { ChannelItem } from "./channel";
 import { Channel } from "../lib/youtubeapi";
 import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
+
+const preferences = getPreferenceValues();
+const { showRecentChannels } = preferences;
 
 export const getRecentChannels = async (): Promise<Channel[] | undefined> => {
   return getChannels("recent-channels");
@@ -30,7 +33,8 @@ export const addRecentChannel = async (channel: Channel): Promise<void> => {
     if (!res) {
       await LocalStorage.setItem("recent-channels", JSON.stringify([channel]));
     } else {
-      const channels = JSON.parse(res.toString());
+      let channels = JSON.parse(res.toString());
+      channels = channels.filter((c: Channel) => c.id !== channel.id);
       channels.unshift(channel);
       channels.splice(15);
       await LocalStorage.setItem("recent-channels", JSON.stringify(channels));
@@ -48,7 +52,8 @@ export const addPinnedChannel = async (channel: Channel): Promise<void> => {
     if (!res) {
       await LocalStorage.setItem("pinned-channels", JSON.stringify([channel]));
     } else {
-      const channels = JSON.parse(res.toString());
+      let channels = JSON.parse(res.toString());
+      channels = channels.filter((c: Channel) => c.id !== channel.id);
       channels.unshift(channel);
       await LocalStorage.setItem("pinned-channels", JSON.stringify(channels));
     }
@@ -210,7 +215,7 @@ export function RecentChannels(props: {
           />
         ))}
       </ListOrGridSection>
-      <ListOrGridSection title="Recent Channels" layout={layout}>
+      {showRecentChannels && <ListOrGridSection title="Recent Channels" layout={layout}>
         {recentChannels?.map((v: Channel) => (
           <ChannelItem
             key={v.id}
@@ -218,7 +223,7 @@ export function RecentChannels(props: {
             actions={<RecentChannelActions channel={v} refresh={refresh} setRefresh={setRefresh} />}
           />
         ))}
-      </ListOrGridSection>
+      </ListOrGridSection>}
     </ListOrGrid>
   );
 }

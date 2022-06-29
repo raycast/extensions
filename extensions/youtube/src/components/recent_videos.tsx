@@ -1,8 +1,11 @@
-import { LocalStorage, Action, Toast, showToast, Icon, Color } from "@raycast/api";
+import { Action, Toast, showToast, Icon, Color, LocalStorage, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import { VideoItem } from "./video";
 import { Video } from "../lib/youtubeapi";
 import { ListOrGrid, ListOrGridSection, ListOrGridEmptyView, getViewLayout, getGridItemSize } from "./listgrid";
+
+const preferences = getPreferenceValues();
+const { showRecentVideos } = preferences;
 
 export const getRecentVideos = async (): Promise<Video[] | undefined> => {
   return getVideos("recent-videos");
@@ -30,7 +33,8 @@ export const addRecentVideo = async (video: Video): Promise<void> => {
     if (!res) {
       await LocalStorage.setItem("recent-videos", JSON.stringify([video]));
     } else {
-      const videos = JSON.parse(res.toString());
+      let videos = JSON.parse(res.toString());
+      videos = videos.filter((v: Video) => v.id !== video.id);
       videos.unshift(video);
       videos.splice(15);
       await LocalStorage.setItem("recent-videos", JSON.stringify(videos));
@@ -48,7 +52,8 @@ export const addPinnedVideo = async (video: Video): Promise<void> => {
     if (!res) {
       await LocalStorage.setItem("pinned-videos", JSON.stringify([video]));
     } else {
-      const videos = JSON.parse(res.toString());
+      let videos = JSON.parse(res.toString());
+      videos = videos.filter((v: Video) => v.id !== video.id);
       videos.unshift(video);
       await LocalStorage.setItem("pinned-videos", JSON.stringify(videos));
     }
@@ -206,11 +211,11 @@ export function RecentVideos(props: {
           <VideoItem key={v.id} video={v} actions={<PinnedVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
         ))}
       </ListOrGridSection>
-      <ListOrGridSection title="Recent Videos" layout={layout}>
+      {showRecentVideos && <ListOrGridSection title="Recent Videos" layout={layout}>
         {recentVideos?.map((v: Video) => (
           <VideoItem key={v.id} video={v} actions={<RecentVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
         ))}
-      </ListOrGridSection>
+      </ListOrGridSection>}
     </ListOrGrid>
   );
 }

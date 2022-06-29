@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
   "title": "YouTube",
-  "description": "Search Videos, Channels and more",
+  "description": "Search Videos, Channels, and more...",
   "icon": "youtube.png",
   "author": "tonka3000",
   "license": "MIT",
@@ -95,6 +95,23 @@
         }
       ],
       "description": "Set the default action"
+    }, 
+    {
+      "title": "Recent Videos and Channels",
+      "name": "showRecentVideos",
+      "label": "Show Recent Videos",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show recent videos in the video search."
+    },
+    {
+      "name": "showRecentChannels",
+      "label": "Show Recent Channels",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show recent channels in the channel search."
     }
   ],
   "dependencies": {

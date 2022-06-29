@@ -3,6 +3,7 @@ import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
+import { addRecentChannel } from "./recent_channels";
 import { getViewLayout } from "./listgrid";
 import he from "he";
 
@@ -72,6 +73,7 @@ export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | u
         title="Show Details"
         target={<ChannelItemDetail channel={channel} />}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+        onPush={async () => await addRecentChannel(channel)}
       />
     );
     const openBrowser = <OpenChannelInBrowser channelId={channel.id} channel={channel} />;
