@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { Dispatch, SetStateAction } from "react";
 import { pinDirectory } from "../pin-directory";
 import { refreshNumber } from "../hooks/hooks";
-import { ActionRemoveAllDirectories } from "./ui-components";
+import { ActionRemoveAllDirectories } from "./action-on-files";
 import { DirectoryWithFileInfo } from "../types/types";
 
 export function QuickAccessEmptyView(props: {
