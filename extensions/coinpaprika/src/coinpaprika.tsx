@@ -4,14 +4,21 @@ import { getCoins } from "./api";
 import { Coin } from "./types/coin";
 import { FetchCoinDetails } from "./utils/coinDetails";
 import { WEBSERVICE_URL } from "./enum";
-import { addFavorite, getFavorites, removeFavorite } from "./utils/favorites";
+import {
+  addFavorite,
+  getFavorites,
+  getShowFavoritesInCoinList,
+  removeFavorite,
+  setShowFavoritesInCoinList
+} from "./utils/favorites";
 
 
 interface ListItemProps {
-  coinId: string,
   coin: Coin,
   isFavorite: boolean,
   onFavoriteToggle: () => void;
+  showFavorites: boolean;
+  onShowFavoritesToggle: () => void;
 }
 
 interface FavoriteProps {
@@ -19,10 +26,17 @@ interface FavoriteProps {
   onToggle: () => void;
 }
 
+interface ShowFavoritesProps {
+  showFavorites: boolean,
+  onToggle: () => void;
+}
+
+
 export default function Main() {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [showFavorites, setShowFavorites] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchCoins() {
@@ -44,6 +58,12 @@ export default function Main() {
       setFavorites(favoriteList);
     }
 
+    async function setShowFavoritesOption() {
+      const showFavorites = await getShowFavoritesInCoinList();
+      setShowFavorites(showFavorites);
+    }
+
+    setShowFavoritesOption();
     fetchFavorites();
     fetchCoins();
   }, []);
@@ -60,6 +80,15 @@ export default function Main() {
     setFavorites(favoriteList);
   }
 
+  async function toggleShowFavoritesInCoinList() {
+    const showFavorites = (await getShowFavoritesInCoinList()) || false;
+    const toggledShowFavorites = !showFavorites;
+
+    await setShowFavoritesInCoinList(toggledShowFavorites);
+    setShowFavorites(toggledShowFavorites);
+  }
+
+
   return (
     <List
       isLoading={isLoading}
@@ -73,18 +102,20 @@ export default function Main() {
 
         {favorites.map((id) => {
 
-          const singleCoin = coins.find(
+          const favoriteCoin = coins.find(
             (coin) => coin.id === id
           );
 
-          if (!singleCoin) return;
+          if (!favoriteCoin) return;
 
           return (
             <ListItemCoin
-              coinId={id}
-              coin={singleCoin}
+              key={id}
+              coin={favoriteCoin}
               isFavorite={true}
               onFavoriteToggle={() => toggleFavorite(id, true)}
+              showFavorites={showFavorites}
+              onShowFavoritesToggle={() => toggleShowFavoritesInCoinList()}
             />
           );
 
@@ -98,12 +129,17 @@ export default function Main() {
 
           const isFavorite = favorites.includes(coin.id);
 
+          if (isFavorite && !showFavorites) return;
+
+
           return (
             <ListItemCoin
-              coinId={coin.id}
+              key={coin.id}
               coin={coin}
-              isFavorite={false}
+              isFavorite={isFavorite}
               onFavoriteToggle={() => toggleFavorite(coin.id, isFavorite)}
+              showFavorites={showFavorites}
+              onShowFavoritesToggle={() => toggleShowFavoritesInCoinList()}
             />
           );
 
@@ -114,11 +150,11 @@ export default function Main() {
 }
 
 
-function ListItemCoin({ coinId, coin, isFavorite, onFavoriteToggle }: ListItemProps) {
+function ListItemCoin({ coin, isFavorite, onFavoriteToggle, showFavorites, onShowFavoritesToggle }: ListItemProps) {
 
   return (
     <List.Item
-      key={coinId}
+      key={coin.id}
       title={"#" + coin.rank + " | " + coin.name}
       icon={{
         source: isFavorite ? Icon.Star : Icon.ArrowRight,
@@ -129,7 +165,8 @@ function ListItemCoin({ coinId, coin, isFavorite, onFavoriteToggle }: ListItemPr
       actions={
         <ActionPanel>
           <FavoriteAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
-          <Action.OpenInBrowser url={WEBSERVICE_URL + coin.id} />
+          <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={WEBSERVICE_URL + coin.id} />
+          <ListFavoriteAction showFavorites={showFavorites} onToggle={onShowFavoritesToggle} />
         </ActionPanel>
       }
     />
@@ -139,5 +176,14 @@ function ListItemCoin({ coinId, coin, isFavorite, onFavoriteToggle }: ListItemPr
 function FavoriteAction(props: FavoriteProps) {
   const { isFavorite, onToggle } = props;
   const title = isFavorite ? "Remove from Favorites" : "Add to Favorites";
-  return <Action icon={Icon.Star} title={title} onAction={onToggle} />;
+
+  return <Action icon={Icon.Star} title={title} shortcut={{ modifiers: ["cmd"], key: "f" }} onAction={onToggle} />;
 }
+
+function ListFavoriteAction(props: ShowFavoritesProps) {
+  const { showFavorites, onToggle } = props;
+  const icon = showFavorites ? `${Icon.EyeSlash}` : `${Icon.Eye}`;
+  const title = showFavorites ? "Hide Favorites in Coin List" : "Show Favorites in Coin List";
+  return <Action icon={icon} title={title} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} onAction={onToggle} />;
+}
+

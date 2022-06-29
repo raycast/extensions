@@ -17,12 +17,12 @@ export function FormatPrice(price: number, currency?: string) {
       style: "currency",
       currency,
       maximumFractionDigits,
-      currencyDisplay: display,
+      currencyDisplay: display
     });
     formattedPrice = formatter.format(price);
   } catch {
     const formatter = new Intl.NumberFormat(DEFAULT_LOCALE, {
-      maximumFractionDigits,
+      maximumFractionDigits
     });
     formattedPrice = `${currency.toUpperCase()} ${formatter.format(price)}`;
   }
@@ -34,10 +34,10 @@ export function FormatDate(date: string) {
   //avoid 1970 timestamp
   date = date
     ? new Date(date).toLocaleDateString(DEFAULT_LOCALE, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    })
     : " / ";
 
   return date;
