@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { Preferences, State } from "./interface";
 import { colorMap, maxLevel } from "./constants";
@@ -131,8 +131,15 @@ export default function Command() {
   }
 
   if (state.gameState === "win" || state.gameState === "lose") {
-    const won = `You won, congratulations on making it the full ${maxLevel} levels!`;
-    const lost = `You lost, but at least you made it to level ${state.sequence.length}. Better luck next time!`;
+    const won = `![](file://${environment.assetsPath}/won-${environment.theme}.png)`;
+    const lost = `![](file://${environment.assetsPath}/lost-${environment.theme}.png)`;
+    const wonMessage = `Congratulations on making it the full ${maxLevel} levels!`;
+    const lostMessage = `You made it to level ${state.sequence.length}. Better luck next time!`;
+
+    showToast({
+      style: state.gameState === "win" ? Toast.Style.Success : Toast.Style.Failure,
+      title: state.gameState === "win" ? wonMessage : lostMessage,
+    });
 
     return (
       <Detail
