@@ -129,7 +129,7 @@ export default function Command() {
   if (state.gameState === "lobby") {
     return (
       <Detail
-        markdown={`![](file://${environment.assetsPath}/game-${environment.theme}.png)`}
+        markdown={`![](file://${environment.assetsPath}/game-${environment.theme}.svg)`}
         actions={
           <ActionPanel>
             <Action.SubmitForm
@@ -154,8 +154,8 @@ export default function Command() {
   }
 
   if (state.gameState === "win" || state.gameState === "lose") {
-    const won = `![](file://${environment.assetsPath}/won-${environment.theme}.png)`;
-    const lost = `![](file://${environment.assetsPath}/lost-${environment.theme}.png)`;
+    const won = `![](file://${environment.assetsPath}/won-${environment.theme}.svg)`;
+    const lost = `![](file://${environment.assetsPath}/lost-${environment.theme}.svg)`;
     const wonMessage = `Congratulations on making it the full ${maxLevel} levels!`;
     const lostMessage = `You made it to level ${state.sequence.length}. Better luck next time!`;
 
