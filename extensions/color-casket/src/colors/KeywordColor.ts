@@ -1,6 +1,6 @@
 import convert from "color-convert";
 
-import { KEYWORD } from "color-convert/conversions";
+import { APPLE, KEYWORD } from "color-convert/conversions";
 import Color from "./Color";
 import { HEXColor, RGBColor, HSLColor } from "./index";
 import { Keyboard } from "@raycast/api";
@@ -16,12 +16,14 @@ export default class KeywordColor extends Color<KEYWORD> {
 
   public readonly shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "k" };
 
+  public static fromAppleColor = <KEYWORD>(color: APPLE): KEYWORD => convert.apple.keyword(color) as unknown as KEYWORD;
+
   public get alternatives(): [KeywordColor, HEXColor, RGBColor, HSLColor] {
     return [
       this,
       new HEXColor(convert.keyword.hex(this.value)),
       new RGBColor(convert.keyword.rgb(this.value)),
-      new HSLColor(convert.keyword.hsl(this.value)),
+      new HSLColor(convert.keyword.hsl(this.value))
     ];
   }
 
