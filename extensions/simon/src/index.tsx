@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  Grid,
+  Color,
+  Detail,
+  environment,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { Preferences, State } from "./interface";
 import { colorMap, maxLevel } from "./constants";
@@ -76,8 +87,22 @@ export default function Command() {
 
   useEffect(() => {
     if (state.gameState === "play") {
-      if (state.sequence.length > 0 && state.humanSequence.length === state.sequence.length) {
-        if (state.humanSequence.join("") === state.sequence.join("")) {
+      if (state.sequence.length > 0) {
+        let humanSequenceIsCorrect = true;
+
+        state.humanSequence.forEach((color, index) => {
+          if (color !== state.sequence[index]) {
+            humanSequenceIsCorrect = false;
+          }
+        });
+
+        if (!humanSequenceIsCorrect) {
+          setState((previous) => ({ ...previous, gameState: "lose" }));
+
+          return;
+        }
+
+        if (humanSequenceIsCorrect && state.humanSequence.join("") === state.sequence.join("")) {
           if (state.level < maxLevel) {
             setState((previous) => ({
               ...previous,
@@ -96,8 +121,6 @@ export default function Command() {
 
             setState((previous) => ({ ...previous, gameState: "win" }));
           }
-        } else {
-          setState((previous) => ({ ...previous, gameState: "lose" }));
         }
       }
     }
