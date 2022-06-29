@@ -7,6 +7,8 @@
 - Add `Reset Pinned Notes` action for `Pinned Notes` command
 - Add `Delete Note` action to `Search Note` and `Pinned Notes` command which lets you delete a note
 - Add `{clipboard}` to available templates
+- Update store images
+- Migrate to Raycast API v1.37.0
 - Minor fixes
 
 ## [Full Content Search, Metadata View, Templates & More| Version 1.6.0] - 2022-06-20
