@@ -23,13 +23,13 @@ Install extension from [Raycast Store](https://www.raycast.com/yaeda/inkdrop), t
   - Ref. [Searching Notes \| Inkdrop Documentation](https://docs.inkdrop.app/manual/searching-notes/#filter-notes-with-special-qualifiers)
 - <kbd>Enter</kbd> will open the not in Inkdrop app
 
-![Screenshot of Search Notes command]()
+![Screenshot of Search Notes command](metadata/inkdrop-1.png)
 
 ### Create Note
 
 - <kbd>Command</kbd> + <kbd>Enter</kbd> will create note
 
-![Screenshot of Create Note command]()
+![Screenshot of Create Note command](metadata/inkdrop-2.png)
 
 ## Preferences
 
