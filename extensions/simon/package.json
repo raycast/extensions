@@ -5,6 +5,9 @@
   "description": "Play a game of Simon.",
   "icon": "command-icon.png",
   "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun"
   ],
