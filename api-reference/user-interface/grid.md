@@ -460,12 +460,13 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | An image, optionally with a tooltip, representing the content of the grid item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike) }</code> | - |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
+| content<mark style="color:red;">*</mark> | An image or color, optionally with a tooltip, representing the content of the grid item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike) }</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ color: [Color.ColorLike](colors.md#color.colorlike) } }</code> | - |
+| actions | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the [Grid](grid.md#grid) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
-| title | The main title displayed for that item, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith [Action.ToggleQuickLook](actions.md#action). | <code>{ name: string; path: string }</code> | - |
+| subtitle | An optional subtitle displayed below the title. | <code>string</code> | - |
+| title | An optional title displayed below the content. | <code>string</code> | - |
 
 ### Grid.Section
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.37.0 – 2022-06-29
+
+### ✨ New
+
+- **React 18**: React Suspense, `useSyncExternalStore`, etc.. A whole bunch of new features are available with the newest version of React. See the [migration guide](https://developers.raycast.com/migration/v1.37.0) for more information.
+- **Quick Look:** Use the new `<Action.ToggleQuickLook />` action to show additional information with a Quick Look preview.
+- **Forms:** Use the new validation feature to check if entered data is correctly formatted and show failure messages in a nice UX
+- **Forms:** Drafts support – use the feature if you want the Raycast preserve non-submitted data, to provide the best experience for users
+- **DevX:** Check out the new screenshot tool that takes photo of Raycast from the best possible angle
+
+### 💎 Improvements
+
+- **List Accessories**: You can now pass `{date: Date}` as an accessory and it will be rendered nicely by Raycast.
+- **Detail View:** Add support for `- [ ] task` and `- [x] task` in markdown views.
+- **Action Panel**: Add a new `onOpen` callback on `ActionPanel.Submenu`. It can, for example, be used to lazily fetch the content of the Submenu.
+- **Grid**: Add support for `ColorLike` as Grid.Item’s content.
+- **Forms:** New callbacks `onFocus` and `onBlur` for all the items
+- **Forms:** Markdown highlighting for the `Form.TextArea`
+
+### 🐞 Fixes
+
+- **Fix:** A crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string (https://github.com/raycast/extensions/issues/1845).
+- **Dev Tools**: Fixed uninstalling of local development extensions via the Action Panel
+- **Markdown**: Fixed rendering of transparent animated gifs in markdown
+- **Forms:** Fixed issue for entering characters with IME (https://github.com/raycast/extensions/issues/739) in controlled text inputs
+- **List Accessories:** Fixed tooltip for grouped accessories, now the tooltip will be shown for the group instead of separate items in it
+
+
 ## 1.36.0 – 2022-06-01
 
 ### ✨ New

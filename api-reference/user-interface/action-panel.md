@@ -154,6 +154,7 @@ export default function Command() {
 | children | Items of the submenu. | <code>[ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children)</code> | - |
 | icon | The icon displayed for the submenu. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the submenu. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| onOpen | Callback that is triggered when the Submenu is opened. | <code>() => void</code> | - |
 
 ## Types
 

@@ -1,6 +1,157 @@
 # Form
 
+Our `Form` component provides great user experience to collect some data from a user and submit it for extensions needs.
+
 ![](../../.gitbook/assets/example-doppler-share-secrets.png)
+
+### Two Types of Items: Controlled vs. Uncontrolled
+
+Items in React can be one of two types: controlled or uncontrolled.
+
+An uncontrolled item is the simpler of the two. It’s the closest to a plain HTML input. React puts it on the page, and Raycast keeps track of the rest. Uncontrolled inputs require less code, but make it harder to do certain things.
+
+With a controlled item, YOU explicitly control the `value` that the item displays. You have to write code to respond to changes with defining `onChange` callback, store the current `value` somewhere, and pass that value back to the item to be displayed. It’s a feedback loop with your code in the middle. It’s more manual work to wire these up, but they offer the most control.
+
+You can take look at these two styles below under each of the supported items.
+
+## Validation
+
+Before submitting data, it is important to ensure all required form controls are filled out, in the correct format.
+
+In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value.
+
+![](../../.gitbook/assets/form-validation.png)
+
+{% hint style="info" %}
+Keep in mind that if the Form has any errors, the [`Action.SubmitForm`](./actions.md#action.submitform) `onSubmit` callback won't be triggered.
+{% endhint %}
+
+#### Example
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
+
+  function dropNameErrorIfNeeded() {
+    if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+
+  function dropPasswordErrorIfNeeded() {
+    if (passwordError && passwordError.length > 0) {
+      setPasswordError(undefined);
+    }
+  }
+
+  return (
+    <Form>
+      <Form.TextField
+        id="nameField"
+        title="Full Name"
+        placeholder="Enter your name"
+        error={nameError}
+        onChange={dropNameErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setNameError("The field should't be empty!");
+          } else {
+            dropNameErrorIfNeeded();
+          }
+        }}
+      />
+      <Form.PasswordField
+        id="password"
+        title="New Password"
+        error={passwordError}
+        onChange={dropPasswordErrorIfNeeded}
+        onBlur={(event) => {
+          const value = event.target.value;
+          if (value && value.length > 0) {
+            if (!validatePassword(value)) {
+              setPasswordError("Password should be at least 8 characters!");
+            } else {
+              dropPasswordErrorIfNeeded();
+            }
+          } else {
+            setPasswordError("The field should't be empty!");
+          }
+        }}
+      />
+      <Form.TextArea id="bioTextArea" title="Add Bio" placeholder="Describe who you are" />
+      <Form.DatePicker id="birthDate" title="Date of Birth" />
+    </Form>
+  );
+}
+
+function validatePassword(value: string): boolean {
+  return value.length >= 8;
+}
+```
+
+### Drafts
+
+Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the top-level props `draftValues`.
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| draftValues | When a user enters the command via a draft, this object will contain the user inputs that were saved as a draft. Use its values to populate the initial state for your Form. | <code>[Form.Values](form.md#form.values)</code> |
+
+![](../../.gitbook/assets/form-drafts.png)
+
+{% hint style="info" %}
+
+- Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
+- Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
+- If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
+
+{% endhint %}
+
+#### Example
+
+```typescript
+import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { useState } from "react";
+
+interface TodoValues {
+  title: string;
+  description?: string;
+  dueDate?: Date;
+}
+
+export default function Command(props: { draftValues?: TodoValues }) {
+  const { draftValues } = props;
+
+  function handleSubmit(values: TodoValues) {
+    console.log("onSubmit", values);
+    popToRoot();
+  }
+
+  return (
+    <Form
+      enableDrafts
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={(values: TodoValues) => {
+              handleSubmit(values);
+              popToRoot();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" defaultValue={draftValues?.title} />
+      <Form.TextArea id="description" title="Description" defaultValue={draftValues?.description} />
+      <Form.DatePicker id="dueDate" title="Due Date" defaultValue={draftValues?.dueDate} />
+    </Form>
+  );
+}
+```
 
 ## API Reference
 
@@ -14,6 +165,7 @@ Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Fo
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
 | children | The Form.Item elements of the form. | <code>React.ReactNode</code> | - |
+| enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | `false` |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
 
@@ -36,10 +188,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -64,10 +213,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -87,12 +233,15 @@ export default function Command() {
 | id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | placeholder | Placeholder text shown in the text field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -120,10 +269,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Password"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Password" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -148,18 +294,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Password"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Password" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.PasswordField
-        id="password"
-        value={password}
-        onChange={setPassword}
-      />
+      <Form.PasswordField id="password" value={password} onChange={setPassword} />
     </Form>
   );
 }
@@ -175,12 +314,15 @@ export default function Command() {
 | id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | placeholder | Placeholder text shown in the password field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -211,10 +353,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Description"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Description" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -239,18 +378,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Description"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Description" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="description"
-        value={description}
-        onChange={setDescription}
-      />
+      <Form.TextArea id="description" value={description} onChange={setDescription} />
     </Form>
   );
 }
@@ -266,12 +398,16 @@ export default function Command() {
 | id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
+| enableMarkdown | Whether markdown will be highlighted in the TextArea or not. When enabled, markdown shortcuts starts to work for the TextArea (pressing `⌘ + B` will add `**bold**` around the selected text, `⌘ + I` will make the selected text italic, etc.) | <code>boolean</code> | `false` |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | placeholder | Placeholder text shown in the text area. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -299,10 +435,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -327,19 +460,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.Checkbox
-        id="answer"
-        label="Do you like orange juice?"
-        value={checked}
-        onChange={setChecked}
-      />
+      <Form.Checkbox id="answer" label="Do you like orange juice?" value={checked} onChange={setChecked} />
     </Form>
   );
 }
@@ -356,11 +481,14 @@ export default function Command() {
 | label<mark style="color:red;">*</mark> | The label displayed on the right side of the checkbox. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>boolean</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>boolean</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: boolean) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;boolean>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -388,18 +516,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        id="dateOfBirth"
-        title="Date of Birth"
-        defaultValue={new Date(1955, 1, 24)}
-      />
+      <Form.DatePicker id="dateOfBirth" title="Date of Birth" defaultValue={new Date(1955, 1, 24)} />
     </Form>
   );
 }
@@ -420,19 +541,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        id="launchDate"
-        title="Launch Date"
-        value={date}
-        onChange={setDate}
-      />
+      <Form.DatePicker id="launchDate" title="Launch Date" value={date} onChange={setDate} />
     </Form>
   );
 }
@@ -448,12 +561,15 @@ export default function Command() {
 | id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>Date</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | type | Indicates what types of date components can be picked | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |
 | value | The current value of the item. | <code>Date</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;Date>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;Date>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -481,21 +597,14 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
       <Form.Dropdown id="emoji" title="Favorite Emoji" defaultValue="lol">
         <Form.Dropdown.Item value="poop" title="Pile of poop" icon="💩" />
         <Form.Dropdown.Item value="rocket" title="Rocket" icon="🚀" />
-        <Form.Dropdown.Item
-          value="lol"
-          title="Rolling on the floor laughing face"
-          icon="🤣"
-        />
+        <Form.Dropdown.Item value="lol" title="Rolling on the floor laughing face" icon="🤣" />
       </Form.Dropdown>
     </Form>
   );
@@ -511,17 +620,13 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [programmingLanguage, setProgrammingLanguage] =
-    useState<string>("typescript");
+  const [programmingLanguage, setProgrammingLanguage] = useState<string>("typescript");
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -554,11 +659,14 @@ export default function Command() {
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | children | Sections or items. If [Form.Dropdown.Item](form.md#form.dropdown.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -581,10 +689,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Icon"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Icon" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -620,10 +725,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -668,18 +770,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Favorite"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Favorite" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="sports"
-        title="Favorite Sports"
-        defaultValue={["football"]}
-      >
+      <Form.TagPicker id="sports" title="Favorite Sports" defaultValue={["football"]}>
         <Form.TagPicker.Item value="basketball" title="Basketball" icon="🏀" />
         <Form.TagPicker.Item value="football" title="Football" icon="⚽️" />
         <Form.TagPicker.Item value="tennis" title="Tennis" icon="🎾" />
@@ -704,19 +799,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Countries"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Countries" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="countries"
-        title="Visited Countries"
-        value={countries}
-        onChange={setCountries}
-      >
+      <Form.TagPicker id="countries" title="Visited Countries" value={countries} onChange={setCountries}>
         <Form.TagPicker.Item value="ger" title="Germany" icon="🇩🇪" />
         <Form.TagPicker.Item value="ind" title="India" icon="🇮🇳" />
         <Form.TagPicker.Item value="ned" title="Netherlands" icon="🇳🇱" />
@@ -741,12 +828,15 @@ export default function Command() {
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
 | children | The list of tags. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | placeholder | Placeholder text shown in the token field. | <code>string</code> | - |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | value | The current value of the item. | <code>string[]</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 | onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -769,29 +859,14 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Color"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Color" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
       <Form.TagPicker id="color" title="Color">
-        <Form.TagPicker.Item
-          value="red"
-          title="Red"
-          icon={{ source: Icon.Circle, tintColor: Color.Red }}
-        />
-        <Form.TagPicker.Item
-          value="green"
-          title="Green"
-          icon={{ source: Icon.Circle, tintColor: Color.Green }}
-        />
-        <Form.TagPicker.Item
-          value="blue"
-          title="Blue"
-          icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-        />
+        <Form.TagPicker.Item value="red" title="Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+        <Form.TagPicker.Item value="green" title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
+        <Form.TagPicker.Item value="blue" title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
       </Form.TagPicker>
     </Form>
   );
@@ -822,10 +897,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Form" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -855,10 +927,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -879,6 +948,46 @@ export default function Command() {
 | title | The display title of the left side from the description item. | <code>string</code> | - |
 
 ## Types
+
+#### Form.Event
+
+Some Form.Item callbacks (like `onFocus` and `onBlur`) can return a `Form.Event` object that you can use in a different ways.
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| target<mark style="color:red;">*</mark> | An interface containing target data related to the event | <code>{ id: string; value: any }</code> |
+| type<mark style="color:red;">*</mark> | A type of event | <code>[Form.Event.Type](form.md#form.event.type)</code> |
+
+#### Example
+
+```typescript
+export default function Main() {
+  return (
+    <Form>
+      <Form.TextField id="textField" title="Text Field" onBlur={logEvent} onFocus={logEvent} />
+      <Form.TextArea id="textArea" title="Text Area" onBlur={logEvent} onFocus={logEvent} />
+      <Form.Dropdown id="dropdown" title="Dropdown" onBlur={logEvent} onFocus={logEvent}>
+        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+          <Form.Dropdown.Item value={String(num)} title={String(num)} key={num} />
+        ))}
+      </Form.Dropdown>
+      <Form.TagPicker id="tagPicker" title="Tag Picker" onBlur={logEvent} onFocus={logEvent}>
+        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+          <Form.TagPicker.Item value={String(num)} title={String(num)} key={num} />
+        ))}
+      </Form.TagPicker>
+    </Form>
+  );
+}
+
+function logEvent(event: Form.Event) {
+  console.log(`Event '${event.type}' has happened for '${event.target.id}'. Current 'value': '${event.target.value}'`);
+}
+```
+
+#### Form.Event.Type
+
+The different types of [`Form.Event`](form.md#form.event). Can be `"focus"` or `"blur"`.
 
 ### Form.Values
 
@@ -975,72 +1084,24 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           <ActionPanel.Section title="Focus">
-            <Action
-              title="Focus TextField"
-              onAction={() => textFieldRef.current?.focus()}
-            />
-            <Action
-              title="Focus TextArea"
-              onAction={() => textAreaRef.current?.focus()}
-            />
-            <Action
-              title="Focus DatePicker"
-              onAction={() => datePickerRef.current?.focus()}
-            />
-            <Action
-              title="Focus PasswordField"
-              onAction={() => passwordFieldRef.current?.focus()}
-            />
-            <Action
-              title="Focus Dropdown"
-              onAction={() => dropdownRef.current?.focus()}
-            />
-            <Action
-              title="Focus TagPicker"
-              onAction={() => tagPickerRef.current?.focus()}
-            />
-            <Action
-              title="Focus First Checkbox"
-              onAction={() => firstCheckboxRef.current?.focus()}
-            />
-            <Action
-              title="Focus Second Checkbox"
-              onAction={() => secondCheckboxRef.current?.focus()}
-            />
+            <Action title="Focus TextField" onAction={() => textFieldRef.current?.focus()} />
+            <Action title="Focus TextArea" onAction={() => textAreaRef.current?.focus()} />
+            <Action title="Focus DatePicker" onAction={() => datePickerRef.current?.focus()} />
+            <Action title="Focus PasswordField" onAction={() => passwordFieldRef.current?.focus()} />
+            <Action title="Focus Dropdown" onAction={() => dropdownRef.current?.focus()} />
+            <Action title="Focus TagPicker" onAction={() => tagPickerRef.current?.focus()} />
+            <Action title="Focus First Checkbox" onAction={() => firstCheckboxRef.current?.focus()} />
+            <Action title="Focus Second Checkbox" onAction={() => secondCheckboxRef.current?.focus()} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Reset">
-            <Action
-              title="Reset TextField"
-              onAction={() => textFieldRef.current?.reset()}
-            />
-            <Action
-              title="Reset TextArea"
-              onAction={() => textAreaRef.current?.reset()}
-            />
-            <Action
-              title="Reset DatePicker"
-              onAction={() => datePickerRef.current?.reset()}
-            />
-            <Action
-              title="Reset PasswordField"
-              onAction={() => passwordFieldRef.current?.reset()}
-            />
-            <Action
-              title="Reset Dropdown"
-              onAction={() => dropdownRef.current?.reset()}
-            />
-            <Action
-              title="Reset TagPicker"
-              onAction={() => tagPickerRef.current?.reset()}
-            />
-            <Action
-              title="Reset First Checkbox"
-              onAction={() => firstCheckboxRef.current?.reset()}
-            />
-            <Action
-              title="Reset Second Checkbox"
-              onAction={() => secondCheckboxRef.current?.reset()}
-            />
+            <Action title="Reset TextField" onAction={() => textFieldRef.current?.reset()} />
+            <Action title="Reset TextArea" onAction={() => textAreaRef.current?.reset()} />
+            <Action title="Reset DatePicker" onAction={() => datePickerRef.current?.reset()} />
+            <Action title="Reset PasswordField" onAction={() => passwordFieldRef.current?.reset()} />
+            <Action title="Reset Dropdown" onAction={() => dropdownRef.current?.reset()} />
+            <Action title="Reset TagPicker" onAction={() => tagPickerRef.current?.reset()} />
+            <Action title="Reset First Checkbox" onAction={() => firstCheckboxRef.current?.reset()} />
+            <Action title="Reset Second Checkbox" onAction={() => secondCheckboxRef.current?.reset()} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -1048,11 +1109,7 @@ export default function Command() {
       <Form.TextField id="textField" title="TextField" ref={textFieldRef} />
       <Form.TextArea id="textArea" title="TextArea" ref={textAreaRef} />
       <Form.DatePicker id="datePicker" title="DatePicker" ref={datePickerRef} />
-      <Form.PasswordField
-        id="passwordField"
-        title="PasswordField"
-        ref={passwordFieldRef}
-      />
+      <Form.PasswordField id="passwordField" title="PasswordField" ref={passwordFieldRef} />
       <Form.Separator />
       <Form.Dropdown
         id="dropdown"

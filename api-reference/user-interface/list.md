@@ -544,6 +544,7 @@ export default function Command() {
 | icon | An optional icon displayed for the list item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>{ tooltip: string; value: [Image.ImageLike](icons-and-images.md#image.imagelike) }</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the [List](list.md#list) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith [Action.ToggleQuickLook](actions.md#action). | <code>{ name: string; path: string }</code> | - |
 | subtitle | An optional subtitle displayed next to the main title, optionally with a tooltip. | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
 
 ### List.Item.Detail
@@ -845,9 +846,10 @@ An interface describing an accessory view in a `List.Item`.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> |
-| text | An optional text that will be used as the label. | <code>string</code> |
-| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> |
+| text | An optional text that will be used as the label. | <code>string</code> or <code>null</code> |
+| date | An optional Date that will be used as the label. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). | <code>Date</code> or <code>null</code> |
+| icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
+| tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
 
 #### Example
 
@@ -863,6 +865,7 @@ export default function Command() {
           { text: `An Accessory Text`, icon: Icon.Hammer },
           { icon: Icon.Person, tooltip: "A person" },
           { text: "Just Do It!" },
+          { date: new Date() },
         ]}
       />
     </List>
