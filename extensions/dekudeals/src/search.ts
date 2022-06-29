@@ -117,6 +117,8 @@ export async function getDetails(deal: Deal): Promise<DealDetails> {
 }
 
 export async function performSearch(searchText: string, signal: AbortSignal): Promise<Deal[]> {
+  if (searchText.length < 3) return [];
+
   const preferences = getPreferenceValues();
   const token = preferences["token"];
   if (!token) throw Error("No API token!");
