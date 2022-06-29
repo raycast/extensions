@@ -178,7 +178,6 @@
     "pngjs": "^6.0.0",
     "resize-image-buffer": "^1.0.0",
     "run-applescript": "^6.0.0",
-    "seconds-formater": "^1.2.0",
     "stream": "^0.0.2"
   },
   "devDependencies": {
