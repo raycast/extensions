@@ -32,10 +32,10 @@ async function setFavorites(favorites: string[]) {
 }
 
 export async function setShowFavoritesInCoinList(showFavorites: boolean) {
-  await LocalStorage.setItem(KEY_SHOW_FAVORITES, (showFavorites));
+  await LocalStorage.setItem(KEY_SHOW_FAVORITES, showFavorites);
 }
 
 export async function getShowFavoritesInCoinList() {
-  const showFavorites = ((await LocalStorage.getItem(KEY_SHOW_FAVORITES)) || false);
+  const showFavorites = (await LocalStorage.getItem(KEY_SHOW_FAVORITES)) || false;
   return showFavorites ? true : false;
 }
