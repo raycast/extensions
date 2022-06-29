@@ -95,7 +95,7 @@
         }
       ],
       "description": "Set the default action"
-    }, 
+    },
     {
       "title": "Recent Videos and Channels",
       "name": "showRecentVideos",

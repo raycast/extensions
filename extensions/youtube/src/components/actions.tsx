@@ -4,7 +4,7 @@ import { SearchVideoList } from "./video_search";
 import { Channel } from "../lib/youtubeapi";
 import { addRecentChannel } from "./recent_channels";
 
-export function OpenChannelInBrowser(props: { channelId: string | undefined, channel?: Channel }): JSX.Element | null {
+export function OpenChannelInBrowser(props: { channelId: string | undefined; channel?: Channel }): JSX.Element | null {
   const channelId = props.channelId;
   if (channelId) {
     return (

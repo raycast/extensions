@@ -215,15 +215,17 @@ export function RecentChannels(props: {
           />
         ))}
       </ListOrGridSection>
-      {showRecentChannels && <ListOrGridSection title="Recent Channels" layout={layout}>
-        {recentChannels?.map((v: Channel) => (
-          <ChannelItem
-            key={v.id}
-            channel={v}
-            actions={<RecentChannelActions channel={v} refresh={refresh} setRefresh={setRefresh} />}
-          />
-        ))}
-      </ListOrGridSection>}
+      {showRecentChannels && (
+        <ListOrGridSection title="Recent Channels" layout={layout}>
+          {recentChannels?.map((v: Channel) => (
+            <ChannelItem
+              key={v.id}
+              channel={v}
+              actions={<RecentChannelActions channel={v} refresh={refresh} setRefresh={setRefresh} />}
+            />
+          ))}
+        </ListOrGridSection>
+      )}
     </ListOrGrid>
   );
 }

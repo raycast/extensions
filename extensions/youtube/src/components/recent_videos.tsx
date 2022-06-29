@@ -62,14 +62,14 @@ export const addPinnedVideo = async (video: Video): Promise<void> => {
   }
 };
 
-export function PinVideo(props: { video: Video, refresh?: boolean, setRefresh?: any }): JSX.Element | null {
+export function PinVideo(props: { video: Video; refresh?: boolean; setRefresh?: any }): JSX.Element | null {
   return (
     <Action
       title="Pin Video"
       icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={async () => {
-        await addPinnedVideo(props.video); 
+        await addPinnedVideo(props.video);
         if (props.setRefresh) props.setRefresh(!props.refresh);
         showToast(Toast.Style.Success, "Pinned Video");
       }}
@@ -97,7 +97,7 @@ export const removeRecentVideo = async (id: string) => {
   removeVideo("recent-videos", id);
 };
 
-export const RecentVideoActions = (props: { video: Video, refresh: boolean, setRefresh: any }): JSX.Element => {
+export const RecentVideoActions = (props: { video: Video; refresh: boolean; setRefresh: any }): JSX.Element => {
   return (
     <React.Fragment>
       <PinVideo video={props.video} refresh={props.refresh} setRefresh={props.setRefresh} />
@@ -133,7 +133,7 @@ export const removePinnedVideo = async (id: string) => {
   removeVideo("pinned-videos", id);
 };
 
-export const PinnedVideoActions = (props: { video: Video, refresh: boolean, setRefresh: any }): JSX.Element => {
+export const PinnedVideoActions = (props: { video: Video; refresh: boolean; setRefresh: any }): JSX.Element => {
   return (
     <React.Fragment>
       <Action
@@ -208,14 +208,24 @@ export function RecentVideos(props: {
       <NoSearchView recentQueries={recentVideos} />
       <ListOrGridSection title="Pinned Videos" layout={layout}>
         {pinnedVideos?.map((v: Video) => (
-          <VideoItem key={v.id} video={v} actions={<PinnedVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
+          <VideoItem
+            key={v.id}
+            video={v}
+            actions={<PinnedVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />}
+          />
         ))}
       </ListOrGridSection>
-      {showRecentVideos && <ListOrGridSection title="Recent Videos" layout={layout}>
-        {recentVideos?.map((v: Video) => (
-          <VideoItem key={v.id} video={v} actions={<RecentVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />} />
-        ))}
-      </ListOrGridSection>}
+      {showRecentVideos && (
+        <ListOrGridSection title="Recent Videos" layout={layout}>
+          {recentVideos?.map((v: Video) => (
+            <VideoItem
+              key={v.id}
+              video={v}
+              actions={<RecentVideoActions video={v} refresh={refresh} setRefresh={setRefresh} />}
+            />
+          ))}
+        </ListOrGridSection>
+      )}
     </ListOrGrid>
   );
 }

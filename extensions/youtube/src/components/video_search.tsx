@@ -27,7 +27,7 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
         throttle={true}
       >
         {data?.map((v) => (
-          <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />}/>
+          <VideoItem key={v.id} video={v} actions={<PinVideo video={v} />} />
         ))}
       </ListOrGrid>
     );

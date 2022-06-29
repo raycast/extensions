@@ -5,7 +5,7 @@ import { getPrimaryActionPreference, PrimaryAction, Video } from "../lib/youtube
 import { OpenChannelInBrowser } from "./actions";
 import { ChannelItemDetailFetched } from "./channel";
 import { getViewLayout } from "./listgrid";
-import { addPinnedVideo, addRecentVideo } from "./recent_videos";
+import { addRecentVideo } from "./recent_videos";
 import fs from "fs";
 import he from "he";
 
@@ -98,12 +98,12 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
 export function VideoItemDetail(props: { video: Video }): JSX.Element {
   const video = props.video;
   const videoId = video.id;
-  const desc = video.description || "<no description>";
+  const desc = video.description || "No description";
   const title = video.title;
   const thumbnailUrl = video.thumbnails?.high?.url || undefined;
   const thumbnailMd = (thumbnailUrl ? `![thumbnail](${thumbnailUrl})` : "") + "\n\n";
   const channel = video.channelTitle;
-  const meta: string[] = [`- Channel: ${channel}  `, `- Published: ${formatDate(video.publishedAt)}`];
+  const meta: string[] = [`* Channel: ${channel}  `, `* Published: ${formatDate(video.publishedAt)}`];
   const md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
   return (
     <Detail
@@ -121,12 +121,12 @@ export function VideoItemDetail(props: { video: Video }): JSX.Element {
   );
 }
 
-export function VideoItem(props: { video: Video, actions?: JSX.Element | undefined }): JSX.Element {
+export function VideoItem(props: { video: Video; actions?: JSX.Element | undefined }): JSX.Element {
   const video = props.video;
   const videoId = video.id;
   let parts: string[] = [];
   if (video.statistics) {
-    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${video.publishedAt}`];
+    parts = [`${compactNumberFormat(parseInt(video.statistics.viewCount))} views · ${formatDate(video.publishedAt)}`];
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
@@ -158,20 +158,16 @@ export function VideoItem(props: { video: Video, actions?: JSX.Element | undefin
   const Actions = (): JSX.Element => {
     return (
       <ActionPanel>
-        <ActionPanel.Section>
-          {mainActions()}
-        </ActionPanel.Section>
+        <ActionPanel.Section>{mainActions()}</ActionPanel.Section>
         <ActionPanel.Section>
           <ShowChannelAction channelId={video.channelId} />
           <CopyVideoUrlAction video={video} />
           <OpenWithIINAAction video={video} />
         </ActionPanel.Section>
-        <ActionPanel.Section>
-          {props.actions}
-        </ActionPanel.Section>
+        <ActionPanel.Section>{props.actions}</ActionPanel.Section>
       </ActionPanel>
-    )
-  }
+    );
+  };
 
   return getViewLayout() === "list" ? (
     <List.Item

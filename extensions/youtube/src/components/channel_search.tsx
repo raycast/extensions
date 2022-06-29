@@ -28,7 +28,7 @@ export function SearchChannelList() {
         throttle={true}
       >
         {data?.map((c) => (
-          <ChannelItem key={c.id} channel={c} actions={<PinChannel channel={c} />}/>
+          <ChannelItem key={c.id} channel={c} actions={<PinChannel channel={c} />} />
         ))}
       </ListOrGrid>
     );

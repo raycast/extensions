@@ -7,10 +7,7 @@ import { addRecentChannel } from "./recent_channels";
 import { getViewLayout } from "./listgrid";
 import he from "he";
 
-export function ChannelItemDetail(props: {
-  channel: Channel;
-  isLoading?: boolean | undefined;
-}): JSX.Element {
+export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
   let channelId: string | undefined;
   let mdParts = [];
@@ -107,12 +104,10 @@ export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | u
             playlistId={channel.relatedPlaylists?.uploads}
           />
         </ActionPanel.Section>
-        <ActionPanel.Section>
-          {props.actions}
-        </ActionPanel.Section>
+        <ActionPanel.Section>{props.actions}</ActionPanel.Section>
       </ActionPanel>
-    )
-  }
+    );
+  };
 
   return getViewLayout() === "list" ? (
     <List.Item
@@ -144,5 +139,5 @@ export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Elem
   if (error) {
     showToast(Toast.Style.Failure, "Error fetching channel info", getErrorMessage(error));
   }
-  return data ? <ChannelItemDetail channel={data} isLoading={isLoading} /> : null; 
+  return data ? <ChannelItemDetail channel={data} isLoading={isLoading} /> : null;
 }
