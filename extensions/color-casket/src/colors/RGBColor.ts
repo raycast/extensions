@@ -1,7 +1,7 @@
 import convert from "color-convert";
 
 import Color from "./Color";
-import { RGB } from "color-convert/conversions";
+import { APPLE, RGB } from "color-convert/conversions";
 import { HEXColor, HSLColor, KeywordColor } from "./index";
 import { Keyboard } from "@raycast/api";
 
@@ -22,7 +22,7 @@ export default class RGBColor extends Color<RGB> {
       this,
       new HEXColor(convert.rgb.hex(this.value)),
       new HSLColor(convert.rgb.hsl(this.value)),
-      new KeywordColor(convert.rgb.keyword(this.value)),
+      new KeywordColor(convert.rgb.keyword(this.value))
     ];
   }
 
