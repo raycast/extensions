@@ -6,9 +6,9 @@
 
 - **React 18**: React Suspense, `useSyncExternalStore`, etc.. A whole bunch of new features are available with the newest version of React. See the [migration guide](https://developers.raycast.com/migration/v1.37.0) for more information.
 - **Quick Look:** Use the new `<Action.ToggleQuickLook />` action to show additional information with a Quick Look preview.
-- **Forms:** Use the new validation feature to check if entered data is correctly formatted and show failure messages in a nice UX
-- **Forms:** Drafts support – use the feature if you want the Raycast preserve non-submitted data, to provide the best experience for users
-- **DevX:** Check out the new screenshot tool that takes photo of Raycast from the best possible angle
+- **Forms:** Use the new validation feature to check if entered data is correctly formatted and show failure messages with a nice UX
+- **Forms:** Drafts support – use the feature if you want Raycast to preserve non-submitted data, to provide the best experience for users
+- **DevX:** Check out the new screenshot tool that takes a photo of Raycast from the best possible angle
 
 ### 💎 Improvements
 
@@ -21,12 +21,11 @@
 
 ### 🐞 Fixes
 
-- **Fix:** A crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string (https://github.com/raycast/extensions/issues/1845).
+- **Misc:** Fixed a crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1845](https://github.com/raycast/extensions/issues/1845)).
 - **Dev Tools**: Fixed uninstalling of local development extensions via the Action Panel
 - **Markdown**: Fixed rendering of transparent animated gifs in markdown
-- **Forms:** Fixed issue for entering characters with IME (https://github.com/raycast/extensions/issues/739) in controlled text inputs
-- **List Accessories:** Fixed tooltip for grouped accessories, now the tooltip will be shown for the group instead of separate items in it
-
+- **Forms:** Fixed an issue when entering characters with IME ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 739](https://github.com/raycast/extensions/issues/739)) in controlled text inputs
+- **List Accessories:** Fixed the tooltip for grouped accessories; now the tooltip will be shown for the group instead of separately for the items
 
 ## 1.36.0 – 2022-06-01
 
