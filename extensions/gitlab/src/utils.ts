@@ -117,6 +117,9 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   // replace all emojis
   result = result.replace(/:(\w*):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
 
+  // remove inline HTML tags
+  result = replaceAll(result, /<[^>]+\/?[^>]+>/g, "");
+
   if (baseUrl) {
     // replace relative links with absolute ones
     try {
