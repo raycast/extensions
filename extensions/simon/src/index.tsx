@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, Grid, Color, Detail, environment, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
 import { Preferences, State } from "./interface";
 import { colorMap, maxLevel } from "./constants";
