@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "short-io",
   "title": "Short.io",
-  "description": "Shorten links using your own domain via Short.io.",
+  "description": "Shorten and search links with your own domain via Short.io",
   "icon": "short-io-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -41,9 +41,8 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "API Secret key",
-      "description": "Short.io API secret key.",
-      "default": ""
+      "title": "API Secret Key",
+      "description": "Short.io API secret key."
     },
     {
       "name": "authFetchLink",

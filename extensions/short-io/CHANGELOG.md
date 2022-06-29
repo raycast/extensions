@@ -2,4 +2,4 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Shorten links using your own domain via Short.io.
+- Shorten and search links with your own domain via Short.io
