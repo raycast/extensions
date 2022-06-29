@@ -1,5 +1,12 @@
 # GitLab Changelog
 
+## [UI Improvements] - 2022-06-29
+
+- Add TagList items to MR details to show assignees and reviewers.
+- Pluralized the TagList.
+- Hide metadata items when they are empty.
+- Add key properties where necessary.
+
 ## [Bugfixes] - 2022-06-28
 
 - Fix GraphQL errors related to [deprecated `ID!` type usage](https://gitlab.com/gitlab-org/gitlab/-/issues/352832).
