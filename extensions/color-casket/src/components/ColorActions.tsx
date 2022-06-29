@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Clipboard, Color, Icon } from "@raycast/api";
-
 import { useContext, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
