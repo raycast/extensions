@@ -1,8 +1,7 @@
-import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
-import { refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
@@ -35,7 +34,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
             icon={Icon.TextDocument}
             onAction={async () => {
               await addFileTemplate(name, path);
-              setRefresh(refreshNumber());
+              setRefresh(Date.now());
             }}
           />
 
@@ -53,9 +52,10 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
             <Action
               title={"Choose File Path"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+              shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
               onAction={() => {
                 getChooseFile().then((path) => {
+                  open("raycast://").then();
                   setPath(path);
                   setName(parse(path).name);
                 });
@@ -116,17 +116,10 @@ const addFileTemplate = async (name: string, path: string) => {
         await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
         return;
       }
-      if (fse.existsSync(templateFolderPath)) {
-        fse.copyFileSync(path, desPath);
-      } else {
-        fse.mkdir(templateFolderPath, function (error) {
-          if (error) {
-            showToast(Toast.Style.Failure, String(error) + ".");
-            return false;
-          }
-          fse.copyFileSync(path, desPath);
-        });
-      }
+
+      fse.ensureDirSync(templateFolderPath);
+      fse.copyFileSync(path, desPath);
+
       await showHUD("Template added");
       await popToRoot({ clearSearchBar: false });
     } else {

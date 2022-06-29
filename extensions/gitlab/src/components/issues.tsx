@@ -1,7 +1,7 @@
-import { Action, ActionPanel, List, Color, showToast, Toast, Detail, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
@@ -11,11 +11,13 @@ import {
   now,
   optimizeMarkdownText,
   Query,
+  showErrorToast,
   toDateString,
   tokenizeQueryText,
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -32,7 +34,7 @@ export enum IssueState {
 }
 
 const GET_ISSUE_DETAIL = gql`
-  query GetIssueDetail($id: ID!) {
+  query GetIssueDetail($id: IssueID!) {
     issue(id: $id) {
       description
       webUrl
@@ -43,7 +45,7 @@ const GET_ISSUE_DETAIL = gql`
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Issue Details", error);
+    showErrorToast(error, "Could not fetch Issue Details");
   }
   if (isLoading || !issue) {
     return <Detail isLoading={isLoading} />;
@@ -69,7 +71,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not get issue details", error);
+    showErrorToast(error, "Could not get Issue Details");
   }
 
   const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
@@ -80,7 +82,6 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
     lines.push(optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
   }
   const md = lines.join("  \n");
-  const author = issue.author ? `${issue.author.name}` : "<no author>";
 
   return (
     <Detail
@@ -97,19 +98,28 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(issue.state)}
-              color={stateColor(issue.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.Label title="Milestone" text={issue.milestone?.title || "<no milestone>"} />
-          <Detail.Metadata.TagList title="Labels">
-            {issue.labels.map((i) => (
-              <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {issue.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={issue.author.name} icon={userIcon(issue.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {issue.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {issue.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
+          {issue.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {issue.labels.map((i) => (
+                <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />
@@ -123,7 +133,7 @@ function useDetail(issueID: number): {
 } {
   const [issueDetail, setIssueDetail] = useState<IssueDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -139,7 +149,7 @@ function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_ISSUE_DETAIL,
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });
@@ -216,7 +226,6 @@ interface IssueListProps {
   project?: Project;
   group?: Group;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
@@ -243,14 +252,10 @@ export function IssueList({
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search issue", error);
+    showErrorToast(error, "Cannot search Issue");
   }
 
-  if (!issues) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
-  const title = scope == IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
+  const title = scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
 
   return (
     <List
@@ -331,7 +336,7 @@ export function useSearch(
 } {
   const [issues, setIssues] = useState<Issue[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -404,7 +409,7 @@ export function useIssue(
 } {
   const [issue, setIssue] = useState<Issue>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

@@ -1,22 +1,53 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import { parseVaults } from "./VaultUtils";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, showToast, Toast, Icon } from "@raycast/api";
+
+import { useObsidianVaults } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+
+const getTarget = (vaultName: string) => {
+  return "obsidian://open?vault=" + encodeURIComponent(vaultName);
+};
 
 export default function Command() {
-  const vaults = parseVaults();
+  const { ready, vaults } = useObsidianVaults();
 
-  return (
-    <List isLoading={vaults === undefined}>
-      {vaults?.map((vault) => (
-        <List.Item
-          title={vault.name}
-          key={vault.key}
-          actions={
-            <ActionPanel>
-              <Action.Open title="Open vault" target={"obsidian://open?vault=" + encodeURIComponent(vault.name)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
+  if (vaults.length === 1) {
+    open(getTarget(vaults[0].name));
+    popToRoot();
+    closeMainWindow();
+  }
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  } else if (vaults.length == 1) {
+    open(getTarget(vaults[0].name));
+    popToRoot();
+    closeMainWindow();
+    return <List />;
+  } else if (vaults.length > 1) {
+    return (
+      <List isLoading={!ready}>
+        {vaults?.map((vault) => (
+          <List.Item
+            title={vault.name}
+            key={vault.key}
+            actions={
+              <ActionPanel>
+                <Action.Open title="Open vault" icon={Icon.ArrowRight} target={getTarget(vault.name)} />
+                <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  } else {
+    showToast({
+      title: "Path Error",
+      message: "Something went wrong with your vault path. There are no paths to select from.",
+      style: Toast.Style.Failure,
+    });
+    return <List />;
+  }
 }

@@ -1,52 +1,65 @@
-import { ActionPanel, Form, Action, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard } from "@raycast/api";
 
-import NoteCreator from "../NoteCreator";
-import { NoteFormPreferences, FormValue } from "../interfaces";
-
-function prefPath(): string {
-  const pref: NoteFormPreferences = getPreferenceValues();
-  const prefPath = pref.prefPath;
-  if (prefPath) {
-    return prefPath;
-  }
-  return "";
-}
-
-function prefTag(): Array<string> {
-  const pref: NoteFormPreferences = getPreferenceValues();
-  const prefTag = pref.prefTag;
-  if (prefTag) {
-    return [prefTag];
-  }
-  return [];
-}
-
-function tags() {
-  const pref: NoteFormPreferences = getPreferenceValues();
-  const tagsString = pref.tags;
-  const prefTag = pref.prefTag;
-  if (!tagsString) {
-    if (prefTag) {
-      return [{ name: prefTag, key: prefTag }];
-    }
-    return [];
-  }
-  const tags = tagsString
-    .split(",")
-    .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
-    .filter((tag) => !!tag);
-  if (prefTag) {
-    tags.push({ name: prefTag, key: prefTag });
-  }
-  return tags;
-}
+import NoteCreator from "../utils/NoteCreator";
+import { NoteFormPreferences, FormValue } from "../utils/interfaces";
 
 export function CreateNoteForm(props: { vaultPath: string }) {
   const vaultPath = props.vaultPath;
+  const pref: NoteFormPreferences = getPreferenceValues();
   const { pop } = useNavigation();
 
-  function createNewNote(noteProps: FormValue) {
-    const nc = new NoteCreator(noteProps, vaultPath);
+  function folders() {
+    const folderString = pref.folderActions;
+    if (folderString) {
+      const folders = folderString
+        .split(",")
+        .filter((folder) => !!folder)
+        .map((folder: string) => folder.trim());
+      return folders;
+    }
+    return [];
+  }
+
+  function tags() {
+    const tagsString = pref.tags;
+    const prefTag = pref.prefTag;
+    if (!tagsString) {
+      if (prefTag) {
+        return [{ name: prefTag, key: prefTag }];
+      }
+      return [];
+    }
+    const tags = tagsString
+      .split(",")
+      .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
+      .filter((tag) => !!tag);
+    if (prefTag) {
+      tags.push({ name: prefTag, key: prefTag });
+    }
+    return tags;
+  }
+
+  function prefTag(): string[] {
+    const prefTag = pref.prefTag;
+    if (prefTag) {
+      return [prefTag];
+    }
+    return [];
+  }
+
+  function prefPath(): string {
+    const prefPath = pref.prefPath;
+    if (prefPath) {
+      return prefPath;
+    }
+    return "";
+  }
+
+  function createNewNote(noteProps: FormValue, path: string | undefined = undefined) {
+    if (path !== undefined) {
+      noteProps.path = path;
+    }
+    const nc = new NoteCreator(noteProps, vaultPath, pref);
     const saved = nc.createNote();
     if (saved) {
       pop();
@@ -59,6 +72,14 @@ export function CreateNoteForm(props: { vaultPath: string }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" onSubmit={createNewNote} />
+          {folders()?.map((folder, index) => (
+            <Action.SubmitForm
+              title={"Create in " + folder}
+              onSubmit={(props: FormValue) => createNewNote(props, folder)}
+              key={index}
+              shortcut={{ modifiers: ["shift", "cmd"], key: index.toString() as Keyboard.KeyEquivalent }}
+            ></Action.SubmitForm>
+          ))}
         </ActionPanel>
       }
     >

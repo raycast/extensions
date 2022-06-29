@@ -1,5 +1,31 @@
 # Changelog
 
+## [Improved revision search and result tooltips](https://github.com/raycast/extensions/pull/2108) - 2022-06-27
+
+- **search**: Results from revision matches (e.g. with `repo:sourcegraph@3.41`) now annotate results with which revision the match was on, and drilldowns (<kbd>Tab</kbd> on a result) now more consistently apply the appropriate revision to generated searches.
+- **search**: Repository results with long names and long descriptions that are at risk of getting their names cut off are now hoverable for the full name of the repository.
+- **search**: Repository results with short descriptions no longer have hover text.
+
+## [Search performance improvements](https://github.com/raycast/extensions/pull/1844) - 2022-05-29
+
+- **search**: The drilldown action shortcut is now <kbd>Tab</kbd>, to align the shortcut for selecting suggestions in the Sourcegraph web application. For example, on a repository result, <kbd>Tab</kbd> will start a search with the `repo:` filter.
+- **search**: The number of rendered results is now limited, which drastically improves performance and stability.
+- **search**: Progress text now indicates whether there are more results to be found and when rendered results are a subset of all results.
+- **search**: Empty search text states now load faster.
+- **self-hosted**: Setup prompts now include an action to directly open extension preferences.
+- **internal**: Migrate to `graphql-code-generator` ([#16](https://github.com/bobheadxi/raycast-sourcegraph/pull/16))
+
+## [Fix search suggestions](https://github.com/raycast/extensions/pull/1696) - 2022-05-14
+
+- **search**: Fix 'Apply suggestions' on some suggestions returned by the search API. ([#15](https://github.com/bobheadxi/raycast-sourcegraph/pull/15))
+
+## [Search fixes, hover tooltips](https://github.com/raycast/extensions/pull/1493) - 2022-04-25
+
+- **search**: Internal improvements to mitigate stuttering when typing search queries.
+- **search**: Icons, titles, and subtitles in the main search results list are now all hoverable to see more details.
+- **batch-changes**: Some list elements are now hoverable for additional details.
+- **notebooks**: Some list elements are now hoverable for additional details.
+
 ## [Bug fixes](https://github.com/raycast/extensions/pull/1291) - 2022-04-05
 
 - **batch-changes**: Fix an issue where typing quickly could cause missed characters.

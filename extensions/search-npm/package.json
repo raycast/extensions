@@ -6,7 +6,11 @@
   "subtitle": "npm",
   "icon": "command-icon.png",
   "author": "mrmartineau",
+  "contributors": [
+    "reloadedhead"
+  ],
   "license": "MIT",
+  "categories": ["Developer Tools"],
   "commands": [
     {
       "name": "index",
@@ -28,6 +32,10 @@
         {
           "title": "npm",
           "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
         }
       ],
       "title": "Default Package Manager",
@@ -35,6 +43,29 @@
       "required": false,
       "default": "npm",
       "value": "npm"
+    },
+    {
+      "name": "secondaryCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        },
+        {
+          "title": "pnpm",
+          "value": "pnpm"
+        }
+      ],
+      "title": "Secondary Package Manager",
+      "description": "The secondary package manager to use",
+      "required": false,
+      "default": "yarn",
+      "value": "yarn"
     },
     {
       "name": "defaultOpenAction",
@@ -51,6 +82,10 @@
         {
           "title": "npm Package Page",
           "value": "npmPackagePage"
+        },
+        {
+          "title": "Skypack.dev Package Page",
+          "value": "skypackPackagePage"
         }
       ],
       "title": "Default Open Action",
@@ -65,7 +100,8 @@
     "fetch-readme": "^1.0.0",
     "gitlab-url-parse": "^1.0.0",
     "node-fetch": "^3.0.0",
-    "parse-github-url": "^1.0.2"
+    "parse-github-url": "^1.0.2",
+    "tiny-relative-date": "^1.3.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

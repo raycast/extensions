@@ -1,10 +1,10 @@
-import { ActionPanel, Color, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
 import { GitLabIcons, useImage } from "../icons";
-import { hashRecord } from "../utils";
+import { hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
@@ -26,7 +26,7 @@ function groupIconUrl(group: any): string | undefined {
 }
 
 function webUrl(group: Group, partial: string) {
-  return gitlabgql.urlJoin(`groups/${group.full_path}/${partial}`);
+  return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
 export function GroupListItem(props: { group: any }): JSX.Element {
@@ -104,7 +104,7 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const { groupsinfo, error, isLoading } = useMyGroups(undefined, parentGroupID);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Groups", error);
+    showErrorToast(error, "Cannot search Groups");
   }
 
   if (isLoading === undefined) {

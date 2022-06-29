@@ -1,9 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
-import { daysInSeconds, getErrorMessage, hashRecord } from "../utils";
+import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
 import { MRScope, MRState, MRListItem } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -29,7 +29,7 @@ export function SearchMyMergeRequests(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Merge Requests", getErrorMessage(error));
+    showErrorToast(getErrorMessage(error), "Could not fetch Merge Requests");
   }
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;

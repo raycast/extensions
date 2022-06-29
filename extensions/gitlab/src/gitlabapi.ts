@@ -6,6 +6,41 @@ import util from "util";
 import fs from "fs";
 import { pipeline } from "stream";
 const streamPipeline = util.promisify(pipeline);
+import https from "https";
+import { getPreferenceValues } from "@raycast/api";
+
+function readCACertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read CA cert file ${filename}`);
+  }
+}
+
+function readCertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read cert file ${filename}`);
+  }
+}
+
+export function getHttpAgent(): https.Agent | undefined {
+  let agent: https.Agent | undefined;
+  const preferences = getPreferenceValues();
+  const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
+  const customcacert = (preferences.customcacert as string) || "";
+  const customcert = (preferences.customcert as string) || "";
+  if (ignoreCertificates || customcacert.length > 0 || customcert.length > 0) {
+    const ca = customcacert.length > 0 ? readCACertFileSync(customcacert) : undefined;
+    const cert = customcert.length > 0 ? readCertFileSync(customcert) : undefined;
+    const opt: https.AgentOptions = { rejectUnauthorized: !ignoreCertificates, ca: ca, cert: cert };
+    agent = new https.Agent(opt);
+  }
+  return agent;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -17,11 +52,11 @@ export function logAPI(message?: any, ...optionalParams: any[]) {
   }
 }
 
-function userFromJson(data: any): User | undefined {
-  if (!data) {
-    // e.g. owners can be null, it seems that when there are multiple owners, then this field is null
-    return undefined;
-  }
+function maybeUserFromJson(data: any): User | undefined {
+  return data ? userFromJson(data) : undefined;
+}
+
+function userFromJson(data: any): User {
   return {
     id: data.id,
     name: data.name,
@@ -43,7 +78,7 @@ export function dataToProject(project: any): Project {
     last_activity_at: project.last_activity_at,
     readme_url: project.readme_url,
     avatar_url: project.avatar_url,
-    owner: userFromJson(project.owner),
+    owner: maybeUserFromJson(project.owner),
     ssh_url_to_repo: project.ssh_url_to_repo,
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
@@ -58,7 +93,9 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     iid: mr.iid,
     state: mr.state,
     updated_at: mr.updated_at,
-    author: userFromJson(mr.author),
+    author: maybeUserFromJson(mr.author),
+    assignees: mr.assignees.map(userFromJson),
+    reviewers: mr.reviewers.map(userFromJson),
     project_id: mr.project_id,
     description: mr.description,
     reference_full: mr.references?.full,
@@ -91,7 +128,8 @@ export function jsonDataToIssue(issue: any): Issue {
     reference_full: issue.references?.full,
     state: issue.state,
     updated_at: issue.updated_at,
-    author: userFromJson(issue.author),
+    author: maybeUserFromJson(issue.author),
+    assignees: issue.assignees.map(userFromJson),
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
     labels: issue.labels as Label[],
@@ -172,6 +210,7 @@ export class Issue {
   public reference_full = "";
   public state = "";
   public author: User | undefined;
+  public assignees: User[] = [];
   public updated_at = "";
   public project_id = 0;
   public milestone?: Milestone = undefined;
@@ -186,6 +225,8 @@ export class MergeRequest {
   public iid = 0;
   public state = "";
   public author: User | undefined;
+  public assignees: User[] = [];
+  public reviewers: User[] = [];
   public updated_at = "";
   public project_id = 0;
   public reference_full = "";
@@ -304,12 +345,14 @@ export class GitLab {
       const ps = paramString(pagedParams);
       const fullUrl = this.url + "/api/v4/" + url + ps;
       logAPI(`send GET request: ${fullUrl}`);
+      const agent = getHttpAgent();
       const response = await fetch(fullUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           "PRIVATE-TOKEN": this.token,
         },
+        agent: agent,
       });
       return response;
     };
@@ -615,7 +658,7 @@ export class GitLab {
         id: issue.id,
         project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
         group: issue.group ? (issue.group as TodoGroup) : undefined,
-        author: userFromJson(issue.author),
+        author: maybeUserFromJson(issue.author),
       }));
     });
 

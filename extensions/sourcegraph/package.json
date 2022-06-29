@@ -150,25 +150,30 @@
     }
   ],
   "dependencies": {
-    "@apollo/client": "^3.5.10",
-    "@raycast/api": "^1.31.0",
+    "@apollo/client": "^3.6.5",
+    "@raycast/api": "^1.35.2",
     "cross-fetch": "^3.1.5",
-    "eventsource": "^2.0.0",
-    "luxon": "^2.3.1",
-    "nanoid": "^3.3.1"
+    "eventsource": "^2.0.2",
+    "graphql": "^14.7.0",
+    "luxon": "^2.4.0",
+    "nanoid": "^3.3.4"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "2.6.2",
+    "@graphql-codegen/fragment-matcher": "3.2.1",
+    "@graphql-codegen/introspection": "2.1.1",
+    "@graphql-codegen/typescript": "2.4.11",
+    "@graphql-codegen/typescript-operations": "2.4.0",
+    "@graphql-codegen/typescript-react-apollo": "3.2.14",
     "@types/eventsource": "^1.1.8",
     "@types/luxon": "^2.3.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.38",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "apollo-codegen": "^0.20.2",
     "eslint": "^8.12.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.6.1",
-    "react-devtools": "^4.24.2",
     "typescript": "^4.5.4"
   },
   "scripts": {
@@ -177,8 +182,6 @@
     "lint": "ray lint",
     "fmt": "ray lint --fix",
     "raycast-publish": ".scripts/raycast-publish.sh",
-    "gql-schema": "apollo-codegen introspect-schema https://sourcegraph.com/.api/graphql --output src/sourcegraph/gql/schema.json",
-    "gql-gen": "apollo-codegen generate src/sourcegraph/gql/queries.ts src/sourcegraph/gql/mutations.ts --schema src/sourcegraph/gql/schema.json --target typescript --output src/sourcegraph/gql/schema.ts && npm run fmt",
-    "gql": "npm run gql-schema && npm run gql-gen"
+    "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt"
   }
 }

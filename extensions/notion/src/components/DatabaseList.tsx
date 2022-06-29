@@ -1,124 +1,55 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, ActionPanel, Action, Color, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  DatabaseView,
-  Page,
-  DatabaseProperty,
-  queryDatabase,
-  fetchDatabaseProperties,
-  fetchUsers,
-} from "../utils/notion";
-import {
-  storeRecentlyOpenedPage,
-  storeDatabaseView,
-  loadDatabaseView,
-  storeDatabaseProperties,
-  loadDatabaseProperties,
-  storeDatabasePages,
-  loadDatabasePages,
-  storeUsers,
-  loadUsers,
-} from "../utils/local-storage";
-import { DatabaseKanbanView, DatabaseListView, DatabaseViewProps } from "./databaseViews";
-import { useForceRenderer } from "../utils/useForceRenderer";
+import { useAtom } from "jotai";
+import { queryDatabase, fetchDatabaseProperties } from "../utils/notion";
+import { DatabaseView, Page, DatabaseProperty } from "../utils/types";
+import { recentlyOpenedPagesAtom, databaseViewsAtom, databasePropertiesAtom } from "../utils/state";
+import { CreateDatabaseForm, DatabaseViewForm } from "./forms";
+import { DatabaseKanbanView, DatabaseListView } from "./databaseViews";
+import { ActionSetVisibleProperties } from "./actions";
 
+const databaseViewTypes = {
+  list: DatabaseListView,
+  kanban: DatabaseKanbanView,
+};
+
+/**
+ * List of the pages in a Database
+ */
 export function DatabaseList(props: { databasePage: Page }): JSX.Element {
   // Get database info
-  const databasePage = props.databasePage;
+  const { databasePage } = props;
   const databaseId = databasePage.id;
   const databaseName =
     (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") +
     (databasePage.title ? databasePage.title : "Untitled");
 
-  // Store as recently opened page
+  const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
+  const [databasePages, setDatabasePages] = useState<Page[]>(
+    recentlyOpenedPages.filter((page) => page.parent_database_id === databaseId)
+  );
+  const [searchText, setSearchText] = useState<string>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [{ loading: isLoadingDatabaseView, value: databaseView }, setDatabaseView] = useAtom(
+    databaseViewsAtom(databaseId)
+  );
+  const [{ loading: isLoadingDatabaseProperties, value: databaseProperties }, setDatabaseProperties] = useAtom(
+    databasePropertiesAtom(databaseId)
+  );
+
   useEffect(() => {
     storeRecentlyOpenedPage(databasePage);
-  }, [databasePage]);
-
-  // Setup useState objects
-  const [databasePages, setDatabasePages] = useState<Page[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [databaseView, setDatabaseView] = useState<DatabaseView>();
-  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>([]);
-  const [didRerender, forceRerender] = useForceRenderer();
-
-  // Currently supported properties
-  const supportedPropTypes = [
-    "number",
-    "rich_text",
-    "url",
-    "email",
-    "phone_number",
-    "date",
-    "checkbox",
-    "select",
-    "multi_select",
-    "formula",
-    "people",
-  ];
+  }, [databaseId]);
 
   // Load database properties
   useEffect(() => {
     const getDatabaseProperties = async () => {
-      const cachedDatabaseProperties = await loadDatabaseProperties(databaseId);
-      setDatabaseProperties(cachedDatabaseProperties);
-
-      // Load users
-      let hasPeopleProperty = cachedDatabaseProperties.some((cdp) => cdp.type === "people");
-      if (hasPeopleProperty) {
-        const cachedUsers = await loadUsers();
-
-        setDatabaseProperties((props) =>
-          props.map((prop) => {
-            if (prop.type === "people") {
-              return { ...prop, options: cachedUsers };
-            }
-            return prop;
-          })
-        );
-      }
-
       const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
-
-      const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property) {
-        return supportedPropTypes.includes(property.type);
-      });
-      setDatabaseProperties(supportedDatabaseProperties);
-
-      // Fetch users
-      hasPeopleProperty = supportedDatabaseProperties.some((cdp) => cdp.type === "people");
-      if (hasPeopleProperty) {
-        const fetchedUsers = await fetchUsers();
-
-        setDatabaseProperties((props) =>
-          props.map((prop) => {
-            if (prop.type === "people") {
-              return { ...prop, options: fetchedUsers };
-            }
-            return prop;
-          })
-        );
-        storeUsers(fetchedUsers);
+      if (fetchedDatabaseProperties.length) {
+        setDatabaseProperties(fetchedDatabaseProperties);
       }
-      storeDatabaseProperties(databaseId, supportedDatabaseProperties);
     };
     getDatabaseProperties();
-  }, []);
-
-  // Load database view
-  useEffect(() => {
-    const getDatabaseView = async () => {
-      const loadedDatabaseView = await loadDatabaseView(databaseId);
-
-      if (loadedDatabaseView?.properties) {
-        setDatabaseView(loadedDatabaseView);
-      } else {
-        setDatabaseView({
-          properties: {},
-        } as DatabaseView);
-      }
-    };
-    getDatabaseView();
   }, []);
 
   // Fetch last 100 edited database pages
@@ -126,27 +57,25 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     const getDatabasePages = async () => {
       setIsLoading(true);
 
-      const cachedDatabasePages = await loadDatabasePages(databaseId);
-
-      if (cachedDatabasePages) {
-        setDatabasePages(cachedDatabasePages);
-      }
-
-      const fetchedDatabasePages = await queryDatabase(databaseId, undefined);
-      if (fetchedDatabasePages && fetchedDatabasePages[0]) {
+      const fetchedDatabasePages = await queryDatabase(databaseId, searchText);
+      if (fetchedDatabasePages.length) {
         setDatabasePages(fetchedDatabasePages);
-        setIsLoading(false);
-        storeDatabasePages(databaseId, fetchedDatabasePages);
       }
+      setIsLoading(false);
     };
     getDatabasePages();
-  }, [didRerender, databaseView]);
+  }, [searchText]);
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
     setDatabaseView(newDatabaseView);
-    showToast(ToastStyle.Success, "View Updated");
-    storeDatabaseView(databaseId, newDatabaseView);
+    showToast({
+      title: "View Updated",
+    });
+  }
+
+  if (isLoadingDatabaseProperties || isLoadingDatabaseView) {
+    return <List isLoading />;
   }
 
   const viewType = databaseView?.type ? databaseView.type : "list";
@@ -154,28 +83,106 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     ? (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") + databaseView.name
     : null;
 
-  const databaseViewTypes: Record<string, (props: DatabaseViewProps) => JSX.Element | null> = {
-    list: DatabaseListView,
-    kanban: DatabaseKanbanView,
-  };
-
   const DatabaseViewType = databaseViewTypes[viewType];
+
+  const visiblePropertiesIds: string[] = [];
+  if (databaseView && databaseView.properties) {
+    databaseProperties?.forEach((dp: DatabaseProperty) => {
+      if (databaseView?.properties && databaseView.properties[dp.id]) visiblePropertiesIds.push(dp.id);
+    });
+  }
 
   return (
     <List
-      key="database-view"
       isLoading={isLoading}
       searchBarPlaceholder="Filter pages"
       navigationTitle={" →  " + (viewTitle ? viewTitle : databaseName)}
-      throttle={true}
+      onSearchTextChange={setSearchText}
+      throttle
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.Push
+              title="Create New Page"
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              target={
+                <CreateDatabaseForm
+                  databaseId={databaseId}
+                  onPageCreated={(page) => setDatabasePages((state) => state.concat([page]))}
+                />
+              }
+            />
+          </ActionPanel.Section>
+
+          {databaseProperties ? (
+            <ActionPanel.Section title="View options">
+              <Action.Push
+                title="Set View Type..."
+                icon={{
+                  source: databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png",
+                  tintColor: Color.PrimaryText,
+                }}
+                target={
+                  <DatabaseViewForm
+                    isDefaultView
+                    databaseId={databaseId}
+                    databaseView={databaseView}
+                    saveDatabaseView={saveDatabaseView}
+                  />
+                }
+              />
+              <ActionSetVisibleProperties
+                databaseProperties={databaseProperties}
+                selectedPropertiesIds={visiblePropertiesIds}
+                onSelect={(propertyId) => {
+                  const databaseViewCopy = (
+                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
+                  ) as DatabaseView;
+                  if (!databaseViewCopy.properties) {
+                    databaseViewCopy.properties = {};
+                  }
+                  databaseViewCopy.properties[propertyId] = {};
+                  saveDatabaseView(databaseViewCopy);
+                }}
+                onUnselect={(propertyId) => {
+                  const databaseViewCopy = (
+                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
+                  ) as DatabaseView;
+                  if (!databaseViewCopy.properties) {
+                    databaseViewCopy.properties = {};
+                  }
+                  delete databaseViewCopy.properties[propertyId];
+                  saveDatabaseView(databaseViewCopy);
+                }}
+              />
+            </ActionPanel.Section>
+          ) : null}
+
+          {databasePage.url ? (
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Page URL"
+                content={databasePage.url}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+              <Action.Paste
+                title="Paste Page URL"
+                content={databasePage.url}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
+            </ActionPanel.Section>
+          ) : null}
+        </ActionPanel>
+      }
     >
       <DatabaseViewType
-        key={`database-${databaseId}-view-${viewType}`}
         databaseId={databaseId}
         databasePages={databasePages ? databasePages : ([] as Page[])}
         databaseProperties={databaseProperties ? databaseProperties : ([] as DatabaseProperty[])}
         databaseView={databaseView}
-        onForceRerender={forceRerender}
+        onPageCreated={(page) => setDatabasePages((state) => state.concat([page]))}
+        onPageUpdated={(page) => setDatabasePages((state) => state.map((x) => (x.id === page.id ? page : x)))}
         saveDatabaseView={saveDatabaseView}
       />
     </List>

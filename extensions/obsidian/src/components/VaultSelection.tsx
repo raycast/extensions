@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 
-import { Vault } from "../interfaces";
+import { Vault } from "../utils/interfaces";
 
 export function VaultSelection(props: { vaults: Vault[]; target: (path: Vault) => React.ReactFragment }) {
   const vaults = props.vaults;

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-maps-search",
+  "title": "Apple Maps Search",
+  "description": "Quickly open Apple Maps directions, for example from your current location to your home.",
+  "icon": "apple-maps-icon.png",
+  "author": "djpowers",
+  "contributors": [
+    "ratoru"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "directions",
+    "navigation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "travelHome",
+      "title": "Travel Home",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions from your current location to your home.",
+      "mode": "no-view"
+    },
+    {
+      "name": "travelTo",
+      "title": "Travel To",
+      "subtitle": "Apple Maps",
+      "description": "Open Apple Maps with directions to a destination.",
+      "mode": "view"
+    },
+    {
+      "name": "find",
+      "title": "Find Place",
+      "subtitle": "Apple Maps",
+      "description": "Find a specific place or category on Apple Maps.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "homeAddress",
+      "title": "Home Address",
+      "description": "Enter your home address as you would enter it into Apple Maps.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Street Address, City, State, ZIP Code"
+    },
+    {
+      "name": "preferredMode",
+      "title": "Preferred Mode of Travel",
+      "description": "Select your default mode of travel.",
+      "type": "dropdown",
+      "required": true,
+      "default": "r",
+      "data": [
+        {
+          "title": "🚗 Driving",
+          "value": "d"
+        },
+        {
+          "title": "🚶‍♀️ Walking",
+          "value": "w"
+        },
+        {
+          "title": "🚆 Transit",
+          "value": "r"
+        },
+        {
+          "title": "🚲 Cycling",
+          "value": "c"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

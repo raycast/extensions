@@ -1,47 +1,88 @@
-import { List, ActionPanel, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, ActionPanel, getPreferenceValues, preferences } from "@raycast/api";
+import React, { useState } from "react";
 
-import fs from "fs";
+import { Note, SearchNotePreferences } from "../utils/interfaces";
+import { OpenNoteActions, NoteActions } from "../utils/actions";
+import { readingTime, wordCount, trimPath, createdDateFor, fileSizeFor } from "../utils/utils";
+import { isNotePinned } from "../utils/PinNoteUtils";
 
-import NoteLoader from "../NoteLoader";
-import { Note } from "../interfaces";
-import { OpenNoteActions, NoteActions } from "../actions";
+export function NoteListItem(props: { note: Note; vaultPath: string; key: number; pref: SearchNotePreferences }) {
+  const note = props.note;
+  const [pinned, setPinned] = useState(isNotePinned(note, props.vaultPath));
 
-export function NoteList(props: { vaultPath: string }) {
-  const vaultPath = props.vaultPath;
-  const [notes, setNotes] = useState<Note[]>();
-  useEffect(() => {
-    async function fetch() {
-      try {
-        await fs.promises.access(vaultPath + "/.");
-        const nl = new NoteLoader(vaultPath);
-        const _notes = nl.loadNotes();
-
-        setNotes(_notes);
-      } catch (error) {
-        showToast({
-          title: "The path set in preferences doesn't exist",
-          message: "Please set a valid path in preferences",
-          style: Toast.Style.Failure,
-        });
-      }
-    }
-    fetch();
-  }, []);
+  const pin = function () {
+    setPinned(!pinned);
+  };
 
   return (
-    <List isLoading={notes === undefined}>
-      {notes?.map((note) => (
-        <List.Item
-          title={note.title}
-          key={note.key}
-          actions={
-            <ActionPanel>
-              <OpenNoteActions note={note} />
-              <NoteActions note={note} />
-            </ActionPanel>
+    <List.Item
+      title={note.title}
+      accessories={[{ text: pinned ? "⭐️" : "" }]}
+      detail={
+        <List.Item.Detail
+          markdown={note.content}
+          metadata={
+            props.pref.showMetadata ? (
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Character Count" text={note.content.length.toString()} />
+                <List.Item.Detail.Metadata.Label title="Word Count" text={wordCount(note.content).toString()} />
+                <List.Item.Detail.Metadata.Label
+                  title="Reading Time"
+                  text={readingTime(note.content).toString() + " min read"}
+                />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label
+                  title="Creation Date"
+                  text={createdDateFor(note).toLocaleDateString()}
+                />
+                <List.Item.Detail.Metadata.Label title="File Size" text={fileSizeFor(note).toFixed(2) + " KB"} />
+                <List.Item.Detail.Metadata.Label
+                  title="Note Path"
+                  text={trimPath(note.path.split(props.vaultPath)[1], 55)}
+                />
+              </List.Item.Detail.Metadata>
+            ) : (
+              <React.Fragment />
+            )
           }
         />
+      }
+      actions={
+        <ActionPanel>
+          <OpenNoteActions note={note} vaultPath={props.vaultPath} />
+          <NoteActions note={note} vaultPath={props.vaultPath} onPin={pin} />
+          {/* {action && action(note)} */}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function NoteList(props: {
+  notes: Note[] | undefined;
+  action?: (note: Note) => React.ReactFragment;
+  isLoading?: boolean;
+  vaultPath: string;
+  onSearchChange: (search: string) => void;
+}) {
+  const notes = props.notes;
+  const action = props.action;
+  const pref: SearchNotePreferences = getPreferenceValues();
+
+  let isLoading = notes === undefined;
+
+  if (notes !== undefined) {
+    isLoading = notes.length == 0;
+  }
+
+  if (props.isLoading !== undefined) {
+    isLoading = props.isLoading;
+  }
+
+  return (
+    <List isLoading={isLoading} isShowingDetail={pref.showDetail} onSearchTextChange={props.onSearchChange}>
+      {notes?.map((note) => (
+        <NoteListItem note={note} vaultPath={props.vaultPath} key={note.key} pref={pref} />
       ))}
     </List>
   );

@@ -21,12 +21,44 @@
   ],
   "preferences": [
     {
-      "name": "showGifPreview",
-      "type": "checkbox",
+      "name": "layoutType",
+      "type": "dropdown",
       "required": false,
-      "default": true,
-      "label": "Show GIF Preview",
-      "description": "Shows a large preview of the selected gif in search results."
+      "title": "Results Layout",
+      "description": "Layout style for displaying GIF search results",
+      "default": "list",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Item Size",
+      "description": "When using Grid layout, control the size of individual grid cells",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
     },
     {
       "name": "maxResults",
@@ -93,7 +125,7 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "@raycast/api": "^1.32.1",
+    "@raycast/api": "^1.36.0",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.28.0",
     "node-fetch": "^3.2.1",

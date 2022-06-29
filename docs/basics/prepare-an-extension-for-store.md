@@ -6,7 +6,7 @@ description: Learn how to get through review process quickly
 
 Here you will find requirements and guidelines that you'll need to follow in order to get through the review before your extension becomes available in the Store. Please read it carefully because it will save time for you and for us. This document is constantly evolving so please do visit it from time to time.
 
-### Metadata and Configuration
+## Metadata and Configuration
 
 - Things to double-check in your `package.json`
   - Ensure you use your **Raycast** account username in the `author` field
@@ -19,7 +19,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
-### Extensions and Commands Naming
+## Extensions and Commands Naming
 
 - Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/#NYT) convention
   - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
@@ -61,7 +61,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ![Example of a good subtitle](../.gitbook/assets/good-subtitle.png)
 
-### Extension Icon
+## Extension Icon
 
 - The published extension in the Store should have a 512x512px icon in `png` format
 - The icon should look good in both dark and light themes (you can switch the theme in Raycast Preferences → Appearance)
@@ -70,14 +70,14 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 - Make sure to remove unused assets and icons
 - 💡 If you feel like designing icons is not up to your alley, ask [community](https://raycast.com/community) for help (#extensions channel)
 
-### Provide README if Additional Configuration Required
+## Provide README if Additional Configuration Required
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `metadata` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
 ![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
 
-### Categories
+## Categories
 
 ![Categories shown on an extension details screen](../.gitbook/assets/categories-focus.png)
 
@@ -85,7 +85,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 - Categories are case-sensitive and should follow the [Title Case](https://titlecaseconverter.com/rules/) convention
 - Add categories in the `package.json` [manifest](https://developers.raycast.com/information/manifest) file or select the categories when you create a new extension using the **Create Extension** command
 
-#### All Categories
+### All Categories
 
 | Category        | Example                                                                                                                                                         |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,33 +105,33 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 | Web             | [Wikipedia](https://www.raycast.com/vimtor/wikipedia) – Search Wikipedia articles and view them.                                                                |
 | Other           | To be used if you think your extension doesn’t fit in any of the above categories.                                                                              |
 
-### Screenshots
+## Screenshots
 
 ![An example of an extension with screenshot metadata](https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
 
-#### Adding Screenshots
+### Adding Screenshots
 
 - To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
 
 ![Extension folder structure with a metadata folder and screenshots](../.gitbook/assets/folder-structure.png)
 
-#### Specifications
+### Specifications
 
 | Screenshot size                | Aspect ratio | Format | Dark mode support |
 | ------------------------------ | ------------ | ------ | ----------------- |
 | 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
 
-#### Guides and Template
+### Guides and Template
 
 - This [screenshot guide and template](https://www.figma.com/community/file/1083160585697279319/Raycast---Extension-Screenshot-Template) can help you make and export a proper screenshot
 - If you feel like you can’t create screenshots and meet the specifications, ask [community](https://raycast.com/community) for help (#extensions channel)
 
 ![Perfectly center the Raycast window in the required screenshot dimensions](../.gitbook/assets/screenshot-guide.png)
 
-#### Do's & Dont's
+### Do's & Dont's
 
 - ✅ Center the main app window in the screenshot, making sure there is equal padding on either sides of the app and your extension
 - ✅ Choose a background with good contrast, that makes it clear and easy to see the app and extension you’ve made
@@ -148,7 +148,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
 
-### Version History
+## Version History
 
 ![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
 
@@ -199,7 +199,7 @@ Initial version code
 You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you format your changelog correctly
 {% endhint %}
 
-### Contributing to Existing Extensions vs Creating a New One
+## Contributing to Existing Extensions vs Creating a New One
 
 - **When you should contribute to an existing extension instead of creating a new one**
   - You want to make a small improvement to an extension that is already published, e.g. extra actions, new preference, UX improvements, etc.. Usually, it's a non-significant change.
@@ -211,7 +211,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 - **Multiple simple extensions vs one large one**
   - If your extension works standalone and brings something new to the Store, it's acceptable to create a new one instead of adding commands to an existing one. E.g. one extension could be "GitHub Repository Search", another one could be "GitHub Issue Search". It should not be the goal to merge all extensions connecting with one service into one mega extension. However, it's also acceptable to merge two extensions under one if the authors decide to do so.
 
-### Binary Dependencies and Additional Configuration
+## Binary Dependencies and Additional Configuration
 
 - Avoid asking users to perform additional downloads and try to automate as much as possible from the extension, especially if you are targeting non-developers. See the [Speedtest](https://github.com/raycast/extensions/pull/302) extension that downloads a CLI in the background and later uses it under the hood.
 - If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise, we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection. Add additional integrity checks through hashes.
@@ -223,7 +223,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
   - ✅ Binary extracted from an npm package and copied to assets, with traceable sources how the binary is built; **note**: we have yet to integrate CI actions for copying and comparing the files; meanwhile, ask a member of the Raycast team to add the binary for you
   - ❌ Any binary with unavailable sources or unclear builds just added to the assets folder
 
-### Keychain Access
+## Keychain Access
 
 - Extensions requesting Keychain Access will be rejected due to security concerns. If you can't work around this limitation, reach out to us on [Slack](https://raycast.com/community) or via `feedback@raycast.com`.
 
@@ -234,7 +234,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 ![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.png)
 
 - Use the [preferences API](https://developers.raycast.com/api-reference/preferences) to let your users configure your extension or for providing credentials like API tokens
-  - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](../../extensions/gitlab/package.json#L123).
+  - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](https://github.com/raycast/extensions/blob/main/extensions/gitlab/package.json#L150).
 - You should not build separate commands for configuring your extension. If you miss some API to achieve the preferences setup you want, please file a [GitHub issue](https://github.com/raycast/extensions/issues) with a feature request.
 
 ### Action Panel

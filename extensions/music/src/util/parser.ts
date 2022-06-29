@@ -1,18 +1,17 @@
+import * as S from "fp-ts/string";
+import * as A from "fp-ts/ReadonlyArray";
+import { flow, pipe } from "fp-ts/function";
+import { parseQueryString } from "./apple-script";
+
 // use to parse run-applescript return (string)
 // see start-playlist.tsx for a full example
-export function parseResult<T>(raw: string): T[] {
-  const lines = raw.trim().split("\n");
-  return lines.map((line) => {
-    let result = {};
-    const properties = line.split("&nbsp;");
-    properties.map((property) => {
-      const [key, ...rest] = property.split(": ");
-      const value = rest.join(": ");
-      result = {
-        ...result,
-        [key]: value,
-      };
-    });
-    return result as T;
-  });
-}
+// prettier-ignore
+export const parseResult = <T extends object>() => (raw: string): ReadonlyArray<T> => pipe(
+  raw,
+  S.trim,
+  S.split("\n"),
+  A.map(flow(
+    S.trim,
+    parseQueryString<T>()
+  ))
+);

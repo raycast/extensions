@@ -6,7 +6,7 @@ import path from "path";
 import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
-import type { APIOpt, IGif, IGifAPI } from "../models/gif";
+import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
 
 export interface TenorResults {
   results?: TenorGif[];
@@ -139,11 +139,12 @@ export class TenorAPI {
 
 export function mapTenorResponse(tenorResp: TenorGif) {
   const mediaItem = tenorResp.media[0];
+  const title = tenorResp.title || tenorResp.h1_title || tenorResp.content_description;
   return <IGif>{
     id: tenorResp.id,
-    title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
+    title: title,
     url: tenorResp.itemurl,
-    slug: path.basename(tenorResp.itemurl),
+    slug: slugify(title),
     preview_gif_url: mediaItem.tinygif.preview,
     gif_url: mediaItem.tinygif.url,
     metadata: {
@@ -153,6 +154,6 @@ export function mapTenorResponse(tenorResp: TenorGif) {
       labels: [{ title: "Created", text: formatRelative(fromUnixTime(tenorResp.created), new Date()) }],
       tags: tenorResp.tags,
     },
-    attribution: environment.theme === "light" ? "PB_tenor_logo_grey_vertical.png" : "PB_tenor_logo_blue_vertical.png",
+    attribution: "tenor-logo-square-180.png",
   };
 }
