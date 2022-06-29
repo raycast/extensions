@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Better Form Navigation] - 2022-06-29
+
+- Added: Support for API version 1.37.0
+- Changed: You no longer have to tab to the next field after selecting a project and task.
+
 ## [Edit Time Entries] 2022-04-08
 
 - Added: You can now edit previous time entries from the action menu or `cmd + E`.

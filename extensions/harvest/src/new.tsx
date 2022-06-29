@@ -11,7 +11,7 @@ import {
   Icon,
   LocalStorage,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
@@ -39,8 +39,10 @@ export default function Command({
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
   const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
-
-  // console.log(projectId);
+  const [formInit, setFormInit] = useState(true);
+  const projectFieldRef = useRef<Form.Dropdown>(null);
+  const taskFieldRef = useRef<Form.Dropdown>(null);
+  const notesFieldRef = useRef<Form.TextField>(null);
 
   useEffect(() => {
     if (error) {
@@ -60,6 +62,8 @@ export default function Command({
     }
   }, [error]);
 
+  setTimeout(() => setFormInit(false), 500); // used to prevent auto-field switching until after the initial values load
+
   const groupedProjects = useMemo(() => {
     // return an array of arrays thats grouped by client to easily group them via a map function
     return _.reduce<
@@ -76,6 +80,7 @@ export default function Command({
   }, [projects]);
 
   useEffect(() => {
+    console.log("running init", { entry });
     if (!entry) {
       // no entry was passed, recall last submitted project/task
       LocalStorage.getItem("lastProject").then((value) => {
@@ -92,11 +97,13 @@ export default function Command({
     }
 
     return () => {
+      console.log("cleaning up init function");
       setProjectId(undefined);
     };
   }, [entry]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
+    console.log("submitting", values);
     if (values.project_id === null) {
       return showToast({
         style: Toast.Style.Failure,
@@ -228,10 +235,14 @@ export default function Command({
       <Form.Dropdown
         id="project_id"
         title="Project"
+        autoFocus
         value={projectId}
+        ref={projectFieldRef}
         onChange={(newValue) => {
+          // console.log("running onChange project", { newValue, formInit });
           setProjectId(newValue);
           setTaskAssignments(newValue);
+          if (!formInit) taskFieldRef.current?.focus();
         }}
       >
         {groupedProjects?.map((groupedProject) => {
@@ -252,7 +263,17 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId} onChange={setTaskId}>
+      <Form.Dropdown
+        id="task_id"
+        title="Task"
+        value={taskId}
+        onChange={(value) => {
+          // console.log("running onChange task", value);
+          setTaskId(value);
+          if (!formInit) notesFieldRef.current?.focus();
+        }}
+        ref={taskFieldRef}
+      >
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
@@ -260,7 +281,7 @@ export default function Command({
 
       <Form.Separator />
 
-      <Form.TextArea id="notes" title="Notes" value={notes} onChange={setNotes} />
+      <Form.TextArea id="notes" title="Notes" value={notes} onChange={setNotes} ref={notesFieldRef} />
       {company?.wants_timestamp_timers && (
         <>
           <Form.TextField id="started_time" title="Start Time" placeholder="Leave blank to default to now." />
