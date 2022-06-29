@@ -37,22 +37,22 @@ export default function SearchTags({ image }: { image: string }) {
   return (
     <List isLoading={loading} onSearchTextChange={onSearchTextChange} throttle>
       {tags.map((tag) =>
-        tag.images?.map((image: TagImage) => (
+        tag.images?.map((imageTag: TagImage) => (
           <List.Item
-            key={`${tag.id}-${image.digest}`}
+            key={`${tag.id}-${imageTag.digest}`}
             title={`${tag.name}`}
             subtitle={`${tag.update_time ? tag.update_time : ""} by ${tag.last_updater_username}`}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Pull Command" content={`docker pull ${image}:${tag.name}`} />
                 <Action.CopyToClipboard title="Copy Name with Tag" content={`${image}:${tag.name}`} />
-                <Action.OpenInBrowser url={image.url ? image.url : ""} />
-                <Action.CopyToClipboard title="Copy URL" content={image.url ? image.url : ""} />
+                <Action.OpenInBrowser url={imageTag.url ? imageTag.url : ""} />
+                <Action.CopyToClipboard title="Copy URL" content={imageTag.url ? imageTag.url : ""} />
               </ActionPanel>
             }
             accessories={[
               {
-                text: `${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`,
+                text: `${imageTag.os_arch ? imageTag.os_arch : ""} ${imageTag.sizeHuman ? imageTag.sizeHuman : ""}`,
               },
             ]}
           />
