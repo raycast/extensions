@@ -14,11 +14,11 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       key={player.id}
       title={player.fullName}
       icon={player.headshot}
-      subtitle={player.position}
+      subtitle={isShowingDetail ? undefined : player.position}
       accessories={generatePlayerAccessories(player)}
       detail={
         <List.Item.Detail
-          markdown={`<img src="${player.headshot}" alt="image" width="250"/>`}
+          markdown={`<img src="${player.headshot}" alt="Photo of ${player.fullName}" width="250"/>`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={player.fullName} />
@@ -45,7 +45,7 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
       actions={
         <ActionPanel title="Player Actions">
           <Action
-            title="Show Player Info"
+            title={isShowingDetail ? "Hide Player Info" : "Show Player Info"}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}

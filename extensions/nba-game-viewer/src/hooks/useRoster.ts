@@ -1,6 +1,9 @@
 import getRoster from "../utils/getRoster";
 import { useState, useEffect } from "react";
 import type { Player, Injury } from "../types/roster.types";
+import { Cache } from "@raycast/api";
+
+const cache = new Cache();
 
 const useRoster = ({ id: id }: { id: number }): { roster: Player[]; loading: boolean; error: boolean } => {
   const [roster, setRoster] = useState<Array<Player>>([]);
@@ -10,6 +13,12 @@ const useRoster = ({ id: id }: { id: number }): { roster: Player[]; loading: boo
   useEffect(() => {
     const fetchRoster = async () => {
       let data: any = null;
+
+      const cachedData = cache.get(`roster-${id}`);
+      if (cachedData) {
+        const cachedRoster = JSON.parse(cachedData);
+        setRoster(cachedRoster);
+      }
 
       try {
         data = await getRoster({ id: id });
@@ -30,7 +39,7 @@ const useRoster = ({ id: id }: { id: number }): { roster: Player[]; loading: boo
               details: `${injury.details.side} ${injury.details.type} ${injury.details.detail}`,
             })
           ),
-          headshot: athlete.headshot.href,
+          headshot: athlete.headshot?.href,
           weight: athlete.displayWeight,
           height: athlete.displayHeight,
           age: athlete.age,
@@ -56,6 +65,8 @@ const useRoster = ({ id: id }: { id: number }): { roster: Player[]; loading: boo
 
       setRoster(athletes);
       setLoading(false);
+
+      cache.set(`roster-${id}`, JSON.stringify(athletes));
     };
 
     fetchRoster();
