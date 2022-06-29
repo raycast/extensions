@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Markdown Improvements] - 2022-06-29
+
+- Render emojis from GitLab Flavored Markdown.
+- Hide inline HTML tags from GitLab Flavored Markdown.
+
 ## [UI Improvements] - 2022-06-29
 
 - Add TagList items to MR details to show assignees and reviewers.
