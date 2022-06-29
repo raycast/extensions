@@ -1,4 +1,4 @@
-import { getPreferenceValues, ActionPanel, List, OpenInBrowserAction, Detail } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
 
@@ -81,7 +81,7 @@ function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName })
       icon="dynamodb-icon.png"
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Browser"
             url={
               "https://" +
