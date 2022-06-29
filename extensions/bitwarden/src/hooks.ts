@@ -11,16 +11,16 @@ const initialPasswordGeneratorState = {
   isGenerating: true,
 };
 
-type State = typeof initialPasswordGeneratorState;
+type GeneratorState = typeof initialPasswordGeneratorState;
 
-type Action =
+type GeneratorActions =
   | { type: "generate" }
   | { type: "setPassword"; password: string }
   | { type: "setOptions"; options: PasswordGeneratorOptions }
   | { type: "cancelGenerate" }
   | { type: "clearPassword"; password: string };
 
-const passwordReducer = (state: State, action: Action): State => {
+const passwordReducer = (state: GeneratorState, action: GeneratorActions): GeneratorState => {
   switch (action.type) {
     case "generate":
       return { ...state, isGenerating: true };
@@ -46,7 +46,10 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
       const password = await bitwardenApi.generatePassword(passwordOptions, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
     } catch (error) {
-      dispatch({ type: "cancelGenerate" });
+      // generate password was likely aborted
+      if (abortControllerRef?.current.signal.aborted) {
+        dispatch({ type: "cancelGenerate" });
+      }
     }
   };
 
@@ -62,7 +65,6 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
     if (!options || options[option] === value) return;
     if (state.isGenerating) {
       abortPreviousGenerate();
-      dispatch({ type: "cancelGenerate" });
     }
 
     const newOptions = { ...options, [option]: value };
