@@ -46,7 +46,7 @@ const Command = () => {
     >
       <Form.TextField title="Title" id="title" autoFocus />
 
-      <Form.TextArea title="Body" id="body" />
+      <Form.TextArea title="Body" id="body" enableMarkdown />
 
       <Form.Dropdown title="Notebook" id="bookId">
         {books?.map((book) => {
