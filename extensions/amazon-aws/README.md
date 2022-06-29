@@ -8,7 +8,6 @@
 - List your EC2 Instances.
 - List your SQS Queues.
 - Access your AWS Console.
-- List your ECS Clusters.
 
 ## Configuration
 
