@@ -26,7 +26,7 @@
       "required": false,
       "title": "Results Layout",
       "description": "Layout style for displaying GIF search results",
-      "default": "list",
+      "default": "grid",
       "data": [
         {
           "title": "List",
