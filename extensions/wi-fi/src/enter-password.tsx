@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Form,
-  LocalStorage,
-  popToRoot,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Form, LocalStorage, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import wifi, { WiFiNetwork } from "node-wifi";
 import Style = Toast.Style;
@@ -22,6 +11,7 @@ export default function EnterPassword(props: {
   setRefresh: Dispatch<SetStateAction<number>>;
 }) {
   const { wifiPassword, wifiNetWork, setRefresh } = props;
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [password, setPassword] = useState<string>("");
 
   return (
@@ -33,6 +23,10 @@ export default function EnterPassword(props: {
             icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
             title={"Connect Wi-Fi"}
             onAction={async () => {
+              if (password.length == 0) {
+                setPasswordError("The field should't be empty!");
+                return;
+              }
               const toast = await showToast(Style.Animated, "Connecting...");
               wifi.connect({ ssid: wifiNetWork.ssid, password: password }, async () => {
                 setRefresh(Date.now());
@@ -63,7 +57,18 @@ export default function EnterPassword(props: {
       }
     >
       <Form.Description title={"Wi-FI"} text={wifiNetWork.ssid} />
-      <Form.TextField id={"password"} title={"Password"} value={password} onChange={setPassword} />
+      <Form.TextField
+        id={"password"}
+        title={"Password"}
+        value={password}
+        onChange={(newValue) => {
+          if (newValue.length > 0) {
+            setPasswordError(undefined);
+          }
+          setPassword(newValue);
+        }}
+        error={passwordError}
+      />
     </Form>
   );
 }
