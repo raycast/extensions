@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wi-fi",
+  "title": "Wi-Fi",
+  "description": "Connect Wi-Fi via Raycast",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scan-wifi",
+      "title": "Scan Wi-Fi",
+      "description": "Scan and connect Wi-Fi.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "node-wifi": "^2.0.16"
+  },
+  "devDependencies": {
+    "@types/node-wifi": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
