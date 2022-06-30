@@ -1,5 +1,9 @@
 # Common Directory Changelog
 
+## [Add text field validation] - {PR_MERGE_DATE}
+
+- Add text field validation
+
 ## [Add feature: Enter sub-folder] - 2022-06-01
 
 - Add feature **Enter sub-folder**: Now you can enter and exit folders with _Enter Folder_(⌘+⎇+↓) and _Enclosing Folder_(⌘+⎇+↑) actions
