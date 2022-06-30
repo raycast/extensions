@@ -29,7 +29,7 @@
       "name": "picker",
       "title": "Pick Color",
       "icon": "picker-icon.png",
-      "description": "Pick Color from everywhere",
+      "description": "Pick color from everywhere",
       "keywords": [
         "color",
         "render",

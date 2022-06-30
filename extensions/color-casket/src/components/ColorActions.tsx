@@ -26,7 +26,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   }
 
   const pasteAction = (
-    <ActionPanel.Section key={"paste-section"}>
+    <ActionPanel.Section key="paste-section">
       <Action.Paste content={color.stringValue()} icon={Icon.Document} />
       {!favorites.has(color) ? (
         <Action
@@ -48,7 +48,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   );
 
   const copyActions = (
-    <ActionPanel.Section key={"copy-section"}>
+    <ActionPanel.Section key="copy-section">
       {color.alternatives.map((altColor: AvailableColor, index: number) => (
         <Action.CopyToClipboard
           key={index}

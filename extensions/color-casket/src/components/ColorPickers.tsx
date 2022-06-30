@@ -1,6 +1,15 @@
 import { useContext } from "react";
 
-import { Action, ActionPanel, Clipboard, closeMainWindow, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  Keyboard,
+  List,
+  showHUD,
+} from "@raycast/api";
 
 import ServicesContext from "./ServicesContext";
 import { Services } from "../Extension";
@@ -38,24 +47,35 @@ export default function ColorPickers() {
     pickerOpened = false;
   };
 
+  const defaultFormat = getPreferenceValues<{
+    format: string;
+  }>().format as ColorType;
+
+  const orderedPickFormats = Object.values(ColorType).filter((color) => color !== defaultFormat);
+
+  const shortcuts: Keyboard.Shortcut[] = [
+    { modifiers: ["cmd"], key: "enter" },
+    { modifiers: ["cmd", "shift"], key: "." },
+    { modifiers: ["cmd", "shift"], key: "," },
+  ];
+
   return (
     <List.Item
       title="Pick a Color"
       icon={{ source: "dropper.png" }}
       actions={
         <ActionPanel>
-          <Action title="Pick in HEX" onAction={() => openColorPicker(ColorType.HEX)} />
-          <Action title="Pick in RGB" onAction={() => openColorPicker(ColorType.RGB)} />
-          <Action
-            title="Pick in HSL"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-            onAction={() => openColorPicker(ColorType.HSL)}
-          />
-          <Action
-            title="Pick in Keyword"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            onAction={() => openColorPicker(ColorType.KEYWORD)}
-          />
+          <Action title={`Pick in ${defaultFormat}`} onAction={() => openColorPicker(defaultFormat)} />
+          <ActionPanel.Section key="pickers">
+            {orderedPickFormats.map((type, index) => (
+              <Action
+                key={index}
+                title={`Pick in ${type}`}
+                shortcut={shortcuts[index]}
+                onAction={() => openColorPicker(type)}
+              />
+            ))}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
