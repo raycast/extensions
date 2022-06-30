@@ -2,7 +2,7 @@
 
 # [Support QuickLook preview] - {PR_MERGE_DATE}
 
-- Added support to quickly preview the files with the help of newly introduced `Action.QuickLook` API.
+- Added support to quickly preview the files with the help of newly introduced `Action.ToggleQuickLook` API.
 
 ## [Fix retrieving stats of a non-existing files] - 2022-05-31
 
