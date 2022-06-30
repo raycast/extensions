@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, Detail, environment, Image } from "@raycast/api";
+import { ActionPanel, Action, Grid, Detail, environment, Image, Icon } from "@raycast/api";
 import { join } from "path";
 
 const eases = [
@@ -54,6 +54,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
+                  icon={Icon.MagnifyingGlass}
                   title="View"
                   target={
                     <Detail
