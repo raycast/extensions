@@ -45,6 +45,7 @@
 
 ## API Reference
 
+- [Cache](api-reference/cache.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
 - [Feedback](api-reference/feedback/README.md)
