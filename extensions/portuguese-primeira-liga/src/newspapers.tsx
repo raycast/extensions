@@ -5,7 +5,7 @@ export default function GetNewspapers() {
   const newspapers = useNewspapers();
 
   return (
-    <Grid throttle isLoading={!newspapers} itemSize={Grid.ItemSize.Large} enableFiltering={false}>
+    <Grid isLoading={!newspapers} itemSize={Grid.ItemSize.Large} enableFiltering={false}>
       {newspapers?.map((paper) => {
         return (
           <Grid.Item
