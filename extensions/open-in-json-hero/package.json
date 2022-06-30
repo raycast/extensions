@@ -5,7 +5,9 @@
   "description": "Opens JSON in your pasteboard in JSON Hero",
   "icon": "command-icon.png",
   "author": "maverickdotdev",
-  "contributors": ["ivart"],
+  "contributors": [
+    "ivart"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
