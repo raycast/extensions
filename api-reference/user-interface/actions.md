@@ -24,14 +24,8 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <Action.OpenInBrowser url="https://github.com/raycast/extensions/pull/1" />
-            <Action.CopyToClipboard
-              title="Copy Pull Request Number"
-              content="#1"
-            />
-            <Action
-              title="Close Pull Request"
-              onAction={() => console.log("Close PR #1")}
-            />
+            <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
+            <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
           </ActionPanel>
         }
       />
@@ -66,10 +60,7 @@ export default function Command() {
       markdown="Press `⌘ + .` and share some love."
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            content="I ❤️ Raycast"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
+          <Action.CopyToClipboard content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
         </ActionPanel>
       }
     />
@@ -326,10 +317,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -431,9 +419,7 @@ export default function Command() {
       markdown="Test out quicklink creation"
       actions={
         <ActionPanel>
-          <Action.CreateQuicklink
-            quicklink={{ link: "https://duckduckgo.com/?q={Query}" }}
-          />
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
         </ActionPanel>
       }
     />
@@ -449,6 +435,40 @@ export default function Command() {
 | icon | A optional icon displayed for the item. See [Image.ImageLike](icons-and-images.md#image.imagelike) for the supported formats and types. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | - |
+
+### Action.ToggleQuickLook
+
+Action that toggles the Quick Look to preview a file.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Preview me"
+        quicklook={{ quickLook: "~/Downloads/Raycast.dmg", name: "Some file" }}
+        actions={
+          <ActionPanel>
+            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Eye](icons-and-images.md#icon) |
+| shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| title | The title for the action. | <code>string</code> | `"Quick Look"` |
 
 ## Types
 

@@ -464,7 +464,7 @@ export default function Command() {
 | actions | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected grid item. | <code>React.ReactNode</code> | - |
 | id | ID of the item. This string is passed to the `onSelectionChange` handler of the [Grid](grid.md#grid) when the item is selected. Make sure to assign each item a unique ID or a UUID will be auto generated. | <code>string</code> | - |
 | keywords | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. | <code>string[]</code> | - |
-| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith [Action.ToggleQuickLook](actions.md#action). | <code>{ name: string; path: string }</code> | - |
+| quickLook | Optional information to preview files with Quick Look. Toggle the preview ith [Action.ToggleQuickLook](actions.md#action.togglequicklook). | <code>{ name: string; path: string }</code> | - |
 | subtitle | An optional subtitle displayed below the title. | <code>string</code> | - |
 | title | An optional title displayed below the content. | <code>string</code> | - |
 
