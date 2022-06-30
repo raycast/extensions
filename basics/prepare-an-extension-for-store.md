@@ -9,9 +9,9 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ## Metadata and Configuration
 
 - Things to double-check in your `package.json`
-    - Ensure you use your **Raycast** account username in the `author` field
-    - Ensure you use `MIT` in the `license` field
-    - Ensure you are using the latest Raycast API version
+  - Ensure you use your **Raycast** account username in the `author` field
+  - Ensure you use `MIT` in the `license` field
+  - Ensure you are using the latest Raycast API version
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses. If your extension doesn't comply with their terms, include a warning in your extension's README. The warning should be similar to:
 
@@ -22,42 +22,42 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ## Extensions and Commands Naming
 
 - Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/#NYT) convention
-    - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
-    - ❌ `Hacker news`, `my issues`
-    - 🤔 It's okay to use lower case for names and trademarks that are canonically written with lower case letters. E.g. `iOS` , `macOS` , `npm`.
+  - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
+  - ❌ `Hacker news`, `my issues`
+  - 🤔 It's okay to use lower case for names and trademarks that are canonically written with lower case letters. E.g. `iOS` , `macOS` , `npm`.
 - **Extension title**
-    - It will be used only in the Store and in the preferences
-    - Make it easy for people to understand what it does when they see it in the Store
-        - ✅ `Emoji Search`, `Airport - Discover Testflight Apps`, `Hacker News`
-        - ❌ `Converter`, `Images`, `Code Review`, `Utils`
-        - 🤔 In some cases, you can add additional information to the title similar to the Airport example above. Only do so if it adds context.
-        - 💡 You can use more creative titles to differentiate your extension from other extensions with similar names.
-    - Aim to use nouns rather than verbs
-        - `Emoji Search` is better than `Search Emoji`
-    - Avoid generic names for an extension when your extension doesn't provide a lot of commands
-        - E.g. if your extension can only search pages in Notion, name it `Notion Search` instead of just `Notion`. This will help users to form the right expectations about your extension. If your extension covers a lot of functionality, it's okay to use a generic name like `Notion`. Example: [GitLab](https://www.raycast.com/tonka3000/gitlab).
-        - **Rule of thumb:** If your extension has only one command, you probably need to name the extension close to what this command does. Example: [Visual Studio Code Recent Projects](https://www.raycast.com/thomas/visual-studio-code) instead of just `Visual Studio Code`.
+  - It will be used only in the Store and in the preferences
+  - Make it easy for people to understand what it does when they see it in the Store
+    - ✅ `Emoji Search`, `Airport - Discover Testflight Apps`, `Hacker News`
+    - ❌ `Converter`, `Images`, `Code Review`, `Utils`
+    - 🤔 In some cases, you can add additional information to the title similar to the Airport example above. Only do so if it adds context.
+    - 💡 You can use more creative titles to differentiate your extension from other extensions with similar names.
+  - Aim to use nouns rather than verbs
+    - `Emoji Search` is better than `Search Emoji`
+  - Avoid generic names for an extension when your extension doesn't provide a lot of commands
+    - E.g. if your extension can only search pages in Notion, name it `Notion Search` instead of just `Notion`. This will help users to form the right expectations about your extension. If your extension covers a lot of functionality, it's okay to use a generic name like `Notion`. Example: [GitLab](https://www.raycast.com/tonka3000/gitlab).
+    - **Rule of thumb:** If your extension has only one command, you probably need to name the extension close to what this command does. Example: [Visual Studio Code Recent Projects](https://www.raycast.com/thomas/visual-studio-code) instead of just `Visual Studio Code`.
 - **Extension description**
-    - In one sentence, what does your extension do? This will be shown in the list of extensions in the Store. Keep it short and descriptive. See how other approved extensions in the Store do it for inspiration.
+  - In one sentence, what does your extension do? This will be shown in the list of extensions in the Store. Keep it short and descriptive. See how other approved extensions in the Store do it for inspiration.
 - **Command title**
-    - Usually it's `<verb> <noun>` structure or just `<noun>`
-    - The best approach is to see how other commands are named in Raycast to get inspiration
-        - ✅ `Search Recent Projects`, `Translate`, `Open Issues`, `Create Task`
-        - ❌ `Recent Projects Search`, `Translation`, `New Task`
-    - Avoid articles
-        - ✅ `Search Emoji`, `Create Issue`
-        - ❌ `Search an Emoji`, `Create an Issue`
-    - Avoid just giving it a service name, be more specific about what the command does
-        - ✅ `Search Packages`
-        - ❌ `NPM`
+  - Usually it's `<verb> <noun>` structure or just `<noun>`
+  - The best approach is to see how other commands are named in Raycast to get inspiration
+    - ✅ `Search Recent Projects`, `Translate`, `Open Issues`, `Create Task`
+    - ❌ `Recent Projects Search`, `Translation`, `New Task`
+  - Avoid articles
+    - ✅ `Search Emoji`, `Create Issue`
+    - ❌ `Search an Emoji`, `Create an Issue`
+  - Avoid just giving it a service name, be more specific about what the command does
+    - ✅ `Search Packages`
+    - ❌ `NPM`
 - **Command subtitle**
-    - Use subtitles to add context to your command. Usually, it's an app or service name that you integrate with. It makes command names more lightweight and removes the need to specify a service name in the command title.
-    - The subtitle is indexed so you can still search using subtitle and title: `xcode recent projects` would return `Search Recent Projects` in the example above.
-    - Don't use subtitles as descriptions for your command
-        - ❌ `Quickly open Xcode recent projects`
-    - Don't use a subtitle if it doesn't add context. Usually, this is the case with single command extensions.
-        - There is no need for a subtitle for the `Search Emoji` command since it's self-explanatory
-        - **Rule of thumb:** If your subtitle is almost a duplication of your command title, you probably don't need it
+  - Use subtitles to add context to your command. Usually, it's an app or service name that you integrate with. It makes command names more lightweight and removes the need to specify a service name in the command title.
+  - The subtitle is indexed so you can still search using subtitle and title: `xcode recent projects` would return `Search Recent Projects` in the example above.
+  - Don't use subtitles as descriptions for your command
+    - ❌ `Quickly open Xcode recent projects`
+  - Don't use a subtitle if it doesn't add context. Usually, this is the case with single command extensions.
+    - There is no need for a subtitle for the `Search Emoji` command since it's self-explanatory
+    - **Rule of thumb:** If your subtitle is almost a duplication of your command title, you probably don't need it
 
 ![Example of a good subtitle](../.gitbook/assets/good-subtitle.png)
 
@@ -114,15 +114,33 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Adding Screenshots
 
-- Use [this guide to capture beautiful metadata images](https://manual.raycast.com/how-to-use-rayfie), it's really simple.
+- To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
 
 ![Extension folder structure with a metadata folder and screenshots](../.gitbook/assets/folder-structure.png)
 
+### Specifications
+
+| Screenshot size                | Aspect ratio | Format | Dark mode support |
+| ------------------------------ | ------------ | ------ | ----------------- |
+| 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
+
+### Guides and Template
+
+- This [screenshot guide and template](https://www.figma.com/community/file/1083160585697279319/Raycast---Extension-Screenshot-Template) can help you make and export a proper screenshot
+- If you feel like you can’t create screenshots and meet the specifications, ask [community](https://raycast.com/community) for help (#extensions channel)
+
+![Perfectly center the Raycast window in the required screenshot dimensions](../.gitbook/assets/screenshot-guide.png)
+
 ### Do's & Dont's
 
+- ✅ Center the main app window in the screenshot, making sure there is equal padding on either sides of the app and your extension
 - ✅ Choose a background with good contrast, that makes it clear and easy to see the app and extension you’ve made
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
+- ❌ Make sure all other app windows are hidden behind Raycast before taking a screenshot
+- ❌ Do not screenshot the window without a background (⌘⇧4 + space bar) – you will lose the vibrancy of the Raycast app window and decrease the quality of your screenshot
+- ❌ Transparent images are not accepted – all screenshots must have a background
+- ❌ Do not scale your screenshot up from its original size – this will lead to blurry pixels and a lower quality image
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
@@ -135,11 +153,11 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 ![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
 
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
-    - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
+  - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 - See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
 - With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
-    - Make sure your change title is within square brackets
-    - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
+  - Make sure your change title is within square brackets
+  - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 - Below is an example of a changelog that follows the correct format
 
 ```markdown
@@ -184,14 +202,14 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 ## Contributing to Existing Extensions vs Creating a New One
 
 - **When you should contribute to an existing extension instead of creating a new one**
-    - You want to make a small improvement to an extension that is already published, e.g. extra actions, new preference, UX improvements, etc.. Usually, it's a non-significant change.
-    - You want to add a simple command that compliments an existing extension without changing the extension title or description, e.g. you want to add "Like Current Track" command for Spotify. It wouldn't make sense to create a whole new extension just for this when there is already the [Spotify Controls](https://www.raycast.com/thomas/spotify-controls) extension.
-    - **Important:** If your change is significant, it makes sense to contact the author of the extension before you invest a lot of time into it. We cannot merge significant contributions without the author's sign-off.
+  - You want to make a small improvement to an extension that is already published, e.g. extra actions, new preference, UX improvements, etc.. Usually, it's a non-significant change.
+  - You want to add a simple command that compliments an existing extension without changing the extension title or description, e.g. you want to add "Like Current Track" command for Spotify. It wouldn't make sense to create a whole new extension just for this when there is already the [Spotify Controls](https://www.raycast.com/thomas/spotify-controls) extension.
+  - **Important:** If your change is significant, it makes sense to contact the author of the extension before you invest a lot of time into it. We cannot merge significant contributions without the author's sign-off.
 - **When you should consider creating a new extension instead of contributing to an existing one**
-    - The changes to an existing extension would be significant and might break other people's workflows. Check with the author if you want to proceed with the collaboration path.
-    - Your extension provides an integration with the same service but has a different configuration, e.g. one extension could be "GitHub Cloud", another "GitHub Enterprise". One extension could be "Spotify Controls" and only uses AppleScript to play/pause songs, while another extension can provide deeper integration via the API and require an access token setup. There is no reason to try to merge everything together as this would only make things more complicated.
+  - The changes to an existing extension would be significant and might break other people's workflows. Check with the author if you want to proceed with the collaboration path.
+  - Your extension provides an integration with the same service but has a different configuration, e.g. one extension could be "GitHub Cloud", another "GitHub Enterprise". One extension could be "Spotify Controls" and only uses AppleScript to play/pause songs, while another extension can provide deeper integration via the API and require an access token setup. There is no reason to try to merge everything together as this would only make things more complicated.
 - **Multiple simple extensions vs one large one**
-    - If your extension works standalone and brings something new to the Store, it's acceptable to create a new one instead of adding commands to an existing one. E.g. one extension could be "GitHub Repository Search", another one could be "GitHub Issue Search". It should not be the goal to merge all extensions connecting with one service into one mega extension. However, it's also acceptable to merge two extensions under one if the authors decide to do so.
+  - If your extension works standalone and brings something new to the Store, it's acceptable to create a new one instead of adding commands to an existing one. E.g. one extension could be "GitHub Repository Search", another one could be "GitHub Issue Search". It should not be the goal to merge all extensions connecting with one service into one mega extension. However, it's also acceptable to merge two extensions under one if the authors decide to do so.
 
 ## Binary Dependencies and Additional Configuration
 
@@ -200,10 +218,10 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 - Don't bundle opaque binaries where sources are unavailable or where it's unclear how they have been built.
 - Don't bundle heavy binary dependencies in the extension – this would lead to an increased extension download size.
 - **Examples for interacting with binaries**
-    - ✅ Calling known system binaries
-    - ✅ Binary downloaded or installed from a trusted location with additional integrity checking through hashes (that is, verify whether the downloaded binary really matches the expected binary)
-    - ✅ Binary extracted from an npm package and copied to assets, with traceable sources how the binary is built; **note**: we have yet to integrate CI actions for copying and comparing the files; meanwhile, ask a member of the Raycast team to add the binary for you
-    - ❌ Any binary with unavailable sources or unclear builds just added to the assets folder
+  - ✅ Calling known system binaries
+  - ✅ Binary downloaded or installed from a trusted location with additional integrity checking through hashes (that is, verify whether the downloaded binary really matches the expected binary)
+  - ✅ Binary extracted from an npm package and copied to assets, with traceable sources how the binary is built; **note**: we have yet to integrate CI actions for copying and comparing the files; meanwhile, ask a member of the Raycast team to add the binary for you
+  - ❌ Any binary with unavailable sources or unclear builds just added to the assets folder
 
 ## Keychain Access
 
@@ -216,7 +234,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 ![Required preferences will be shown when opening the command](../.gitbook/assets/required-preferences-2.png)
 
 - Use the [preferences API](https://developers.raycast.com/api-reference/preferences) to let your users configure your extension or for providing credentials like API tokens
-    - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](https://github.com/raycast/extensions/blob/main/extensions/gitlab/package.json#L150).
+  - When using `required: true`, Raycast will ask the user to set preferences before continuing with an extension. See the example [here](https://github.com/raycast/extensions/blob/main/extensions/gitlab/package.json#L150).
 - You should not build separate commands for configuring your extension. If you miss some API to achieve the preferences setup you want, please file a [GitHub issue](https://github.com/raycast/extensions/issues) with a feature request.
 
 ### Action Panel
@@ -224,13 +242,13 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 ![Raycast Action Panel component](../.gitbook/assets/action-panel.png)
 
 - Actions in the action panel should also follow the **Title Case** naming convention
-    - ✅ `Open in Browser`, `Copy to Clipboard`
-    - ❌ `Copy url`, `set project`, `Set priority`
+  - ✅ `Open in Browser`, `Copy to Clipboard`
+  - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
-    - Avoid having a list of actions where some have icons and some don't
+  - Avoid having a list of actions where some have icons and some don't
 - Add ellipses `...` for actions that will have a submenu. Don't repeat parent the action name in the submenu
-    - ✅ `Set Priority...` and submenu would have `Low`, `Medium`, `High`
-    - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
+  - ✅ `Set Priority...` and submenu would have `Low`, `Medium`, `High`
+  - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 
 ### Navigation
 
@@ -240,9 +258,9 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 ### Empty States
 
 - When you update lists with an empty array of elements, the "No results" view will be shown. Avoid introducing your own UI to achieve a similar effect (e.g. showing list item).
-    - **Known issue:** Sometimes, there is nothing you can show when the search query is empty, and an extension shows "No results" when you open it (often in search commands). We have plans to provide an API that would improve that experience. In the meantime, you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
+  - **Known issue:** Sometimes, there is nothing you can show when the search query is empty, and an extension shows "No results" when you open it (often in search commands). We have plans to provide an API that would improve that experience. In the meantime, you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
 - **Common mistake** – "flickering empty state view" on start
-    - If you try rendering an empty list before real data arrives (e.g. from the network or disk), you might see a flickering "No results" view when opening the extension. To prevent this, make sure not to return an empty list of items before you get the data you want to display. In the meantime, you can show the loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
+  - If you try rendering an empty list before real data arrives (e.g. from the network or disk), you might see a flickering "No results" view when opening the extension. To prevent this, make sure not to return an empty list of items before you get the data you want to display. In the meantime, you can show the loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
 
 ### Navigation Title
 
