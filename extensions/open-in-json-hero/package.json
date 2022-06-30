@@ -5,6 +5,7 @@
   "description": "Opens JSON in your pasteboard in JSON Hero",
   "icon": "command-icon.png",
   "author": "maverickdotdev",
+  "contributors": ["ivart"],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -17,6 +18,66 @@
       "title": "Open in JSON Hero",
       "description": "Opens JSON in your pasteboard in JSON Hero",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ttl",
+      "description": "How long you want your file stored",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "60"
+        },
+        {
+          "title": "5 minute",
+          "value": "300"
+        },
+        {
+          "title": "15 minute",
+          "value": "900"
+        },
+        {
+          "title": "30 minutes",
+          "value": "1800"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600"
+        },
+        {
+          "title": "6 hour",
+          "value": "21600"
+        },
+        {
+          "title": "12 hour",
+          "value": "43200"
+        },
+        {
+          "title": "1 day",
+          "value": "86400"
+        },
+        {
+          "title": "3 days",
+          "value": "259200"
+        },
+        {
+          "title": "1 week",
+          "value": "604800"
+        },
+        {
+          "title": "1 month",
+          "value": "2592000"
+        },
+        {
+          "title": "Eternity",
+          "value": "0"
+        }
+      ],
+      "default": "86400",
+      "title": "Keep the file for:"
     }
   ],
   "dependencies": {
