@@ -87,7 +87,7 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
             key={optionType}
             option={optionType}
             field={optionField}
-            defaultValue={options?.[optionType]}
+            defaultValue={options[optionType]}
             errorMessage={optionField.errorMessage}
             onChange={handleFieldChange(optionType)}
           />
