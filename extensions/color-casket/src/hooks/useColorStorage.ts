@@ -1,20 +1,9 @@
-import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
-import { createColor } from "../typeUtilities";
 
-import asyncEffect from "../utilities";
-
-export interface SerializedColor {
-  value: string;
-  savedAt: number;
-}
-
-export interface SavedColor {
-  instance: AvailableColor;
-  savedAt: number;
-}
+import { asyncEffect } from "../utilities";
+import { list, update, SavedColor } from "./colorSaver";
 
 export interface Storage {
   isLoading: boolean;
@@ -35,7 +24,7 @@ enum StorageActions {
   Add = "add",
   Remove = "remove",
   Update = "update",
-  Clear = "clear",
+  Clear = "clear"
 }
 
 type StorageKeys = "history" | "favorites";
@@ -47,25 +36,8 @@ export type StorageAction =
   | { type: StorageActions.Clear; key: StorageKeys };
 
 export const storageInitialState = {
-  collection: [],
+  collection: []
 };
-
-async function rawList(key: string): Promise<SerializedColor[]> {
-  return JSON.parse((await LocalStorage.getItem(key)) || "[]");
-}
-
-async function items(key: string): Promise<SavedColor[]> {
-  const items = await rawList(key);
-
-  return items.map((color: SerializedColor) => ({ instance: createColor(color.value), savedAt: color.savedAt }));
-}
-
-function update(key: string, items: SavedColor[]) {
-  LocalStorage.setItem(
-    key,
-    JSON.stringify(items.map((color) => ({ value: color.instance.stringValue(), savedAt: color.savedAt })))
-  );
-}
 
 function storageReducer(state: InitialState, action: StorageAction) {
   let newState = state;
@@ -79,7 +51,7 @@ function storageReducer(state: InitialState, action: StorageAction) {
       return { collection: action.items };
     case StorageActions.Remove:
       newState = {
-        collection: state.collection.filter(({ instance }) => instance.stringValue() !== action.value.stringValue()),
+        collection: state.collection.filter(({ instance }) => instance.stringValue() !== action.value.stringValue())
       };
 
       break;
@@ -112,7 +84,7 @@ export function useColorStorage(key: StorageKeys, initialCallback?: (state: Save
     update(key, state.collection);
   }, [state.collection]);
 
-  asyncEffect(items(key), (state) => {
+  asyncEffect(list(key), (state) => {
     dispatch({ type: StorageActions.Update, key, items: state });
     setIsLoading(false);
 
@@ -132,6 +104,6 @@ export function useColorStorage(key: StorageKeys, initialCallback?: (state: Save
     },
     add: (color: AvailableColor) => dispatch({ type: StorageActions.Add, value: color, key }),
     remove: (color: AvailableColor) => dispatch({ type: StorageActions.Remove, value: color, key }),
-    empty: () => state.collection.length === 0,
+    empty: () => state.collection.length === 0
   };
 }

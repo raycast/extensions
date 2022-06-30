@@ -5,7 +5,7 @@ import { useContext, useState } from "react";
 import { AvailableColor } from "../colors/Color";
 import { Services } from "../Extension";
 
-import asyncEffect from "../utilities";
+import { asyncEffect } from "../utilities";
 import ServicesContext from "./ServicesContext";
 
 export default function ColorActions({ color, storageMode }: { color: AvailableColor; storageMode: boolean }) {

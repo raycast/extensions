@@ -24,6 +24,48 @@
         "color casket"
       ],
       "mode": "view"
+    },
+    {
+      "name": "picker",
+      "title": "Pick Color",
+      "icon": "picker-icon.png",
+      "description": "Pick Color from everywhere",
+      "keywords": [
+        "color",
+        "render",
+        "render color",
+        "color utilities",
+        "color casket"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "format",
+          "title": "Default Format",
+          "description": "Default format for color picker",
+          "type": "dropdown",
+          "default": "HEX",
+          "required": false,
+          "data": [
+            {
+              "title": "HEX",
+              "value": "HEX"
+            },
+            {
+              "title": "RGB",
+              "value": "RGB"
+            },
+            {
+              "title": "HSL",
+              "value": "HSL"
+            },
+            {
+              "title": "Keyword",
+              "value": "KEYWORD"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
