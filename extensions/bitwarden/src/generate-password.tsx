@@ -82,14 +82,14 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
         ))}
       </Form.Dropdown>
       {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
-        ([optionType, optionField]: PasswordOptionsToFieldEntries) => (
+        ([option, optionField]: PasswordOptionsToFieldEntries) => (
           <OptionField
-            key={optionType}
-            option={optionType}
+            key={option}
+            option={option}
             field={optionField}
             currentOptions={options}
             errorMessage={optionField.errorMessage}
-            onChange={handleFieldChange(optionType)}
+            onChange={handleFieldChange(option)}
           />
         )
       )}
