@@ -2,10 +2,7 @@ import { spawnSync } from "child_process";
 
 export const activateScreenSaver = async () => {
   try {
-    const script = `tell application "System Events" 
-    start current screen saver
-end tell`;
-    spawnSync("osascript", ["-e", script]);
+    spawnSync("open -a ScreenSaverEngine.app", { shell: true });
     return { success: true, message: "Screen saver activated" };
   } catch (e) {
     console.error(String(e));
