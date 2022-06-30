@@ -1,5 +1,5 @@
 import { popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import wifi from "node-wifi";
+import wifi, { WiFiNetwork } from "node-wifi";
 import Style = Toast.Style;
 import { Dispatch, SetStateAction } from "react";
 
@@ -22,4 +22,12 @@ export const connectWifi = async (ssid: string, password: string, setRefresh: Di
       }
     }
   );
+};
+
+export const uniqueWifiNetWork = (arr: WiFiNetwork[]) => {
+  if (arr.length <= 1) {
+    return arr;
+  }
+  const res = new Map();
+  return arr.filter((item) => !res.has(item.ssid) && res.set(item.ssid, 1));
 };

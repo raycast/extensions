@@ -3,6 +3,7 @@ import wifi, { WiFiNetwork } from "node-wifi";
 import { LocalStorage } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPassword } from "../types/types";
+import { uniqueWifiNetWork } from "../utils/common-utils";
 
 wifi.init({
   iface: null,
@@ -32,7 +33,9 @@ export const getWifiList = (refresh: number) => {
     if (typeof localStorageWifiCache === "string") {
       allWifiList = JSON.parse(localStorageWifiCache) as WiFiNetwork[];
     } else {
-      allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+      const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+      allWifiList = uniqueWifiNetWork(_allWifiList);
+      await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
     }
 
     const _wifiList: WiFiNetwork[] = [];
@@ -51,7 +54,8 @@ export const getWifiList = (refresh: number) => {
     setWifiList(_wifiList);
     setPublicWifi(allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
 
-    const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+    const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+    const _allWifiList = uniqueWifiNetWork(__allWifiList);
 
     const __wifiList: WiFiNetwork[] = [];
     const __wifiListWithPassword: WifiNetworkWithPassword[] = [];
