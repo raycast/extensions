@@ -51,7 +51,7 @@ export default function PlayLibraryAlbum() {
 
   useEffect(() => {
     const getArtworks = async () => {
-      if (albums !== null && albums.length > 0) {
+      if (albums !== null) {
         const ids = albums.map((album) => album.id);
         try {
           const artworks = await getArtworkByIds(ids);
@@ -59,7 +59,7 @@ export default function PlayLibraryAlbum() {
         } catch {
           showToast(Toast.Style.Failure, "Error: Failed to get track artworks");
         }
-      }
+      } else setArtworks(null);
     };
     getArtworks();
     return () => {

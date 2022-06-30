@@ -74,14 +74,14 @@ export default function PlaySelected() {
           .map(([_, data]) => data.map((playlist) => playlist.id))
           .reduce((acc, curr) => acc.concat(curr), [])
           .slice(0, numResults);
-        if (ids !== null && ids.length > 0) {
+        if (ids !== null) {
           try {
             const artworks = await getArtworkByIds(ids);
             setArtworks(artworks);
           } catch {
             showToast(Toast.Style.Failure, "Error: Failed to get track artworks");
           }
-        } else setArtworks([]);
+        } else setArtworks(null);
       }
     };
     getArtworks();
