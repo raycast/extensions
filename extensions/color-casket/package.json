@@ -32,9 +32,10 @@
       "description": "Pick color from everywhere",
       "keywords": [
         "color",
-        "render",
-        "render color",
-        "color utilities",
+        "pick",
+        "eyedropper",
+        "dropper",
+        "pipette",
         "color casket"
       ],
       "mode": "view"
