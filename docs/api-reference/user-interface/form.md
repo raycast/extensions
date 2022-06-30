@@ -4,7 +4,7 @@ Our `Form` component provides great user experience to collect some data from a 
 
 ![](../../.gitbook/assets/example-doppler-share-secrets.png)
 
-### Two Types of Items: Controlled vs. Uncontrolled
+## Two Types of Items: Controlled vs. Uncontrolled
 
 Items in React can be one of two types: controlled or uncontrolled.
 
@@ -93,7 +93,7 @@ function validatePassword(value: string): boolean {
 }
 ```
 
-### Drafts
+## Drafts
 
 Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the top-level props `draftValues`.
 
