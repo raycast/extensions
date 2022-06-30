@@ -114,9 +114,11 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 
 #### Example
 
+{% tabs %}
+{% tab title="Uncontrolled Form" %}
+
 ```typescript
 import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
-import { useState } from "react";
 
 interface TodoValues {
   title: string;
@@ -153,6 +155,57 @@ export default function Command(props: { draftValues?: TodoValues }) {
   );
 }
 ```
+
+{% endtab %}
+
+{% tab title="Controlled Form" %}
+
+```typescript
+import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { useState } from "react";
+
+interface TodoValues {
+  title: string;
+  description?: string;
+  dueDate?: Date;
+}
+
+export default function Command(props: { draftValues?: TodoValues }) {
+  const { draftValues } = props;
+
+  const [title, setTitle] = useState<string | undefined>(draftValues?.title);
+  const [description, setDescription] = useState<string | undefined>(draftValues?.description);
+  const [dueDate, setDueDate] = useState<Date | undefined>(draftValues?.dueDate);
+
+  function handleSubmit(values: TodoValues) {
+    console.log("onSubmit", values);
+    popToRoot();
+  }
+
+  return (
+    <Form
+      enableDrafts
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={(values: TodoValues) => {
+              handleSubmit(values);
+              popToRoot();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" value={title} onChange={setTitle} />
+      <Form.TextArea id="description" title="Description" value={description} onChange={setDescription} />
+      <Form.DatePicker id="dueDate" title="Due Date" value={dueDate} onChange={setDueDate} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
 
 ## API Reference
 
