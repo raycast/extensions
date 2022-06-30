@@ -175,10 +175,8 @@
   "dependencies": {
     "@raycast/api": "^1.36.1",
     "fp-ts": "^2.12.1",
-    "pngjs": "^6.0.0",
     "resize-image-buffer": "^1.0.0",
-    "run-applescript": "^6.0.0",
-    "stream": "^0.0.2"
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

@@ -75,6 +75,10 @@ export default function PlaySelected() {
           .reduce((acc, curr) => acc.concat(curr), [])
           .slice(0, numResults);
         if (ids !== null) {
+          if (ids.length === 0) {
+            setArtworks({});
+            return;
+          }
           try {
             const artworks = await getArtworkByIds(ids);
             setArtworks(artworks);
@@ -144,8 +148,6 @@ interface ActionsProps {
 }
 
 function Actions({ playlist: { name, id }, pop }: ActionsProps) {
-  const title = `Start Playlist "${name}"`;
-
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
       id,
@@ -158,9 +160,9 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
   };
 
   return (
-    <ActionPanel title={title}>
-      <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={`Shuffle Playlist "${name}"`} onAction={handleSubmit(true)} />
+    <ActionPanel>
+      <Action title="Start Playlist" onAction={handleSubmit(false)} />
+      <Action title="Shuffle Playlist" onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

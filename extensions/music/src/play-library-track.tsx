@@ -55,6 +55,10 @@ export default function PlayLibraryTrack() {
   useEffect(() => {
     const getArtworks = async () => {
       if (tracks !== null) {
+        if (tracks.length == 0) {
+          setArtworks({}); 
+          return; 
+        }
         const ids = tracks.map((track) => track.id);
         try {
           const artworks = await getArtworkByIds(ids);
@@ -105,8 +109,6 @@ export default function PlayLibraryTrack() {
 }
 
 function Actions({ name, pop, id }: { id: string; name: string; pop: () => void }) {
-  const title = `Start Track "${name}"`;
-
   const handleSubmit = async () => {
     await pipe(
       id,
@@ -120,7 +122,7 @@ function Actions({ name, pop, id }: { id: string; name: string; pop: () => void 
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleSubmit} />
+      <Action title="Play Track" onAction={handleSubmit} />
     </ActionPanel>
   );
 }
