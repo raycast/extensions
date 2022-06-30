@@ -37,33 +37,33 @@
         "color utilities",
         "color casket"
       ],
-      "mode": "view",
-      "preferences": [
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "title": "Default Format",
+      "description": "Default format for color picker",
+      "type": "dropdown",
+      "default": "HEX",
+      "required": false,
+      "data": [
         {
-          "name": "format",
-          "title": "Default Format",
-          "description": "Default format for color picker",
-          "type": "dropdown",
-          "default": "HEX",
-          "required": false,
-          "data": [
-            {
-              "title": "HEX",
-              "value": "HEX"
-            },
-            {
-              "title": "RGB",
-              "value": "RGB"
-            },
-            {
-              "title": "HSL",
-              "value": "HSL"
-            },
-            {
-              "title": "Keyword",
-              "value": "KEYWORD"
-            }
-          ]
+          "title": "HEX",
+          "value": "HEX"
+        },
+        {
+          "title": "RGB",
+          "value": "RGB"
+        },
+        {
+          "title": "HSL",
+          "value": "HSL"
+        },
+        {
+          "title": "Keyword",
+          "value": "KEYWORD"
         }
       ]
     }
