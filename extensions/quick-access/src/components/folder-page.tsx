@@ -27,6 +27,7 @@ export function FolderPage(props: { folderName: string; folderPath: string; prim
             key={index}
             icon={{ fileIcon: folderPath + "/" + value.name }}
             title={value.name}
+            quickLook={{ path: folderPath + "/" + value.name, name: value.name }}
             accessories={[currentItem === value.name ? { text: folderPath + "/" + value.name } : {}]}
             actions={
               <ActionPanel>
