@@ -17,6 +17,7 @@ import { Services } from "../Extension";
 import { ColorType } from "../colors/Color";
 import { returnToRaycast } from "../utilities";
 import pickColor from "../pickerHelper";
+import GeneralActions from "./GeneralActions";
 
 export default function ColorPickers() {
   const { history } = useContext(ServicesContext) as Services;
@@ -76,6 +77,7 @@ export default function ColorPickers() {
               />
             ))}
           </ActionPanel.Section>
+          <GeneralActions history={history} />
         </ActionPanel>
       }
     />

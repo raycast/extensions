@@ -6,6 +6,7 @@ import { AvailableColor } from "../colors/Color";
 import { Services } from "../Extension";
 
 import { asyncEffect } from "../utilities";
+import GeneralActions from "./GeneralActions";
 import ServicesContext from "./ServicesContext";
 
 export default function ColorActions({ color, storageMode }: { color: AvailableColor; storageMode: boolean }) {
@@ -67,15 +68,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   return (
     <ActionPanel>
       {storageMode ? [pasteAction, copyActions] : [copyActions, pasteAction]}
-      <ActionPanel.Section>
-        <Action
-          title="Clear History"
-          shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-          onAction={() => history.clear()}
-        />
-        <Action.OpenInBrowser title="Support Me" icon={{ source: "heart.png" }} url="https://ko-fi.com/slavarazum" />
-      </ActionPanel.Section>
+      <GeneralActions history={history} />
     </ActionPanel>
   );
 }
