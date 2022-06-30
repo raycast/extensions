@@ -15,14 +15,14 @@ export interface SavedColor {
 function serialize(color: SavedColor): SerializedColor {
   return {
     value: color.instance.stringValue(),
-    savedAt: color.savedAt
+    savedAt: color.savedAt,
   };
 }
 
 function unserialize(color: SerializedColor): SavedColor {
   return {
     instance: createColor(color.value),
-    savedAt: color.savedAt
+    savedAt: color.savedAt,
   };
 }
 
@@ -39,7 +39,7 @@ export async function prepend(key: string, color: AvailableColor) {
 
   items.unshift({
     instance: color,
-    savedAt: Date.now()
+    savedAt: Date.now(),
   });
 
   update(key, items);

@@ -24,7 +24,7 @@ enum StorageActions {
   Add = "add",
   Remove = "remove",
   Update = "update",
-  Clear = "clear"
+  Clear = "clear",
 }
 
 type StorageKeys = "history" | "favorites";
@@ -36,7 +36,7 @@ export type StorageAction =
   | { type: StorageActions.Clear; key: StorageKeys };
 
 export const storageInitialState = {
-  collection: []
+  collection: [],
 };
 
 function storageReducer(state: InitialState, action: StorageAction) {
@@ -51,7 +51,7 @@ function storageReducer(state: InitialState, action: StorageAction) {
       return { collection: action.items };
     case StorageActions.Remove:
       newState = {
-        collection: state.collection.filter(({ instance }) => instance.stringValue() !== action.value.stringValue())
+        collection: state.collection.filter(({ instance }) => instance.stringValue() !== action.value.stringValue()),
       };
 
       break;
@@ -104,6 +104,6 @@ export function useColorStorage(key: StorageKeys, initialCallback?: (state: Save
     },
     add: (color: AvailableColor) => dispatch({ type: StorageActions.Add, value: color, key }),
     remove: (color: AvailableColor) => dispatch({ type: StorageActions.Remove, value: color, key }),
-    empty: () => state.collection.length === 0
+    empty: () => state.collection.length === 0,
   };
 }

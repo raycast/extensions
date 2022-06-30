@@ -22,7 +22,7 @@ export default class RGBColor extends Color<RGB> {
       this,
       new HEXColor(convert.rgb.hex(this.value)),
       new HSLColor(convert.rgb.hsl(this.value)),
-      new KeywordColor(convert.rgb.keyword(this.value))
+      new KeywordColor(convert.rgb.keyword(this.value)),
     ];
   }
 
