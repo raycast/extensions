@@ -109,7 +109,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
+    "@raycast/api": "^1.37.0",
     "execa": "^6.1.0"
   },
   "devDependencies": {

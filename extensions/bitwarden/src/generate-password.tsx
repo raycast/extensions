@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Action, Form, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
+import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
 import { useOneTimePasswordHistoryWarning, usePasswordGenerator } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
@@ -10,7 +10,7 @@ import {
   PasswordType,
 } from "./types";
 import { TroubleshootingGuide } from "./components";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -29,6 +29,16 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   useOneTimePasswordHistoryWarning();
 
   if (!options) return <Detail isLoading />;
+
+  const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
+
+  const handleFieldChange = <O extends keyof PassGenOptions>(field: O) => {
+    return async (value: PassGenOptions[O]) => {
+      setOption(field, value);
+    };
+  };
+
+  const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";
 
   return (
     <Form
@@ -66,48 +76,6 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
       <Form.Description title="🔑  Password" text={password ?? "Generating..."} />
       <FormSpace />
       <Form.Separator />
-      <OptionForm options={options} onOptionChange={setOption} />
-    </Form>
-  );
-}
-
-type OptionFormProps = {
-  options: PassGenOptions;
-  onOptionChange: ReturnType<typeof usePasswordGenerator>["setOption"];
-};
-
-function OptionForm({ options, onOptionChange: saveOption }: OptionFormProps) {
-  const [formOptions, setFormOptions] = useState(options);
-  const validationToastRef = useRef<Toast>();
-
-  const updateFormOptions = <O extends keyof PassGenOptions>(option: O, value: PassGenOptions[O]) => {
-    const newFormOptions = { ...formOptions, [option]: value };
-    setFormOptions(newFormOptions);
-  };
-
-  const handlePasswordTypeChange = (type: string) => {
-    const isPassphrase = type === "passphrase";
-    updateFormOptions("passphrase", isPassphrase);
-    saveOption("passphrase", isPassphrase);
-  };
-
-  const handleFieldChange = <O extends keyof PassGenOptions>(field: O, errorMessage?: string) => {
-    return async (value: PassGenOptions[O]) => {
-      updateFormOptions(field, value);
-
-      if (isValidFieldValue(field, value)) {
-        validationToastRef.current?.hide();
-        saveOption(field, value);
-      } else if (errorMessage) {
-        validationToastRef.current = await showToast(Toast.Style.Failure, errorMessage);
-      }
-    };
-  };
-
-  const passwordType: PasswordType = formOptions?.passphrase ? "passphrase" : "password";
-
-  return (
-    <>
       <Form.Dropdown id="type" title="Type" value={passwordType} onChange={handlePasswordTypeChange} autoFocus>
         {Object.keys(PASSWORD_OPTIONS_MAP).map((key) => (
           <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
@@ -119,12 +87,60 @@ function OptionForm({ options, onOptionChange: saveOption }: OptionFormProps) {
             key={optionType}
             option={optionType}
             field={optionField}
-            currentOptions={formOptions}
-            handleFieldChange={handleFieldChange(optionType, optionField.errorMessage)}
+            currentOptions={options}
+            errorMessage={optionField.errorMessage}
+            onChange={handleFieldChange(optionType)}
           />
         )
       )}
-    </>
+    </Form>
+  );
+}
+
+type OptionFieldProps = {
+  field: PasswordOptionField;
+  option: keyof PassGenOptions;
+  currentOptions: PassGenOptions | undefined;
+  onChange: (value: PassGenOptions[keyof PassGenOptions]) => Promise<void>;
+  errorMessage?: string;
+};
+
+function OptionField({ option, currentOptions, onChange: handleChange, errorMessage, field }: OptionFieldProps) {
+  const { hint = "", label, type } = field;
+  const [error, setError] = useState<string>();
+
+  const handleTextFieldChange = (value: string) => {
+    if (isValidFieldValue(option, value)) {
+      handleChange(value);
+      setError(undefined);
+    } else {
+      setError(errorMessage);
+    }
+  };
+
+  if (type === "boolean") {
+    return (
+      <Form.Checkbox
+        key={option}
+        id={option}
+        title={label}
+        label={hint}
+        defaultValue={Boolean(currentOptions?.[option])}
+        onChange={handleChange}
+      />
+    );
+  }
+
+  return (
+    <Form.TextField
+      key={option}
+      id={option}
+      title={label}
+      placeholder={hint}
+      defaultValue={String(currentOptions?.[option] ?? "")}
+      onChange={handleTextFieldChange}
+      error={error}
+    />
   );
 }
 
@@ -139,41 +155,6 @@ function isValidFieldValue<O extends keyof PassGenOptions>(field: O, value: Pass
   if (field === "separator") return (value as string).length === 1;
   if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
   return true;
-}
-
-type OptionFieldProps = {
-  field: PasswordOptionField;
-  option: keyof PassGenOptions;
-  currentOptions: PassGenOptions | undefined;
-  handleFieldChange: (value: PassGenOptions[keyof PassGenOptions]) => Promise<void>;
-};
-
-function OptionField({ option, currentOptions, handleFieldChange, field }: OptionFieldProps) {
-  const { hint = "", label, type } = field;
-
-  if (type === "boolean") {
-    return (
-      <Form.Checkbox
-        key={option}
-        id={option}
-        title={label}
-        label={hint}
-        value={Boolean(currentOptions?.[option])}
-        onChange={handleFieldChange}
-      />
-    );
-  }
-
-  return (
-    <Form.TextField
-      key={option}
-      id={option}
-      title={label}
-      placeholder={hint}
-      value={String(currentOptions?.[option] ?? "")}
-      onChange={handleFieldChange}
-    />
-  );
 }
 
 export default GeneratePassword;
