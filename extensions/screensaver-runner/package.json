@@ -14,15 +14,15 @@
     {
       "name": "screensaver",
       "title": "Run Screensaver",
-      "subtitle": "Easy way to run screensaver",
-      "description": "Run the mac's screensaver",
+      "subtitle": "Screensaver Runner",
+      "description": "Run the Mac's screensaver",
       "mode": "no-view"
     },
     {
       "name": "screensaver-mute",
       "title": "Run Screensaver and Mute",
-      "subtitle": "Easy way to run screensaver",
-      "description": "Run the mac's screensaver and mute the system",
+      "subtitle": "Screensaver Runner",
+      "description": "Run the Mac's screensaver and mute the system",
       "mode": "no-view"
     }
   ],
