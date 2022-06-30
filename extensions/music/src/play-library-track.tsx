@@ -56,8 +56,8 @@ export default function PlayLibraryTrack() {
     const getArtworks = async () => {
       if (tracks !== null) {
         if (tracks.length == 0) {
-          setArtworks({}); 
-          return; 
+          setArtworks({});
+          return;
         }
         const ids = tracks.map((track) => track.id);
         try {

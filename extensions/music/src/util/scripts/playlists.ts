@@ -7,7 +7,7 @@ import { getViewLayout, getImageSize } from "../listorgrid";
 import { parseImageStream } from "../artwork";
 
 const layout = getViewLayout();
-const imageSize = getImageSize(); 
+const imageSize = getImageSize();
 
 const outputQuery = createQueryString({
   id: "pId",
@@ -65,7 +65,7 @@ export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =
 
 export const getArtworkByIds = async (ids: string[]) => {
   const result: any = {};
-  const size = (layout === "list" || ids.length > 10) ? imageSize : undefined;
+  const size = layout === "list" || ids.length > 10 ? imageSize : undefined;
   const promises = ids.map(async (id) => {
     const data = await runAppleScript(`
       tell application "Music"

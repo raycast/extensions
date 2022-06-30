@@ -3,7 +3,7 @@ import { runAppleScript } from "run-applescript";
 import { getViewLayout, getImageSize } from "../listorgrid";
 import { parseImageStream } from "../artwork";
 
-const layout = getViewLayout(); 
+const layout = getViewLayout();
 const imageSize = getImageSize();
 
 export const search = (search: string) => {
@@ -42,7 +42,7 @@ export const playById = (id: string) =>
 
 export const getArtworkByIds = async (ids: string[]) => {
   const result: any = {};
-  const size = (layout === "list" || ids.length > 10) ? imageSize : undefined;
+  const size = layout === "list" || ids.length > 10 ? imageSize : undefined;
   const promises = ids.map(async (id) => {
     const data = await runAppleScript(`
       tell application "Music"
