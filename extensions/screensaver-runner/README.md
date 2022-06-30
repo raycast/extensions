@@ -1,6 +1,6 @@
 # Screensaver Runner
 
-Run the screensaver set in your mac preferences
+Run your Mac's screensaver from Raycast.
 
 ## Run Screensaver
 
