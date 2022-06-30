@@ -1,6 +1,6 @@
 # Simon Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2022-06-30
 
 - Add sounds with a preference to disable them
 - Add short delays between rounds and on game start
