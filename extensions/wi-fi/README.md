@@ -2,4 +2,4 @@
 
 Connect Wi-Fi via Raycast.
 
-**Note:** This extension can now only connect to Wi-Fi with a password
+**Note**: This extension now does not support disconnecting Wi-Fi.
