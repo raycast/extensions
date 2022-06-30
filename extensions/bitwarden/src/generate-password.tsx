@@ -33,7 +33,7 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
 
   const handleFieldChange = <O extends keyof PassGenOptions>(field: O) => {
-    return async (value: PassGenOptions[O]) => {
+    return (value: PassGenOptions[O]) => {
       setOption(field, value);
     };
   };
@@ -82,14 +82,14 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
         ))}
       </Form.Dropdown>
       {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
-        ([option, optionField]: PasswordOptionsToFieldEntries) => (
+        ([optionType, optionField]: PasswordOptionsToFieldEntries) => (
           <OptionField
-            key={option}
-            option={option}
+            key={optionType}
+            option={optionType}
             field={optionField}
-            currentOptions={options}
+            defaultValue={options?.[optionType]}
             errorMessage={optionField.errorMessage}
-            onChange={handleFieldChange(option)}
+            onChange={handleFieldChange(optionType)}
           />
         )
       )}
@@ -100,12 +100,12 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
 type OptionFieldProps = {
   field: PasswordOptionField;
   option: keyof PassGenOptions;
-  currentOptions: PassGenOptions | undefined;
-  onChange: (value: PassGenOptions[keyof PassGenOptions]) => Promise<void>;
+  defaultValue: PassGenOptions[keyof PassGenOptions];
+  onChange: (value: PassGenOptions[keyof PassGenOptions]) => void;
   errorMessage?: string;
 };
 
-function OptionField({ option, currentOptions, onChange: handleChange, errorMessage, field }: OptionFieldProps) {
+function OptionField({ option, defaultValue = "", onChange: handleChange, errorMessage, field }: OptionFieldProps) {
   const { hint = "", label, type } = field;
   const [error, setError] = useState<string>();
 
@@ -125,7 +125,7 @@ function OptionField({ option, currentOptions, onChange: handleChange, errorMess
         id={option}
         title={label}
         label={hint}
-        defaultValue={Boolean(currentOptions?.[option])}
+        defaultValue={Boolean(defaultValue)}
         onChange={handleChange}
       />
     );
@@ -137,7 +137,7 @@ function OptionField({ option, currentOptions, onChange: handleChange, errorMess
       id={option}
       title={label}
       placeholder={hint}
-      defaultValue={String(currentOptions?.[option] ?? "")}
+      defaultValue={String(defaultValue)}
       onChange={handleTextFieldChange}
       error={error}
     />
