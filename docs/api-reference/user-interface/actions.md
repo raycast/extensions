@@ -381,7 +381,7 @@ export default function Command() {
     <List>
       <List.Item
         title="Preview me"
-        quicklook={{ quickLook: "~/Downloads/Raycast.dmg", name: "Some file" }}
+        quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
         actions={
           <ActionPanel>
             <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
