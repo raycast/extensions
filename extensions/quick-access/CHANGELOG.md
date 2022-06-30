@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [Add file preview] - {PR_MERGE_DATE}
+## [Add file preview] - 2022-06-30
 
 - Add file preview (CMD+Y)
 
