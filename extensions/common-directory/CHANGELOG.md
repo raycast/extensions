@@ -1,6 +1,6 @@
 # Common Directory Changelog
 
-## [Add text field validation] - {PR_MERGE_DATE}
+## [Add text field validation] - 2022-06-30
 
 - Add text field validation
 
