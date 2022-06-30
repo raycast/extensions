@@ -97,6 +97,7 @@ export default function SearchPinnedDirectories() {
                         isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }
                       }
                       title={fileValue.name}
+                      quickLook={{ path: fileValue.path, name: fileValue.name }}
                       detail={<ItemDetail isDetailLoading={isDetailLoading} fileContentInfo={fileContentInfo} />}
                       actions={
                         <ActionPanel>

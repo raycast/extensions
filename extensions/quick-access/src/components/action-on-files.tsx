@@ -58,6 +58,7 @@ export function ActionsOnFile(props: {
           path={path}
           onShow={async () => await upRank(index, setRefresh)}
         />
+        <Action.ToggleQuickLook title={"Quick Look"} shortcut={{ modifiers: ["cmd"], key: "y" }} />
       </ActionPanel.Section>
       {!isTopFolder && (
         <Action
