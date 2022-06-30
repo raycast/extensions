@@ -1,6 +1,6 @@
 # Google Drive Changelog
 
-# [Support QuickLook preview] - {PR_MERGE_DATE}
+# [Support QuickLook preview] - 2022-06-30
 
 - Added support to quickly preview the files with the help of newly introduced `Action.ToggleQuickLook` API.
 
