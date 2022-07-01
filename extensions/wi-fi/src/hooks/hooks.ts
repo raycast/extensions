@@ -3,7 +3,7 @@ import wifi, { WiFiNetwork } from "node-wifi";
 import { LocalStorage } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPassword } from "../types/types";
-import { uniqueWifiNetWork } from "../utils/common-utils";
+import { getCurWifiStatus, uniqueWifiNetWork } from "../utils/common-utils";
 
 wifi.init({
   iface: null,
@@ -35,7 +35,9 @@ export const getWifiList = (refresh: number) => {
     } else {
       const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
       allWifiList = uniqueWifiNetWork(_allWifiList);
-      await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
+      if (allWifiList.length > 0) {
+        await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
+      }
     }
 
     const _wifiList: WiFiNetwork[] = [];
@@ -73,7 +75,9 @@ export const getWifiList = (refresh: number) => {
     setWifiList(__wifiList);
     setPublicWifi(_allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
     setLoading(false);
-    await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
+    if (_allWifiList.length > 0) {
+      await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
+    }
   }, [refresh]);
 
   useEffect(() => {
@@ -87,5 +91,22 @@ export const getWifiList = (refresh: number) => {
     wifiList: wifiList,
     curWifi: curWifi,
     loading: loading,
+  };
+};
+
+export const getWifiStatus = () => {
+  const [wifiStatus, setWifiStatus] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    const _wifiStatus = await getCurWifiStatus();
+    setWifiStatus(_wifiStatus);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return {
+    wifiStatus: wifiStatus,
   };
 };

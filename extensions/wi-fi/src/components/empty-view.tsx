@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 
-export function EmptyView(props: { title: string }) {
-  const { title } = props;
-  return <List.EmptyView title={title} icon={"empty-icon.svg"} />;
+export function EmptyView(props: { title: string; description: string | undefined }) {
+  const { title, description } = props;
+  return <List.EmptyView title={title} description={description} icon={"empty-icon.svg"} />;
 }
