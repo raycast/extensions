@@ -1,5 +1,10 @@
 # Easy New File Changelog
 
+## [Add text field validation] - {PR_MERGE_DATE}
+
+- Add text field validation
+- Add template preview
+
 ## [Add new file layout options] - 2022-06-13
 
 - Add new file layout options: List or Grid
