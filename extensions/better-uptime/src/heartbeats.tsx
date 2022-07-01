@@ -1,38 +1,11 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface HeartbeatItem {
-  id: string;
-  type: string;
-  attributes: HeartbeatItemAttributes;
-}
-
-interface HeartbeatItemAttributes {
-  url: string;
-  name: string;
-  period: number;
-  grace: number;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-  status: string;
-}
-
-interface State {
-  isLoading: boolean;
-  items: HeartbeatItem[];
-  error?: any;
-}
+import { HeartbeatsState, Preferences } from "./interface";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const [state, setState] = useState<HeartbeatsState>({ items: [], isLoading: true });
   const statusMap = {
     paused: "⏸",
     pending: "🔍",

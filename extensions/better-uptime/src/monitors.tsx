@@ -1,40 +1,12 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { MonitorItem, Preferences, MonitorsState } from "./interface";
 import { ucfirst } from "./utils";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface MonitorItem {
-  id: string;
-  type: string;
-  attributes: MonitorItemAttributes;
-}
-
-interface MonitorItemAttributes {
-  url: string;
-  pronounceable_name: string;
-  monitor_type: string;
-  last_checked_at: string;
-  status: string;
-  check_frequency: number;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-}
-
-interface State {
-  isLoading: boolean;
-  items: MonitorItem[];
-  error?: any;
-}
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const [state, setState] = useState<MonitorsState>({ items: [], isLoading: true });
   const statusMap = {
     paused: "⏸",
     pending: "🔍",

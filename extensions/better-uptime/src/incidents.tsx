@@ -1,39 +1,11 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface IncidentItem {
-  id: string;
-  type: string;
-  attributes: IncidentItemAttributes;
-}
-
-interface IncidentItemAttributes {
-  name: string;
-  url: string;
-  http_method: string;
-  cause: string;
-  started_at: string;
-  screenshot_url: string;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-}
-
-interface State {
-  isLoading: boolean;
-  items: IncidentItem[];
-  error?: any;
-}
+import { IncidentItem, IncidentsState, Preferences } from "./interface";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const [state, setState] = useState<IncidentsState>({ items: [], isLoading: true });
 
   useEffect(() => {
     async function fetchIncidents() {

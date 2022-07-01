@@ -11,24 +11,48 @@
   ],
   "license": "MIT",
   "commands": [{
-    "name": "monitors",
-    "title": "Search Monitors",
-    "subtitle": "Better Uptime",
-    "description": "List all existing monitors.",
-    "mode": "view"
-  }, {
-    "name": "incidents",
-    "title": "Search Incidents",
-    "subtitle": "Better Uptime",
-    "description": "List all existing incidents.",
-    "mode": "view"
-  }, {
-    "name": "heartbeats",
-    "title": "Search Heartbeats",
-    "subtitle": "Better Uptime",
-    "description": "List all existing heartbeats.",
-    "mode": "view"
-  }],
+      "name": "monitors",
+      "title": "Show Monitors",
+      "subtitle": "Better Uptime",
+      "description": "List all existing monitors.",
+      "mode": "view"
+    },
+    {
+      "name": "add-monitor",
+      "title": "Add Monitor",
+      "subtitle": "Better Uptime",
+      "description": "Add a new monitor.",
+      "mode": "view"
+    },
+    {
+      "name": "incidents",
+      "title": "Show Incidents",
+      "subtitle": "Better Uptime",
+      "description": "List all existing incidents.",
+      "mode": "view"
+    },
+    {
+      "name": "add-incident",
+      "title": "Add Incident",
+      "subtitle": "Better Uptime",
+      "description": "Add a new incident.",
+      "mode": "view"
+    },
+    {
+      "name": "heartbeats",
+      "title": "Show Heartbeats",
+      "subtitle": "Better Uptime",
+      "description": "List all existing heartbeats.",
+      "mode": "view"
+    },
+    {
+      "name": "add-heartbeat",
+      "title": "Add Heartbeat",
+      "subtitle": "Better Uptime",
+      "description": "Add a new heartbeat.",
+      "mode": "view"
+    }
+  ],
   "preferences": [{
     "name": "apiKey",
     "type": "password",
@@ -37,7 +61,7 @@
     "description": "You can find this API Key in the Better Uptime dashboard."
   }],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.37.1",
     "axios": "^0.26.1"
   },
   "devDependencies": {
