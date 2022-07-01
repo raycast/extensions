@@ -12,17 +12,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "screen-saver",
-      "title": "Screen Saver",
-      "subtitle": "System",
-      "description": "Activate screen saver of your Mac.",
+      "name": "start-screen-saver",
+      "title": "Start Screen Saver",
+      "subtitle": "Screen Saver",
+      "description": "Start screen saver of your Mac.",
       "mode": "no-view"
     },
     {
       "name": "random-screen-saver",
       "title": "Random Screen Saver",
-      "subtitle": "System",
-      "description": "Activate random screen saver of your Mac.",
+      "subtitle": "Screen Saver",
+      "description": "Start random screen saver of your Mac.",
       "mode": "no-view"
     }
   ],

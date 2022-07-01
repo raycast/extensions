@@ -2,4 +2,4 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Activate screen saver of your Mac.
+- Start screen saver of your Mac.
