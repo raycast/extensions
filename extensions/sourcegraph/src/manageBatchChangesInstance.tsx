@@ -1,6 +1,6 @@
-import SelfHostedCommand from "./components/SelfHostedCommand";
+import InstanceCommand from "./components/InstanceCommand";
 import ManageBatchChanges from "./components/ManageBatchChangesCommand";
 
 export default function ManageBatchChangesSelfHosted() {
-  return <SelfHostedCommand Command={ManageBatchChanges} />;
+  return <InstanceCommand Command={ManageBatchChanges} />;
 }

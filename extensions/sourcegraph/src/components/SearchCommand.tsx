@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, Detail, Icon, Image } from "@raycast/api";
-import { useState, Fragment, useMemo } from "react";
+import React, { useState, Fragment, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
@@ -231,7 +231,7 @@ function SearchResultItem({
   // Icon to denote the type of the result
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   // Broader context about the result, usually just the repository.
-  const accessory: List.Item.Accessory = revisions
+  const accessory: List.Item.Accessory = firstRevision
     ? {
         text: `${match.repository}@${firstRevision}`,
         tooltip: `${match.repository}@${firstRevision}`,
@@ -554,7 +554,11 @@ function ResultView({
       navigationTitle={navigationTitle}
       markdown={`${markdownTitle}\n\n${markdownContent}`}
       actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
-      metadata={<Detail.Metadata>{metadata}</Detail.Metadata>}
+      metadata={
+        <Detail.Metadata>
+          <>{metadata}</>
+        </Detail.Metadata>
+      }
     ></Detail>
   );
 }

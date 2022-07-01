@@ -1,6 +1,6 @@
-import CloudCommand from "./components/CloudCommand";
+import DotComCommand from "./components/CloudCommand";
 import FindNotebooksCommand from "./components/FindNotebooksCommand";
 
 export default function FindNotebooksCloud() {
-  return <CloudCommand Command={FindNotebooksCommand} />;
+  return <DotComCommand Command={FindNotebooksCommand} />;
 }

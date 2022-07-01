@@ -3,14 +3,14 @@ import { useEffect } from "react";
 
 import checkAuthEffect from "../hooks/checkAuthEffect";
 import { bold } from "../markdown";
-import { sourcegraphSelfHosted, Sourcegraph } from "../sourcegraph";
+import { sourcegraphInstance, Sourcegraph } from "../sourcegraph";
 
 /**
- * SelfHostedCommand wraps the given command with the configuration for a self-hosted
+ * InstanceCommand wraps the given command with the configuration for a specific
  * Sourcegraph instance.
  */
-export default function SelfHostedCommand({ Command }: { Command: React.FunctionComponent<{ src: Sourcegraph }> }) {
-  const tryCloudMessage = "Alternatively, you can try the Sourcegraph Cloud version of this command first.";
+export default function InstanceCommand({ Command }: { Command: React.FunctionComponent<{ src: Sourcegraph }> }) {
+  const tryCloudMessage = "Alternatively, you can try the Sourcegraph.com version of this command first.";
 
   const setupGuideAction = (
     <Action.OpenInBrowser
@@ -24,7 +24,7 @@ export default function SelfHostedCommand({ Command }: { Command: React.Function
     <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
   );
 
-  const src = sourcegraphSelfHosted();
+  const src = sourcegraphInstance();
   if (!src) {
     return (
       <Detail
