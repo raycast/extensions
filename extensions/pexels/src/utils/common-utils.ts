@@ -1,32 +1,18 @@
-import { environment, getPreferenceValues, LocalStorage, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import fetch from "node-fetch";
 import path from "path";
-import Values = LocalStorage.Values;
 import Style = Toast.Style;
-
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    apikey: preferencesMap.get("apikey") as string,
-    applyTo: preferencesMap.get("applyTo") as string,
-    downloadSize: preferencesMap.get("downloadSize") as string,
-    downloadDirectory: preferencesMap.get("downloadDirectory") as string,
-    autoDownload: preferencesMap.get("autoDownload") as boolean,
-
-    //search collections
-    rememberTag: preferencesMap.get("rememberTag") as boolean,
-  };
-};
+import { Preferences } from "../types/preferences";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
 export const getDownloadDirectory = () => {
-  const directoryPreference = commonPreferences().downloadDirectory;
+  const directoryPreference = getPreferenceValues<Preferences>().downloadDirectory;
   let actualDirectory = directoryPreference;
   if (directoryPreference.startsWith("~")) {
     actualDirectory = directoryPreference.replace("~", `${homedir()}`);
@@ -71,7 +57,7 @@ export const setWallpaper = async (url: string) => {
   const toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
   const title = buildImageName(url);
 
-  const { applyTo } = commonPreferences();
+  const { applyTo } = getPreferenceValues<Preferences>();
   const selectedPath = environment.supportPath;
   const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${title}` : `${selectedPath}/${title}`;
 

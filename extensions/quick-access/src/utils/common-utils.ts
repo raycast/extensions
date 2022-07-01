@@ -1,6 +1,6 @@
 import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import { DirectoryInfo, DirectoryType, FileType } from "../types/types";
+import { DirectoryInfo, FileType } from "../types/types";
 import { imgExt } from "./constants";
 import { parse } from "path";
 import { getFinderInsertLocation } from "./applescript-utils";
@@ -51,22 +51,6 @@ export const isDirectory = (path: string) => {
     console.error(String(e));
     return false;
   }
-};
-
-export const isDirectoryOrFile = (path: string) => {
-  try {
-    const stat = fse.lstatSync(path);
-    if (stat.isDirectory()) {
-      return DirectoryType.DIRECTORY;
-    }
-    if (stat.isFile()) {
-      return DirectoryType.FILE;
-    }
-  } catch (e) {
-    console.error(String(e));
-    return DirectoryType.FILE;
-  }
-  return DirectoryType.FILE;
 };
 
 export const isDirectoryOrFileForFile = (path: string) => {

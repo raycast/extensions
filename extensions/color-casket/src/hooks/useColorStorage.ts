@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
 import { createColor } from "../typeUtilities";
@@ -50,16 +50,6 @@ export const storageInitialState = {
   collection: [],
 };
 
-const queue = new Set<Promise<void>>();
-
-function queueAdd(callback: () => Promise<void>) {
-  const engine = async () => {
-    await Promise.all(queue);
-    await callback();
-  };
-  queue.add(engine());
-}
-
 async function rawList(key: string): Promise<SerializedColor[]> {
   return JSON.parse((await LocalStorage.getItem(key)) || "[]");
 }
@@ -70,13 +60,11 @@ async function items(key: string): Promise<SavedColor[]> {
   return items.map((color: SerializedColor) => ({ instance: createColor(color.value), savedAt: color.savedAt }));
 }
 
-async function update(key: string, items: SavedColor[]) {
-  queueAdd(async () => {
-    const newLocal = JSON.stringify(
-      items.map((color) => ({ value: color.instance.stringValue(), savedAt: color.savedAt }))
-    );
-    await LocalStorage.setItem(key, newLocal);
-  });
+function update(key: string, items: SavedColor[]) {
+  LocalStorage.setItem(
+    key,
+    JSON.stringify(items.map((color) => ({ value: color.instance.stringValue(), savedAt: color.savedAt })))
+  );
 }
 
 function storageReducer(state: InitialState, action: StorageAction) {
@@ -113,14 +101,16 @@ function storageReducer(state: InitialState, action: StorageAction) {
       throw Error("Unknown action");
   }
 
-  update(action.key, newState.collection);
-
   return newState;
 }
 
 export function useColorStorage(key: StorageKeys, initialCallback?: (state: SavedColor[]) => void): Storage {
   const [state, dispatch] = useReducer(storageReducer, storageInitialState);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    update(key, state.collection);
+  }, [state.collection]);
 
   asyncEffect(items(key), (state) => {
     dispatch({ type: StorageActions.Update, key, items: state });

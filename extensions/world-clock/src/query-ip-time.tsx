@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useState } from "react";
 import { getIpTime } from "./hooks/hooks";
-import { isEmpty } from "./utils/common-utils";
+import { buildDayAndNightIcon, isEmpty } from "./utils/common-utils";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { ListEmptyView } from "./components/list-empty-view";
 
@@ -33,7 +33,12 @@ export default function QueryIpTime() {
         return (
           <List.Item
             key={index}
-            icon={{ source: { light: "timezone.png", dark: "timezone@dark.png" } }}
+            icon={{
+              source: {
+                light: buildDayAndNightIcon(timeInfo[0][1], true),
+                dark: buildDayAndNightIcon(timeInfo[0][1], false),
+              },
+            }}
             title={value[0]}
             subtitle={value[1]}
             actions={

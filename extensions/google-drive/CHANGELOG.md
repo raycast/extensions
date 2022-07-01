@@ -1,5 +1,9 @@
 # Google Drive Changelog
 
+# [Support QuickLook preview] - 2022-06-30
+
+- Added support to quickly preview the files with the help of newly introduced `Action.ToggleQuickLook` API.
+
 ## [Fix retrieving stats of a non-existing files] - 2022-05-31
 
 - Fixed [an issue](https://github.com/raycast/extensions/issues/1855) due to which the extension was crashing while retrieving the stats of a file that doesn't exists anymore.

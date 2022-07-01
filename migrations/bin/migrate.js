@@ -57,8 +57,10 @@ const migrationsToApply = migrations.filter((x) =>
   semver.gt(x, currentVersion.version)
 );
 
-const realMigrations = migrationsToApply.filter((x) =>
-  fs.existsSync(path.join(migrationToolFolder, x, "index.ts"))
+const realMigrations = migrationsToApply.filter(
+  (x) =>
+    fs.existsSync(path.join(migrationToolFolder, x, "index.ts")) ||
+    fs.existsSync(path.join(migrationToolFolder, x, "command.sh"))
 );
 
 if (migrationsToApply.length === 0) {
@@ -114,21 +116,46 @@ new Promise((resolve, reject) => {
         console.log(`🚀 Applying the migration to ${migration}...`);
         console.log("");
 
-        return new Promise((resolve, reject) => {
-          let stream = exec(
-            `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
-            { cwd: migrationToolFolder },
-            (err, stdout, stderr) => {
-              if (err) {
-                reject(stderr);
-              } else {
-                resolve();
-              }
-            }
-          );
+        return Promise.all([
+          fs.existsSync(path.join(migrationToolFolder, migration, "index.ts"))
+            ? new Promise((resolve, reject) => {
+                let stream = exec(
+                  `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
+                  { cwd: migrationToolFolder },
+                  (err, stdout, stderr) => {
+                    if (err) {
+                      reject(stderr);
+                    } else {
+                      resolve();
+                    }
+                  }
+                );
 
-          stream.stdout.pipe(process.stdout);
-        });
+                stream.stdout.pipe(process.stdout);
+              })
+            : Promise.resolve(),
+          fs.existsSync(path.join(migrationToolFolder, migration, "command.sh"))
+            ? new Promise((resolve, reject) => {
+                let stream = exec(
+                  `bash "${path.join(
+                    migrationToolFolder,
+                    migration,
+                    "command.sh"
+                  )}"`,
+                  { cwd: extensionPath },
+                  (err, stdout, stderr) => {
+                    if (err) {
+                      reject(stderr);
+                    } else {
+                      resolve();
+                    }
+                  }
+                );
+
+                stream.stdout.pipe(process.stdout);
+              })
+            : Promise.resolve(),
+        ]);
       });
     }, Promise.resolve());
   })

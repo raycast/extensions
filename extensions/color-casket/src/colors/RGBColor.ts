@@ -9,6 +9,8 @@ import { isValidRGB } from "../validators";
 import { parseValues } from "../typeUtilities";
 
 export default class RGBColor extends Color<RGB> {
+  public type = "RGB";
+
   public static validator = isValidRGB;
 
   public static prepareValue = <RGB>(value: string): RGB => parseValues(value) as unknown as RGB;

@@ -114,39 +114,26 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Adding Screenshots
 
-- To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
+In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
 
-![Extension folder structure with a metadata folder and screenshots](../.gitbook/assets/folder-structure.png)
+#### How to use it?
+1) Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
+2) Open the command
+3) Press the hotkey, remember to tick `Save to Metadata`
 
-### Specifications
+{% hint style="info" %}
+This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
 
-| Screenshot size                | Aspect ratio | Format | Dark mode support |
-| ------------------------------ | ------------ | ------ | ----------------- |
-| 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
-
-### Guides and Template
-
-- This [screenshot guide and template](https://www.figma.com/community/file/1083160585697279319/Raycast---Extension-Screenshot-Template) can help you make and export a proper screenshot
-- If you feel like you can’t create screenshots and meet the specifications, ask [community](https://raycast.com/community) for help (#extensions channel)
-
-![Perfectly center the Raycast window in the required screenshot dimensions](../.gitbook/assets/screenshot-guide.png)
+You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
+{% endhint %}
 
 ### Do's & Dont's
 
-- ✅ Center the main app window in the screenshot, making sure there is equal padding on either sides of the app and your extension
 - ✅ Choose a background with good contrast, that makes it clear and easy to see the app and extension you’ve made
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
-- ❌ Make sure all other app windows are hidden behind Raycast before taking a screenshot
-- ❌ Do not screenshot the window without a background (⌘⇧4 + space bar) – you will lose the vibrancy of the Raycast app window and decrease the quality of your screenshot
-- ❌ Transparent images are not accepted – all screenshots must have a background
-- ❌ Do not scale your screenshot up from its original size – this will lead to blurry pixels and a lower quality image
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
-
-{% hint style="info" %}
-You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
-{% endhint %}
 
 ## Version History
 
