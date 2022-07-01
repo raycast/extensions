@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Edit Note Action, Clipboard Template | Version 1.6.1] - 2022-06-28
+## [Edit Note Action, Clipboard Template | Version 1.6.1] - 2022-07-01
 
 - Add `Edit Note` action to `Search Note` and `Pinned Notes` command which lets you edit a note
 - `Edit Note` action supports templates
