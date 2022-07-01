@@ -36,14 +36,14 @@ The options for creating a new Cache.
 
 ### Methods
 
-| Method                                                                   |
-| :----------------------------------------------------------------------- |
-| <code>get(key: string): string \| undefined</code>                       |
-| <code>has(key: string): boolean</code>                                   |
-| <code>set(key: string, data: string)</code>                              |
-| <code>remove(key: string): boolean</code>                                |
-| <code>clear(options = { notifySubscribers: true })</code>                |
-| <code>subscribe(subscriber: Cache.Subscriber): Cache.Subscription</code> |
+| Method                                                                                 |
+| :------------------------------------------------------------------------------------- |
+| <code>[get(key: string): string \| undefined](#get)</code>                             |
+| <code>[has(key: string): boolean](#has)</code>                                         |
+| <code>[set(key: string, data: string)](#set)</code>                                    |
+| <code>[remove(key: string): boolean](#remove)</code>                                   |
+| <code>[clear(options = { notifySubscribers: true })](#clear)</code>                    |
+| <code>[subscribe(subscriber: Cache.Subscriber): Cache.Subscription](#subscribe)</code> |
 
 ### get
 
