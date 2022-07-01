@@ -4,7 +4,7 @@ import {
   Color,
   Icon,
   List,
-  openExtensionPreferences,
+  openCommandPreferences,
 } from '@raycast/api'
 import { useTodos } from '@/hooks/use-todos'
 import { EmptyList } from '@/components/empty-list'
@@ -129,7 +129,7 @@ export function ToDoList() {
                   <Action
                     title="Open Extension Preferences"
                     icon={Icon.Gear}
-                    onAction={openExtensionPreferences}
+                    onAction={openCommandPreferences}
                     shortcut={{ modifiers: ['opt'], key: 'u' }}
                   />
                 </ActionPanel>

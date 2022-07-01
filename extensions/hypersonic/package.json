@@ -5,6 +5,7 @@
   "description": "Fastest Notion to-do app ever",
   "icon": "icon.png",
   "author": "reboot.studio",
+  "version": "0.0.1",
   "categories": [
     "Developer Tools",
     "Design Tools",
