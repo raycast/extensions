@@ -29,7 +29,9 @@ export default function Command(): JSX.Element {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="https://raycast.com" />
+      <Form.TextField id="summary" title="Summary" placeholder="New users can't sign up" />
+      <Form.TextField id="description" title="Description" />
+      <Form.TextField id="requester_email" title="Requester Email" placeholder="john@example.com" />
     </Form>
   );
 }
