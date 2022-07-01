@@ -1,6 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
 import axios from "axios";
-import { useRef, useState } from "react";
 import { Preferences } from "./interface";
 
 export default function Command(): JSX.Element {
@@ -46,11 +45,7 @@ export default function Command(): JSX.Element {
       }
     >
       <Form.TextField id="url" title="URL" placeholder="https://raycast.com" />
-      <Form.TextField
-        id="friendly_name"
-        placeholder="Optional, leave blank for using the url as name"
-        title="Friendly Name"
-      />
+      <Form.TextField id="friendly_name" title="Friendly Name" placeholder="Friendly name" />
     </Form>
   );
 }

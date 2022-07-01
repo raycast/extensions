@@ -1,6 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
 import axios from "axios";
-import { useRef, useState } from "react";
 import { Preferences } from "./interface";
 
 export default function Command(): JSX.Element {
