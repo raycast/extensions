@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Grid, List } from "@raycast/api";
 
 export const competitions = [
   {
@@ -16,26 +16,30 @@ export const competitions = [
 ];
 
 export default function CompetitionDropdown(props: {
+  type?: string;
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
+  const DropdownComponent =
+    props.type === "grid" ? Grid.Dropdown : List.Dropdown;
+
   return (
-    <List.Dropdown
+    <DropdownComponent
       tooltip="Filter by Competition"
       value={props.selected}
       onChange={props.onSelect}
     >
-      <List.Dropdown.Section>
+      <DropdownComponent.Section>
         {competitions.map((competition) => {
           return (
-            <List.Dropdown.Item
+            <DropdownComponent.Item
               key={competition.value}
               value={competition.value}
               title={competition.title}
             />
           );
         })}
-      </List.Dropdown.Section>
-    </List.Dropdown>
+      </DropdownComponent.Section>
+    </DropdownComponent>
   );
 }

@@ -2,6 +2,7 @@ import { showToast, Toast, environment } from "@raycast/api";
 import fs from "fs";
 
 import { Note } from "./interfaces";
+import { getNoteFileContent } from "./utils";
 
 interface DataProps {
   vaultPath: string;
@@ -29,6 +30,15 @@ function getInfo(vaultPath: string) {
 
 export function getPinnedNotes(path: string): Note[] {
   const info = getInfo(path);
+
+  // Make sure old pinned notes conform to newest interface
+  info.pinnedNotes.forEach((note) => {
+    if (note.content == undefined || note.content == "") {
+      note.content = getNoteFileContent(note.path);
+      unpinNote(note, path);
+      pinNote(note, path);
+    }
+  });
   return info.pinnedNotes;
 }
 

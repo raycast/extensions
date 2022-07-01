@@ -1,6 +1,17 @@
 import client, { Product } from "./client";
-import { GraphqlData, LoginResult, Manhour, Project, SearchResult, Space, Sprint, Task, User } from "./type";
-import { clearLocalStorage, preferences, showToast, ToastStyle } from "@raycast/api";
+import {
+  GraphqlData,
+  LoginResult,
+  Manhour,
+  Preferences,
+  Project,
+  SearchResult,
+  Space,
+  Sprint,
+  Task,
+  User,
+} from "./type";
+import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/api";
 import moment from "moment";
 import axios from "axios";
 
@@ -25,7 +36,7 @@ export enum ManhourFormat {
 export const MANHOUR_BASE = 100000;
 
 export function manhourMode(): string {
-  return (preferences.manhourMode.value ? preferences.manhourMode.value : preferences.manhourMode.default) as string;
+  return getPreferenceValues<Preferences>().manhourMode;
 }
 
 export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }> {
@@ -186,7 +197,7 @@ export async function search(product: Product, q: string, types: SearchType[], s
   };
   try {
     const resp = await client.get(product, "search", params);
-    showToast(ToastStyle.Success, `Took ${resp.took_time}ms`);
+    showToast(Toast.Style.Success, `Took ${resp.took_time}ms`);
     return Promise.resolve(resp as SearchResult);
   } catch (err) {
     return Promise.reject(new Error(`search failed: ${(err as Error).message}`));
@@ -360,14 +371,14 @@ export async function deleteManhour(uuid: string): Promise<void> {
 
 export async function login(data: { email: string; password: string }): Promise<LoginResult> {
   try {
-    const resp = await axios.post(`${preferences.url.value}/project/api/project/auth/login`, data, {
+    const resp = await axios.post(`${getPreferenceValues<Preferences>().url}/project/api/project/auth/login`, data, {
       headers: {
         "Content-Type": "application/json",
       },
     });
     return Promise.resolve(resp.data as LoginResult);
   } catch (err) {
-    await clearLocalStorage();
+    await LocalStorage.clear();
     return Promise.reject(new Error(`login failed: ${(err as Error).message}`));
   }
 }

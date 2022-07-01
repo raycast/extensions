@@ -1,6 +1,5 @@
 import axios from "axios";
-import { LocalStorage } from "@raycast/api";
-import { Clipboard, showHUD } from "@raycast/api";
+import { LocalStorage, popToRoot, Clipboard, showHUD } from "@raycast/api";
 import path from "path";
 import fs from "fs/promises";
 
@@ -162,6 +161,28 @@ export const openEmail = async (id: string) => {
     await fs.writeFile(`${dir}/assets/email.html`, data.html[0]);
 
     return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteMessage = async (id: string) => {
+  // get all the items from local storage
+  const storage = await LocalStorage.allItems();
+  // parse storage
+  const account = JSON.parse(storage.account);
+
+  const { token } = account;
+
+  try {
+    await axios.delete(`https://api.mail.tm/messages/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    showHUD("✅ Message deleted successfully");
+    popToRoot();
   } catch (error) {
     console.log(error);
   }
