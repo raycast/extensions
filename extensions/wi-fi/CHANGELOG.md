@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [New command: Toggle Wi-Fi] - {PR_MERGE_DATE}
+## [New command: Toggle Wi-Fi] - 2022-07-01
 
 - Add a new command Toggle Wi-Fi: Toggle Wi-Fi on and off.
 
