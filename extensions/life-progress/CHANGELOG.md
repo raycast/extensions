@@ -1,6 +1,6 @@
 # Life Progress Changelog
 
-## [Add text field validation] - {PR_MERGE_DATE}
+## [Add text field validation] - 2022-07-01
 
 - Add text field validation
 
