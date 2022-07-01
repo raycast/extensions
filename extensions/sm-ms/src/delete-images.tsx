@@ -9,6 +9,7 @@ import { isEmpty } from "./utils/common-utils";
 
 export default function DeleteImages() {
   const [hash, setHash] = useState<string>("");
+  const [hashError, setHashError] = useState<string | undefined>();
   const [deletedImage, setDeletedImage] = useState<string[]>([]);
 
   return (
@@ -21,7 +22,7 @@ export default function DeleteImages() {
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => {
               if (isEmpty(hash)) {
-                showToast(Style.Failure, "Hash cannot be empty!").then();
+                setHashError("The field should't be empty!");
                 return;
               }
               alertDialog(
@@ -47,7 +48,19 @@ export default function DeleteImages() {
         </ActionPanel>
       }
     >
-      <Form.TextField id={"Hash"} title={"Hash"} value={hash} onChange={setHash} placeholder={"Image hash"} />
+      <Form.TextField
+        id={"Hash"}
+        title={"Hash"}
+        value={hash}
+        error={hashError}
+        onChange={(newValue) => {
+          setHash(newValue);
+          if (newValue.length > 0) {
+            setHashError(undefined);
+          }
+        }}
+        placeholder={"Image hash"}
+      />
 
       {deletedImage.map((value, index, array) => {
         return <Form.Description title={array.length - index + ""} text={value} />;

@@ -5,6 +5,7 @@ import { Clipboard, showToast, Toast } from "@raycast/api";
 import { isEmpty, isUrl, titleCase } from "./common-utils";
 import { secretToken } from "../hooks/hooks";
 import fse from "fs-extra";
+import { Dispatch, SetStateAction } from "react";
 import FormData = require("form-data");
 import Style = Toast.Style;
 
@@ -30,13 +31,21 @@ export const deleteImageByHash = async (hash: string) => {
     });
 };
 
-export const uploadImage = async (imagePath: string) => {
+export const uploadImage = async (
+  imagePath: string,
+  setImagePathError: Dispatch<SetStateAction<string | undefined>>
+) => {
   const formData = new FormData();
   let imageStream;
   if (isEmpty(imagePath)) {
-    await showToast(Style.Failure, "Image path cannot be empty!");
+    setImagePathError("The field should't be empty!");
     return;
   }
+  if (!fse.existsSync(imagePath) && !isUrl(imagePath)) {
+    setImagePathError("Invalid image path!");
+    return;
+  }
+
   await showToast(Style.Animated, "Uploading image...");
   if (fse.existsSync(imagePath)) {
     //Path
@@ -44,9 +53,6 @@ export const uploadImage = async (imagePath: string) => {
   } else if (isUrl(imagePath)) {
     //URL
     imageStream = (await axios.get(imagePath, { responseType: "stream" })).data;
-  } else {
-    await showToast(Style.Failure, "Invalid image path!");
-    return;
   }
   formData.append("smfile", imageStream);
 
