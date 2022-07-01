@@ -59,10 +59,6 @@ export function buildFileName(path: string, name: string, extension: string) {
 }
 
 export const createBunchesByContent = async (title: string, tag: string, content: string, bunchesPreview: string) => {
-  if (isEmpty(title)) {
-    await showToast(Style.Failure, "Title is empty");
-    return false;
-  }
   await showToast(Style.Success, "Creating bunches...");
   const bunchFolder = await scriptToGetBunchFolder();
   const actualBunchFolder = fs.existsSync(bunchFolder) ? bunchFolder : homedir() + "/Downloads";

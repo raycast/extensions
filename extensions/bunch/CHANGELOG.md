@@ -1,5 +1,9 @@
 # Bunch Changelog
 
+## [Text field validation] - {PR_MERGE_DATE}
+
+- Add text field validation
+
 ## [Support Bunch Beta] - 2022-06-24
 
 - Support Bunch Beta
