@@ -1,6 +1,6 @@
 import convert from "color-convert";
 
-import { APPLE, KEYWORD } from "color-convert/conversions";
+import { KEYWORD } from "color-convert/conversions";
 import Color from "./Color";
 import { HEXColor, RGBColor, HSLColor } from "./index";
 import { Keyboard } from "@raycast/api";
