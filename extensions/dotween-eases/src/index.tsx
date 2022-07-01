@@ -49,7 +49,7 @@ export default function Command() {
         return (
           <Grid.Item
             key={ease}
-            content={{ source: `${ease}.gif`, mask: Image.Mask.RoundedRectangle }}
+            content={{ source: `${join("grid", ease)}.gif` }}
             title={ease}
             actions={
               <ActionPanel>
@@ -58,7 +58,7 @@ export default function Command() {
                   title="View"
                   target={
                     <Detail
-                      markdown={`![](file://${join(environment.assetsPath, ease)}.gif)`}
+                      markdown={`![](file://${join(environment.assetsPath, "full", ease)}.gif)`}
                       actions={<ActionPanel>{copyAction}</ActionPanel>}
                     />
                   }
