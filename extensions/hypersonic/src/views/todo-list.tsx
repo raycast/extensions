@@ -130,7 +130,7 @@ export function ToDoList() {
                     title="Open Extension Preferences"
                     icon={Icon.Gear}
                     onAction={openCommandPreferences}
-                    shortcut={{ modifiers: ['opt'], key: 'u' }}
+                    shortcut={{ modifiers: ['cmd'], key: ',' }}
                   />
                 </ActionPanel>
               }

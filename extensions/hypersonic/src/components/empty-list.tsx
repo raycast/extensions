@@ -111,7 +111,7 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
             title="Open Extension Preferences"
             icon={Icon.Gear}
             onAction={openCommandPreferences}
-            shortcut={{ modifiers: ['opt'], key: 'u' }}
+            shortcut={{ modifiers: ['cmd'], key: ',' }}
           />
           <OpenNotionAction notionDbUrl={notionDbUrl} />
         </ActionPanel>
