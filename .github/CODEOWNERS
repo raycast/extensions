@@ -352,6 +352,7 @@
 /extensions/rsync-commands                           @maxfahl
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann
+/extensions/screen-saver                             @koinzhang
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
 /extensions/search-composer-packagist                @danyelkeddah
