@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
@@ -43,11 +43,6 @@ export default function Command() {
       </List>
     );
   } else {
-    showToast({
-      title: "Path Error",
-      message: "Something went wrong with your vault path. There are no paths to select from.",
-      style: Toast.Style.Failure,
-    });
     return <List />;
   }
 }

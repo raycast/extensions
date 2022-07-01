@@ -2,14 +2,14 @@ import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
-import { SearchNotePreferences, Note } from "./interfaces";
+import { SearchNotePreferences, Note, Vault } from "./interfaces";
 import { getNoteFileContent } from "./utils";
 
 class NoteLoader {
   vaultPath: string;
 
-  constructor(vaultPath: string) {
-    this.vaultPath = vaultPath;
+  constructor(vault: Vault) {
+    this.vaultPath = vault.path;
   }
 
   loadNotes() {

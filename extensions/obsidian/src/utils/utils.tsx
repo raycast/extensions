@@ -1,4 +1,4 @@
-import { getPreferenceValues, Clipboard } from "@raycast/api";
+import { getPreferenceValues, Clipboard, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 
 import fs from "fs";
 import fsPath from "path";
@@ -15,18 +15,11 @@ import {
   Vault,
 } from "../utils/interfaces";
 
-import { BYTES_PER_MEGABYTE } from "./constants";
+import { BYTES_PER_KILOBYTE } from "./constants";
+import { isNotePinned, unpinNote } from "./PinNoteUtils";
 
-export function getNoteFileContent(path: string) {
+function filterContent(content: string) {
   const pref: SearchNotePreferences = getPreferenceValues();
-
-  let content = "";
-
-  try {
-    content = fs.readFileSync(path, "utf8") as string;
-  } catch {
-    content = "Couldn't read file. Did you move, delete or rename the file?";
-  }
 
   if (pref.removeYAML) {
     const yamlHeader = content.match(/---(.|\n)*?---/gm);
@@ -44,16 +37,26 @@ export function getNoteFileContent(path: string) {
       content = content.replace(match[0], "");
     }
   }
-
   if (pref.removeLinks) {
     content = content.replaceAll("![[", "");
     content = content.replaceAll("[[", "");
     content = content.replaceAll("]]", "");
   }
+  return content;
+}
 
-  // console.log("Got note content for note: ", path);
-  // const memory = process.memoryUsage();
-  // console.log((memory.heapUsed / 1024 / 1024 / 1024).toFixed(4), "GB");
+export function getNoteFileContent(path: string, filter = true) {
+  let content = "";
+
+  try {
+    content = fs.readFileSync(path, "utf8") as string;
+  } catch {
+    content = "Couldn't read file. Did you move, delete or rename the file?";
+  }
+
+  if (filter) {
+    content = filterContent(content);
+  }
 
   return content;
 }
@@ -140,6 +143,28 @@ export function useObsidianVaults(): ObsidianVaultsState {
   return state;
 }
 
+export async function deleteNote(note: Note, vault: Vault) {
+  const options = {
+    title: "Delete Note",
+    message: 'Are you sure you want to delete the note: "' + note.title + '"?',
+    icon: Icon.ExclamationMark,
+  };
+  if (await confirmAlert(options)) {
+    try {
+      fs.unlinkSync(note.path);
+      if (isNotePinned(note, vault)) {
+        unpinNote(note, vault);
+      }
+      showToast({ title: "Deleted Note", style: Toast.Style.Success });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 export function filterNotes(notes: Note[], input: string, byContent: boolean) {
   if (input.length === 0) {
     return notes;
@@ -183,7 +208,7 @@ export function createdDateFor(note: Note) {
 
 export function fileSizeFor(note: Note) {
   const { size } = fs.statSync(note.path);
-  return size / BYTES_PER_MEGABYTE;
+  return size / BYTES_PER_KILOBYTE;
 }
 
 export function trimPath(path: string, maxLength: number) {
@@ -227,3 +252,32 @@ export const monthMapping: Record<number, string> = {
   10: "Nov",
   11: "Dec",
 };
+
+export async function applyTemplates(content: string) {
+  const date = new Date();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+
+  const timestamp = Date.now().toString();
+
+  content = content.replaceAll("{time}", date.toLocaleTimeString());
+  content = content.replaceAll("{date}", date.toLocaleDateString());
+
+  content = content.replaceAll("{year}", date.getFullYear().toString());
+  content = content.replaceAll("{month}", monthMapping[date.getMonth()]);
+  content = content.replaceAll("{day}", dayMapping[date.getDay()]);
+
+  content = content.replaceAll("{hour}", hours);
+  content = content.replaceAll("{minute}", minutes);
+  content = content.replaceAll("{second}", seconds);
+  content = content.replaceAll("{millisecond}", date.getMilliseconds().toString());
+
+  content = content.replaceAll("{timestamp}", timestamp);
+  content = content.replaceAll("{zettelkastenID}", timestamp);
+
+  const clipboard = await getClipboardContent();
+  content = content.replaceAll("{clipboard}", clipboard);
+
+  return content;
+}

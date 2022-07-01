@@ -1,10 +1,10 @@
 import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard } from "@raycast/api";
 
 import NoteCreator from "../utils/NoteCreator";
-import { NoteFormPreferences, FormValue } from "../utils/interfaces";
+import { NoteFormPreferences, FormValue, Vault } from "../utils/interfaces";
 
-export function CreateNoteForm(props: { vaultPath: string }) {
-  const vaultPath = props.vaultPath;
+export function CreateNoteForm(props: { vault: Vault }) {
+  const vault = props.vault;
   const pref: NoteFormPreferences = getPreferenceValues();
   const { pop } = useNavigation();
 
@@ -55,12 +55,12 @@ export function CreateNoteForm(props: { vaultPath: string }) {
     return "";
   }
 
-  function createNewNote(noteProps: FormValue, path: string | undefined = undefined) {
+  async function createNewNote(noteProps: FormValue, path: string | undefined = undefined) {
     if (path !== undefined) {
       noteProps.path = path;
     }
-    const nc = new NoteCreator(noteProps, vaultPath, pref);
-    const saved = nc.createNote();
+    const nc = new NoteCreator(noteProps, vault, pref);
+    const saved = await nc.createNote();
     if (saved) {
       pop();
     }
