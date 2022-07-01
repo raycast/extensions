@@ -1,14 +1,15 @@
 import { List, Grid, getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues();
-const { gridItemSize, layoutType } = preferences;
+const { gridItemSize, layoutType, playlistTracksLayout } = preferences;
 
 export type ListType = "list";
 export type GridType = "grid";
 
-type ListOrGridProps = List.Props | Grid.Props;
+type ListOrGridProps = ({ overrideLayout?: string } & List.Props) | ({ overrideLayout?: string } & Grid.Props);
 export function ListOrGrid<T>(props: ListOrGridProps, context?: T) {
-  return layoutType === "list" ? List(props, context) : Grid(props, context);
+  const layout = props.overrideLayout || layoutType;
+  return layout === "list" ? List(props, context) : Grid(props, context);
 }
 
 type ListOrGridSectionProps = List.Section.Props | Grid.Section.Props;
@@ -44,26 +45,32 @@ export const getViewLayout = (): string => {
   return layoutType;
 };
 
+export const getPlaylistTracksLayout = (): string => {
+  return playlistTracksLayout;
+};
+
 export const getGridItemSize = (): Grid.ItemSize => {
   if (gridItemSize == "small") return Grid.ItemSize.Small;
   else if (gridItemSize == "large") return Grid.ItemSize.Large;
   else return Grid.ItemSize.Medium;
 };
 
-export const getMaxNumberOfResults = (): number => {
-  if (layoutType == "list") return 20;
+export const getMaxNumberOfResults = (overrideLayout?: string): number => {
+  const layout = overrideLayout || layoutType;
+  if (layout == "list") return 100;
   if (gridItemSize == "small") return 32;
   else if (gridItemSize == "large") return 15;
   else return 25;
 };
 
-interface ImageSize {
+type ImageSize = {
   width: number;
   height: number;
-}
+};
 
-export const getImageSize = (): ImageSize => {
-  if (layoutType == "list") return { width: 32, height: 32 };
+export const getImageSize = (overrideLayout?: string): ImageSize => {
+  const layout = overrideLayout || layoutType;
+  if (layout == "list") return { width: 32, height: 32 };
   if (gridItemSize == "small") return { width: 128, height: 128 };
   else if (gridItemSize == "large") return { width: 300, height: 300 };
   else return { width: 200, height: 200 };

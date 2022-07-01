@@ -38,6 +38,58 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
     end repeat
 `;
 
+export const tracks = (id: string) => {
+  const outputQuery = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "artistName",
+    album: "albumName",
+    duration: "trackDuration",
+  });
+
+  return runScript(`
+		set output to ""
+			tell application "Music"
+				set results to tracks of first playlist of (every playlist whose id is ${id})
+				repeat with selectedTrack in results
+					set trackId to the database ID of selectedTrack
+					set trackName to the name of selectedTrack
+					set albumName to the album of selectedTrack
+					set artistName to the artist of selectedTrack
+					set trackDuration to the duration of selectedTrack
+					set output to output & ${outputQuery} & "\n"
+				end repeat
+			end tell
+		return output
+	`);
+};
+
+export const search_tracks = (id: string, search: string) => {
+  const outputQuery = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "artistName",
+    album: "albumName",
+    duration: "trackDuration",
+  });
+
+  return runScript(`
+    set output to ""
+      tell application "Music"
+        set results to (every track whose name contains "${search}" or artist contains "${search}")
+        repeat with selectedTrack in results
+          set trackId to the database ID of selectedTrack
+          set trackName to the name of selectedTrack
+          set albumName to the album of selectedTrack
+          set artistName to the artist of selectedTrack
+          set trackDuration to the duration of selectedTrack
+          set output to output & ${outputQuery} & "\n"
+        end repeat
+      end tell
+    return output
+  `);
+};
+
 export const play =
   (shuffle = false) =>
   (name: string): TE.TaskEither<Error, string> =>

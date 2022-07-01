@@ -11,6 +11,11 @@ export interface Track {
   album: string;
   duration: string;
   state?: PlayerState;
+  time?: string;
+  genre?: string;
+  playCount?: number;
+  loved?: boolean;
+  year?: string;
 }
 
 export interface Playlist {

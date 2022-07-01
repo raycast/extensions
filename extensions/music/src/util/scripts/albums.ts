@@ -13,7 +13,7 @@ export const getAll = runScript(`
 			set trackCount to count (every track of playlist 1 whose album contains albumName)
 			tell album of aTrack to if albumList does not contain it then
 				set end of albumList to it
-				set trackId to the id of aTrack
+				set trackId to the database ID of aTrack
 				set artistName to the artist of aTrack
 				set output to output & ${createQueryString({
           id: "trackId",
@@ -45,7 +45,7 @@ export const search = (search: string) => {
 				set trackCount to count (every track of playlist 1 whose album contains albumName)
 				tell album of aTrack to if albumList does not contain it then
 					set end of albumList to it
-					set trackId to the id of aTrack
+					set trackId to the database ID of aTrack
 					set artistName to the artist of aTrack
 					set output to output & ${query} & "\n"
 				end if

@@ -21,7 +21,7 @@
     {
       "name": "layoutType",
       "type": "dropdown",
-      "title": "View Layout",
+      "title": "Main View Layout",
       "description": "The view layout for displaying tracks, albums, and playlists.",
       "default": "grid",
       "required": false,
@@ -55,6 +55,68 @@
         {
           "value": "large",
           "title": "Large"
+        }
+      ]
+    },
+    {
+      "name": "playlistTracksLayout", 
+      "type": "dropdown", 
+      "title": "Playlist Tracks Layout",
+      "description": "The layout for tracks in a playlist (use List for more results).",
+      "default": "list",
+      "required": false,
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "primaryPlaylistAction", 
+      "type": "dropdown",
+      "title": "Primary Playlist Action",
+      "description": "The primary action for a playlist.",
+      "default": "play",
+      "required": false,
+      "data": [
+        {
+          "value": "play",
+          "title": "Play Playlist"
+        },
+        {
+          "value": "shuffle",
+          "title": "Shuffle Playlist"
+        }, 
+        {
+          "value": "show", 
+          "title": "Show Tracks"
+        }
+      ]
+    },
+    {
+      "name": "secondaryPlaylistAction", 
+      "type": "dropdown",
+      "title": "Secondary Playlist Action",
+      "description": "The secondary action for a playlist.",
+      "default": "shuffle",
+      "required": false,
+      "data": [
+        {
+          "value": "play",
+          "title": "Play Playlist"
+        },
+        {
+          "value": "shuffle",
+          "title": "Shuffle Playlist"
+        }, 
+        {
+          "value": "show", 
+          "title": "Show Tracks"
         }
       ]
     }
@@ -175,10 +237,12 @@
   "dependencies": {
     "@raycast/api": "^1.36.1",
     "fp-ts": "^2.12.1",
+    "json2md": "^1.12.0",
     "resize-image-buffer": "^1.0.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@types/json2md": "^1.5.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

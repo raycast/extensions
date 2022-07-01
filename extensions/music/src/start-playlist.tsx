@@ -1,4 +1,14 @@
 import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { getArtworkByIds } from "./util/scripts/playlists";
+import { displayDuration, getPlaylistPrimaryAction, getPlaylistSecondaryAction } from "./util/utils";
+import { PlaylistTracks } from "./playlist-tracks";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import { Playlist } from "./util/models";
+import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
+import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -8,15 +18,6 @@ import {
   getMaxNumberOfResults,
   getGridItemSize,
 } from "./util/listorgrid";
-import { getArtworkByIds } from "./util/scripts/playlists";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
-import { Playlist } from "./util/models";
-import { parseResult } from "./util/parser";
-import * as music from "./util/scripts";
-import * as A from "fp-ts/ReadonlyNonEmptyArray";
-import { displayDuration } from "./util/utils";
 
 enum PlaylistKind {
   ALL = "all",
@@ -159,10 +160,30 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
     pop();
   };
 
+  const actions: any = {
+    play: <Action title="Start Playlist" onAction={handleSubmit(false)} />,
+    shuffle: <Action title="Shuffle Playlist" onAction={handleSubmit(true)} />,
+    show: <Action.Push title="Show Tracks" target={<PlaylistTracks id={id} />} />,
+  };
+
+  const primary: string = getPlaylistPrimaryAction();
+  const secondary: string = getPlaylistSecondaryAction();
+
+  let third_action: any = null;
+  for (const [key, action] of Object.entries(actions)) {
+    if (key !== primary && key !== secondary) {
+      third_action = action;
+    }
+  }
+  if (third_action === null) {
+    console.error("Third action is null");
+  }
+
   return (
     <ActionPanel>
-      <Action title="Start Playlist" onAction={handleSubmit(false)} />
-      <Action title="Shuffle Playlist" onAction={handleSubmit(true)} />
+      {actions[primary]}
+      {actions[secondary]}
+      <ActionPanel.Section>{third_action}</ActionPanel.Section>
     </ActionPanel>
   );
 }

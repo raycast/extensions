@@ -1,6 +1,6 @@
 import resizeImg from "resize-image-buffer";
 
-type Size = {
+export type Size = {
   width: number;
   height: number;
 };
