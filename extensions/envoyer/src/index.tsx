@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, LocalStorage, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  open,
+} from "@raycast/api";
 import fetch from "node-fetch";
 import React, { useEffect, useState } from "react";
 
@@ -8,7 +17,6 @@ interface Preferences {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -18,10 +26,17 @@ export default function Command() {
           Authorization: `Bearer ${preferences.envoyer_api_key}`,
         },
       });
-      const data: { projects: Project[] } = (await response.json()) as { projects: Project[] };
-      await LocalStorage.setItem("projects", JSON.stringify(data.projects));
-      setProjects(data.projects);
-      setLoading(false);
+
+      let data: { projects: Project[] } = { projects: [] };
+      try {
+        data = (await response.json()) as { projects: Project[] };
+      } catch (e) {
+        console.error(e);
+      } finally {
+        await LocalStorage.setItem("projects", JSON.stringify(data.projects));
+        setProjects(data.projects);
+        setLoading(false);
+      }
     }
 
     LocalStorage.getItem<string>("projects").then((projects) => {
@@ -35,20 +50,28 @@ export default function Command() {
 
   return (
     <List isLoading={loading}>
-      {projects.map((project) => (
-        <List.Item
-          key={project.id}
-          icon="command-icon.png"
-          title={project.name}
-          subtitle={project.last_deployment_timestamp}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<ProjectDetails project={project} />} />
-              <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`} />
-            </ActionPanel>
-          }
+      {projects.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="No projects found"
+          description="Make sure your API Key is valid and your account has projects"
         />
-      ))}
+      ) : (
+        projects.map((project) => (
+          <List.Item
+            key={project.id}
+            icon="command-icon.png"
+            title={project.name}
+            subtitle={project.last_deployment_timestamp}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<ProjectDetails project={project} />} icon={Icon.List} />
+                <Action.OpenInBrowser url={`https://envoyer.io/projects/${project.id}`} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
@@ -85,6 +108,12 @@ function ProjectDetails({ project }: { project: Project }) {
           <ActionPanel>
             <Action
               title="Start New Deployment"
+              icon={{
+                source: {
+                  light: "deploy.svg",
+                  dark: "deploy-dark.svg",
+                },
+              }}
               onAction={async () => {
                 setLoading(true);
                 await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {

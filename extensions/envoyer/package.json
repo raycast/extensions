@@ -26,7 +26,6 @@
       "required": true,
       "title": "Envoyer API Key",
       "description": "Your Envoyer API Key. `deployments:create` scope is required when you want to start deployments.",
-      "link": "https://envoyer.io/user/profile#/api",
       "placeholder": "Enter your Envoyer API Key"
     }
   ],
