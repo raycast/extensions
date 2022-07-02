@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Add the ability to create monitors from within Raycast
+- Add the ability to create/delete monitors, incidents and heartbeats from within Raycast
 
 ## [Added Better Uptime] - 2022-06-17
 
