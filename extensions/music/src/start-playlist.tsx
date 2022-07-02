@@ -18,7 +18,6 @@ import {
   getMaxNumberOfResults,
   getGridItemSize,
 } from "./util/listorgrid";
-import { privateEncrypt } from "crypto";
 
 enum PlaylistKind {
   ALL = "all",
