@@ -1,9 +1,11 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
 import axios from "axios";
+import { useState } from "react";
 import { Preferences } from "./interface";
 
 export default function Command(): JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
+  const [monitorType, setMonitorType] = useState("status");
 
   async function handleSubmit(item: any) {
     // {
@@ -44,8 +46,20 @@ export default function Command(): JSX.Element {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="https://raycast.com" />
-      <Form.TextField id="friendly_name" title="Friendly Name" placeholder="Friendly name" />
+      <Form.Dropdown
+        id="monitor_type"
+        title="Monitor Type"
+        onChange={(value) => setMonitorType(value)}
+      >
+        <Form.Dropdown.Item key="status" value="status" title="Status" />
+        <Form.Dropdown.Item key="ping" value="ping" title="Ping" />
+      </Form.Dropdown>
+      <Form.TextField
+        id="url"
+        title={monitorType === "status" ? "URL" : "Host"}
+        placeholder={monitorType === "status" ? "https://raycast.com" : "76.76.21.21"}
+      />
+      <Form.TextField id="check_frequency" title="Check Frequency (seconds)" placeholder="180" />
     </Form>
   );
 }
