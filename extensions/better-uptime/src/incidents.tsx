@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { ActionCopyScreenshotUrl, ActionDeleteIncident } from "./actions";
 import { IncidentItem, IncidentsState, Preferences } from "./interface";
 
 export default function Command() {
@@ -81,22 +82,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               {item.attributes.screenshot_url && (
-                <Action.OpenInBrowser title="Open Screenshot in Browser" url={item.attributes.screenshot_url} />
+                <>
+                  <Action.OpenInBrowser title="Open Screenshot in Browser" url={item.attributes.screenshot_url} />
+                  <ActionCopyScreenshotUrl url={item.attributes.screenshot_url} />
+                </>
               )}
-              {item.attributes.screenshot_url && (
-                <Action
-                  title="Copy Screenshot URL"
-                  icon={Icon.Clipboard}
-                  onAction={async () => {
-                    await Clipboard.copy(item.attributes.screenshot_url);
-
-                    showToast({
-                      title: "Copied",
-                      message: "Screenshot URL copied to clipboard",
-                    });
-                  }}
-                />
-              )}
+              <ActionDeleteIncident item={item} />
             </ActionPanel>
           }
         />

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { ActionCopyHeartbeatUrl, ActionDeleteHeartbeat } from "./actions";
 import { statusMap } from "./constants";
 import { HeartbeatItem, HeartbeatsState, Preferences } from "./interface";
 
@@ -74,18 +75,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
-              <Action
-                title="Copy Heartbeat URL"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await Clipboard.copy(item.attributes.url);
-
-                  showToast({
-                    title: "Copied",
-                    message: "Heartbeat URL copied to clipboard",
-                  });
-                }}
-              />
+              <ActionCopyHeartbeatUrl url={item.attributes.url} />
+              <ActionDeleteHeartbeat item={item} />
             </ActionPanel>
           }
         />

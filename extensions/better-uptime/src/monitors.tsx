@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { statusMap } from "./constants";
 import { MonitorItem, Preferences, MonitorsState } from "./interface";
 import { ucfirst } from "./utils";
+import { ActionCopyUrl, ActionDeleteMonitor } from './actions';
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -87,18 +88,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
-              <Action
-                title="Copy URL"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await Clipboard.copy(item.attributes.url);
-
-                  showToast({
-                    title: "Copied",
-                    message: "URL copied to clipboard",
-                  });
-                }}
-              />
+              <ActionCopyUrl url={item.attributes.url} />
+              <ActionDeleteMonitor item={item} />
             </ActionPanel>
           }
         />
