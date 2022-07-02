@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { statusMap } from "./constants";
 import { MonitorItem, Preferences, MonitorsState } from "./interface";
 import { ucfirst } from "./utils";
-import { ActionCopyUrl, ActionDeleteMonitor } from './actions';
+import { ActionCopyUrl, ActionDeleteMonitor } from "./actions";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
