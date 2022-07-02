@@ -119,7 +119,7 @@ export const getArtworkByIds = async (ids: string[]) => {
   const result: any = {};
   const size = layout === "list" || ids.length > 10 ? imageSize : undefined;
   const promises = ids.map(async (id) => {
-    try { 
+    try {
       const data = await runAppleScript(`
         tell application "Music"
           set playlistArtwork to first artwork of first playlist of (every playlist whose id is ${id})
@@ -129,7 +129,7 @@ export const getArtworkByIds = async (ids: string[]) => {
       `);
       result[id] = await parseImageStream(data, size);
     } catch {
-      result[id] = "../assets/no-playlist.png"; 
+      result[id] = "../assets/no-playlist.png";
     }
   });
   await Promise.all(promises);
