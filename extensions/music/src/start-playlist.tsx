@@ -18,6 +18,7 @@ import {
   getMaxNumberOfResults,
   getGridItemSize,
 } from "./util/listorgrid";
+import { privateEncrypt } from "crypto";
 
 enum PlaylistKind {
   ALL = "all",
@@ -59,7 +60,9 @@ export default function PlaySelected() {
         flow(
           parseResult<Playlist>(),
           (data) => {
-            data = data.filter((playlist) => playlist.name !== "Library" && playlist.name !== "Music");
+            data = data.filter(
+              (playlist) => playlist.name !== "Library" && playlist.name !== "Music" && playlist.name !== "Genius Mixes"
+            );
             return A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data);
           },
           setPlaylists
@@ -83,8 +86,9 @@ export default function PlaySelected() {
           try {
             const artworks = await getArtworkByIds(ids);
             setArtworks(artworks);
-          } catch {
+          } catch (err) {
             showToast(Toast.Style.Failure, "Error: Failed to get track artworks");
+            console.error(err);
           }
         } else setArtworks(null);
       }

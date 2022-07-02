@@ -57,7 +57,11 @@ export const getArtworkByIds = async (ids: string[], overrideLayout?: string) =>
   const imageSize = getImageSize(layout);
   const size = layout === "list" || ids.length > 10 ? imageSize : undefined;
   const promises = ids.map(async (id) => {
-    result[id] = await getArtwork(id, size);
+    try {
+      result[id] = await getArtwork(id, size);
+    } catch {
+      result[id] = "../assets/no-track.png";
+    }
   });
   await Promise.all(promises);
   return result;
