@@ -44,8 +44,7 @@ const DeploymentsList = ({ deployments }: Props) => {
           icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
           subtitle={deployment.url}
           keywords={[deployment.name, getCommitMessage(deployment) || ""]}
-          id={deployment.id}
-          key={deployment.id}
+          key={deployment.uid}
           actions={
             <ActionPanel>
               <Action

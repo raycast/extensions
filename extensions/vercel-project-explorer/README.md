@@ -21,7 +21,7 @@ This is a (heavily) modified fork of the [vercast](https://github.com/raycast/ex
 
 
 ## Screenshots:
-<img src="metadata/home.png" width="600">
-<img src="metadata/view-project.png" width="600">
-<img src="metadata/search-deployments.png" width="600">
-<img src="metadata/new-env-var.png" width="600">
+<img src="media/vercel-project-explorer-1.png" width="600">
+<img src="media/vercel-project-explorer-2.png" width="600">
+<img src="media/vercel-project-explorer-3.png" width="600">
+<img src="media/vercel-project-explorer-4.png" width="600">

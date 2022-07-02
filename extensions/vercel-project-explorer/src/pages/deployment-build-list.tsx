@@ -43,10 +43,10 @@ const DeploymentBuildList = ({ deployment }: Props) => {
     }
   };
   const listItems = () => {
-    if (!build) return;
+    if (!build) return [];
     const items: React.ReactNode[] = [];
-    items.push(<List.Item title="State" subtitle={build.readyState} icon={getReadyStateIcon()} />);
-    items.push(<List.Section title="Files" subtitle={build.output.length.toString()} />);
+    items.push(<List.Item title="State" key="state" subtitle={build.readyState} icon={getReadyStateIcon()} />);
+    items.push(<List.Section title="Files" key="file-section" subtitle={build.output.length.toString()} />);
     build.output.forEach((e) => {
       items.push(
         <List.Item
