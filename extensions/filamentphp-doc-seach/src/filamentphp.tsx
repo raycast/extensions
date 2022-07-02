@@ -17,13 +17,13 @@ type result = {
   };
   _highlightResult: {
     content:
-        | {
-      value: string;
-      matchlevel: string;
-      fullyHighlighted: boolean;
-      matchedWords: string[];
-    }
-        | undefined;
+      | {
+          value: string;
+          matchlevel: string;
+          fullyHighlighted: boolean;
+          matchedWords: string[];
+        }
+      | undefined;
     hierarchy: {
       [key: string]: {
         value: string;
@@ -80,28 +80,29 @@ export default function SearchFilamentphpDocumentation() {
       }}
     >
       {searchResults?.map(([hitType, hitTypeResults]) => (
-
         <List.Section title={hitType} key={hitType}>
-          {hitTypeResults?.filter((hit: { hierarchy: { lvl2: null; }; }) => hit.hierarchy.lvl2 != null).map((hit: result) => (
-            <List.Item
-              id={hit.objectID}
-              key={hit.objectID}
-              icon="command-icon2.png"
-              title={
-                (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : '' ) + ' ' + (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : '' )
-              }
-              actions={
-                <ActionPanel title={(hit.url)}>
-                  <Action.OpenInBrowser url={(hit.url)} />
-                  <Action.CopyToClipboard content={(hit.url)} title="Copy URL" />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {hitTypeResults
+            ?.filter((hit: { hierarchy: { lvl2: null } }) => hit.hierarchy.lvl2 != null)
+            .map((hit: result) => (
+              <List.Item
+                id={hit.objectID}
+                key={hit.objectID}
+                icon="command-icon2.png"
+                title={
+                  (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
+                  " " +
+                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "")
+                }
+                actions={
+                  <ActionPanel title={hit.url}>
+                    <Action.OpenInBrowser url={hit.url} />
+                    <Action.CopyToClipboard content={hit.url} title="Copy URL" />
+                  </ActionPanel>
+                }
+              />
+            ))}
         </List.Section>
-
       ))}
-
     </List>
   );
 }
