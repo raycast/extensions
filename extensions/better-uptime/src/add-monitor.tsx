@@ -8,22 +8,6 @@ export default function Command(): JSX.Element {
   const [monitorType, setMonitorType] = useState("status");
 
   async function handleSubmit(item: any) {
-    // {
-    //   "monitor_type": "status",
-    //   "url": "https://facebook.com",
-    //   "pronounceable_name": "Facebook homepage",
-    //   "email": true,
-    //   "sms": true,
-    //   "call": true,
-    //   "check_frequency": 30,
-    //   "request_headers": [
-    //     {
-    //       "name": "X-Custom-Header",
-    //       "value": "custom header value"
-    //     }
-    //   ]
-    // }
-
     axios
       .post("https://betteruptime.com/api/v2/monitors", item, {
         headers: { Authorization: `Bearer ${preferences.apiKey}` },
@@ -46,11 +30,7 @@ export default function Command(): JSX.Element {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="monitor_type"
-        title="Monitor Type"
-        onChange={(value) => setMonitorType(value)}
-      >
+      <Form.Dropdown id="monitor_type" title="Monitor Type" onChange={(value) => setMonitorType(value)}>
         <Form.Dropdown.Item key="status" value="status" title="Status" />
         <Form.Dropdown.Item key="ping" value="ping" title="Ping" />
       </Form.Dropdown>
@@ -60,6 +40,11 @@ export default function Command(): JSX.Element {
         placeholder={monitorType === "status" ? "https://raycast.com" : "76.76.21.21"}
       />
       <Form.TextField id="check_frequency" title="Check Frequency (seconds)" placeholder="180" />
+      <Form.Checkbox id="call" label="Call" defaultValue={false} />
+      <Form.Checkbox id="sms" label="Send SMS" defaultValue={false} />
+      <Form.Checkbox id="email" label="Send Email" defaultValue={true} />
+      <Form.Checkbox id="push" label="Push Notification" defaultValue={false} />
+      <Form.TextField id="pronounceable_name" title="Pronounceable Name" />
     </Form>
   );
 }
