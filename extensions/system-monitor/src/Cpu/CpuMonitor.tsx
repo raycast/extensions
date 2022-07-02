@@ -20,7 +20,6 @@ export default function CpuMonitor() {
       });
       let newLoadAvg = loadavg();
       let newTopProcess = await getTopCpuProcess(5);
-      console.log(newTopProcess);
       setState((prevState) => {
         return {
           ...prevState,
@@ -41,7 +40,7 @@ export default function CpuMonitor() {
   return (
     <>
       <List.Item
-        title={`🖥️ CPU Usage: `}
+        title={`🖥️ CPU :`}
         subtitle={`${state.cpu}%`}
         detail={
           <List.Item.Detail
@@ -54,10 +53,10 @@ export default function CpuMonitor() {
                 <List.Item.Detail.Metadata.Label title="5 min" text={state.avgLoad[1]} />
                 <List.Item.Detail.Metadata.Label title="15 min" text={state.avgLoad[2]} />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Top Processes" />
+                <List.Item.Detail.Metadata.Label title="Process Name" />
                 {state.topProcess !== [] &&
                   state.topProcess.map((element, index) => {
-                    return <List.Item.Detail.Metadata.Label key={index} title={element[1]} text={element[0]} />;
+                    return <List.Item.Detail.Metadata.Label key={index} title={element[1]} text={element[0] + "%"} />;
                   })}
               </List.Item.Detail.Metadata>
             }

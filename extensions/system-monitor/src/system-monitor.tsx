@@ -2,7 +2,8 @@ import { List, Grid } from "@raycast/api";
 import { cpuUsage, freemem, freememPercentage } from "os-utils";
 import { useState } from "react";
 import CpuMonitor from "./Cpu/CpuMonitor";
-import MemoryMonitor from "./MemoryMonitor";
+import MemoryMonitor from "./Memory/MemoryMonitor";
+import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
 
 export default function SystemMonitor() {
@@ -12,6 +13,7 @@ export default function SystemMonitor() {
         <CpuMonitor />
         <MemoryMonitor />
         <PowerMonitor />
+        <NetworkMonitor />
       </List>
     );
   };

@@ -5,7 +5,6 @@ import { ExecError } from "../Interfaces";
 const execp = promisify(exec);
 
 const isValidTime = (value) => {
-  console.log(value);
   const regexp = /^([0-9]?[0-9]):([0-5]?[0-9])$/;
   if (regexp.test(value)) {
     return true;
@@ -88,7 +87,6 @@ const getMaxBatteryCapacity = async () => {
 const getBatteryTime = async () => {
   try {
     const output = await execp("/usr/bin/pmset -g ps | sed -n 2p | awk '{print $5}'");
-    console.log(output.stdout);
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
