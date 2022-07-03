@@ -26,7 +26,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
+      accessoryTitle={searchResult.platform}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -98,29 +98,27 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   const params = new URLSearchParams();
   params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
 
-  const response = await fetch("https://api.npms.io/v2/search" + "?" + params.toString(), {
+  const response = await fetch("https://libraries.io/api/search" + "?" + params.toString(), {
     method: "get",
     signal: signal,
   });
 
   const json = (await response.json()) as
     | {
-        results: {
-          package: { name: string; description?: string; publisher?: { username: string }; links: { npm: string } };
-        }[];
-      }
+        name: string; description?: string; platform: string; package_manager_url: string;
+      }[]
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return json.results.map((result) => {
+  return json.map((result) => {
     return {
-      name: result.package.name,
-      description: result.package.description,
-      username: result.package.publisher?.username,
-      url: result.package.links.npm,
+      name: result.name,
+      description: result.description,
+      platform: result.platform,
+      url: result.package_manager_url,
     };
   });
 }
@@ -133,6 +131,6 @@ interface SearchState {
 interface SearchResult {
   name: string;
   description?: string;
-  username?: string;
+  platform: string;
   url: string;
 }
