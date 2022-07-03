@@ -22,8 +22,8 @@ export const toTitleCase = (str: string): string => {
 };
 
 export const resolveHome = (filepath: string) => {
-  if (filepath[0] === '~') {
+  if (filepath[0] === "~") {
     return join(homedir(), filepath.slice(1));
   }
   return filepath;
-}
+};
