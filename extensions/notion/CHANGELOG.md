@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Timezone Fix] - 2022-07-05
+
+- Fixed `Create Database Page` to use client timezone when supplying a date field.
+
 ## [OAuth] - 2022-05-10
 
 - You can now logged in using OAuth instead of having to create your own integration
