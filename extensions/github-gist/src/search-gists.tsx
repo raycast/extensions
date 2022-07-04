@@ -1,10 +1,11 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, List } from "@raycast/api";
 import { useState } from "react";
 import { githubGists } from "./util/gist-utils";
 import { getGistDetailContent, preference } from "./util/utils";
 import { getGistContent, showGists } from "./hooks/hooks";
 import { GistAction } from "./components/gist-action";
 import { GistEmptyView } from "./components/gist-empty-view";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function main() {
   const [page, setPage] = useState<number>(1);
@@ -46,7 +47,7 @@ export default function main() {
         </List.Dropdown>
       }
     >
-      <GistEmptyView title={""} description={"No gists found"} />
+      <GistEmptyView title={""} description={"No gist found"} />
       {gists.map((gist, gistIndex, gistArray) => {
         return (
           <List.Section key={"gist" + gistIndex + gist.gist_id} title={gist.description}>
@@ -60,7 +61,7 @@ export default function main() {
                     gistId: gist.gist_id,
                   })}
                   key={"gistFile" + gistIndex + gistFileIndex}
-                  icon={Icon.TextDocument}
+                  icon={{ source: "gist-icon.svg", tintColor: Color.SecondaryText }}
                   title={gistFile.filename}
                   accessories={[{ text: gistFile.language == "null" ? "Binary" : gistFile.language }]}
                   detail={
@@ -79,6 +80,7 @@ export default function main() {
                         route={route}
                         setRefresh={setRefresh}
                       />
+                      <ActionOpenPreferences command={true} />
                     </ActionPanel>
                   }
                 />

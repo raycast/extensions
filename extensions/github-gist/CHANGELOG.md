@@ -1,5 +1,10 @@
 # GitHub Gist Changelog
 
+## [Delete Gist action optimization] - 2022-07-04
+
+- Optimize delete Gist action: a warning will pop up to prompt the user to confirm before deleting the gist
+- Update toast text
+
 ## [Add "Load More"] - 2022-05-15
 
 - Update settings item: you can choose the number(30-100) of Gist loaded per page.
