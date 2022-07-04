@@ -25,7 +25,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.username + ", " + searchResult.one_day_floor_change}
+      accessoryTitle={searchResult.price + ", " + searchResult.one_day_floor_change}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -50,10 +50,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             {searchResult.discord ? (
               <Action.OpenInBrowser title="Open Discord in Browser" url={searchResult.discord} icon="discord.png" />
             ) : null}
-            {searchResult.ins ? (
+            {searchResult.instagram ? (
               <Action.OpenInBrowser
-                title="Open Ins in Browser"
-                url={"https://www.instagram.com/" + searchResult.ins}
+                title="Open Instagram in Browser"
+                url={"https://www.instagram.com/" + searchResult.instagram}
                 icon="ig.png"
               />
             ) : null}
@@ -179,13 +179,13 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     return {
       name: result.name,
       description: result.description,
-      username: result.stats.floor_price?.toString(),
+      price: result.stats.floor_price?.toString(),
       url: `https://genie.xyz/collection/${result.address}`,
       address: result.address,
       website: result.externalUrl,
       discord: result.discordUrl,
       twitter: result.twitter,
-      ins: result.instagram,
+      instagram: result.instagram,
       one_day_floor_change: (result.stats.one_day_floor_change * 100).toFixed(1).toString() + "%",
     };
   });
@@ -199,12 +199,12 @@ interface SearchState {
 interface SearchResult {
   name: string;
   description?: string;
-  username?: string;
+  price?: string;
   url: string;
   address: string;
   one_day_floor_change: string;
   twitter?: string;
   discord?: string;
   website?: string;
-  ins?: string;
+  instagram?: string;
 }
