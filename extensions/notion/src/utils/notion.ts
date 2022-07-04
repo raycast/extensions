@@ -252,13 +252,17 @@ export async function queryDatabase(databaseId: string, query: string | undefine
   }
 }
 
+type UnwrapRecordValue<T> = T extends Record<never, infer U> ? U : T;
+type CreateRequest = Parameters<typeof notion.pages.create>[0];
+type CreateProperties = UnwrapRecordValue<CreateRequest["properties"]>;
+
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
   try {
     await authorize();
     const { database, content, ...props } = values;
 
-    const arg: Parameters<typeof notion.pages.create>[0] = {
+    const arg: CreateRequest = {
       parent: { database_id: database },
       properties: {},
     };
@@ -325,7 +329,11 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
           case "date":
             arg.properties[propId] = {
               date: {
-                start: value,
+                start: moment(value).subtract(new Date().getTimezoneOffset(), "minutes").toISOString(),
+                time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as Extract<
+                  CreateProperties,
+                  { type?: "date" }
+                >,
               },
             };
             break;
@@ -360,6 +368,7 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
       }
     });
 
+    console.log(JSON.stringify(arg));
     const page = await notion.pages.create(arg);
 
     return pageMapper(page);
