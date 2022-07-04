@@ -368,7 +368,6 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
       }
     });
 
-    console.log(JSON.stringify(arg));
     const page = await notion.pages.create(arg);
 
     return pageMapper(page);
