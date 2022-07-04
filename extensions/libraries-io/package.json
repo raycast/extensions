@@ -3,7 +3,7 @@
   "name": "libraries-io",
   "title": "Libraries.io",
   "description": "Look up packages and dependency information via Libraries.io",
-  "icon": "command-icon.png",
+  "icon": "libraries-io-icon.png",
   "author": "djpowers",
   "categories": [
     "Developer Tools",
