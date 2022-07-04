@@ -9,6 +9,7 @@ import {
   getMaxBatteryCapacity,
   isValidTime,
 } from "./PowerUtils";
+import { useInterval } from "usehooks-ts";
 
 const PowerMonitor = () => {
   const [state, setState] = useState({
@@ -19,6 +20,23 @@ const PowerMonitor = () => {
     maxBatteryCapacity: "Checking...",
     batteryTime: "Calculating...",
   });
+  useInterval(async () => {
+    try {
+      const tempState = {
+        batteryLevel: await getBatteryLevel(),
+        isCharging: await getIsCharging(),
+        batteryTime: await getBatteryTime(),
+      };
+      setState((prevState) => {
+        return {
+          ...prevState,
+          ...tempState,
+        };
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }, 1000);
   useEffect(() => {
     const updatePowerInfo = async () => {
       const permState = {
@@ -34,26 +52,6 @@ const PowerMonitor = () => {
       });
     };
     updatePowerInfo();
-    const monitorInterval = setInterval(async () => {
-      try {
-        const tempState = {
-          batteryLevel: await getBatteryLevel(),
-          isCharging: await getIsCharging(),
-          batteryTime: await getBatteryTime(),
-        };
-        setState((prevState) => {
-          return {
-            ...prevState,
-            ...tempState,
-          };
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    }, 1000);
-    return () => {
-      clearInterval(monitorInterval);
-    };
   }, []);
   return (
     <>

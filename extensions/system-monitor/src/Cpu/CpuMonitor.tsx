@@ -3,6 +3,7 @@ import { cpuUsage } from "os-utils";
 import { List } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess } from "./CpuUtils";
+import { useInterval } from "usehooks-ts";
 
 export default function CpuMonitor() {
   const [state, setState] = useState({
@@ -11,31 +12,26 @@ export default function CpuMonitor() {
     topProcess: [],
   });
 
-  useEffect(() => {
-    let monitorInterval = setInterval(async () => {
-      cpuUsage((v) => {
-        setState((prevState) => {
-          return { ...prevState, cpu: Math.round(v * 100) };
-        });
-      });
-      let newLoadAvg = loadavg();
-      let newTopProcess = await getTopCpuProcess(5);
+  useInterval(async () => {
+    cpuUsage((v) => {
       setState((prevState) => {
-        return {
-          ...prevState,
-          avgLoad: [
-            newLoadAvg[0].toFixed(2).toString(),
-            newLoadAvg[1].toFixed(2).toString(),
-            newLoadAvg[2].toFixed(2).toString(),
-          ],
-          topProcess: newTopProcess,
-        };
+        return { ...prevState, cpu: Math.round(v * 100) };
       });
-    }, 1000);
-    return () => {
-      clearInterval(monitorInterval);
-    };
-  }, []);
+    });
+    let newLoadAvg = loadavg();
+    let newTopProcess = await getTopCpuProcess(5);
+    setState((prevState) => {
+      return {
+        ...prevState,
+        avgLoad: [
+          newLoadAvg[0].toFixed(2).toString(),
+          newLoadAvg[1].toFixed(2).toString(),
+          newLoadAvg[2].toFixed(2).toString(),
+        ],
+        topProcess: newTopProcess,
+      };
+    });
+  }, 1000);
 
   return (
     <>

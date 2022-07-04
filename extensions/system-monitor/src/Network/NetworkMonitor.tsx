@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { List } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
+import { useInterval } from "usehooks-ts";
 
 export default function NetworkMonitor() {
-  const savedCallback = useRef();
   const [state, setState] = useState({
     upload: "Loading...",
     download: "Loading...",
@@ -38,7 +38,7 @@ export default function NetworkMonitor() {
     return processList;
   };
 
-  const callback = async () => {
+  useInterval(async () => {
     const currProcess = await getNetworkData();
     const prevProcess = state.prevProcess;
     let newUpload = 0;
@@ -71,21 +71,7 @@ export default function NetworkMonitor() {
         prevProcess: currProcess,
       };
     });
-  };
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  });
-
-  useEffect(() => {
-    const tick = () => {
-      savedCallback.current();
-    };
-    let monitorInterval = setInterval(tick, 1000);
-    return () => {
-      clearInterval(monitorInterval);
-    };
-  }, []);
+  }, 1000);
 
   return (
     <>

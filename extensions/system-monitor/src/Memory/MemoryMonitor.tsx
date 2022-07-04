@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { freemem, freememPercentage } from "os-utils";
 import { useEffect, useState } from "react";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace } from "./MemoryUtils";
+import { useInterval } from "usehooks-ts";
 
 export default function MemoryMonitor() {
   const [state, setState] = useState({
@@ -12,6 +13,19 @@ export default function MemoryMonitor() {
     topProcess: [],
   });
 
+  useInterval(async () => {
+    const newTopProcess = await getTopRamProcess();
+    const newFreeDisk = await getFreeDiskSpace();
+    setState((prevState) => {
+      return {
+        ...prevState,
+        freeDisk: newFreeDisk,
+        freeMemPercentage: Math.round(freememPercentage() * 100).toString(),
+        freeMem: Math.round(freemem() / 1024).toString(),
+        topProcess: newTopProcess,
+      };
+    });
+  }, 1000);
   useEffect(() => {
     const permData = async () => {
       const newTotalDisk = await getTotalDiskSpace();
@@ -23,22 +37,6 @@ export default function MemoryMonitor() {
       });
     };
     permData();
-    let monitorInterval = setInterval(async () => {
-      const newTopProcess = await getTopRamProcess();
-      const newFreeDisk = await getFreeDiskSpace();
-      setState((prevState) => {
-        return {
-          ...prevState,
-          freeDisk: newFreeDisk,
-          freeMemPercentage: Math.round(freememPercentage() * 100).toString(),
-          freeMem: Math.round(freemem() / 1024).toString(),
-          topProcess: newTopProcess,
-        };
-      });
-    }, 1000);
-    return () => {
-      clearInterval(monitorInterval);
-    };
   }, []);
 
   return (
