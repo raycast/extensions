@@ -2,6 +2,7 @@ import { useState } from "react";
 import { List } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
+import { formatBytes } from "../Power/utils";
 
 export default function NetworkMonitor() {
   const [state, setState] = useState({
@@ -31,10 +32,6 @@ export default function NetworkMonitor() {
   const getTopProcess = (processList) => {
     processList.sort(sortFunction);
     processList = processList.slice(0, 5);
-    processList.forEach((value, index) => {
-      processList[index][1] = Math.round(value[1] / 1024);
-      processList[index][2] = Math.round(value[2] / 1024);
-    });
     return processList;
   };
 
@@ -65,8 +62,8 @@ export default function NetworkMonitor() {
     setState((prevState) => {
       return {
         ...prevState,
-        upload: Math.round(newUpload / 1024),
-        download: Math.round(newDownload / 1024),
+        upload: newUpload,
+        download: newDownload,
         processList: newProcessList,
         prevProcess: currProcess,
       };
@@ -78,7 +75,9 @@ export default function NetworkMonitor() {
       <List.Item
         title={`📶️ Network`}
         subtitle={
-          state.processList.length ? "D : " + state.download + " KB/s U : " + state.upload + " KB/s" : "Loading..."
+          state.processList.length
+            ? "D : " + formatBytes(state.download) + "/s U : " + formatBytes(state.upload) + " /s"
+            : "Loading..."
         }
         detail={
           <List.Item.Detail
@@ -86,11 +85,11 @@ export default function NetworkMonitor() {
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label
                   title="Upload Speed"
-                  text={(state.processList.length === 0 ? 0 : state.upload) + " KB/s"}
+                  text={(state.processList.length === 0 ? "0 B" : formatBytes(state.upload)) + "/s"}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Download Speed"
-                  text={(state.processList.length === 0 ? 0 : state.download) + " KB/s"}
+                  text={(state.processList.length === 0 ? "0 B" : formatBytes(state.download)) + "/s"}
                 />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" />
@@ -100,7 +99,7 @@ export default function NetworkMonitor() {
                       <List.Item.Detail.Metadata.Label
                         key={index}
                         title={index + 1 + ".    " + value[0]}
-                        text={"D : " + value[1] + " KB/s   U : " + value[2] + " KB/s"}
+                        text={"D : " + formatBytes(value[1]) + "/s   U : " + formatBytes(value[2]) + " /s"}
                       />
                     );
                   })}
