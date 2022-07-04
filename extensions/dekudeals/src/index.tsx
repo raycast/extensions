@@ -196,7 +196,13 @@ const Command = (): JSX.Element => {
         <SearchListItem key={searchResult.name} searchResult={searchResult} />
       ))}
       <List.EmptyView
-        title={state.query.length < 3 ? "Search for something (min. 3 characters)" : state.isLoading ? "Loading..." : "No results"}
+        title={
+          state.query.length < 3
+            ? "Search for something (min. 3 characters)"
+            : state.isLoading
+            ? "Loading..."
+            : "No results"
+        }
       />
     </List>
   );
