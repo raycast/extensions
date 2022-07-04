@@ -13,6 +13,8 @@ import {
   User,
   PagePropertyType,
   supportedPropTypes,
+  UnwrapRecord,
+  NotionObject,
 } from "./types";
 
 const clientId = "c843219a-d93c-403c-8e4d-e8aa9a987494";
@@ -252,9 +254,8 @@ export async function queryDatabase(databaseId: string, query: string | undefine
   }
 }
 
-type UnwrapRecordValue<T> = T extends Record<never, infer U> ? U : T;
 type CreateRequest = Parameters<typeof notion.pages.create>[0];
-type CreateProperties = UnwrapRecordValue<CreateRequest["properties"]>;
+type CreateProperties = UnwrapRecord<CreateRequest["properties"]>;
 
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
@@ -546,10 +547,7 @@ export async function appendToPage(pageId: string, params: { content: string }):
   }
 }
 
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>): Page {
+function pageMapper(jsonPage: NotionObject): Page {
   const page: Page = {
     object: jsonPage.object,
     id: jsonPage.id,

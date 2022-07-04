@@ -4,6 +4,7 @@
 
 - Fixed `Create Database Page` to use client [timezone](https://developers.notion.com/changelog/time-zone-support) when supplying a date field.
 - Fixed `Create Database Page` to pop navigation when using `Create and Open Page`.
+- Clean up some type definitions.
 
 ## [OAuth] - 2022-05-10
 
