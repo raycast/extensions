@@ -1,6 +1,6 @@
 # GitHub Gist Changelog
 
-## [Delete Gist action optimization] - {PR_MERGE_DATE}
+## [Delete Gist action optimization] - 2022-07-04
 
 - Optimize delete Gist action: a warning will pop up to prompt the user to confirm before deleting the gist
 - Update toast text
