@@ -255,7 +255,8 @@ export async function queryDatabase(databaseId: string, query: string | undefine
 }
 
 type CreateRequest = Parameters<typeof notion.pages.create>[0];
-type CreateProperties = UnwrapRecord<CreateRequest["properties"]>;
+type DatabaseCreateProperties<T> = T extends { parent: { type?: "database_id" }; properties: infer U } ? U : never;
+type DatabaseCreateProperty = UnwrapRecord<DatabaseCreateProperties<CreateRequest>>;
 
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
@@ -327,17 +328,17 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
               phone_number: value,
             };
             break;
-          case "date":
+          case "date": {
+            type DateProperty = Exclude<Extract<DatabaseCreateProperty, { type?: "date" }>["date"], null>;
+            type DatePropertyTimeZone = Required<DateProperty["time_zone"]>;
             arg.properties[propId] = {
               date: {
                 start: moment(value).subtract(new Date().getTimezoneOffset(), "minutes").toISOString(),
-                time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as Extract<
-                  CreateProperties,
-                  { type?: "date" }
-                >,
+                time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
               },
             };
             break;
+          }
           case "checkbox":
             arg.properties[propId] = {
               checkbox: value === 1 ? true : false,

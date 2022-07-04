@@ -106,5 +106,5 @@ export type UnwrapArray<T> = T extends Array<infer U> ? U : never;
 
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
-type PageProperties<T> = T extends { object: "page"; properties: infer U } ? U : never;
-export type PagePropertyType = UnwrapRecord<PageProperties<NotionObject>>;
+type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
+export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;
