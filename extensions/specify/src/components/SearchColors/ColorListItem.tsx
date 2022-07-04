@@ -28,7 +28,7 @@ export default ({ color, namespace, repositoryName }: ColorListItemProps) => {
           <Action.CopyToClipboard title="Copy HEX" content={colorInstance.toHexString()} />
           <Action.CopyToClipboard title="Copy RGBA" content={colorInstance.toRgbString()} />
           <Action.CopyToClipboard title="Copy HSL" content={colorInstance.toHslString()} />
-          <Action.CopyToClipboard title="Copy token name" icon={Icon.Text} content={color.name} />
+          <Action.CopyToClipboard title="Copy Token Name" icon={Icon.Text} content={color.name} />
           <Action.OpenInBrowser
             title="Go to Repository"
             url={`https://specifyapp.com/${namespace}/${repositoryName}/color`}

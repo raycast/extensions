@@ -10,6 +10,7 @@ import { Repository } from './types/repositories.types';
 export default function Command() {
   const [namespace, setNamespace] = useState('');
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
+  const [isLoadingDisplay, setIsLoadingDisplay] = useState(true);
 
   const { getRepositories, getColors } = useSpecifyHttpApi();
 
@@ -20,6 +21,11 @@ export default function Command() {
 
   useEffect(() => {
     if (!repositories) {
+      // There is no repositories to display.
+      if (!isLoadingRepositories) {
+        setIsLoadingDisplay(false);
+      }
+
       return;
     }
 
@@ -40,6 +46,7 @@ export default function Command() {
   }, [repositories]);
 
   const handleChange = (repo: Repository) => {
+    setIsLoadingDisplay(true);
     setSelectedRepo(repo);
   };
 
@@ -51,13 +58,17 @@ export default function Command() {
     return result;
   }, [selectedRepo]);
 
-  const isLoadingDisplay = isLoadingRepositories || isLoadingColors;
+  useEffect(() => {
+    if (!isLoadingColors && selectedRepo) {
+      setIsLoadingDisplay(false);
+    }
+  }, [isLoadingColors]);
 
   return (
     <List
       isLoading={isLoadingDisplay}
       navigationTitle="Search Colors"
-      searchBarPlaceholder="Search Your Colors"
+      searchBarPlaceholder="Search your colors"
       searchBarAccessory={
         <RepositoryDropdown repositories={repositories} onChange={handleChange} isLoading={isLoadingDisplay} />
       }

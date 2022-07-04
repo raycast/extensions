@@ -46,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.37.1",
     "axios": "^0.27.2",
     "js-base64": "^3.7.2",
     "react-use": "^17.4.0",

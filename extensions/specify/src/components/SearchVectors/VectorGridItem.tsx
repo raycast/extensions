@@ -63,10 +63,10 @@ export default ({
               url={`https://help.specifyapp.com/en/articles/6321713-how-the-raycast-extension-works`}
             />
           )}
-          {page !== maxPage && <Action icon={Icon.ChevronDown} title="Next page" onAction={handleGoNextPage} />}
-          {page !== 0 && <Action icon={Icon.ChevronUp} title="Previous page" onAction={handleGoPreviousPage} />}
+          {page !== maxPage && <Action icon={Icon.ChevronDown} title="Next Page" onAction={handleGoNextPage} />}
+          {page !== 0 && <Action icon={Icon.ChevronUp} title="Previous Page" onAction={handleGoPreviousPage} />}
           {page !== 0 && (
-            <Action icon={Icon.ArrowRight} title="Back to the first page" onAction={handleGoToFirstPage} />
+            <Action icon={Icon.ArrowRight} title="Back to the First Page" onAction={handleGoToFirstPage} />
           )}
           <Action.OpenInBrowser
             title="Go to Repository"

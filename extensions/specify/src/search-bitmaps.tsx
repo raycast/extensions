@@ -10,6 +10,7 @@ import RepositoryDropdown from './components/GridUtils/RepositoryDropdown';
 export default function Command() {
   const [namespace, setNamespace] = useState('');
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
+  const [isLoadingDisplay, setIsLoadingDisplay] = useState(true);
 
   const { getRepositories, getBitmaps } = useSpecifyHttpApi();
 
@@ -20,6 +21,11 @@ export default function Command() {
 
   useEffect(() => {
     if (!repositories) {
+      // There is no repositories to display.
+      if (!isLoadingRepositories) {
+        setIsLoadingDisplay(false);
+      }
+
       return;
     }
 
@@ -40,6 +46,7 @@ export default function Command() {
   }, [repositories]);
 
   const handleChange = (repo: Repository) => {
+    setIsLoadingDisplay(true);
     setSelectedRepo(repo);
   };
 
@@ -51,7 +58,11 @@ export default function Command() {
     return result;
   }, [selectedRepo]);
 
-  const isLoadingDisplay = isLoadingRepositories || isLoadingBitmaps;
+  useEffect(() => {
+    if (!isLoadingBitmaps && selectedRepo) {
+      setIsLoadingDisplay(false);
+    }
+  }, [isLoadingBitmaps]);
 
   return (
     <Grid
@@ -59,7 +70,7 @@ export default function Command() {
       itemSize={Grid.ItemSize.Medium}
       inset={Grid.Inset.Small}
       navigationTitle="Search Bitmaps"
-      searchBarPlaceholder="Search Your Bitmaps"
+      searchBarPlaceholder="Search your bitmaps"
       searchBarAccessory={
         <RepositoryDropdown repositories={repositories} onChange={handleChange} isLoading={isLoadingDisplay} />
       }

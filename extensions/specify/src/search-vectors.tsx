@@ -17,6 +17,7 @@ export default function Command() {
   const [vectorsPerPage, setVectorsPerPage] = useState(defaultVectorsPerPage);
   const [searchText, setSearchText] = useState('');
   const [vectorsToDisplay, setVectorsToDisplay] = useState<Vector[]>([]);
+  const [isLoadingDisplay, setIsLoadingDisplay] = useState(true);
 
   const { getRepositories, getVectors } = useSpecifyHttpApi();
 
@@ -27,6 +28,11 @@ export default function Command() {
 
   useEffect(() => {
     if (!repositories) {
+      // There is no repositories to display.
+      if (!isLoadingRepositories) {
+        setIsLoadingDisplay(false);
+      }
+
       return;
     }
 
@@ -47,6 +53,7 @@ export default function Command() {
   }, [repositories]);
 
   const handleChange = (repo: Repository) => {
+    setIsLoadingDisplay(true);
     setSelectedRepo(repo);
   };
 
@@ -58,7 +65,11 @@ export default function Command() {
     return result;
   }, [selectedRepo]);
 
-  const isLoadingDisplay = isLoadingRepositories || isLoadingVectors;
+  useEffect(() => {
+    if (!isLoadingVectors && selectedRepo) {
+      setIsLoadingDisplay(false);
+    }
+  }, [isLoadingVectors]);
 
   const handleSearchTextChange = (text: string) => {
     setSearchText(text);
@@ -123,7 +134,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
       navigationTitle="Search Vectors"
-      searchBarPlaceholder="Search Your Vectors"
+      searchBarPlaceholder="Search your vectors"
       searchBarAccessory={
         <RepositoryDropdown repositories={repositories} onChange={handleChange} isLoading={isLoadingDisplay} />
       }
