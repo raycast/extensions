@@ -25,4 +25,41 @@ const getTopRamProcess = async () => {
   }
 };
 
-export { getTopRamProcess };
+const getFreeDiskSpace = async () => {
+  try {
+    const output = await execp(
+      `/usr/sbin/system_profiler SPStorageDataType | grep Free | sed -n 2p | awk '{print $2 " " $3}'`
+    );
+    let freeDiskSpace = output.stdout.trim();
+    return freeDiskSpace;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1) {
+      console.log(execErr.stderr);
+      return "Error";
+    } else {
+      console.log(`${err}`);
+      return "Error";
+    }
+  }
+};
+const getTotalDiskSpace = async () => {
+  try {
+    const output = await execp(
+      `/usr/sbin/system_profiler SPStorageDataType | grep Capacity | sed -n 2p | awk '{print $2 " " $3}'`
+    );
+    let totalDiskSpace = output.stdout.trim();
+    return totalDiskSpace;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1) {
+      console.log(execErr.stderr);
+      return "Error";
+    } else {
+      console.log(`${err}`);
+      return "Error";
+    }
+  }
+};
+
+export { getTopRamProcess, getFreeDiskSpace, getTotalDiskSpace };

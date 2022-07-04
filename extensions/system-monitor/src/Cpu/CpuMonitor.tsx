@@ -6,8 +6,8 @@ import { getTopCpuProcess } from "./CpuUtils";
 
 export default function CpuMonitor() {
   const [state, setState] = useState({
-    cpu: "Checking...",
-    avgLoad: ["Checking...", "Checking...", "Checking..."],
+    cpu: "Loading...",
+    avgLoad: ["Loading...", "Loading...", "Loading..."],
     topProcess: [],
   });
 
@@ -56,7 +56,13 @@ export default function CpuMonitor() {
                 <List.Item.Detail.Metadata.Label title="Process Name" />
                 {state.topProcess !== [] &&
                   state.topProcess.map((element, index) => {
-                    return <List.Item.Detail.Metadata.Label key={index} title={element[1]} text={element[0] + "%"} />;
+                    return (
+                      <List.Item.Detail.Metadata.Label
+                        key={index}
+                        title={index + 1 + ".    " + element[1]}
+                        text={element[0] + "%"}
+                      />
+                    );
                   })}
               </List.Item.Detail.Metadata>
             }

@@ -35,7 +35,6 @@ export default function NetworkMonitor() {
       processList[index][1] = Math.round(value[1] / 1024);
       processList[index][2] = Math.round(value[2] / 1024);
     });
-    console.log(processList);
     return processList;
   };
 
@@ -62,7 +61,6 @@ export default function NetworkMonitor() {
         }
       }
       newProcessList = getTopProcess(newProcessList);
-      console.log(newProcessList);
     }
     setState((prevState) => {
       return {

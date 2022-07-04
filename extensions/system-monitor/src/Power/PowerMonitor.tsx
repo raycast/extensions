@@ -20,23 +20,40 @@ const PowerMonitor = () => {
     batteryTime: "Calculating...",
   });
   useEffect(() => {
-    //checking for charging
-    const updatePowerData = async () => {
+    const updatePowerInfo = async () => {
+      const permState = {
+        cycleCount: await getCycleCount(),
+        batteryCondition: await getBatteryCondition(),
+        maxBatteryCapacity: await getMaxBatteryCapacity(),
+      };
+      setState((prevState) => {
+        return {
+          ...prevState,
+          ...permState,
+        };
+      });
+    };
+    updatePowerInfo();
+    const monitorInterval = setInterval(async () => {
       try {
-        const newState = {
+        const tempState = {
           batteryLevel: await getBatteryLevel(),
-          cycleCount: await getCycleCount(),
           isCharging: await getIsCharging(),
-          batteryCondition: await getBatteryCondition(),
-          maxBatteryCapacity: await getMaxBatteryCapacity(),
           batteryTime: await getBatteryTime(),
         };
-        setState(newState);
+        setState((prevState) => {
+          return {
+            ...prevState,
+            ...tempState,
+          };
+        });
       } catch (err) {
         console.log(err);
       }
+    }, 1000);
+    return () => {
+      clearInterval(monitorInterval);
     };
-    updatePowerData();
   }, []);
   return (
     <>
