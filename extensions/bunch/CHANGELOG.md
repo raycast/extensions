@@ -1,6 +1,6 @@
 # Bunch Changelog
 
-## [Text field validation] - {PR_MERGE_DATE}
+## [Text field validation] - 2022-07-04
 
 - Add text field validation
 
