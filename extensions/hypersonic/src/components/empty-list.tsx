@@ -10,6 +10,7 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  openCommandPreferences,
 } from '@raycast/api'
 import { useEffect, useMemo, useState } from 'react'
 import { OpenNotionAction } from './open-notion-action'
@@ -106,6 +107,12 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
         <ActionPanel>
           <WhatHaveIDoneAction />
           <ReauthorizeAction />
+          <Action
+            title="Open Extension Preferences"
+            icon={Icon.Gear}
+            onAction={openCommandPreferences}
+            shortcut={{ modifiers: ['cmd'], key: ',' }}
+          />
           <OpenNotionAction notionDbUrl={notionDbUrl} />
         </ActionPanel>
       }
