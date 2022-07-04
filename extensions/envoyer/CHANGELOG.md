@@ -1,3 +1,3 @@
 # Envoyer Changelog
 
-## [Initial Version] - 2022-06-22
+## [Initial Version] - 2022-07-04
