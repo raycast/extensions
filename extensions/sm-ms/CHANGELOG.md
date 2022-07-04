@@ -1,6 +1,6 @@
 # SM.MS Changelog
 
-## [Add text field validation] - {PR_MERGE_DATE}
+## [Add text field validation] - 2022-07-04
 
 - Add text field validation
 
