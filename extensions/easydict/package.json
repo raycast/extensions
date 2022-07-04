@@ -63,7 +63,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "lint-staged": "lint-staged",
-    "prepare": "husky install",
+    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
     "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
   },
   "lint-staged": {
