@@ -138,12 +138,13 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle, showFavorites, onSho
   return (
     <List.Item
       key={coin.id}
-      title={"#" + coin.rank + " | " + coin.name}
+      title={coin.name}
       icon={{
         source: isFavorite ? Icon.Star : Icon.ArrowRight,
         tintColor: isFavorite ? Color.Yellow : Color.SecondaryText,
       }}
       subtitle={coin.symbol.toUpperCase()}
+      accessories={[{ text: `#${coin.rank}` }]}
       detail={<FetchCoinDetails coinId={coin.id} />}
       actions={
         <ActionPanel>
