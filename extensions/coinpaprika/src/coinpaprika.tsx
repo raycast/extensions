@@ -158,7 +158,7 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle, showFavorites, onSho
 
 function FavoriteAction(props: FavoriteProps) {
   const { isFavorite, onToggle } = props;
-  const title = isFavorite ? "Remove from Favorites" : "Add to Favorites";
+  const title = isFavorite ? "Remove From Favorites" : "Add to Favorites";
 
   return <Action icon={Icon.Star} title={title} shortcut={{ modifiers: ["cmd"], key: "f" }} onAction={onToggle} />;
 }
