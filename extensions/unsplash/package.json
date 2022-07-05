@@ -167,14 +167,6 @@
       "default": ""
     },
     {
-      "name": "wallpaperPath",
-      "title": "Wallpaper Path",
-      "placeholder": "~/Pictures/Wallpapers",
-      "description": "The folder to store the random wallpaper.",
-      "type": "textfield",
-      "required": false
-    },
-    {
       "name": "includeDefaults",
       "title": "Include Default Collections",
       "type": "dropdown",
@@ -191,6 +183,14 @@
       ],
       "required": false,
       "default": "no"
+    },
+    {
+      "name": "wallpaperPath",
+      "title": "Wallpaper Path",
+      "placeholder": "~/Pictures/Wallpapers",
+      "description": "The folder to store wallpapers.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
