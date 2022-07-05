@@ -145,8 +145,8 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     title: title,
     url: tenorResp.itemurl,
     slug: slugify(title),
-    preview_gif_url: mediaItem.tinygif.preview,
-    gif_url: mediaItem.tinygif.url,
+    preview_gif_url: mediaItem.tinygif.url,
+    gif_url: mediaItem.gif.url,
     metadata: {
       width: mediaItem.gif.dims[0],
       height: mediaItem.gif.dims[1],
