@@ -610,22 +610,19 @@ function textToMarkdown(input: string): string {
 type Result = { transformedText: string; markdown: string };
 
 export default function Command() {
-	/** IGNORE COMMENT
-	// "Prime the pump", as it were
-	// The first call to execFile (and related methods) is very slow; subsequent calls
-	// are faster. So we throw in a fake async call at the beginning to speed up the
-	subsequent ones
-	* END IGNORE
-	*/
+	// IGNORE COMMENT \
+	// "Prime the pump", as it were. The first call to execFile (and related methods) is
+	// very slow; subsequent calls are faster. So we throw in a fake async call at the
+	// beginning to speed up the subsequent ones \
+	// END IGNORE
 
 	const defaultActionId = ESSE_ITEMS[0].uid;
 
-	const [clipboardWasRead, setClipboardWasRead] = useState(false);
+	const [textInfo, setTextInfo] = useState({ text: "", clipboardWasRead: false });
 	const [isLoading, setIsLoading] = useState(true);
-	const [text, setText] = useState("");
 	const [actionId, setActionId] = useState(defaultActionId);
 
-	const initialResult = { transformedText: text, markdown: "Loading..." };
+	const initialResult = { transformedText: textInfo.text, markdown: "Loading..." };
 	const [result, setResult] = useState(initialResult);
 
 	useEffect(() => {
@@ -635,6 +632,7 @@ export default function Command() {
 		}
 
 		setIsLoading(true);
+		const { text, clipboardWasRead } = textInfo;
 
 		if (clipboardWasRead && text.length === 0) {
 			finish({
@@ -656,12 +654,13 @@ export default function Command() {
 		// setResult({ transformedText, markdown });
 
 		// setIsLoading(false);
-	}, [text, actionId, clipboardWasRead]);
+	}, [textInfo, actionId]);
 
-	// TODO: add `getSelectedText` here as well, before Clipboard.readText()
+	// TODO: add `getSelectedText` here as well, before Clipboard.readText() \
+	// Currently this results in the error `Cannot copy selected text from frontmost
+	// application.`
 	Promise.all([Clipboard.readText()]).then(([clipboard]) => {
-		setText(clipboard ?? "");
-		setClipboardWasRead(true);
+		setTextInfo({ text: clipboard ?? "", clipboardWasRead: true });
 	});
 
 	return (
