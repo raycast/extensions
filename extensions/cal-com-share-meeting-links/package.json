@@ -47,10 +47,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.1",
+    "axios": "^0.27.2",
     "dayjs": "^1.11.3",
-    "node-fetch": "^3.2.6"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.182",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

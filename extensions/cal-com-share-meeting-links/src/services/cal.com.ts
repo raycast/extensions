@@ -1,78 +1,103 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import axios, { AxiosRequestConfig } from "axios";
+import { isEmpty } from "lodash";
 
 export interface Preferences {
   token: string;
+  baseUrl?: string;
   defaultAction: "meeting" | "one-time";
 }
 
-// export interface CalendlyUser {
-//   avatar_url: string;
-//   created_at: string;
-//   current_organization: string;
-//   email: string;
-//   name: string;
-//   scheduling_url: string;
-//   slug: string;
-//   timezone: string;
-//   updated_at: string;
-//   uri: string;
-// }
-// interface CalendlyUserResource extends AxiosResponse {
-//   data: {
-//     resource: CalendlyUser;
-//   };
-// }
-
-// export interface CalendlyEventType {
-//   active: boolean;
-//   color: string;
-//   created_at: string;
-//   description_html: string | null;
-//   description_plain: string | null;
-//   duration: number;
-//   internal_note: string | null;
-//   kind: "solo";
-//   name: string;
-//   pooling_type: string | null;
-//   scheduling_url: string;
-//   secret: boolean;
-//   slug: string;
-//   type: string;
-//   updated_at: string;
-//   uri: string;
-// }
-
-export interface CalendlySingleUseLinkResponse extends AxiosResponse {
-  data: { resource: { booking_url: string; owner?: string; owner_type?: string } };
+export interface CalUser {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  emailVerified: string;
+  bio: string;
+  avatar: string;
+  timeZone: string;
+  weekStart: string;
+  endTime: number;
+  bufferTime: number;
+  theme: null;
+  defaultScheduleId: number;
+  locale: string;
+  timeFormat: number;
+  brandColor: string;
+  darkBrandColor: string;
+  allowDynamicBooking: true;
+  away: false;
+  createdDate: string;
+  verified: false;
+  invitedTo: null;
+}
+interface CalUserResp {
+  users: CalUser[];
 }
 
-interface CalendlyEventTypeResponse extends AxiosResponse {
-  data: { collection: CalendlyEventType[] };
+export interface CalEventType {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  position: number;
+  locations: Array<unknown>;
+  length: number;
+  hidden: false;
+  userId: null;
+  teamId: null;
+  eventName: null;
+  timeZone: null;
+  periodType: string;
+  periodStartDate: string;
+  periodEndDate: string;
+  periodDays: null;
+  periodCountCalendarDays: false;
+  requiresConfirmation: false;
+  recurringEvent: null;
+  disableGuests: false;
+  hideCalendarNotes: false;
+  minimumBookingNotice: number;
+  beforeEventBuffer: number;
+  afterEventBuffer: number;
+  seatsPerTimeSlot: null;
+  schedulingType: null;
+  scheduleId: null;
+  price: number;
+  currency: string;
+  slotInterval: null;
+  metadata: object;
+  successRedirectUrl: null;
 }
 
-const { token }: Preferences = getPreferenceValues();
+interface CalEventTypeResp {
+  event_types: CalEventType[];
+}
+
+const defaultBaseUrl = "https://api.cal.com/v1/";
+const { token, baseUrl }: Preferences = getPreferenceValues();
 
 const api = axios.create({
-  baseURL: "https://api.calendly.com/",
-  headers: { Authorization: `Bearer ${token}` },
+  baseURL: isEmpty(baseUrl) ? defaultBaseUrl : baseUrl,
+  params: { apiKey: token },
 });
 
-async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = api.request<unknown, T>({ method, ...props });
-  return resp;
+async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
+  const resp = await api.request<T>({ method, ...props });
+  return resp.data;
 }
 
-async function getCurrentUser(): Promise<CalendlyUser> {
-  const data = await calendlyAPI<CalendlyUserResource>({ url: "/users/me" });
-  const resource = data.data.resource;
-  return resource;
+async function getCurrentUser(): Promise<unknown> {
+  const data = await calAPI<CalUserResp>({ url: "/users" });
+  return data.users[0];
 }
 
 async function getEventTypes() {
-  const user = await getUserFromCache();
-  const data = await calendlyAPI<CalendlyEventTypeResponse>({ url: "/event_types", params: { user: user.uri } });
-  const collection = _.filter(data.data.collection, "active");
-  return collection;
+  // const user = await getUserFromCache();
+  const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
+  console.log(data.event_types);
+  return data.event_types;
 }
 
 export async function refreshData() {
@@ -83,23 +108,23 @@ export async function refreshData() {
   LocalStorage.setItem("updated_ts", new Date().toISOString());
 }
 
-export async function getUserFromCache(): Promise<CalendlyUser> {
+export async function getUserFromCache(): Promise<CalUser> {
   const cache = await LocalStorage.getItem("user");
   if (!cache) throw new Error("User not found in Cache");
   return JSON.parse(cache.toString());
 }
 
-export async function getEventTypesFromCache(): Promise<CalendlyEventType[]> {
+export async function getEventTypesFromCache(): Promise<CalEventType[]> {
   const cache = await LocalStorage.getItem("eventTypes");
   if (!cache) throw new Error("Event Types not found in Cache");
   return JSON.parse(cache.toString());
 }
 
-export async function createSingleUseLink(event: CalendlyEventType) {
-  const data = await calendlyAPI<CalendlySingleUseLinkResponse>({
-    url: "/scheduling_links",
-    method: "POST",
-    data: { max_event_count: 1, owner: event.uri, owner_type: "EventType" },
-  });
-  return data.data.resource;
-}
+// export async function createSingleUseLink(event: CalendlyEventType) {
+//   const data = await calAPI<CalendlySingleUseLinkResponse>({
+//     url: "/scheduling_links",
+//     method: "POST",
+//     data: { max_event_count: 1, owner: event.uri, owner_type: "EventType" },
+//   });
+//   return data.data.resource;
+// }
