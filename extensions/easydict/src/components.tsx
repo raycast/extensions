@@ -1,27 +1,186 @@
-import { Component } from "react";
-import { execFile } from "child_process";
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-26 11:13
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2022-07-04 18:19
+ * @fileName: components.tsx
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
 import { languageItemList, SectionType, TranslateType } from "./consts";
-import { ListItemActionPanelItem, YoudaoTranslateReformatResultItem } from "./types";
-import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { getGoogleWebTranslateURL, myPreferences } from "./utils";
-import { getWordAudioPath, playWordAudio, sayTruncateCommand } from "./audio";
-import fs from "fs";
+import { ActionListPanelProps, YoudaoTranslateReformatResultItem } from "./types";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import {
+  checkIsInstalledEudic,
+  getEudicWebTranslateURL,
+  getGoogleWebTranslateURL,
+  getYoudaoWebTranslateURL,
+  myPreferences,
+} from "./utils";
+import { sayTruncateCommand } from "./audio";
+import { openInEudic } from "./scripts";
+import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
+import { ReleaseDetail } from "./releaseVersion/releaseDetail";
+import { useState } from "react";
+import { Easydict } from "./releaseVersion/versionInfo";
 
 export const eudicBundleId = "com.eusoft.freeeudic";
 
+export function ActionFeedback() {
+  const easydict = new Easydict();
+  return <Action.OpenInBrowser icon={Icon.QuestionMark} title="Feedback" url={easydict.getIssueUrl()} />;
+}
+
+export function ActionRecentUpdate(props: { title?: string }) {
+  return <Action.Push icon={Icon.Sidebar} title={props.title || "Recent Update ✨"} target={<ReleaseDetail />} />;
+}
+
+export function ActionCurrentVersion() {
+  const easydict = new Easydict();
+  return (
+    <Action.OpenInBrowser
+      icon={Icon.Globe}
+      title={`Version: ${easydict.version}`}
+      url={easydict.getCurrentReleaseTagUrl()}
+    />
+  );
+}
+
+/**
+ * Get the list action panel item with ListItemActionPanelItem
+ */
+export default function ListActionPanel(props: ActionListPanelProps) {
+  const currentEasydict = new Easydict();
+
+  const [hasPrompted, setHasPrompted] = useState(false);
+  // const [easydict, setEasydict] = useState<Easydict>();
+  const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
+
+  checkIsInstalledEudic(setIsInstalledEudic);
+
+  currentEasydict.getCurrentVersionInfo().then((easydict) => {
+    console.log(`has prompted: ${easydict.hasPrompted}`);
+    setHasPrompted(easydict.hasPrompted);
+  });
+
+  const eudicWebUrl = getEudicWebTranslateURL(props.displayItem.queryWordInfo);
+  const youdaoWebUrl = getYoudaoWebTranslateURL(props.displayItem.queryWordInfo);
+
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        {!hasPrompted && <ActionRecentUpdate title="✨ New Version Released" />}
+
+        {isInstalledEudic && (
+          <Action
+            icon={Icon.MagnifyingGlass}
+            title="Open in Eudic"
+            onAction={() => openInEudic(props.displayItem.queryWordInfo.word)}
+          />
+        )}
+        <Action.CopyToClipboard
+          onCopy={() => {
+            console.log("copy: ", props.displayItem.copyText);
+          }}
+          title={`Copy Text`}
+          content={props.displayItem.copyText || ""}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Search Query Text Online">
+        {eudicWebUrl.length !== 0 && (
+          <Action.OpenInBrowser icon={Icon.Globe} title="Eudic Dictionary" url={eudicWebUrl} />
+        )}
+        {youdaoWebUrl.length !== 0 && (
+          <Action.OpenInBrowser icon={Icon.Globe} title="Youdao Dictionary" url={youdaoWebUrl} />
+        )}
+
+        <Action.OpenInBrowser
+          icon={Icon.Globe}
+          title="Google Translate"
+          url={getGoogleWebTranslateURL(props.displayItem.queryWordInfo)}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Play Text Audio">
+        <Action
+          title="Play Query Text"
+          icon={playSoundIcon("black")}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={() => {
+            console.log(`start play sound: ${props.displayItem.queryWordInfo.word}`);
+            playYoudaoWordAudioAfterDownloading(props.displayItem.queryWordInfo);
+          }}
+        />
+        <Action
+          title="Play Result Text"
+          icon={playSoundIcon("black")}
+          onAction={() => {
+            /**
+             *  directly use say command to play the result text.
+             *  because it is difficult to determine whether the result is a word, impossible to use Youdao web audio directly.
+             *  in addition, TTS needs to send additional youdao query requests.
+             */
+            sayTruncateCommand(props.displayItem.copyText, props.displayItem.queryWordInfo.toLanguage);
+          }}
+        />
+      </ActionPanel.Section>
+
+      {myPreferences.isDisplayTargetTranslationLanguage && (
+        <ActionPanel.Section title="Target Language">
+          {languageItemList.map((selectedLanguageItem) => {
+            // hide auto language
+            const isAutoLanguage = selectedLanguageItem.youdaoLanguageId === "auto";
+            // hide current detected language
+            const isSameWithDetectedLanguage =
+              selectedLanguageItem.youdaoLanguageId === props.displayItem.queryWordInfo.fromLanguage;
+            const isSameWithTargetLanguage =
+              selectedLanguageItem.youdaoLanguageId === props.displayItem.queryWordInfo.toLanguage;
+            if (isAutoLanguage || isSameWithDetectedLanguage) {
+              return null;
+            }
+
+            return (
+              <Action
+                key={selectedLanguageItem.youdaoLanguageId}
+                title={selectedLanguageItem.languageTitle}
+                onAction={() => props.onLanguageUpdate(selectedLanguageItem)}
+                icon={isSameWithTargetLanguage ? Icon.ArrowRight : Icon.Globe}
+              />
+            );
+          })}
+        </ActionPanel.Section>
+      )}
+
+      <ActionPanel.Section>
+        {hasPrompted && <ActionRecentUpdate />}
+        <ActionCurrentVersion />
+        <ActionFeedback />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
 export function playSoundIcon(lightTintColor: string) {
   return {
-    source: { light: "speak.png", dark: "speak.png" },
+    source: { light: "play.png", dark: "play.png" },
     tintColor: { light: lightTintColor, dark: "lightgray" },
   };
 }
 
-// function: Returns the corresponding ImageLike based on the SectionType type
+/**
+  Return the corresponding ImageLike based on the SectionType type
+*/
 export function getListItemIcon(sectionType: SectionType | TranslateType): Image.ImageLike {
   let dotColor: Color.ColorLike = Color.PrimaryText;
   switch (sectionType) {
     case TranslateType.Youdao: {
       dotColor = Color.Red;
+      break;
+    }
+    case TranslateType.Apple: {
+      dotColor = "#408080";
       break;
     }
     case TranslateType.Baidu: {
@@ -62,10 +221,27 @@ export function getListItemIcon(sectionType: SectionType | TranslateType): Image
   if (sectionType === SectionType.Forms) {
     itemIcon = Icon.Text;
   }
+
+  if (sectionType in TranslateType) {
+    itemIcon = getTranslateTypeIcon(sectionType as TranslateType);
+  }
+
   return itemIcon;
 }
 
-// function: return List.Item.Accessory[] based on the SectionType type
+/**
+ * Get translate type icon based on the section type
+ */
+function getTranslateTypeIcon(translatType: TranslateType): Image.ImageLike {
+  return {
+    source: `${translatType}-Translate.png`,
+    mask: Image.Mask.RoundedRectangle,
+  };
+}
+
+/**
+  return List.Item.Accessory[] based on the SectionType type
+*/
 export function getWordAccessories(
   sectionType: SectionType | TranslateType,
   item: YoudaoTranslateReformatResultItem
@@ -96,122 +272,4 @@ export function getWordAccessories(
     }
   }
   return wordAccessories;
-}
-
-export function ActionFeedback() {
-  return (
-    <Action.OpenInBrowser
-      icon={Icon.QuestionMark}
-      title="Feedback"
-      url="https://github.com/raycast/extensions/issues"
-    />
-  );
-}
-
-export class ListActionPanel extends Component<ListItemActionPanelItem> {
-  onPlaySound(text: string, language: string) {
-    const wordAudioPath = getWordAudioPath(text);
-    if (fs.existsSync(wordAudioPath)) {
-      playWordAudio(text);
-    } else {
-      sayTruncateCommand(text, language);
-    }
-  }
-
-  openInEudic = (queryText: string) => {
-    const url = `eudic://dict/${queryText}`;
-    execFile("open", [url], (error, stdout) => {
-      if (error) {
-        console.log("error:", error);
-        LocalStorage.removeItem(eudicBundleId);
-
-        showToast({
-          title: "Eudic is not installed.",
-          style: Toast.Style.Failure,
-        });
-      }
-      console.log(stdout);
-    });
-  };
-
-  render() {
-    return (
-      <ActionPanel>
-        <ActionPanel.Section>
-          {this.props.isInstalledEudic && (
-            <Action
-              icon={Icon.MagnifyingGlass}
-              title="Open in Eudic"
-              onAction={() => this.openInEudic(this.props.queryText)}
-            />
-          )}
-          <Action.CopyToClipboard
-            onCopy={() => {
-              console.log("copy: ", this.props.copyText);
-            }}
-            title={`Copy Text`}
-            content={this.props.copyText || ""}
-          />
-        </ActionPanel.Section>
-
-        <ActionPanel.Section title="Search Query Text Online">
-          {this.props.isShowOpenInEudicWeb && (
-            <Action.OpenInBrowser icon={Icon.Link} title="See Eudic Translate Results" url={this.props.eudicWebUrl} />
-          )}
-          {this.props.isShowOpenInYoudaoWeb && (
-            <Action.OpenInBrowser icon={Icon.Link} title="See Youdao Translate Results" url={this.props.youdaoWebUrl} />
-          )}
-
-          <Action.OpenInBrowser
-            icon={Icon.Link}
-            title="See Google Translate Results"
-            url={getGoogleWebTranslateURL(
-              this.props.queryText,
-              this.props.currentFromLanguage,
-              this.props.currentTargetLanguage
-            )}
-          />
-        </ActionPanel.Section>
-
-        <ActionPanel.Section title="Play Sound">
-          <Action
-            title="Play Query Text Sound"
-            icon={playSoundIcon("black")}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={() => this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.youdaoLanguageId)}
-          />
-          <Action
-            title="Play Result Text Sound"
-            icon={playSoundIcon("black")}
-            onAction={() => this.onPlaySound(this.props.copyText, this.props.currentTargetLanguage?.youdaoLanguageId)}
-          />
-        </ActionPanel.Section>
-
-        {myPreferences.isDisplayTargetTranslationLanguage && (
-          <ActionPanel.Section title="Target Language">
-            {languageItemList.map((region) => {
-              if (this.props.currentFromLanguage?.youdaoLanguageId === region.youdaoLanguageId) return null;
-
-              return (
-                <Action
-                  key={region.youdaoLanguageId}
-                  title={region.languageTitle}
-                  onAction={() => this.props.onLanguageUpdate(region)}
-                  icon={
-                    this.props.currentTargetLanguage?.youdaoLanguageId === region.youdaoLanguageId
-                      ? Icon.ArrowRight
-                      : Icon.Globe
-                  }
-                />
-              );
-            })}
-          </ActionPanel.Section>
-        )}
-
-        <ActionPanel.Section>
-          <ActionFeedback />
-        </ActionPanel.Section>
-      </ActionPanel>
-    );
-  }
 }

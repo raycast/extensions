@@ -21,6 +21,7 @@
 /extensions/avatar                                   @koinzhang
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
+/extensions/battery-health                           @o1y
 /extensions/bazinga-tools                            @luin
 /extensions/bear                                     @hmarr @ron-myers
 /extensions/better-uptime                            @andreaselia
@@ -207,6 +208,7 @@
 /extensions/iconpark                                 @koinzhang
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
+/extensions/inkdrop                                  @yaeda
 /extensions/ip-geolocation                           @koinzhang
 /extensions/iptv                                     @Aayush9029
 /extensions/itch-io                                  @Aayush9029
@@ -278,7 +280,7 @@
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits
-/extensions/notion                                   @HenriChabrand @mathieudutour
+/extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
 /extensions/nsis-reference                           @idleberg
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @marcjulianschwarz

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Action, ActionPanel, environment, Icon, List, Toast } from "@raycast/api";
 import { spawn } from "child_process";
+import { createInterface } from "readline";
 import { join } from "path";
 import { pythonbin } from "./index";
 
@@ -29,14 +31,15 @@ export function ListBibmItem(props: { item: Item; index: number }) {
 }
 
 function Actions(props: { item: Item }) {
+  const [PDFDownloaded, setPDFDownloaded] = useState<string>(props.item.pdf);
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {props.item.pdf && (
-          <Action.OpenWith path={props.item.pdf} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
+        {PDFDownloaded && (
+          <Action.OpenWith path={PDFDownloaded} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
         )}
         {props.item.link && <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" />}
-        {!props.item.pdf && (
+        {!PDFDownloaded && (
           <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
         {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
@@ -45,6 +48,51 @@ function Actions(props: { item: Item }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
+
+  function DownloadPDF(key: string) {
+    const toast = new Toast({
+      style: Toast.Style.Animated,
+      title: "Downloading PDF",
+    });
+    toast.show();
+
+    const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
+    const lineReader = createInterface({ input: python.stdout });
+
+    lineReader.on("line", (line) => {
+      if (line.includes("PDF: ")) {
+        const PDFstring = line.substring(5);
+        toast.style = Toast.Style.Success;
+        toast.title = "Download succeeded";
+        setPDFDownloaded(PDFstring);
+        return;
+      } else if (line.includes("[]yes [n]o.")) {
+        toast.title = "Bibmanager needs input";
+        toast.style = Toast.Style.Failure;
+        toast.message = "Try manually with bibmanager CLI";
+        return;
+      } else if (line.includes("out of time")) {
+        toast.title = "Download timed out";
+        toast.style = Toast.Style.Failure;
+        toast.message = "Try manually with bibmanager CLI";
+        return;
+      }
+    });
+    python.on("error", () => {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Download failed";
+      toast.message = "Try manually with bibmanager CLI";
+      return;
+    });
+    python.on("close", (code) => {
+      if (code != 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Download failed";
+        toast.message = "Try manually with bibmanager CLI";
+      }
+      return;
+    });
+  }
 }
 
 function getItemDetail(item: Item) {
@@ -93,30 +141,3 @@ const monthMap = new Map<number, string>([
   [11, "November"],
   [12, "December"],
 ]);
-
-export function DownloadPDF(key: string) {
-  const toast = new Toast({
-    style: Toast.Style.Animated,
-    title: "Downloading PDF",
-  });
-  toast.show();
-
-  const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
-  python.on("close", (code) => {
-    if (code === 0) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Download succeeded";
-      toast.message = "Rerun to open";
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Download error";
-      toast.message = "Try manually with bibmanager CLI";
-    }
-  });
-  python.on("error", () => {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Download error";
-    toast.message = "Try manually with bibmanager CLI";
-    return;
-  });
-}

@@ -1,3 +1,13 @@
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-15 18:28
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2022-06-27 11:35
+ * @fileName: interface.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
 export interface IcibaDictionaryResult {
   exchange?: IcibaExchange; // English word part of speech
   is_CRI?: string | number; // has is_CRI when hitting word, is_CRI='1' when word has ph_am ?

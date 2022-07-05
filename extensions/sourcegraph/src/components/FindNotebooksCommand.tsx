@@ -111,8 +111,10 @@ function NotebookResultItem({
       subtitle={updated ? `by ${author}, updated ${updated}` : author}
       accessories={accessories}
       icon={{
-        source: Icon.Document,
-        tintColor: notebook.public ? ColorDefault : ColorPrivate,
+        value: {
+          source: Icon.Document,
+          tintColor: notebook.public ? ColorDefault : ColorPrivate,
+        },
         tooltip: notebook.public ? "Public notebook" : "Private notebook",
       }}
       actions={

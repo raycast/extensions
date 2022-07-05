@@ -1,8 +1,17 @@
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-26 11:13
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2022-07-03 17:08
+ * @fileName: utils.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
 import { Clipboard, environment, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
-import { LanguageItem, MyPreferences, QueryRecoredItem, TranslateFormatResult } from "./types";
-
+import { LanguageItem, MyPreferences, QueryRecoredItem, QueryWordInfo, TranslateFormatResult } from "./types";
 import CryptoJS from "crypto-js";
 
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
@@ -12,8 +21,9 @@ export const maxLineLengthOfChineseTextDisplay = 45;
 export const maxLineLengthOfEnglishTextDisplay = 95;
 
 export const myPreferences: MyPreferences = getPreferenceValues();
-export const defaultLanguage1 = getLanguageItemFromLanguageId(myPreferences.language1);
-export const defaultLanguage2 = getLanguageItemFromLanguageId(myPreferences.language2);
+export const defaultLanguage1 = getLanguageItemFromYoudaoId(myPreferences.language1) as LanguageItem;
+export const defaultLanguage2 = getLanguageItemFromYoudaoId(myPreferences.language2) as LanguageItem;
+export const preferredLanguages = [defaultLanguage1, defaultLanguage2];
 
 const defaultEncrytedYoudaoAppId = "U2FsdGVkX19SpBCGxMeYKP0iS1PWKmvPeqIYNaZjAZC142Y5pLrOskw0gqHGpVS1";
 const defaultEncrytedYoudaoAppKey =
@@ -36,7 +46,78 @@ export const defaultTencentSecretKey = myDecrypt(defaultEncryptedTencentSecretKe
 const defaultEncryptedCaiyunToken = "U2FsdGVkX1+ihWvHkAfPMrWHju5Kg4EXAm1AVbXazEeHaXE1jdeUzZZrhjdKmS6u";
 export const defaultCaiyunToken = myDecrypt(defaultEncryptedCaiyunToken);
 
-// export function: Determine whether the title of the result exceeds the maximum value of one line.
+export function getLanguageItemFromYoudaoId(youdaoLanguageId: string): LanguageItem {
+  for (const langItem of languageItemList) {
+    if (langItem.youdaoLanguageId === youdaoLanguageId) {
+      return langItem;
+    }
+  }
+  return languageItemList[0];
+}
+
+/**
+ * get language item from tencent language id, if not found, return auto language item
+ */
+export function getLanguageItemFromTencentId(tencentLanguageId: string): LanguageItem {
+  for (const langItem of languageItemList) {
+    const tencentDetectLanguageId = langItem.tencentDetectLanguageId || langItem.tencentLanguageId;
+    if (tencentDetectLanguageId === tencentLanguageId) {
+      return langItem;
+    }
+  }
+  return languageItemList[0];
+}
+
+/**
+ * return language item from apple Chinese title, such as "中文" --> LanguageItem
+ *
+ * Todo: currently only support Chinese, later support other languages
+ */
+export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem {
+  for (const langItem of languageItemList) {
+    if (langItem.appleChineseLanguageTitle === chineseTitle) {
+      return langItem;
+    }
+  }
+  return languageItemList[0];
+}
+
+/**
+ * Get language item from franc language id
+ */
+export function getLanguageItemFromFrancId(francLanguageId: string): LanguageItem {
+  for (const langItem of languageItemList) {
+    if (langItem.francLanguageId === francLanguageId) {
+      return langItem;
+    }
+  }
+  return languageItemList[0];
+}
+
+/**
+ * Check language id is valid, except 'auto', ''
+ */
+export function isValidLanguageId(languageId: string): boolean {
+  if (languageId === "auto" || languageId.length === 0) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * get another language item expcept chinese from language item array
+ */
+export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
+  if (youdaoLanguageIds[0] === "zh-CHS") {
+    return youdaoLanguageIds[1];
+  } else {
+    return youdaoLanguageIds[0];
+  }
+}
+
+/**
+ * Determine whether the title of the result exceeds the maximum value of one line.
+ */
 export function isTranslateResultTooLong(formatResult: TranslateFormatResult | null): boolean {
   if (!formatResult) {
     return false;
@@ -62,78 +143,37 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   return false;
 }
 
-export function isPreferredChinese(): boolean {
-  const lanuguageIdPrefix = "zh";
-  const preferences: MyPreferences = getPreferenceValues();
-  if (preferences.language1.startsWith(lanuguageIdPrefix) || preferences.language2.startsWith(lanuguageIdPrefix)) {
-    return true;
-  }
-  return false;
-}
-
-export function getLanguageItemFromLanguageId(youdaoLanguageId: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    if (langItem.youdaoLanguageId === youdaoLanguageId) {
-      return langItem;
-    }
-  }
-  return {
-    youdaoLanguageId: "",
-    aliyunLanguageId: "",
-    languageTitle: "",
-    languageVoice: [""],
-  };
-}
-
-export function getLanguageItemFromTencentDetectLanguageId(tencentLanguageId: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    const tencentDetectLanguageId = langItem.tencentDetectLanguageId || langItem.tencentLanguageId;
-    if (tencentDetectLanguageId === tencentLanguageId) {
-      return langItem;
-    }
-  }
-  return {
-    youdaoLanguageId: "",
-    aliyunLanguageId: "",
-    languageTitle: "",
-    languageVoice: [""],
-  };
-}
-
-// function: get another language item expcept chinese
-
-function getLanguageItemExpceptChinese(from: LanguageItem, to: LanguageItem): LanguageItem {
-  if (from.youdaoLanguageId === "zh-CHS") {
-    return to;
-  } else {
-    return from;
-  }
-}
-
-export function getEudicWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const eudicWebLanguageId = getLanguageItemExpceptChinese(from, to).eudicWebLanguageId;
-  if (eudicWebLanguageId) {
-    return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryText)}`;
+export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+  const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
+  const eudicWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
+  if (languageId) {
+    return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
   return "";
 }
 
-export function getYoudaoWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const youdaoWebLanguageId = getLanguageItemExpceptChinese(from, to).youdaoWebLanguageId;
+export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+  const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
+  const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
   if (youdaoWebLanguageId) {
-    return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryText)}`;
+    return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
   return "";
 }
 
-export function getGoogleWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const fromLanguageId = from.googleLanguageId || from.youdaoLanguageId;
-  const toLanguageId = to.googleLanguageId || to.youdaoLanguageId;
-  const text = encodeURI(queryText);
+export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+  const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
+  const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
+  const fromLanguageId = fromLanguageItem.googleLanguageId || fromLanguageItem.youdaoLanguageId;
+  const toLanguageId = toLanguageItem.googleLanguageId || toLanguageItem.youdaoLanguageId;
+  const text = encodeURI(queryTextInfo.word);
   return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
 }
 
-// function: query the clipboard text from LocalStorage
+/**
+ * query the clipboard text from LocalStorage
+ * * deprecate
+ */
 export async function tryQueryClipboardText(queryClipboardText: (text: string) => void) {
   const text = await Clipboard.readText();
   console.log("query clipboard text: " + text);
@@ -162,74 +202,21 @@ export async function tryQueryClipboardText(queryClipboardText: (text: string) =
   }
 }
 
-// function: save last Clipboard text and timestamp
+/**
+ * save last Clipboard text and timestamp
+ */
 export function saveQueryClipboardRecord(text: string) {
   const jsonString: string = JSON.stringify({
     queryText: text,
     timestamp: new Date().getTime(),
   });
   LocalStorage.setItem(clipboardQueryTextKey, jsonString);
-
   console.log("saveQueryClipboardRecord: " + jsonString);
 }
 
-// function: remove all punctuation from the text
-export function removeEnglishPunctuation(text: string) {
-  return text.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~]/g, "");
-}
-
-// function: remove all Chinese punctuation and blank space from the text
-export function removeChinesePunctuation(text: string) {
-  return text.replace(
-    /[\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]/g,
-    ""
-  );
-}
-
-// function: remove all punctuation from the text
-export function removePunctuation(text: string) {
-  return removeEnglishPunctuation(removeChinesePunctuation(text));
-}
-
-// function: remove all blank space from the text
-export function removeBlankSpace(text: string) {
-  return text.replace(/\s/g, "");
-}
-
-// function: check if the text contains Chinese characters
-export function isContainChinese(text: string) {
-  return /[\u4e00-\u9fa5]/g.test(text);
-}
-
-// function: check if text isEnglish or isNumber
-export function isEnglishOrNumber(text: string) {
-  const pureText = removePunctuation(removeBlankSpace(text));
-  console.log("pureText: " + pureText);
-  return /^[a-zA-Z0-9]+$/.test(pureText);
-}
-
-// function: get the language type represented by the string, priority to use English and Chinese, and then auto
-export function detectInputTextLanguageId(inputText: string): string {
-  let fromLanguageId = "auto";
-  const EnglishLanguageId = "en";
-  const ChineseLanguageId = "zh-CHS";
-  if (
-    isEnglishOrNumber(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === EnglishLanguageId || defaultLanguage2.youdaoLanguageId === EnglishLanguageId)
-  ) {
-    fromLanguageId = EnglishLanguageId;
-  } else if (
-    isContainChinese(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === ChineseLanguageId || defaultLanguage2.youdaoLanguageId === ChineseLanguageId)
-  ) {
-    fromLanguageId = ChineseLanguageId;
-  }
-
-  console.log("fromLanguage-->:", fromLanguageId);
-  return fromLanguageId;
-}
-
-// function: return and update the autoSelectedTargetLanguage according to the languageId
+/**
+ * return and update the autoSelectedTargetLanguage according to the languageId
+ */
 export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): string {
   let targetLanguageId = "auto";
   if (accordingLanguageId === defaultLanguage1.youdaoLanguageId) {
@@ -238,12 +225,15 @@ export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): st
     targetLanguageId = defaultLanguage1.youdaoLanguageId;
   }
 
-  const targetLanguage = getLanguageItemFromLanguageId(targetLanguageId);
+  const targetLanguage = getLanguageItemFromYoudaoId(targetLanguageId);
 
   console.log(`languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`);
   return targetLanguage.youdaoLanguageId;
 }
 
+/**
+ * traverse all applications, check if Eudic is installed
+ */
 async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInstalled: boolean) => void) {
   const installedApplications = await getApplications();
   LocalStorage.setItem(eudicBundleId, false);
@@ -262,7 +252,7 @@ async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInsta
 
 export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean) => void) {
   LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    console.log("is install Eudic: ", isInstalledEudic);
+    // console.log("is install Eudic: ", isInstalledEudic);
 
     if (isInstalledEudic == true) {
       setIsInstalledEudic(true);
@@ -291,4 +281,17 @@ export function myDecrypt(ciphertext: string) {
 
 export function isShowMultipleTranslations(formatResult: TranslateFormatResult) {
   return !formatResult.explanations && !formatResult.forms && !formatResult.webPhrases && !formatResult.webTranslation;
+}
+
+/**
+ * Trim the text to the max length, default 2000.
+ *
+ * 例如，百度翻译 query 长度限制：为保证翻译质量，请将单次请求长度控制在 6000 bytes 以内（汉字约为输入参数 2000 个）
+ */
+export function trimTextLength(text: string, length = 2000) {
+  text = text.trim();
+  if (text.length > length) {
+    return text.substring(0, length) + "...";
+  }
+  return text.substring(0, length);
 }
