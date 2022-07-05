@@ -13,6 +13,8 @@ import {
   User,
   PagePropertyType,
   supportedPropTypes,
+  UnwrapRecord,
+  NotionObject,
 } from "./types";
 
 const clientId = "c843219a-d93c-403c-8e4d-e8aa9a987494";
@@ -252,13 +254,17 @@ export async function queryDatabase(databaseId: string, query: string | undefine
   }
 }
 
+type CreateRequest = Parameters<typeof notion.pages.create>[0];
+type DatabaseCreateProperties<T> = T extends { parent: { type?: "database_id" }; properties: infer U } ? U : never;
+type DatabaseCreateProperty = UnwrapRecord<DatabaseCreateProperties<CreateRequest>>;
+
 // Create database page
 export async function createDatabasePage(values: Form.Values): Promise<Page | undefined> {
   try {
     await authorize();
     const { database, content, ...props } = values;
 
-    const arg: Parameters<typeof notion.pages.create>[0] = {
+    const arg: CreateRequest = {
       parent: { database_id: database },
       properties: {},
     };
@@ -322,13 +328,17 @@ export async function createDatabasePage(values: Form.Values): Promise<Page | un
               phone_number: value,
             };
             break;
-          case "date":
+          case "date": {
+            type DateProperty = Exclude<Extract<DatabaseCreateProperty, { type?: "date" }>["date"], null>;
+            type DatePropertyTimeZone = Required<DateProperty["time_zone"]>;
             arg.properties[propId] = {
               date: {
-                start: value,
+                start: moment(value).subtract(new Date().getTimezoneOffset(), "minutes").toISOString(),
+                time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
               },
             };
             break;
+          }
           case "checkbox":
             arg.properties[propId] = {
               checkbox: value === 1 ? true : false,
@@ -538,10 +548,7 @@ export async function appendToPage(pageId: string, params: { content: string }):
   }
 }
 
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>): Page {
+function pageMapper(jsonPage: NotionObject): Page {
   const page: Page = {
     object: jsonPage.object,
     id: jsonPage.id,

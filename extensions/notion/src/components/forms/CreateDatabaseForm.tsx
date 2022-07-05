@@ -60,9 +60,9 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
 
       if (openPage) {
         handleOnOpenPage(page, storeRecentlyOpenedPage);
-      } else {
-        pop();
       }
+
+      pop();
     }
   }
 
