@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-title",
+  "title": "Title",
+  "description": "Capitalize your titles properly with Title Case, as per \"The Chicago Manual of Style\".",
+  "icon": "command-icon.png",
+  "author": "timolins",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Capitalize Title",
+      "description": "Capitalize text in \"Title Case\".",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "title": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "~18.0.1",
+    "@types/react": "^18.0.14",
+    "@types/title": "^3.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "react-devtools": "^4.24.7",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
