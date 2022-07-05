@@ -1,5 +1,5 @@
 # Battery Health Check Changelog
 
-## [Add Battery Health Check] - 2022-06-25
+## [Add Battery Health Check] - 2022-07-05
 
 Initial version code
