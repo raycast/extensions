@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix Tenor bug in Grid view] - 2022-06-30
+## [Fix Tenor bug in Grid view] - 2022-07-05
 - Fixes bug where medium-sized Tenor grid gifs weren't animating
 - Switches the default layout type to grid
 - Default initial state grid items to "small"
