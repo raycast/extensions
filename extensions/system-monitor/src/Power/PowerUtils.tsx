@@ -4,7 +4,7 @@ import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
-const isValidTime = (value) => {
+const isValidTime = (value: string): boolean => {
   const regexp = /^([0-9]?[0-9]):([0-5]?[0-9])$/;
   if (regexp.test(value)) {
     return true;
@@ -12,21 +12,21 @@ const isValidTime = (value) => {
   return false;
 };
 
-const getCycleCount = async () => {
+const getCycleCount = async (): Promise<string> => {
   try {
     const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Cycle Count' | awk '{print $3}'");
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };
 
-const getIsCharging = async () => {
+const getIsCharging = async (): Promise<boolean> => {
   try {
     const output = await execp(
       "/usr/sbin/system_profiler SPPowerDataType | grep 'Charging' | sed -n 2p | awk '{print $2}'"
@@ -35,40 +35,40 @@ const getIsCharging = async () => {
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };
-const getBatteryLevel = async () => {
+const getBatteryLevel = async (): Promise<string> => {
   try {
     const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'State of Charge' | awk '{print $5}'");
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };
-const getBatteryCondition = async () => {
+const getBatteryCondition = async (): Promise<string> => {
   try {
     const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Condition' | awk '{print $2}'");
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };
 
-const getMaxBatteryCapacity = async () => {
+const getMaxBatteryCapacity = async (): Promise<string> => {
   try {
     const output = await execp(
       "/usr/sbin/system_profiler SPPowerDataType | grep 'Maximum Capacity' | awk '{print $3}'"
@@ -77,23 +77,23 @@ const getMaxBatteryCapacity = async () => {
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };
 
-const getBatteryTime = async () => {
+const getBatteryTime = async (): Promise<string> => {
   try {
     const output = await execp("/usr/bin/pmset -g ps | sed -n 2p | awk '{print $5}'");
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      return execErr.stderr;
+      throw execErr.stderr;
     } else {
-      return `${err}`;
+      throw `${err}`;
     }
   }
 };

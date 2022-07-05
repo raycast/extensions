@@ -3,9 +3,10 @@ import { freemem, freememPercentage } from "os-utils";
 import { useEffect, useState } from "react";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
+import { MemoryMonitorState } from "../Interfaces";
 
 export default function MemoryMonitor() {
-  const [state, setState] = useState({
+  const [state, setState] = useState<MemoryMonitorState>({
     freeDisk: "Loading...",
     totalDisk: "Loading...",
     freeMem: "Loading...",
@@ -42,7 +43,7 @@ export default function MemoryMonitor() {
   return (
     <>
       <List.Item
-        title={`📝 Memory: `}
+        title={`📝 Memory`}
         subtitle={`${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
         detail={
           <List.Item.Detail
@@ -51,8 +52,8 @@ export default function MemoryMonitor() {
                 <List.Item.Detail.Metadata.Label title="Total Disk Space" text={state.totalDisk} />
                 <List.Item.Detail.Metadata.Label title="Free Disk Space" text={state.freeDisk} />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Free RAM %: " text={state.freeMemPercentage + " %"} />
-                <List.Item.Detail.Metadata.Label title="Free RAM : " text={state.freeMem + " GB"} />
+                <List.Item.Detail.Metadata.Label title="Free RAM %" text={state.freeMemPercentage + " %"} />
+                <List.Item.Detail.Metadata.Label title="Free RAM" text={state.freeMem + " GB"} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
                 {state.topProcess !== [] &&

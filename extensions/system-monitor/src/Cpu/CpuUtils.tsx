@@ -4,23 +4,23 @@ import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
-const getTopCpuProcess = async (count) => {
+const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   try {
     const output = await execp("/bin/ps -Aceo pcpu,comm -r");
-    let processList = output.stdout.trim().split("\n").slice(1, 6);
+    let processList: string[] = output.stdout.trim().split("\n").slice(1, 6);
+    let modProcessList: string[][] = [];
     processList.forEach((value, index) => {
-      processList[index] = value.trim().split(" ");
-      processList[index] = [processList[index][0], processList[index].slice(1).join(" ")];
+      let temp: string[] = value.trim().split(" ");
+      temp = [temp[0], temp.slice(1).join(" ")];
+      modProcessList.push(temp);
     });
-    return processList;
+    return modProcessList;
   } catch (err) {
     const execErr = err as ExecError;
     if (execErr?.code === 1) {
-      console.log(execErr.stderr);
-      return [];
+      throw execErr.stderr;
     } else {
-      console.log(`${err}`);
-      return [];
+      throw `${err}`;
     }
   }
 };

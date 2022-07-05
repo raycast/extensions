@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { cpuUsage } from "os-utils";
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
+import { CpuMonitorState } from "../Interfaces";
 
 export default function CpuMonitor() {
-  const [state, setState] = useState({
+  const [error, setError] = useState<Error>();
+  const [state, setState] = useState<CpuMonitorState>({
     cpu: "Loading...",
     avgLoad: ["Loading...", "Loading...", "Loading..."],
     topProcess: [],
@@ -15,28 +17,42 @@ export default function CpuMonitor() {
   useInterval(async () => {
     cpuUsage((v) => {
       setState((prevState) => {
-        return { ...prevState, cpu: Math.round(v * 100) };
+        return { ...prevState, cpu: Math.round(v * 100).toString() };
       });
     });
-    let newLoadAvg = loadavg();
-    let newTopProcess = await getTopCpuProcess(5);
-    setState((prevState) => {
-      return {
-        ...prevState,
-        avgLoad: [
-          newLoadAvg[0].toFixed(2).toString(),
-          newLoadAvg[1].toFixed(2).toString(),
-          newLoadAvg[2].toFixed(2).toString(),
-        ],
-        topProcess: newTopProcess,
-      };
-    });
+    try {
+      let newLoadAvg = loadavg();
+      let newTopProcess = await getTopCpuProcess(5);
+      setState((prevState) => {
+        return {
+          ...prevState,
+          avgLoad: [
+            newLoadAvg[0].toFixed(2).toString(),
+            newLoadAvg[1].toFixed(2).toString(),
+            newLoadAvg[2].toFixed(2).toString(),
+          ],
+          topProcess: newTopProcess,
+        };
+      });
+    } catch (err: any) {
+      setError(err);
+    }
   }, 1000);
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Fetch Top Processes",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   return (
     <>
       <List.Item
-        title={`🖥️ CPU :`}
+        title={`🖥️ CPU`}
         subtitle={`${state.cpu}%`}
         detail={
           <List.Item.Detail

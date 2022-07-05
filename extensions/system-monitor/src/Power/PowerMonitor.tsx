@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   getBatteryCondition,
@@ -10,9 +10,11 @@ import {
   isValidTime,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
+import { PowerMointorState } from "../Interfaces";
 
 const PowerMonitor = () => {
-  const [state, setState] = useState({
+  const [error, setError] = useState<Error>();
+  const [state, setState] = useState<PowerMointorState>({
     batteryLevel: "Checking...",
     isCharging: false,
     cycleCount: "Checking...",
@@ -33,8 +35,8 @@ const PowerMonitor = () => {
           ...tempState,
         };
       });
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      setError(err);
     }
   }, 1000);
   useEffect(() => {
@@ -53,10 +55,19 @@ const PowerMonitor = () => {
     };
     updatePowerInfo();
   }, []);
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't fetch Power Info",
+        message: error.message,
+      });
+    }
+  }, [error]);
   return (
     <>
       <List.Item
-        title={`🔋 Power : `}
+        title={`🔋 Power`}
         subtitle={`${state.batteryLevel}%`}
         detail={
           <List.Item.Detail

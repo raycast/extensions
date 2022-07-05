@@ -2,17 +2,18 @@ import { useState } from "react";
 import { List } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
-import { formatBytes } from "../Power/utils";
+import { formatBytes, isObjectEmpty } from "../Power/utils";
+import { NetworkMonitorState } from "../Interfaces";
 
 export default function NetworkMonitor() {
-  const [state, setState] = useState({
-    upload: "Loading...",
-    download: "Loading...",
+  const [state, setState] = useState<NetworkMonitorState>({
+    upload: 0,
+    download: 0,
     processList: [],
     prevProcess: {},
   });
 
-  const sortFunction = (a, b) => {
+  const sortFunction = (a: [string, number, number], b: [string, number, number]): number => {
     let minA = Math.min(a[1], a[2]);
     let maxA = Math.max(a[1], a[2]);
     let minB = Math.min(b[1], b[2]);
@@ -29,19 +30,19 @@ export default function NetworkMonitor() {
       return 0;
     }
   };
-  const getTopProcess = (processList) => {
-    processList.sort(sortFunction);
-    processList = processList.slice(0, 5);
-    return processList;
+  const getTopProcess = (arr: [string, number, number][]): [string, number, number][] => {
+    arr.sort(sortFunction);
+    arr = arr.slice(0, 5);
+    return arr;
   };
 
   useInterval(async () => {
-    const currProcess = await getNetworkData();
-    const prevProcess = state.prevProcess;
-    let newUpload = 0;
-    let newDownload = 0;
-    let newProcessList = [];
-    if (prevProcess.length !== 0) {
+    const currProcess: { [key: string]: number[] } = await getNetworkData();
+    const prevProcess: { [key: string]: number[] } = state.prevProcess;
+    let newUpload: number = 0;
+    let newDownload: number = 0;
+    let newProcessList: [string, number, number][] = [];
+    if (!isObjectEmpty(prevProcess)) {
       for (const key in currProcess) {
         let down = currProcess[key][0] - (key in prevProcess ? prevProcess[key][0] : 0);
         if (down < 0) {
@@ -77,7 +78,7 @@ export default function NetworkMonitor() {
         subtitle={
           state.processList.length
             ? "D : " + formatBytes(state.download) + "/s U : " + formatBytes(state.upload) + " /s"
-            : "Loading..."
+            : ""
         }
         detail={
           <List.Item.Detail
