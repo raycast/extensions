@@ -56,24 +56,28 @@
   "preferences": [
     {
       "name": "rating_pg",
-      "title": "Enable PG Questions",
+      "title": "Enabled Ratings",
+      "label": "Enable PG Questions",
       "description": "Enables questions that include general topics.",
       "type": "checkbox",
-      "default": true
+      "default": true,
+      "required": false
     },
     {
       "name": "rating_pg13",
-      "title": "Enable PG13 Questions",
+      "label": "Enable PG13 Questions",
       "description": "Enables questions that include content about relationships.",
       "type": "checkbox",
-      "default": true
+      "default": true,
+      "required": false
     },
     {
       "name": "rating_r",
-      "title": "Enable 18+ Questions",
+      "label": "Enable 18+ Questions",
       "description": "Enables questions that reference adult content.",
       "type": "checkbox",
-      "default": false
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
