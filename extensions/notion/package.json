@@ -34,6 +34,13 @@
       "title": "Open Link using Notion",
       "description": "Open Notion URL in clipboard using the Notion app",
       "mode": "no-view"
+    },
+    {
+      "name": "convert-to-app-link",
+      "title": "Convert to App Link",
+      "subtitle": "Notion",
+      "description": "Converts Notion URL in clipboard into Notion app link",
+      "mode": "no-view"
     }
   ],
   "preferences": [

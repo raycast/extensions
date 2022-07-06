@@ -1,4 +1,4 @@
-import { Clipboard, open, showHUD } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
 import { getAppLinkFromWebLink } from "./utils/getAppLinkFromWebLink";
 
 export default async function main() {
@@ -6,7 +6,7 @@ export default async function main() {
   try {
     const appLink = await getAppLinkFromWebLink(clipboardText);
     if (appLink) {
-      await open(appLink);
+      await Clipboard.copy(appLink);
     }
   } catch (error) {
     if (error instanceof Error) {
