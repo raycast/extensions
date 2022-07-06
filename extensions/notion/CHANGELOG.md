@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [New Command] - 2022-07-06
+
+- Added "Open Link using Notion" command
+
 ## [Bugfixes] - 2022-07-05
 
 - Fixed `Create Database Page` to use client [timezone](https://developers.notion.com/changelog/time-zone-support) when supplying a date field.
