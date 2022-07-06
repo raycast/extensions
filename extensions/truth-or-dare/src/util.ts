@@ -1,8 +1,16 @@
-import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 
-export type QuestionType = "TRUTH" | "DARE" | "WYR" | "NHIE" | "PARANOIA";
+export type QuestionType = "TOD" | "TRUTH" | "DARE" | "WYR" | "NHIE" | "PARANOIA";
 export type Rating = "PG" | "PG13" | "R";
+export const gameNames = {
+  TOD: "Truth or Dare",
+  WYR: "Would You Rather",
+  NHIE: "Never Have I Ever",
+  PARANOIA: "Most Likely To",
+  TRUTH: "Truth",
+  DARE: "Dare",
+};
 
 export async function fetchQuestion(type: QuestionType): Promise<{
   question: string;
@@ -15,10 +23,6 @@ export async function fetchQuestion(type: QuestionType): Promise<{
     question: string;
     error: string;
   };
-}
-
-export function capitalizeFirstLetter(text: string) {
-  return text.charAt(0).toUpperCase() + text.toLowerCase().slice(1);
 }
 
 export function getRatingsFromPrefrences({
@@ -39,5 +43,5 @@ export function getRatingsFromPrefrences({
 
 export async function copyQuestion(question: string) {
   await Clipboard.copy(question);
-  showHUD("✅ Copied Question");
+  showToast({ title: "Copied Question!", style: Toast.Style.Success });
 }
