@@ -88,11 +88,17 @@ export default function SearchDocumentation() {
                 id={hit.objectID}
                 key={hit.objectID}
                 icon="command-icon2.png"
-                title={
+                title={(
                   (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
                   " " +
-                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "")
-                }
+                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "") +
+                  " " +
+                  (hit.hierarchy.lvl4 != null ? hit.hierarchy.lvl4 : "") +
+                  " " +
+                  (hit.hierarchy.lvl5 != null ? hit.hierarchy.lvl5 : "") +
+                  " " +
+                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")
+                ).replace("&amp;", "&")}
                 actions={
                   <ActionPanel title={hit.url}>
                     <Action.OpenInBrowser url={hit.url} />
