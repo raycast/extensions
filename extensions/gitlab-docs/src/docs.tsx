@@ -29,9 +29,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       accessoryTitle={searchResult.category}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={searchResult.url} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={searchResult.url} />
         </ActionPanel>
       }
     />
@@ -88,7 +86,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const lastSearchText: string = (await LocalStorage.getItem("GitLabDocs.lastSearch")) || '';
+  const lastSearchText: string = (await LocalStorage.getItem("GitLabDocs.lastSearch")) || "";
 
   const data = {
     requests: [

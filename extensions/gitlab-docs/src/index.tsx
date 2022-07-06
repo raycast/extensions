@@ -32,9 +32,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       subtitle={searchResult.category}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={searchResult.url} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={searchResult.url} />
         </ActionPanel>
       }
     />
@@ -91,7 +89,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const lastSearchText: string = (await LocalStorage.getItem("GitLabHandbook.lastSearch")) || 'about gitlab';
+  const lastSearchText: string = (await LocalStorage.getItem("GitLabHandbook.lastSearch")) || "about gitlab";
   const params = new URLSearchParams();
   params.append("q", searchText.length >= 3 ? searchText : lastSearchText);
 

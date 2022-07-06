@@ -17,7 +17,7 @@ export default function Command() {
       searchBarPlaceholder="Search GitLab Design System..."
       throttle
     >
-      {Object.entries(groupBy(state.metas, 'category')).map(([category, group]) => (
+      {Object.entries(groupBy(state.metas, "category")).map(([category, group]) => (
         <List.Section title={category + ""} subtitle={group.length + ""} key={category}>
           {group.map((searchResult) => (
             <SearchListItem key={searchResult.key} searchResult={searchResult} />
@@ -35,9 +35,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={searchResult.url} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={searchResult.url} />
         </ActionPanel>
       }
     />
