@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "alpinejs",
-      "title": "Search Alpine.js Documenantion",
+      "title": "Search Documenantion",
       "subtitle": "Alpine.js",
       "description": "Searches alpine.js documentation",
       "mode": "view"
