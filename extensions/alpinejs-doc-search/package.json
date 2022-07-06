@@ -1,15 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alpinejs",
-  "title": "Alpinejs",
-  "description": "Documentation Search",
+  "title": "Alpine.js",
+  "description": "Search Alpine.js documentation",
   "icon": "command-icon2.png",
   "author": "aurawindsurfing",
   "license": "MIT",
   "commands": [
     {
       "name": "alpinejs",
-      "title": "Search Alpine.js Documenantion",
+      "title": "Search Documenantion",
       "subtitle": "Alpine.js",
       "description": "Searches alpine.js documentation",
       "mode": "view"
