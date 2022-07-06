@@ -25,6 +25,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
+      icon={`package_manager_icons/${searchResult.platform.toLowerCase()}.png`}
       subtitle={searchResult.description}
       accessoryTitle={searchResult.platform}
       actions={
