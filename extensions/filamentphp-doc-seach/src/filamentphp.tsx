@@ -69,7 +69,6 @@ export default function SearchFilamentphpDocumentation() {
     })();
   }, []);
 
-  // @ts-ignore
   return (
     <List
       throttle={true}
@@ -89,8 +88,8 @@ export default function SearchFilamentphpDocumentation() {
                 id={hit.objectID}
                 key={hit.objectID}
                 icon="command-icon2.png"
-                title={
-                  ((hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
+                title={(
+                  (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
                   " " +
                   (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "") +
                   " " +
@@ -98,8 +97,8 @@ export default function SearchFilamentphpDocumentation() {
                   " " +
                   (hit.hierarchy.lvl5 != null ? hit.hierarchy.lvl5 : "") +
                   " " +
-                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")).replace('&amp;', '&')
-                }
+                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")
+                ).replace("&amp;", "&")}
                 actions={
                   <ActionPanel title={hit.url}>
                     <Action.OpenInBrowser url={hit.url} />
@@ -110,10 +109,7 @@ export default function SearchFilamentphpDocumentation() {
             ))}
         </List.Section>
       ))}
-      <List.EmptyView
-          icon="empty-state-icon2.png"
-          title="Whoops! We did not find any results!"
-      />
+      <List.EmptyView icon="empty-state-icon2.png" title="Whoops! We did not find any results!" />
     </List>
   );
 }
