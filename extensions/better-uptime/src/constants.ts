@@ -6,3 +6,5 @@ export const statusMap = {
   validating: "🤔",
   down: "❌",
 } as { [key: string]: string };
+
+export const requiredErrorText = "This field is required!";
