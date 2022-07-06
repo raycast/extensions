@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Add details view]
+
+Add details view so the full text of translations can be previewed
+
 ## [Fix] - 2022-06-15
 
 Fix character encoding in `TextArea` on translate form
