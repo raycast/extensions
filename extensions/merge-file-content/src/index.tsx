@@ -1,6 +1,5 @@
 import { Form, ActionPanel, Action, showToast } from "@raycast/api";
 import * as fs from 'fs-extra';
-import * as path from 'path';
 
 type Values = {
   inPath: string;
