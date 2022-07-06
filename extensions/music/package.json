@@ -232,6 +232,13 @@
         "track",
         "rating"
       ]
+    },
+    {
+      "name": "repeat", 
+      "title": "Toggle Repeat",
+      "subtitle": "Apple Music",
+      "description": "Toggle repeat mode.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
