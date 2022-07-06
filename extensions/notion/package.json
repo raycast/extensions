@@ -8,7 +8,8 @@
   "license": "MIT",
   "contributors": [
     "mathieudutour",
-    "metakirby5"
+    "metakirby5",
+    "sasivarnan"
   ],
   "categories": [
     "Applications",
@@ -27,6 +28,12 @@
       "title": "Search Notion",
       "description": "Search for Notion databases and pages.",
       "mode": "view"
+    },
+    {
+      "name": "open-with-notion",
+      "title": "Open Link using Notion",
+      "description": "Open Notion URL in clipboard using the Notion app",
+      "mode": "no-view"
     }
   ],
   "preferences": [

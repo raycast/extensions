@@ -1,0 +1,5 @@
+{
+  "emptyClipboard": "🗑️ Clipboard is empty",
+  "invalidURL": "❌ Copied text is not a valid URL",
+  "invalidNotionURL": "❌ Copied text is not a valid Notion URL"
+}
