@@ -9,7 +9,7 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search npm packages..."
+      searchBarPlaceholder="Search packages on Libraries.io..."
       throttle
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
