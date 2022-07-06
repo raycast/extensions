@@ -90,15 +90,15 @@ export default function SearchFilamentphpDocumentation() {
                 key={hit.objectID}
                 icon="command-icon2.png"
                 title={
-                  (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
+                  ((hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
                   " " +
-                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3.replace('&amp;', '&') : "") +
+                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "") +
                   " " +
-                  (hit.hierarchy.lvl4 != null ? hit.hierarchy.lvl4.replace('&amp;', '&') : "") +
+                  (hit.hierarchy.lvl4 != null ? hit.hierarchy.lvl4 : "") +
                   " " +
-                  (hit.hierarchy.lvl5 != null ? hit.hierarchy.lvl5.replace('&amp;', '&') : "") +
+                  (hit.hierarchy.lvl5 != null ? hit.hierarchy.lvl5 : "") +
                   " " +
-                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6.replace('&amp;', '&') : "")
+                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")).replace('&amp;', '&')
                 }
                 actions={
                   <ActionPanel title={hit.url}>
