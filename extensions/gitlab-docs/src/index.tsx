@@ -1,8 +1,9 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
+import { LocalStorage } from "@raycast/api";
 
-const apiUrl = "https://search-api.swiftype.com/api/v1/public/installs/DTF81Pizm7yGQpgXcrMP/suggest.json";
+const apiUrl = "https://search-api.swiftype.com/api/v1/public/installs/DTF81Pizm7yGQpgXcrMP/search.json";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -28,18 +29,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       icon="../assets/handbook-icon.png"
       title={searchResult.name}
-      accessoryTitle={searchResult.category}
+      subtitle={searchResult.category}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Show Details" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
+            <Action.OpenInBrowser url={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -97,8 +91,9 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+  const lastSearchText: string = (await LocalStorage.getItem("GitLabHandbook.lastSearch")) || 'about gitlab';
   const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "" : searchText);
+  params.append("q", searchText.length >= 3 ? searchText : lastSearchText);
 
   const response = await fetch(apiUrl + "?" + params.toString(), {
     method: "get",
@@ -117,10 +112,14 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
+  if (searchText.length > 0 && searchText !== lastSearchText) {
+    await LocalStorage.setItem("GitLabHandbook.lastSearch", searchText);
+  }
+
   return json.records.page.map((result) => {
     return {
-      name: result.title,
-      category: result.sections[0],
+      name: result.sections[0],
+      category: `${result.sections[3]}: ${result.sections[4]}, ${result.sections[5]}, ${result.sections[6]}, ${result.sections[7]}, ${result.sections[8]}, ...`,
       url: result.url,
     };
   });
@@ -128,6 +127,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
 interface Parameters {
   title: string;
+  body: string;
   sections: string;
   url: string;
 }

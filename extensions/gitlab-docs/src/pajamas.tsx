@@ -2,6 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { LocalStorage } from "@raycast/api";
+import groupBy from "lodash.groupby";
 
 const baseUrl = "https://design.gitlab.com/";
 const apiUrl = `${baseUrl}/_nuxt/search-index/en.json`;
@@ -16,11 +17,13 @@ export default function Command() {
       searchBarPlaceholder="Search GitLab Design System..."
       throttle
     >
-      <List.Section title="Results" subtitle={state.metas.length + ""}>
-        {state.metas.map((searchResult) => (
-          <SearchListItem key={searchResult.key} searchResult={searchResult} />
-        ))}
-      </List.Section>
+      {Object.entries(groupBy(state.metas, 'category')).map(([category, group]) => (
+        <List.Section title={category + ""} subtitle={group.length + ""} key={category}>
+          {group.map((searchResult) => (
+            <SearchListItem key={searchResult.key} searchResult={searchResult} />
+          ))}
+        </List.Section>
+      ))}
     </List>
   );
 }
@@ -30,18 +33,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       icon="../assets/pajamas-icon.png"
       title={searchResult.name}
-      accessoryTitle={searchResult.category}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Show Details" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
+            <Action.OpenInBrowser url={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -146,12 +141,10 @@ interface MetaItem {
   title: string;
   route: string;
 }
-
 interface SearchState {
   metas: SearchResult[];
   isLoading: boolean;
 }
-
 interface SearchResult {
   key: string;
   icon?: string;

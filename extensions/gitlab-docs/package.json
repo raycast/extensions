@@ -31,7 +31,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.1",
+    "@types/lodash.groupby": "^4.6.7",
     "apicache": "^1.6.3",
+    "lodash.groupby": "^4.6.0",
     "node-fetch": "^3.0.0",
     "node-json-cache": "^0.0.2",
     "simple-json-cache": "^1.0.3"
