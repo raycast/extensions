@@ -23,12 +23,9 @@ export default function FundingOffers() {
         return (
           <List.Item
             key={interest.id}
-            title={interest.currency}
-            subtitle={amount}
+            title={`$${amount} ${interest.currency}`}
+            subtitle={`${roi}%`}
             accessories={[
-              {
-                text: `${roi}%`,
-              },
               {
                 date: new Date(interest.mts),
               },

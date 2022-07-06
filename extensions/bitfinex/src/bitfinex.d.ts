@@ -33,6 +33,11 @@ declare module "bitfinex-api-node" {
 
     fundingTrades(symbol = "fBTC", start = 0, end = Date.now(), limit = null, cb?: CallbackFn): Promise<unknown>;
 
+    fundingLoans (symbol = 'fUSD', cb?: CallbackFn): Promise<unknown>;
+    fundingLoanHistory (symbol?, start = null, end = null, limit = null, cb?: CallbackFn): Promise<unknown>
+
+
+    closeFunding (params = {}, cb?: CallbackFn): Promise<unknown>;
     
     ledgers (filters?: LedgerFilters, start = null, end = Date.now(), limit = 25, cb?: CallbackFn): Promise<unknown>
   }
