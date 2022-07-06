@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "merge-file-content",
   "title": "MergeContent",
-  "description": "合并文件夹中所有文件的内容",
+  "description": "合并一个指定目录下的所有指定文件中的内容到一个指定的文件里面",
   "icon": "command-icon.png",
   "author": "carlton",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "MergeContent",
-      "description": "合并文件夹中所有文件的内容",
+      "description": "合并一个指定目录下的所有指定文件中的内容到一个指定的文件里面",
       "mode": "view"
     }
   ],

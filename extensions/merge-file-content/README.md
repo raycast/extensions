@@ -1,3 +1,3 @@
-# Texts
+# MergeFileContent
 
-文本处理工具
+合并所有文件内容到指定文件
