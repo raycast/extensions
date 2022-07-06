@@ -31,5 +31,11 @@
     "eslint-plugin-react": "^7.30.1",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
