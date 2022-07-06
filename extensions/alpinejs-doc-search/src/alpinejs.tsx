@@ -46,7 +46,7 @@ export default function SearchDocumentation() {
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const search = async (query = "") => {
+  const search = async (query = "install") => {
     setIsLoading(true);
 
     return await algoliaIndex
@@ -103,6 +103,10 @@ export default function SearchDocumentation() {
             ))}
         </List.Section>
       ))}
+      <List.EmptyView
+          icon="empty-icon.png"
+          title="Whoops! We did not find any matches for your search."
+      />
     </List>
   );
 }
