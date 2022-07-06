@@ -103,10 +103,7 @@ export default function SearchDocumentation() {
             ))}
         </List.Section>
       ))}
-      <List.EmptyView
-          icon="empty-icon.png"
-          title="Whoops! We did not find any matches for your search."
-      />
+      <List.EmptyView icon="empty-icon.png" title="Whoops! We did not find any matches for your search." />
     </List>
   );
 }
