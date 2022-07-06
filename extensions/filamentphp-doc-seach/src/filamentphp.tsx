@@ -46,7 +46,7 @@ export default function SearchFilamentphpDocumentation() {
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const search = async (query = "") => {
+  const search = async (query = "admin") => {
     setIsLoading(true);
 
     return await algoliaIndex
@@ -103,6 +103,10 @@ export default function SearchFilamentphpDocumentation() {
             ))}
         </List.Section>
       ))}
+      <List.EmptyView
+          icon="empty-state-icon2.png"
+          title="Whoops! We did not find any results!"
+      />
     </List>
   );
 }
