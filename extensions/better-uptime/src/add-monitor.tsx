@@ -72,11 +72,7 @@ export default function Command(): JSX.Element {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="monitor_type"
-        title="Monitor Type"
-        onChange={(value) => setMonitorType(value)}
-      >
+      <Form.Dropdown id="monitor_type" title="Monitor Type" onChange={(value) => setMonitorType(value)}>
         <Form.Dropdown.Item key="status" value="status" title="Status" />
         <Form.Dropdown.Item key="ping" value="ping" title="Ping" />
       </Form.Dropdown>
@@ -129,30 +125,11 @@ export default function Command(): JSX.Element {
           }}
         />
       )}
-      <Form.Checkbox
-        id="call"
-        label="Call"
-        defaultValue={false}
-      />
-      <Form.Checkbox
-        id="sms"
-        label="Send SMS"
-        defaultValue={false}
-      />
-      <Form.Checkbox
-        id="email"
-        label="Send Email"
-        defaultValue={true}
-      />
-      <Form.Checkbox
-        id="push"
-        label="Push Notification"
-        defaultValue={false}
-      />
-      <Form.TextField
-        id="pronounceable_name"
-        title="Pronounceable Name"
-      />
+      <Form.Checkbox id="call" label="Call" defaultValue={false} />
+      <Form.Checkbox id="sms" label="Send SMS" defaultValue={false} />
+      <Form.Checkbox id="email" label="Send Email" defaultValue={true} />
+      <Form.Checkbox id="push" label="Push Notification" defaultValue={false} />
+      <Form.TextField id="pronounceable_name" title="Pronounceable Name" />
     </Form>
   );
 }
