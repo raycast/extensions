@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
-import { formatBytes, isObjectEmpty } from "../Power/utils";
+import { formatBytes, isObjectEmpty } from "../utils";
 import { NetworkMonitorState } from "../Interfaces";
 
 export default function NetworkMonitor() {
@@ -74,11 +74,12 @@ export default function NetworkMonitor() {
   return (
     <>
       <List.Item
-        title={`📶️ Network`}
-        subtitle={
+        title={`Network`}
+        icon={{ source: "connection.png", tintColor: Color.PrimaryText }}
+        accessoryTitle={
           state.processList.length
-            ? "D : " + formatBytes(state.download) + "/s U : " + formatBytes(state.upload) + " /s"
-            : ""
+            ? "↓ " + formatBytes(state.download) + "/s ↑ " + formatBytes(state.upload) + " /s"
+            : "Loading..."
         }
         detail={
           <List.Item.Detail
@@ -100,7 +101,7 @@ export default function NetworkMonitor() {
                       <List.Item.Detail.Metadata.Label
                         key={index}
                         title={index + 1 + ".    " + value[0]}
-                        text={"D : " + formatBytes(value[1]) + "/s   U : " + formatBytes(value[2]) + " /s"}
+                        text={"↓ " + formatBytes(value[1]) + "/s   ↑ " + formatBytes(value[2]) + " /s"}
                       />
                     );
                   })}

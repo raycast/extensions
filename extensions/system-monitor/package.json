@@ -19,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.37.1",
     "os-utils": "0.0.14",
     "usehooks-ts": "^2.6.0"
   },

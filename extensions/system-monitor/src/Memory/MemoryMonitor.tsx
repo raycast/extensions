@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { freemem, freememPercentage } from "os-utils";
 import { useEffect, useState } from "react";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace } from "./MemoryUtils";
@@ -6,6 +6,7 @@ import { useInterval } from "usehooks-ts";
 import { MemoryMonitorState } from "../Interfaces";
 
 export default function MemoryMonitor() {
+  const [isLoading, setIsLoading] = useState(true);
   const [state, setState] = useState<MemoryMonitorState>({
     freeDisk: "Loading...",
     totalDisk: "Loading...",
@@ -15,17 +16,23 @@ export default function MemoryMonitor() {
   });
 
   useInterval(async () => {
-    const newTopProcess = await getTopRamProcess();
-    const newFreeDisk = await getFreeDiskSpace();
-    setState((prevState) => {
-      return {
-        ...prevState,
-        freeDisk: newFreeDisk,
-        freeMemPercentage: Math.round(freememPercentage() * 100).toString(),
-        freeMem: Math.round(freemem() / 1024).toString(),
-        topProcess: newTopProcess,
-      };
-    });
+    try {
+      const newTopProcess = await getTopRamProcess();
+      const newFreeDisk = await getFreeDiskSpace();
+      setState((prevState) => {
+        return {
+          ...prevState,
+          freeDisk: newFreeDisk,
+          freeMemPercentage: Math.round(freememPercentage() * 100).toString(),
+          freeMem: Math.round(freemem() / 1024).toString(),
+          topProcess: newTopProcess,
+        };
+      });
+    } catch (err: any) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, 1000);
   useEffect(() => {
     const permData = async () => {
@@ -43,8 +50,9 @@ export default function MemoryMonitor() {
   return (
     <>
       <List.Item
-        title={`📝 Memory`}
-        subtitle={`${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
+        title={`Memory`}
+        icon={{ source: "memory.png", tintColor: Color.PrimaryText }}
+        accessoryTitle={isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
         detail={
           <List.Item.Detail
             metadata={
