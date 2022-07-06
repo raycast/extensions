@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "truth-or-dare",
+  "title": "Truth or Dare",
+  "description": "Get a random Truth or Dare, Would You Rather, Never Have I Ever, or Paranoia question!\nPowered by https://truthordarebot.xyz",
+  "icon": "command-icon.png",
+  "author": "coding",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "truthordare",
+      "title": "Get Truth or Dare",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random Truth or Dare question",
+      "mode": "no-view"
+    },
+    {
+      "name": "truth",
+      "title": "Get Truth",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random Truth question",
+      "mode": "no-view"
+    },
+    {
+      "name": "dare",
+      "title": "Get Dare",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random Dare question",
+      "mode": "no-view"
+    },
+    {
+      "name": "nhie",
+      "title": "Get Never Have I Ever",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random NHIE question",
+      "mode": "no-view"
+    },
+    {
+      "name": "wyr",
+      "title": "Get Would You Rather",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random WYR question",
+      "mode": "no-view"
+    },
+    {
+      "name": "paranoia",
+      "title": "Get Paranoia",
+      "subtitle": "Truth or Dare",
+      "description": "Get a random Who's Most Likely To question",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rating_pg",
+      "title": "Enable PG Questions",
+      "description": "Enables questions that include general topics.",
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "rating_pg13",
+      "title": "Enable PG13 Questions",
+      "description": "Enables questions that include content about relationships.",
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "rating_r",
+      "title": "Enable 18+ Questions",
+      "description": "Enables questions that reference adult content.",
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "node-fetch": "^3.2.6"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
