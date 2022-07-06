@@ -2,7 +2,7 @@
 
 ## [New Command] - 2022-07-06
 
-- Added "Open Link using Notion" command
+- Added `Open Link using Notion` and `Convert to App Link` commands
 
 ## [Bugfixes] - 2022-07-05
 
