@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Add details view]
+## [Add details view] - 2022-07-07
 
 Add details view so the full text of translations can be previewed
 
