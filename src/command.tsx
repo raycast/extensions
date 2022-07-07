@@ -17,7 +17,7 @@ async function runEsseAsync(input: string, transformationId: string, callback: (
 		["-t", transformationId, "-i", input],
 		{ env: {}, encoding: "utf8" },
 		(error, stdout, _stderr) => {
-			console.log("ran esse");
+			console.log(`ran esse with ${transformationId}`);
 			if (error) {
 				throw error;
 			}
@@ -32,6 +32,7 @@ async function runEsseAsync(input: string, transformationId: string, callback: (
 }
 
 function textToMarkdown(input: string): string {
+	// return input.replace(/([`*_()[\]])|(^(?:[#-+*]|>+))|(?:^\d+(\.))/g, (_match, group) => `\\${group}`);
 	return `\`\`\`text\n${input}\n\`\`\``;
 }
 
@@ -48,22 +49,13 @@ export default function Command() {
 
 	const [textInfo, setTextInfo] = useState({ text: "", clipboardWasRead: false });
 	const [actionId, setActionId] = useState(defaultActionId);
-	const [prevActionId, setPrevActionId] = useState<string | undefined>(undefined);
 
 	const [isLoading, setIsLoading] = useState(true);
 
 	const initialResult = { transformedText: textInfo.text, markdown: "Loading..." };
 	const [result, setResult] = useState(initialResult);
 
-	const [hasRunOnce, setHasRunOnce] = useState(false);
-
 	useEffect(() => {
-		if (prevActionId === actionId && hasRunOnce) {
-			return;
-		}
-
-		setPrevActionId(actionId);
-
 		function finish(result: Result) {
 			setResult(result);
 			setIsLoading(false);
@@ -82,7 +74,6 @@ export default function Command() {
 		} else {
 			runEsseAsync(text, actionId, (transformedText) => {
 				const markdown = textToMarkdown(transformedText);
-				setHasRunOnce(true);
 				finish({ transformedText, markdown });
 			});
 		}
@@ -91,9 +82,11 @@ export default function Command() {
 	// TODO: add `getSelectedText` here as well, before Clipboard.readText() \
 	// Currently this results in the error `Cannot copy selected text from frontmost
 	// application.`
-	Promise.all([Clipboard.readText()]).then(([clipboard]) => {
-		setTextInfo({ text: clipboard ?? "", clipboardWasRead: true });
-	});
+	useEffect(() => {
+		Promise.all([Clipboard.readText()]).then(([clipboard]) => {
+			setTextInfo({ text: clipboard ?? "", clipboardWasRead: true });
+		});
+	}, [textInfo.clipboardWasRead]);
 
 	const onSelectionChange = useCallback(
 		(actionId) => {
@@ -128,22 +121,6 @@ export default function Command() {
 						})}
 					</List.Section>
 				);
-
-				// subtitle = subtitle ?? autocomplete ?? title;
-				// return (
-				// 	<List.Item
-				// 		title={title}
-				// 		accessories={[{ icon: Icon.QuestionMark, tooltip: subtitle }]}
-				// 		id={uid}
-				// 		key={uid}
-				// 		detail={<List.Item.Detail markdown={result.markdown}></List.Item.Detail>}
-				// 		actions={
-				// 			<ActionPanel title="#1 in raycast/extensions">
-				// 				<Action.CopyToClipboard title="Copy to Clipboard" content={result.transformedText} />
-				// 			</ActionPanel>
-				// 		}
-				// 	></List.Item>
-				// );
 			})}
 		</List>
 	);
