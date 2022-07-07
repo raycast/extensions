@@ -30,14 +30,18 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       accessoryTitle={searchResult.platform}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+          <ActionPanel.Section title="Links">
+            <Action.OpenInBrowser
+              title="Open Libraries.io Page"
+              url={`https://libraries.io/${searchResult.platform}/${searchResult.name}`}
+              icon={`libraries-io-icon.png`}
+            />
+            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
+            <Action.OpenInBrowser title="Open Repository" url={searchResult.repositoryUrl} />
+            <Action.OpenInBrowser
+              title="Open Package Manager Page"
+              url={searchResult.packageManagerUrl}
+              icon={`package_manager_icons/${searchResult.platform.toLowerCase()}.png`}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -108,7 +112,12 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   const json = (await response.json()) as
     | {
-        name: string; description?: string; platform: string; package_manager_url: string;
+        name: string;
+        description?: string;
+        platform: string;
+        homepage: string;
+        repository_url: string;
+        package_manager_url: string;
       }[]
     | { code: string; message: string };
 
@@ -121,7 +130,9 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       name: result.name,
       description: result.description,
       platform: result.platform,
-      url: result.package_manager_url,
+      homepage: result.homepage,
+      repositoryUrl: result.repository_url,
+      packageManagerUrl: result.package_manager_url,
     };
   });
 }
@@ -135,5 +146,7 @@ interface SearchResult {
   name: string;
   description?: string;
   platform: string;
-  url: string;
+  homepage: string;
+  repositoryUrl: string;
+  packageManagerUrl: string;
 }
