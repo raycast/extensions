@@ -115,7 +115,7 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   result = replaceAll(result, /<br>/g, "  \n");
 
   // replace all emojis
-  result = result.replace(/:(\w*):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
+  result = result.replace(/:(\w+):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
 
   // remove inline HTML tags
   result = replaceAll(result, /<[^>]+>/g, "");
