@@ -11,7 +11,7 @@
 	"license": "MIT",
 	"commands": [
 		{
-			"name": "esse-actions",
+			"name": "command",
 			"title": "Esse Actions",
 			"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
 			"mode": "view"
