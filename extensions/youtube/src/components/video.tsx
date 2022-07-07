@@ -1,19 +1,8 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  List,
-  OpenAction,
-  OpenInBrowserAction,
-  PushAction,
-  showHUD,
-} from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, List, showHUD, Action } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { getPrimaryActionPreference, PrimaryAction, Video } from "../lib/youtubeapi";
-import { OpenChannelInBrowser } from "./actions";
+import { LogoutAction, OpenChannelInBrowser } from "./actions";
 import { ChannelListItemDetailFetched } from "./channel";
 import fs from "fs";
 
@@ -28,7 +17,7 @@ function CopyVideoUrlAction(props: { videoId: string | null | undefined }): JSX.
   const url = videoUrl(props.videoId);
   if (url) {
     return (
-      <CopyToClipboardAction title="Copy Video URL" content={url} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy Video URL" content={url} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
     );
   }
   return null;
@@ -37,7 +26,7 @@ function CopyVideoUrlAction(props: { videoId: string | null | undefined }): JSX.
 function OpenVideoInBrowser(props: { videoId: string | null | undefined }): JSX.Element | null {
   const videoId = props.videoId;
   if (videoId) {
-    return <OpenInBrowserAction title="Open Video in Browser" url={`https://youtube.com/watch?v=${videoId}`} />;
+    return <Action.OpenInBrowser title="Open Video in Browser" url={`https://youtube.com/watch?v=${videoId}`} />;
   }
   return null;
 }
@@ -48,7 +37,7 @@ function OpenWithIINAAction(props: { videoId: string | null | undefined }): JSX.
     const appPath = "/Applications/IINA.app";
     if (fs.existsSync(appPath)) {
       return (
-        <OpenAction
+        <Action.Open
           title="Open with IINA"
           target={url}
           application="iina"
@@ -67,7 +56,7 @@ function OpenWithIINAAction(props: { videoId: string | null | undefined }): JSX.
 function ShowVideoDetails(props: { video: Video }): JSX.Element {
   const video = props.video;
   return (
-    <PushAction
+    <Action.Push
       title="Show Details"
       target={<VideoListItemDetail video={video} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
@@ -79,7 +68,7 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
   const cid = props.channelId;
   if (cid) {
     return (
-      <PushAction
+      <Action.Push
         title="Show Channel"
         target={<ChannelListItemDetailFetched channelId={cid} />}
         icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
@@ -155,15 +144,20 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
       key={videoId}
       title={title}
       icon={{ source: thumbnail }}
-      accessoryTitle={parts.join(" ")}
       actions={
         <ActionPanel>
           {mainActions()}
           <ShowChannelAction channelId={video.channelId} />
           <CopyVideoUrlAction videoId={videoId} />
           <OpenWithIINAAction videoId={videoId} />
+          <LogoutAction />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: parts.join(" "),
+        },
+      ]}
     />
   );
 }

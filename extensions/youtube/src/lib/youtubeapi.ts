@@ -2,16 +2,40 @@ import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
-import { GaxiosResponse } from "googleapis-common";
+import { GaxiosResponse, OAuth2Client } from "googleapis-common";
+import { authorize, getOAuthToken } from "./oauth";
 
-function createClient(): youtube_v3.Youtube {
+export function getClientID(): string | undefined {
   const pref = getPreferenceValues();
-  const apiKey = (pref.apikey as string) || "";
-  const client = youtube({ version: "v3", auth: apiKey });
-  return client;
+  return pref.clientid as string;
 }
 
-export const youtubeClient = createClient();
+export async function getYouTubeClient(): Promise<youtube_v3.Youtube> {
+  const pref = getPreferenceValues();
+  const apiKey = (pref.apikey as string) || "";
+  const clientID = getClientID();
+  if (clientID) {
+    await authorize(clientID);
+    console.log("use OAuth2");
+    const oAuth2Client = new OAuth2Client({
+      clientId: clientID,
+    });
+    const rt = await getOAuthToken();
+    oAuth2Client.setCredentials({
+      access_token: rt?.accessToken,
+      refresh_token: rt?.refreshToken,
+      id_token: rt?.idToken,
+      scope: rt?.scope,
+      expiry_date: rt?.expiresIn,
+    });
+    const client = youtube({ version: "v3", auth: oAuth2Client });
+    return client;
+  } else {
+    console.log("use API key");
+    const client = youtube({ version: "v3", auth: apiKey });
+    return client;
+  }
+}
 
 export enum PrimaryAction {
   Detail = "detail",
@@ -171,7 +195,9 @@ function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undef
 async function fetchAndInjectVideoStats(videos: Video[]) {
   const videoIds: string[] = videos.map((v) => v.id);
   if (videoIds) {
-    const statsData = await youtubeClient.videos.list({
+    const statsData = await (
+      await getYouTubeClient()
+    ).videos.list({
       id: videoIds,
       part: ["statistics"],
       maxResults: videoIds.length,
@@ -201,7 +227,9 @@ async function search(
   type: SearchType,
   channedId?: string | undefined
 ): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
-  const data = await youtubeClient.search.list({
+  const data = await (
+    await getYouTubeClient()
+  ).search.list({
     q: query,
     part: ["id", "snippet"],
     type: [type],
@@ -273,7 +301,9 @@ export async function searchChannels(query: string): Promise<Channel[]> {
   }
   if (channelIds) {
     // get stats
-    const statsData = await youtubeClient.channels.list({
+    const statsData = await (
+      await getYouTubeClient()
+    ).channels.list({
       id: channelIds,
       part: ["statistics", "contentDetails"],
       maxResults: channelIds.length,
@@ -311,7 +341,9 @@ export async function searchChannels(query: string): Promise<Channel[]> {
 export async function getChannel(channelId: string): Promise<Channel | undefined> {
   let result: Channel | undefined;
   if (channelId) {
-    const data = await youtubeClient.channels.list({
+    const data = await (
+      await getYouTubeClient()
+    ).channels.list({
       id: [channelId],
       part: ["statistics", "snippet", "contentDetails"],
       maxResults: 1,
@@ -362,7 +394,9 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
   let result: Video[] | undefined;
 
   if (playlistId) {
-    const data = await youtubeClient.playlistItems.list({
+    const data = await (
+      await getYouTubeClient()
+    ).playlistItems.list({
       playlistId: playlistId,
       part: ["snippet", "contentDetails"],
       maxResults: maxPageResults,
@@ -402,7 +436,9 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
 
 export async function getPopularVideos(): Promise<Video[] | undefined> {
   let result: Video[] | undefined;
-  const data = await youtubeClient.videos.list({
+  const data = await (
+    await getYouTubeClient()
+  ).videos.list({
     chart: "mostPopular",
     part: ["snippet", "contentDetails", "statistics"],
     maxResults: maxPageResults,

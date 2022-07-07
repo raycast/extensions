@@ -1,8 +1,13 @@
-import { ActionPanel, Color, Detail, Icon, ImageMask, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, List, showToast, Action, Image, Toast } from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
-import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
+import {
+  LogoutAction,
+  OpenChannelInBrowser,
+  SearchChannelVideosAction,
+  ShowRecentPlaylistVideosAction,
+} from "./actions";
 
 export function ChannelListItemDetail(props: {
   channel: Channel | undefined;
@@ -60,7 +65,7 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
 
   const mainActions = (): JSX.Element => {
     const showDetail = (
-      <PushAction
+      <Action.Push
         title="Show Details"
         target={<ChannelListItemDetail channel={channel} />}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
@@ -89,8 +94,7 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
     <List.Item
       key={channelId}
       title={channel.title}
-      icon={{ source: thumbnail, mask: ImageMask.Circle }}
-      accessoryTitle={parts.join(" ")}
+      icon={{ source: thumbnail, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
           {mainActions()}
@@ -99,8 +103,14 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
             title="Show Recent Channel Videos"
             playlistId={channel.relatedPlaylists?.uploads}
           />
+          <LogoutAction />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: parts.join(" "),
+        },
+      ]}
     />
   );
 }
@@ -114,7 +124,11 @@ export function ChannelListItemDetailFetched(props: { channelId: string }): JSX.
     return undefined;
   }, [channelId]);
   if (error) {
-    showToast(ToastStyle.Failure, "Error fetching channel info", getErrorMessage(error));
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error fetching channel info",
+      message: getErrorMessage(error),
+    });
   }
   return <ChannelListItemDetail channel={data} isLoading={isLoading} />;
 }

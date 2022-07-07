@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { searchVideos, useRefresher, Video } from "../lib/youtubeapi";
@@ -20,7 +20,11 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
     return undefined;
   }, [searchText]);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search videos", getErrorMessage(error));
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not search videos",
+      message: getErrorMessage(error),
+    });
   }
   if (data) {
     return (
