@@ -96,8 +96,10 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+  if (!searchText) return Promise.resolve([]);
+
   const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
+  params.append("q", searchText);
 
   const response = await fetch("https://libraries.io/api/search" + "?" + params.toString(), {
     method: "get",
