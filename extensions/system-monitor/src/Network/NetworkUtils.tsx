@@ -7,7 +7,7 @@ const execp = promisify(exec);
 const getNetworkData = async (): Promise<{ [key: string]: number[] }> => {
   try {
     const output = await execp(
-      "nettop -P -L 1 -k time,interface,state,rx_dupe,rx_ooo,re-tx,rtt_avg,rcvsize,tx_win,tc_class,tc_mgt,cc_algo,P,C,R,W,arch"
+      "/usr/bin/nettop -P -L 1 -k time,interface,state,rx_dupe,rx_ooo,re-tx,rtt_avg,rcvsize,tx_win,tc_class,tc_mgt,cc_algo,P,C,R,W,arch"
     );
     let processList: string[] = output.stdout.trim().split("\n").slice(1);
     let modProcessList: string[][] = [];
@@ -28,11 +28,7 @@ const getNetworkData = async (): Promise<{ [key: string]: number[] }> => {
     return processDict;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 export { getNetworkData };

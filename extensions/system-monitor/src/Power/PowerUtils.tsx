@@ -18,11 +18,7 @@ const getCycleCount = async (): Promise<string> => {
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 
@@ -34,11 +30,7 @@ const getIsCharging = async (): Promise<boolean> => {
     return output.stdout.trim() === "Yes";
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 const getBatteryLevel = async (): Promise<string> => {
@@ -47,11 +39,7 @@ const getBatteryLevel = async (): Promise<string> => {
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 const getBatteryCondition = async (): Promise<string> => {
@@ -60,11 +48,7 @@ const getBatteryCondition = async (): Promise<string> => {
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 
@@ -76,11 +60,7 @@ const getMaxBatteryCapacity = async (): Promise<string> => {
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 
@@ -90,11 +70,7 @@ const getBatteryTime = async (): Promise<string> => {
     return output.stdout.trim();
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 

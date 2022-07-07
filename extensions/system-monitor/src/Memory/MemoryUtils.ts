@@ -11,20 +11,13 @@ const getTopRamProcess = async (): Promise<string[][]> => {
     let modProcessList: string[][] = [];
     processList.forEach((value) => {
       let temp: string[] = value.trim().split(" ");
-      if (temp === undefined) {
-        throw new TypeError("undefined value");
-      }
       temp = [temp.slice(0, -1).join(" "), temp[temp.length - 1].slice(0, -1) + " MB"];
       modProcessList.push(temp);
     });
     return modProcessList;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 
@@ -37,11 +30,7 @@ const getFreeDiskSpace = async (): Promise<string> => {
     return freeDiskSpace;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 const getTotalDiskSpace = async (): Promise<string> => {
@@ -53,11 +42,7 @@ const getTotalDiskSpace = async (): Promise<string> => {
     return totalDiskSpace;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 

@@ -17,11 +17,7 @@ const getTopCpuProcess = async (count: number): Promise<string[][]> => {
     return modProcessList;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code === 1) {
-      throw execErr.stderr;
-    } else {
-      throw `${err}`;
-    }
+    throw execErr;
   }
 };
 

@@ -4,11 +4,11 @@ import { Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
-import { CpuMonitorState } from "../Interfaces";
+import { CpuMonitorState, ExecError } from "../Interfaces";
 
 export default function CpuMonitor() {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<ExecError>();
   const [state, setState] = useState<CpuMonitorState>({
     cpu: "Loading...",
     avgLoad: ["Loading...", "Loading...", "Loading..."],
@@ -32,10 +32,9 @@ export default function CpuMonitor() {
             topProcess: newTopProcess,
           };
         });
+        setIsLoading(false);
       } catch (err: any) {
         setError(err);
-      } finally {
-        setIsLoading(false);
       }
     });
   }, 1000);
@@ -44,8 +43,8 @@ export default function CpuMonitor() {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Fetch Top Processes",
-        message: error.message,
+        title: "Failed to Fetch CPU info [Error Code: " + error.code + "]",
+        message: error.stderr,
       });
     }
   }, [error]);

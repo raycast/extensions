@@ -10,11 +10,11 @@ import {
   isValidTime,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
-import { PowerMointorState } from "../Interfaces";
+import { ExecError, PowerMointorState } from "../Interfaces";
 
 const PowerMonitor = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<ExecError>();
   const [state, setState] = useState<PowerMointorState>({
     batteryLevel: "Loading...",
     isCharging: false,
@@ -23,50 +23,76 @@ const PowerMonitor = () => {
     maxBatteryCapacity: "Loading...",
     batteryTime: "Calculating...",
   });
+
   useInterval(async () => {
-    try {
-      const tempState = {
-        batteryLevel: await getBatteryLevel(),
-        isCharging: await getIsCharging(),
-        batteryTime: await getBatteryTime(),
-      };
-      setState((prevState) => {
-        return {
-          ...prevState,
-          ...tempState,
-        };
+    getBatteryLevel()
+      .then((newBatteryLevel) => {
+        getIsCharging()
+          .then((newIsCharging) => {
+            getBatteryTime()
+              .then((newBatteryTime) => {
+                setState((prevState) => {
+                  return {
+                    ...prevState,
+                    batteryLevel: newBatteryLevel,
+                    isCharging: newIsCharging,
+                    batteryTime: newBatteryTime,
+                  };
+                });
+                setIsLoading(false);
+              })
+              .catch((error: ExecError) => {
+                setError(error);
+              });
+          })
+          .catch((error: ExecError) => {
+            setError(error);
+          });
+      })
+      .catch((error: ExecError) => {
+        setError(error);
       });
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
   }, 1000);
+
   useEffect(() => {
-    const updatePowerInfo = async () => {
-      const permState = {
-        cycleCount: await getCycleCount(),
-        batteryCondition: await getBatteryCondition(),
-        maxBatteryCapacity: await getMaxBatteryCapacity(),
-      };
-      setState((prevState) => {
-        return {
-          ...prevState,
-          ...permState,
-        };
+    getCycleCount()
+      .then((newCycleCount) => {
+        getBatteryCondition()
+          .then((newBatteryCondition) => {
+            getMaxBatteryCapacity()
+              .then((newMaxBatteryCapacity) => {
+                setState((prevState) => {
+                  return {
+                    ...prevState,
+                    cycleCount: newCycleCount,
+                    batteryCondition: newBatteryCondition,
+                    maxBatteryCapacity: newMaxBatteryCapacity,
+                  };
+                });
+              })
+              .catch((error: ExecError) => {
+                setError(error);
+              });
+          })
+          .catch((error: ExecError) => {
+            setError(error);
+          });
+      })
+      .catch((error: ExecError) => {
+        setError(error);
       });
-    };
-    updatePowerInfo();
   }, []);
+
   useEffect(() => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Couldn't fetch Power Info",
-        message: error.message,
+        title: "Couldn't fetch Power Info [Error Code: " + error.code + "]",
+        message: error.stderr,
       });
     }
   }, [error]);
+
   return (
     <List.Item
       title={`Power`}

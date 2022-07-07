@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
 import { formatBytes, isObjectEmpty } from "../utils";
-import { NetworkMonitorState } from "../Interfaces";
+import { ExecError, NetworkMonitorState } from "../Interfaces";
 
 export default function NetworkMonitor() {
+  const [error, setError] = useState<ExecError>();
   const [state, setState] = useState<NetworkMonitorState>({
     upload: 0,
     download: 0,
@@ -37,39 +38,54 @@ export default function NetworkMonitor() {
   };
 
   useInterval(async () => {
-    const currProcess: { [key: string]: number[] } = await getNetworkData();
-    const prevProcess: { [key: string]: number[] } = state.prevProcess;
-    let newUpload: number = 0;
-    let newDownload: number = 0;
-    let newProcessList: [string, number, number][] = [];
-    if (!isObjectEmpty(prevProcess)) {
-      for (const key in currProcess) {
-        let down = currProcess[key][0] - (key in prevProcess ? prevProcess[key][0] : 0);
-        if (down < 0) {
-          down = 0;
+    getNetworkData()
+      .then((currProcess: { [key: string]: number[] }) => {
+        const prevProcess: { [key: string]: number[] } = state.prevProcess;
+        let newUpload: number = 0;
+        let newDownload: number = 0;
+        let newProcessList: [string, number, number][] = [];
+        if (!isObjectEmpty(prevProcess)) {
+          for (const key in currProcess) {
+            let down = currProcess[key][0] - (key in prevProcess ? prevProcess[key][0] : 0);
+            if (down < 0) {
+              down = 0;
+            }
+            let up = currProcess[key][1] - (key in prevProcess ? prevProcess[key][1] : 0);
+            if (up < 0) {
+              up = 0;
+            }
+            newDownload += down;
+            newUpload += up;
+            if (key in prevProcess) {
+              newProcessList.push([key, down, up]);
+            }
+          }
+          newProcessList = getTopProcess(newProcessList);
         }
-        let up = currProcess[key][1] - (key in prevProcess ? prevProcess[key][1] : 0);
-        if (up < 0) {
-          up = 0;
-        }
-        newDownload += down;
-        newUpload += up;
-        if (key in prevProcess) {
-          newProcessList.push([key, down, up]);
-        }
-      }
-      newProcessList = getTopProcess(newProcessList);
-    }
-    setState((prevState) => {
-      return {
-        ...prevState,
-        upload: newUpload,
-        download: newDownload,
-        processList: newProcessList,
-        prevProcess: currProcess,
-      };
-    });
+        setState((prevState) => {
+          return {
+            ...prevState,
+            upload: newUpload,
+            download: newDownload,
+            processList: newProcessList,
+            prevProcess: currProcess,
+          };
+        });
+      })
+      .catch((err: ExecError) => {
+        setError(err);
+      });
   }, 1000);
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't fetch Network Info [Error Code: " + error.code + "]",
+        message: error.stderr,
+      });
+    }
+  }, [error]);
 
   return (
     <>
