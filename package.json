@@ -3,7 +3,7 @@
 	"name": "esse-actions",
 	"title": "Esse Actions",
 	"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
-	"icon": "command-icon.png",
+	"icon": "esse-icon.png",
 	"author": "bert",
 	"categories": [
 		"Developer Tools"
