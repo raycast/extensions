@@ -1,6 +1,27 @@
 # Obsidian Changelog
 
-## [New command, Detail View & More | Version 1.5.0] - 2022-05-04
+## [Edit Note Action, Clipboard Template | Version 1.6.1] - 2022-07-01
+
+- Add `Edit Note` action to `Search Note` and `Pinned Notes` command which lets you edit a note
+- `Edit Note` action supports templates
+- Add `Reset Pinned Notes` action for `Pinned Notes` command
+- Add `Delete Note` action to `Search Note` and `Pinned Notes` command which lets you delete a note
+- Add `{clipboard}` to available templates
+- Update store images
+- Migrate to Raycast API v1.37.0
+- Minor fixes
+
+## [Full Content Search, Metadata View, Templates & More| Version 1.6.0] - 2022-06-20
+
+- Add full content search to `Search Note` and `Pinned Notes` command
+- Add metadata view for notes in `Search Note` and `Pinned Notes` command
+- Add templates for `Create Note` command that can be used in the notes name and content
+- Add `Show in Finder` action to `Search Note`, `Pinned Notes` and `Open Vault` commands
+- Vaults will now be found automatically
+- Fix performance issues
+- Migrate to Raycast API v1.36.0
+
+## [New command, Detail View & More | Version 1.5.0] - 2022-05-02
 
 - Add `Pinned Notes` command which lists all pinned notes of a vault
 - Add `Pin Note` action to `Search Note` command which pins a note

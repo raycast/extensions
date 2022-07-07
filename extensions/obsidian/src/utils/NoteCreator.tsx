@@ -1,46 +1,41 @@
-import { showToast, Toast, confirmAlert, Icon, open, getPreferenceValues } from "@raycast/api";
-
+import { showToast, Toast, confirmAlert, Icon, open } from "@raycast/api";
 import path from "path";
 import fs from "fs";
-import { NoteFormPreferences } from "./interfaces";
 
-interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
+import { NoteFormPreferences, FormValue, Vault } from "./interfaces";
+import { applyTemplates } from "./utils";
 
 class NoteCreator {
   vaultPath: string;
   noteProps: FormValue;
   saved = false;
-  openOnCreation: boolean;
+  pref: NoteFormPreferences;
 
-  constructor(noteProps: FormValue, vaultPath: string, openOnCreation: boolean) {
-    this.vaultPath = vaultPath;
+  constructor(noteProps: FormValue, vault: Vault, pref: NoteFormPreferences) {
+    this.vaultPath = vault.path;
     this.noteProps = noteProps;
-    this.openOnCreation = openOnCreation;
+    this.pref = pref;
   }
 
-  createNote() {
+  async createNote() {
     if (this.noteProps.name == "") {
-      const pref: NoteFormPreferences = getPreferenceValues();
-      this.noteProps.name = pref.prefNoteName;
+      this.noteProps.name = this.pref.prefNoteName;
     }
-    const content = this.buildNoteContent();
-    this.saveNote(content);
-    if (this.openOnCreation) {
+    let content = this.addYAMLFrontmatter("");
+    content = await applyTemplates(content);
+    const name = await applyTemplates(this.noteProps.name);
+
+    this.saveNote(content, name);
+
+    if (this.pref.openOnCreate) {
       const target =
-        "obsidian://open?path=" +
-        encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, this.noteProps.name + ".md"));
+        "obsidian://open?path=" + encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md"));
       open(target);
     }
     return this.saved;
   }
 
-  buildNoteContent() {
-    let content = "";
+  addYAMLFrontmatter(content: string) {
     if (this.noteProps.tags.length > 0) {
       content = "---\ntags: [";
       for (let i = 0; i < this.noteProps.tags.length - 1; i++) {
@@ -49,27 +44,28 @@ class NoteCreator {
       content += '"' + this.noteProps.tags.pop() + '"]\n---\n';
     }
     content += this.noteProps.content;
+
     return content;
   }
 
-  async saveNote(content: string) {
+  async saveNote(content: string, name: string) {
     const notePath = path.join(this.vaultPath, this.noteProps.path);
 
-    if (fs.existsSync(path.join(notePath, this.noteProps.name + ".md"))) {
+    if (fs.existsSync(path.join(notePath, name + ".md"))) {
       const options = {
         title: "Override note",
-        message: 'Are you sure you want to override the note: "' + this.noteProps.name + '"?',
+        message: 'Are you sure you want to override the note: "' + name + '"?',
         icon: Icon.ExclamationMark,
       };
       if (await confirmAlert(options)) {
-        this.writeToFile(notePath, content);
+        this.writeToFile(notePath, name, content);
       }
     } else {
-      this.writeToFile(notePath, content);
+      this.writeToFile(notePath, name, content);
     }
   }
 
-  writeToFile(notePath: string, content: string) {
+  writeToFile(notePath: string, name: string, content: string) {
     try {
       try {
         fs.mkdirSync(notePath, { recursive: true });
@@ -82,11 +78,11 @@ class NoteCreator {
         return;
       }
       try {
-        fs.writeFileSync(path.join(notePath, this.noteProps.name + ".md"), content);
+        fs.writeFileSync(path.join(notePath, name + ".md"), content);
       } catch {
         showToast({
           title: "Couldn't write to file:",
-          message: notePath + "/" + this.noteProps.name + ".md",
+          message: notePath + "/" + name + ".md",
           style: Toast.Style.Failure,
         });
         return;

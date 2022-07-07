@@ -1,7 +1,7 @@
 import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
@@ -20,6 +20,7 @@ import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -38,7 +39,7 @@ export enum MRState {
 }
 
 const GET_MR_DETAIL = gql`
-  query GetMRDetail($id: ID!) {
+  query GetMRDetail($id: MergeRequestID!) {
     mergeRequest(id: $id) {
       description
       project {
@@ -95,8 +96,6 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   }
 
   const md = lines.join("  \n");
-  const author = mr.author ? `${mr.author.name}` : "<no author>";
-  const milestone = mr.milestone ? mr.milestone.title : "<no milestone>";
 
   return (
     <Detail
@@ -113,21 +112,37 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(mr.state)}
-              color={stateColor(mr.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(mr.state)} color={stateColor(mr.state)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.Label title="Milestone" text={milestone} />
-          <Detail.Metadata.TagList title="Labels">
-            {mr.labels.map((m) => (
-              <Detail.Metadata.TagList.Item text={m.name} color={m.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {mr.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={mr.author.name} icon={userIcon(mr.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {mr.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {mr.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.reviewers.length > 0 && (
+            <Detail.Metadata.TagList title="Reviewer">
+              {mr.reviewers.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.milestone && <Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+          {mr.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {mr.labels.map((m) => (
+                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />
@@ -157,7 +172,7 @@ function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_MR_DETAIL,
           variables: { id: `gid://gitlab/MergeRequest/${issueID}` },
         });

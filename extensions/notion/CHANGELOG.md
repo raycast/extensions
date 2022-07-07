@@ -1,5 +1,11 @@
 # Notion Changelog
 
+## [Bugfixes] - 2022-07-05
+
+- Fixed `Create Database Page` to use client [timezone](https://developers.notion.com/changelog/time-zone-support) when supplying a date field.
+- Fixed `Create Database Page` to pop navigation when using `Create and Open Page`.
+- Clean up some type definitions.
+
 ## [OAuth] - 2022-05-10
 
 - You can now logged in using OAuth instead of having to create your own integration

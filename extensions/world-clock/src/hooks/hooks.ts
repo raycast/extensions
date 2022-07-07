@@ -3,7 +3,12 @@ import axios from "axios";
 import { IP_GEOLOCATION_API, localStorageKey, TIMEZONE_BASE_URL } from "../utils/costants";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { IPGeolocation, TimeInfo, Timezone } from "../types/types";
-import { calculateDateTimeByOffset, calculateTimeInfoByOffset, isEmpty } from "../utils/common-utils";
+import {
+  calculateDateTimeByOffset,
+  calculateTimeInfoByOffset,
+  getStarredTimezones,
+  isEmpty,
+} from "../utils/common-utils";
 import { isIPv4 } from "net";
 import { axiosGetIpTime } from "../utils/axios-utils";
 import Style = Toast.Style;
@@ -37,9 +42,7 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
         url: TIMEZONE_BASE_URL,
       })
         .then(async (axiosResponse) => {
-          const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
-          const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
-
+          const _starTimezones = await getStarredTimezones();
           setStarTimezones(_starTimezones);
           setTimezones(await buildStarTimezone(axiosResponse.data as string[]));
           setLoading(false);
@@ -51,8 +54,7 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
           setLoading(false);
         });
     } else {
-      const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
-      const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
+      const _starTimezones = await getStarredTimezones();
       setStarTimezones(_starTimezones);
       setTimezones(await buildStarTimezone(_timezoneCache));
       setLoading(false);

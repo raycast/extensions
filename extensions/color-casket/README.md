@@ -10,7 +10,13 @@
 
 Handy color utilities in your pocket.
 
-**Color Casket** provide you simple ability to render color strings in next formats:
+Now with **Color Picker**!
+
+<img width="50" height="50" src="./assets/picker-icon.png">
+
+---
+
+**Color Casket** provide you ability to pick and render color strings in next formats:
 
 - HEX
 - RGB
@@ -21,25 +27,36 @@ Keyword - its basic color names as: red, blue, cyan, purple, etc. When you searc
 
 ## Usage
 
-Use `Render Color` command to run.
+### Render Color
 
-Available keywords to find command: `color`, `render`, `render color`, `color utilities`, `color casket`
+Type `Render Color` command to open your color casket.
+
+### Pick Color
+
+Type `Pick Color` command to open a color picker.
+
+---
+
+Available keywords to find commands: `color`, `pick`, `eyedropper`, `pipette`, `render`, `render color`, `color utilities`, `color casket`
 
 ## Features
 
-- [x] Render Color by String Value
-- [x] Copy History
-- [x] Favorites Color List
+- [x] pick color from everywhere
+- [x] render color by string value
+- [x] render and pick history
+- [x] favorite color list
+- [x] configure preferred color format
 
 ## Future updates
 
-Let's make **Color Casket** as your favorite pocket color tools. Just make a Pull Request with a new great idea.
+Let's make **Color Casket** as your favorite pocket color tools. Create a Pull Request or open a Feature Request with your new great idea.
 
-- [ ] Filter by Formats
-- [ ] Generate Shades (based on color)
-- [ ] Generate Color Palette (based on color)
-- [ ] Search in Opinion Recommended Color Palettes
-- [ ] Configure Preferred Color Format
+### TODO schedule
+
+- [ ] filter by formats
+- [ ] generate shades (based on color)
+- [ ] generate color palette (based on color)
+- [ ] search in opinion recommended color palettes
 
 ## Changelog
 
@@ -51,7 +68,3 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 - [Perfect Raycast Documentation and API](https://developers.raycast.com)
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

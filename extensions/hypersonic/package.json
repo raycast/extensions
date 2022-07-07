@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hypersonic",
+  "title": "Hypersonic",
+  "description": "Fastest Notion to-do app ever",
+  "icon": "icon.png",
+  "author": "reboot.studio",
+  "version": "0.0.1",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "My Todos",
+      "subtitle": "Hypersonic",
+      "description": "The fastest Notion to-do app for Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "database_name",
+      "type": "textfield",
+      "title": "Notion Page Name",
+      "label": "Notion Page Name",
+      "description": "Create, filter and complete all your to-do's",
+      "placeholder": "Hypersonic",
+      "default": "Hypersonic",
+      "required": false
+    },
+    {
+      "name": "open_in_native_app",
+      "type": "checkbox",
+      "title": "Open links in the desktop app",
+      "label": "Open links in the desktop app",
+      "description": "Enable if you want to open links in the desktop app instead of the browser",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^1.0.4",
+    "@raycast/api": "^1.36.1",
+    "node-fetch": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

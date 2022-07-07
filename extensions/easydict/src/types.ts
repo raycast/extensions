@@ -1,14 +1,25 @@
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-04 21:58
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2022-07-03 20:02
+ * @fileName: types.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { DicionaryType, SectionType, TranslateType } from "./consts";
+import { RequestType, SectionType, TranslateType } from "./consts";
 import { IcibaDictionaryResult } from "./dict/iciba/interface";
 
 export interface TranslateTypeResult {
-  type: TranslateType | DicionaryType;
+  type: RequestType;
   result:
     | YoudaoTranslateResult
     | BaiduTranslateResult
     | TencentTranslateResult
     | CaiyunTranslateResult
+    | AppleTranslateResult
     | IcibaDictionaryResult
     | YoudaoDictionaryResult
     | null;
@@ -31,14 +42,14 @@ export type YoudaoDictionaryResult = YoudaoTranslateResult;
 
 export interface QueryWordInfo {
   word: string;
-  phonetic?: string;
-  speech?: string;
   fromLanguage: string;
   toLanguage: string;
-  isWord: boolean;
+  isWord?: boolean; // * NOTE: youdao return must be have value.
+  phonetic?: string;
+  speech?: string;
   examTypes?: string[];
   audioPath?: string;
-  speechUrl: string; // youdao tts url
+  speechUrl?: string; // youdao tts url, some language not have tts url, such as "ຂາດ"
 }
 
 export interface YoudaoTranslateResultBasicItem {
@@ -88,36 +99,33 @@ export interface MyPreferences {
   enableBaiduTranslate: boolean;
   enableTencentTranslate: boolean;
   enableCaiyunTranslate: boolean;
+  enableAppleLanguageDetect: boolean;
+  enableAppleTranslate: boolean;
 }
 
-export interface ListItemActionPanelItem {
-  isInstalledEudic: boolean;
-  isShowOpenInEudicWeb: boolean;
-  eudicWebUrl: string;
-  isShowOpenInYoudaoWeb: boolean;
-  youdaoWebUrl: string;
-  copyText: string;
-  queryText: string;
-  queryWordInfo: QueryWordInfo;
-  currentFromLanguage: LanguageItem;
-  currentTargetLanguage: LanguageItem;
+export interface ActionListPanelProps {
+  displayItem: TranslateDisplayItem;
   onLanguageUpdate: (language: LanguageItem) => void;
 }
 
 export interface RequestErrorInfo {
-  errorCode: string;
-  errorMessage: string;
+  message: string;
+  code?: string;
+  type?: RequestType;
 }
 
 export interface LanguageItem {
   youdaoLanguageId: string;
+  appleLanguageId?: string; // apple language id, apple translate support 12 languages
+  appleChineseLanguageTitle?: string; // apple Chinese language title, 中文，英语
+  francLanguageId: string; // the languages represented by ISO 639-3
   aliyunLanguageId: string;
   tencentDetectLanguageId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
   tencentLanguageId?: string;
   baiduLanguageId?: string;
   caiyunLanguageId?: string;
   languageTitle: string;
-  languageVoice: string[];
+  voiceList?: string[];
   googleLanguageId?: string;
   youdaoWebLanguageId?: string;
   eudicWebLanguageId?: string;
@@ -137,17 +145,14 @@ export interface BaiduTranslateItem {
 
 export type TencentTranslateResult = TextTranslateResponse;
 
-// export interface TencentTranslateResult {
-//   TargetText: string;
-//   Source: string;
-//   Target: string;
-//   RequestId: string;
-// }
-
 export interface CaiyunTranslateResult {
   rc: string;
   target: string[];
   confidence: number;
+}
+
+export interface AppleTranslateResult {
+  translatedText: string;
 }
 
 export interface TranslateSourceResult {

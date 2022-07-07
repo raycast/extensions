@@ -1,4 +1,4 @@
-import { showToast, ToastStyle, environment, getPreferenceValues, showHUD } from "@raycast/api";
+import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { existsSync } from "fs";
 
@@ -10,7 +10,7 @@ interface SetWallpaperProps {
 
 export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProps) => {
   let toast;
-  if (!useHud) toast = await showToast(ToastStyle.Animated, "Downloading and setting wallpaper...");
+  if (!useHud) toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
 
   const { downloadSize, applyTo } = getPreferenceValues<UnsplashPreferences>();
   const selectedPath = environment.supportPath;
@@ -59,14 +59,14 @@ export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProp
     else if (useHud) {
       await showHUD("Wallpaper set!");
     } else if (toast) {
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";
     }
   } catch (err) {
     console.error(err);
 
     if (toast) {
-      toast.style = ToastStyle.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Something went wrong.";
       toast.message = "Try with another image or check your internet connection.";
     }

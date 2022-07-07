@@ -109,14 +109,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
-    "execa": "^6.1.0",
-    "throttle-debounce": "^3.0.1"
+    "@raycast/api": "^1.37.0",
+    "execa": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@types/throttle-debounce": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
