@@ -9,9 +9,12 @@ import he from "he";
 
 export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
+  let statistics;
   let channelId: string | undefined;
   let mdParts = [];
   if (channel) {
+    statistics = channel.statistics;
+    console.log(statistics);
     channelId = channel.id;
     const desc = channel.description || "No description";
     const title = channel.title;
@@ -20,13 +23,7 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
     if (thumbnailUrl) {
       mdParts.push(`![thumbnail](${thumbnailUrl})`);
     }
-    const meta: string[] = [`* Channel Name: ${channel.title}  `, `* Published: ${formatDate(channel.publishedAt)}`];
-    mdParts = mdParts.concat([desc, meta.join("\n")]);
-    if (channel.statistics) {
-      const cs = channel.statistics;
-      const stats = [`* Videos: ${cs.videoCount}`, `* Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
-      mdParts.push(`## Statistics\n\n ${stats.join("\n")}`);
-    }
+    mdParts.push(`\n${desc}`);
   } else {
     mdParts = ["Error getting channel info"];
   }
@@ -35,6 +32,35 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
     <Detail
       isLoading={props.isLoading}
       markdown={md}
+      metadata={
+        channel && (
+          <Detail.Metadata>
+            {statistics && (
+              <Detail.Metadata.Label
+                title="Subscribers"
+                text={compactNumberFormat(parseInt(statistics.subscriberCount))}
+              />
+            )}
+            <Detail.Metadata.Label title="Published" text={formatDate(channel.publishedAt)} />
+            <Detail.Metadata.Separator />
+            {statistics && (
+              <React.Fragment>
+                <Detail.Metadata.Label
+                  title="Number of Videos"
+                  text={compactNumberFormat(parseInt(statistics.videoCount))}
+                />
+                <Detail.Metadata.Label title="View Count" text={compactNumberFormat(parseInt(statistics.viewCount))} />
+              </React.Fragment>
+            )}
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Link
+              title="Open Channel in Browser"
+              target={`https://youtube.com/channel/${channel.id}`}
+              text={channel.title}
+            />
+          </Detail.Metadata>
+        )
+      }
       actions={
         <ActionPanel>
           <ShowRecentPlaylistVideosAction

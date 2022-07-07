@@ -97,16 +97,36 @@ function ShowChannelAction(props: { channelId: string | undefined }): JSX.Elemen
 
 export function VideoItemDetail(props: { video: Video }): JSX.Element {
   const video = props.video;
+  const statistics = video.statistics;
   const desc = video.description || "No description";
   const title = video.title;
   const thumbnailUrl = video.thumbnails?.high?.url || undefined;
   const thumbnailMd = (thumbnailUrl ? `![thumbnail](${thumbnailUrl})` : "") + "\n\n";
   const channel = video.channelTitle;
-  const meta: string[] = [`* Channel: ${channel}  `, `* Published: ${formatDate(video.publishedAt)}`];
-  const md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
+  const md = `# ${title}\n\n${thumbnailMd}${desc}\n\n`;
   return (
     <Detail
       markdown={md}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Channel" text={channel} />
+          <Detail.Metadata.Label title="Published" text={formatDate(video.publishedAt)} />
+          <Detail.Metadata.Separator />
+          {statistics && (
+            <React.Fragment>
+              <Detail.Metadata.Label title="Views" text={compactNumberFormat(parseInt(statistics.viewCount))} />
+              <Detail.Metadata.Label title="Likes" text={compactNumberFormat(parseInt(statistics.likeCount))} />
+              <Detail.Metadata.Label title="Comments" text={compactNumberFormat(parseInt(statistics.commentCount))} />
+            </React.Fragment>
+          )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="Open Video in Browser"
+            target={`https://youtube.com/watch?v=${video.id}`}
+            text={"Watch"}
+          />
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           <OpenVideoInBrowser video={props.video} />

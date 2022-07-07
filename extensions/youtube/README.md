@@ -62,23 +62,3 @@ and more
 - Set the API token from the previous step into the `API Key` field in this extension preferences
 
 Now you should be able to search videos and channels on YoutTube with Raycast 🚀.
-
-## Grid View Layout
-
-See Popular Vidoes and Search Videos in the grid view. 
-
-![grid-video](metadata/grid-video.png)
-
-Search Channels in the grid view.
-
-![grid-channel](metadata/grid-channel.png)
-
-## List View Layout
-
-See Popular Vidoes and Search Videos in the list view.
-
-![list-video](metadata/list-video.png)
-
-Search Channels in the list view.
-
-![list-channel](metadata/list-channel.png)
