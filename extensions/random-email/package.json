@@ -20,6 +20,13 @@
       "subtitle": "Random Email",
       "description": "Pastes a random email to the current selection of the frontmost application",
       "mode": "no-view"
+    },
+    {
+      "name": "generate-paste-clipboard",
+      "title": "Paste Random Email and Copy to Clipboard",
+      "subtitle": "Random Email",
+      "description": "Pastes a random email to the current selection of the frontmost application and copies it to the clipboard",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
