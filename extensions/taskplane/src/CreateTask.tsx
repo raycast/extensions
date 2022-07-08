@@ -3,7 +3,7 @@ import Task from "./Task";
 import axios from "axios";
 import { API_URL, AuthContext } from "./lib";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 
 export default function CreateTask() {
   const { token } = useContext(AuthContext);
@@ -12,6 +12,13 @@ export default function CreateTask() {
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [titleError, setTitleError] = useState<string>();
+
+  const organizationRef = useRef<Form.Dropdown>(null);
+  const descriptionRef = useRef<Form.TextArea>(null);
+  const autoAssignRef = useRef<Form.Checkbox>(null);
+  const dueDateRef = useRef<Form.DatePicker>(null);
+  const priorityRef = useRef<Form.Dropdown>(null);
+  const titleRef = useRef<Form.TextField>(null);
 
   useEffect(() => {
     try {
@@ -66,6 +73,13 @@ export default function CreateTask() {
       if (task) {
         setIsLoading(false);
 
+        organizationRef.current?.reset();
+        descriptionRef.current?.reset();
+        autoAssignRef.current?.reset();
+        priorityRef.current?.reset();
+        dueDateRef.current?.reset();
+        titleRef.current?.reset();
+
         showToast(Toast.Style.Success, "Task created👍");
 
         push(<Task task={task} organizationId={organization} />);
@@ -86,7 +100,7 @@ export default function CreateTask() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="organization" title="Workspace">
+      <Form.Dropdown id="organization" title="Workspace" ref={organizationRef}>
         {organizations?.map((organization) => (
           <Form.Dropdown.Item value={organization.id} title={organization.name} key={organization.id} />
         ))}
@@ -94,6 +108,7 @@ export default function CreateTask() {
 
       <Form.TextField
         error={titleError}
+        ref={titleRef}
         id="title"
         title="Title"
         placeholder="Implement feature"
@@ -111,14 +126,15 @@ export default function CreateTask() {
       <Form.TextArea
         placeholder="We should implement this feature by..."
         info="Markdown is supported"
+        ref={descriptionRef}
         title="Description"
         id="description"
         enableMarkdown
       />
 
-      <Form.DatePicker id="dueDate" title="Due date" />
+      <Form.DatePicker ref={dueDateRef} id="dueDate" title="Due date" />
 
-      <Form.Dropdown id="priority" title="Priority">
+      <Form.Dropdown ref={priorityRef} id="priority" title="Priority">
         <Form.Dropdown.Item title="None" value="" />
 
         {["Low", "Medium", "High"].map((priority) => (
@@ -126,7 +142,12 @@ export default function CreateTask() {
         ))}
       </Form.Dropdown>
 
-      <Form.Checkbox label="Assign myself as a member on this task" title="Assign to myself" id="autoAssign" />
+      <Form.Checkbox
+        ref={autoAssignRef}
+        label="Assign myself as a member on this task"
+        title="Assign to myself"
+        id="autoAssign"
+      />
     </Form>
   );
 }
