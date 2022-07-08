@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Markdown Improvements] - 2022-06-29
+## [Markdown Improvements] - 2022-07-08
 
 - Render emojis from GitLab Flavored Markdown.
 - Hide inline HTML tags from GitLab Flavored Markdown.
