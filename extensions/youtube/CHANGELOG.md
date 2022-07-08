@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2022-07-08
 
 - Added optional grid view. 
 - Fixed title bug by decoding the HTML video and channel titles.
