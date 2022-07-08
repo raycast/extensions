@@ -125,6 +125,6 @@ export class PermissionError extends Error {
   }
 }
 
-export const isPermissionError = (error: unknown) => {
+export const isPermissionError = (error: unknown): error is PermissionError => {
   return error instanceof Error && error.name === "PermissionError";
 };
