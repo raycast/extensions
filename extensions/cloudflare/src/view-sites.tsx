@@ -88,7 +88,9 @@ function Command() {
                         icon={Icon.Hammer}
                         title="Purge Everything from Cache"
                         shortcut={{ modifiers: ['cmd'], key: 'e' }}
-                        onAction={async () => { purgeEverything(site) }}
+                        onAction={async () => {
+                          purgeEverything(site);
+                        }}
                       ></Action>
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
@@ -277,28 +279,33 @@ async function clearUrlsFromCache(zoneId: string, urls: string) {
 }
 
 async function purgeEverything(zone: Zone) {
-  if (!await confirmAlert({
-    title: "Do you really want to purge everything from cache for " + zone.name + "?",
-    primaryAction: { title: "Purge", style: Alert.ActionStyle.Destructive }
-  })) {
+  if (
+    !(await confirmAlert({
+      title:
+        'Do you really want to purge everything from cache for ' +
+        zone.name +
+        '?',
+      primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
+    }))
+  ) {
     return;
   }
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Purging cache",
+    title: 'Purging cache',
   });
 
   const result = await service.purgeEverything(zone.id);
 
   if (result.success) {
     toast.style = Toast.Style.Success;
-    toast.title = "Cache purged";
+    toast.title = 'Cache purged';
     return;
   }
 
   toast.style = Toast.Style.Failure;
-  toast.title = "Failed to purge cache";
+  toast.title = 'Failed to purge cache';
   if (result.errors.length > 0) {
     toast.message = result.errors[0].message;
   }
@@ -308,7 +315,7 @@ async function clearSiteCache() {
   service.clearCache();
   showToast({
     style: Toast.Style.Success,
-    title: "Local site cache cleared",
+    title: 'Local site cache cleared',
   });
   popToRoot({ clearSearchBar: true });
 }

@@ -1,4 +1,7 @@
 # Changelog
+## Add Purge Everything Command (2022-07-08)
+- Add purge everything command
+- Add local site cache
 
 ## Add Purge Cache command (2022-03-06)
 - Add purge cache functionality
