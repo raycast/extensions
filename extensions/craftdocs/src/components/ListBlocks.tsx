@@ -1,5 +1,5 @@
-import {Action, ActionPanel, Color, List} from "@raycast/api";
-import {Block} from "../hooks/useSearch";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Block } from "../hooks/useSearch";
 import Config from "../Config";
 import CreateDocumentItem from "./CreateDocumentItem";
 
@@ -33,8 +33,8 @@ const BlockItem = ({ block }: { block: Block }) => (
   <List.Item
     icon={
       block.entityType === "document"
-        ? {source: "doc_richtext.png", tintColor: Color.PrimaryText}
-        : {source: "doc_on_doc.png", tintColor: Color.PrimaryText}
+        ? { source: "doc_richtext.png", tintColor: Color.PrimaryText }
+        : { source: "doc_on_doc.png", tintColor: Color.PrimaryText }
     }
     subtitle={block.content}
     title={block.documentName || block.content}
