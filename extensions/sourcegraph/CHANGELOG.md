@@ -1,6 +1,6 @@
 # Changelog
 
-## [Bug fix] - 2022-07-07
+## [Bug fix](https://github.com/raycast/extensions/pull/2210) - 2022-07-07
 
 - **search**: Fix issue where search results with lengthy details can cause Raycast to crash.
 
