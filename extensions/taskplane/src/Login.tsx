@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AuthContext, API_URL } from "./lib";
-import { LocalStorage, showToast, Toast, Form, ActionPanel, Action } from "@raycast/api";
+import { LocalStorage, showToast, Toast, Form, ActionPanel, Action, Icon } from "@raycast/api";
 import { useContext } from "react";
 
 export default function Login() {
@@ -20,10 +20,9 @@ export default function Login() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Sign in" />
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.ArrowRight} title="Sign In" />
         </ActionPanel>
       }
-      navigationTitle="Sign in to Taskplane"
     >
       <Form.TextField id="email" placeholder="john.doe@email.com" title="Email" autoFocus />
       <Form.PasswordField id="password" placeholder="•••••••••••••" title="Password" />
