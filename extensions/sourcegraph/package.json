@@ -80,7 +80,7 @@
       "icon": "logo-bw.png",
       "title": "Search Code",
       "subtitle": "Sourcegraph Instance",
-      "description": "Search code on a specific Sourcegraph instance.",
+      "description": "Search code on a Sourcegraph instance.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
