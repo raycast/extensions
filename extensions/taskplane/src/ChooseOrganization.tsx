@@ -53,6 +53,7 @@ export default function ChooseOrganization() {
                       );
                     }}
                     title="Choose Workspace"
+                    icon={Icon.ArrowRight}
                   />
                 </ActionPanel>
               }
