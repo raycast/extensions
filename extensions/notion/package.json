@@ -59,18 +59,16 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^1.0.4",
-    "@raycast/api": "^1.33.0",
-    "@tryfabric/martian": "^1.2.0",
-    "jotai": "^1.6.5",
-    "moment": "^2.29.1",
-    "node-fetch": "^3.2.4",
-    "notion-to-md": "^2.3.2"
+    "@notionhq/client": "^1.0.0",
+    "@raycast/api": "^1.37.1",
+    "@tryfabric/martian": "^1.2.4",
+    "jotai": "^1.7.3",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.2.6",
+    "notion-to-md": "^2.5.1"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.6.1",
-    "@types/react": "^17.0.15",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",

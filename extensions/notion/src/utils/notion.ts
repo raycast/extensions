@@ -210,7 +210,11 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 /**
  * Query a database
  */
-export async function queryDatabase(databaseId: string, query: string | undefined): Promise<Page[]> {
+export async function queryDatabase(
+  databaseId: string,
+  query: string | undefined,
+  sort: "last_edited_time" | "created_time" = "last_edited_time"
+): Promise<Page[]> {
   try {
     await authorize();
     const database = await notion.databases.query({
@@ -219,7 +223,7 @@ export async function queryDatabase(databaseId: string, query: string | undefine
       sorts: [
         {
           direction: "descending",
-          timestamp: "last_edited_time",
+          timestamp: sort,
         },
       ],
       filter: query
