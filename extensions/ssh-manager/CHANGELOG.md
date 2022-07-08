@@ -1,6 +1,6 @@
 # ssh-manager Changelog
 
-## [Add support to custom port] - 2022-07-07
+## [Add support to custom port] - 2022-07-08
 This version adds option to set custom port (other than `22`) in SSH connections.
 
 ## [Add iTerm Support] - 2022-06-28
