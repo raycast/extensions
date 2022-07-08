@@ -54,7 +54,7 @@ export default function Command() {
           icon="notes-icon.png"
           title={note.title || ""}
           subtitle={note.snippet}
-          keywords={[`${note.folder}`, `${note.account}`, note.snippet]}
+          keywords={[`${note.folder}`, `${note.account}`].concat(note.snippet ? [note.snippet] : [])}
           accessories={([] as List.Item.Accessory[])
             .concat(
               preferences.accounts
