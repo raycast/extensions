@@ -180,5 +180,7 @@ function Action({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user}@${item.address}${item.port ? " Port:" + item.port : ""}${item.sshKey ? " SSH Key:" + item.sshKey : ""}`;
+  return `${item.user}@${item.address}${item.port ? " Port:" + item.port : ""}${
+    item.sshKey ? " SSH Key:" + item.sshKey : ""
+  }`;
 }
