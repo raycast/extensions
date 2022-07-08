@@ -60,7 +60,7 @@
   ],
   "dependencies": {
     "@notionhq/client": "^1.0.0",
-    "@raycast/api": "^1.37.1",
+    "@raycast/api": "^1.37.0",
     "@tryfabric/martian": "^1.2.4",
     "jotai": "^1.7.3",
     "moment": "^2.29.4",
