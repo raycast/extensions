@@ -7,6 +7,7 @@ import {
   Form,
   Icon,
   List,
+  popToRoot,
   showToast,
   Toast,
 } from '@raycast/api';
@@ -83,10 +84,21 @@ function Command() {
                         }
                         shortcut={{ modifiers: ['cmd'], key: 'p' }}
                       />
+                      <Action
+                        icon={Icon.Hammer}
+                        title="Purge Everything from Cache"
+                        shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                        onAction={async () => { purgeEverything(site) }}
+                      ></Action>
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
                         url={getSiteUrl(accountId, site.name)}
                         shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                      />
+                      <Action
+                        icon={Icon.ArrowClockwise}
+                        title="Reload sites from Cloudflare"
+                        onAction={clearSiteCache}
                       />
                     </ActionPanel>
                   }
@@ -262,6 +274,43 @@ async function clearUrlsFromCache(zoneId: string, urls: string) {
   if (result.errors.length > 0) {
     toast.message = result.errors[0].message;
   }
+}
+
+async function purgeEverything(zone: Zone) {
+  if (!await confirmAlert({
+    title: "Do you really want to purge everything from cache for " + zone.name + "?",
+    primaryAction: { title: "Purge", style: Alert.ActionStyle.Destructive }
+  })) {
+    return;
+  }
+
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Purging cache",
+  });
+
+  const result = await service.purgeEverything(zone.id);
+
+  if (result.success) {
+    toast.style = Toast.Style.Success;
+    toast.title = "Cache purged";
+    return;
+  }
+
+  toast.style = Toast.Style.Failure;
+  toast.title = "Failed to purge cache";
+  if (result.errors.length > 0) {
+    toast.message = result.errors[0].message;
+  }
+}
+
+async function clearSiteCache() {
+  service.clearCache();
+  showToast({
+    style: Toast.Style.Success,
+    title: "Local site cache cleared",
+  });
+  popToRoot({ clearSearchBar: true });
 }
 
 export default Command;
