@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AuthContext, API_URL } from "./lib";
-import { LocalStorage, showToast, Toast, Form, ActionPanel, Action, Icon } from "@raycast/api";
+import { LocalStorage, showToast, Toast, Form, ActionPanel, Action, Icon, open } from "@raycast/api";
 import { useContext, useState } from "react";
 
 export default function Login() {
