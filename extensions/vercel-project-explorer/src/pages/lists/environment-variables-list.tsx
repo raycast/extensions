@@ -1,6 +1,6 @@
 import { ActionPanel, confirmAlert, Icon, List, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
-import { Environment, Project, Team } from "../../types";
+import { CreateEnvironment, Environment, Project, Team } from "../../types";
 import {
   createEnvironmentVariable,
   deleteEnvironmentVariableById,
@@ -69,7 +69,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
     }
   };
 
-  const createEnvVar = async (envVar: Partial<Environment>) => {
+  const createEnvVar = async (envVar: CreateEnvironment) => {
     const addedVar = await createEnvironmentVariable(project.id, envVar, team?.id);
     if (addedVar.error) {
       showToast({
@@ -121,7 +121,8 @@ const EnvironmentVariables = ({ project, team }: Props) => {
             <Action
               title="Add"
               onAction={() => {
-                push(<NewEnvironmentVariable createEnvVar={createEnvVar} />);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                push(<NewEnvironmentVariable createEnvVar={createEnvVar as any} />);
               }}
             />
           </ActionPanel>
