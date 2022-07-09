@@ -12,6 +12,27 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "toggle-availability-status",
+      "title": "Toggle Availability Status",
+      "subtitle": "Gather",
+      "description": "Toggle your vailability status in Gather",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-camera",
+      "title": "Toggle Camera",
+      "subtitle": "Gather",
+      "description": "Toggle your camera in Gather",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Microphone",
+      "subtitle": "Gather",
+      "description": "Toggle your microphone in Gather",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle-afk",
       "title": "Toggle Away From Keyboard",
       "subtitle": "Gather",
