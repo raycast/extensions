@@ -1,20 +1,26 @@
 import { ActionPanel, Icon, List, useNavigation, Action, LocalStorage } from "@raycast/api";
-import ProjectComponent from "./project-list";
-
-import { Project, Team } from "../types";
-import { fromNow } from "../time";
+import ProjectComponent from "../project";
+import { Project, Team, User } from "../../types";
+import { fromNow } from "../../utils/time";
+import SearchBarAccessory from "../search-projects/search-bar-accessory";
+import useVercel from "../../hooks/use-vercel-info";
 
 type Props = {
   projects?: Project[];
-  username?: string;
+  user?: User;
   selectedTeam?: Team;
   updateProject: (projectId: string, project: Partial<Project>, teamId?: string) => Promise<void>;
+  teams?: Team[];
 };
 
-const ProjectList = ({ projects, username, selectedTeam: team, updateProject }: Props) => {
+const SearchProjectPage = ({ projects, user, selectedTeam, updateProject, teams }: Props) => {
   const { push } = useNavigation();
+  const { onTeamChange } = useVercel();
+
   return (
-    <List navigationTitle="Results" isLoading={!projects}>
+    <List searchBarPlaceholder="Search Projects..." navigationTitle="Results" isLoading={!projects && !teams?.length} searchBarAccessory={
+      <>{user && <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />}</>
+    }>
       {projects &&
         projects.map((project) => (
           <List.Item
@@ -37,8 +43,8 @@ const ProjectList = ({ projects, username, selectedTeam: team, updateProject }: 
                     );
                     push(
                       <ProjectComponent
-                        username={username}
-                        team={team}
+                        username={user?.username}
+                        team={selectedTeam}
                         project={project}
                         updateProject={updateProject}
                       />
@@ -61,45 +67,16 @@ const ProjectList = ({ projects, username, selectedTeam: team, updateProject }: 
   );
 };
 
-const ProjectListSection = ({ projects, selectedTeam, username, updateProject }: Props) => {
-  const { push } = useNavigation();
-
-  const newURL = `https://vercel.com/new${selectedTeam ? `/${selectedTeam.slug}` : ""}`;
+const ProjectListSection = ({ projects, selectedTeam, user, updateProject, teams }: Props) => {
   return (
-    <List.Section title={selectedTeam ? `${selectedTeam.name}: Projects` : `Projects`}>
-      <List.Item
-        title={selectedTeam ? `${selectedTeam.name}: Search projects...` : `Search projects...`}
-        icon={Icon.MagnifyingGlass}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Search Projects..."
-              icon={{ source: Icon.MagnifyingGlass }}
-              onAction={() =>
-                push(
-                  <ProjectList
-                    projects={projects}
-                    updateProject={updateProject}
-                    username={username}
-                    selectedTeam={selectedTeam}
-                  />
-                )
-              }
-            />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        title="Create New Project"
-        icon={Icon.Plus}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url={newURL} />
-          </ActionPanel>
-        }
-      />
-    </List.Section>
-  );
+    <SearchProjectPage
+      projects={projects}
+      updateProject={updateProject}
+      user={user}
+      selectedTeam={selectedTeam}
+      teams={teams}
+    />
+  )
 };
 
 export default ProjectListSection;

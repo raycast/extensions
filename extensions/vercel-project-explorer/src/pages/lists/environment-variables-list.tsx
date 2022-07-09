@@ -1,14 +1,14 @@
 import { ActionPanel, confirmAlert, Icon, List, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
-import { Environment, Project, Team } from "../types";
+import { Environment, Project, Team } from "../../types";
 import {
   createEnvironmentVariable,
   deleteEnvironmentVariableById,
   fetchEnvironmentVariables,
   updateEnvironmentVariable,
-} from "../vercel";
-import EditEnvironmentVariable from "./forms/edit-env-var";
-import NewEnvironmentVariable from "./forms/new-env-var";
+} from "../../vercel";
+import EditEnvironmentVariable from "../forms/edit-env-var";
+import NewEnvironmentVariable from "../forms/new-env-var";
 
 type Props = {
   project: Project;
@@ -128,14 +128,14 @@ const EnvironmentVariables = ({ project, team }: Props) => {
         }
       />
       {systemVarsPresent && <List.Section title="System Environment Variables" />}
-      {systemVarsPresent && systemVars.map((v) => <EnvironmentVariableItem envVar={v} actions={itemActions(v)} />)}
+      {systemVarsPresent && systemVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {plainVarsPresent && <List.Section title="Plain Environment Variables" />}
-      {plainVarsPresent && plainVars.map((v) => <EnvironmentVariableItem envVar={v} actions={itemActions(v)} />)}
+      {plainVarsPresent && plainVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {encryptedVarsPresent && <List.Section title="Encrypted Environment Variables" />}
       {encryptedVarsPresent &&
-        encryptedVars.map((v) => <EnvironmentVariableItem envVar={v} actions={itemActions(v)} />)}
+        encryptedVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {secretVarsPresent && <List.Section title="Secret Environment Variables" />}
-      {secretVarsPresent && secretVars.map((v) => <EnvironmentVariableItem envVar={v} actions={itemActions(v)} />)}
+      {secretVarsPresent && secretVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
     </List>
   );
 };

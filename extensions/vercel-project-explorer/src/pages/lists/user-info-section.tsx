@@ -3,12 +3,12 @@ import { User } from "../../types";
 import CopyToClipboardActionPanel from "../action-panels/copy-to-clipboard";
 
 type Props = {
-  user: User;
+  user?: User;
 };
 
 const UserListSection = ({ user }: Props) => {
   return (
-    <List.Section title={`Account information`}>
+    user ? <List.Section title={`Account information`}>
       <List.Item
         title={`Username`}
         subtitle={user.username || undefined}
@@ -33,7 +33,7 @@ const UserListSection = ({ user }: Props) => {
         icon={Icon.Clipboard}
         actions={<CopyToClipboardActionPanel text={user.uid} />}
       />
-    </List.Section>
+    </List.Section> : null
   );
 };
 
