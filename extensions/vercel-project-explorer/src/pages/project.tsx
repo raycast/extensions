@@ -14,11 +14,11 @@ type Props = {
   team?: Team;
   updateProject: (projectId: string, project: Partial<ProjectType>, teamId?: string) => Promise<void>;
 };
-const Project = ({ project, team, username, updateProject }: Props) => {
+const Project = ({ project, team, updateProject }: Props) => {
   const { push } = useNavigation();
   const [deployments, setDeployments] = useState<Deployment[]>();
   const [latestDeployment, setLatestDeployment] = useState<Deployment>();
-  const name = team ? team.slug : username;
+
   useEffect(() => {
     fetchDeploymentsForProject(project, team?.id).then((deployments) => {
       setDeployments(deployments);
@@ -30,43 +30,38 @@ const Project = ({ project, team, username, updateProject }: Props) => {
   return (
     <List navigationTitle={project.name} isLoading={!deployments}>
       <List.Section title={`Deployments`}>
-        {latestDeployment && (
-          <List.Item
-            title={`Visit Most Recent Deployment`}
-            icon={Icon.Link}
-            subtitle={latestDeployment.createdAt ? fromNow(latestDeployment.createdAt, new Date()) : ""}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`https://${latestDeployment.url}`} />
-              </ActionPanel>
-            }
-            accessories={[
-              {
-                text: latestDeployment.state?.toLowerCase() || latestDeployment.readyState?.toLowerCase(),
-              },
-            ]}
-          />
-        )}
-        {deployments && deployments.length ? (
-          <List.Item
-            title="Search Deployments..."
-            icon={Icon.MagnifyingGlass}
-            subtitle={`${deployments?.length} deployments loaded`}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Search Deployments..."
-                  icon={{ source: Icon.MagnifyingGlass }}
-                  onAction={() => {
-                    push(<DeploymentList deployments={deployments} />);
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ) : (
-          <List.Item title="No Deployments" />
-        )}
+        <List.Item
+          title={`Visit Most Recent Deployment`}
+          icon={Icon.Link}
+          subtitle={latestDeployment?.createdAt ? fromNow(latestDeployment.createdAt, new Date()) : ""}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={`https://${latestDeployment?.url}`} />
+            </ActionPanel>
+          }
+          accessories={[
+            {
+              text: latestDeployment?.state?.toLowerCase() || latestDeployment?.readyState?.toLowerCase(),
+            },
+          ]}
+        />
+
+        <List.Item
+          title="Search Deployments..."
+          icon={Icon.MagnifyingGlass}
+          subtitle={`${deployments?.length} deployments loaded`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Search Deployments..."
+                icon={{ source: Icon.MagnifyingGlass }}
+                onAction={() => {
+                  push(<DeploymentList deployments={deployments || []} />);
+                }}
+              />
+            </ActionPanel>
+          }
+        />
       </List.Section>
       <List.Section title="Settings">
         <List.Item
