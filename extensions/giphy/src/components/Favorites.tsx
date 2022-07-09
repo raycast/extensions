@@ -9,7 +9,7 @@ function Favorites() {
     <Grid.Section title="Favorites">
       {Object.values(favs)
         .reverse()
-        .filter(item => item.title.startsWith(searchText))
+        .filter((item) => item.title.startsWith(searchText))
         .map((recentItem) => (
           <Grid.Item
             key={recentItem.id}

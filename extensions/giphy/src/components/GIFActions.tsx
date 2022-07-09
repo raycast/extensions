@@ -9,14 +9,13 @@ import { ViewHandle } from "../hooks/useGiphy";
 export type GIFActionsProps = {
   gif: IGif;
   details?: boolean;
-  onView?: ViewHandle
+  onView?: ViewHandle;
 };
 
 function GIFActions({ gif, details, onView }: GIFActionsProps) {
   const { recents, favs } = useApp();
   const dispatch = useDispatch();
 
- 
   return (
     <ActionPanel>
       {!details && (
