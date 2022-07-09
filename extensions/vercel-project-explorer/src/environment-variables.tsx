@@ -34,10 +34,12 @@ function Main() {
                     push(<EnvironmentVariables project={project} team={selectedTeam} />);
                   }}
                 />
-              </ActionPanel>}
+              </ActionPanel>
+            }
           />
         ))}
-    </List>)
+    </List>
+  );
 }
 
 export default Main;

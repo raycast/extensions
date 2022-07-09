@@ -27,7 +27,6 @@ const InspectDeployment = ({ deployment }: Props) => {
     fetchBuilds();
   }, [deployment]);
 
-
   const getCommitMessage = (deployment: Deployment) => {
     // TODO: determine others
     if (deployment.meta.githubCommitMessage) {
@@ -37,27 +36,33 @@ const InspectDeployment = ({ deployment }: Props) => {
   };
 
   const getStateText = () => {
-    return (build?.readyState) ? build.readyState.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase()) : "";
+    return build?.readyState
+      ? build.readyState.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+      : "";
   };
 
   return (
-    <Detail navigationTitle={getCommitMessage(deployment)} isLoading={!markdown} markdown={markdown}
+    <Detail
+      navigationTitle={getCommitMessage(deployment)}
+      isLoading={!markdown}
+      markdown={markdown}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title={`Open on Vercel`} url={`https://${deployment.url}`} icon={Icon.Link} />
           <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment}`} icon={Icon.Link} />
         </ActionPanel>
       }
-      metadata={<Detail.Metadata>
-        <Detail.Metadata.Label title={"State"} text={getStateText()} />
-        <Detail.Metadata.Link title={deployment.name} text={deployment.url} target={`https://${deployment.url}`} />
-        <Detail.Metadata.Label title={"Commit"} text={getCommitMessage(deployment)} />
-        <Detail.Metadata.Label title={"Created"} text={deployment.createdAt ? fromNow(deployment.createdAt) : ""} />
-        <Detail.Metadata.Separator />
-        <Detail.Metadata.Link title={""} text={"Open on Vercel"} target={`https://${deployment.url}`} />
-        <Detail.Metadata.Separator />
-        <Detail.Metadata.Label title={"Creator"} text={deployment.creator?.username || "Unknown"} />
-      </Detail.Metadata>
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title={"State"} text={getStateText()} />
+          <Detail.Metadata.Link title={deployment.name} text={deployment.url} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Label title={"Commit"} text={getCommitMessage(deployment)} />
+          <Detail.Metadata.Label title={"Created"} text={deployment.createdAt ? fromNow(deployment.createdAt) : ""} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title={""} text={"Open on Vercel"} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title={"Creator"} text={deployment.creator?.username || "Unknown"} />
+        </Detail.Metadata>
       }
     />
   );

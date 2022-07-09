@@ -43,10 +43,18 @@ const DeploymentsList = ({ deployments }: Props) => {
   const { user, selectedTeam, teams, onTeamChange } = useVercel();
 
   return (
-    <List searchBarPlaceholder="Search Deployments..." navigationTitle="Results" isLoading={!deployments.length}
-      searchBarAccessory={<>
-        {user && <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />}
-      </>}>
+    <List
+      searchBarPlaceholder="Search Deployments..."
+      navigationTitle="Results"
+      isLoading={!deployments.length}
+      searchBarAccessory={
+        <>
+          {user && (
+            <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />
+          )}
+        </>
+      }
+    >
       {deployments.map((deployment) => (
         <List.Item
           title={`${getCommitMessage(deployment)} — ${deployment.createdAt ? fromNow(deployment.createdAt) : ""}`}

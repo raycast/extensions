@@ -18,9 +18,18 @@ const SearchProjectPage = ({ projects, user, selectedTeam, updateProject, teams 
   const { onTeamChange } = useVercel();
 
   return (
-    <List searchBarPlaceholder="Search Projects..." navigationTitle="Results" isLoading={!projects && !teams?.length} searchBarAccessory={
-      <>{user && <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />}</>
-    }>
+    <List
+      searchBarPlaceholder="Search Projects..."
+      navigationTitle="Results"
+      isLoading={!projects && !teams?.length}
+      searchBarAccessory={
+        <>
+          {user && (
+            <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />
+          )}
+        </>
+      }
+    >
       {projects &&
         projects.map((project) => (
           <List.Item
@@ -76,7 +85,7 @@ const ProjectListSection = ({ projects, selectedTeam, user, updateProject, teams
       selectedTeam={selectedTeam}
       teams={teams}
     />
-  )
+  );
 };
 
 export default ProjectListSection;

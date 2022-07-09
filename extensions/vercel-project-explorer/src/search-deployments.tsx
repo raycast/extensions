@@ -23,9 +23,7 @@ function Main() {
     fetch();
   }, [selectedTeam]);
 
-  return (
-    <DeploymentsList deployments={deployments || []} />
-  );
+  return <DeploymentsList deployments={deployments || []} />;
 }
 
 export default Main;
