@@ -55,7 +55,8 @@ const InspectDeployment = ({ deployment }: Props) => {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title={"State"} text={getStateText()} />
-          <Detail.Metadata.Link title={deployment.name} text={deployment.url} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Label title="Name" text={deployment.name} />
+          <Detail.Metadata.Link title={"URL"} text={deployment.url} target={`https://${deployment.url}`} />
           <Detail.Metadata.Label title={"Commit"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Label title={"Created"} text={deployment.createdAt ? fromNow(deployment.createdAt) : ""} />
           <Detail.Metadata.Separator />
