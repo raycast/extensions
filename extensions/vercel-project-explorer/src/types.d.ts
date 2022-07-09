@@ -249,8 +249,6 @@ export type Deployment =
             workspaceUuid: string;
             repoUuid: string;
           };
-      /** A string holding the unique ID of the deployment */
-      id: string;
       uid: string;
       lambdas?: {
         id: string;
@@ -981,3 +979,47 @@ interface Pagination {
   /** Timestamp that must be used to request the previous page. */
   prev: number | null;
 }
+
+type Check = {
+  completedAt?: number;
+  conclusion?: "canceled" | "failed" | "neutral" | "succeeded" | "skipped" | "stale";
+  createdAt: number;
+  detailsUrl?: string;
+  id: string;
+  integrationId: string;
+  name: string;
+  output?: {
+    metrics?: {
+      FCP: {
+        value: number | null;
+        previousValue?: number;
+        source: "web-vitals";
+      };
+      LCP: {
+        value: number | null;
+        previousValue?: number;
+        source: "web-vitals";
+      };
+      CLS: {
+        value: number | null;
+        previousValue?: number;
+        source: "web-vitals";
+      };
+      TBT: {
+        value: number | null;
+        previousValue?: number;
+        source: "web-vitals";
+      };
+      virtualExperienceScore?: {
+        value: number | null;
+        previousValue?: number;
+        source: "web-vitals";
+      };
+    };
+  };
+  path?: string;
+  rerequestable: boolean;
+  startedAt?: number;
+  status: "registered" | "running" | "completed";
+  updatedAt: number;
+};

@@ -2,7 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { Project, Team, User } from "../types";
 import useInterval from "../utils/use-interval";
-import { fetchUser, fetchTeams, fetchProjects, updateProject } from "../vercel";
+import { fetchUser, fetchTeams, fetchProjects, updateProject, getChecksForDeployment } from "../vercel";
 import useSharedState from "./use-shared-state";
 
 const useVercel = () => {

@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, List, useNavigation, Action, LocalStorage } from "@raycast/api";
 import ProjectComponent from "../project";
 import { Project, Team, User } from "../../types";
-import { fromNow } from "../../utils/time";
+import fromNow from "../../utils/time";
 import SearchBarAccessory from "../search-projects/search-bar-accessory";
 import useVercel from "../../hooks/use-vercel-info";
 
@@ -66,7 +66,7 @@ const SearchProjectPage = ({ projects, user, selectedTeam, updateProject, teams 
               {
                 text:
                   project.latestDeployments?.length && project.latestDeployments[0].createdAt
-                    ? fromNow(project.latestDeployments[0].createdAt)
+                    ? fromNow(project.latestDeployments[0].createdAt, new Date())
                     : "",
               },
             ]}

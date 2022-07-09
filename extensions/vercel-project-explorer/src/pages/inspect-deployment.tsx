@@ -1,7 +1,7 @@
 import { Icon, Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import getProjectMarkdown from "../markdown/get-deployment-markdown";
-import { fromNow } from "../utils/time";
+import fromNow from "../utils/time";
 import { Build, Deployment } from "../types";
 import { fetchDeploymentBuildsByDeploymentId } from "../vercel";
 
@@ -58,11 +58,14 @@ const InspectDeployment = ({ deployment }: Props) => {
           <Detail.Metadata.Label title="Name" text={deployment.name} />
           <Detail.Metadata.Link title={"URL"} text={deployment.url} target={`https://${deployment.url}`} />
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
-          <Detail.Metadata.Label title={"Created"} text={deployment.createdAt ? fromNow(deployment.createdAt) : ""} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title={"Created"}
+            text={deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : ""}
+          />
+          <Detail.Metadata.Label title={"Creator"} text={deployment.creator?.username || "Unknown"} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title={""} text={"Open on Vercel"} target={`https://${deployment.url}`} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title={"Creator"} text={deployment.creator?.username || "Unknown"} />
         </Detail.Metadata>
       }
     />

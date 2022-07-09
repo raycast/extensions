@@ -1,6 +1,6 @@
 import { Icon, Color, List, ActionPanel, useNavigation, Action } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
-import { fromNow } from "../../utils/time";
+import fromNow from "../../utils/time";
 import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/search-bar-accessory";
@@ -57,9 +57,9 @@ const DeploymentsList = ({ deployments }: Props) => {
     >
       {deployments.map((deployment) => (
         <List.Item
-          title={`${getCommitMessage(deployment)} — ${deployment.createdAt ? fromNow(deployment.createdAt) : ""}`}
+          title={`${getCommitMessage(deployment)}`}
           icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
-          subtitle={deployment.target || ""}
+          subtitle={deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : ""}
           keywords={[deployment.name, getCommitMessage(deployment) || ""]}
           key={deployment.uid}
           actions={
