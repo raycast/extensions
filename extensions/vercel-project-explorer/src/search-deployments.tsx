@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchDeployments } from "./vercel";
+import { fetchDeployments, getChecksForDeployment } from "./vercel";
 
 import { Deployment } from "./types";
 import isValidToken from "./utils/is-valid-token";
@@ -16,7 +16,6 @@ function Main() {
   useEffect(() => {
     async function fetch() {
       const fetched = await fetchDeployments(selectedTeam?.id);
-
       setDeployments(fetched);
     }
 

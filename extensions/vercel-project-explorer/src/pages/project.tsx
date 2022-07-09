@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, useNavigation, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fromNow } from "../utils/time";
+import fromNow from "../utils/time";
 import { Deployment, Project as ProjectType, Team } from "../types";
 import { fetchDeploymentsForProject } from "../vercel";
 import CopyToClipboardActionPanel from "./action-panels/copy-to-clipboard";

@@ -11,6 +11,7 @@ import type {
   Pagination,
   Paginated,
   CreateEnvironment,
+  Check,
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
@@ -187,7 +188,7 @@ export async function fetchDeploymentsForProject(project: Project, teamId?: stri
   }
 }
 
-export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 200) {
+export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 400) {
   try {
     const fetchURL = apiURL + `v6/deployments?teamId=${teamId ?? ""}&limit=${limit}`;
     const response = await fetch(fetchURL, {
@@ -196,14 +197,16 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
     });
     const json = (await response.json()) as { deployments: Deployment[]; pagination: Pagination };
 
-    const { deployments, pagination } = json;
+    // eslint-disable-next-line prefer-const
+    let { deployments, pagination } = json;
 
     while (pagination.next && deployments.length < maxToFetch) {
-      const next = await fetch(fetchURL + "&after=" + pagination.next, {
+      const next = await fetch(fetchURL + "&until=" + pagination.next, {
         method: "get",
         headers: headers,
       });
       const nextJson = (await next.json()) as { deployments: Deployment[]; pagination: Pagination };
+      pagination = nextJson.pagination;
       json.deployments.push(...nextJson.deployments);
     }
 
@@ -329,7 +332,7 @@ async function _rawUpdateProjectEnvironmentVariable(
   }
 }
 
-export async function getScreenshotImageURL(deploymentId: Deployment["id"]) {
+export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
   function arrayBufferToBase64(buffer: ArrayBuffer) {
     let binary = "";
     const bytes = [].slice.call(new Uint8Array(buffer));
@@ -355,5 +358,12 @@ export async function getScreenshotImageURL(deploymentId: Deployment["id"]) {
   return imageStr;
 }
 
-// requests are of the form (for deployments):
-// deployments: Deployment[], pagination: Pagination,
+export async function getChecksForDeployment(deploymentId: Deployment["uid"], teamId?: string) {
+  const teamIdString = teamId ? `teamId=${teamId}` : "";
+  const response = await fetch(apiURL + `v1/deployments/${deploymentId}/checks?${teamIdString}`, {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { checks: Check[] };
+  return json.checks;
+}
