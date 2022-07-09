@@ -1,3 +1,3 @@
 # Gather
 
-Handle AFK
+Handle AFK inside Gather
