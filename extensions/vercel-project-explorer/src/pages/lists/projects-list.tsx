@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, useNavigation, Action, LocalStorage } from "@raycast/api";
+import { ActionPanel, Icon, List, useNavigation, Action } from "@raycast/api";
 import ProjectComponent from "../project";
 import { Project, Team, User } from "../../types";
 import fromNow from "../../utils/time";
@@ -44,20 +44,7 @@ const SearchProjectPage = ({ projects, user, selectedTeam, updateProject, teams 
                   title="Open"
                   icon={Icon.ArrowRight}
                   onAction={async () => {
-                    const previous = await LocalStorage.getItem<string>("recents");
-                    const recents = previous ? JSON.parse(previous) : [];
-                    await LocalStorage.setItem(
-                      "recents",
-                      JSON.stringify(recents?.length ? [...recents, project.id] : [project.id])
-                    );
-                    push(
-                      <ProjectComponent
-                        username={user?.username}
-                        team={selectedTeam}
-                        project={project}
-                        updateProject={updateProject}
-                      />
-                    );
+                    push(<ProjectComponent team={selectedTeam} project={project} updateProject={updateProject} />);
                   }}
                 />
               </ActionPanel>

@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
 import type {
   Team,
@@ -9,7 +9,6 @@ import type {
   CreateEnvironmentVariableResponse,
   Build,
   Pagination,
-  Paginated,
   CreateEnvironment,
   Check,
 } from "./types";
@@ -188,7 +187,7 @@ export async function fetchDeploymentsForProject(project: Project, teamId?: stri
   }
 }
 
-export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 400) {
+export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300) {
   try {
     const fetchURL = apiURL + `v6/deployments?teamId=${teamId ?? ""}&limit=${limit}`;
     const response = await fetch(fetchURL, {

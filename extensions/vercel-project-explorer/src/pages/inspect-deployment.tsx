@@ -41,6 +41,7 @@ const InspectDeployment = ({ deployment }: Props) => {
       : "";
   };
 
+  console.log(deployment);
   return (
     <Detail
       navigationTitle={getCommitMessage(deployment)}
@@ -48,15 +49,20 @@ const InspectDeployment = ({ deployment }: Props) => {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title={`Open on Vercel`} url={`https://${deployment.url}`} icon={Icon.Link} />
-          <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment}`} icon={Icon.Link} />
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <Action.OpenInBrowser title={`Open on Vercel`} url={`https://${deployment.inspectorUrl}`} icon={Icon.Link} />
+          <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title={"State"} text={getStateText()} />
           <Detail.Metadata.Label title="Name" text={deployment.name} />
-          <Detail.Metadata.Link title={"URL"} text={deployment.url} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Link title={"Site URL"} text={deployment.url} target={`https://${deployment.url}`} />
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label

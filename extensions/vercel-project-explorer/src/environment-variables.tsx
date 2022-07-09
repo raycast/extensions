@@ -1,6 +1,6 @@
 import isValidToken from "./utils/is-valid-token";
 import useVercel from "./hooks/use-vercel-info";
-import { Action, ActionPanel, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import EnvironmentVariables from "./pages/lists/environment-variables-list";
 
 function Main() {
@@ -25,12 +25,6 @@ function Main() {
                   title="Open"
                   icon={Icon.ArrowRight}
                   onAction={async () => {
-                    const previous = await LocalStorage.getItem<string>("recents");
-                    const recents = previous ? JSON.parse(previous) : [];
-                    await LocalStorage.setItem(
-                      "recents",
-                      JSON.stringify(recents?.length ? [...recents, project.id] : [project.id])
-                    );
                     push(<EnvironmentVariables project={project} team={selectedTeam} />);
                   }}
                 />
