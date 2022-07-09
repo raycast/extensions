@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "toggle-afk",
-      "title": "Toggle Away From Keyboard (AFK)",
+      "title": "Toggle Away From Keyboard",
       "subtitle": "Gather",
       "description": "Toggle your camera, microphone and availability status in Gather",
       "mode": "no-view"
