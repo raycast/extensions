@@ -128,14 +128,17 @@ const EnvironmentVariables = ({ project, team }: Props) => {
         }
       />
       {systemVarsPresent && <List.Section title="System Environment Variables" />}
-      {systemVarsPresent && systemVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+      {systemVarsPresent &&
+        systemVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {plainVarsPresent && <List.Section title="Plain Environment Variables" />}
-      {plainVarsPresent && plainVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+      {plainVarsPresent &&
+        plainVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {encryptedVarsPresent && <List.Section title="Encrypted Environment Variables" />}
       {encryptedVarsPresent &&
         encryptedVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
       {secretVarsPresent && <List.Section title="Secret Environment Variables" />}
-      {secretVarsPresent && secretVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+      {secretVarsPresent &&
+        secretVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
     </List>
   );
 };

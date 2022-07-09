@@ -7,8 +7,8 @@ type Props = {
 };
 
 const UserListSection = ({ user }: Props) => {
-  return (
-    user ? <List.Section title={`Account information`}>
+  return user ? (
+    <List.Section title={`Account information`}>
       <List.Item
         title={`Username`}
         subtitle={user.username || undefined}
@@ -33,8 +33,8 @@ const UserListSection = ({ user }: Props) => {
         icon={Icon.Clipboard}
         actions={<CopyToClipboardActionPanel text={user.uid} />}
       />
-    </List.Section> : null
-  );
+    </List.Section>
+  ) : null;
 };
 
 export default UserListSection;

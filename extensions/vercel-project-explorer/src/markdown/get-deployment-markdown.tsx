@@ -152,11 +152,11 @@ const getDeploymentMarkdown = async (deployment: Deployment) => {
   // we want the first domain, the last deploy time, the last commit message,
   // and the last commit author
   // console.log(project.latestDeployments?.length && getScreenshotImageURL(project.latestDeployments[0].id))
-  const { uid } = deployment
+  const { uid } = deployment;
 
-  const imageURL = await getScreenshotImageURL(uid)
+  const imageURL = await getScreenshotImageURL(uid);
 
   return `![](${imageURL})`;
-}
+};
 
 export default getDeploymentMarkdown;
