@@ -1,10 +1,18 @@
-import { ActionPanel, Icon, List, showToast, Action, Toast } from "@raycast/api";
+import { ActionPanel, Icon, List, showToast, Action, Toast, getPreferenceValues } from "@raycast/api";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { build, getRecentEntries } from "./db";
-import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
+import {
+  EntryLike,
+  isFileEntry,
+  isFolderEntry,
+  isRemoteEntry,
+  isWorkspaceEntry,
+  RemoteEntry,
+  Preferences,
+} from "./types";
 
 const appKeyMapping = {
   Code: "com.microsoft.VSCode",
@@ -17,10 +25,16 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [entries, setEntries] = useState<EntryLike[]>([]);
+  const [searchText, setSearchText] = useState<string>();
+  const [originalEntries, setOriginalEntries] = useState<EntryLike[]>([]);
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     getRecentEntries()
-      .then((entries) => setEntries(entries))
+      .then((entries) => {
+        setEntries(entries);
+        setOriginalEntries(entries);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));
   }, []);
@@ -33,8 +47,43 @@ export default function Command() {
     });
   }
 
+  const splitFilter = (search: string) => {
+    return [...entries].filter((item) => {
+      let value = "";
+
+      if (isWorkspaceEntry(item)) {
+        value = item.workspace.configPath;
+      } else if (isFolderEntry(item) || isRemoteEntry(item)) {
+        value = item.folderUri;
+      } else if (isFileEntry(item)) {
+        value = item.fileUri;
+      } else {
+        return null;
+      }
+
+      // Split search by whitespace and check if value contains all parts
+      return search.split(" ").every((part) => {
+        return value.toLowerCase().includes(part.toLowerCase());
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (preferences.split && searchText) {
+      const filteredItems = splitFilter(searchText);
+      setEntries([...filteredItems]);
+    } else if (preferences.split) {
+      setEntries([...originalEntries]);
+    }
+  }, [searchText]);
+
   return (
-    <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
+    <List
+      searchBarPlaceholder="Search recent projects..."
+      isLoading={isLoading}
+      enableFiltering={!preferences.split}
+      onSearchTextChange={setSearchText}
+    >
       <List.Section title="Workspaces">
         {entries.filter(isWorkspaceEntry).map((entry) => (
           <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
