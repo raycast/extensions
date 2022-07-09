@@ -34,7 +34,7 @@ const Project = ({ project, team, username, updateProject }: Props) => {
           <List.Item
             title={`Visit Most Recent Deployment`}
             icon={Icon.Link}
-            subtitle={latestDeployment.createdAt ? fromNow(latestDeployment.createdAt) : ""}
+            subtitle={latestDeployment.createdAt ? fromNow(latestDeployment.createdAt, new Date()) : ""}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://${latestDeployment.url}`} />
@@ -85,7 +85,7 @@ const Project = ({ project, team, username, updateProject }: Props) => {
         <List.Item
           title={`Environment Variables`}
           icon={Icon.List}
-          subtitle={project.env?.length ? `${project.env.length} variables` : "No Variables"}
+          subtitle={project.env?.length ? `${project.env.length} variables` : "No variables"}
           actions={
             <ActionPanel>
               <Action title="Edit" onAction={() => push(<EnvironmentVariables team={team} project={project} />)} />

@@ -16,7 +16,6 @@ const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
     const formedValues: Partial<Environment> = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target: targets() as any,
-      type: values.dropdown,
       key: values.key,
       value: values.value,
     };
@@ -32,12 +31,6 @@ const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id={"dropdown"} title="Type">
-        <Form.Dropdown.Item title="Provided by System" value="system" icon={Icon.Desktop} />
-        <Form.Dropdown.Item title="Plaintext" value="plain" icon={Icon.TextDocument} />
-        <Form.Dropdown.Item title="Secret" value="secret" icon={Icon.EyeSlash} />
-      </Form.Dropdown>
-      <Form.Separator />
       <Form.TextField id="key" title="Environment variable key" placeholder="YOUR_KEY" />
       <Form.TextField id="value" title="Environment variable value" placeholder="your_value" />
       <Form.Separator />
