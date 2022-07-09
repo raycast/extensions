@@ -1,3 +1,3 @@
 # Taskplane Changelog
 
-## [Initial Version] - 2022-07-06
+## [Initial Version] - {PR_MERGE_DATE}
