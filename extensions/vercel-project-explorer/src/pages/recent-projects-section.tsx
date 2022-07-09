@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, useNavigation, Action, LocalStorage } from "@raycast/api";
-import ProjectComponent from "./project-list";
+import ProjectComponent from "./project";
 
 import type { Project, Team } from "../types";
 import { useEffect, useState } from "react";

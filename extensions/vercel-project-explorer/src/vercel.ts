@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
-import type { Team, Deployment, Project, Environment, User, CreateEnvironmentVariableResponse, Build } from "./types";
+import type { Team, Deployment, Project, Environment, User, CreateEnvironmentVariableResponse, Build, Pagination, Paginated, CreateEnvironment } from "./types";
 
 export const token = getPreferenceValues().accessToken;
 const headers = new Headers({
@@ -16,7 +16,9 @@ export async function fetchUser(): Promise<User> {
       method: "get",
       headers: headers,
     });
+
     const json = (await response.json()) as { user: User };
+
     return json.user;
   } catch (err) {
     console.error(err);
@@ -47,7 +49,7 @@ export async function fetchTeams(): Promise<Team[]> {
 /*
  * Fetch all projects for the user and optional teams
  */
-export async function fetchProjects(username: string, teams?: Team[]): Promise<Project[]> {
+export async function fetchProjects(username: User['username'], teams?: Team[]): Promise<Project[]> {
   const projects: Project[] = [];
   if (teams?.length) {
     for (const team of teams) {
@@ -91,7 +93,7 @@ async function _rawFetchProjects(team?: Team, limit = 100): Promise<Project[]> {
   }
 }
 
-export async function deleteProjectById(projectId: string, teamId?: string) {
+export async function deleteProjectById(projectId: Project['id'], teamId?: Team['id']) {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}?teamId=${teamId ?? ""}`, {
       method: "delete",
@@ -109,7 +111,7 @@ export async function deleteProjectById(projectId: string, teamId?: string) {
   }
 }
 
-export async function deleteEnvironmentVariableById(projectId: string, envId: string): Promise<Environment> {
+export async function deleteEnvironmentVariableById(projectId: Project['id'], envId: Environment['id']): Promise<Environment> {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}/env/${envId}`, {
       method: "delete",
@@ -127,7 +129,7 @@ export async function deleteEnvironmentVariableById(projectId: string, envId: st
   }
 }
 
-export async function fetchProjectById(projectId: string, teamId?: string) {
+export async function fetchProjectById(projectId: Project['id'], teamId?: string) {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}`, {
       method: "get",
@@ -160,6 +162,37 @@ export async function fetchDeploymentsForProject(project: Project, teamId?: stri
       headers: headers,
     });
     const json = (await response.json()) as { deployments: Deployment[] };
+    return json.deployments;
+  } catch (err) {
+    console.error(err);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to fetch deployments",
+    });
+    throw new Error("Failed to fetch deployments");
+  }
+}
+
+export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 200) {
+  try {
+    const fetchURL = apiURL + `v6/deployments?teamId=${teamId ?? ""}&limit=${limit}`;
+    const response = await fetch(fetchURL, {
+      method: "get",
+      headers: headers,
+    });
+    const json = (await response.json()) as { deployments: Deployment[], pagination: Pagination };
+
+    const { deployments, pagination } = json;
+
+    while (pagination.next && deployments.length < maxToFetch) {
+      const next = await fetch(fetchURL + "&after=" + pagination.next, {
+        method: "get",
+        headers: headers,
+      });
+      const nextJson = (await next.json()) as { deployments: Deployment[], pagination: Pagination };
+      json.deployments.push(...nextJson.deployments);
+    }
+
     return json.deployments;
   } catch (err) {
     console.error(err);
@@ -217,8 +250,8 @@ async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: 
 
 // Update project environment variable
 export async function updateEnvironmentVariable(
-  projectId: string,
-  envId: string,
+  projectId: Project['id'],
+  envId: Environment['id'],
   envVar: Partial<Environment>
 ): Promise<Environment> {
   const environmentVariable: Environment = await _rawUpdateProjectEnvironmentVariable(projectId, envId, envVar);
@@ -237,12 +270,12 @@ export async function updateProject(projectId: string, project: Partial<Project>
 
 // TODO: use Omit<>
 export async function createEnvironmentVariable(
-  projectId: string,
-  envVar: Partial<Environment>,
-  teamId?: string
+  projectId: Project['id'],
+  envVar: CreateEnvironment,
+  teamId?: Team['id']
 ): Promise<CreateEnvironmentVariableResponse> {
   try {
-    const response = await fetch(apiURL + `v8/projects/${projectId}/env?teamId=${teamId ? teamId : ""}`, {
+    const response = await fetch(apiURL + `v9/projects/${projectId}/env?teamId=${teamId ? teamId : ""}`, {
       method: "post",
       headers: headers,
       body: JSON.stringify(envVar),
@@ -260,8 +293,8 @@ export async function createEnvironmentVariable(
 }
 
 async function _rawUpdateProjectEnvironmentVariable(
-  projectId: string,
-  envId: string,
+  projectId: Project['id'],
+  envId: Environment['id'],
   envVar: Partial<Environment>
 ): Promise<Environment> {
   try {
@@ -281,3 +314,30 @@ async function _rawUpdateProjectEnvironmentVariable(
     throw new Error("Failed to fetch environment variable");
   }
 }
+
+export async function getScreenshotImageURL(deploymentId: Deployment['id']) {
+  function arrayBufferToBase64(buffer: ArrayBuffer) {
+    let binary = '';
+    const bytes = [].slice.call(new Uint8Array(buffer));
+
+    bytes.forEach((b) => binary += String.fromCharCode(b));
+
+    return btoa(binary);
+  };
+
+  const theme = environment.theme === "light" ? "0" : "1";
+  const image = await fetch(`https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false`,
+    {
+      method: "get",
+      headers: headers,
+    })
+
+  const arrayBuffer = await image.arrayBuffer();
+  const base64Flag = 'data:image/png;base64,';
+  const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
+
+  return imageStr;
+}
+
+// requests are of the form (for deployments):
+// deployments: Deployment[], pagination: Pagination,

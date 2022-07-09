@@ -1,11 +1,11 @@
 import { ActionPanel, Icon, List, useNavigation, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fromNow } from "../time";
+import { fromNow } from "../utils/time";
 import { Deployment, Project as ProjectType, Team } from "../types";
 import { fetchDeploymentsForProject } from "../vercel";
 import CopyToClipboardActionPanel from "./action-panels/copy-to-clipboard";
-import DeploymentList from "./deployments-list";
-import EnvironmentVariables from "./environment-variables-list";
+import DeploymentList from "./lists/deployments-list";
+import EnvironmentVariables from "./lists/environment-variables-list";
 import EditPreferences from "./forms/edit-preferences";
 
 type Props = {
@@ -29,71 +29,6 @@ const Project = ({ project, team, username, updateProject }: Props) => {
 
   return (
     <List navigationTitle={project.name} isLoading={!deployments}>
-      <List.Section title={"Navigation"}>
-        <List.Item
-          title={`Open in Browser`}
-          icon={Icon.ArrowRight}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/${name}/${project.name}`} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title={`Open Domains`}
-          icon={Icon.ArrowRight}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/${name}/${project.name}/settings/domains`} />
-            </ActionPanel>
-          }
-        />
-        {project.analytics && (
-          <List.Item
-            title={`Open Analytics`}
-            icon={Icon.ArrowRight}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`https://vercel.com/${name}/${project.name}/analytics`} />
-              </ActionPanel>
-            }
-          />
-        )}
-        <List.Item
-          title={`Open Logs`}
-          icon={Icon.ArrowRight}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/${project.accountId}/${project.name}/logs`} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title="Settings">
-        <List.Item
-          title={`Change project name`}
-          icon={Icon.Gear}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Edit"
-                onAction={() => push(<EditPreferences updateProject={updateProject} team={team} project={project} />)}
-              />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title={`Environment Variables`}
-          icon={Icon.List}
-          subtitle={project.env?.length ? `${project.env.length} variables` : "No Variables"}
-          actions={
-            <ActionPanel>
-              <Action title="Edit" onAction={() => push(<EnvironmentVariables team={team} project={project} />)} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
       <List.Section title={`Deployments`}>
         {latestDeployment && (
           <List.Item
@@ -132,6 +67,31 @@ const Project = ({ project, team, username, updateProject }: Props) => {
         ) : (
           <List.Item title="No Deployments" />
         )}
+      </List.Section>
+      <List.Section title="Settings">
+        <List.Item
+          title={`Change project name`}
+          icon={Icon.Gear}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Edit"
+                onAction={() => push(<EditPreferences updateProject={updateProject} team={team} project={project} />)}
+              />
+            </ActionPanel>
+          }
+        />
+
+        <List.Item
+          title={`Environment Variables`}
+          icon={Icon.List}
+          subtitle={project.env?.length ? `${project.env.length} variables` : "No Variables"}
+          actions={
+            <ActionPanel>
+              <Action title="Edit" onAction={() => push(<EnvironmentVariables team={team} project={project} />)} />
+            </ActionPanel>
+          }
+        />
       </List.Section>
       <List.Section title={`Project Information`}>
         <List.Item
