@@ -76,6 +76,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
         style: Toast.Style.Failure,
         title: "Failed to create environment variable",
       });
+      console.log(addedVar.error);
     } else if (addedVar) {
       await fetchAndSetVars();
       showToast({
@@ -103,7 +104,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
         title="Delete"
         onAction={async () => {
           if (await confirmAlert({ title: `Are you sure you want to delete ${v.key}}?` })) {
-            await deleteEnvironmentVariableById(project.id, v.id);
+            Promise.all([deleteEnvironmentVariableById(project.id, v.id), fetchAndSetVars()]);
           }
         }}
         icon={Icon.Trash}
@@ -130,16 +131,18 @@ const EnvironmentVariables = ({ project, team }: Props) => {
       />
       {systemVarsPresent && <List.Section title="System Environment Variables" />}
       {systemVarsPresent &&
-        systemVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+        systemVars.map((v) => <EnvironmentVariableItem type={v.type} envVar={v} key={v.id} actions={itemActions(v)} />)}
       {plainVarsPresent && <List.Section title="Plain Environment Variables" />}
       {plainVarsPresent &&
-        plainVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+        plainVars.map((v) => <EnvironmentVariableItem type={v.type} envVar={v} key={v.id} actions={itemActions(v)} />)}
       {encryptedVarsPresent && <List.Section title="Encrypted Environment Variables" />}
       {encryptedVarsPresent &&
-        encryptedVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+        encryptedVars.map((v) => (
+          <EnvironmentVariableItem type={v.type} envVar={v} key={v.id} actions={itemActions(v)} />
+        ))}
       {secretVarsPresent && <List.Section title="Secret Environment Variables" />}
       {secretVarsPresent &&
-        secretVars.map((v) => <EnvironmentVariableItem envVar={v} key={v.id} actions={itemActions(v)} />)}
+        secretVars.map((v) => <EnvironmentVariableItem type={v.type} envVar={v} key={v.id} actions={itemActions(v)} />)}
     </List>
   );
 };
@@ -149,6 +152,7 @@ const EnvironmentVariableItem = ({
 }: {
   icon?: string;
   envVar: Environment;
+  type: Environment["type"];
   actions: ReactElement<typeof ActionPanel>;
 }) => {
   const getIcon = (type: string) => {
@@ -169,7 +173,7 @@ const EnvironmentVariableItem = ({
   return (
     <List.Item
       title={envVar.key}
-      subtitle={envVar.type === "secret" ? "" : envVar.value}
+      subtitle={envVar.value}
       icon={getIcon(envVar.type)}
       actions={actions}
       key={envVar.id}

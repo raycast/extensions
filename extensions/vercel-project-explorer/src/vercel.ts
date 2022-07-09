@@ -291,6 +291,8 @@ export async function createEnvironmentVariable(
   envVar: CreateEnvironment,
   teamId?: Team["id"]
 ): Promise<CreateEnvironmentVariableResponse> {
+  envVar["type"] = "encrypted";
+
   try {
     const response = await fetch(apiURL + `v9/projects/${projectId}/env?teamId=${teamId ? teamId : ""}`, {
       method: "post",
@@ -305,6 +307,7 @@ export async function createEnvironmentVariable(
       style: Toast.Style.Failure,
       title: "Failed to create environment variable",
     });
+    console.log(e);
     throw new Error("Failed to create environment variable");
   }
 }
