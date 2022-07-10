@@ -1,5 +1,5 @@
 # Nuget
-This extension let you to search for a Nuget package an then view details or generate code to install.
+This extension let you search for a Nuget package, view its details and quickly copy the command to install it to the clipboard.
 
 ## Preferences
 ### Command to copy
