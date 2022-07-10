@@ -45,7 +45,7 @@
       ]
     },
     {
-      "title": "Element to fetch",
+      "title": "Packages to fetch",
       "description": "Numbers of packages to fetch",
       "name": "element-to-fetch",
       "type": "textfield",
