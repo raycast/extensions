@@ -17,7 +17,7 @@ export async function searchNuget(query?: string, fetchId?: string): Promise<Fet
     _query = "&q=" + query;
   }
 
-  const response = await fetch("https://azuresearch-usnc.nuget.org/query?take=" + numofElements + _query, {
+  const response = await fetch(`https://azuresearch-usnc.nuget.org/query?take=${numofElements}${_query}`, {
     method: "GET",
   });
   const data: NugetPackage[] = JSON.parse(await response.text()).data;
