@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nuget",
   "title": "Nuget",
-  "description": "Simple estension to search for Nuget packages and get command to install",
+  "description": "Simple extension to search for Nuget packages and copy command to install them to clipboard",
   "icon": "icon.png",
   "author": "lbergantin",
   "categories": [
