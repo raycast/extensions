@@ -1,5 +1,5 @@
 # Gather Changelog
 
-## [Initial Version] - 2022-07-07
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial version code
