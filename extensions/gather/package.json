@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gather",
   "title": "Gather",
-  "description": "Control Gather from Raycast with commands like Toggle AFK",
+  "description": "Control Gather from Raycast",
   "icon": "command-icon.png",
   "author": "yannglt",
   "version": "1.0.0",
   "categories": [
-    "Communication"
+    "Communication",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
