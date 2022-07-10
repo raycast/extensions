@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Search Nuget Package",
-      "description": "Search for Nuget packages and get details about them",
+      "description": "Search for Nuget packages",
       "mode": "view"
     }
   ],
