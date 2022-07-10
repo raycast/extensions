@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
+import { PackageVersions } from "./components/PackageVersions";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -43,6 +44,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               url={searchResult.packageManagerUrl}
               icon={`package_manager_icons/${searchResult.platform.toLowerCase()}.png`}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Info">
+            <Action.Push title="Show Versions" icon={Icon.List} target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -118,6 +122,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
         homepage: string;
         repository_url: string;
         package_manager_url: string;
+        versions: Version[];
       }[]
     | { code: string; message: string };
 
@@ -133,6 +138,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       homepage: result.homepage,
       repositoryUrl: result.repository_url,
       packageManagerUrl: result.package_manager_url,
+      versions: result.versions,
     };
   });
 }
@@ -149,4 +155,14 @@ interface SearchResult {
   homepage: string;
   repositoryUrl: string;
   packageManagerUrl: string;
+  versions: Array<Version>;
+}
+
+interface Version {
+  number: string;
+  published_at: string;
+  spdx_expression: string;
+  original_license: string;
+  researched_at: string;
+  repository_sources: string[];
 }
