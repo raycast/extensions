@@ -1,9 +1,9 @@
-import { Detail, environment } from "@raycast/api";
+import { ActionPanel, Action, Detail, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { searchReadMe } from "../nuget-client";
 import { NugetPackage } from "../NugetPackage";
 import { join } from "path";
-import { humanizeNumber } from "../utils";
+import { GetCommandForCli, humanizeNumber } from "../utils";
 
 export interface PackageDetailProps {
   package: NugetPackage;
@@ -39,7 +39,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
         <Detail.Metadata.Link
           key={v.version}
           title={isFirst ? "Versions" : ""}
-          target=`${nugetBaseUrl}${props.package.id}/${v.version}`
+          target={`${nugetBaseUrl}${props.package.id}/${v.version}`}
           text={v.version}
         />
       );
@@ -73,6 +73,22 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
           <Detail.Metadata.Separator />
           {renderVersions()}
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy installation command" content={GetCommandForCli(props.package)} />
+          <Action.Paste
+            title="Paste to front-most"
+            content={GetCommandForCli(props.package)}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+          />
+          <Action.OpenInBrowser
+            icon={join(environment.assetsPath, "icon.png")}
+            url={`${nugetBaseUrl}${props.package.id}`}
+            title="View in Nuget Website"
+          />
+          <Action.OpenInBrowser url={props.package.projectUrl} title="View Source repository" />
+        </ActionPanel>
       }
     />
   );

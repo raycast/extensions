@@ -5,12 +5,7 @@ import { FetchResponse } from "./utils";
 
 export async function searchNuget(query?: string, fetchId?: string): Promise<FetchResponse<NugetPackage[]>> {
   const _preference = getPreferenceValues();
-  let numofElements = 25;
-  try {
-    numofElements = parseInt(_preference["element-to-fetch"]);
-  } catch {
-    numofElements = 25;
-  }
+  const numofElements = parseInt(_preference["element-to-fetch"]);
 
   let _query = "";
   if (query) {
@@ -28,11 +23,4 @@ export async function searchNuget(query?: string, fetchId?: string): Promise<Fet
 
 export async function searchReadMe(_package: NugetPackage): Promise<string> {
   return _package.description;
-
-  // const lastVersion = _.find(_package.versions, (o) => { return o.version === _package.version; });
-  // const catalogEntryUrl = JSON.parse((await fetch(lastVersion["@id"])).text()).catalogEntry;
-  // const respobj = await (await fetch(catalogEntryUrl)).json();
-  // const readmeFile = respobj.readmeFile;
-  // const readmeUrl = _.find(respobj.packageEntries, (o) => { return o.fullName === readmeFile})["@id"];
-  // return (await (await fetch(readmeUrl)).text());
 }

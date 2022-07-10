@@ -36,7 +36,6 @@ export default function Command(): JSX.Element {
   return (
     <List
       onSearchTextChange={(query: string) => {
-        // Perhaps query should be another useState??
         setState((oldState) => ({ ...oldState, query: query, isLoading: true }));
       }}
       isLoading={state.isLoading}
@@ -53,16 +52,18 @@ export default function Command(): JSX.Element {
                 {
                   text: humanizeNumber(item.totalDownloads),
                   icon: Icon.Download,
+                  tooltip: "Total Downloads",
                 },
                 {
                   text: item.version,
-                  icon: Icon.Eye,
+                  icon: Icon.Gear,
+                  tooltip: "Latest Version",
                 },
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={GetCommandForCli(item)} />
-                  <Action.Push title="Show Details" target={<PackageDetail package={item} />} icon={Icon.Eye} />
+                  <Action.Push title="Show Details" target={<PackageDetail package={item} />} icon={Icon.Sidebar} />
+                  <Action.CopyToClipboard title="Copy installation command" content={GetCommandForCli(item)} />
                   <Action.Paste
                     title="Paste to front-most"
                     content={GetCommandForCli(item)}
@@ -73,10 +74,6 @@ export default function Command(): JSX.Element {
             />
           );
         })}
-      {/* {state.isLoading &&
-        <List.Item
-          title={"Searching " + state.query}
-        />} */}
     </List>
   );
 }
