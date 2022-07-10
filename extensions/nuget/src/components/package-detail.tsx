@@ -39,7 +39,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
         <Detail.Metadata.Link
           key={v.version}
           title={isFirst ? "Versions" : ""}
-          target={nugetBaseUrl + props.package.id + "/" + v.version}
+          target=`${nugetBaseUrl}${props.package.id}/${v.version}`
           text={v.version}
         />
       );
