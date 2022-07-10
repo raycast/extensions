@@ -31,13 +31,14 @@ export async function getPagesFromGithub() {
       item.path = file.path;
       item.sha = file.sha;
 
-      item.name = path.parse(file.path).name;
+      const filepath = path.parse(file.path);
+      item.name = filepath.name;
       item.title = item.name
         .split("-")
         .join(" ")
         .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase());
 
-      item.filepath = path.parse(file.path).dir;
+      item.filepath = `${filepath.dir}/${filepath.name}`;
       return item;
     });
   LocalStorage.setItem("topics", JSON.stringify(results));

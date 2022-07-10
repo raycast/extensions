@@ -346,9 +346,12 @@ function SearchResultItem({
 
   return (
     <List.Item
-      title={{ value: title, tooltip: matchDetails.join(", ") }}
+      title={{
+        value: title.slice(0, combinedThreshold),
+        tooltip: matchDetails.join(", "),
+      }}
       subtitle={{
-        value: subtitle,
+        value: subtitle.slice(0, combinedThreshold),
         // If no subtitle is present, let subtitle itself be hoverable if it is long
         // using a guesstimated threshold
         tooltip:

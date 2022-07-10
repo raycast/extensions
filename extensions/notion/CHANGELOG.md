@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Markdown parsing] - 2022-07-08
+
+- Improve markdown parsing when create a page
+- Add a dropdown to sort by "last edited at" or "last created at" when searching in a database
+
 ## [Bugfixes] - 2022-07-05
 
 - Fixed `Create Database Page` to use client [timezone](https://developers.notion.com/changelog/time-zone-support) when supplying a date field.

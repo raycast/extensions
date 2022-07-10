@@ -5,7 +5,7 @@ export function WhatHaveIDoneAction() {
   return (
     <Action.Push
       icon={Icon.Eye}
-      title="Share your work"
+      title="Share Your Work"
       target={<DoneWork />}
       shortcut={{ modifiers: ['cmd'], key: 't' }}
     />

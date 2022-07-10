@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import Topic from "./Topic";
 import { TopicType } from "./types/GithubType";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ export default function main() {
 
   useEffect(() => {
     async function getAllPages() {
-      const cached_pages = await getPagesFromCache().catch((err) => {
+      const cached_pages = await getPagesFromCache().catch(() => {
         console.log("Failed to fetch data!");
       });
 

@@ -24,6 +24,13 @@
       "subtitle": "Spaces",
       "description": "It shows list of spaces available from your spaces app.",
       "mode": "view"
+    },
+    {
+      "name": "stop-space",
+      "title": "Stop Space",
+      "subtitle": "Spaces",
+      "description": "It stops the space if it is active.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
