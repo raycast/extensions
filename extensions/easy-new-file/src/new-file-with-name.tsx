@@ -1,16 +1,19 @@
-import { useState } from "react";
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, isImage, preferences } from "./utils/common-utils";
+import React, { useState } from "react";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { getFinderPath, isImage } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-here";
-import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
+import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./types/file-type";
 import { getFileType } from "./hooks/hooks";
 import { parse } from "path";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { Preferences } from "./types/preferences";
+import { homedir } from "os";
 
 export default function NewFileWithName(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
 }) {
-  const preference = preferences();
+  const { showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
   const [fileName, setFileName] = useState<string>("");
@@ -29,33 +32,26 @@ export default function NewFileWithName(props: {
             onAction={async () => {
               try {
                 const path = await getFinderPath();
-                switch (newFileType.section) {
-                  case "Template": {
-                    await createNewFileByTemplate(templateFiles[newFileType.index], path, fileName);
-                    break;
-                  }
-                  case "Document": {
-                    await createNewFile(documentFileTypes[newFileType.index], path, fileName, fileContent);
-                    break;
-                  }
-                  case "Code": {
-                    await createNewFile(codeFileTypes[newFileType.index], path, fileName, fileContent);
-                    break;
-                  }
-                  case "Script": {
-                    await createNewFile(scriptFileTypes[newFileType.index], path, fileName, fileContent);
-                    break;
-                  }
-                  default: {
-                    await createNewFile(documentFileTypes[0], path, fileName, fileContent);
-                    break;
-                  }
-                }
+                await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
               } catch (e) {
-                await showToast(Toast.Style.Failure, "Create File Failed", String(e));
+                await showToast(Toast.Style.Failure, "Failed to create file", String(e));
               }
             }}
           />
+          <Action
+            title={"New File in Desktop"}
+            icon={Icon.Window}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            onAction={async () => {
+              try {
+                const path = `${homedir()}/Desktop/`;
+                await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
+              } catch (e) {
+                await showToast(Toast.Style.Failure, "Failed to create file", String(e));
+              }
+            }}
+          />
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >
@@ -82,7 +78,7 @@ export default function NewFileWithName(props: {
           })}
         </Form.Dropdown.Section>
 
-        {preference.showDocument && (
+        {showDocument && (
           <Form.Dropdown.Section title={"Document"}>
             {documentFileTypes.map((fileType, index) => {
               return (
@@ -96,7 +92,7 @@ export default function NewFileWithName(props: {
             })}
           </Form.Dropdown.Section>
         )}
-        {preference.showCode && (
+        {showCode && (
           <Form.Dropdown.Section title={"Code"}>
             {codeFileTypes.map((fileType, index) => {
               return (
@@ -110,7 +106,7 @@ export default function NewFileWithName(props: {
             })}
           </Form.Dropdown.Section>
         )}
-        {preference.showScript && (
+        {showScript && (
           <Form.Dropdown.Section title={"Script"}>
             {scriptFileTypes.map((fileType, index) => {
               return (
@@ -147,3 +143,34 @@ export default function NewFileWithName(props: {
     </Form>
   );
 }
+
+const createFileWithName = async (
+  newFileType: { section: string; index: number },
+  templateFiles: TemplateType[],
+  path: string,
+  fileName: string,
+  fileContent: string
+) => {
+  switch (newFileType.section) {
+    case "Template": {
+      await createNewFileByTemplate(templateFiles[newFileType.index], path, fileName);
+      break;
+    }
+    case "Document": {
+      await createNewFile(documentFileTypes[newFileType.index], path, fileName, fileContent);
+      break;
+    }
+    case "Code": {
+      await createNewFile(codeFileTypes[newFileType.index], path, fileName, fileContent);
+      break;
+    }
+    case "Script": {
+      await createNewFile(scriptFileTypes[newFileType.index], path, fileName, fileContent);
+      break;
+    }
+    default: {
+      await createNewFile(documentFileTypes[0], path, fileName, fileContent);
+      break;
+    }
+  }
+};

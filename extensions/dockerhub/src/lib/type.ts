@@ -30,7 +30,7 @@ export enum FilterType {
   COMMUNITY = "community",
 }
 
-export interface Image {
+export interface DockerImage {
   id: string;
   name: string;
   slug: string;
@@ -41,13 +41,13 @@ export interface Image {
   short_description: string;
   source: SourceType;
   popularity: number;
-  categories: any;
+  categories: unknown;
   operating_systems: OperatingSystem[];
   architectures: Architecture[];
   logo_url: LogoUrl;
   certification_status: string;
   star_count: number;
-  pull_count: number;
+  pull_count: string;
   filter_type: FilterType;
   url?: string;
   from?: string;
@@ -55,7 +55,7 @@ export interface Image {
 
 export interface SearchImageResult {
   count: number;
-  summaries?: Image[];
+  summaries?: DockerImage[];
   page: number;
   page_size: number;
   next: string;
@@ -64,7 +64,7 @@ export interface SearchImageResult {
 
 export interface SearchTagResult {
   results?: Tag[];
-  previous?: any;
+  previous?: unknown;
   next?: string;
   count: number;
 }
@@ -72,7 +72,7 @@ export interface SearchTagResult {
 export interface Tag {
   creator: number;
   id: number;
-  image_id?: any;
+  image_id?: unknown;
   images?: TagImage[];
   last_updated: string;
   last_updater: number;
@@ -90,11 +90,11 @@ export interface Tag {
 export interface TagImage {
   architecture: string;
   features: string;
-  variant?: any;
+  variant?: unknown;
   digest: string;
   os: string;
   os_features: string;
-  os_version?: any;
+  os_version?: unknown;
   size: number;
   status: string;
   last_pulled: string;

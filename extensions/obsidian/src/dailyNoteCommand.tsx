@@ -1,14 +1,21 @@
-import { List, ActionPanel, Action, Detail, showToast, Toast, closeMainWindow, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Detail, List, open, popToRoot, showToast, Toast } from "@raycast/api";
 
 import { Vault } from "./utils/interfaces";
-import { vaultPluginCheck, parseVaults } from "./utils/utils";
+import { useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
 
 const getTarget = (vaultName: string) => {
   return "obsidian://advanced-uri?vault=" + encodeURIComponent(vaultName) + "&daily=true";
 };
 
 export default function Command() {
-  const vaults = parseVaults();
+  const { vaults, ready } = useObsidianVaults();
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  }
 
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
 

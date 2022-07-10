@@ -1,4 +1,4 @@
-import { List, getPreferenceValues, ActionPanel, showToast, Toast, Action } from "@raycast/api";
+import { List, getPreferenceValues, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import translate from "@vitalets/google-translate-api";
 import { supportedLanguagesByCode, LanguageCode } from "./languages";
@@ -9,6 +9,7 @@ export default function Command(): ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
   const [results, setResults] = useState<{ text: string; languages: string }[]>([]);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   useEffect(() => {
     if (toTranslate === "") {
@@ -69,6 +70,7 @@ export default function Command(): ReactElement {
       searchBarPlaceholder="Enter text to translate"
       onSearchTextChange={setToTranslate}
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
       throttle
     >
       {results.map((r, index) => (
@@ -76,10 +78,16 @@ export default function Command(): ReactElement {
           key={index}
           title={r.text}
           accessoryTitle={r.languages}
+          detail={<List.Item.Detail markdown={r.text} />}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.CopyToClipboard title="Copy" content={r.text} />
+                <Action
+                  title="Toggle Full Text"
+                  icon={Icon.Text}
+                  onAction={() => setIsShowingDetail(!isShowingDetail)}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

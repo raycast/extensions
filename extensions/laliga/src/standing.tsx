@@ -1,6 +1,5 @@
 import { List, Icon, Image, Color, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import json2md from "json2md";
 import CompetitionDropdown, {
   competitions,
 } from "./components/competition_dropdown";
@@ -18,25 +17,6 @@ export default function GetTables() {
       setStandings(data);
     });
   }, [competition]);
-
-  const club = (standing: Standing): json2md.DataObject => {
-    return [
-      { h1: standing.team.name },
-      { h2: "Stats" },
-      {
-        p: [
-          `Previous Position: ${standing.previous_position}`,
-          `Played: ${standing.played}`,
-          `Won: ${standing.won}`,
-          `Drawn: ${standing.drawn}`,
-          `Lost: ${standing.lost}`,
-          `Goals For: ${standing.goals_for}`,
-          `Goals Against: ${standing.goals_against}`,
-          `Goal Difference: ${standing.goal_difference}`,
-        ],
-      },
-    ];
-  };
 
   return (
     <List
@@ -65,25 +45,54 @@ export default function GetTables() {
           };
         }
 
-        const props: Partial<List.Item.Props> = showStats
-          ? {
-              detail: <List.Item.Detail markdown={json2md(club(team))} />,
-              accessories: [{ text: team.points.toString() }, { icon }],
-            }
-          : {
-              subtitle: team.team.shortname,
-              accessories: [
-                { text: `Played: ${team.played}` },
-                { text: `Points: ${team.points}` },
-                { icon },
-              ],
-            };
-
         return (
           <List.Item
             key={team.team.id}
-            title={`${team.position}. ${team.team.nickname}`}
-            {...props}
+            title={team.position.toString()}
+            subtitle={team.team.nickname}
+            keywords={[team.team.nickname, team.team.shortname]}
+            accessories={[{ text: team.points.toString() }, { icon }]}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Stats" />
+                    <List.Item.Detail.Metadata.Label
+                      title="Previous Position"
+                      text={team.previous_position.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Played"
+                      text={team.played.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Won"
+                      text={team.won.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Drawn"
+                      text={team.drawn.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Lost"
+                      text={team.lost.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals For"
+                      text={team.goals_for.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals Against"
+                      text={team.goals_against.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goal Difference"
+                      text={team.goal_difference.toString()}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <Action

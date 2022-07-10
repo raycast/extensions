@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { existsSync, PathLike, readFileSync, writeFileSync } from "fs";
+import { Entry } from "fast-glob";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { useEffect, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
@@ -9,15 +10,18 @@ import {
   FILES_LAST_INDEXED_AT_KEY,
   MAX_RESULTS_WITHOUT_SEARCH_TEXT,
   MAX_RESULTS_WITH_SEARCH_TEXT,
+  TOAST_UPDATE_INTERVAL,
 } from "./constants";
 import { FileInfo, Preferences } from "./types";
 import {
   clearAllFilePreviewsCache,
+  formatBytes,
   fuzzyMatch,
-  getDirectories,
+  displayPath,
   getDriveRootPath,
-  getExcludePaths,
-  saveFilesInDirectory,
+  throttledUpdateToastMessage,
+  driveFileStream,
+  log,
 } from "./utils";
 
 export const filesLastIndexedAt = async () => {
@@ -30,7 +34,9 @@ export const shouldInvalidateFilesIndex = async () => {
 
   if (lastIndexedAt === null) return true;
 
-  return lastIndexedAt.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days
+  const { autoReindexingInterval } = getPreferenceValues<Preferences>();
+
+  return lastIndexedAt.getTime() < new Date().getTime() - parseInt(autoReindexingInterval);
 };
 
 const mandateFilesIndexInvalidation = async () => {
@@ -51,7 +57,7 @@ const dbConnection = async () => {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
     db.close();
-    mandateFilesIndexInvalidation();
+    await mandateFilesIndexInvalidation();
   }
 
   try {
@@ -67,6 +73,20 @@ const dbConnection = async () => {
         favorite INTEGER NOT NULL DEFAULT 0
       )`;
 
+    const deleteDuplicatesByDisplayPath = `
+      DELETE FROM files
+      WHERE displayPath IN (
+        SELECT displayPath
+        FROM files
+        GROUP BY displayPath
+        HAVING COUNT(*) > 1
+      );`;
+
+    const createIndexes = `
+      CREATE UNIQUE INDEX IF NOT EXISTS filesDisplayPathUniqueIndex
+        ON files (displayPath);
+    `;
+
     // Delete the paths that were indexed for a Google Drive root path that was
     // previously specified in the preferences but has been changed to
     // another path now.
@@ -75,11 +95,13 @@ const dbConnection = async () => {
           WHERE path NOT LIKE "${getDriveRootPath()}%"`;
 
     db.exec(createFilesTable);
+    db.exec(deleteDuplicatesByDisplayPath);
+    db.exec(createIndexes);
     db.exec(deleteUnwantedFiles);
 
     return db;
   } catch (e) {
-    console.error(e);
+    log("error", e);
     showToast({ style: Toast.Style.Failure, title: `Unable to open the database file at ${DB_FILE_PATH}` });
     return null;
   }
@@ -169,55 +191,85 @@ export const insertFile = (
   const insertStatement = `
       INSERT
         INTO files (name, path, displayPath, fileSizeFormatted, createdAt, updatedAt)
-        VALUES ("${name}", "${path}", "${displayPath}", "${fileSizeFormatted}", "${createdAt.toISOString()}", "${updatedAt.toISOString()}")
-        ON CONFLICT (path) DO
-          UPDATE SET name = EXCLUDED.name, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT (displayPath) DO
+          UPDATE SET name = EXCLUDED.name, path = EXCLUDED.path, displayPath = EXCLUDED.displayPath, fileSizeFormatted = EXCLUDED.fileSizeFormatted, createdAt = EXCLUDED.createdAt, updatedAt = EXCLUDED.updatedAt;`;
 
-  db.run(insertStatement);
+  db.run(insertStatement, [name, path, displayPath, fileSizeFormatted, createdAt, updatedAt]);
 };
 
-export const walkRecursivelyAndSaveFiles = (path: PathLike, db: Database): void => {
-  if (getExcludePaths().includes(path.toLocaleString())) return;
-  saveFilesInDirectory(path, db);
-  getDirectories(path).map((dir) => walkRecursivelyAndSaveFiles(dir, db));
+const listFilesAndInsertIntoDb = async (db: Database, toast: Toast): Promise<void> => {
+  const updateToastMessage = throttledUpdateToastMessage({ toast, interval: TOAST_UPDATE_INTERVAL });
+
+  let totalFiles = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _ of driveFileStream()) {
+    totalFiles += 1;
+    updateToastMessage(`Counting files: ${totalFiles}`);
+  }
+
+  let filesIndexed = 0;
+  for await (const file of driveFileStream({ stats: true })) {
+    const { name, path, stats } = file as unknown as Entry;
+
+    if (stats === undefined) {
+      continue;
+    }
+
+    filesIndexed += 1;
+
+    updateToastMessage(`Indexing: ${Math.round((filesIndexed / totalFiles) * 100)}% (${filesIndexed}/${totalFiles})`);
+
+    insertFile(db, {
+      name,
+      path,
+      displayPath: displayPath(path),
+      fileSizeFormatted: formatBytes(stats.size > 0 ? stats.size : 0),
+      createdAt: (stats.birthtime ? stats.birthtime : new Date()).toISOString(),
+      updatedAt: (stats.mtime ? stats.mtime : new Date()).toISOString(),
+      favorite: false,
+    });
+  }
 };
 
 type IndexFilesOptions = { force?: boolean };
-export const indexFiles = async (
-  path: PathLike,
-  db: Database,
-  options: IndexFilesOptions = { force: false }
-): Promise<boolean> => {
+export const indexFiles = async (db: Database, options: IndexFilesOptions = { force: false }): Promise<boolean> => {
   if (options.force || (await shouldInvalidateFilesIndex())) {
-    let favoriteFilePaths: Array<PathLike> = [];
+    const alreadyIndexed = !!(await filesLastIndexedAt());
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `${alreadyIndexed ? "Updating file index" : "Indexing files"} ${
+        alreadyIndexed ? "" : "for the first time"
+      }`,
+      message: "This may take some time, please wait...",
+    });
 
-    if (options.force) {
-      // Backup the favorite file paths before force indexing
-      favoriteFilePaths = queryFavoriteFiles(db, 1000).map((file) => file.path);
+    // Backup the favorite file paths before indexing
+    const favoriteFilePaths = queryFavoriteFiles(db, 1000).map((file) => file.path);
 
-      // Delete all the old indexed files
-      db.exec("DELETE from files");
+    // Delete all the old indexed files
+    db.exec("DELETE from files");
 
-      clearAllFilePreviewsCache(false);
-    }
+    clearAllFilePreviewsCache(false);
 
-    walkRecursivelyAndSaveFiles(path, db);
+    await listFilesAndInsertIntoDb(db, toast);
 
     // Restore the favorite file paths
     favoriteFilePaths.forEach((filePath) => {
-      db.run(`UPDATE files SET favorite = 1 WHERE path = "${filePath}"`);
+      db.run(`UPDATE files SET favorite = 1 WHERE path = ?`, [filePath]);
     });
 
     dumpDb(db);
     await setFilesIndexedAt();
 
+    toast.hide();
     return true;
   }
 
   return false;
 };
 
-export const toggleFavorite = (db: Database, path: PathLike, isFavorite: boolean) => {
+export const toggleFavorite = (db: Database, path: string, isFavorite: boolean) => {
   if (!db) return;
 
   const updateStatement = `

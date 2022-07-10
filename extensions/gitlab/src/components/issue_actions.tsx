@@ -3,7 +3,7 @@ import React from "react";
 import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { LabelList } from "./label";
 import { IssueMRCreateForm } from "./mr_create";
 
@@ -16,7 +16,7 @@ export function CloseIssueAction(props: { issue: Issue; finished?: () => void })
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to close issue", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to close Issue");
     }
   }
   return (
@@ -48,7 +48,7 @@ export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to reopen issue", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to reopen Issue");
     }
   }
   return <Action title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
@@ -75,7 +75,7 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
       await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/todo`);
       showToast(Toast.Style.Success, "To do created");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to add as to do", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to add as to do");
     }
   }
   if (issue.state === "opened") {

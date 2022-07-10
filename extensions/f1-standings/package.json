@@ -46,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "1.35.1",
     "cheerio": "^1.0.0-rc.10",
     "moment": "^2.29.3",
     "node-fetch": "^3.0.0",

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock-tinker",
+  "title": "Dock Tinker",
+  "description": "Custom hidden preferences of Dock.\nBackup, restore and reset Dock state.",
+  "icon": "dock-tinker.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-spacer-to-dock",
+      "title": "Add Spacer to Dock",
+      "subtitle": "Dock",
+      "description": "Add a movable spacer tile between icons on the Dock.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-dock-state",
+      "title": "Restore Dock State",
+      "subtitle": "Dock",
+      "description": "Restore Dock state from the last backups.",
+      "mode": "no-view"
+    },
+    {
+      "name": "backup-dock-state",
+      "title": "Backup Dock State",
+      "subtitle": "Dock",
+      "description": "Backup current Dock state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset-dock-state",
+      "title": "Reset Dock State",
+      "subtitle": "Dock",
+      "description": "Reset Dock to initial state.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-hide",
+      "title": "Toggle Auto Hide",
+      "subtitle": "Dock",
+      "description": "The Dock will automatically show and hide.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-hide-delay",
+      "title": "Toggle Auto Hide Delay",
+      "subtitle": "Dock",
+      "description": "Disable Dock auto-hide time delay.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-dock-orientation",
+      "title": "Toggle Dock Orientation",
+      "subtitle": "Dock",
+      "description": "Set the orientation of the Dock, including Left, Bottom, Right",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-minimal-effect",
+      "title": "Toggle Minimal Effect",
+      "subtitle": "Dock",
+      "description": "Set the effects when the application is minimized, including Suck, Genie, Scale.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-scroll-to-open",
+      "title": "Toggle Scroll to Open",
+      "subtitle": "Dock",
+      "description": "Allows you to use the scroll up gesture to open the stack or use the same gesture on a running application to display all windows associated with that application (also known as Exposé).",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-show-hidden",
+      "title": "Toggle Show Hidden",
+      "subtitle": "Dock",
+      "description": "The icon of apps with hidden window on the Dock will be dimmed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-single-app",
+      "title": "Toggle Single App",
+      "subtitle": "Dock",
+      "description": "When you click on an app on the Dock, the window of that app will be displayed at the top and all other apps will be hidden at the same time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-static-only",
+      "title": "Toggle Static Only",
+      "subtitle": "Dock",
+      "description": "The Dock will only show the icon of the currently running application.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

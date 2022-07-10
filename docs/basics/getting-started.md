@@ -23,3 +23,14 @@ You need to be signed in to use the following extension development commands.
 - **Create Extension:** Create new extensions from templates
 - **Import Extension:** Import extensions from source code
 - **Manage Extensions**: List and edit your published extensions
+
+## Editor/IDE Extensions
+
+You can enhance your extension development experience by installing extensions for common editors.
+
+- [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast)
+  - Intellisense for image assets
+  - A treeview for easier navigation (commands and preferences)
+  - VSCode commands for creating new commands and preferences
+  - The possibility to attach a node.js debugger
+  - VSCode command for command `ray` operations like `build`, `dev`, `lint`or `fix-lint`

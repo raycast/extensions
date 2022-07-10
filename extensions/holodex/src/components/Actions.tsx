@@ -1,7 +1,20 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { useMemo } from "react";
+import { ClipItem } from "../clips";
 import { Video } from "../lib/interfaces";
 import { Details } from "./Details";
+
+function RelatedClips({ title, clips }: { title: string; clips: Video[] }) {
+  return (
+    <List isShowingDetail navigationTitle={title}>
+      <List.Section title="Clips" subtitle={clips.length + ""}>
+        {clips.map((video) => (
+          <ClipItem key={video.videoId} video={video} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
 
 export function Actions({ video, isInDetail = false }: { video: Video; isInDetail?: boolean }) {
   const { videoId, channelId, channelName } = video;
@@ -53,6 +66,19 @@ export function Actions({ video, isInDetail = false }: { video: Video; isInDetai
             <YouTube shortcut={secondaryShortcut} />
           </>
         )}
+        {video.clips && (
+          <Action.Push
+            title="Related Clips"
+            target={<RelatedClips title={`Clips for ${video.title}`} clips={video.clips} />}
+            icon={Icon.MagnifyingGlass}
+            shortcut={{ key: ".", modifiers: ["cmd", "shift"] }}
+          />
+        )}
+        <Action.CopyToClipboard
+          content={preferYouTube ? youtubeUrl : holodexUrl}
+          title="Copy Video URL"
+          shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title={`Channel: ${channelName}`}>
         {preferYouTube ? (
@@ -66,13 +92,6 @@ export function Actions({ video, isInDetail = false }: { video: Video; isInDetai
             <YouTubeChannel />
           </>
         )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          content={preferYouTube ? youtubeUrl : holodexUrl}
-          title="Copy Video URL"
-          shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
-        />
         <Action.CopyToClipboard
           content={preferYouTube ? youtubeChannelUrl : holodexChannelUrl}
           title="Copy Channel URL"

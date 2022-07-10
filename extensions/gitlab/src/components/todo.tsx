@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Color, Image, List } from "@raycast/api";
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
@@ -6,7 +6,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { ensureCleanAccessories } from "../utils";
+import { ensureCleanAccessories, showErrorToast } from "../utils";
 
 function userToIcon(user?: User): Image.ImageLike {
   let result = "";
@@ -64,7 +64,7 @@ export function TodoList(): JSX.Element {
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   if (isLoading === undefined) {

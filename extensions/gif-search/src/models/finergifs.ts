@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-import type { APIOpt, IGif, IGifAPI } from "./gif";
+import { APIOpt, IGif, IGifAPI, slugify } from "./gif";
 
 export interface FinerGifsClubResults {
   results: FinerGif[];
@@ -89,7 +89,7 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   return <IGif>{
     id: finerGifsResp.fields.fileid,
     title: finerGifsResp.fields.text,
-    slug: finerGifsResp.fields.fileid,
+    slug: slugify(finerGifsResp.fields.text),
     preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
     metadata:
