@@ -17,6 +17,13 @@
       "subtitle": "Libraries.io",
       "description": "Search packages on Libraries.io",
       "mode": "view"
+    },
+    {
+      "name": "search-platforms",
+      "title": "Search Platforms",
+      "subtitle": "Libraries.io",
+      "description": "Search package managers on Libraries.io",
+      "mode": "view"
     }
   ],
   "dependencies": {
