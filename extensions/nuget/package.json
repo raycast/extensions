@@ -46,7 +46,7 @@
     },
     {
       "title": "Element to fetch",
-      "description": "Numbers of element to fetch",
+      "description": "Numbers of packages to fetch",
       "name": "element-to-fetch",
       "type": "textfield",
       "required": true,
