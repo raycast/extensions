@@ -48,7 +48,7 @@ export default function Command() {
   }
 
   const splitFilter = (search: string) => {
-    return [...entries].filter((item) => {
+    return [...originalEntries].filter((item) => {
       let value = "";
 
       if (isWorkspaceEntry(item)) {
