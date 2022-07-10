@@ -306,7 +306,6 @@ export async function createEnvironmentVariable(
       style: Toast.Style.Failure,
       title: "Failed to create environment variable",
     });
-    console.log(e);
     throw new Error("Failed to create environment variable");
   }
 }
