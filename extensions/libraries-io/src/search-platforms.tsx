@@ -3,13 +3,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const { state } = useSearch();
 
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search npm packages..."
+      searchBarPlaceholder="Filter platforms..."
+      enableFiltering
       throttle
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
@@ -25,19 +25,17 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
+      icon={`package_manager_icons/${searchResult.name.toLowerCase()}.png`}
+      subtitle={searchResult.defaultLanguage}
+      accessoryTitle={`${searchResult.projectCount.toLocaleString()} packages available`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+            <Action.OpenInBrowser title="Open Libraries.io Page"
+              url={`https://libraries.io/${searchResult.name}`}
+              icon={`libraries-io-icon.png`}
             />
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.homepage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -95,32 +93,25 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
-
-  const response = await fetch("https://api.npms.io/v2/search" + "?" + params.toString(), {
+  const response = await fetch("https://libraries.io/api/platforms", {
     method: "get",
     signal: signal,
   });
 
   const json = (await response.json()) as
-    | {
-        results: {
-          package: { name: string; description?: string; publisher?: { username: string }; links: { npm: string } };
-        }[];
-      }
+    | { name: string; project_count: number; homepage: string; default_language: string; }[]
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return json.results.map((result) => {
+  return json.map((result) => {
     return {
-      name: result.package.name,
-      description: result.package.description,
-      username: result.package.publisher?.username,
-      url: result.package.links.npm,
+      name: result.name,
+      projectCount: result.project_count,
+      homepage: result.homepage,
+      defaultLanguage: result.default_language,
     };
   });
 }
@@ -132,7 +123,7 @@ interface SearchState {
 
 interface SearchResult {
   name: string;
-  description?: string;
-  username?: string;
-  url: string;
+  projectCount: number;
+  homepage: string;
+  defaultLanguage: string;
 }
