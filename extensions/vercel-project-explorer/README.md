@@ -1,6 +1,8 @@
 # Vercel Project Explorer
 Vercel for Raycast.
 
+Not affiliated with Vercel.
+
 ## Setup:
 - You need to add your Vercel token in the extension settings. You can get it from https://vercel.com/account/tokens.
 
@@ -19,9 +21,7 @@ The [Vercel REST API docs](https://vercel.com/docs/rest-api) and [Raycast develo
 
 This is a (heavily) modified fork of the [vercast](https://github.com/raycast/extensions/tree/main/extensions/vercast) extension.
 
-
 ## Screenshots:
 <img src="media/vercel-project-explorer-1.png" width="600">
 <img src="media/vercel-project-explorer-2.png" width="600">
 <img src="media/vercel-project-explorer-3.png" width="600">
-<img src="media/vercel-project-explorer-4.png" width="600">

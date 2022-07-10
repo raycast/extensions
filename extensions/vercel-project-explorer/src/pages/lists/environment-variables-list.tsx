@@ -76,7 +76,6 @@ const EnvironmentVariables = ({ project, team }: Props) => {
         style: Toast.Style.Failure,
         title: "Failed to create environment variable",
       });
-      console.log(addedVar.error);
     } else if (addedVar) {
       await fetchAndSetVars();
       showToast({

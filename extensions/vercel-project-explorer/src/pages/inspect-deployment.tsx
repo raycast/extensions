@@ -41,7 +41,6 @@ const InspectDeployment = ({ deployment }: Props) => {
       : "";
   };
 
-  console.log(deployment);
   return (
     <Detail
       navigationTitle={getCommitMessage(deployment)}
