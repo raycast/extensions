@@ -20,6 +20,13 @@
       "subtitle": "Bitfinex",
       "description": "Show Funding Interest History on Bitfinex",
       "mode": "view"
+    },
+    {
+      "name": "lending-rates",
+      "title": "Show Lending Rates",
+      "subtitle": "Bitfinex",
+      "description": "Show Lending Rate History on Bitfinex",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,6 +48,7 @@
   "dependencies": {
     "@raycast/api": "^1.37.0",
     "bitfinex-api-node": "^5.0.4",
+    "node-fetch": "^3.2.6",
     "swr": "^1.3.0"
   },
   "devDependencies": {
