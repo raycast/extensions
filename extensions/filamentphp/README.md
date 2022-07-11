@@ -1,4 +1,4 @@
-# Filamentphp Admin Documentation Search
+# Filament
 
 ![Raycast Filamntphp Search](media/filamentphp.gif)
 
