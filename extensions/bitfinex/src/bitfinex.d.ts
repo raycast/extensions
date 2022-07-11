@@ -27,6 +27,8 @@ declare module "bitfinex-api-node" {
     getURL(): string;
     usesAgent(): boolean;
 
+    trades (symbol = 'tBTCUSD', start = null, end = null, limit = null, sort = null, cb?: CallbackFn): Promise<unknown> 
+
     fundingOffers(symbol = "fUSD", cb?: CallbackFn): Promise<unknown>;
     fundingOfferHistory(symbol?: string, start = null, end = null, limit = null, cb?: CallbackFn): Promise<unknown>;
 
