@@ -57,7 +57,7 @@ export default function SearchFilamentDocumentation() {
         return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
       })
       .catch((err) => {
-        showToast(Toast.Style.Failure, "Error searching filament documentation", err.message);
+        showToast(Toast.Style.Failure, "Error searching Filament documentation", err.message);
         return [];
       });
   };
