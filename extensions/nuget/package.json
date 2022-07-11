@@ -20,7 +20,7 @@
   "preferences": [
     {
       "title": "Command to copy",
-      "description": "Command to use for copy to clipboard",
+      "description": "Command to be used when copying to clipboard",
       "name": "command-to-copy",
       "type": "dropdown",
       "required": true,
