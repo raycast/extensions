@@ -1,8 +1,10 @@
 import useAppExists from "./hooks/useAppExists";
 import useConfig from "./hooks/useConfig";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import * as chrono from "chrono-node";
+import { Shortcut } from "./components/Shortcut";
+import { DailyNoteRef } from "./components/DailyNoteRef";
 
 // noinspection JSUnusedGlobalSymbols
 export default function dailyNotes() {
@@ -36,39 +38,3 @@ export default function dailyNotes() {
     </List>
   );
 }
-
-const DailyNoteRef = ({ date, text, spaceID }: { date: Date | undefined; text: string; spaceID: string }) => (
-  <List.Item
-    title={date ? date.toDateString() : "Specify query"}
-    subtitle={text}
-    actions={
-      !date ? undefined : (
-        <ActionPanel>
-          <Action.Open
-            title={`Open ${date.toDateString()}`}
-            target={`craftdocs://openByQuery?query=${date.toISOString().substring(0, 10)}&spaceId=${spaceID}`}
-          />
-        </ActionPanel>
-      )
-    }
-  />
-);
-
-type DayReference = "today" | "yesterday" | "tomorrow";
-
-const Shortcut = ({ dayRef, spaceID }: { dayRef: DayReference; spaceID: string }) => (
-  <List.Item
-    title={toTitleCase(dayRef)}
-    subtitle={chrono.parseDate(dayRef).toDateString()}
-    actions={
-      <ActionPanel>
-        <Action.Open
-          title={`Open ${dayRef} notes`}
-          target={`craftdocs://openByQuery?query=${dayRef}&spaceId=${spaceID}`}
-        />
-      </ActionPanel>
-    }
-  />
-);
-
-const toTitleCase = (str: string) => str.substring(0, 1).toUpperCase() + str.substring(1);
