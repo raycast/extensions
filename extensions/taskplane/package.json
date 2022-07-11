@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "taskplane",
+  "title": "Taskplane",
+  "description": "Manage your tasks for Taskplane right in Raycast",
+  "icon": "command-icon.png",
+  "author": "albingroen",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-tasks",
+      "title": "Browse Tasks",
+      "subtitle": "Taskplane",
+      "description": "Browse your Taskplane tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Taskplane",
+      "description": "Create a Taskplane task",
+      "mode": "view"
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign Out",
+      "subtitle": "Taskplane",
+      "description": "Sign out of your Taskplane account",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "axios": "^0.27.2",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
