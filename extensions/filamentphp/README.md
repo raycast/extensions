@@ -1,5 +1,5 @@
 # Filament
 
-![Raycast Filamntphp Search](media/filamentphp.gif)
+![Raycast Filament](media/filamentphp.gif)
 
 [Filamentphp](https://filamentphp.com) search
