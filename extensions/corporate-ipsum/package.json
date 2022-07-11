@@ -5,7 +5,14 @@
   "description": "Generate placeholder text in a form of 'Corporate Speach'",
   "icon": "icon1.png",
   "author": "Kontek",
-  "categories": ["Fun", "Communication", "Data", "Productivity", "Design Tools", "Developer Tools"],
+  "categories": [
+    "Fun",
+    "Communication",
+    "Data",
+    "Productivity",
+    "Design Tools",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -59,6 +66,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
