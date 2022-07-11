@@ -111,7 +111,7 @@ export function isNotePinned(note: Note, vault: Vault) {
 
 export function pinNote(note: Note, vault: Vault) {
   const info = getInfoFor(vault);
-  let pinnedNotes = info.pinnedNotes;
+  const pinnedNotes = info.pinnedNotes;
   const data = info.data;
   if (isNotePinned(note, vault)) {
     noteAlreadyPinnedToast(note);
