@@ -52,8 +52,7 @@ export default function CpuMonitor() {
   return (
     <>
       <List.Item
-        title={`CPU`}
-        icon={{ source: Icon.MemoryChip, tintColor: Color.PrimaryText }}
+        title={`🖥️  CPU`}
         accessoryTitle={isLoading ? "Loading..." : `${state.cpu}%`}
         detail={
           <List.Item.Detail

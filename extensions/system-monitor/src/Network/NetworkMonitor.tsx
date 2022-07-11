@@ -91,7 +91,7 @@ export default function NetworkMonitor() {
     <>
       <List.Item
         title={`Network`}
-        icon={{ source: "connection.png", tintColor: Color.PrimaryText }}
+        icon={{ source: "connection.png", tintColor: Color.Blue }}
         accessoryTitle={
           state.processList.length
             ? "↓ " + formatBytes(state.download) + "/s ↑ " + formatBytes(state.upload) + " /s"

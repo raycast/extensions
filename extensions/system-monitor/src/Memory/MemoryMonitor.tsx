@@ -73,8 +73,7 @@ export default function MemoryMonitor() {
   return (
     <>
       <List.Item
-        title={`Memory`}
-        icon={{ source: "memory.png", tintColor: Color.PrimaryText }}
+        title={`📝  Memory`}
         accessoryTitle={isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)`}
         detail={
           <List.Item.Detail

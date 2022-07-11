@@ -96,7 +96,7 @@ const PowerMonitor = () => {
   return (
     <List.Item
       title={`Power`}
-      icon={{ source: "lightning.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "lightning.png", tintColor: Color.Yellow }}
       accessoryTitle={isLoading ? "Loading..." : `${state.batteryLevel}%`}
       detail={
         <List.Item.Detail
