@@ -2,4 +2,4 @@
 
 ![Raycast Filament](media/filamentphp.gif)
 
-[Filamentphp](https://filamentphp.com) search
+[Filament](https://filamentphp.com)
