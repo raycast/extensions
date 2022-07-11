@@ -46,7 +46,7 @@ export default function Command(): JSX.Element {
           return (
             <List.Item
               key={item.id}
-              icon={item.iconUrl || join(environment.assetsPath, "command-icon.png")}
+              icon={item.iconUrl || join(environment.assetsPath, "icon.png")}
               title={item.title}
               accessories={[
                 {

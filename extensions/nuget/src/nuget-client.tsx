@@ -1,18 +1,14 @@
-import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { NugetPackage } from "./NugetPackage";
 import { FetchResponse } from "./utils";
 
 export async function searchNuget(query?: string, fetchId?: string): Promise<FetchResponse<NugetPackage[]>> {
-  const _preference = getPreferenceValues();
-  const numofElements = parseInt(_preference["element-to-fetch"]);
-
   let _query = "";
   if (query) {
     _query = "&q=" + query;
   }
 
-  const response = await fetch(`https://azuresearch-usnc.nuget.org/query?take=${numofElements}${_query}`, {
+  const response = await fetch(`https://azuresearch-usnc.nuget.org/query?${_query}`, {
     method: "GET",
   });
   const data: NugetPackage[] = JSON.parse(await response.text()).data;

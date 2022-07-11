@@ -58,7 +58,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
           <Detail.Metadata.Label
             title={props.package.id}
             text={props.package.title}
-            icon={props.package.iconUrl || join(environment.assetsPath, "command-icon.png")}
+            icon={props.package.iconUrl || join(environment.assetsPath, "icon.png")}
           />
           <Detail.Metadata.Label title="Authors" text={props.package.authors.join("\t")} />
           <Detail.Metadata.Label title="Downloads" text={humanizeNumber(props.package.totalDownloads, "standard")} />
@@ -68,7 +68,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="About" target={nugetBaseUrl + props.package.id} text="View in Nuget Website" />
+          <Detail.Metadata.Link title="About" target={nugetBaseUrl + props.package.id} text="View in NuGet Website" />
           <Detail.Metadata.Link title="" target={props.package.projectUrl} text="Source repository" />
           <Detail.Metadata.Separator />
           {renderVersions()}
@@ -85,7 +85,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
           <Action.OpenInBrowser
             icon={join(environment.assetsPath, "icon.png")}
             url={`${nugetBaseUrl}${props.package.id}`}
-            title="View in Nuget Website"
+            title="View in NuGet Website"
           />
           <Action.OpenInBrowser url={props.package.projectUrl} title="View Source repository" />
         </ActionPanel>

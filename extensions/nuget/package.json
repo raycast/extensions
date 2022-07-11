@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nuget",
-  "title": "Nuget",
-  "description": "Simple extension to search for Nuget packages and copy command to install them to clipboard",
+  "title": "NuGet",
+  "description": "Simple extension to search for NuGet packages and copy command to install them to clipboard",
   "icon": "icon.png",
   "author": "lbergantin",
   "categories": [
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Nuget Packages",
-      "description": "Search for Nuget packages",
+      "title": "Search NuGet Packages",
+      "description": "Search for NuGet packages",
       "mode": "view"
     }
   ],
@@ -43,14 +43,6 @@
           "value": "packet-cli"
         }
       ]
-    },
-    {
-      "title": "Packages to fetch",
-      "description": "Numbers of packages to fetch",
-      "name": "element-to-fetch",
-      "type": "textfield",
-      "required": true,
-      "default": "25"
     }
   ],
   "dependencies": {
