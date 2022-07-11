@@ -10,4 +10,4 @@ If you are a developer and often write markdown code blocks, you may need it.
 
 批量设置或修改 markdown 中的代码块语言。如果你是一个开发者，并且经常写 markdown 代码块，也许会用得上它。
 
-![](https://i.imgur.com/y9CzCIA.gif)
+![CodeBlocks](https://user-images.githubusercontent.com/25194972/178324039-5c6415d4-fe8b-458f-917e-f62a887e3592.gif)
