@@ -1,17 +1,17 @@
 import { closeMainWindow, copyTextToClipboard, pasteText, showHUD } from "@raycast/api";
-import  createIpsum from 'corporate-ipsum';
+import createIpsum from "corporate-ipsum";
 
 export const generateParagraph = () => {
-  return createIpsum(10)
+  return createIpsum(10);
 };
 
 export const generateSentence = () => {
-  return createIpsum(1)
+  return createIpsum(1);
 };
 
 export const notify = () => {
   showHUD("📋  Copied to clipboard");
-}; 
+};
 
 export const preformAction = async (action: string, output: string) => {
   switch (action) {
