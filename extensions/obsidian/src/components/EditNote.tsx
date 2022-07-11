@@ -10,9 +10,9 @@ interface FormValue {
 }
 
 export function EditNote(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const { note, vault, actionCallback } = props;
+  const { note, actionCallback } = props;
   const { pop } = useNavigation();
-  const [defaultContent, setDefaultContent] = useState(getNoteFileContent(note.path, false));
+  const [defaultContent] = useState(getNoteFileContent(note.path, false));
 
   async function writeToNote(form: FormValue) {
     let content = form.content;

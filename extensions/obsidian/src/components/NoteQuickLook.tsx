@@ -10,7 +10,7 @@ import { filterContent, getNoteFileContent } from "../utils/utils";
 export function NoteQuickLook(props: {
   note: Note | undefined;
   vault: Vault;
-  actionCallback: (action: NoteAction) => void;
+  actionCallback?: (action: NoteAction) => void;
 }) {
   const { note, vault, actionCallback } = props;
   const { pop } = useNavigation();
@@ -32,7 +32,9 @@ export function NoteQuickLook(props: {
   useEffect(reloadContent, [note]);
 
   function quickLookActionCallback(action: NoteAction, value: any = undefined) {
-    actionCallback(action);
+    if (actionCallback) {
+      actionCallback(action);
+    }
     switch (+action) {
       case NoteAction.Pin:
         setPinned(!pinned);

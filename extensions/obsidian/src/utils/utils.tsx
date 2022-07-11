@@ -275,7 +275,9 @@ export async function applyTemplates(content: string) {
     const selectedText = await getSelectedText();
     content = content.replaceAll("{selected}", selectedText);
     content = content.replaceAll("{selectedText}", selectedText);
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
   return content;
 }
 
@@ -313,10 +315,10 @@ export const getDailyNoteTarget = (vault: Vault) => {
 };
 
 function getListOfInlineTags(notes: Note[]) {
-  let foundTags: string[] = [];
-  for (let note of notes) {
-    let tags = [...note.content.matchAll(INLINE_TAGS_REGEX)];
-    for (let tag of tags) {
+  const foundTags: string[] = [];
+  for (const note of notes) {
+    const tags = [...note.content.matchAll(INLINE_TAGS_REGEX)];
+    for (const tag of tags) {
       if (!foundTags.includes(tag[1])) {
         foundTags.push(tag[1]);
       }
@@ -326,9 +328,9 @@ function getListOfInlineTags(notes: Note[]) {
 }
 
 export function inlineTagsFor(content: string) {
-  let foundTags: string[] = [];
-  let tags = [...content.matchAll(INLINE_TAGS_REGEX)];
-  for (let tag of tags) {
+  const foundTags: string[] = [];
+  const tags = [...content.matchAll(INLINE_TAGS_REGEX)];
+  for (const tag of tags) {
     if (!foundTags.includes(tag[1])) {
       foundTags.push(tag[1]);
     }
@@ -343,9 +345,9 @@ export function YAMLTagsFor(content: string) {
     try {
       const parsedYAML = YAML.parse(frontmatter[0].replaceAll("---", ""));
 
-      if (parsedYAML.hasOwnProperty("tag")) {
+      if (Object.prototype.hasOwnProperty.call(parsedYAML, "tag")) {
         foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
-      } else if (parsedYAML.hasOwnProperty("tags")) {
+      } else if (Object.prototype.hasOwnProperty.call(parsedYAML, "tags")) {
         foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
       }
     } catch {
@@ -357,9 +359,9 @@ export function YAMLTagsFor(content: string) {
 }
 
 export function tagsFor(content: string) {
-  let foundTags = inlineTagsFor(content);
-  let foundYAMLTags = YAMLTagsFor(content);
-  for (let tag of foundYAMLTags) {
+  const foundTags = inlineTagsFor(content);
+  const foundYAMLTags = YAMLTagsFor(content);
+  for (const tag of foundYAMLTags) {
     if (!foundTags.includes(tag)) {
       foundTags.push(tag);
     }
@@ -369,10 +371,10 @@ export function tagsFor(content: string) {
 }
 
 function getListOfYAMLTags(notes: Note[]) {
-  let foundTags: string[] = [];
-  for (let note of notes) {
-    let tags = YAMLTagsFor(note.content);
-    for (let tag of tags) {
+  const foundTags: string[] = [];
+  for (const note of notes) {
+    const tags = YAMLTagsFor(note.content);
+    for (const tag of tags) {
       if (!foundTags.includes(tag)) {
         foundTags.push(tag);
       }
@@ -382,9 +384,9 @@ function getListOfYAMLTags(notes: Note[]) {
 }
 
 export function getListOfTags(notes: Note[]) {
-  let foundTags = getListOfInlineTags(notes);
-  let foundYAMLTags = getListOfYAMLTags(notes);
-  for (let tag of foundYAMLTags) {
+  const foundTags = getListOfInlineTags(notes);
+  const foundYAMLTags = getListOfYAMLTags(notes);
+  for (const tag of foundYAMLTags) {
     if (!foundTags.includes(tag)) {
       foundTags.push(tag);
     }
@@ -414,15 +416,15 @@ export function isNote(note: Note | undefined): note is Note {
 export function getRandomNote(vault: Vault | Vault[]) {
   let notes: Note[] = [];
   if (Array.isArray(vault)) {
-    for (let v of vault) {
-      let nl = new NoteLoader(v);
+    for (const v of vault) {
+      const nl = new NoteLoader(v);
       notes = [...notes, ...nl.loadNotes()];
     }
   } else {
-    let nl = new NoteLoader(vault);
+    const nl = new NoteLoader(vault);
     notes = nl.loadNotes();
   }
 
-  let randomNote = notes[Math.floor(Math.random() * notes.length)];
+  const randomNote = notes[Math.floor(Math.random() * notes.length)];
   return randomNote;
 }

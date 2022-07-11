@@ -53,7 +53,7 @@ export function AppendSelectedTextToNoteAction(props: { note: Note; actionCallba
       title="Append Selected Text to Note"
       shortcut={{ modifiers: ["opt"], key: "s" }}
       onAction={async () => {
-        let done = await appendSelectedTextTo(note);
+        const done = await appendSelectedTextTo(note);
         if (done) {
           actionCallback(NoteAction.Append);
         }
@@ -150,7 +150,7 @@ export function QuickLookAction(props: { note: Note; vault: Vault; actionCallbac
   return (
     <Action.Push
       title="Quick Look"
-      target={<NoteQuickLook note={note} vault={vault} actionCallback={props.actionCallback} />}
+      target={<NoteQuickLook note={note} vault={vault} actionCallback={actionCallback} />}
       icon={Icon.Eye}
     />
   );

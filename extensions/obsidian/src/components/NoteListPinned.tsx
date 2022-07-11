@@ -23,7 +23,7 @@ export function NoteListPinned(props: { vault: Vault }) {
     setPinnedNotes(pinnedNotes.filter((n) => n.path !== note.path));
   }
 
-  function resetPinnedNotesAction(note: Note) {
+  function resetPinnedNotesAction() {
     return (
       <Action
         title="Reset Pinned Notes"
@@ -31,7 +31,7 @@ export function NoteListPinned(props: { vault: Vault }) {
         shortcut={{ modifiers: ["opt"], key: "r" }}
         onAction={async () => {
           if (await resetPinnedNotes(vault)) {
-            setPinnedNotes((pinnedNotes) => []);
+            setPinnedNotes(() => []);
           }
         }}
       />
@@ -43,7 +43,7 @@ export function NoteListPinned(props: { vault: Vault }) {
       <React.Fragment>
         <OpenNoteActions note={note} vault={vault} actionCallback={actionCallback} />
         <NoteActions note={note} vault={vault} actionCallback={actionCallback} />
-        {resetPinnedNotesAction(note)}
+        {resetPinnedNotesAction()}
       </React.Fragment>
     );
   }

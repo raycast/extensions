@@ -51,7 +51,9 @@ export function SimpleNoteList(props: { vault: Vault; title: string }) {
       notes={notes}
       vault={vault}
       onSearchChange={setInput}
-      onDelete={() => {}}
+      onDelete={(note) => {
+        console.log("Delete " + note.title);
+      }}
       action={actions}
     ></NoteList>
   );

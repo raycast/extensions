@@ -16,7 +16,6 @@ class NoteLoader {
     const notes: Note[] = [];
     const files = this.getFiles();
 
-    let key = 0;
     for (const f of files) {
       const comp = f.split("/");
       const f_name = comp.pop();

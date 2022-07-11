@@ -17,7 +17,7 @@ export function getInfoFor(vault: Vault): { pinnedNotes: string[]; vault: Vault;
   const dataForVault = parsedData.find((d) => d.vaultPath === vault.path);
 
   if (dataForVault) {
-    return { pinnedNotes: dataForVault?.pinnedNotes!, vault: vault, data: parsedData! };
+    return { pinnedNotes: dataForVault.pinnedNotes, vault: vault, data: parsedData };
   } else {
     parsedData.push({ vaultPath: vault.path, pinnedNotes: [] });
     fs.writeFileSync(environment.supportPath + "/data.json", JSON.stringify(parsedData));
@@ -33,12 +33,11 @@ export function migratePinnedNotes() {
     const parsedData: [{ vaultPath: string; pinnedNotes: [{ title: string; path: string; content: string }] }] =
       JSON.parse(data);
 
-    let migratedData: PinnedNotesJSON[] = [];
+    const migratedData: PinnedNotesJSON[] = [];
 
-    for (let vault of parsedData) {
-      let paths = [];
-      console.log(vault);
-      for (let note of vault.pinnedNotes) {
+    for (const vault of parsedData) {
+      const paths = [];
+      for (const note of vault.pinnedNotes) {
         paths.push(note.path);
       }
       migratedData.push({ vaultPath: vault.vaultPath, pinnedNotes: paths });
@@ -50,7 +49,7 @@ export function migratePinnedNotes() {
 
 export function getPinnedNotes(vault: Vault) {
   const { pinnedNotes } = getInfoFor(vault);
-  let pinnedNoteObjects = pinnedNotes
+  const pinnedNoteObjects = pinnedNotes
     .map((p) => {
       const comp = p.split("/");
       const f_name = comp.pop();
@@ -78,7 +77,9 @@ export function getPinnedNotes(vault: Vault) {
 }
 
 function unpinNotePath(path: string, vault: Vault) {
-  let { pinnedNotes, data } = getInfoFor(vault);
+  const info = getInfoFor(vault);
+  let pinnedNotes = info.pinnedNotes;
+  const data = info.data;
   pinnedNotes = pinnedNotes.filter((n) => n != path);
 
   const idx = data.findIndex((d) => d.vaultPath == vault.path);
@@ -88,7 +89,9 @@ function unpinNotePath(path: string, vault: Vault) {
 }
 
 export function unpinNote(note: Note, vault: Vault) {
-  let { pinnedNotes, data } = getInfoFor(vault);
+  const info = getInfoFor(vault);
+  let pinnedNotes = info.pinnedNotes;
+  const data = info.data;
   pinnedNotes = pinnedNotes.filter((n) => n != note.path);
 
   const idx = data.findIndex((d) => d.vaultPath == vault.path);
@@ -107,7 +110,9 @@ export function isNotePinned(note: Note, vault: Vault) {
 }
 
 export function pinNote(note: Note, vault: Vault) {
-  let { pinnedNotes, data } = getInfoFor(vault);
+  const info = getInfoFor(vault);
+  let pinnedNotes = info.pinnedNotes;
+  const data = info.data;
   if (isNotePinned(note, vault)) {
     noteAlreadyPinnedToast(note);
     return;
@@ -120,7 +125,9 @@ export function pinNote(note: Note, vault: Vault) {
 }
 
 export async function resetPinnedNotes(vault: Vault) {
-  let { pinnedNotes, data } = getInfoFor(vault);
+  const info = getInfoFor(vault);
+  let pinnedNotes = info.pinnedNotes;
+  const data = info.data;
   pinnedNotes = [];
 
   const idx = data.findIndex((d) => d.vaultPath == vault.path);

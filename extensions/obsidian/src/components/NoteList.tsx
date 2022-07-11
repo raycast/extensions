@@ -123,9 +123,13 @@ export function NoteList(props: {
           tooltip="Search For"
           onChange={(value) => {
             if (value != "all") {
-              props.setNotes!(allNotes.filter((note) => note.tags.includes(value)));
+              if (props.setNotes) {
+                props.setNotes(allNotes.filter((note) => note.tags.includes(value)));
+              }
             } else {
-              props.setNotes!(allNotes);
+              if (props.setNotes) {
+                props.setNotes(allNotes);
+              }
             }
           }}
         >

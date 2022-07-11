@@ -11,5 +11,5 @@ export function RandomNote(props: { vault: Vault }) {
     setRandomNote(getRandomNote(vault));
   }, []);
 
-  return <NoteQuickLook note={randomNote} vault={vault} actionCallback={() => {}}></NoteQuickLook>;
+  return <NoteQuickLook note={randomNote} vault={vault}></NoteQuickLook>;
 }
