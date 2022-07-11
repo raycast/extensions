@@ -1,5 +1,19 @@
 # Obsidian Changelog
 
+## [Tag Filter, Markdown Controls for Edit Note, Templates for Append Action & More | Version 1.7.0] - 2022-07-11
+
+- Add tag filter to filter results in `Search Note` and `Pinned Notes` command by tags (YAML frontmatter and inline)
+- `Edit Note` action now supports markdown controls (e.g. `cmd + b` for bold and `cmd + i` for italic)
+- `Append to Note` and `Append Selected Text to Note` actions now support all templates
+- Add template preference for both `Append to Note` and `Append Selected Text to Note` actions
+- Use `{content}` for `Append Selected Text to Note` action
+- Add templates `{selected}`, `{selectedText}` for selected Text
+- Add templates `{\n}`, `{newline}`, `{nl}` for new line
+- Add shorter template `{clip}` for clipboard
+- Add `Default Content` and `Fill Form with Default Values` settings for `Create Note` command
+- Add `Show in Finder` action for all vault selection lists
+- Minor fixes
+
 ## [Edit Note Action, Clipboard Template | Version 1.6.1] - 2022-07-01
 
 - Add `Edit Note` action to `Search Note` and `Pinned Notes` command which lets you edit a note

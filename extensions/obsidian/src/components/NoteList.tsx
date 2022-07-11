@@ -2,21 +2,27 @@ import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
 
 import { Note, Vault, SearchNotePreferences } from "../utils/interfaces";
-import { OpenNoteActions, NoteActions } from "../utils/actions";
-import { readingTime, wordCount, trimPath, createdDateFor, fileSizeFor, getNoteFileContent } from "../utils/utils";
-import { isNotePinned } from "../utils/PinNoteUtils";
+import {
+  readingTime,
+  wordCount,
+  trimPath,
+  createdDateFor,
+  fileSizeFor,
+  getNoteFileContent,
+  filterContent,
+} from "../utils/utils";
+import { isNotePinned } from "../utils/pinNoteUtils";
 import { NoteAction } from "../utils/constants";
 
 export function NoteListItem(props: {
   note: Note;
   vault: Vault;
-  key: number;
+  key: string;
   pref: SearchNotePreferences;
   onDelete: (note: Note) => void;
-  action?: (note: Note) => React.ReactFragment;
+  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
 }) {
-  const note = props.note;
-  const vault = props.vault;
+  const { note, vault, pref, onDelete, action } = props;
   const [content, setContent] = useState(note.content);
   const [pinned, setPinned] = useState(isNotePinned(note, vault));
 
@@ -32,7 +38,7 @@ export function NoteListItem(props: {
         setPinned(!pinned);
         break;
       case NoteAction.Delete:
-        props.onDelete(note);
+        onDelete(note);
         break;
       case NoteAction.Edit:
         reloadContent();
@@ -48,9 +54,9 @@ export function NoteListItem(props: {
       accessories={[{ text: pinned ? "⭐️" : "" }]}
       detail={
         <List.Item.Detail
-          markdown={content}
+          markdown={filterContent(content)}
           metadata={
-            props.pref.showMetadata ? (
+            pref.showMetadata ? (
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Character Count" text={content.length.toString()} />
                 <List.Item.Detail.Metadata.Label title="Word Count" text={wordCount(content).toString()} />
@@ -77,11 +83,7 @@ export function NoteListItem(props: {
       }
       actions={
         <ActionPanel>
-          <React.Fragment>
-            <OpenNoteActions note={note} vault={vault} actionCallback={actionCallback} />
-            <NoteActions note={note} vault={vault} actionCallback={actionCallback} />
-            {props.action && props.action(note)}
-          </React.Fragment>
+          <React.Fragment>{action && action(note, vault, actionCallback)}</React.Fragment>
         </ActionPanel>
       }
     />
@@ -90,37 +92,65 @@ export function NoteListItem(props: {
 
 export function NoteList(props: {
   notes: Note[] | undefined;
+  allNotes?: Note[];
+  setNotes?: (notes: Note[]) => void;
+  tags?: string[];
   isLoading?: boolean;
+  title?: string;
   vault: Vault;
-  action?: (note: Note) => React.ReactFragment;
+  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
   onSearchChange: (search: string) => void;
   onDelete: (note: Note) => void;
 }) {
-  const notes = props.notes;
-  const vault = props.vault;
-  const pref: SearchNotePreferences = getPreferenceValues();
+  const { notes, allNotes, vault, isLoading, title, tags, action, onSearchChange, onDelete } = props;
+  const pref = getPreferenceValues<SearchNotePreferences>();
+  const { showDetail } = pref;
 
-  let isLoading = notes === undefined;
+  let isNotesUndefined = notes === undefined;
 
   if (notes !== undefined) {
-    isLoading = notes.length == 0;
+    isNotesUndefined = notes.length == 0;
   }
 
-  if (props.isLoading !== undefined) {
-    isLoading = props.isLoading;
+  if (isLoading !== undefined) {
+    isNotesUndefined = isLoading;
+  }
+
+  function DropDownList() {
+    if (props.setNotes && allNotes && tags) {
+      return (
+        <List.Dropdown
+          tooltip="Search For"
+          onChange={(value) => {
+            if (value != "all") {
+              props.setNotes!(allNotes.filter((note) => note.tags.includes(value)));
+            } else {
+              props.setNotes!(allNotes);
+            }
+          }}
+        >
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Section title="Tags" />
+          {tags.map((tag) => (
+            <List.Dropdown.Item title={tag} value={tag} key={tag} />
+          ))}
+        </List.Dropdown>
+      );
+    } else {
+      return <React.Fragment />;
+    }
   }
 
   return (
-    <List isLoading={isLoading} isShowingDetail={pref.showDetail} onSearchTextChange={props.onSearchChange}>
+    <List
+      isLoading={isNotesUndefined}
+      isShowingDetail={showDetail}
+      onSearchTextChange={onSearchChange}
+      navigationTitle={title}
+      searchBarAccessory={<DropDownList />}
+    >
       {notes?.map((note) => (
-        <NoteListItem
-          note={note}
-          vault={vault}
-          key={note.key}
-          pref={pref}
-          onDelete={props.onDelete}
-          action={props.action}
-        />
+        <NoteListItem note={note} vault={vault} key={note.path} pref={pref} onDelete={onDelete} action={action} />
       ))}
     </List>
   );

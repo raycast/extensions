@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
 
-import { CreateNoteForm } from "./components/CreateNoteForm";
+import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
-import { useObsidianVaults } from "./utils/utils";
+import { NoteListPinned } from "./components/NoteListPinned";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
+import { RandomNote } from "./components/RandomNote";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -15,10 +16,11 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <CreateNoteForm vault={vault} />} />;
+    return <VaultSelection vaults={vaults} target={(vault: Vault) => <RandomNote vault={vault} />} />;
   } else if (vaults.length == 1) {
-    return <CreateNoteForm vault={vaults[0]} />;
+    return <NoteListPinned vault={vaults[0]} />;
   } else {
     noVaultPathsToast();
+    return <List />;
   }
 }

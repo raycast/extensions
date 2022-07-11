@@ -5,7 +5,7 @@ import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
 import { NoteListPinned } from "./components/NoteListPinned";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
-import { pathErrorToast } from "./components/Toasts";
+import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -19,7 +19,7 @@ export default function Command() {
   } else if (vaults.length == 1) {
     return <NoteListPinned vault={vaults[0]} />;
   } else {
-    pathErrorToast();
+    noVaultPathsToast();
     return <List />;
   }
 }
