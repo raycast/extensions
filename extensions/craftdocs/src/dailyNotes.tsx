@@ -3,13 +3,12 @@ import useConfig from "./hooks/useConfig";
 import { List } from "@raycast/api";
 import { useState } from "react";
 import * as chrono from "chrono-node";
-import { Shortcut } from "./components/Shortcut";
-import { DailyNoteRef } from "./components/DailyNoteRef";
+import { DailyNotes } from "./components/DailyNotes";
 
 // noinspection JSUnusedGlobalSymbols
 export default function dailyNotes() {
-  const { appExists, appExistsLoading } = useAppExists();
-  const { config, configLoading } = useConfig({ appExists, appExistsLoading });
+  const appExists = useAppExists();
+  const { config, configLoading } = useConfig(appExists);
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<Date>();
 
@@ -26,15 +25,8 @@ export default function dailyNotes() {
   };
 
   return (
-    <List isLoading={appExistsLoading && configLoading} onSearchTextChange={parseDate}>
-      {query.length === 0 && (
-        <List.Section title="Shortcuts">
-          <Shortcut dayRef="today" spaceID={config?.primarySpace()?.spaceID || ""} />
-          <Shortcut dayRef="yesterday" spaceID={config?.primarySpace()?.spaceID || ""} />
-          <Shortcut dayRef="tomorrow" spaceID={config?.primarySpace()?.spaceID || ""} />
-        </List.Section>
-      )}
-      {query.length > 0 && <DailyNoteRef date={date} text={query} spaceID={config?.primarySpace()?.spaceID || ""} />}
+    <List isLoading={configLoading} onSearchTextChange={parseDate}>
+      <DailyNotes appExists={appExists.appExists} config={config} date={date} query={query} />
     </List>
   );
 }
