@@ -1,5 +1,5 @@
-# Filamentphp Admin Documentation Search
+# Filament Admin Documentation Search
 
-![Raycast Filamntphp Search](media/filamentphp.gif)
+![Raycast Filament Search](media/filamentphp.gif)
 
-[Filamentphp](https://filamentphp.com) search
+[Filament](https://filamentphp.com) search

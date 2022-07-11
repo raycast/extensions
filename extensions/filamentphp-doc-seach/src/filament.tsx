@@ -34,7 +34,7 @@ type result = {
   };
 };
 
-export default function SearchFilamentphpDocumentation() {
+export default function SearchFilamentDocumentation() {
   const algoliaClient = useMemo(() => {
     return algoliaSearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
@@ -57,7 +57,7 @@ export default function SearchFilamentphpDocumentation() {
         return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
       })
       .catch((err) => {
-        showToast(Toast.Style.Failure, "Error searching filamentphp docs", err.message);
+        showToast(Toast.Style.Failure, "Error searching filament documentation", err.message);
         return [];
       });
   };
@@ -73,7 +73,7 @@ export default function SearchFilamentphpDocumentation() {
     <List
       throttle={true}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search Filamentphp"}
+      searchBarPlaceholder={"Search Filament"}
       onSearchTextChange={async (query) => {
         setSearchResults(await search(query));
         setIsLoading(false);

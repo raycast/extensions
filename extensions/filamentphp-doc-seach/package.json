@@ -1,17 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "filamentphp",
-  "title": "Filamentphp",
+  "name": "filament",
+  "title": "Filament",
   "description": "Documentation Search",
   "icon": "command-icon2.png",
   "author": "aurawindsurfing",
   "license": "MIT",
   "commands": [
     {
-      "name": "filamentphp",
+      "name": "filament",
       "title": "Search Documentation",
-      "subtitle": "Filamentphp",
-      "description": "Searches the filamentphp documentation",
+      "subtitle": "Filament",
+      "description": "Searches the filament documentation",
       "mode": "view"
     }
   ],
