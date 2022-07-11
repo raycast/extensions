@@ -1,9 +1,11 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { FundingOffer } from "bfx-api-node-models";
 import Bitfinex from "./api";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 ("swr");
 
-function OfferListItem({ offer }: { offer: any }) {
+function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?: boolean; canCancel?: boolean }) {
+  const rest = Bitfinex.rest();
   const symbol = offer.symbol.slice(1);
   const amount = Number(offer.amount).toFixed(2);
   const yearlyRate = Number(offer.rate * 365 * 100).toFixed(2);
@@ -25,6 +27,8 @@ function OfferListItem({ offer }: { offer: any }) {
     } else {
       daysLeftText = `${Math.floor(daysLeft)}/${period} days left`;
     }
+  } else {
+    daysLeftText = `${period} days`;
   }
 
   return (
@@ -41,7 +45,62 @@ function OfferListItem({ offer }: { offer: any }) {
           date: new Date(offer.mtsCreate),
         },
       ]}
-    ></List.Item>
+      actions={
+        <ActionPanel>
+          {canUpdate && <Action.Push title="Update Offer" target={<EditOfferForm offer={offer} />} />}
+          {canCancel && (
+            <Action
+              title="Cancel Offer"
+              onAction={async () => {
+                await rest.cancelFundingOffer(offer.id);
+                mutate("/api/funding-offers");
+              }}
+            />
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function EditOfferForm(props: { offer: any }) {
+  const defaultRate = Number(props.offer.rate * 365 * 100).toFixed(3);
+  const rest = Bitfinex.rest();
+  const { pop } = useNavigation();
+
+  const onSubmit = async (values: any) => {
+    try {
+      const newOffer = new FundingOffer({
+        type: "LIMIT",
+        symbol: props.offer.symbol,
+        rate: parseFloat(values.rate) / 100 / 365,
+        amount: parseFloat(values.amount),
+        period: parseInt(values.period, 10),
+      });
+      await rest.cancelFundingOffer(props.offer.id);
+      await rest.submitFundingOffer(newOffer);
+    } catch (e) {
+      console.error(e);
+    }
+
+    mutate("/api/funding-offers");
+    pop();
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Answer" onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="symbol" title="Symbol" defaultValue={props.offer.symbol} />
+
+      <Form.TextField id="amount" title="Amount" defaultValue={Number(props.offer.amount).toFixed(5)} />
+      <Form.TextField id="rate" title="Rate (in APR)" defaultValue={defaultRate} />
+      <Form.TextField id="period" title="Period (in days)" defaultValue={String(props.offer.period)} />
+    </Form>
   );
 }
 
@@ -59,7 +118,7 @@ export default function FundingOffers() {
     <List isLoading={isValidating || activeOfferLoading}>
       <List.Section title="Pending Offers">
         {activeOffers?.map((offer) => {
-          return <OfferListItem key={offer.id} offer={offer} />;
+          return <OfferListItem key={offer.id} offer={offer} canUpdate canCancel />;
         })}
       </List.Section>
 

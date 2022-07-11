@@ -27,10 +27,16 @@ declare module "bitfinex-api-node" {
     getURL(): string;
     usesAgent(): boolean;
 
+    updateOrder (changes: Record<string, any>, cb?: CallbackFn): Promise<unknown>;
+
     trades (symbol = 'tBTCUSD', start = null, end = null, limit = null, sort = null, cb?: CallbackFn): Promise<unknown> 
 
     fundingOffers(symbol = "fUSD", cb?: CallbackFn): Promise<unknown>;
     fundingOfferHistory(symbol?: string, start = null, end = null, limit = null, cb?: CallbackFn): Promise<unknown>;
+
+    submitFundingOffer (offer: any, cb?: CallbackFn): Promise<unknown>
+    cancelFundingOffer (id: number, cb?: CallbackFn): Promise<unknown>
+    cancelAllFundingOffers (params: any, cb?: CallbackFn): Promise<unknown>
 
     fundingCredits(symbol = "fUSD", cb?: CallbackFn): Promise<unknown>;
     fundingCreditHistory(symbol?: string, start = null, end = null, limit = null, cb?: CallbackFn): Promise<unknown>;
@@ -43,5 +49,11 @@ declare module "bitfinex-api-node" {
     closeFunding(params = {}, cb?: CallbackFn): Promise<unknown>;
 
     ledgers(filters?: LedgerFilters, start = null, end = Date.now(), limit = 25, cb?: CallbackFn): Promise<unknown>;
+  }
+}
+
+declare module 'bfx-api-node-models' {
+  export class FundingOffer {
+    constructor(data: any);
   }
 }
