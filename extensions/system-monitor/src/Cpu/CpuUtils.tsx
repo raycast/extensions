@@ -7,9 +7,12 @@ const execp = promisify(exec);
 const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   try {
     const output = await execp("/bin/ps -Aceo pcpu,comm -r");
-    let processList: string[] = output.stdout.trim().split("\n").slice(1, 6);
-    let modProcessList: string[][] = [];
-    processList.forEach((value, index) => {
+    const processList: string[] = output.stdout
+      .trim()
+      .split("\n")
+      .slice(1, count + 1);
+    const modProcessList: string[][] = [];
+    processList.forEach((value) => {
       let temp: string[] = value.trim().split(" ");
       temp = [temp[0], temp.slice(1).join(" ")];
       modProcessList.push(temp);

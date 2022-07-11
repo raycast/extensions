@@ -1,8 +1,8 @@
 function formatBytes(bytes: number): string {
-  const decimals: number = 2;
+  const decimals = 2;
   if (bytes === 0) return "0 B";
 
-  const k: number = 1024;
+  const k = 1024;
   const dm: number = decimals < 0 ? 0 : decimals;
   const sizes: string[] = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 

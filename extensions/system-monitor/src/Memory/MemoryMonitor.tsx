@@ -1,4 +1,4 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { freemem, freememPercentage } from "os-utils";
 import { useEffect, useState } from "react";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace } from "./MemoryUtils";

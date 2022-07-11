@@ -1,4 +1,4 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Color, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   getBatteryCondition,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cpuUsage } from "os-utils";
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
@@ -18,8 +18,8 @@ export default function CpuMonitor() {
   useInterval(() => {
     cpuUsage(async (v) => {
       try {
-        let newLoadAvg = loadavg();
-        let newTopProcess = await getTopCpuProcess(5);
+        const newLoadAvg = loadavg();
+        const newTopProcess = await getTopCpuProcess(5);
         setState((prevState) => {
           return {
             ...prevState,

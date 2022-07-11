@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Color, List, showToast, Toast } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
 import { formatBytes, isObjectEmpty } from "../utils";
@@ -15,10 +15,10 @@ export default function NetworkMonitor() {
   });
 
   const sortFunction = (a: [string, number, number], b: [string, number, number]): number => {
-    let minA = Math.min(a[1], a[2]);
-    let maxA = Math.max(a[1], a[2]);
-    let minB = Math.min(b[1], b[2]);
-    let maxB = Math.max(b[1], b[2]);
+    const minA = Math.min(a[1], a[2]);
+    const maxA = Math.max(a[1], a[2]);
+    const minB = Math.min(b[1], b[2]);
+    const maxB = Math.max(b[1], b[2]);
     if (maxA > maxB) {
       return -1;
     } else if (maxB > maxA) {
@@ -41,8 +41,8 @@ export default function NetworkMonitor() {
     getNetworkData()
       .then((currProcess: { [key: string]: number[] }) => {
         const prevProcess: { [key: string]: number[] } = state.prevProcess;
-        let newUpload: number = 0;
-        let newDownload: number = 0;
+        let newUpload = 0;
+        let newDownload = 0;
         let newProcessList: [string, number, number][] = [];
         if (!isObjectEmpty(prevProcess)) {
           for (const key in currProcess) {

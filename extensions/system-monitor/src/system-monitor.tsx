@@ -1,6 +1,4 @@
-import { List, Grid } from "@raycast/api";
-import { cpuUsage, freemem, freememPercentage } from "os-utils";
-import { useState } from "react";
+import { List } from "@raycast/api";
 import CpuMonitor from "./Cpu/CpuMonitor";
 import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
