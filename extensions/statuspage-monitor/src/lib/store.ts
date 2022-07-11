@@ -1,37 +1,40 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import { environment } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
 
-export const pagesConfigPath = environment.supportPath + "/pages.json";
-export const defaultPagesConfig = [];
+export const defaultPagesConfig = ["kctbh9vrtdwd", "srhpyqt94yxb", "yh6f0r4529hb"];
 
-export function getPageIds() {
-  if (!existsSync(pagesConfigPath)) setPageIds(defaultPagesConfig);
-  const pagesConfig = JSON.parse(readFileSync(pagesConfigPath).toString());
-  return pagesConfig as string[];
+export async function getPageIds() {
+  const pageIdStore = await LocalStorage.getItem<string>("pages");
+  if (!pageIdStore) {
+    await LocalStorage.setItem("pages", JSON.stringify(defaultPagesConfig));
+    return defaultPagesConfig;
+  }
+  const pageIds = JSON.parse(pageIdStore) as string[];
+  return pageIds;
 }
 
-export function setPageIds(ids: string[]) {
-  writeFileSync(pagesConfigPath, JSON.stringify(ids));
+export async function setPageIds(ids: string[]) {
+  return await LocalStorage.setItem("pages", JSON.stringify(ids));
 }
 
-export function addPageId(id: string) {
-  const pages = getPageIds();
+export async function addPageId(id: string) {
+  const pages = await getPageIds();
   pages.push(id);
-  setPageIds(pages);
+  await setPageIds(pages);
   return pages;
 }
 
-export function removePageIdByIndex(index: number) {
-  const pages = getPageIds();
+export async function removePageIdByIndex(index: number) {
+  const pages = await getPageIds();
   pages.splice(index, 1);
-  setPageIds(pages);
+  await setPageIds(pages);
   return pages;
 }
 
-export function removePageId(id: string) {
-  const pages = getPageIds();
+export async function removePageId(id: string) {
+  const pages = await getPageIds();
   const index = pages.indexOf(id);
   if (index > -1) pages.splice(index, 1);
-  setPageIds(pages);
+  await setPageIds(pages);
   return pages;
 }
