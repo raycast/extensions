@@ -2,6 +2,7 @@ import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api"
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { PackageVersions } from "./components/PackageVersions";
+import type { Package, Version } from "./types";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -22,7 +23,7 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({ searchResult }: { searchResult: Package }) {
   return (
     <List.Item
       title={searchResult.name}
@@ -103,7 +104,7 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+async function performSearch(searchText: string, signal: AbortSignal): Promise<Package[]> {
   if (!searchText) return Promise.resolve([]);
 
   const params = new URLSearchParams();
@@ -144,25 +145,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 }
 
 interface SearchState {
-  results: SearchResult[];
+  results: Package[];
   isLoading: boolean;
-}
-
-interface SearchResult {
-  name: string;
-  description?: string;
-  platform: string;
-  homepage: string;
-  repositoryUrl: string;
-  packageManagerUrl: string;
-  versions: Array<Version>;
-}
-
-interface Version {
-  number: string;
-  published_at: string;
-  spdx_expression: string;
-  original_license: string;
-  researched_at: string;
-  repository_sources: string[];
 }

@@ -1,6 +1,7 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
+import type { Platform } from "./types";
 
 export default function Command() {
   const { state } = useSearch();
@@ -21,7 +22,7 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({ searchResult }: { searchResult: Platform }) {
   return (
     <List.Item
       title={searchResult.name}
@@ -92,7 +93,7 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+async function performSearch(searchText: string, signal: AbortSignal): Promise<Platform[]> {
   const response = await fetch("https://libraries.io/api/platforms", {
     method: "get",
     signal: signal,
@@ -117,13 +118,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 }
 
 interface SearchState {
-  results: SearchResult[];
+  results: Platform[];
   isLoading: boolean;
-}
-
-interface SearchResult {
-  name: string;
-  projectCount: number;
-  homepage: string;
-  defaultLanguage: string;
 }
