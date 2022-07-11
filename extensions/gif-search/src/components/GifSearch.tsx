@@ -9,6 +9,7 @@ import {
   getServiceTitle,
   getLayoutType,
   getGridItemSize,
+  getGridTrendingItemSize,
 } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
@@ -25,7 +26,7 @@ export function GifSearch() {
   const [searchService, setSearchService] = useState<ServiceName>();
   const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
 
-  const [itemSize, setItemSize] = useState(Grid.ItemSize.Small);
+  const [itemSize, setItemSize] = useState(getGridTrendingItemSize());
 
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);
@@ -43,7 +44,7 @@ export function GifSearch() {
     if (searchTerm) {
       setItemSize(getGridItemSize());
     } else {
-      setItemSize(Grid.ItemSize.Small);
+      setItemSize(getGridTrendingItemSize());
     }
   }, [searchTerm, searchService]);
 

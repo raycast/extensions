@@ -1,8 +1,13 @@
 # Notion Changelog
 
-## [New Command] - 2022-07-06
+## [New Command] - 2022-07-11
 
 - Added `Open Link using Notion` and `Convert to App Link` commands
+
+## [Markdown parsing] - 2022-07-08
+
+- Improve markdown parsing when create a page
+- Add a dropdown to sort by "last edited at" or "last created at" when searching in a database
 
 ## [Bugfixes] - 2022-07-05
 
