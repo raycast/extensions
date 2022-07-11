@@ -100,7 +100,7 @@ export default function SearchFilamentDocumentation() {
                   (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")
                 ).replace("&amp;", "&")}
                 actions={
-                  <ActionPanel title={hit.url}>
+                  <ActionPanel title="Actions">
                     <Action.OpenInBrowser url={hit.url} />
                     <Action.CopyToClipboard content={hit.url} title="Copy URL" />
                   </ActionPanel>
