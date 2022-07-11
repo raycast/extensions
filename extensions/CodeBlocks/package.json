@@ -3,7 +3,7 @@
   "name": "codeblocks",
   "title": "CodeBlocks",
   "description": "Set or modify the programming language in markdown code blocks in batch.",
-  "icon": "CodeBlock.png",
+  "icon": "CodeBlocks.png",
   "author": "isfeng",
   "categories": [
     "Developer Tools",
