@@ -1,3 +1,3 @@
 # Filament Changelog
 
-## [Initial Version] - 2022-07-10
+## [Initial Version] - {PR_MERGE_DATE}
