@@ -15,15 +15,26 @@ export const DailyNotes = ({ appExists, config, query, date }: DailyNotesParams)
     return <List.EmptyView title="Craft not installed" icon={"command-icon-small.png"} />;
   }
 
+  const space = config.primarySpace();
+  if (!space) {
+    return (
+      <List.EmptyView
+        title="Craft not initialized"
+        description="Try using Craft app first"
+        icon={"command-icon-small.png"}
+      />
+    );
+  }
+
   if (query.length > 0) {
-    return <DailyNoteRef date={date} text={query} spaceID={config?.primarySpace()?.spaceID || ""} />;
+    return <DailyNoteRef date={date} text={query} spaceID={space.spaceID} />;
   }
 
   return (
     <List.Section title="Shortcuts">
-      <Shortcut dayRef="today" spaceID={config?.primarySpace()?.spaceID || ""} />
-      <Shortcut dayRef="yesterday" spaceID={config?.primarySpace()?.spaceID || ""} />
-      <Shortcut dayRef="tomorrow" spaceID={config?.primarySpace()?.spaceID || ""} />
+      <Shortcut dayRef="today" spaceID={space.spaceID} />
+      <Shortcut dayRef="yesterday" spaceID={space.spaceID} />
+      <Shortcut dayRef="tomorrow" spaceID={space.spaceID} />
     </List.Section>
   );
 };
