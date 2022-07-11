@@ -76,7 +76,7 @@ export default function PackageDetail(props: PackageDetailProps): JSX.Element {
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy installation command" content={GetCommandForCli(props.package)} />
+          <Action.CopyToClipboard title="Copy Install Command" content={GetCommandForCli(props.package)} />
           <Action.Paste
             title="Paste to front-most"
             content={GetCommandForCli(props.package)}
