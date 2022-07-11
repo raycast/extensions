@@ -3,6 +3,7 @@
 ## [Tag Filter, Markdown Controls for Edit Note, Templates for Append Action & More | Version 1.7.0] - 2022-07-11
 
 - Add tag filter to filter results in `Search Note` and `Pinned Notes` command by tags (YAML frontmatter and inline)
+- Add `Random Note` command which opens a random note in Quick Look (all actions available)
 - `Edit Note` action now supports markdown controls (e.g. `cmd + b` for bold and `cmd + i` for italic)
 - `Append to Note` and `Append Selected Text to Note` actions now support all templates
 - Add template preference for both `Append to Note` and `Append Selected Text to Note` actions
