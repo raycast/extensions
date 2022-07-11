@@ -1,5 +1,11 @@
-import { showToast, Toast } from '@raycast/api';
+import { showToast, Toast, getPreferenceValues } from '@raycast/api';
 import osascript from 'osascript-tag';
+
+type Preferences = {
+  thingsAppIdentifier: string;
+};
+
+export const preferences: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
