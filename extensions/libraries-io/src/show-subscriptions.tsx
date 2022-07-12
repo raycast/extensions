@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
+import type { Package, Version } from "./types";
 
 export default function Command() {
   const { state } = useSearch();
@@ -8,7 +9,7 @@ export default function Command() {
   return (
     <List
       isLoading={state.isLoading}
-      searchBarPlaceholder="Filter platforms..."
+      searchBarPlaceholder="Filter subscriptions..."
       enableFiltering
       throttle
     >
@@ -21,13 +22,13 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({ searchResult }: { searchResult: Package }) {
   return (
     <List.Item
       title={searchResult.name}
       icon={`package_manager_icons/${searchResult.name.toLowerCase()}.png`}
-      subtitle={searchResult.defaultLanguage}
-      accessoryTitle={`${searchResult.projectCount.toLocaleString()} packages available`}
+      subtitle={searchResult.description}
+      accessoryTitle={searchResult.platform}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -92,14 +93,25 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const response = await fetch("https://libraries.io/api/platforms", {
+async function performSearch(searchText: string, signal: AbortSignal): Promise<Package[]> {
+  const preferences = getPreferenceValues<Preferences>();
+  const response = await fetch(`https://libraries.io/api/subscriptions?api_key=${preferences.token}`, {
     method: "get",
     signal: signal,
   });
 
   const json = (await response.json()) as
-    | { name: string; project_count: number; homepage: string; default_language: string; }[]
+    | {
+      project: {
+        name: string;
+        description?: string;
+        platform: string;
+        homepage: string;
+        repository_url: string;
+        package_manager_url: string;
+        versions: Version[];
+      }
+    }[]
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
@@ -108,22 +120,22 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   return json.map((result) => {
     return {
-      name: result.name,
-      projectCount: result.project_count,
-      homepage: result.homepage,
-      defaultLanguage: result.default_language,
+      name: result.project.name,
+      description: result.project.description,
+      platform: result.project.platform,
+      homepage: result.project.homepage,
+      repositoryUrl: result.project.repository_url,
+      packageManagerUrl: result.project.package_manager_url,
+      versions: result.project.versions,
     };
   });
 }
 
 interface SearchState {
-  results: SearchResult[];
+  results: Package[];
   isLoading: boolean;
 }
 
-interface SearchResult {
-  name: string;
-  projectCount: number;
-  homepage: string;
-  defaultLanguage: string;
+interface Preferences {
+  token: string;
 }
