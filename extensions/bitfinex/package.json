@@ -9,16 +9,16 @@
   "commands": [
     {
       "name": "funding-offers",
-      "title": "Show Funding Offers",
+      "title": "Manage Funding Offers",
       "subtitle": "Bitfinex",
-      "description": "Show Funding Offer History on Bitfinex",
+      "description": "Manage Funding Offer History on Bitfinex",
       "mode": "view"
     },
     {
       "name": "funding-interests",
       "title": "Show Funding Interests",
       "subtitle": "Bitfinex",
-      "description": "Show Funding Interest History on Bitfinex",
+      "description": "Show Daily Funding Interest on Bitfinex",
       "mode": "view"
     },
     {

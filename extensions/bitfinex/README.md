@@ -1,1 +1,1 @@
-# Bitfinex
+# Bitfinex Extension

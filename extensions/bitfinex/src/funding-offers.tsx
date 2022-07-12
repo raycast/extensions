@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "./lending-rates";
 import Bitfinex from "./api";
@@ -85,13 +85,18 @@ function EditOfferForm(props: { offer: any }) {
       });
       await rest.cancelFundingOffer(props.offer.id);
       await rest.submitFundingOffer(newOffer);
-    } catch (e) {
-      console.error(e);
-    }
 
-    mutate("/api/funding-offers");
-    mutate("/api/balance");
-    pop();
+      mutate("/api/funding-offers");
+      mutate("/api/balance");
+
+      pop();
+    } catch (e) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Update Offer Failed",
+        message: String(e),
+      });
+    }
   };
 
   return (
