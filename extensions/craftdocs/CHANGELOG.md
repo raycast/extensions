@@ -1,6 +1,6 @@
 # Craftdocs Changelog
 
-## [Update] - 2022-07-11
+## [Update] - 2022-07-12
 
 - Added a new `daily notes` command.
 
