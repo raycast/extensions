@@ -3,7 +3,7 @@
   "name": "bitfinex",
   "title": "Bitfinex",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "bitfinex-raycast.png",
   "author": "Yukai",
   "license": "MIT",
   "commands": [
