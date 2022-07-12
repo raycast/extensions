@@ -58,6 +58,7 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
               onAction={async () => {
                 await rest.cancelFundingOffer(offer.id);
                 mutate("/api/funding-offers");
+                mutate("/api/balance");
               }}
             />
           )}
@@ -89,6 +90,7 @@ function EditOfferForm(props: { offer: any }) {
     }
 
     mutate("/api/funding-offers");
+    mutate("/api/balance");
     pop();
   };
 
@@ -126,6 +128,7 @@ function CreateOfferForm() {
     }
 
     mutate("/api/funding-offers");
+    mutate("/api/balance");
     pop();
   };
 
