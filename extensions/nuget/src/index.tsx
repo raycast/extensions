@@ -63,7 +63,7 @@ export default function Command(): JSX.Element {
               actions={
                 <ActionPanel>
                   <Action.Push title="Show Details" target={<PackageDetail package={item} />} icon={Icon.Sidebar} />
-                  <Action.CopyToClipboard title="Copy Install Command" content={GetCommandForCli(item)} />
+                  <Action.CopyToClipboard content={GetCommandForCli(item)} />
                   <Action.Paste
                     title="Paste to front-most"
                     content={GetCommandForCli(item)}
