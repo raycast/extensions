@@ -29,11 +29,10 @@ export default function Command() {
   return (
     <Detail
       isLoading={loading}
-      navigationTitle="ChuckNorrisFacts"
       markdown={json2md(
         fact
           ? [
-              { h1: "ChuckNorrisFacts" },
+              { h1: "Chuck Norris Fact" },
               { blockquote: fact.value },
               {
                 img: {
