@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-system-monitor",
   "title": "System Monitor",
-  "description": "Show CPU and memory usage",
+  "description": "Show information and usage related to CPU , Memory , Power and Network",
   "icon": "command-icon.png",
   "author": "hossammourad",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
   "license": "MIT",
   "contributors": [
     "Crayon144",
@@ -14,7 +18,7 @@
     {
       "name": "system-monitor",
       "title": "System Monitor",
-      "description": "Show CPU and memory usage",
+      "description": "Show information and usage related to CPU , Memory , Power and Network",
       "mode": "view"
     }
   ],
