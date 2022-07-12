@@ -171,6 +171,7 @@
 /extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5
+/extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger
 /extensions/go-package-search                        @bstncartwright
 /extensions/google-books                             @Ali-Parandeh
