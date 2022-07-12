@@ -1,10 +1,15 @@
-import { ToastStyle, Detail, Toast, Navigation } from "@raycast/api";
+import { useNavigation } from "@raycast/api";
+import ExpandableErrorToast from "../components/ExpandableErrorToast";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
-import { AuthError, checkAuth } from "../sourcegraph/gql";
+import { AuthError, checkAuth } from "../sourcegraph/gql/auth";
 
-export default function checkAuthEffect(src: Sourcegraph, { push }: Navigation) {
+/**
+ * checkAuthEffect validates connectivity to the given Sourcegraph instance configuration.
+ */
+export default function checkAuthEffect(src: Sourcegraph) {
   const srcName = instanceName(src);
+  const { push } = useNavigation();
 
   return () => {
     async function checkSrc() {
@@ -14,31 +19,22 @@ export default function checkAuthEffect(src: Sourcegraph, { push }: Navigation) 
           await checkAuth(controller.signal, src);
         }
       } catch (err) {
+        const helpText =
+          "\n\nThis may be an issue with your configuration - try updating the Sourcegraph extension settings!";
         const toast =
           err instanceof AuthError
-            ? new Toast({
-                title: `Failed to authenticate against ${srcName}`,
-                message: err.message,
-                style: ToastStyle.Failure,
-              })
-            : new Toast({
-                title: `Error authenticating against ${srcName}`,
-                message: JSON.stringify(err),
-                style: ToastStyle.Failure,
-              });
-        toast.primaryAction = {
-          title: "View details",
-          onAction: () => {
-            push(
-              <Detail
-                navigationTitle="Error"
-                markdown={`**${toast.title}:** ${toast.message}.
-
-This may be an issue with your configuration - try updating the Sourcegraph extension settings!`}
-              />
-            );
-          },
-        };
+            ? ExpandableErrorToast(
+                push,
+                "Authentication error",
+                `Failed to authenticate against ${srcName}`,
+                `${err.message}. ${helpText}`
+              )
+            : ExpandableErrorToast(
+                push,
+                "Authentication error",
+                `Encountered error authenticating against ${srcName}`,
+                `${String(err)}. ${helpText}`
+              );
         await toast.show();
       }
     }

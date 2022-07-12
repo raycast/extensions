@@ -6,12 +6,57 @@ import util from "util";
 import fs from "fs";
 import { pipeline } from "stream";
 const streamPipeline = util.promisify(pipeline);
+import https from "https";
+import { getPreferenceValues } from "@raycast/api";
 
-function userFromJson(data: any): User | undefined {
-  if (!data) {
-    // e.g. owners can be null, it seems that when there are multiple owners, then this field is null
-    return undefined;
+function readCACertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read CA cert file ${filename}`);
   }
+}
+
+function readCertFileSync(filename: string): Buffer | undefined {
+  try {
+    const data = fs.readFileSync(filename);
+    return data;
+  } catch (e) {
+    throw Error(`Could not read cert file ${filename}`);
+  }
+}
+
+export function getHttpAgent(): https.Agent | undefined {
+  let agent: https.Agent | undefined;
+  const preferences = getPreferenceValues();
+  const ignoreCertificates = (preferences.ignorecerts as boolean) || false;
+  const customcacert = (preferences.customcacert as string) || "";
+  const customcert = (preferences.customcert as string) || "";
+  if (ignoreCertificates || customcacert.length > 0 || customcert.length > 0) {
+    const ca = customcacert.length > 0 ? readCACertFileSync(customcacert) : undefined;
+    const cert = customcert.length > 0 ? readCertFileSync(customcert) : undefined;
+    const opt: https.AgentOptions = { rejectUnauthorized: !ignoreCertificates, ca: ca, cert: cert };
+    agent = new https.Agent(opt);
+  }
+  return agent;
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
+const activateAPILogging = false;
+
+export function logAPI(message?: any, ...optionalParams: any[]) {
+  if (activateAPILogging) {
+    console.log(message, ...optionalParams);
+  }
+}
+
+function maybeUserFromJson(data: any): User | undefined {
+  return data ? userFromJson(data) : undefined;
+}
+
+function userFromJson(data: any): User {
   return {
     id: data.id,
     name: data.name,
@@ -33,7 +78,7 @@ export function dataToProject(project: any): Project {
     last_activity_at: project.last_activity_at,
     readme_url: project.readme_url,
     avatar_url: project.avatar_url,
-    owner: userFromJson(project.owner),
+    owner: maybeUserFromJson(project.owner),
     ssh_url_to_repo: project.ssh_url_to_repo,
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
@@ -47,12 +92,20 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     id: mr.id,
     iid: mr.iid,
     state: mr.state,
-    updated_at: new Date(mr.updated_at),
-    author: userFromJson(mr.author),
+    updated_at: mr.updated_at,
+    author: maybeUserFromJson(mr.author),
+    assignees: mr.assignees.map(userFromJson),
+    reviewers: mr.reviewers.map(userFromJson),
     project_id: mr.project_id,
     description: mr.description,
     reference_full: mr.references?.full,
     labels: mr.labels as Label[],
+    source_branch: mr.source_branch,
+    target_branch: mr.target_branch,
+    merge_commit_sha: mr.merge_commit_sha,
+    sha: mr.sha,
+    milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
+    draft: mr.draft,
   };
 }
 
@@ -74,8 +127,9 @@ export function jsonDataToIssue(issue: any): Issue {
     iid: issue.iid,
     reference_full: issue.references?.full,
     state: issue.state,
-    updated_at: new Date(issue.updated_at),
-    author: userFromJson(issue.author),
+    updated_at: issue.updated_at,
+    author: maybeUserFromJson(issue.author),
+    assignees: issue.assignees.map(userFromJson),
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
     labels: issue.labels as Label[],
@@ -156,7 +210,8 @@ export class Issue {
   public reference_full = "";
   public state = "";
   public author: User | undefined;
-  public updated_at = new Date(2000, 1, 1);
+  public assignees: User[] = [];
+  public updated_at = "";
   public project_id = 0;
   public milestone?: Milestone = undefined;
   public labels: Label[] = [];
@@ -170,10 +225,18 @@ export class MergeRequest {
   public iid = 0;
   public state = "";
   public author: User | undefined;
-  public updated_at = new Date(2000, 1, 1);
+  public assignees: User[] = [];
+  public reviewers: User[] = [];
+  public updated_at = "";
   public project_id = 0;
   public reference_full = "";
   public labels: Label[] = [];
+  public source_branch = "";
+  public target_branch = "";
+  public merge_commit_sha = "";
+  public sha = "";
+  public milestone?: Milestone;
+  public draft = false;
 }
 
 export interface TodoGroup {
@@ -240,7 +303,7 @@ export function isValidStatus(status: Status): boolean {
 
 async function toJsonOrError(response: Response): Promise<any> {
   const s = response.status;
-  console.log(`status code: ${s}`);
+  logAPI(`status code: ${s}`);
   if (s >= 200 && s < 300) {
     const json = await response.json();
     return json;
@@ -252,17 +315,17 @@ async function toJsonOrError(response: Response): Promise<any> {
     if (json.error && json.error == "insufficient_scope") {
       msg = "Insufficient API token scope";
     }
-    console.log(msg);
+    logAPI(msg);
     throw Error(msg);
   } else if (s == 404) {
     throw Error("Not found");
   } else if (s >= 400 && s < 500) {
     const json = await response.json();
-    console.log(json);
+    logAPI(json);
     const msg = json.message;
     throw Error(msg);
   } else {
-    console.log("unknown error");
+    logAPI("unknown error");
     throw Error(`http status ${s}`);
   }
 }
@@ -281,13 +344,15 @@ export class GitLab {
       const pagedParams = { ...params, ...{ per_page: `${per_page}`, page: `${page}` } };
       const ps = paramString(pagedParams);
       const fullUrl = this.url + "/api/v4/" + url + ps;
-      console.log(`send GET request: ${fullUrl}`);
+      logAPI(`send GET request: ${fullUrl}`);
+      const agent = getHttpAgent();
       const response = await fetch(fullUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           "PRIVATE-TOKEN": this.token,
         },
+        agent: agent,
       });
       return response;
     };
@@ -298,7 +363,7 @@ export class GitLab {
       if (all) {
         const next_page = response.headers.get("x-next-page");
         if (next_page && next_page.length > 0) {
-          console.log(next_page);
+          logAPI(next_page);
           page++;
           const jsonpage = await fetchPage(page);
           json.concat(jsonpage);
@@ -311,7 +376,7 @@ export class GitLab {
   }
 
   public async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
-    console.log(`download ${url}`);
+    logAPI(`download ${url}`);
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -321,15 +386,15 @@ export class GitLab {
     if (!response.ok) {
       throw new Error(`unexpected response ${response.statusText}`);
     }
-    console.log(`write ${url} to ${params.localFilepath}`);
+    logAPI(`write ${url} to ${params.localFilepath}`);
     await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
     return params.localFilepath;
   }
 
-  public async post(url: string, params: { [key: string]: any } = {}) {
+  public async post(url: string, params: { [key: string]: any } = {}): Promise<any> {
     const fullUrl = this.url + "/api/v4/" + url;
-    console.log(`send POST request: ${fullUrl}`);
-    console.log(params);
+    logAPI(`send POST request: ${fullUrl}`);
+    logAPI(params);
     try {
       const response = await fetch(fullUrl, {
         method: "POST",
@@ -340,7 +405,7 @@ export class GitLab {
         body: JSON.stringify(params),
       });
       const s = response.status;
-      console.log(`status code: ${s}`);
+      logAPI(`status code: ${s}`);
       if (s >= 200 && s < 300) {
         const json = await response.json();
         return json;
@@ -355,13 +420,13 @@ export class GitLab {
         if (json.error && json.error == "insufficient_scope") {
           msg = "Insufficient API token scope";
         }
-        console.log(msg);
+        logAPI(msg);
         throw Error(msg);
       } else if (s == 404) {
         throw Error("Not found");
       } else if (s >= 400 && s < 500) {
         const json = await response.json();
-        console.log(json);
+        logAPI(json);
         let msg = `http status ${s}`;
         if (json.message) {
           // TODO better form error handling
@@ -369,19 +434,19 @@ export class GitLab {
         }
         throw Error(msg);
       } else {
-        console.log("unknown error");
+        logAPI("unknown error");
         throw Error(`http status ${s}`);
       }
     } catch (e: any) {
-      console.log(`catch error: ${e}`);
+      logAPI(`catch error: ${e}`);
       throw Error(e.message); // rethrow error, otherwise raycast could not catch the error
     }
   }
 
-  public async put(url: string, params: { [key: string]: any } = {}) {
+  public async put(url: string, params: { [key: string]: any } = {}): Promise<void> {
     const fullUrl = this.url + "/api/v4/" + url;
-    console.log(`send PUT request: ${fullUrl}`);
-    console.log(params);
+    logAPI(`send PUT request: ${fullUrl}`);
+    logAPI(params);
     try {
       const response = await fetch(fullUrl, {
         method: "PUT",
@@ -393,20 +458,31 @@ export class GitLab {
       });
       await toJsonOrError(response);
     } catch (e: any) {
-      console.log(`catch error: ${e}`);
+      logAPI(`catch error: ${e}`);
       throw Error(e.message); // rethrow error, otherwise raycast could not catch the error
     }
   }
 
-  async getIssues(params: Record<string, any>, project?: Project): Promise<Issue[]> {
+  async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }
-    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params).then((issues) => {
-      return issues.map((issue: any, index: number) => jsonDataToIssue(issue));
+    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params, all).then((issues) => {
+      return issues.map((issue: any) => jsonDataToIssue(issue));
     });
     return issueItems;
+  }
+
+  async getIssue(projectID: number, issueID: number, params: Record<string, any>): Promise<Issue> {
+    if (!params.with_labels_details) {
+      params.with_labels_details = "true";
+    }
+    const projectPrefix = `projects/${projectID}/issues/${issueID}`;
+    const result: Issue = await this.fetch(`${projectPrefix}`, params).then((issue) => {
+      return jsonDataToIssue(issue);
+    });
+    return result;
   }
 
   async getGroupIssues(params: Record<string, any>, groupID: number): Promise<Issue[]> {
@@ -414,22 +490,22 @@ export class GitLab {
       params.with_labels_details = "true";
     }
     const issueItems: Issue[] = await this.fetch(`groups/${groupID}/issues`, params).then((issues) => {
-      return issues.map((issue: any, index: number) => jsonDataToIssue(issue));
+      return issues.map((issue: any) => jsonDataToIssue(issue));
     });
     return issueItems;
   }
 
-  async createIssue(projectID: number, data: { [key: string]: any }) {
+  async createIssue(projectID: number, data: { [key: string]: any }): Promise<void> {
     await this.post(`projects/${projectID}/issues`, data);
   }
 
-  async createMR(projectID: number, data: { [key: string]: any }) {
+  async createMR(projectID: number, data: { [key: string]: any }): Promise<void> {
     await this.post(`projects/${projectID}/merge_requests`, data);
   }
 
   async getProjectMember(projectId: number): Promise<User[]> {
     const userItems: User[] = await this.fetch(`projects/${projectId}/users`).then((users) => {
-      return users.map((userdata: any, index: number) => ({
+      return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
         username: userdata.username,
@@ -443,7 +519,7 @@ export class GitLab {
 
   async getProjectLabels(projectId: number): Promise<Label[]> {
     const items: Label[] = await this.fetch(`projects/${projectId}/labels`, {}, true).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         name: data.name,
         color: data.color,
@@ -457,7 +533,7 @@ export class GitLab {
 
   async getProjectMilestones(projectId: number): Promise<Milestone[]> {
     const items: Milestone[] = await this.fetch(`projects/${projectId}/milestones`).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         title: data.title,
       }));
@@ -467,7 +543,7 @@ export class GitLab {
 
   async getGroupMilestones(group: Group): Promise<Milestone[]> {
     const items: Milestone[] = await this.fetch(`groups/${group.id}/milestones`).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         title: data.title,
       }));
@@ -491,7 +567,7 @@ export class GitLab {
       params.in = args.searchIn || "title";
     }
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
-      return projects.map((project: any, index: number) => dataToProject(project));
+      return projects.map((project: any) => dataToProject(project));
     });
     return issueItems;
   }
@@ -527,7 +603,7 @@ export class GitLab {
       params.in = args.searchIn || "title";
     }
     const userItems: User[] = await this.fetch("users", params).then((users) => {
-      return users.map((userdata: any, index: number) => ({
+      return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
         username: userdata.username,
@@ -545,9 +621,20 @@ export class GitLab {
     }
     const projectPrefix = project ? `projects/${project.id}/` : "";
     const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, params).then((issues) => {
-      return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue));
+      return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
     return issueItems;
+  }
+
+  async getMergeRequest(projectID: number, mrID: number, params: Record<string, any>): Promise<MergeRequest> {
+    if (!params.with_labels_details) {
+      params.with_labels_details = "true";
+    }
+    const projectPrefix = `projects/${projectID}/merge_requests/${mrID}`;
+    const result: MergeRequest = await this.fetch(`${projectPrefix}`, params).then((mr) => {
+      return jsonDataToMergeRequest(mr);
+    });
+    return result;
   }
 
   async getGroupMergeRequests(params: Record<string, any>, group: Group): Promise<MergeRequest[]> {
@@ -555,14 +642,14 @@ export class GitLab {
       params.with_labels_details = "true";
     }
     const issueItems: MergeRequest[] = await this.fetch(`groups/${group.id}/merge_requests`, params).then((issues) => {
-      return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue));
+      return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
     return issueItems;
   }
 
-  async getTodos(params: Record<string, any>): Promise<Todo[]> {
-    const issueItems: Todo[] = await this.fetch("todos", params).then((issues) => {
-      return issues.map((issue: any, _: number) => ({
+  async getTodos(params: Record<string, any>, all?: boolean): Promise<Todo[]> {
+    const issueItems: Todo[] = await this.fetch("todos", params, all).then((issues) => {
+      return issues.map((issue: any) => ({
         title: issue.target.title,
         action_name: issue.action_name,
         target_url: issue.target_url,
@@ -571,7 +658,7 @@ export class GitLab {
         id: issue.id,
         project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
         group: issue.group ? (issue.group as TodoGroup) : undefined,
-        author: userFromJson(issue.author),
+        author: maybeUserFromJson(issue.author),
       }));
     });
 
@@ -612,7 +699,7 @@ export class GitLab {
     const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
-    return await searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });
+    return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });
   }
 
   async getUserEpics(params: Record<string, any> = {}): Promise<Epic[]> {
@@ -640,7 +727,7 @@ export class GitLab {
           epics.push(e);
         }
       } catch (e: any) {
-        console.log("skip during error");
+        logAPI("skip during error");
       }
     }
     return epics;
@@ -681,10 +768,10 @@ export class GitLab {
   }
 }
 
-export async function searchData<Type>(
+export function searchData<Type>(
   data: any,
   params: { search: string; keys: string[]; limit: number; threshold?: number; ignoreLocation?: boolean }
-) {
+): any {
   const options = {
     includeScore: true,
     threshold: params.threshold || 0.2,

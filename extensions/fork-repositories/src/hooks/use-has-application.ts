@@ -1,23 +1,39 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getApplications } from "@raycast/api";
 
-const useHasApplication = (identifier: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFound, setIsFound] = useState(false);
+const useHasApplication = (identifier: string): [boolean, boolean] => {
+  const [state, setState] = useState<{ isLoading: boolean; isFound: boolean }>({ isLoading: true, isFound: false });
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    getApplications().then((applications) => {
+    (async () => {
+      setState((previous) => ({ ...previous, isLoading: true }));
+
+      const applications = await getApplications();
+
+      let isFound = false;
       for (const application of applications) {
         if ([application.name, application.path, application.bundleId].includes(identifier)) {
-          setIsFound(true);
+          if (isMounted.current) {
+            isFound = true;
+          }
           break;
         }
       }
-      setIsLoading(false);
-    });
+
+      if (!isMounted.current) {
+        return;
+      }
+
+      setState({ isLoading: false, isFound });
+    })();
+
+    return function cleanup() {
+      isMounted.current = false;
+    };
   }, [identifier]);
 
-  return [isLoading, isFound];
+  return [state.isFound, state.isLoading];
 };
 
 export { useHasApplication };

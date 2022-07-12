@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chinese-character",
+  "title": "Chinese Character",
+  "description": "Chinese character conversion tools.",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "simplified-to-traditional",
+      "title": "Simplified to Traditional",
+      "icon": "zh2tw.png",
+      "description": "Convert Simplified Chinese to Traditional Chinese from selection or clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "traditional-to-simplified",
+      "title": "Traditional to Simplified",
+      "icon": "tw2zh.png",
+      "description": "Convert Traditional Chinese to Simplified Chinese from selection or clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "chinese-to-pinyin",
+      "title": "Chinese to Pinyin",
+      "icon": "zh2pinyin.png",
+      "description": "Convert Chinese to pinyin from selection or clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "actionAfterConversion",
+      "type": "dropdown",
+      "required": true,
+      "title": "Action After Conversion",
+      "description": "Paste the result or copy the result to the clipboard after converting text.",
+      "default": "Paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "Paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "Copy"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "cjk-conv": "^1.2.139",
+    "pinyin-pro": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

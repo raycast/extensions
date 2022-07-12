@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-link-in-specific-browser",
+  "title": "Open Link in Specific Browser",
+  "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+  "icon": "open-link.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-link-in-specific-browser",
+      "title": "Open Link in Specific Browser",
+      "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the surfboard items.",
+          "required": true,
+          "title": "Surfboard Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the surfboard items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Surfboard Item Size",
+          "default": "small",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "itemInset",
+          "type": "dropdown",
+          "description": "Set the inset of the surfboard items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Surfboard Item Inset",
+          "default": "sm",
+          "data": [
+            {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
+              "title": "Small",
+              "value": "sm"
+            },
+            {
+              "title": "Medium",
+              "value": "md"
+            },
+            {
+              "title": "Large",
+              "value": "lg"
+            }
+          ]
+        },
+        {
+          "name": "surfEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Surf Engine",
+          "description": "Search Engine for SelectedText (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            }
+          ]
+        },
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort by",
+          "description": "Surfboard sorting method (default: Rank).",
+          "default": "Rank",
+          "data": [
+            {
+              "title": "Rank",
+              "value": "Rank"
+            },
+            {
+              "title": "Name ↑",
+              "value": "Name+"
+            },
+            {
+              "title": "Name ↓",
+              "value": "Name-"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

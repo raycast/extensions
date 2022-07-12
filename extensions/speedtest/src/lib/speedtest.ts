@@ -9,6 +9,7 @@ export interface Result {
   download: number | undefined;
   upload: number | undefined;
   ping: number | undefined;
+  url: string | undefined;
 }
 
 export interface ResultProgress {
@@ -36,6 +37,7 @@ export function runSpeedTest(
     download: undefined,
     upload: undefined,
     ping: undefined,
+    url: undefined,
   };
   const resultProgress: ResultProgress = { download: undefined, upload: undefined, ping: undefined };
 
@@ -88,6 +90,7 @@ export function runSpeedTest(
         result.download = (obj.download.bandwidth as number) || undefined;
         result.upload = (obj.upload.bandwidth as number) || undefined;
         result.ping = obj.ping?.latency;
+        result.url = obj.result?.url;
         resultCallback(result);
         progressCallback({ download: undefined, upload: undefined, ping: undefined });
       }

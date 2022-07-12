@@ -1,0 +1,402 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easydict",
+  "title": "Easy Dictionary",
+  "description": "Look up words or translate text in an easy way, especially optimized for English and Chinese words.",
+  "icon": "eudic-icon.png",
+  "author": "isfeng",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "easydict",
+      "title": "Search Word",
+      "subtitle": "Easy Dictionary",
+      "description": "Easy to look up words or translate text, support MacOS system translate, Youdao, Tencent, Baidu and Caiyun translation API.",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "dictionary",
+    "translate",
+    "apple",
+    "youdao",
+    "baidu",
+    "tencent",
+    "caiyun",
+    "eudic",
+    "shortcuts"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "axios": "^0.25.0",
+    "crypto-js": "^4.1.1",
+    "franc": "^6.0.0",
+    "play-sound": "^1.1.5",
+    "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.2",
+    "@commitlint/config-conventional": "^17.0.2",
+    "@types/crypto-js": "^4.1.1",
+    "@types/node": "~16.10.0",
+    "@types/play-sound": "^1.1.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.2",
+    "prettier": "^2.5.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "lint-staged": "lint-staged",
+    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
+    "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "npm run eslint",
+    "**/*": "prettier --write . --ignore-unknown"
+  },
+  "preferences": [
+    {
+      "title": "First Language",
+      "name": "language1",
+      "type": "dropdown",
+      "required": false,
+      "default": "Chinese-Simplified",
+      "description": "Select the first language you want to translate into",
+      "data": [
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        }
+      ]
+    },
+    {
+      "title": "Second Language",
+      "name": "language2",
+      "type": "dropdown",
+      "required": false,
+      "default": "English",
+      "description": "Select the second language you want to translate into",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        }
+      ]
+    },
+    {
+      "title": "Switch Boxes",
+      "name": "isAutomaticQuerySelectedText",
+      "type": "checkbox",
+      "label": "Automatic Query Selected Text",
+      "required": false,
+      "description": "Automatic query selected text of the frontmost application",
+      "default": true
+    },
+    {
+      "name": "isAutomaticPlayWordAudio",
+      "type": "checkbox",
+      "label": "Automatic Play Word Audio",
+      "required": false,
+      "description": "Automatic play audio after looking up a word",
+      "default": false
+    },
+    {
+      "name": "isDisplayTargetTranslationLanguage",
+      "type": "checkbox",
+      "label": "Select Target Translation Language",
+      "required": false,
+      "description": "Select target translation language in action panel manually",
+      "default": false
+    },
+    {
+      "title": "Apple System Features",
+      "name": "enableAppleTranslate",
+      "type": "checkbox",
+      "label": "Apple Translate",
+      "required": false,
+      "description": "Need to install an apple translate shortcut, please see README for more details",
+      "default": false
+    },
+    {
+      "name": "enableAppleLanguageDetect",
+      "type": "checkbox",
+      "label": "Apple Language Detect",
+      "required": false,
+      "description": "Need to install an apple language detect shortcut, please see README for more details",
+      "default": false
+    },
+    {
+      "title": "Translation Services",
+      "name": "enableBaiduTranslate",
+      "type": "checkbox",
+      "label": "Baidu Translate",
+      "required": false,
+      "description": "Turn on/off Baidu Translate",
+      "default": true
+    },
+    {
+      "name": "enableTencentTranslate",
+      "type": "checkbox",
+      "label": "Tencent Translate",
+      "required": false,
+      "description": "Turn on/off Tencent Translate",
+      "default": true
+    },
+    {
+      "name": "enableCaiyunTranslate",
+      "type": "checkbox",
+      "label": "Caiyun Translate",
+      "required": false,
+      "description": "Turn on/off Caiyun Translate",
+      "default": true
+    },
+    {
+      "title": "Youdao App ID",
+      "name": "youdaoAppId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App ID",
+      "default": ""
+    },
+    {
+      "title": "Youdao App Secret",
+      "name": "youdaoAppSecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App Secret",
+      "default": ""
+    },
+    {
+      "title": "Baidu App ID",
+      "name": "baiduAppId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Baidu App ID",
+      "default": ""
+    },
+    {
+      "title": "Baidu App Secret",
+      "name": "baiduAppSecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Baidu App Secret",
+      "default": ""
+    },
+    {
+      "title": "Tencent SecretId",
+      "name": "tencentSecretId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Tencent SecretId",
+      "default": ""
+    },
+    {
+      "title": "Tencent SecretKey",
+      "name": "tencentSecretKey",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Tencent SecretKey",
+      "default": ""
+    },
+    {
+      "title": "Caiyun Token",
+      "name": "caiyunToken",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Caiyun Token",
+      "default": ""
+    }
+  ]
+}

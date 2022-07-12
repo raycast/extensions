@@ -2,8 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.2.2",
+  "version": "1.2.4",
   "author": "tonka3000",
+  "contributors": [
+    "altrdev",
+    "rspeicher"
+  ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
   "icon": "home-assistant.png",
@@ -20,6 +24,13 @@
       "title": "Covers",
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant covers",
+      "mode": "view"
+    },
+    {
+      "name": "fans",
+      "title": "Fans",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant fans",
       "mode": "view"
     },
     {
@@ -80,7 +91,7 @@
     },
     {
       "name": "attributes",
-      "title": "All Entities with Attributes",
+      "title": "All Entities With Attributes",
       "subtitle": "Home Assistant",
       "description": "Query Home Assistant entity attributes",
       "mode": "view"
@@ -133,6 +144,41 @@
       "subtitle": "Home Assistant",
       "description": "Query Scenes",
       "mode": "view"
+    },
+    {
+      "name": "switches",
+      "title": "Switches",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Switches",
+      "mode": "view"
+    },
+    {
+      "name": "helpers",
+      "title": "Helpers",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Helpers",
+      "mode": "view"
+    },
+    {
+      "name": "updates",
+      "title": "Updates",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity Updates",
+      "mode": "view"
+    },
+    {
+      "name": "doors",
+      "title": "Doors",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity with device class door",
+      "mode": "view"
+    },
+    {
+      "name": "weather",
+      "title": "Weather",
+      "subtitle": "Home Assistant",
+      "description": "Get Weather states of Home Assistant Entity Weather",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -170,17 +216,31 @@
       "default": false,
       "title": "Style",
       "description": "Show Entity IDs as subtitle"
+    },
+    {
+      "name": "camerarefreshinterval",
+      "type": "textfield",
+      "required": false,
+      "default": "3000",
+      "title": "Camera Refresh Interval (ms)",
+      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "3000"
     }
   ],
+  "categories": [
+    "Other"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.26.0",
+    "@raycast/api": "^1.33.0",
     "home-assistant-js-websocket": "^5.11.1",
+    "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^16.4.3",
     "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",
@@ -194,6 +254,8 @@
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

@@ -1,21 +1,15 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  Image,
-  Color,
-  showToast,
-  ToastStyle,
-  PushAction,
-} from "@raycast/api";
+import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
-import { getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { GitLabIcons } from "../icons";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 const GET_PIPELINES = gql`
   query GetProjectPipeplines($fullPath: ID!) {
@@ -37,22 +31,25 @@ const GET_PIPELINES = gql`
 function getIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
-      return { source: Icon.Checkmark, tintColor: Color.Green };
+      return { source: GitLabIcons.status_success, tintColor: Color.Green };
     }
     case "created": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_created, tintColor: Color.Yellow };
     }
     case "pending": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_pending, tintColor: Color.Yellow };
     }
     case "running": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Blue };
+      return { source: GitLabIcons.status_running, tintColor: Color.Blue };
     }
     case "failed": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
+    }
+    case "canceled": {
+      return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
     }
     default:
-      return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
+      return { source: GitLabIcons.status_notfound, tintColor: Color.Magenta };
   }
 }
 
@@ -64,25 +61,31 @@ function getStatusText(status: string) {
   }
 }
 
-export function PipelineListItem(props: { pipeline: any; projectFullPath: string; onRefreshPipelines: () => void }) {
+export function PipelineListItem(props: {
+  pipeline: any;
+  projectFullPath: string;
+  onRefreshPipelines: () => void;
+}): JSX.Element {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
   return (
     <List.Item
-      id={pipeline.id}
+      id={`${pipeline.id}`}
       title={pipeline.id.toString()}
       icon={icon}
       subtitle={pipeline.ref || ""}
-      accessoryTitle={getStatusText(pipeline.status.toLowerCase())}
+      accessories={ensureCleanAccessories([{ text: getStatusText(pipeline.status.toLowerCase()) }])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Jobs"
-              target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
+              target={
+                <JobList projectFullPath={props.projectFullPath} pipelineID={pipeline.id} pipelineIID={pipeline.iid} />
+              }
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={pipeline.webUrl} />
+            <GitLabOpenInBrowserAction url={pipeline.webUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />
@@ -93,13 +96,13 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
   );
 }
 
-export function PipelineList(props: { projectFullPath: string }) {
+export function PipelineList(props: { projectFullPath: string }): JSX.Element {
   const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
   useInterval(() => {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   return (
     <List isLoading={isLoading} navigationTitle="Pipelines">
@@ -126,7 +129,7 @@ export function useSearch(
 } {
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -147,7 +150,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_PIPELINES,
           variables: { fullPath: projectFullPath },
           fetchPolicy: "network-only",
@@ -157,15 +160,15 @@ export function useSearch(
           iid: `${p.iid}`,
           status: p.status,
           active: p.active,
-          webUrl: `${gitlabgql.url}${p.path}`,
+          webUrl: `${getGitLabGQL().url}${p.path}`,
           ref: p.ref,
         }));
         if (!didUnmount) {
           setPipelines(glData);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

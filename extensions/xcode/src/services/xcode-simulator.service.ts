@@ -1,7 +1,7 @@
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { execAsync } from "../shared/exec-async";
 import { BehaviorSubject, Observable } from "rxjs";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 /**
  * XcodeSimulatorService
@@ -94,11 +94,10 @@ export class XcodeSimulatorService {
       // Send empty XcodeSimulators to Subject
       this.xcodeSimulatorsSubject.next([]);
       // Show failure Toast
-      await showToast(
-        ToastStyle.Failure,
-        "An error occurred while retrieving the Xcode Simulators",
-        (error as Error).message
-      );
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "An error occurred while retrieving the Xcode Simulators",
+      });
     }
   }
 

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bunch",
+  "title": "Bunch",
+  "description": "Control Bunch via Raycast. Bunch is a Mac automation tool.",
+  "icon": "bunch.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bunches",
+      "title": "Search Bunches",
+      "subtitle": "Bunch",
+      "description": "Search bunches, support tag:tag1+tag2 and tag:tag1,tag2 to search by tag.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberFilter",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "create-bunch",
+      "title": "Create Bunch",
+      "subtitle": "Bunch",
+      "description": "Create a bunch.",
+      "mode": "view"
+    },
+    {
+      "name": "close-all-bunches",
+      "title": "Close All Bunches",
+      "subtitle": "Bunch",
+      "description": "Close all running bunches.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-bunch-folder",
+      "title": "Open Bunch Folder",
+      "subtitle": "Bunch",
+      "description": "Open Bunch folder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-bunch-preferences",
+      "title": "Get Bunch Preferences",
+      "subtitle": "Bunch",
+      "description": "View several of Bunch’s preferences.",
+      "mode": "view"
+    },
+    {
+      "name": "open-bunch-preferences",
+      "title": "Open Bunch Preferences",
+      "subtitle": "Bunch",
+      "description": "Open Bunch Preferences dialog.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-bunch-references",
+      "title": "Search Bunch References",
+      "subtitle": "Bunch",
+      "description": "Search Bunch syntax references.",
+      "mode": "view"
+    },
+    {
+      "name": "process-bunch-text",
+      "title": "Process Bunch Text",
+      "subtitle": "Bunch",
+      "description": "Process raw Bunch text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-browsers",
+      "title": "Refresh Browsers",
+      "subtitle": "Bunch",
+      "description": "If your Bunches make use of the display command to create single site browsers, you can reload their contents via this command.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,6 +1,8 @@
-import { render } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { DeviceList } from "./helpers";
+import { AirPlaySelector } from "./airplay";
 
-export default async function main() {
-  render(<DeviceList type="output" />);
+export default function Command() {
+  const preferences = getPreferenceValues();
+  return preferences.airplay ? <AirPlaySelector /> : <DeviceList type="output" />;
 }

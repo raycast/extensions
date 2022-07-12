@@ -3,8 +3,13 @@
   "name": "bitwarden",
   "title": "Bitwarden Vault",
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
-  "icon": "bitwarden.png",
+  "icon": "bitwarden-512.png",
   "author": "pomdtr",
+  "contributors": [
+    "daniel-stoneuk",
+    "jomifepe",
+    "andreaselia"
+  ],
   "license": "MIT",
   "keywords": [
     "bitwarden",
@@ -12,20 +17,43 @@
     "security",
     "passwords"
   ],
+  "categories": [
+    "Security"
+  ],
   "commands": [
     {
       "name": "search",
       "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on a vault item.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "lock-vault",
-      "title": "Lock Vault",
+      "name": "generate-password",
+      "title": "Generate Password",
       "subtitle": "Bitwarden",
-      "description": "Lock the vault.",
-      "mode": "no-view"
+      "description": "Generate a password using Bitwarden.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -34,7 +62,7 @@
       "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "The client_id value seen in the My Account section of a Bitwarden web vault. More info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_id value seen in the My Account section of a Bitwarden web vault.",
       "placeholder": "client_id"
     },
     {
@@ -42,8 +70,17 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.\r\nMore info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
       "placeholder": "client_secret"
+    },
+    {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "title": "Privacy",
+      "label": "Fetch Vault Items Icons",
+      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
     },
     {
       "name": "cliPath",
@@ -54,33 +91,43 @@
       "placeholder": "CLI Installation Path"
     },
     {
-      "name": "fetchFavicons",
-      "type": "checkbox",
+      "name": "serverUrl",
+      "type": "textfield",
       "required": false,
-      "default": false,
-      "title": "Privacy",
-      "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a Google-owned service to fetch icons for vault items. If left unchecked, built-in icons will be used."
+      "default": "",
+      "title": "Bitwarden Server URL",
+      "description": "Optional: URL to use for self-hosted servers.",
+      "placeholder": "https://bitwarden.com"
+    },
+    {
+      "name": "serverCertsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-signed Certificates Path",
+      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
+      "placeholder": "absolute/path/to/your/certs.pem"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "execa": "^5.1.1",
-    "treeify": "^1.1.0"
+    "@raycast/api": "^1.37.0",
+    "execa": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@types/treeify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
+    "build": "ray build -e dist",
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

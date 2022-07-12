@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Detail, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, useNavigation, Action } from "@raycast/api";
 
 export default function Help({
   onExit = () => {
@@ -11,7 +11,7 @@ export default function Help({
       navigationTitle="DisplayPlacer Help"
       actions={
         <ActionPanel>
-          <ActionPanelItem title="Back" onAction={pop} />
+          <Action title="Back" onAction={pop} />
         </ActionPanel>
       }
       markdown={`

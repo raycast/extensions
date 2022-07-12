@@ -1,19 +1,8 @@
 import _ from 'lodash';
-import {
-  List,
-  Detail,
-  Icon,
-  ActionPanel,
-  OpenInBrowserAction,
-  getLocalStorageItem,
-  setLocalStorageItem,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from '@raycast/api';
+import { List, Detail, Icon, ActionPanel, showToast, Action, LocalStorage, Toast } from '@raycast/api';
 import { useCallback, useEffect, useState, Fragment } from 'react';
 import dayjs from 'dayjs';
-import { ListName, executeJxa, thingsNotRunningError } from './shared';
+import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
 import AddNewTodo from './add-new-todo';
 
 enum TodoStatus {
@@ -55,7 +44,7 @@ const listNameToListIdMapping = {
 
 const getListTodos = (listName: ListName) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${listNameToListIdMapping[listName]}').toDos();
   return todos.map(todo => ({
     id: todo.id(),
@@ -84,13 +73,13 @@ const getListTodos = (listName: ListName) =>
 
 const setTodoProperty = (todoId: string, key: string, value: string) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   things.toDos.byId('${todoId}').${key} = '${value}';
 `);
 
 const deleteTodo = (todoId: string) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   things.delete(things.toDos.byId('${todoId}'));
 `);
 
@@ -138,14 +127,17 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Todo: ${name}`}>
-            <OpenInBrowserAction title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
+            <Action.OpenInBrowser title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
             {status !== 'completed' && (
-              <ActionPanel.Item
+              <Action
                 title="Mark as Completed"
                 icon={statusIcons.completed}
                 onAction={async () => {
                   await setTodoProperty(id, 'status', 'completed');
-                  await showToast(ToastStyle.Success, 'Marked as Completed');
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: 'Marked as Completed',
+                  });
                   refreshTodos();
                   // Force additional refresh once todo has been removed from list by Things
                   setTimeout(refreshTodos, 2000);
@@ -153,30 +145,36 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
               />
             )}
             {status !== 'canceled' && (
-              <ActionPanel.Item
+              <Action
                 title="Mark as Canceled"
                 icon={statusIcons.canceled}
                 onAction={async () => {
                   await setTodoProperty(id, 'status', 'canceled');
-                  await showToast(ToastStyle.Success, 'Marked as Canceled');
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: 'Marked as Canceled',
+                  });
                   refreshTodos();
                 }}
               />
             )}
-            <ActionPanel.Item
+            <Action
               title="Delete"
               icon={Icon.Trash}
               shortcut={{ modifiers: ['ctrl'], key: 'x' }}
               onAction={async () => {
                 await deleteTodo(id);
-                await showToast(ToastStyle.Success, 'Deleted');
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: 'Deleted',
+                });
                 refreshTodos();
               }}
             />
           </ActionPanel.Section>
           {project && (
             <ActionPanel.Section title={`Project: ${project.name}`}>
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open in Things"
                 icon={Icon.ArrowRight}
                 shortcut={{ modifiers: ['cmd'], key: 'o' }}
@@ -186,7 +184,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
           )}
           {area && (
             <ActionPanel.Section title={`Area: ${area.name}`}>
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open in Things"
                 icon={Icon.ArrowRight}
                 shortcut={{ modifiers: ['opt'], key: 'o' }}
@@ -195,19 +193,19 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
             </ActionPanel.Section>
           )}
           <ActionPanel.Section title={`List: ${listName}`}>
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open in Things"
               icon={Icon.ArrowRight}
               shortcut={{ modifiers: ['ctrl'], key: 'o' }}
               url={`things:///show?id=${listName.toLowerCase()}`}
             />
-            <PushAction
+            <Action.Push
               title="Add New To-Do"
               icon={Icon.Plus}
               shortcut={{ modifiers: ['cmd'], key: 'n' }}
               target={<AddNewTodo listName={listName} />}
             />
-            <ActionPanel.Item
+            <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ['cmd'], key: 'r' }}
@@ -238,7 +236,7 @@ const getListTodosCacheKey = (listName: ListName): string => `list:${listName}:t
 
 const getCachedListTodos = async (listName: ListName): Promise<Todo[] | undefined> => {
   const key = getListTodosCacheKey(listName);
-  const value = (await getLocalStorageItem(key)) as string;
+  const value = (await LocalStorage.getItem(key)) as string;
   if (value) {
     return JSON.parse(value);
   }
@@ -248,7 +246,7 @@ const setCachedListTodos = async (listName: ListName, todos: Todo[]): Promise<vo
   const key = getListTodosCacheKey(listName);
   const value = JSON.stringify(todos);
   if (value) {
-    return setLocalStorageItem(key, value);
+    return LocalStorage.setItem(key, value);
   }
 };
 
@@ -340,7 +338,7 @@ export default function ShowList(props: { listName: ListName }) {
               icon={Icon.Plus}
               actions={
                 <ActionPanel>
-                  <PushAction
+                  <Action.Push
                     icon={Icon.Plus}
                     title="Add New To-Do"
                     target={<AddNewTodo title={searchText} listName={listName} />}
@@ -354,7 +352,7 @@ export default function ShowList(props: { listName: ListName }) {
               icon={Icon.MagnifyingGlass}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction
+                  <Action.OpenInBrowser
                     title="Search in Things"
                     icon={Icon.MagnifyingGlass}
                     url={`things:///search?query=${searchText}`}

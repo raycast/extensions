@@ -1,40 +1,35 @@
-import { useEffect, useState } from "react";
-import { Icon, List, preferences, getPreferenceValues, ActionPanel, OpenAction, Application } from "@raycast/api";
+import { Icon, List, getPreferenceValues, ActionPanel, Application, Action } from "@raycast/api";
 
-interface OpenWithAppActionProps {
-  link: string;
-  application: Application;
-}
-
-function OpenWithApplicationAction({ link, application }: OpenWithAppActionProps) {
-  return <OpenAction target={link} title="Open Link" icon={Icon.Globe} application={application} />;
+interface AppPickerPreferences {
+  openWithRequired: Application;
+  openWithOptional?: Application;
 }
 
 export default function AppPicker() {
-  const preferenceValues = getPreferenceValues();
-  console.log(preferences, preferenceValues);
-  const { link, openWithOptional, openWithRequired } = preferenceValues;
-  const [query, setQuery] = useState("raycast");
-  const [linkToOpen, setLinkToOpen] = useState("");
-  useEffect(() => {
-    setLinkToOpen(link.toLowerCase().replace("{query}", query));
-  }, [query]);
+  const preferenceValues: AppPickerPreferences = getPreferenceValues();
+  const { openWithRequired, openWithOptional } = preferenceValues;
 
   return (
-    <List onSearchTextChange={setQuery}>
+    <List>
       <List.Item
-        title={`Open ${linkToOpen} in required browser: ${JSON.stringify(openWithRequired)}`}
+        title="Open https://raycast.com"
         actions={
           <ActionPanel>
-            <OpenWithApplicationAction link={linkToOpen} application={openWithRequired} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        title={`Open ${linkToOpen} in optional browser: ${JSON.stringify(openWithOptional)}`}
-        actions={
-          <ActionPanel>
-            <OpenWithApplicationAction link={linkToOpen} application={openWithOptional} />
+            <Action.Open
+              target="https://raycast.com"
+              title={`Open In "${openWithRequired.path}"`}
+              icon={Icon.Globe}
+              application={openWithRequired}
+            />
+
+            {openWithOptional && (
+              <Action.Open
+                target="https://raycast.com"
+                title={`Open In "${openWithOptional.path}"`}
+                icon={Icon.Globe}
+                application={openWithOptional}
+              />
+            )}
           </ActionPanel>
         }
       />

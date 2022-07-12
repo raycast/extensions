@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, Color, Icon, ImageLike } from "@raycast/api";
+import { ActionPanel, List, Color, Icon, Action, Image } from "@raycast/api";
 import { agents } from "caniuse-lite";
 import * as caniuse from "caniuse-api";
 import { getCanIUseLink } from "../utils";
@@ -19,35 +19,34 @@ export default function FeatureDetail({ feature }: FeatureDetailProps) {
 
         const agentSupport = supportTable[agentName];
 
-        let accessoryTitle = "Not supported";
-        let accessoryIcon: ImageLike = { source: Icon.XmarkCircle, tintColor: Color.Red };
+        let text = "Not supported";
+        let icon: Image.ImageLike = { source: Icon.XmarkCircle, tintColor: Color.Red };
 
         if ("u" in agentSupport) {
-          accessoryTitle = "Unknown support";
-          accessoryIcon = Icon.QuestionMark;
+          text = "Unknown support";
+          icon = Icon.QuestionMark;
         }
 
         if ("a" in agentSupport || "x" in agentSupport) {
-          accessoryTitle = "Partial support";
-          accessoryIcon = { source: Icon.Checkmark, tintColor: Color.Orange };
+          text = "Partial support";
+          icon = { source: Icon.Checkmark, tintColor: Color.Orange };
         }
 
         if ("y" in agentSupport) {
-          accessoryTitle = `Support since version ${agentSupport.y}`;
-          accessoryIcon = { source: Icon.Checkmark, tintColor: Color.Green };
+          text = `Support since version ${agentSupport.y}`;
+          icon = { source: Icon.Checkmark, tintColor: Color.Green };
         }
 
         return (
           <List.Item
             key={agentName}
             title={agentInfos.browser}
-            accessoryTitle={accessoryTitle}
-            accessoryIcon={accessoryIcon}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={getCanIUseLink(feature)} />
+                <Action.OpenInBrowser url={getCanIUseLink(feature)} />
               </ActionPanel>
             }
+            accessories={[{ text }, { icon }]}
           />
         );
       })}

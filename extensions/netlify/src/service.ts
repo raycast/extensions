@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
 interface SiteItemResponse {
   id: string;
@@ -56,7 +56,7 @@ interface DeployItemResponse {
   skipped?: boolean;
 }
 
-export type DeployStatus = "ok" | "skipped" | "error";
+export type DeployStatus = 'ok' | 'skipped' | 'error';
 
 export interface DeployItem {
   id: string;
@@ -150,7 +150,7 @@ class Service {
 
   constructor(apiToken: string) {
     this.client = axios.create({
-      baseURL: "https://api.netlify.com/api/v1",
+      baseURL: 'https://api.netlify.com/api/v1',
       headers: {
         Authorization: `Bearer ${apiToken}`,
       },
@@ -158,7 +158,7 @@ class Service {
   }
 
   async getSites(): Promise<SiteItem[]> {
-    const response = await this.client.get<SiteItemResponse[]>("/sites");
+    const response = await this.client.get<SiteItemResponse[]>('/sites');
     return response.data.map((item) => {
       return {
         id: item.id,
@@ -188,11 +188,13 @@ class Service {
   }
 
   async getDeploys(site: string): Promise<DeployItem[]> {
-    const response = await this.client.get<DeployItemResponse[]>(`/sites/${site}/deploys`);
+    const response = await this.client.get<DeployItemResponse[]>(
+      `/sites/${site}/deploys`,
+    );
     return response.data.map((item) => {
       return {
         id: item.id,
-        name: item.title || "No deploy message",
+        name: item.title || 'No deploy message',
         siteId: item.site_id,
         status: getDeployStatus(item.error_message, item.skipped),
       };
@@ -200,11 +202,13 @@ class Service {
   }
 
   async getDeploy(siteId: string, deployId: string): Promise<Deploy> {
-    const { data } = await this.client.get<DeployResponse>(`/sites/${siteId}/deploys/${deployId}`);
+    const { data } = await this.client.get<DeployResponse>(
+      `/sites/${siteId}/deploys/${deployId}`,
+    );
 
     return {
       id: deployId,
-      name: data.title || "No deploy message",
+      name: data.title || 'No deploy message',
       site: {
         id: data.site_id,
         name: data.name,
@@ -220,7 +224,7 @@ class Service {
   }
 
   async getDomains(): Promise<Domain[]> {
-    const response = await this.client.get<DnsResponse[]>("/dns_zones");
+    const response = await this.client.get<DnsResponse[]>('/dns_zones');
 
     return response.data.map((item) => {
       return {
@@ -245,7 +249,9 @@ class Service {
   }
 
   async getMembers(team: string): Promise<Member[]> {
-    const response = await this.client.get<MemberResponse[]>(`/${team}/members`);
+    const response = await this.client.get<MemberResponse[]>(
+      `/${team}/members`,
+    );
 
     return response.data.map((item) => {
       return {
@@ -258,7 +264,7 @@ class Service {
 }
 
 function getDeployStatus(error?: string, skipped?: boolean): DeployStatus {
-  return !error ? "ok" : skipped ? "skipped" : "error";
+  return !error ? 'ok' : skipped ? 'skipped' : 'error';
 }
 
 export default Service;

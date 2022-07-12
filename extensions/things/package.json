@@ -51,8 +51,28 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "thingsAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Things version switcher",
+      "description": "Switch between Things or Things Beta",
+      "default": "com.culturedcode.ThingsMac",
+      "data": [
+        {
+          "value": "com.culturedcode.ThingsMac",
+          "title": "Things"
+        },
+        {
+          "value": "com.culturedcode.ThingsMac.beta",
+          "title": "Things Beta"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "dayjs": "^1.10.7",
     "lodash": "^4.17.21",
     "osascript-tag": "^0.1.2"
