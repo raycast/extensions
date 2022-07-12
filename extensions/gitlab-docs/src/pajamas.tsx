@@ -31,7 +31,7 @@ export default function Command() {
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
-      icon="../assets/pajamas-icon.png"
+      icon="pajamas-icon.png"
       title={searchResult.name}
       actions={
         <ActionPanel>
