@@ -1,7 +1,7 @@
 type Highlight = {
   text: string;
   note: string;
-}
+};
 
 export type Bookmark = {
   _id: number;
