@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
+import LendingRates from "./lending-rates";
 import Bitfinex from "./api";
 import useSWR, { mutate } from "swr";
 ("swr");
@@ -60,6 +61,7 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
               }}
             />
           )}
+          <Action.Push icon={Icon.Plus} title="Create Offer" target={<CreateOfferForm />} />
         </ActionPanel>
       }
     />
@@ -98,11 +100,49 @@ function EditOfferForm(props: { offer: any }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="symbol" title="Symbol" defaultValue={props.offer.symbol} />
-
       <Form.TextField id="amount" title="Amount" defaultValue={Number(props.offer.amount).toFixed(5)} />
       <Form.TextField id="rate" title="Rate (in APR)" defaultValue={defaultRate} />
       <Form.TextField id="period" title="Period (in days)" defaultValue={String(props.offer.period)} />
+    </Form>
+  );
+}
+
+function CreateOfferForm() {
+  const rest = Bitfinex.rest();
+  const { pop } = useNavigation();
+
+  const onSubmit = async (values: any) => {
+    try {
+      const newOffer = new FundingOffer({
+        type: "LIMIT",
+        symbol: values.symbol,
+        rate: parseFloat(values.rate) / 100 / 365,
+        amount: parseFloat(values.amount),
+        period: parseInt(values.period, 10),
+      });
+      await rest.submitFundingOffer(newOffer);
+    } catch (e) {
+      console.error(e);
+    }
+
+    mutate("/api/funding-offers");
+    pop();
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} />
+          <Action.Push title="Show Lending Rates" target={<LendingRates />} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="symbol" title="Symbol" defaultValue="fUSD" />
+
+      <Form.TextField id="amount" title="Amount" defaultValue="100" />
+      <Form.TextField id="rate" title="Rate (in APR)" defaultValue="18" />
+      <Form.TextField id="period" title="Period (in days)" defaultValue="7" />
     </Form>
   );
 }
