@@ -3,11 +3,29 @@ import { List } from "@raycast/api";
 import useSWR from "swr";
 import fetch from "node-fetch";
 
-const candlesTimeFrame = {
-  "1h": "https://api-pub.bitfinex.com/v2/candles/trade:1h:fUSD:a30:p2:p30/hist",
-  "1d": "https://api-pub.bitfinex.com/v2/candles/trade:1D:fUSD:a30:p2:p30/hist",
-  "1w": "https://api-pub.bitfinex.com/v2/candles/trade:1W:fUSD:a30:p2:p30/hist",
-};
+// ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
+const tfOptions = [
+  ["1m", "1 min"],
+  ["5m", "5 min"],
+  ["15m", "15 min"],
+  ["30m", "30 min"],
+  ["1h", "1 hour"],
+  ["3h", "3 hours"],
+  ["6h", "6 hours"],
+  ["12h", "12 hours"],
+  ["1D", "1 day"],
+  ["1W", "1 week"],
+  ["14D", "2 weeks"],
+  ["1M", "1 month"],
+];
+
+const candlesTimeFrame: Record<string, string> = tfOptions.reduce(
+  (acc, tf) => ({
+    ...acc,
+    [tf[0]]: `https://api-pub.bitfinex.com/v2/candles/trade:${tf[0]}:fUSD:a30:p2:p30/hist`,
+  }),
+  {}
+);
 
 type LendingRatesDropdownProps = {
   onChange: (value: string) => void;
@@ -16,9 +34,9 @@ type LendingRatesDropdownProps = {
 function LendingRatesDropdown(props: LendingRatesDropdownProps) {
   return (
     <List.Dropdown tooltip="Set rates time frame" storeValue={true} onChange={props.onChange}>
-      <List.Dropdown.Item title="by hour" value="1h" />
-      <List.Dropdown.Item title="by day" value="1d" />
-      <List.Dropdown.Item title="by week" value="1w" />
+      {tfOptions.map(([value, label]) => (
+        <List.Dropdown.Item key={value} title={label} value={value} />
+      ))}
     </List.Dropdown>
   );
 }
@@ -51,10 +69,10 @@ export default function LendingRates() {
                 text: averageRate.toFixed(2) + "%" + "(avg)",
               },
               {
-                text: highRate.toFixed(2) + "%" + "(h)",
+                text: highRate.toFixed(2) + "%" + "(hi)",
               },
               {
-                text: lowRate.toFixed(2) + "%" + "(l)",
+                text: lowRate.toFixed(2) + "%" + "(lo)",
               },
             ]}
           />
