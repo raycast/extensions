@@ -82,13 +82,15 @@ export default function SearchDocumentation() {
       {searchResults?.map(([hitType, hitTypeResults]) => (
         <List.Section title={hitType} key={hitType}>
           {hitTypeResults
-            ?.filter((hit: { hierarchy: { lvl2: null } }) => hit.hierarchy.lvl2 != null)
+            ?.filter((hit: { hierarchy: { lvl1: null } }) => hit.hierarchy.lvl1 != null)
             .map((hit: result) => (
               <List.Item
                 id={hit.objectID}
                 key={hit.objectID}
                 icon="command-icon2.png"
                 title={(
+                  (hit.hierarchy.lvl1 != null ? hit.hierarchy.lvl1 : "") +
+                  " " +
                   (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
                   " " +
                   (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "") +
