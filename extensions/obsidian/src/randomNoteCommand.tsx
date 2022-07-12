@@ -3,7 +3,6 @@ import { List } from "@raycast/api";
 import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
-import { NoteListPinned } from "./components/NoteListPinned";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 import { RandomNote } from "./components/RandomNote";
@@ -18,7 +17,7 @@ export default function Command() {
   } else if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} target={(vault: Vault) => <RandomNote vault={vault} />} />;
   } else if (vaults.length == 1) {
-    return <NoteListPinned vault={vaults[0]} />;
+    return <RandomNote vault={vaults[0]} />;
   } else {
     noVaultPathsToast();
     return <List />;
