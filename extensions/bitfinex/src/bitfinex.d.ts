@@ -49,6 +49,14 @@ declare module "bitfinex-api-node" {
     closeFunding(params = {}, cb?: CallbackFn): Promise<unknown>;
 
     ledgers(filters?: LedgerFilters, start = null, end = Date.now(), limit = 25, cb?: CallbackFn): Promise<unknown>;
+
+    calcAvailableBalance(
+      symbol = "tBTCUSD",
+      dir: number,
+      rate: number,
+      type: string,
+      cb?: CallbackFn
+    ): Promise<unknown>;
   }
 }
 

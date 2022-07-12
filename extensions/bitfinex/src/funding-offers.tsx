@@ -96,7 +96,7 @@ function EditOfferForm(props: { offer: any }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update Offer" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Update Offer" onSubmit={onSubmit} icon={Icon.Pencil} />
         </ActionPanel>
       }
     >
@@ -133,15 +133,20 @@ function CreateOfferForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} />
-          <Action.Push title="Show Lending Rates" target={<LendingRates />} />
+          <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} icon={Icon.Plus} />
+          <Action.Push title="Show Lending Rates" target={<LendingRates />} icon={Icon.LevelMeter} />
         </ActionPanel>
       }
     >
       <Form.TextField id="symbol" title="Symbol" defaultValue="fUSD" />
 
       <Form.TextField id="amount" title="Amount" defaultValue="100" />
-      <Form.TextField id="rate" title="Rate (in APR)" defaultValue="18" />
+      <Form.TextField
+        id="rate"
+        title="Rate (in APR)"
+        defaultValue="18"
+        info="You can lookup lending rates for reference"
+      />
       <Form.TextField id="period" title="Period (in days)" defaultValue="7" />
     </Form>
   );
@@ -157,8 +162,19 @@ export default function FundingOffers() {
     () => rest.fundingOffers() as Promise<any[]>
   );
 
+  const { data: balanceInfo, isValidating: isBalanceLoading } = useSWR(
+    "/api/balance",
+    () => rest.calcAvailableBalance("fUSD", 0, 0, "FUNDING") as Promise<any>
+  );
+
   return (
-    <List isLoading={isValidating || activeOfferLoading}>
+    <List isLoading={isValidating || activeOfferLoading || isBalanceLoading}>
+      {balanceInfo && (
+        <List.Section title="Available Funding">
+          <List.Item title={`${Math.abs(balanceInfo[0])} USD`} />
+        </List.Section>
+      )}
+
       <List.Section title="Pending Offers">
         {activeOffers?.map((offer) => {
           return <OfferListItem key={offer.id} offer={offer} canUpdate canCancel />;
