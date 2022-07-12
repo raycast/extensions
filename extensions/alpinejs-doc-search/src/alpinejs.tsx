@@ -57,7 +57,7 @@ export default function SearchDocumentation() {
         return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
       })
       .catch((err) => {
-        showToast(Toast.Style.Failure, "Error searching alpinejs docs", err.message);
+        showToast(Toast.Style.Failure, "Error searching Alpine.js documentation", err.message);
         return [];
       });
   };
@@ -100,7 +100,7 @@ export default function SearchDocumentation() {
                   (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")
                 ).replace("&amp;", "&")}
                 actions={
-                  <ActionPanel title={hit.url}>
+                  <ActionPanel title="Actions">
                     <Action.OpenInBrowser url={hit.url} />
                     <Action.CopyToClipboard content={hit.url} title="Copy URL" />
                   </ActionPanel>
