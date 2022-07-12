@@ -9,21 +9,21 @@
   "commands": [
     {
       "name": "index",
-      "title": "GitLab Handbook",
+      "title": "Search Handbook",
       "description": "Search GitLab Handbook.",
       "mode": "view",
       "icon": "handbook-icon.png"
     },
     {
       "name": "docs",
-      "title": "GitLab Docs",
+      "title": "Search Documentation",
       "description": "Search GitLab Docs.",
       "mode": "view",
       "icon": "docs-icon.png"
     },
     {
       "name": "pajamas",
-      "title": "Pajamas Design System",
+      "title": "Search Design System",
       "description": "Search Pajamas components.",
       "mode": "view",
       "icon": "pajamas-icon.png"

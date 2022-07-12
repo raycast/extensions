@@ -47,12 +47,12 @@ Raycast extension to search GitLab Docs, Handbook & Pajamas Design System.
 
 ### Search GitLab Handbook
 
-![handbook](./screenshots/handbook.png)
+![handbook](./metadata/gitlab-docs-1.png)
 
 ### Search GitLab Docs
 
-![docs](./screenshots/docs.png)
+![docs](./metadata/gitlab-docs-2.png)
 
 ### Search in Pajamas Design System
 
-![pajamas](./screenshots/pajamas.png)
+![pajamas](./metadata/gitlab-docs-3.png)
