@@ -9,10 +9,10 @@ import { filterNotes, getListOfTags } from "../utils/utils";
 import { MAX_RENDERED_NOTES, NoteAction } from "../utils/constants";
 import { NoteActions, OpenNoteActions } from "../utils/actions";
 
-export function NoteListObsidian(props: { vault: Vault }) {
+export function NoteListObsidian(props: { vault: Vault; showTitle: boolean }) {
   const { searchContent } = getPreferenceValues<SearchNotePreferences>();
 
-  const vault = props.vault;
+  const { showTitle, vault } = props;
   const [notes, setNotes] = useState<Note[]>([]);
   const [allNotes, setAllNotes] = useState<Note[]>([]);
 
@@ -47,7 +47,7 @@ export function NoteListObsidian(props: { vault: Vault }) {
 
   return (
     <NoteList
-      title={"Search Note in " + vault.name}
+      title={showTitle ? "Search Note in " + vault.name : ""}
       notes={list.slice(0, MAX_RENDERED_NOTES)}
       allNotes={allNotes}
       setNotes={setNotes}

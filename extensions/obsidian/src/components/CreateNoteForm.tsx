@@ -3,8 +3,8 @@ import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard
 import NoteCreator from "../utils/NoteCreator";
 import { NoteFormPreferences, FormValue, Vault } from "../utils/interfaces";
 
-export function CreateNoteForm(props: { vault: Vault }) {
-  const { vault } = props;
+export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
+  const { vault, showTitle } = props;
   const { pop } = useNavigation();
 
   const pref = getPreferenceValues<NoteFormPreferences>();
@@ -39,17 +39,20 @@ export function CreateNoteForm(props: { vault: Vault }) {
   }
 
   async function createNewNote(noteProps: FormValue, path: string | undefined = undefined) {
+    console.log("Creating note...");
+    console.log(noteProps.path);
     if (path !== undefined) {
       noteProps.path = path;
     }
     const nc = new NoteCreator(noteProps, vault, pref);
+    console.log("Creating note... creator");
     nc.createNote();
     pop();
   }
 
   return (
     <Form
-      navigationTitle={"Create Note for " + vault.name}
+      navigationTitle={showTitle ? "Create Note for " + vault.name : ""}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" onSubmit={createNewNote} />

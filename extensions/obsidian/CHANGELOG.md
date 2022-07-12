@@ -8,7 +8,6 @@
 - `Append to Note` and `Append Selected Text to Note` actions now support all templates
 - Add template preference for both `Append to Note` and `Append Selected Text to Note` actions
 - Use `{content}` for `Append Selected Text to Note` action
-- Add templates `{selected}`, `{selectedText}` for selected Text
 - Add templates `{\n}`, `{newline}`, `{nl}` for new line
 - Add shorter template `{clip}` for clipboard
 - Add `Default Content` and `Fill Form with Default Values` settings for `Create Note` command

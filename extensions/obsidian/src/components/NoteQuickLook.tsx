@@ -8,11 +8,12 @@ import { NoteAction } from "../utils/constants";
 import { filterContent, getNoteFileContent } from "../utils/utils";
 
 export function NoteQuickLook(props: {
+  showTitle: boolean;
   note: Note | undefined;
   vault: Vault;
   actionCallback?: (action: NoteAction) => void;
 }) {
-  const { note, vault, actionCallback } = props;
+  const { note, showTitle, vault, actionCallback } = props;
   const { pop } = useNavigation();
 
   let noteContent = note?.content;
@@ -53,7 +54,7 @@ export function NoteQuickLook(props: {
   return (
     <Detail
       isLoading={note === undefined}
-      navigationTitle={pinned ? "⭐ " + note?.title : note?.title}
+      navigationTitle={showTitle ? (pinned ? "⭐ " + note?.title : note?.title) : ""}
       markdown={content}
       actions={
         note ? (

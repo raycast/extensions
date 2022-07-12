@@ -79,7 +79,6 @@ Both the note name and note content support these templates:
 - `{millisecond}`
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
-- `{selectedText}`, `{selected}`
 - `{\n}`, `{nl}`, `{newline}`
 
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">

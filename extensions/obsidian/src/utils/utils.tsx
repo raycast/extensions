@@ -271,13 +271,6 @@ export async function applyTemplates(content: string) {
   content = content.replaceAll("{newline}", "\n");
   content = content.replaceAll("{nl}", "\n");
 
-  try {
-    const selectedText = await getSelectedText();
-    content = content.replaceAll("{selected}", selectedText);
-    content = content.replaceAll("{selectedText}", selectedText);
-  } catch (e) {
-    console.log(e);
-  }
   return content;
 }
 

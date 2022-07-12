@@ -150,7 +150,7 @@ export function QuickLookAction(props: { note: Note; vault: Vault; actionCallbac
   return (
     <Action.Push
       title="Quick Look"
-      target={<NoteQuickLook note={note} vault={vault} actionCallback={actionCallback} />}
+      target={<NoteQuickLook note={note} vault={vault} showTitle={true} actionCallback={actionCallback} />}
       icon={Icon.Eye}
     />
   );
