@@ -1,3 +1,3 @@
 # GitLab Docs Changelog
 
-## [Initial Version] - 2022-06-28
+## [Initial Version] - {PR_MERGE_DATE}
