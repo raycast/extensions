@@ -2,7 +2,7 @@
 
 ## [Update] - 2022-07-12
 
-- Added a new `daily notes` command.
+- Added a new `Daily Notes` command.
 
 ## [Update] - 2022-07-09
 
