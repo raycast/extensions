@@ -23,7 +23,7 @@ export default function Command() {
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
-      icon="../assets/docs-icon.png"
+      icon="docs-icon.png"
       title={searchResult.name}
       subtitle={searchResult.description}
       accessoryTitle={searchResult.category}
