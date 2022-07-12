@@ -23,10 +23,20 @@ ${_bunchesContent}
 
 export const bunchInstalled = () => {
   try {
-    return fs.existsSync("/Applications/Bunch.app");
+    return fs.existsSync("/Applications/Bunch.app") || fs.existsSync("/Applications/Bunch Beta.app");
   } catch (e) {
     console.error(String(e));
     return false;
+  }
+};
+
+export const bunchAppName = () => {
+  try {
+    if (fs.existsSync("/Applications/Bunch.app")) return "Bunch";
+    if (fs.existsSync("/Applications/Bunch Beta.app")) return "Bunch Beta";
+  } catch (e) {
+    console.error(String(e));
+    return "Bunch";
   }
 };
 
@@ -49,10 +59,6 @@ export function buildFileName(path: string, name: string, extension: string) {
 }
 
 export const createBunchesByContent = async (title: string, tag: string, content: string, bunchesPreview: string) => {
-  if (isEmpty(title)) {
-    await showToast(Style.Failure, "Title is empty");
-    return false;
-  }
   await showToast(Style.Success, "Creating bunches...");
   const bunchFolder = await scriptToGetBunchFolder();
   const actualBunchFolder = fs.existsSync(bunchFolder) ? bunchFolder : homedir() + "/Downloads";

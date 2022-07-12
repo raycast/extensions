@@ -1,6 +1,5 @@
 import { Action } from "@raycast/api";
 import { TimeInfo } from "../types/types";
-import React from "react";
 
 export function ActionTimeInfo(props: { timeInfo: TimeInfo }) {
   const { timeInfo } = props;

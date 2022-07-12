@@ -1,5 +1,26 @@
 # `Easydict` Changelog
 
+## [1.2.0] - 2022-07-04
+
+### ✨ New
+
+- Added Apple 🍎 system translation.
+- Added Apple 🍎 system language detection.
+- Added view recent version changelog feature.
+
+### 💎 Improvements
+
+- Used the logo of Youdao, Baidu, Tencent and other translation services to increase icon recognition.
+- Optimized the response speed of querying selected text.
+- Optimized the response speed and accuracy of automatic language detection.
+
+### ✅ Recent Updates
+
+- Added Tencent text translation.
+- Added Tencent language detection.
+- Supported automatically play the voice of word after querying, need to enable in settings.
+- Supported Youdao TTS.
+
 ## [1.1.0] - 2022-06-20
 
 ### ✨ New

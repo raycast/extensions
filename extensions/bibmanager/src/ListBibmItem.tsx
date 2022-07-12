@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Action, ActionPanel, environment, Icon, List, Toast } from "@raycast/api";
 import { spawn } from "child_process";
+import { createInterface } from "readline";
 import { join } from "path";
 import { pythonbin } from "./index";
 
@@ -23,20 +25,21 @@ export function ListBibmItem(props: { item: Item; index: number }) {
       title={props.item.uid ?? "No title"}
       actions={<Actions item={props.item} />}
       keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
-      detail={<List.Item.Detail markdown={getItemDetail(props.item)} />}
+      detail={getItemDetail(props.item)}
     />
   );
 }
 
 function Actions(props: { item: Item }) {
+  const [PDFDownloaded, setPDFDownloaded] = useState<string>(props.item.pdf);
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {props.item.pdf && (
-          <Action.OpenWith path={props.item.pdf} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
+        {PDFDownloaded && (
+          <Action.OpenWith path={PDFDownloaded} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
         )}
         {props.item.link && <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" />}
-        {!props.item.pdf && (
+        {!PDFDownloaded && (
           <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
         {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
@@ -45,20 +48,79 @@ function Actions(props: { item: Item }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
+
+  function DownloadPDF(key: string) {
+    const toast = new Toast({
+      style: Toast.Style.Animated,
+      title: "Downloading PDF",
+    });
+    toast.show();
+
+    const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
+    const lineReader = createInterface({ input: python.stdout });
+
+    lineReader.on("line", (line) => {
+      if (line.includes("PDF: ")) {
+        const PDFstring = line.substring(5);
+        toast.style = Toast.Style.Success;
+        toast.title = "Download succeeded";
+        setPDFDownloaded(PDFstring);
+        return;
+      } else if (line.includes("[]yes [n]o.")) {
+        toast.title = "Bibmanager needs input";
+        toast.style = Toast.Style.Failure;
+        toast.message = "Try manually with bibmanager CLI";
+        return;
+      } else if (line.includes("out of time")) {
+        toast.title = "Download timed out";
+        toast.style = Toast.Style.Failure;
+        toast.message = "Try manually with bibmanager CLI";
+        return;
+      }
+    });
+    python.on("error", () => {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Download failed";
+      toast.message = "Try manually with bibmanager CLI";
+      return;
+    });
+    python.on("close", (code) => {
+      if (code != 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Download failed";
+        toast.message = "Try manually with bibmanager CLI";
+      }
+      return;
+    });
+  }
 }
 
-function getItemDetail(item: Item): string {
+function getItemDetail(item: Item) {
+  return (
+    <List.Item.Detail
+      markdown={getMarkdown(item)}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Tags" text={`${item.tags.length > 0 ? item.tags.join(", ") : ""}`} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Publication Date"
+            text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
+          />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+function getMarkdown(item: Item) {
   return `## ${item.title}
-
-${item.authors_string ? "**Authors:** " + item.authors_string : ""}
-
-${item.year && item.month ? "**Publication Date:** " + getMonth(item.month) + " " + item.year.toString() : ""}
-
-${item.tags.length > 0 ? "**Tags:** " + item.tags.join(", ") : ""}
-
-${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-
-`;
+  
+  **Authors**: ${item.authors_string ? item.authors_string : ""}
+  
+  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
+  
+  `;
 }
 
 function getMonth(key: number) {
@@ -79,34 +141,3 @@ const monthMap = new Map<number, string>([
   [11, "November"],
   [12, "December"],
 ]);
-
-export function DownloadPDF(key: string) {
-  const toastload = new Toast({
-    style: Toast.Style.Animated,
-    title: "Downloading PDF",
-  });
-  const toastsuccess = new Toast({
-    style: Toast.Style.Success,
-    title: "Download succeeded",
-    message: "Rerun to open",
-  });
-  const toastfail = new Toast({
-    style: Toast.Style.Failure,
-    title: "Download error",
-    message: "Try manually with bibmanager CLI",
-  });
-
-  const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_download.py"), key]);
-  toastload.show();
-  python.on("close", (code) => {
-    if (code === 0) {
-      toastsuccess.show();
-    } else {
-      toastfail.show();
-    }
-  });
-  python.on("error", () => {
-    toastfail.show();
-    return;
-  });
-}

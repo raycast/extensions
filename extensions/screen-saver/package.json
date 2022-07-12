@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screen-saver",
+  "title": "Screen Saver",
+  "description": "Activate screen saver of your Mac.",
+  "icon": "screen-saver.png",
+  "author": "koinzhang",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-screen-saver",
+      "title": "Start Screen Saver",
+      "subtitle": "Screen Saver",
+      "description": "Start screen saver of your Mac.",
+      "mode": "no-view"
+    },
+    {
+      "name": "random-screen-saver",
+      "title": "Random Screen Saver",
+      "subtitle": "Screen Saver",
+      "description": "Start random screen saver of your Mac.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

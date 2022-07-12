@@ -10,6 +10,7 @@ export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
 export const LAYOUT = "layoutType";
 export const GRID_ITEM_SIZE = "gridItemSize";
+export const GRID_TRENDING_ITEM_SIZE = "gridTrendingItemSize";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
@@ -120,4 +121,8 @@ export const GRID_SIZE: { [key: string]: Grid.ItemSize } = {
 
 export function getGridItemSize() {
   return GRID_SIZE[getPrefs()[GRID_ITEM_SIZE]];
+}
+
+export function getGridTrendingItemSize() {
+  return GRID_SIZE[getPrefs()[GRID_TRENDING_ITEM_SIZE]];
 }

@@ -1,5 +1,5 @@
 import { Image, List } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { TimeInfo, Timezone } from "../types/types";
 import { TimeInfoDetail } from "./time-info-detail";
 import {

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { DirectoryWithFileInfo, FileInfo } from "../types/types";
+import { DirectoryWithFileInfo, FileInfo, FolderPageItem } from "../types/types";
 import {
   checkDirectoryValid,
   getDirectoryFiles,
   getFileShowNumber,
   getLocalStorage,
+  isDirectory,
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
@@ -13,6 +14,7 @@ import { copyFileByPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
 import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
 import { Preferences } from "../types/preferences";
+import fse from "fs-extra";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -137,6 +139,29 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
     void fetchData();
   }, [fetchData]);
 };
+
+export function getFolderByPath(folderPath: string) {
+  const [folders, setFolders] = useState<FolderPageItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const fetchData = useCallback(async () => {
+    const files = fse.readdirSync(folderPath);
+    const _folders: FolderPageItem[] = [];
+    files.forEach((value) => {
+      if (!value.startsWith(".")) {
+        _folders.push({ name: value, isFolder: isDirectory(folderPath + "/" + value) });
+      }
+    });
+    setFolders(_folders);
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { folders: folders, loading: loading };
+}
 
 export const alertDialog = async (
   icon: Icon,

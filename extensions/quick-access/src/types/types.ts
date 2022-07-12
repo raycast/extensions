@@ -15,6 +15,11 @@ export interface FileInfo {
   modifyTime: number;
 }
 
+export interface FolderPageItem {
+  name: string;
+  isFolder: boolean;
+}
+
 export interface DirectoryWithFileInfo {
   directory: DirectoryInfo;
   files: FileInfo[];
