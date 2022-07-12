@@ -10,7 +10,7 @@ export const Shortcut = ({ dayRef, spaceID }: { dayRef: DayReference; spaceID: s
     actions={
       <ActionPanel>
         <Action.Open
-          title={`Open ${dayRef} notes`}
+          title={`Open ${dayRef.charAt(0).toUpperCase() + dayRef.slice(1)} Notes`}
           target={`craftdocs://openByQuery?query=${dayRef}&spaceId=${spaceID}`}
         />
       </ActionPanel>
