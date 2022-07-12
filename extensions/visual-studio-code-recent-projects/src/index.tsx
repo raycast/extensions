@@ -1,55 +1,63 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  environment,
-  Icon,
-  List,
-  OpenAction,
-  OpenInBrowserAction,
-  OpenWithAction,
-  ShowInFinderAction,
-  TrashAction,
-} from "@raycast/api";
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
+import { ActionPanel, Icon, List, showToast, Action, Toast } from "@raycast/api";
 import { basename, dirname } from "path";
-import { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import tildify from "tildify";
-import { fileURLToPath, URL } from "url";
+import { fileURLToPath } from "url";
+import { build, getRecentEntries } from "./db";
 import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
 
-const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
 
-function getRecentEntries(): EntryLike[] {
-  const json = JSON.parse(readFileSync(STORAGE).toString());
-  return json.openedPathsList.entries;
-}
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 export default function Command() {
-  const folders = new Array<ReactNode>();
-  const files = new Array<ReactNode>();
-  const workspaces = new Array<ReactNode>();
-  const remoteEntries = new Array<ReactNode>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
+  const [entries, setEntries] = useState<EntryLike[]>([]);
 
-  const recentEntries = getRecentEntries();
-  recentEntries.forEach((entry) => {
-    if (isRemoteEntry(entry)) {
-      remoteEntries.push(<RemoteListItem key={entry.folderUri} entry={entry} />);
-    } else if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
-      folders.push(<LocalListItem key={entry.folderUri} uri={entry.folderUri} />);
-    } else if (isFileEntry(entry) && existsSync(new URL(entry.fileUri))) {
-      files.push(<LocalListItem key={entry.fileUri} uri={entry.fileUri} />);
-    } else if (isWorkspaceEntry(entry) && existsSync(new URL(entry.workspace.configPath))) {
-      workspaces.push(<LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />);
-    }
-  });
+  useEffect(() => {
+    getRecentEntries()
+      .then((entries) => setEntries(entries))
+      .catch((e) => setError(e.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to load recent projects",
+      message: error,
+    });
+  }
 
   return (
-    <List searchBarPlaceholder="Search recent projects...">
-      <List.Section title="Workspaces">{workspaces}</List.Section>
-      <List.Section title="Folders">{folders}</List.Section>
-      <List.Section title="Remotes Folders">{remoteEntries}</List.Section>
-      <List.Section title="Files">{files}</List.Section>
+    <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
+      <List.Section title="Workspaces">
+        {entries.filter(isWorkspaceEntry).map((entry) => (
+          <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
+        ))}
+      </List.Section>
+
+      <List.Section title="Folders">
+        {entries.filter(isFolderEntry).map((entry) => (
+          <LocalListItem key={entry.folderUri} uri={entry.folderUri} />
+        ))}
+      </List.Section>
+
+      <List.Section title="Remotes Folders">
+        {entries.filter(isRemoteEntry).map((entry) => (
+          <RemoteListItem key={entry.folderUri} entry={entry} />
+        ))}
+      </List.Section>
+
+      <List.Section title="Files">
+        {entries.filter(isFileEntry).map((entry) => (
+          <LocalListItem key={entry.fileUri} uri={entry.fileUri} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -66,9 +74,8 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Code" icon="action-icon.png" url={uri} />
+            <Action.OpenInBrowser title={`Open in ${build}`} icon="action-icon.png" url={uri} />
           </ActionPanel.Section>
-          <DevelopmentActionSection />
         </ActionPanel>
       }
     />
@@ -76,7 +83,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
 }
 
 function LocalListItem(props: { uri: string }) {
-  const name = decodeURI(basename(props.uri));
+  const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
@@ -90,39 +97,23 @@ function LocalListItem(props: { uri: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction
-              title="Open in Code"
-              icon="action-icon.png"
-              target={props.uri}
-              application="Visual Studio Code"
-            />
-            <ShowInFinderAction path={path} />
-            <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.Open title={`Open in ${build}`} icon="action-icon.png" target={props.uri} application={appKey} />
+            <Action.ShowInFinder path={path} />
+            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard
               title="Copy Path"
               content={prettyPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <TrashAction paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+            <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
           </ActionPanel.Section>
-          <DevelopmentActionSection />
         </ActionPanel>
       }
     />
   );
-}
-
-function DevelopmentActionSection() {
-  return environment.isDevelopment ? (
-    <ActionPanel.Section title="Development">
-      <OpenAction title="Open Storage File in Code" icon="icon.png" target={STORAGE} application="Visual Studio Code" />
-      <ShowInFinderAction title="Show Storage File in Finder" path={STORAGE} />
-      <CopyToClipboardAction title="Copy Storage File Path" content={STORAGE} />
-    </ActionPanel.Section>
-  ) : null;
 }

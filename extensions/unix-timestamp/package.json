@@ -5,10 +5,12 @@
   "description": "Convert between unix timestamp and human readable form date",
   "icon": "command-icon.png",
   "author": "destiner",
+  "categories": ["Data", "Developer Tools"],
   "license": "MIT",
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   },
   "commands": [
     {
@@ -60,7 +62,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2"
+    "@raycast/api": "^1.28.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

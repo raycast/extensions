@@ -1,4 +1,16 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  getPreferenceValues,
+  getSelectedText,
+  Action,
+  Icon,
+  Clipboard,
+  showHUD,
+  closeMainWindow,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
 import { useEffect, useState } from "react";
@@ -32,8 +44,36 @@ async function runShellScript(command: string) {
   return stdout;
 }
 
-async function readClipboard() {
-  return await runShellScript("pbpaste");
+class NoTextError extends Error {
+  constructor() {
+    super("No text");
+
+    Object.setPrototypeOf(this, NoTextError.prototype);
+  }
+}
+
+async function getSelection() {
+  try {
+    return await getSelectedText();
+  } catch (error) {
+    return "";
+  }
+}
+
+async function readContent(preferredSource: string) {
+  if (preferredSource === "clipboard") {
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    throw new NoTextError();
+  } else {
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    throw new NoTextError();
+  }
 }
 
 export default function changeChase() {
@@ -61,11 +101,23 @@ export default function changeChase() {
   ];
 
   const [clipboard, setClipboard] = useState<string>("");
-  useEffect(() => {
-    readClipboard().then((c) => setClipboard(c));
-  });
 
   const preferences = getPreferenceValues();
+  const preferredSource = preferences["source"];
+
+  useEffect(() => {
+    readContent(preferredSource)
+      .then((c) => setClipboard(c))
+      .catch((error) => {
+        if (error instanceof NoTextError) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Nothing to convert",
+            message: "Please ensure that text is either selected or copied",
+          });
+        }
+      });
+  }, [preferredSource]);
 
   return (
     <List>
@@ -80,8 +132,8 @@ export default function changeChase() {
             subtitle={modified}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
-                <PasteAction title="Paste in Frontmost App" content={modified} />
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
+                <Action title="Paste in Active App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
               </ActionPanel>
             }
           />
@@ -89,4 +141,16 @@ export default function changeChase() {
       })}
     </List>
   );
+}
+
+export async function copyToClipboard(content: string) {
+  await showHUD("Copied to Clipboard");
+  await Clipboard.copy(content);
+  await closeMainWindow();
+}
+
+export async function paste(content: string) {
+  await showHUD("Pasted in Active App");
+  await Clipboard.paste(content);
+  await closeMainWindow();
 }

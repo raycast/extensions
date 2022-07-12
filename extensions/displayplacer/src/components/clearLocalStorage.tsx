@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, clearLocalStorage, Detail, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, useNavigation, Action, LocalStorage } from "@raycast/api";
 
 export default function ClearLocalStorage({
   onExit = () => {
@@ -11,10 +11,10 @@ export default function ClearLocalStorage({
       navigationTitle="Clear All Display Presets"
       actions={
         <ActionPanel>
-          <ActionPanelItem
+          <Action
             title="Confirm"
             onAction={() =>
-              clearLocalStorage().then(() => {
+              LocalStorage.clear().then(() => {
                 pop();
                 onExit();
               })

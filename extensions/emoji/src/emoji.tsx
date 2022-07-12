@@ -1,81 +1,57 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  PasteAction,
-  List,
-  getLocalStorageItem,
-  setLocalStorageItem,
-  preferences,
-} from "@raycast/api";
-
-import { useState, useEffect, useCallback } from "react";
-import type { ReactElement, SetStateAction, Dispatch } from "react";
+import { ActionPanel, List, closeMainWindow, popToRoot, getPreferenceValues, Action } from "@raycast/api";
+import { useState, useEffect } from "react";
+import type { ReactElement } from "react";
 import { createEmojiList } from "generate-emoji-list";
 import { UnicodeVersion } from "generate-emoji-list/dist/createEmojiList";
+// @ts-expect-error no types available
+import emojiKeywords from "emojilib";
+import Fuse from "fuse.js";
+import { usePersistentState } from "raycast-toolkit";
 
 type Category = { category: string; emojis: Emoji[] };
 type Emoji = {
   emoji: string;
   description: string;
   shortCode?: string[];
+  keywords?: string[];
+  category?: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStateFromLocalStorage = <T, _ = void>(
-  key: string,
-  initialValue: T
-): [T, Dispatch<SetStateAction<T>>, boolean] => {
-  const [loading, setLoading] = useState(true);
-  const [state, setState] = useState<T>(initialValue);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    (async () => {
-      const cache = await getLocalStorageItem(key);
-
-      if (typeof cache === "string") {
-        if (!didUnmount) {
-          setState(JSON.parse(cache));
-        }
-      }
-      setLoading(false);
-    })();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, []);
-
-  const setStateAndLocalStorage = useCallback((updater) => {
-    setState((state) => {
-      const newValue = typeof updater === "function" ? updater(state) : updater;
-      setLocalStorageItem(key, JSON.stringify(newValue));
-      return newValue;
+const filterList = (list: Category[], searchText: string, category: string): Category[] => {
+  return list.map((c) => {
+    const emojis = c.emojis.filter((emoji) => {
+      return category !== "" ? emoji.category === category : true;
     });
-  }, []);
-
-  return [state, setStateAndLocalStorage, loading];
+    const fuse = new Fuse(emojis, { keys: ["keywords"] });
+    return { ...c, emojis: searchText === "" ? emojis : fuse.search(searchText).map((item) => item.item) };
+  });
 };
 
 export default function Main(): ReactElement {
-  const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
-
+  const [list, setList] = usePersistentState<Emoji[]>("emoji-list-v2", []);
+  const [categories, setCategories] = usePersistentState<string[]>("emoji-categories", []);
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
     // https://github.com/facebook/react/pull/22114
     let didUnmount = false;
 
     const options = {
-      unicodeVersion: preferences.unicodeVersion.value as UnicodeVersion,
-      features: { shortCodes: Boolean(preferences.shortCodes.value) },
+      unicodeVersion: getPreferenceValues().unicodeVersion.value as UnicodeVersion,
+      features: { shortCodes: Boolean(getPreferenceValues().shortCodes.value) },
     };
 
     createEmojiList(options).then((list: Category[]) => {
       if (!didUnmount) {
-        setList(list);
+        setList(
+          list.flatMap((category) =>
+            category.emojis.map((emoji) => ({
+              ...emoji,
+              category: category.category,
+              keywords: emojiKeywords[emoji.emoji],
+            }))
+          )
+        );
+        setCategories(list.map((category) => category.category));
       }
     });
 
@@ -84,23 +60,49 @@ export default function Main(): ReactElement {
     };
   }, []);
 
-  const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = useStateFromLocalStorage<Emoji[]>("recently-used", []);
-  const addToRecentlyUsed = useCallback((emoji: Emoji) => {
+  const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = usePersistentState<Emoji[]>("recently-used", []);
+  const addToRecentlyUsed = (emoji: Emoji) => {
     setRecentlyUsed((list) =>
       list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
     );
-  }, []);
+  };
+
+  const [category, setCategory] = useState<string>("");
+  const [searchText, setSearchText] = useState("");
 
   const isLoading = list.length === 0 || loadingRecentlyUsed;
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select Category" onChange={setCategory}>
+          <List.Dropdown.Item key={category} title="All Emojis" value="" icon="🥳" />
+          {categories.map((category) => (
+            <List.Dropdown.Item
+              key={category}
+              title={category}
+              value={category}
+              icon={list.find((emoji) => emoji.category === category)?.emoji}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
       {!isLoading
-        ? [{ category: "Recently Used", emojis: recentlyUsed }, ...list].map((category: Category) => (
+        ? filterList(
+            [
+              !searchText && { category: "Recently Used", emojis: recentlyUsed },
+              { category: category || "Emojis", emojis: list },
+            ].filter(Boolean) as Category[],
+            searchText,
+            category
+          ).map((category: Category) => (
             <List.Section title={category.category} key={category.category}>
               {category.emojis.map((emoji) => (
                 <List.Item
-                  key={`${category.category}${emoji.description}`}
+                  key={emoji.description}
                   id={`${category.category}${emoji.description}`}
                   icon={emoji.emoji}
                   title={emoji.description.replace(/\b(\w)/g, (s) => s.toUpperCase())}
@@ -109,15 +111,23 @@ export default function Main(): ReactElement {
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section>
-                        <PasteAction
-                          title="Paste Emoji to Current Window"
+                        <Action.Paste
+                          title="Paste Emoji in Active App"
                           content={emoji.emoji}
-                          onPaste={() => addToRecentlyUsed(emoji)}
+                          onPaste={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
-                        <CopyToClipboardAction
+                        <Action.CopyToClipboard
                           title="Copy Emoji to Clipboard"
                           content={emoji.emoji}
-                          onCopy={() => addToRecentlyUsed(emoji)}
+                          onCopy={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, OpenAction, OpenWithAction, ShowInFinderAction } from "@raycast/api";
+import { ActionPanel, Detail, List, Action } from "@raycast/api";
 import { homedir } from "os";
 import { dirname } from "path";
 import tildify from "./vendor/tildify";
@@ -25,8 +25,10 @@ const ForkNotFound = () => {
 };
 
 const Command = () => {
-  const [isLoading, hasFork] = useHasApplication(FORK_BUNDLE_ID);
-  const repos = useRepos(REPO_FILE_PATH);
+  const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
+  const [repos, isReposLoading] = useRepos(REPO_FILE_PATH);
+
+  const isLoading = isHasForkLoading || isReposLoading;
 
   if (!isLoading && !hasFork) {
     return <ForkNotFound />;
@@ -38,26 +40,28 @@ const Command = () => {
 
   return (
     <List searchBarPlaceholder="Search repositories…" isLoading={isLoading}>
-      {repos.map((repo, index) => {
-        const { path, name } = repo;
-        return (
-          <List.Item
-            key={index}
-            title={name}
-            accessoryTitle={dirname(tildify(path))}
-            icon={{ fileIcon: path }}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <OpenAction title="Open in Fork" icon="icon.png" target={path} application={FORK_BUNDLE_ID} />
-                  <OpenWithAction path={path} />
-                  <ShowInFinderAction path={path} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      <List.Section title={`${repos.length} ${repos.length === 1 ? "Repository" : "Repositories"}`}>
+        {repos.map((repo, index) => {
+          const { path, name } = repo;
+          return (
+            <List.Item
+              key={index}
+              title={name}
+              accessoryTitle={dirname(tildify(path))}
+              icon={{ fileIcon: path }}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.Open title="Open in Fork" icon="icon.png" target={path} application={FORK_BUNDLE_ID} />
+                    <Action.OpenWith path={path} />
+                    <Action.ShowInFinder path={path} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 };

@@ -26,12 +26,11 @@ export interface Nameable {
 
 interface Installable {
   tap: string;
-  desc: string;
+  desc?: string;
   homepage: string;
   versions: Versions;
   outdated: boolean;
   caveats?: string;
-  conflicts_with?: string[];
 }
 
 export interface Cask extends Installable {
@@ -41,6 +40,7 @@ export interface Cask extends Installable {
   installed?: string; // version
   auto_updates: boolean;
   depends_on: CaskDependency;
+  conflicts_with?: { cask: string[] };
 }
 
 export interface CaskDependency {
@@ -56,6 +56,7 @@ export interface Formula extends Installable, Nameable {
   keg_only: boolean;
   linked_key: string;
   pinned: boolean;
+  conflicts_with?: string[];
 }
 
 interface Outdated extends Nameable {
@@ -126,13 +127,10 @@ export async function brewDoctorCommand(): Promise<string> {
   }
 }
 
-export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean, cancel?: AbortController): Promise<string> {
+export async function brewUpgradeCommand(greedy: boolean, cancel?: AbortController): Promise<string> {
   let cmd = `${brewExecutable} upgrade`;
   if (greedy) {
     cmd += " --greedy";
-  }
-  if (dryRun) {
-    cmd += " --dry-run";
   }
   const output = await execSignal(cmd, cancel);
   return output.stdout;
@@ -236,12 +234,21 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
   if (searchText.length > 0) {
     const target = searchText.toLowerCase();
-    formulae = formulae?.filter((formula) => {
-      return formula.name.toLowerCase().includes(target);
-    });
-    casks = casks?.filter((cask) => {
-      return cask.token.toLowerCase().includes(target);
-    });
+    formulae = formulae
+      ?.filter((formula) => {
+        return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return brewCompare(lhs.name, rhs.name, target);
+      });
+
+    casks = casks
+      ?.filter((cask) => {
+        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return brewCompare(lhs.token, rhs.token, target);
+      });
   }
 
   const formulaeLen = formulae.length;
@@ -405,6 +412,18 @@ function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
 }
 
+function brewCompare(lhs: string, rhs: string, target: string): number {
+  const lhs_matches = lhs.toLowerCase().includes(target);
+  const rhs_matches = rhs.toLowerCase().includes(target);
+  if (lhs_matches && !rhs_matches) {
+    return -1;
+  } else if (rhs_matches && !lhs_matches) {
+    return 1;
+  } else {
+    return lhs.localeCompare(rhs);
+  }
+}
+
 async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
-  return await execp(cmd, { signal: cancel?.signal });
+  return await execp(cmd, { signal: cancel?.signal, maxBuffer: 10 * 1024 * 1024 });
 }

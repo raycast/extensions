@@ -1,6 +1,6 @@
 import { XcodeRelease } from "../../models/release/xcode-release.model";
-import { ActionPanel, ActionPanelProps, Image, List, OpenAction } from "@raycast/api";
-import { ReactElement } from "react";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { ReactElement, ReactNode } from "react";
 
 /**
  * Xcode Release List Item
@@ -14,7 +14,7 @@ export function xcodeReleaseListItem(xcodeRelease: XcodeRelease, index: number):
       icon={icon(xcodeRelease)}
       title={title(xcodeRelease)}
       subtitle={subtitle(xcodeRelease)}
-      accessoryTitle={accessoryTitle(xcodeRelease)}
+      accessories={[{ text: accessoryTitle(xcodeRelease) }]}
       keywords={keywords(xcodeRelease)}
       actions={actions(xcodeRelease)}
     />
@@ -33,7 +33,7 @@ function icon(xcodeRelease: XcodeRelease): Image {
     // Push 13
     imageSourceComponents.push("13");
   } else {
-    // Otherwise always use 12
+    // Otherwise, always use 12
     imageSourceComponents.push("12");
   }
   // Check if beta number is available
@@ -48,7 +48,7 @@ function icon(xcodeRelease: XcodeRelease): Image {
 }
 
 /**
- * Retrieve user friendly display title from XcodeRelease
+ * Retrieve user-friendly display title from XcodeRelease
  * @param xcodeRelease The XcodeRelease
  */
 function title(xcodeRelease: XcodeRelease): string {
@@ -59,7 +59,7 @@ function title(xcodeRelease: XcodeRelease): string {
     // Push beta number to title components
     titleComponents.push(`Beta ${xcodeRelease.beta}`);
   } else if (xcodeRelease.releaseCandidate) {
-    // Otherwise if a release candidate is available
+    // Otherwise, if a release candidate is available
     // initialize the release candidate components
     const releaseCandidateComponents = ["Release Candidate"];
     // Check if release candidate number is greater one
@@ -114,19 +114,19 @@ function keywords(xcodeRelease: XcodeRelease): string[] {
  * Retrieve actions from XcodeRelease, if available
  * @param xcodeRelease The XcodeRelease
  */
-function actions(xcodeRelease: XcodeRelease): ReactElement<ActionPanelProps> | undefined {
+function actions(xcodeRelease: XcodeRelease): ReactElement<ReactNode> | undefined {
   // Initialize ReactElements
   const elements: ReactElement[] = [];
   // Check if a download link is available
   if (xcodeRelease.downloadLink) {
     // Push OpenAction to download the Xcode Release from the Apple Developer portal
-    elements.push(<OpenAction key="download" title="Download" target={xcodeRelease.downloadLink} />);
+    elements.push(<Action.OpenInBrowser key="download" title="Download" url={xcodeRelease.downloadLink} />);
   }
   // Check if a release notes link is available
   if (xcodeRelease.releaseNotesLink) {
     // Push OpenAction to view the Xcode Release notes
     elements.push(
-      <OpenAction key="view-release-notes" title="View Release Notes" target={xcodeRelease.releaseNotesLink} />
+      <Action.OpenInBrowser key="view-release-notes" title="View Release Notes" url={xcodeRelease.releaseNotesLink} />
     );
   }
   // Check if elements are empty

@@ -5,6 +5,10 @@
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
+  "contributors": [
+    "adrienbaron",
+    "dima-m711"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,15 +20,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "app",
-      "type": "textfield",
-      "required": false,
-      "title": "Preferred App",
-      "description": "Prefer which JetBrains Application (will be sorted to the top of the list)",
-      "default": "PhpStorm",
-      "placeholder": "PhpStorm"
-    },
     {
       "name": "bin",
       "type": "textfield",
@@ -63,16 +58,23 @@
     }
   ],
   "keywords": [
-    "JetBrains",
-    "JB",
-    "Launch",
-    "Open",
-    "Projects",
-    "Recent"
+    "IntelliJ IDEA",
+    "PyCharm",
+    "WebStorm",
+    "PhpStorm",
+    "Rider",
+    "CLion",
+    "Datalore",
+    "DataSpell",
+    "DataGrip",
+    "RubyMine",
+    "AppCode",
+    "GoLand"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
+    "raycast-hooks": "^1.0.4",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
   },
@@ -90,6 +92,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

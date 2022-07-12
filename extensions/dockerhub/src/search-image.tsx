@@ -1,5 +1,5 @@
-import { Search } from "./search";
-import { render } from "@raycast/api";
-import { SearchType } from "./lib/api";
+import SearchImages from "./components/SearchImages";
 
-render(<Search searchType={SearchType.IMAGE} />);
+export default function Command() {
+  return <SearchImages />;
+}

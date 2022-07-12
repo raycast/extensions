@@ -5,6 +5,9 @@
   "description": "Browse and copy-paste common Unicode symbols.",
   "icon": "command-icon.png",
   "author": "mmazzarolo",
+  "contributors": [
+    "FezVrasta"
+  ],
   "license": "MIT",
   "commands": [
     {

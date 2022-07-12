@@ -1,8 +1,9 @@
-import { ActionPanel, Color, Icon, KeyboardShortcut } from "@raycast/api";
-import { KtoColorLike, miredToK, RGB } from "../color";
+import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
+import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { ensureMinMax } from "../utils";
+import { lightRGBColors } from "../constants";
 
 function ceilRound50(value: number): number {
   return Math.ceil(value / 50) * 50;
@@ -54,7 +55,7 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
         shortcut={{ modifiers: ["cmd"], key: "b" }}
       >
         {brightnessValues.map((value) => (
-          <ActionPanel.Item key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
+          <Action key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -65,7 +66,7 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
 function BrightnessAddAction(props: {
   state: State;
   add: number;
-  shortcut?: KeyboardShortcut | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
 }): JSX.Element | null {
   const state = props.state;
 
@@ -84,7 +85,7 @@ function BrightnessAddAction(props: {
       return null;
     }
     return (
-      <ActionPanel.Item
+      <Action
         title={`Brightness ${props.add < 0 ? "Down" : "Up"}`}
         icon={{ source: props.add < 0 ? Icon.ChevronDown : Icon.ChevronUp, tintColor: Color.PrimaryText }}
         shortcut={props.shortcut}
@@ -154,7 +155,7 @@ export function ColorTempControlAction(props: { state: State }): JSX.Element | n
         shortcut={{ modifiers: ["cmd"], key: "t" }}
       >
         {brightnessValues.map((value) => (
-          <ActionPanel.Item
+          <Action
             key={`${value}`}
             title={`${value} K`}
             icon={{ source: "lightbulb.png", tintColor: KtoColorLike(value) }}
@@ -170,7 +171,7 @@ export function ColorTempControlAction(props: { state: State }): JSX.Element | n
 function ColorTempControlAddAction(props: {
   state: State;
   add: number;
-  shortcut?: KeyboardShortcut | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
 }): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
@@ -203,7 +204,7 @@ function ColorTempControlAddAction(props: {
     }
 
     return (
-      <ActionPanel.Item
+      <Action
         key={`${nextK}`}
         title={`Color Temperature ${add < 0 ? "Down" : "Up"}`}
         icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
@@ -225,4 +226,36 @@ export function ColorTempControlDownAction(props: { state: State }): JSX.Element
   return (
     <ColorTempControlAddAction state={props.state} add={-50} shortcut={{ modifiers: ["cmd", "shift"], key: "-" }} />
   );
+}
+
+export function ColorRgbControlAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const modes = state.attributes.supported_color_modes;
+
+  const handle = async (color_rgb: RGB) => {
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      rgb_color: [color_rgb.r, color_rgb.g, color_rgb.b],
+    });
+  };
+
+  if (modes && Array.isArray(modes) && modes.includes("rgb")) {
+    return (
+      <ActionPanel.Submenu
+        title="Color RGB"
+        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      >
+        {lightRGBColors.map((color) => (
+          <Action
+            key={`${color.name}`}
+            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`}
+            icon={{ source: "lightbulb.png", tintColor: RGBtoColorLike(color.value) }}
+            onAction={() => handle(color.value)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+    );
+  }
+  return null;
 }

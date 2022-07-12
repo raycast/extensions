@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
+import { Action, List, showToast, Toast } from "@raycast/api";
 import { XcodeProjectService } from "../../services/xcode-project.service";
 import { useEffect, useState } from "react";
 import { XcodeProject } from "../../models/project/xcode-project.model";
@@ -51,13 +51,16 @@ export function XcodeAddSwiftPackageSelectXcodeProject(props: {
   // Initialize select Action provider
   const selectActionProvider = (xcodeProject: XcodeProject) => {
     return (
-      <ActionPanel.Item
+      <Action
         title="Add Swift Package"
-        onAction={() => {
+        onAction={async () => {
           // Check if XcodeProject is a Swift Playground
           if (xcodeProject.type === XcodeProjectType.swiftPlayground) {
             // Show Toast
-            showToast(ToastStyle.Failure, "Swift Package can not be added to a Swift Playground");
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Swift Package can not be added to a Swift Playground",
+            });
           } else {
             // Invoke onSelect with XcodeProject
             props.onSelect(xcodeProject);
@@ -86,7 +89,7 @@ export function XcodeAddSwiftPackageSelectXcodeProject(props: {
               // Include any XcodeProject
               return true;
             }
-            // Otherwise filter out XcodeProjects
+            // Otherwise, filter out XcodeProjects
             // which are already included in the opened XcodeProjects
             return !openedXcodeProjects.map((project) => project.filePath).includes(xcodeProject.filePath);
           })

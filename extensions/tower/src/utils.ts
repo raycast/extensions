@@ -1,16 +1,17 @@
-import { preferences, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import os from "os";
 import path from "path";
 import plist from "plist";
 import Bookmark from "./dtos/bookmark-dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
+import TowerPreferences from "./interfaces/tower-preferences";
 
 const towerBookmarksPlistLocation = `${os.homedir()}/Library/Application Support/com.fournova.Tower3/bookmarks-v2.plist`;
 
 export function isTowerCliInstalled(): boolean {
   try {
-    const towerCliPath = preferences.towerCliPath.value as string;
+    const towerCliPath = getPreferenceValues<TowerPreferences>().towerCliPath;
     if (fs.existsSync(towerCliPath)) return true;
 
     return false;
@@ -58,7 +59,7 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     const obj = plist.parse(fs.readFileSync(bookmarksFile, "utf8")) as unknown as ImportedTowerBookmarks;
 
     if (obj.children.length === 0) {
-      await showToast(ToastStyle.Failure, "No Bookmarks found", "Now is the time to start bookmarking!");
+      await showToast(Toast.Style.Failure, "No Bookmarks found", "Now is the time to start bookmarking!");
 
       return Promise.resolve([]);
     }
@@ -73,7 +74,7 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
 
     return Promise.resolve(bookmarks);
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Something whent wrong", "Something whent wrong loading the Tower bookmarks.");
+    await showToast(Toast.Style.Failure, "Something whent wrong", "Something whent wrong loading the Tower bookmarks.");
     return Promise.resolve([]);
   }
 }

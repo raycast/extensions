@@ -1,8 +1,8 @@
-import { CopyToClipboardAction } from "@raycast/api";
+import { Action } from "@raycast/api";
 
 const CopyTitleAction = (props: { title?: string }) => {
   return props.title ? (
-    <CopyToClipboardAction
+    <Action.CopyToClipboard
       title="Copy Title"
       content={props.title}
       shortcut={{ modifiers: ["cmd", "shift"], key: "." }}

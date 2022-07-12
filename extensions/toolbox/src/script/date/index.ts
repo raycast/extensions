@@ -1,2 +1,2 @@
-export * from "./timestamp";
-export * from "./utc";
+export * from "./date";
+export * from "./time";

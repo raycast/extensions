@@ -1,16 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  OpenInBrowserAction,
-  OpenWithAction,
-  PasteAction,
-  showHUD,
-  ShowInFinderAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Detail, Icon, showHUD, showToast, Action, Toast } from "@raycast/api";
 import open from "open";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -32,12 +20,12 @@ Leverage one of the built-in actions to quickly add functionality to your comman
 
 ## Custom actions
 
-Use the \`ActionPanel.Item\` to extend your commands even further. Specify a title, icon and action 
+Use the \`ActionPanel.Item\` to extend your commands even further. Specify a title, icon and action
 handler. Or wrap it in a separate React component to reuse it.
 
 ## Keyboard shortcuts
 
-Assign keyboard shortcuts to actions to make it quicker for users to perform them. By default, the 
+Assign keyboard shortcuts to actions to make it quicker for users to perform them. By default, the
 first two actions get the primary (\`↵\`) and secondary shortcut (\`⌘ + ↵\`).
 `;
 
@@ -50,29 +38,31 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Built-in actions">
-            <CopyToClipboardAction content="Text copied to the clipboard" />
-            <OpenInBrowserAction url="https://raycast.com" />
-            <ShowInFinderAction title="Open Downloads" path={downloadsDir} />
-            <PasteAction content="Text pasted to the frontmost application" />
-            <OpenWithAction path={downloadsDir} />
+            <Action.CopyToClipboard content="Text copied to the clipboard" />
+            <Action.OpenInBrowser url="https://raycast.com" />
+            <Action.ShowInFinder title="Open Downloads" path={downloadsDir} />
+            <Action.Paste content="Text pasted to the frontmost application" />
+            <Action.OpenWith path={downloadsDir} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Custom actions">
-            <ActionPanel.Item
+            <Action
               title="Custom Action"
               icon={Icon.Dot}
               shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={() => showToast(ToastStyle.Success, "Performed custom action")}
+              onAction={() =>
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Performed custom action",
+                })
+              }
             />
             <ReusableAction title="Hey 👋" />
             <ActionPanel.Submenu title="Open With..." icon={Icon.Globe}>
-              <ActionPanel.Item
+              <Action
                 title="Google Chrome"
                 onAction={() => open("https://raycast.com", { app: { name: open.apps.chrome } })}
               />
-              <ActionPanel.Item
-                title="Safari"
-                onAction={() => open("https://raycast.com", { app: { name: "Safari" } })}
-              />
+              <Action title="Safari" onAction={() => open("https://raycast.com", { app: { name: "Safari" } })} />
             </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>
@@ -83,7 +73,7 @@ export default function Command() {
 
 function ReusableAction(props: { title: string; icon?: Icon }) {
   return (
-    <ActionPanel.Item
+    <Action
       title="Reusable Action"
       icon={props.icon ?? Icon.Star}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}

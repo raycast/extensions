@@ -1,5 +1,5 @@
 import Dockerode from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, PushAction } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useMemo } from 'react';
 import ContainerList from './container_list';
 import { useDocker } from './docker';
@@ -27,12 +27,12 @@ export default function ProjectsList() {
           subtitle={projectSubTitle(project)}
           actions={
             <ActionPanel>
-              <PushAction
+              <Action.Push
                 title="Show Containers"
                 icon={{ source: Icon.Binoculars }}
                 target={<ContainerList projectFilter={project.name} />}
               />
-              <ActionPanel.Item
+              <Action
                 title="Start All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
                 icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
@@ -42,7 +42,7 @@ export default function ProjectsList() {
                   onFailure: ({ message }) => message,
                 })}
               />
-              <ActionPanel.Item
+              <Action
                 title="Stop All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
                 icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}

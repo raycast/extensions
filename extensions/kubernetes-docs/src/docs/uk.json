@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Розуміння основ",
+    "link": "https://kubernetes.io/uk/docs/concepts/"
+  },
+  {
+    "title": "Спробуйте Kubernetes",
+    "link": "https://kubernetes.io/uk/docs/tutorials/"
+  },
+  {
+    "title": "Налаштування кластера",
+    "link": "https://kubernetes.io/uk/docs/setup/"
+  }
+]

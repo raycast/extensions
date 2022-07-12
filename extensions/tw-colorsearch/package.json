@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tw-colorpicker",
+  "title": "Tailwind CSS Colorpicker",
+  "description": "Search Tailwind CSS colors to use the HEX or RGB color value in projects that don't use Tailwind CSS classes.",
+  "icon": "icon-tw-logo.png",
+  "author": "magicjaqk",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Color Search",
+      "subtitle": "Tailwind CSS",
+      "description": "Show Tailwind CSS color list and convert to HEX or RGB.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

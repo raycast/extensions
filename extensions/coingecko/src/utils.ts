@@ -1,62 +1,67 @@
-import { getPreferenceValues } from "@raycast/api";
-import { Coin } from "./service";
+import currencies from './currencies.json';
+import { getPreferenceValues } from '@raycast/api';
 
-interface Preferences {
-  currency: Currency;
+export interface Currency {
+  id: string;
+  name: string;
+  symbol: string;
+  category: string;
 }
 
-export type Currency = "usd" | "eur" | "gbp" | "jpy" | "cny" | "rub";
+interface Preferences {
+  currency: string;
+}
 
-export const currencies: Currency[] = ["usd", "eur", "gbp", "jpy", "cny", "rub"];
+const DEFAULT_LOCALE = 'en-US';
 
-export function getCurrency(): Currency {
-  const { currency } = getPreferences();
+export function getPreferredCurrency(): Currency {
+  const { currency: perference } = getPreferences();
+
+  const currency = currencies.find(({ id }) => id === perference);
+
+  if (currency === undefined) {
+    throw new Error(
+      `Preferred currency (${perference}) not found, try updating your preferred currency in the extension settings`,
+    );
+  }
+
   return currency;
 }
 
-export function formatPrice(price: number) {
-  const currencyMap: Record<Currency, string> = {
-    usd: "USD",
-    eur: "EUR",
-    gbp: "GBP",
-    jpy: "JPY",
-    cny: "CNY",
-    rub: "RUB",
-  };
-  const currency = getCurrency();
-  const currencyString = currencyMap[currency];
-  const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currencyString,
-    maximumFractionDigits: 6,
-  });
-  const priceString = currencyFormatter.format(price);
-  return priceString;
+export function getCurrencies(): Currency[] {
+  return currencies;
+}
+
+export function formatPrice(price: number, currency: string) {
+  const maximumFractionDigits = 6;
+
+  let formattedPrice;
+
+  try {
+    const formatter = new Intl.NumberFormat(DEFAULT_LOCALE, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits,
+    });
+
+    formattedPrice = formatter.format(price);
+  } catch {
+    const formatter = new Intl.NumberFormat(DEFAULT_LOCALE, {
+      maximumFractionDigits,
+    });
+
+    formattedPrice = `${currency.toUpperCase()} ${formatter.format(price)}`;
+  }
+
+  return formattedPrice;
 }
 
 export function formatDate(date: Date) {
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  return date.toLocaleString(DEFAULT_LOCALE, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
-}
-
-export function filterCoins(coins: Coin[], input: string): Coin[] {
-  if (input.length === 0) {
-    return coins;
-  }
-  return coins
-    .filter((coin) => {
-      return (
-        coin.symbol.toLowerCase().includes(input.toLowerCase()) || coin.name.toLowerCase().includes(input.toLowerCase())
-      );
-    })
-    .sort((a, b) => {
-      const aName = a.name;
-      const bName = b.name;
-      return aName.length - bName.length;
-    });
 }
 
 function getPreferences() {

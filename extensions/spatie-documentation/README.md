@@ -1,6 +1,6 @@
 # Spatie Documentation
 
-![Raycast Spatie Open Source Packages Documentation](./assets/raycast-spatie-documentation-extension.png)
+![Raycast Spatie Open Source Packages Documentation](media/raycast-spatie-documentation-extension.png)
 
 Easy access commands for Spatie open source packages documentation
 

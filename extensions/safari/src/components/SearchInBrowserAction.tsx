@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Icon } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Icon, Action } from "@raycast/api";
 
 import { executeJxa } from "../utils";
 
@@ -17,7 +17,7 @@ const searchInBrowser = async (searchText?: string) => {
 
 const SearchInBrowserAction = (props: { searchText?: string }) => {
   return props.searchText ? (
-    <ActionPanel.Item
+    <Action
       title="Search in Browser"
       icon={Icon.MagnifyingGlass}
       onAction={async () => {

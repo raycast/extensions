@@ -5,6 +5,7 @@
   "description": "Translate words, or entire sentences, into 26 different languages using DeepL.",
   "icon": "icon.png",
   "author": "mooxl",
+  "contributors": ["peter-gy"],
   "license": "MIT",
   "commands": [
     {
@@ -13,6 +14,188 @@
       "subtitle": "Deepcast",
       "description": "Translate text using DeepL",
       "mode": "view"
+    },
+    {
+      "name": "bulgarian",
+      "title": "Translate Into Bulgarian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Bulgarian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "chinese",
+      "title": "Translate Into Chinese",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Chinese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "czech",
+      "title": "Translate Into Czech",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Czech using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "danish",
+      "title": "Translate Into Danish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Danish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "dutch",
+      "title": "Translate Into Dutch",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Dutch using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "englishUK",
+      "title": "Translate Into English (UK)",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into English (UK) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "englishUS",
+      "title": "Translate Into English (US)",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into English (US) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "estonian",
+      "title": "Translate Into Estonian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Estonian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "finnish",
+      "title": "Translate Into Finnish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Finnish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "french",
+      "title": "Translate Into French",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into French using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "german",
+      "title": "Translate Into German",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into German using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "greek",
+      "title": "Translate Into Greek",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Greek using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "hungarian",
+      "title": "Translate Into Hungarian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Hungarian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "italian",
+      "title": "Translate Into Italian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Italian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "japanese",
+      "title": "Translate Into Japanese",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Japanese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "latvian",
+      "title": "Translate Into Latvian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Latvian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "lithuanian",
+      "title": "Translate Into Lithuanian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Lithuanian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "polish",
+      "title": "Translate Into Polish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Polish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "portuguese",
+      "title": "Translate Into Portuguese",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Portuguese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "portugueseBrazil",
+      "title": "Translate Into Portuguese (Brazil)",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Portuguese (Brazil) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "romanian",
+      "title": "Translate Into Romanian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Romanian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "russian",
+      "title": "Translate Into Russian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Russian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "slovak",
+      "title": "Translate Into Slovak",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Slovak using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "slovenian",
+      "title": "Translate Into Slovenian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Slovenian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "spanish",
+      "title": "Translate Into Spanish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Spanish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "swedish",
+      "title": "Translate Into Swedish",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Swedish using DeepL",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -35,7 +218,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.31.0",
     "got": "^11.8.2"
   },
   "devDependencies": {

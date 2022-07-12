@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "short-io",
+  "title": "Short.io",
+  "description": "Shorten and search links with your own domain via Short.io",
+  "icon": "short-io-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-link",
+      "icon": "shorten-link-icon.png",
+      "title": "Shorten Link",
+      "subtitle": "Short.io",
+      "description": "Shorten links with your own domain.",
+      "mode": "view"
+    },
+    {
+      "name": "search-links",
+      "icon": "search-link-icon.png",
+      "title": "Search Links",
+      "subtitle": "Short.io",
+      "description": "Search short links with your own domain.",
+      "mode": "view"
+    },
+    {
+      "name": "shorten-link-with-domain",
+      "icon": "shorten-link-with-domain-icon.png",
+      "title": "Shorten Link With Domain",
+      "subtitle": "Short.io",
+      "description": "Shorten links using your own domain and set default domain of other commands.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Secret Key",
+      "description": "Short.io API secret key."
+    },
+    {
+      "name": "authFetchLink",
+      "type": "checkbox",
+      "required": false,
+      "title": "Advanced Preference",
+      "label": "Auto Fetch Link",
+      "description": "Automatically fetch and fill in link form the selection or clipboard.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, Icon, popToRoot, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import open from "open";
 
 interface FormValues {
@@ -8,7 +8,7 @@ interface FormValues {
 }
 
 function GrabUrlAction() {
-  function handleSubmit({ url, tags, pin }: FormValues) {
+  async function handleSubmit({ url, tags, pin }: FormValues) {
     if (!url) {
       showToast(ToastStyle.Failure, "URL is required");
       return;
@@ -18,6 +18,8 @@ function GrabUrlAction() {
         pin ? "yes" : "no"
       }`
     );
+
+    await popToRoot({ clearSearchBar: true });
   }
 
   return <SubmitFormAction icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit} />;
@@ -33,7 +35,7 @@ export default function GrabUrl() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture" />
+      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture (eg. http://raycast.com)" />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Checkbox id="pin" label="Pin note to top of note list" />
     </Form>

@@ -1,21 +1,18 @@
-import { ActionPanel, Color, Icon, showToast, ToastStyle } from "@raycast/api";
+import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
 import { clearLargeObjectCache } from "../cache";
+import { getErrorMessage, showErrorToast } from "../utils";
 
-export function ClearLocalCacheAction() {
+export function ClearLocalCacheAction(): JSX.Element {
   async function handleAction() {
     try {
       clearLargeObjectCache();
-      showToast(ToastStyle.Success, "Local Cache deleted");
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Could not clear local cache",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast(Toast.Style.Success, "Local Cache deleted");
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not clear local cache");
     }
   }
   return (
-    <ActionPanel.Item
+    <Action
       title="Clear local cache"
       icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
       onAction={handleAction}

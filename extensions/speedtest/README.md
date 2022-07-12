@@ -48,6 +48,10 @@ Speedtest via [speedtest.net](https://speedtest.net) 🚀.
 - Perform Speedtest via speedtest.net official CLI
 - Automatically download speedtest.net CLI
 
+## Compatibility
+
+Please note that if you are running this extension on a Mac with Apple Silicon, you will need to [install Rosetta](https://support.apple.com/en-us/HT211861) and ensure that "Open using Rosetta" is checked for the Raycast application.
+
 ## ⚠️ Speedtest.net CLI license agreements ⚠️
 
 This extension command automatically agree the license agreements of the official [speedtest.net CLI](https://www.speedtest.net/apps/cli) for easy usage.
