@@ -15,9 +15,11 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListObsidian vault={vault} showTitle={true}/>} />;
+    return (
+      <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListObsidian vault={vault} showTitle={true} />} />
+    );
   } else if (vaults.length == 1) {
-    return <NoteListObsidian vault={vaults[0]} showTitle={false}/>;
+    return <NoteListObsidian vault={vaults[0]} showTitle={false} />;
   } else {
     noVaultPathsToast();
   }
