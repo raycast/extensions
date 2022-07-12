@@ -36,6 +36,7 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
         defaultValue={draftValues?.markup}
         title="Content"
         placeholder="Add markdown content..."
+        enableMarkdown
         error={markupError}
         onChange={dropNameErrorIfNeeded}
         onBlur={(event) => {

@@ -3,6 +3,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useStoreCard } from "../hooks/useRecent";
 import { PermMap } from "../util/mapping";
 import { ICard } from "../util/types";
+import CommonCardActions from "./CommonCardActions";
 
 const CardDetail = ({ card }: { card: ICard }) => {
   useStoreCard(card);
@@ -13,8 +14,7 @@ const CardDetail = ({ card }: { card: ICard }) => {
       markdown={card.data.markup}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy HTML" content={card.data.html} icon={Icon.Clipboard} />
-          <Action.CopyToClipboard title="Copy Markdown" content={card.data.markup} icon={Icon.Clipboard} />
+          <CommonCardActions card={card} />
         </ActionPanel>
       }
       metadata={

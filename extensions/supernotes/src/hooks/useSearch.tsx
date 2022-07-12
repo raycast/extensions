@@ -6,7 +6,7 @@ import fetch, { AbortError } from "node-fetch";
 import { ICardCollection, SupernotesErrorPayload } from "../util/types";
 import { SUPERNOTES_API_URL } from "../util/defines";
 
-const useSearch = (callback: (cards: ICardCollection) => void) => {
+const useSearch = (callback: (cards?: ICardCollection) => void) => {
   const { apiKey } = getPreferenceValues();
 
   const [loading, setLoading] = React.useState(true);
@@ -27,6 +27,7 @@ const useSearch = (callback: (cards: ICardCollection) => void) => {
       abortRef.current = new AbortController();
       if (searchTerm === "") {
         setLoading(false);
+        callback(undefined);
         return;
       }
       try {

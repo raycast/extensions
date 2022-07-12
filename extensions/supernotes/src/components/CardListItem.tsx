@@ -3,20 +3,25 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { ColorMap } from "../util/mapping";
 import { ICard } from "../util/types";
 import CardDetail from "./CardDetail";
+import CommonCardActions from "./CommonCardActions";
 
-const CardListItem = ({ card }: { card: ICard }) => {
+interface CardListItemProps {
+  card: ICard;
+  refreshList?: () => void;
+}
+
+const CardListItem = ({ card, refreshList }: CardListItemProps) => {
   return (
     <List.Item
       title={card.data.name}
       icon={{
-        source: Icon.Circle,
+        source: Icon.TextDocument,
         tintColor: card.membership.color ? ColorMap[card.membership.color] : Color.SecondaryText,
       }}
       actions={
         <ActionPanel>
-          <Action.Push title="View Card" icon={Icon.Document} target={<CardDetail card={card} />} />
-          <Action.CopyToClipboard title="Copy HTML" content={card.data.html} icon={Icon.Clipboard} />
-          <Action.CopyToClipboard title="Copy Markdown" content={card.data.markup} icon={Icon.Clipboard} />
+          <Action.Push title="View Card" icon={Icon.TextDocument} target={<CardDetail card={card} />} />
+          <CommonCardActions card={card} refreshList={refreshList} />
         </ActionPanel>
       }
     />

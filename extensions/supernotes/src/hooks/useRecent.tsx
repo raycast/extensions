@@ -9,6 +9,23 @@ interface Recent {
   timestamp: number;
 }
 
+export const useRecentRemover = (card: ICard) => {
+  const [found, setFound] = React.useState(false);
+
+  React.useEffect(() => {
+    LocalStorage.getItem(card.data.id).then((stored) => setFound(Boolean(stored)));
+  }, []);
+
+  const removeFromRecents = async () => {
+    await LocalStorage.removeItem(card.data.id);
+  };
+
+  return {
+    found,
+    removeFromRecents,
+  };
+};
+
 export const useStoreCard = (card: ICard) => {
   React.useEffect(() => {
     const recent: Recent = { card, timestamp: Date.now() };
@@ -21,7 +38,7 @@ export const useRecentCards = () => {
   const [loading, setLoading] = React.useState(true);
   const [cards, setCards] = React.useState<Array<ICard>>();
 
-  React.useEffect(() => {
+  const refresh = React.useCallback(async () => {
     setLoading(true);
     LocalStorage.allItems<Record<string, string>>().then((storedCards) => {
       // sort based on the timestamp
@@ -34,5 +51,9 @@ export const useRecentCards = () => {
     });
   }, []);
 
-  return { loading, cards };
+  React.useEffect(() => {
+    refresh();
+  }, []);
+
+  return { cards, loading, refresh };
 };

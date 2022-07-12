@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "create",
-      "title": "Create a Card",
+      "title": "Create Card",
       "subtitle": "Supernotes",
       "description": "Quickly create a Supernotes card.",
       "mode": "view"
@@ -22,13 +22,6 @@
     {
       "name": "search",
       "title": "Search Cards",
-      "subtitle": "Supernotes",
-      "description": "Search your cards on Supernotes.",
-      "mode": "view"
-    },
-    {
-      "name": "recents",
-      "title": "Recent Cards",
       "subtitle": "Supernotes",
       "description": "Search your cards on Supernotes.",
       "mode": "view"
