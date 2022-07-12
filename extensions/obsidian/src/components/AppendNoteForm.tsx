@@ -1,7 +1,7 @@
-import { ActionPanel, Form, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import { NoteAction } from "../utils/constants";
-import { Note } from "../utils/interfaces";
+import { Note, SearchNotePreferences } from "../utils/interfaces";
 import { applyTemplates } from "../utils/utils";
 
 interface FormValue {
@@ -9,15 +9,17 @@ interface FormValue {
 }
 
 export function AppendNoteForm(props: { note: Note; actionCallback: (action: NoteAction) => void }) {
-  const note = props.note;
+  const { note, actionCallback } = props;
   const { pop } = useNavigation();
+
+  const { appendTemplate } = getPreferenceValues<SearchNotePreferences>();
 
   async function addTextToNote(text: FormValue) {
     const content = await applyTemplates(text.content);
     fs.appendFileSync(note.path, "\n" + content);
     showToast({ title: "Added text to note", style: Toast.Style.Success });
     pop();
-    props.actionCallback(NoteAction.Append);
+    actionCallback(NoteAction.Append);
   }
 
   return (
@@ -29,7 +31,12 @@ export function AppendNoteForm(props: { note: Note; actionCallback: (action: Not
         </ActionPanel>
       }
     >
-      <Form.TextArea title={"Add text to:\n" + note.title} id="content" placeholder={"Text"} />
+      <Form.TextArea
+        title={"Add text to:\n" + note.title}
+        id="content"
+        placeholder={"Text"}
+        defaultValue={appendTemplate}
+      />
     </Form>
   );
 }

@@ -4,11 +4,11 @@ import fs from "fs";
 
 import { NoteFormPreferences, FormValue, Vault } from "./interfaces";
 import { applyTemplates } from "./utils";
+import { directoryCreationErrorToast, fileWriteErrorToast } from "../components/Toasts";
 
 class NoteCreator {
   vaultPath: string;
   noteProps: FormValue;
-  saved = false;
   pref: NoteFormPreferences;
 
   constructor(noteProps: FormValue, vault: Vault, pref: NoteFormPreferences) {
@@ -18,21 +18,22 @@ class NoteCreator {
   }
 
   async createNote() {
-    if (this.noteProps.name == "") {
-      this.noteProps.name = this.pref.prefNoteName;
-    }
-    let content = this.addYAMLFrontmatter("");
-    content = await applyTemplates(content);
-    const name = await applyTemplates(this.noteProps.name);
+    let name = this.noteProps.name == "" ? this.pref.prefNoteName : this.noteProps.name;
+    let content = this.pref.prefNoteContent;
 
-    this.saveNote(content, name);
+    content = this.addYAMLFrontmatter(content);
+    content = await applyTemplates(content);
+    name = await applyTemplates(name);
+
+    const saved = await this.saveNote(content, name);
 
     if (this.pref.openOnCreate) {
       const target =
         "obsidian://open?path=" + encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md"));
-      open(target);
+      if (saved) {
+        open(target);
+      }
     }
-    return this.saved;
   }
 
   addYAMLFrontmatter(content: string) {
@@ -59,43 +60,28 @@ class NoteCreator {
       };
       if (await confirmAlert(options)) {
         this.writeToFile(notePath, name, content);
+        return true;
       }
     } else {
       this.writeToFile(notePath, name, content);
+      return true;
     }
   }
 
   writeToFile(notePath: string, name: string, content: string) {
     try {
-      try {
-        fs.mkdirSync(notePath, { recursive: true });
-      } catch {
-        showToast({
-          title: "Couldn't create directories for the given path:",
-          message: notePath,
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
-      try {
-        fs.writeFileSync(path.join(notePath, name + ".md"), content);
-      } catch {
-        showToast({
-          title: "Couldn't write to file:",
-          message: notePath + "/" + name + ".md",
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
-      showToast({ title: "Note created", style: Toast.Style.Success });
-      this.saved = true;
+      fs.mkdirSync(notePath, { recursive: true });
     } catch {
-      showToast({
-        title: "Something went wrong",
-        message: " Maybe your vault, path or filename is not valid",
-        style: Toast.Style.Failure,
-      });
+      directoryCreationErrorToast(notePath);
+      return;
     }
+    try {
+      fs.writeFileSync(path.join(notePath, name + ".md"), content);
+    } catch {
+      fileWriteErrorToast(notePath, name);
+      return;
+    }
+    showToast({ title: "Note created", style: Toast.Style.Success });
   }
 }
 
