@@ -27,7 +27,7 @@ export default function Command() {
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
-      icon="../assets/handbook-icon.png"
+      icon="handbook-icon.png"
       title={searchResult.name}
       subtitle={searchResult.category}
       actions={
