@@ -47,6 +47,7 @@ export function NoteListObsidian(props: { vault: Vault }) {
 
   return (
     <NoteList
+      title={"Search Note in " + vault.name}
       notes={list.slice(0, MAX_RENDERED_NOTES)}
       allNotes={allNotes}
       setNotes={setNotes}

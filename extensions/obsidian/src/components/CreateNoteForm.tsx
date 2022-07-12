@@ -49,7 +49,7 @@ export function CreateNoteForm(props: { vault: Vault }) {
 
   return (
     <Form
-      navigationTitle={"Create Note"}
+      navigationTitle={"Create Note for " + vault.name}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" onSubmit={createNewNote} />

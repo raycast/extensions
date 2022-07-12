@@ -6,7 +6,7 @@ import { Vault } from "../utils/interfaces";
 export function VaultSelection(props: { vaults: Vault[]; target: (vault: Vault) => any }) {
   const { vaults, target } = props;
   return (
-    <List navigationTitle="Select Vault">
+    <List>
       {vaults?.map((vault) => (
         <List.Item
           title={vault.name}

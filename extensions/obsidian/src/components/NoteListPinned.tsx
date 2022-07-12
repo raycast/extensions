@@ -58,6 +58,7 @@ export function NoteListPinned(props: { vault: Vault }) {
 
   return (
     <NoteList
+      title={"Pinned Notes for " + vault.name}
       notes={list.slice(0, MAX_RENDERED_NOTES)}
       allNotes={allNotes}
       setNotes={setPinnedNotes}
