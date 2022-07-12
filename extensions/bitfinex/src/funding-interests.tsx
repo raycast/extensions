@@ -26,7 +26,7 @@ export default function FundingOffers() {
   }, [data]);
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isValidating} enableFiltering={false}>
       <List.Section title="Interests Summary">
         <List.Item title="Total Interests" accessories={[{ text: `${totalInterest.toFixed(2)} USD` }]} />
         <List.Item title="Balance" accessories={[{ text: `${currentBalance} USD` }]} />

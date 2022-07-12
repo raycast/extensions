@@ -47,9 +47,12 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
       ]}
       actions={
         <ActionPanel>
-          {canUpdate && <Action.Push title="Update Offer" target={<EditOfferForm offer={offer} />} />}
+          {canUpdate && (
+            <Action.Push title="Update Offer" target={<EditOfferForm offer={offer} />} icon={Icon.Pencil} />
+          )}
           {canCancel && (
             <Action
+              icon={Icon.XmarkCircle}
               title="Cancel Offer"
               onAction={async () => {
                 await rest.cancelFundingOffer(offer.id);
@@ -91,7 +94,7 @@ function EditOfferForm(props: { offer: any }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Answer" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Update Offer" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
