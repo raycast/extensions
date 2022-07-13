@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "search-books",
-      "title": "Search Books on Library Genesis",
+      "title": "Search Books",
+      "subtitle": "Library Genesis",
       "description": "Search books on Library Genesis.",
       "mode": "view"
     }
