@@ -9,15 +9,10 @@ export default function TenantsConfiguration() {
   const { tenantsLoading, tenants, createTenant, editTenant, deleteTenant } = useTenants();
   const { pop } = useNavigation();
 
-  const onCreateTenant = (tenant: TenantConfiguration) =>
-    createTenant(tenant)
-      .then(pop)
-      .catch(showError);
+  const onCreateTenant = (tenant: TenantConfiguration) => createTenant(tenant).then(pop).catch(showError);
 
   const onEditTenant = (current: TenantConfiguration) => (updated: TenantConfiguration) =>
-    editTenant(current, updated)
-      .then(pop)
-      .catch(showError);
+    editTenant(current, updated).then(pop).catch(showError);
 
   const onDeleteTenant = (tenant: TenantConfiguration) => () => deleteTenant(tenant).catch(showError);
 

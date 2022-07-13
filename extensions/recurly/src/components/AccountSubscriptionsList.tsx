@@ -1,9 +1,9 @@
-import {Action, ActionPanel, List} from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { UseRecurly } from "../hooks/useRecurly";
 import { Account } from "recurly";
 import useRecurlyAccountSubscriptions from "../hooks/useRecurlyAccountSubscriptions";
 import SubscriptionItemDetail from "./SubscriptionItemDetail";
-import {TenantConfiguration} from "../TenantConfiguration";
+import { TenantConfiguration } from "../TenantConfiguration";
 
 export type AccountSubscriptionsListProps = {
   recurly: UseRecurly;
@@ -24,7 +24,9 @@ export default function AccountSubscriptionsList({ recurly, account, tenant }: A
           detail={<SubscriptionItemDetail subscription={subscription} />}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://${tenant.subdomain}.recurly.com/subscriptions/${subscription.uuid}`} />
+              <Action.OpenInBrowser
+                url={`https://${tenant.subdomain}.recurly.com/subscriptions/${subscription.uuid}`}
+              />
             </ActionPanel>
           }
         />
