@@ -1,15 +1,17 @@
-import { List } from "@raycast/api";
+import {Action, ActionPanel, List} from "@raycast/api";
 import { UseRecurly } from "../hooks/useRecurly";
 import { Account } from "recurly";
 import useRecurlyAccountSubscriptions from "../hooks/useRecurlyAccountSubscriptions";
 import SubscriptionItemDetail from "./SubscriptionItemDetail";
+import {TenantConfiguration} from "../TenantConfiguration";
 
 export type AccountSubscriptionsListProps = {
   recurly: UseRecurly;
   account: Account;
+  tenant: TenantConfiguration;
 };
 
-export default function AccountSubscriptionsList({ recurly, account }: AccountSubscriptionsListProps) {
+export default function AccountSubscriptionsList({ recurly, account, tenant }: AccountSubscriptionsListProps) {
   const { subscriptionsLoading, subscriptions } = useRecurlyAccountSubscriptions(recurly, account.id || "");
 
   return (
@@ -20,6 +22,11 @@ export default function AccountSubscriptionsList({ recurly, account }: AccountSu
           title={`${subscription.plan?.name} (${subscription.plan?.code})`}
           icon={formatSubscriptionStateEmoji(subscription.state)}
           detail={<SubscriptionItemDetail subscription={subscription} />}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={`https://${tenant.subdomain}.recurly.com/subscriptions/${subscription.uuid}`} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>

@@ -22,7 +22,7 @@ export default function AccountItem({ recurly, tenant, account }: AccountItemPro
           <Action.OpenInBrowser url={`https://${tenant.subdomain}.recurly.com/accounts/${account.code}`} />
           <Action.Push
             title="List subscriptions"
-            target={<AccountSubscriptionsList recurly={recurly} account={account} />}
+            target={<AccountSubscriptionsList recurly={recurly} account={account} tenant={tenant} />}
           />
         </ActionPanel>
       }
