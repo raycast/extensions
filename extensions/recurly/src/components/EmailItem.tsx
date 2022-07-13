@@ -1,21 +1,16 @@
-import {TenantConfiguration} from "../TenantConfiguration";
 import {Action, ActionPanel, List} from "@raycast/api";
 import AccountsListByEmail from "./AccountsListByEmail";
+import {ItemProps} from "./PrepareList";
 
-export type EmailItemProps = {
-  tenant: TenantConfiguration;
-  email: string;
-};
-
-export default function EmailItem({tenant, email}: EmailItemProps) {
+export default function EmailItem({tenant, query}: ItemProps) {
   return <List.Item
     title="Find By Email"
-    subtitle={email ? `${email} ➡️` : 'Please start entering an email'}
+    subtitle={query ? `${query} ➡️` : 'Please start entering an email'}
     actions={
       <ActionPanel>
-        {email.length > 0 && <Action.Push
+        {query.length > 0 && <Action.Push
           title="Find"
-          target={<AccountsListByEmail tenant={tenant} email={email}/>}
+          target={<AccountsListByEmail tenant={tenant} email={query}/>}
         />}
       </ActionPanel>
     }
