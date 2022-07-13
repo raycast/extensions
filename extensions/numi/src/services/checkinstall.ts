@@ -3,7 +3,10 @@ import { getApplications, showToast, Toast, open } from "@raycast/api";
 async function isNumiInstalled() {
   const applications = await getApplications();
   return applications.some(
-    ({ bundleId }) => bundleId === "com.nikolaeu.numi-setapp" || bundleId === "com.nikolaeu.numi"
+    ({ bundleId }) =>
+      bundleId === "com.dmitrynikolaev.numi" ||
+      bundleId === "com.nikolaeu.numi-setapp" ||
+      bundleId === "com.nikolaeu.numi"
   );
 }
 
