@@ -5,6 +5,9 @@
   "icon": "canvas.png",
   "author": "Yoda",
   "license": "MIT",
+  "contributors": [
+    "yug2005"
+  ],
   "preferences": [
     {
       "name": "token",
@@ -20,7 +23,45 @@
       "required": true,
       "title": "Domain",
       "placeholder": "canvas.instructure.com",
-      "description": "Domain for your canvas LMS. Do not include URL; just the domain."
+      "description": "Just the domain for your canvas LMS (Do not include the URL)"
+    }, 
+    {
+      "name": "recent", 
+      "type": "checkbox", 
+      "required": false, 
+      "label": "Show Recent Module Items", 
+      "default": true, 
+      "description": "Show the recently used module items"
+    },
+    {
+      "name": "numRecent", 
+      "type": "dropdown", 
+      "required": false, 
+      "title": "Number of Recent Items", 
+      "default": "4", 
+      "description": "Number of recently used module items shown",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        }
+      ]
     }
   ],
   "commands": [
@@ -28,14 +69,16 @@
       "name": "index",
       "title": "My Courses",
       "subtitle": "Canvas",
-      "description": "View the Canvas dashboard",
+      "description": "See the modules, assignments, and announcements for your courses.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@api-blueprints/pathmaker": "^1.0.0",
-    "@raycast/api": "^1.25.1",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.36.1",
+    "node-fetch": "^3.2.6",
+    "open": "^8.4.0",
+    "turndown-rn": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -49,6 +92,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

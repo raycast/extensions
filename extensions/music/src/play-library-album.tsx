@@ -1,44 +1,65 @@
-import { ActionPanel, closeMainWindow, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { isLeft } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
+import * as S from "fp-ts/string";
+import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import React, { useState } from "react";
-import { playAlbum, searchForAlbum } from "./util/controls";
+import React, { useEffect, useState } from "react";
 import { Album } from "./util/models";
+import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
 
 export default function PlayLibraryAlbum() {
-  const [albums, setAlbums] = useState<Album[] | null>();
+  const [albums, setAlbums] = useState<readonly Album[] | null>(null);
   const { pop } = useNavigation();
 
+  const loadAll = pipe(
+    music.albums.getAll,
+    TE.map(parseResult<Album>()),
+    TE.matchW(
+      () => {
+        showToast(Toast.Style.Failure, "Could not get albums");
+        return [] as ReadonlyArray<Album>;
+      },
+      flow(
+        fromEmptyOrNullable,
+        O.matchW(() => setAlbums([]), setAlbums)
+      )
+    )
+  );
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
   const onSearch = async (next: string) => {
-    setAlbums(null);
+    setAlbums(null); // start loading
+
     if (!next || next?.length < 1) {
-      setAlbums([]);
+      setAlbums(null);
+      await loadAll();
       return;
     }
 
-    const result = await pipe(
+    await pipe(
       next,
-      searchForAlbum,
+      S.trim,
+      music.track.search,
       TE.matchW(
         () => {
-          showToast(ToastStyle.Failure, "Could not get albums");
-          return [];
+          showToast(Toast.Style.Failure, "Could not get albums");
+          return [] as ReadonlyArray<Album>;
         },
-        (albums) =>
+        (tracks) =>
           pipe(
-            albums,
-            O.fromNullable,
-            O.matchW(
-              () => [],
-              (res) => (res ? parseResult<Album>(res) : [])
-            )
+            tracks,
+            fromEmptyOrNullable,
+            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>())
           )
-      )
+      ),
+      T.map(setAlbums)
     )();
-    setAlbums(result);
   };
 
   return (
@@ -48,18 +69,16 @@ export default function PlayLibraryAlbum() {
       onSearchTextChange={onSearch}
       throttle
     >
-      {albums &&
-        albums?.length > 0 &&
-        albums.map(({ id, name, artist, count }) => (
-          <List.Item
-            key={id}
-            title={name}
-            subtitle={artist}
-            accessoryTitle={count ? `🎧 ${count}` : ""}
-            icon={{ source: "../assets/icon.png" }}
-            actions={<Actions name={name} pop={pop} />}
-          />
-        ))}
+      {(albums || [])?.map(({ id, name, artist, count }) => (
+        <List.Item
+          key={id}
+          title={name ?? "--"}
+          subtitle={artist ?? "--"}
+          accessoryTitle={count ? `🎧 ${count}` : ""}
+          icon={{ source: "../assets/icon.png" }}
+          actions={<Actions name={name} pop={pop} />}
+        />
+      ))}
     </List>
   );
 }
@@ -67,19 +86,21 @@ export default function PlayLibraryAlbum() {
 function Actions({ name, pop }: { name: string; pop: () => void }) {
   const title = `Start Album "${name}"`;
 
-  const handleSubmit = async () => {
-    const play = await playAlbum(name)();
-    if (isLeft(play)) {
-      showToast(ToastStyle.Failure, "Could not play this album");
-      return;
-    }
-    await closeMainWindow();
+  const handleSubmit = (shuffle?: boolean) => async () => {
+    await pipe(
+      name,
+      music.albums.play(shuffle),
+      TE.map(() => closeMainWindow()),
+      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this album"))
+    )();
+
     pop();
   };
 
   return (
     <ActionPanel>
-      <ActionPanel.Item title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit(false)} />
+      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

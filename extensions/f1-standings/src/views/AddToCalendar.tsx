@@ -61,7 +61,7 @@ export function AddToCalendar({ race, raceDates }: { race: Race; raceDates: [str
         "end tell\n"
     );
     pop();
-    showHUD("All event have been added to your calendar. 🏎️💨");
+    showHUD("All events have been added to your calendar. 🏎️💨");
   }
 
   return (

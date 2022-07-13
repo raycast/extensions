@@ -20,27 +20,27 @@ export interface Gist {
 
 export enum GITHUB_GISTS {
   MY_GISTS = "My Gists",
-  STARRED = "My Starred",
+  STARRED = "Starred Gists",
   ALL_GISTS = "All Public Gists",
 }
 export const githubGists = Object.values(GITHUB_GISTS);
 
 export const octokit = new Octokit({ auth: `${preference.personalAccessTokens}` });
 
-export async function requestGist(route: string) {
+export async function requestGist(route: string, page: number, perPage: number) {
   const response = await (async () => {
     switch (route) {
       case GITHUB_GISTS.MY_GISTS: {
-        return await octokit.request(`GET /gists`);
+        return await octokit.request(`GET /gists`, { page: page, per_page: perPage });
       }
       case GITHUB_GISTS.ALL_GISTS: {
-        return await octokit.request(`GET /gists/public`);
+        return await octokit.request(`GET /gists/public`, { page: page, per_page: perPage });
       }
       case GITHUB_GISTS.STARRED: {
-        return await octokit.request(`GET /gists/starred`);
+        return await octokit.request(`GET /gists/starred`, { page: page, per_page: perPage });
       }
       default: {
-        return await octokit.request(`GET /gists`);
+        return await octokit.request(`GET /gists`, { page: page, per_page: perPage });
       }
     }
   })();

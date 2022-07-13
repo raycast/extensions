@@ -1,21 +1,22 @@
-import { ActionPanel, List, Action, Detail, Icon, Image, useNavigation } from "@raycast/api";
-import { useState, useRef, Fragment, useMemo } from "react";
+import { ActionPanel, List, Action, Detail, Icon, Image } from "@raycast/api";
+import React, { useState, Fragment, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
-import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
+import { PatternType, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
-import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
-import ExpandableErrorToast from "./ExpandableErrorToast";
-import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
-import { useLazyQuery } from "@apollo/client";
-import { GET_FILE_CONTENTS } from "../sourcegraph/gql/queries";
-import { BlobContents, GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
+import { BlobContentsFragment as BlobContents, useGetFileContentsLazyQuery } from "../sourcegraph/gql/operations";
 import { bold, codeBlock, quoteBlock } from "../markdown";
 import { count, sentenceCase } from "../text";
+import { useSearch } from "../hooks/search";
+
+import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
+import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
 
 const link = new LinkBuilder("search");
+
+const MAX_RENDERED_RESULTS = 100;
 
 /**
  * SearchCommand is the shared search command implementation.
@@ -26,7 +27,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
     src.featureFlags.searchPatternDropdown ? undefined : "literal"
   );
 
-  const { state, search } = useSearch(src);
+  const { state, search } = useSearch(src, MAX_RENDERED_RESULTS);
   useMemo(() => {
     if (patternType) {
       search(searchText, patternType);
@@ -48,9 +49,9 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {/* show suggestions IFF no results */}
       {!state.isLoading && state.results.length === 0 ? (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
-          {state.suggestions.slice(0, 3).map((suggestion) => (
+          {state.suggestions.slice(0, 3).map((suggestion, i) => (
             <SuggestionItem
-              key={nanoid()}
+              key={`suggestion-item-${i}`}
               suggestion={suggestion}
               searchText={searchText}
               setSearchText={setSearchText}
@@ -83,10 +84,13 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       )}
 
       {/* results */}
-      <List.Section title="Results" subtitle={state.summary || ""}>
-        {state.results.map((searchResult) => (
+      <List.Section
+        title="Results"
+        subtitle={state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary}
+      >
+        {state.results.map((searchResult, i) => (
           <SearchResultItem
-            key={nanoid()}
+            key={`result-item-${i}`}
             searchResult={searchResult}
             searchText={searchText}
             src={src}
@@ -212,6 +216,14 @@ function SearchResultItem({
   const queryURL = getQueryURL(src, searchText);
   const { match } = searchResult;
 
+  // Branches is a common property for setting a revision
+  let revisions: string[] | undefined;
+  let firstRevision: string | undefined;
+  if ("branches" in match && match.branches) {
+    revisions = match.branches;
+    firstRevision = match.branches[0];
+  }
+
   // Title to denote the result
   let title = "";
   // Subtitle to show context about the result
@@ -219,7 +231,12 @@ function SearchResultItem({
   // Icon to denote the type of the result
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   // Broader context about the result, usually just the repository.
-  const accessory: List.Item.Accessory = { text: match.repository, tooltip: match.repository };
+  const accessory: List.Item.Accessory = firstRevision
+    ? {
+        text: `${match.repository}@${firstRevision}`,
+        tooltip: `${match.repository}@${firstRevision}`,
+      }
+    : { text: match.repository, tooltip: match.repository };
 
   // Action to drill down on the search result.
   let drilldownAction: React.ReactElement | undefined;
@@ -230,6 +247,10 @@ function SearchResultItem({
   // Details about the subtitle, to present on subtitle hover. Defaults to just the
   // subtitle, which can be long and helpful to present in the results list.
   let subtitleTooltip: string | undefined;
+
+  // A guesstimated threshold at which title + subtitle is long and likely to cause
+  // cutting-off of text
+  const combinedThreshold = 90;
 
   switch (match.type) {
     case "repo":
@@ -248,6 +269,16 @@ function SearchResultItem({
       }
       title = match.repository;
       subtitle = match.description || "";
+      if (revisions) {
+        // On revision matches, render the branch match first and move the default
+        // subtitle to a hover item.
+        subtitleTooltip = subtitle;
+        subtitle = revisions.map((r) => `@${r}`).join(", ");
+      }
+      // Add repo name to popover if we are at risk of cutting it off
+      if (title.length > 30 && title.length + subtitle.length > combinedThreshold) {
+        matchDetails.push(match.repository);
+      }
       if (match.repoStars) {
         accessory.text = `${match.repoStars}`;
         accessory.icon = Icon.Star;
@@ -257,6 +288,7 @@ function SearchResultItem({
       }
       drilldownAction = makeDrilldownAction("Search Repository", setSearchText, {
         repo: match.repository,
+        revision: firstRevision,
       });
       break;
 
@@ -266,9 +298,9 @@ function SearchResultItem({
       subtitle = DateTime.fromISO(match.authorDate).toRelative() || match.authorDate;
       subtitleTooltip = match.authorDate;
       matchDetails.push(`by ${match.authorName}`);
-      drilldownAction = makeDrilldownAction("Search Revision", setSearchText, {
+      drilldownAction = makeDrilldownAction("Search Revision of Repository", setSearchText, {
         repo: match.repository,
-        revision: match.oid,
+        revision: match.oid, // a commit is always a revision
       });
       break;
 
@@ -278,6 +310,7 @@ function SearchResultItem({
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
 
@@ -289,6 +322,7 @@ function SearchResultItem({
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
 
@@ -300,6 +334,7 @@ function SearchResultItem({
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
   }
@@ -311,8 +346,18 @@ function SearchResultItem({
 
   return (
     <List.Item
-      title={{ value: title, tooltip: matchDetails.join(", ") }}
-      subtitle={{ value: subtitle, tooltip: subtitleTooltip || subtitle }}
+      title={{
+        value: title.slice(0, combinedThreshold),
+        tooltip: matchDetails.join(", "),
+      }}
+      subtitle={{
+        value: subtitle.slice(0, combinedThreshold),
+        // If no subtitle is present, let subtitle itself be hoverable if it is long
+        // using a guesstimated threshold
+        tooltip:
+          subtitleTooltip ||
+          (subtitle.length > 60 && title.length + subtitle.length > combinedThreshold ? subtitle : ""),
+      }}
       accessories={accessories}
       icon={{ value: icon, tooltip: sentenceCase(`${matchTypeDetails.join(", ")} ${match.type} match`) }}
       actions={
@@ -421,9 +466,7 @@ function ResultView({
   searchResult: SearchResult;
   icon: Image.ImageLike;
 }) {
-  const [getFileContents, fileContents] = useLazyQuery<GetFileContents, GetFileContentsVariables>(GET_FILE_CONTENTS, {
-    client: src.client,
-  });
+  const [getFileContents, fileContents] = useGetFileContentsLazyQuery(src);
 
   const { match } = searchResult;
   const navigationTitle = `View ${match.type} result`;
@@ -514,7 +557,11 @@ function ResultView({
       navigationTitle={navigationTitle}
       markdown={`${markdownTitle}\n\n${markdownContent}`}
       actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
-      metadata={<Detail.Metadata>{metadata}</Detail.Metadata>}
+      metadata={
+        <Detail.Metadata>
+          <>{metadata}</>
+        </Detail.Metadata>
+      }
     ></Detail>
   );
 }
@@ -531,7 +578,7 @@ function SuggestionItem({
   return (
     <List.Item
       title={suggestion.title}
-      subtitle={suggestion.description}
+      subtitle={suggestion.description || "Press 'Enter' to apply suggestion"}
       icon={{
         source: suggestion.query ? Icon.Binoculars : Icon.ExclamationMark,
         tintColor: suggestion.query ? ColorDefault : ColorEmphasis,
@@ -543,7 +590,12 @@ function SuggestionItem({
               title="Apply Suggestion"
               icon={Icon.Clipboard}
               onAction={async () => {
-                setSearchText(`${searchText} ${suggestion.query}`);
+                const { query } = suggestion;
+                if (typeof query === "object") {
+                  setSearchText(`${searchText} ${query.addition}`);
+                } else {
+                  setSearchText(query || "");
+                }
               }}
             />
           </ActionPanel>
@@ -564,89 +616,4 @@ function SuggestionItem({
       }
     />
   );
-}
-
-interface SearchState {
-  results: SearchResult[];
-  suggestions: Suggestion[];
-  summary: string | null;
-  isLoading: boolean;
-  previousSearch: string;
-}
-
-function useSearch(src: Sourcegraph) {
-  const [state, setState] = useState<SearchState>({
-    results: [],
-    suggestions: [],
-    summary: "",
-    isLoading: false,
-    previousSearch: "",
-  });
-  const cancelRef = useRef<AbortController | null>(null);
-  const { push } = useNavigation();
-
-  async function search(searchText: string, pattern: PatternType) {
-    // Do not repeat searches that are essentially the same
-    if (state.previousSearch.trim() === searchText.trim()) {
-      return;
-    }
-
-    // Cancel previous search
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-
-    // Reset state for new search
-    setState((oldState) => ({
-      ...oldState,
-      results: [],
-      suggestions: [],
-      summary: null,
-      isLoading: true,
-      previousSearch: searchText,
-    }));
-
-    try {
-      await performSearch(cancelRef.current.signal, src, searchText, pattern, {
-        onResults: (results) => {
-          setState((oldState) => ({
-            ...oldState,
-            results: oldState.results.concat(results),
-          }));
-        },
-        onSuggestions: (suggestions, pushToTop) => {
-          setState((oldState) => ({
-            ...oldState,
-            suggestions: pushToTop
-              ? suggestions.concat(oldState.suggestions)
-              : oldState.suggestions.concat(suggestions),
-          }));
-        },
-        onAlert: (alert) => {
-          ExpandableErrorToast(push, "Alert", alert.title, alert.description || "").show();
-        },
-        onProgress: (progress) => {
-          setState((oldState) => ({
-            ...oldState,
-            summary: `${progress.matchCount} results in ${progress.duration}`,
-          }));
-        },
-      });
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-      }));
-    } catch (error) {
-      ExpandableErrorToast(push, "Unexpected error", "Search failed", String(error)).show();
-
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-      }));
-    }
-  }
-
-  return {
-    state: state,
-    search: search,
-  };
 }

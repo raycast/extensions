@@ -1,21 +1,19 @@
-import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../utils/file-type";
+import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "../types/file-type";
 import { useCallback, useEffect, useState } from "react";
 import fse from "fs-extra";
 import path from "path";
-
-//for refresh useState
-export const refreshNumber = () => {
-  return new Date().getTime();
-};
+import { Alert, confirmAlert, Icon } from "@raycast/api";
+import { templateFolderPath } from "../utils/constants";
 
 //new file here
-export const getTemplateFile = (templateFolderPath: string, refresh: number) => {
+export const getTemplateFile = (refresh: number) => {
   const [templateFiles, setTemplateFiles] = useState<TemplateType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     const _templateFiles: TemplateType[] = [];
     try {
+      fse.ensureDirSync(templateFolderPath);
       fse.readdirSync(templateFolderPath).forEach((file) => {
         if (!file.startsWith(".")) {
           const filePath = templateFolderPath + "/" + file;
@@ -28,12 +26,12 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
           });
         }
       });
+      setTemplateFiles(_templateFiles);
+      setIsLoading(false);
     } catch (e) {
+      setIsLoading(false);
       console.error(String(e));
-      fse.mkdirSync(templateFolderPath);
     }
-    setTemplateFiles(_templateFiles);
-    setIsLoading(false);
   }, [refresh]);
 
   useEffect(() => {
@@ -83,4 +81,28 @@ export const getFileType = (newFileType: { section: string; index: number }, tem
   }, [fetchData]);
 
   return { isSimpleContent: isSimpleContent, fileExtension: fileExtension };
+};
+
+export const alertDialog = async (
+  icon: Icon,
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction?: () => void
+) => {
+  const options: Alert.Options = {
+    icon: icon,
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

@@ -1,5 +1,67 @@
 # Changelog
 
+## 1.37.0 – 2022-06-29
+
+### ✨ New
+
+- **React 18**: React Suspense, `useSyncExternalStore`, etc.. A whole bunch of new features are available with the newest version of React. See the [migration guide](https://developers.raycast.com/migration/v1.37.0) for more information.
+- **Quick Look:** Use the new `<Action.ToggleQuickLook />` action to show additional information with a Quick Look preview.
+- **Forms:** Use the new validation feature to check if entered data is correctly formatted and show failure messages with a nice UX
+- **Forms:** Drafts support – use the feature if you want Raycast to preserve non-submitted data, to provide the best experience for users
+- **DevX:** Check out the new screenshot tool that takes a photo of Raycast from the best possible angle
+
+### 💎 Improvements
+
+- **List Accessories**: You can now pass `{date: Date}` as an accessory and it will be rendered nicely by Raycast.
+- **Detail View:** Add support for `- [ ] task` and `- [x] task` in markdown views.
+- **Action Panel**: Add a new `onOpen` callback on `ActionPanel.Submenu`. It can, for example, be used to lazily fetch the content of the Submenu.
+- **Grid**: Add support for `ColorLike` as Grid.Item’s content.
+- **Forms:** New callbacks `onFocus` and `onBlur` for all the items
+- **Forms:** Markdown highlighting for the `Form.TextArea`
+
+### 🐞 Fixes
+
+- **Misc:** Fixed a crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1845](https://github.com/raycast/extensions/issues/1845)).
+- **Dev Tools**: Fixed uninstalling of local development extensions via the Action Panel
+- **Markdown**: Fixed rendering of transparent animated gifs in markdown
+- **Forms:** Fixed an issue when entering characters with IME ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 739](https://github.com/raycast/extensions/issues/739)) in controlled text inputs
+- **List Accessories:** Fixed the tooltip for grouped accessories; now the tooltip will be shown for the group instead of separately for the items
+
+## 1.36.0 – 2022-06-01
+
+### ✨ New
+
+The `<Grid />` component’s made its way to our API. It’s perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component  for smooth adoption.
+
+![](.gitbook/assets/grid.png)
+
+### 🐞 Fixes
+
+- Fixed the controlled mode for `Form.DatePicker`
+- Fixed the dynamic appearance of form item’s `info` accessory
+- Fixed the OAuth logout preference not being shown for single-command extensions
+- Fixed a bug where components that are pushed with the same properties values would not be updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1843](https://github.com/raycast/extensions/issues/1843))
+- Fixed a bug where updated list metadata items would cause unnecessary list reloading
+- Fixed an issue with tinted, resized icons appearing blurred in some cases (e.g. Alerts)
+
+## 1.35.0 – 2022-05-18
+
+### ✨ New
+
+- **List Item Metadata**: we’ve added a new `metadata` property to the `List.Item.Detail` component, allowing you to add structured metadata. The `metadata` property can be used together with `markdown`, in which case the detail view will be split horizontally, with the markdown being displayed in the top half and the metadata displayed in the bottom half (similar to the `File Search`, `Clipboard History` or `Search Contacts` commands). Alternatively, it can be used by itself, in which case the metadata will take up the entire height of the detail view.
+- **Preferences**: We’ve added two new top-level methods `openExtensionPreferences` and `openCommandPreferences` that allow you to open both extension and command preferences, for example, via an Action ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 179](https://github.com/raycast/extensions/issues/179))
+
+### 💎 Improvements
+
+- Added a new development action to clear the local storage of an extension
+
+### 🐞 Fixes
+
+- Fixed a bug where the wrong form element onChange handler would be called initially while the form was being updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1633](https://github.com/raycast/extensions/issues/1633))
+- Fixed a bug where form elements would not be re-rendered correctly ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1663](https://github.com/raycast/extensions/issues/1663))
+- Fixed a bug where a fully controlled form TextField/PasswordField behaves as stateful ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1093](https://github.com/raycast/extensions/issues/1093))
+- Fixed `EmptyView` not being displayed when it would be reused in a navigation stack
+
 ## 1.34.0 – 2022-05-04
 
 ### 💎 Improvements
@@ -12,7 +74,7 @@
 - Fixed an issue where updating the search bar accessory would result in the search bar text being selected
 - Forms: We’ve fixed some inconsistencies around form item properties and added new warnings (e.g. when `defaultValue` and `value` are set at the same time); this also fixes [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1104](https://github.com/raycast/extensions/issues/1104)
 - Forms: Fixed an issue where updating form items would lead to unwanted scrolling; fixed the `autoFocus` property not scrolling to the focused item
-- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it’s still mounted. https://github.com/raycast/extensions/issues/1495
+- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it’s still mounted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1495](https://github.com/raycast/extensions/issues/1495)).
 - Fixed an issue where `adjustContrast` would not be respected for colored TagPicker items.
 
 ## 1.33.0 – 2022-04-20

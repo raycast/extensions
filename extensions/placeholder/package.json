@@ -1,0 +1,173 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "placeholder",
+  "title": "Placeholder",
+  "description": "Just add your desired image size (width & height), and you'll get a stylish placeholder.",
+  "icon": "placeholder-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-placeholder-images",
+      "title": "Search Placeholder Images",
+      "description": "Search placeholder images, add your desired image size (width & height), and get a stylish placeholder.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the image items.",
+          "required": true,
+          "title": "Image Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the image items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Image Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "perPage",
+          "type": "dropdown",
+          "description": "Number of images loaded per page.",
+          "required": false,
+          "title": "Per Page",
+          "default": "100",
+          "data": [
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            },
+            {
+              "title": "80",
+              "value": "80"
+            },
+            {
+              "title": "100",
+              "value": "100"
+            }
+          ]
+        },
+        {
+          "name": "applyTo",
+          "title": "Apply Wallpaper To",
+          "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Current Monitor",
+              "value": "current"
+            },
+            {
+              "title": "Every Monitor",
+              "value": "every"
+            }
+          ],
+          "required": false,
+          "default": "every"
+        }
+      ]
+    },
+    {
+      "name": "random-placeholder-image",
+      "title": "Random Placeholder Image",
+      "description": "Just add your desired image size (width & height), and get a random stylish placeholder.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoRefresh",
+          "type": "checkbox",
+          "description": "Automatically refresh image URL after copying or downloading images.",
+          "required": false,
+          "title": "Advanced Preferences",
+          "default": true,
+          "label": "Auto Refresh"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "description": "Set the primary action in commands.",
+      "required": false,
+      "title": "Primary action",
+      "default": "Copy Image URL",
+      "data": [
+        {
+          "title": "Copy Image URL",
+          "value": "Copy Image URL"
+        },
+        {
+          "title": "Copy Image",
+          "value": "Copy Image"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "fs-extra": "^10.1.0",
+    "picsum-photos": "^3.0.10",
+    "run-applescript": "^6.0.0",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

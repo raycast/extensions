@@ -51,6 +51,7 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              tags={task.tags}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
             />
           ))
@@ -65,6 +66,7 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
                   />
                 ))}

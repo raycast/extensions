@@ -1,6 +1,16 @@
+import { open } from "@raycast/api";
 import { useEffect } from "react";
 
-export default function asyncEffect<T>(action: Promise<T>, callback: (state: T) => void) {
+export function returnToRaycast() {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      open("raycast://");
+      resolve();
+    }, 100);
+  });
+}
+
+export function asyncEffect<T>(action: Promise<T>, callback: (state: T) => void) {
   useEffect(() => {
     let cancel = false;
     action.then((state) => {

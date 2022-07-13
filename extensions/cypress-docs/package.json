@@ -3,7 +3,7 @@
   "name": "cypress-docs",
   "title": "Cypress Documentation",
   "description": "Quickly search the Cypress docs and open them in the browser",
-  "icon": "cypress-logo.png",
+  "icon": "icon.png",
   "author": "robertguss",
   "categories": [
     "Documentation"

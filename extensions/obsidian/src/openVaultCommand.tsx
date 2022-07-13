@@ -1,33 +1,45 @@
-import { List, ActionPanel, Action, open, popToRoot, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
-import { parseVaults } from "./utils/utils";
-
-const getTarget = (vaultName: string) => {
-  return "obsidian://open?vault=" + encodeURIComponent(vaultName);
-};
+import { getOpenVaultTarget, useObsidianVaults } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { ShowVaultInFinderAction } from "./utils/actions";
 
 export default function Command() {
-  const vaults = parseVaults();
+  const { ready, vaults } = useObsidianVaults();
 
-  if (vaults.length == 1) {
-    open(getTarget(vaults[0].name));
+  if (vaults.length === 1) {
+    open(getOpenVaultTarget(vaults[0]));
     popToRoot();
     closeMainWindow();
   }
 
-  return (
-    <List isLoading={vaults === undefined}>
-      {vaults?.map((vault) => (
-        <List.Item
-          title={vault.name}
-          key={vault.key}
-          actions={
-            <ActionPanel>
-              <Action.Open title="Open vault" target={getTarget(vault.name)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  } else if (vaults.length == 1) {
+    open(getOpenVaultTarget(vaults[0]));
+    popToRoot();
+    closeMainWindow();
+    return <List />;
+  } else if (vaults.length > 1) {
+    return (
+      <List isLoading={!ready}>
+        {vaults?.map((vault) => (
+          <List.Item
+            title={vault.name}
+            key={vault.key}
+            actions={
+              <ActionPanel>
+                <Action.Open title="Open vault" icon={Icon.ArrowRight} target={getOpenVaultTarget(vault)} />
+                <ShowVaultInFinderAction vault={vault} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  } else {
+    return <List />;
+  }
 }

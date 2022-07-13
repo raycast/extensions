@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-uptime",
+  "title": "Better Uptime",
+  "description": "Check on your Better Uptime monitors, incidents and heartbeats.",
+  "icon": "command-icon.png",
+  "author": "andreaselia",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [{
+    "name": "monitors",
+    "title": "Search Monitors",
+    "subtitle": "Better Uptime",
+    "description": "List all existing monitors.",
+    "mode": "view"
+  }, {
+    "name": "incidents",
+    "title": "Search Incidents",
+    "subtitle": "Better Uptime",
+    "description": "List all existing incidents.",
+    "mode": "view"
+  }, {
+    "name": "heartbeats",
+    "title": "Search Heartbeats",
+    "subtitle": "Better Uptime",
+    "description": "List all existing heartbeats.",
+    "mode": "view"
+  }],
+  "preferences": [{
+    "name": "apiKey",
+    "type": "password",
+    "required": true,
+    "title": "Better Uptime API Key",
+    "description": "You can find this API Key in the Better Uptime dashboard."
+  }],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

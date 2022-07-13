@@ -16,9 +16,7 @@ async function clearSearchBar(options: {
 
 #### Parameters
 
-| Name    | Type                                       | Required | Description                                                                                                   |
-| :------ | :----------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------ |
-| options | <code>{ forceScrollToTop: boolean }</code> | No       | Can be used to force scrolling to the top. Defaults to scrolling to the top after the search bar was cleared. |
+<FunctionParametersTableFromJSDoc name="clearSearchBar" />
 
 #### Return
 
@@ -50,13 +48,99 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                      | Required | Description                                                                                                 |
-| :------ | :---------------------------------------- | :------- | :---------------------------------------------------------------------------------------------------------- |
-| options | <code>{ clearRootSearch: boolean }</code> | No       | Can be used to clear the root search. Defaults to not clearing the root search after the window was closed. |
+<FunctionParametersTableFromJSDoc name="closeMainWindow" />
 
 #### Return
 
 A Promise that resolves when the main window is closed.
+
+### openExtensionPreferences
+
+Opens the extension's preferences screen.
+
+#### Signature
+
+```typescript
+export declare function openExtensionPreferences(): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import {
+  ActionPanel,
+  Action,
+  Detail,
+  openExtensionPreferences,
+} from "@raycast/api";
+
+export default function Command() {
+  const markdown = `
+API key incorrect. Please update it in extension preferences and try again.
+  `;
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open Extension Preferences"
+            onAction={openExtensionPreferences}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Return
+
+A Promise that resolves when the extensions preferences screen is opened.
+
+### openCommandPreferences
+
+Opens the command's preferences screen.
+
+#### Signature
+
+```typescript
+export declare function openCommandPreferences(): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import {
+  ActionPanel,
+  Action,
+  Detail,
+  openCommandPreferences,
+} from "@raycast/api";
+
+export default function Command() {
+  const markdown = `
+API key incorrect. Please update it in command preferences and try again.
+  `;
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open Extension Preferences"
+            onAction={openCommandPreferences}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Return
+
+A Promise that resolves when the command's preferences screen is opened.
 
 ### popToRoot
 
@@ -88,9 +172,7 @@ export default function Command() {
 
 #### Parameters
 
-| Name    | Type                                     | Required | Description                                                                                    |
-| :------ | :--------------------------------------- | :------- | :--------------------------------------------------------------------------------------------- |
-| options | <code>{ clearSearchBar: boolean }</code> | No       | Can be used to clear the search bar. Defaults to clearing the search bar after popped to root. |
+<FunctionParametersTableFromJSDoc name="popToRoot" />
 
 #### Return
 

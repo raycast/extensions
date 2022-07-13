@@ -10,7 +10,9 @@
     "Productivity"
   ],
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "henrique",
+    "metakirby5"
   ],
   "license": "MIT",
   "commands": [

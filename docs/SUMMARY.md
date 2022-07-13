@@ -45,6 +45,7 @@
 
 ## API Reference
 
+- [Cache](api-reference/cache.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
 - [Feedback](api-reference/feedback/README.md)
@@ -61,6 +62,7 @@
   - [Detail](api-reference/user-interface/detail.md)
   - [Form](api-reference/user-interface/form.md)
   - [List](api-reference/user-interface/list.md)
+  - [Grid](api-reference/user-interface/grid.md)
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
@@ -73,4 +75,5 @@
 - [Migration](migration/README.md)
   - [v1.28.0](migration/v1.28.0.md)
   - [v1.31.0](migration/v1.31.0.md)
+  - [v1.37.0](migration/v1.37.0.md)
 - [FAQ](faq.md)

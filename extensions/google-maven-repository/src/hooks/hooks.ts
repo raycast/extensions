@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { ArtifactTag, fetchArtifacts } from "../utils/google-maven-utils";
 import { artifactModel } from "../model/packages-model";
 import { showToast, Toast } from "@raycast/api";
-import Style = Toast.Style;
 import fetch, { AbortError } from "node-fetch";
 import { allPackagesURL } from "../utils/constans";
 import { MavenModel } from "../model/maven-model";
+import Style = Toast.Style;
+import { isEmpty } from "../utils/common-utils";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -13,7 +14,7 @@ export const refreshNumber = () => {
 };
 
 export const searchArtifacts = (searchContent: string) => {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [artifactInfo, setArtifactInfo] = useState<{
     tagList: ArtifactTag[];
     artifactName: string[];
@@ -25,6 +26,9 @@ export const searchArtifacts = (searchContent: string) => {
   });
 
   const fetchData = useCallback(async () => {
+    if (isEmpty(searchContent) || searchContent.length < 4) {
+      return;
+    }
     setLoading(true);
     try {
       setArtifactInfo(await fetchArtifacts(searchContent));
@@ -54,6 +58,11 @@ export const getGoogleMavenRepositories = () => {
         .then((data) => {
           setAllPackages(data.data);
           setLoading(false);
+        })
+        .catch((reason) => {
+          setAllPackages([]);
+          setLoading(false);
+          showToast(Style.Failure, String(reason));
         });
     } catch (e) {
       if (e instanceof AbortError) {

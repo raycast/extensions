@@ -1,4 +1,4 @@
-import { Image, List, LocalStorage } from "@raycast/api";
+import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
@@ -8,6 +8,7 @@ import * as crypto from "crypto";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import urljoin from "url-join";
+import { emojiSymbol } from "./components/status/utils";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -112,6 +113,12 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
 
   // <br> to markdown new line
   result = replaceAll(result, /<br>/g, "  \n");
+
+  // replace all emojis
+  result = result.replace(/:(\w+):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
+
+  // remove inline HTML tags
+  result = replaceAll(result, /<[^>]+>/g, "");
 
   if (baseUrl) {
     // replace relative links with absolute ones
@@ -283,4 +290,18 @@ export function ensureCleanAccessories(
     return result;
   }
   return undefined;
+}
+
+export function showErrorToast(message: string, title?: string): Promise<Toast> {
+  const t = title || "Something went wrong";
+  return showToast({
+    style: Toast.Style.Failure,
+    title: t,
+    message: message,
+    primaryAction: {
+      title: "Copy Error Message",
+      onAction: (toast) => Clipboard.copy(`${t}: ${toast.message ?? ""}`),
+      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+    },
+  });
 }

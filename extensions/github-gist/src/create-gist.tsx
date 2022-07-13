@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import {
   checkGistFileContent,
@@ -10,11 +10,14 @@ import {
   octokit,
   updateGist,
 } from "./util/gist-utils";
-import { fetchItemInput, ItemSource } from "./util/input";
+import { fetchItemInput } from "./util/input";
+import { refreshNumber } from "./hooks/hooks";
+import { GistFileForm } from "./components/gist-file-form";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateGist(props: {
   gist: Gist | undefined;
-  refreshUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>] | undefined;
+  setRefresh: Dispatch<SetStateAction<number>> | undefined;
 }) {
   const gist =
     typeof props.gist == "undefined"
@@ -25,8 +28,12 @@ export default function CreateGist(props: {
           file: [],
         }
       : props.gist;
-  const [refresh, setRefresh] =
-    typeof props.refreshUseState == "undefined" ? useState<number[]>([0]) : props.refreshUseState;
+  const setRefresh =
+    typeof props.setRefresh == "undefined"
+      ? () => {
+          return;
+        }
+      : props.setRefresh;
 
   const isEdit = typeof props.gist != "undefined";
   const [description, setDescription] = useState<string>("");
@@ -50,11 +57,7 @@ export default function CreateGist(props: {
         setGistFiles(_gistFiles);
       } else {
         const inputItem = await fetchItemInput();
-        if (inputItem.source === ItemSource.NULL) {
-          await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
-        } else {
-          setGistFiles([...gistFiles, { filename: "", content: inputItem.content }]);
-        }
+        setGistFiles([...gistFiles, { filename: "", content: inputItem }]);
       }
       setIsLoading(false);
     }
@@ -70,24 +73,24 @@ export default function CreateGist(props: {
         <ActionPanel>
           <Action
             title={isEdit ? "Update Gist" : "Create Gist"}
-            icon={Icon.Upload}
+            icon={isEdit ? Icon.Pencil : Icon.Plus}
             onAction={async () => {
               try {
                 await showToast(Toast.Style.Animated, isEdit ? "Updating..." : "Creating...");
                 if (gistFiles.length == 0) {
-                  await showToast(Toast.Style.Failure, "No files in gist.");
+                  await showToast(Toast.Style.Failure, "No file in gist.");
                   return;
                 }
                 const _isNameValid = checkGistFileName(gistFiles);
                 if (!_isNameValid) {
-                  await showToast(Toast.Style.Failure, `Contents must have unique filenames.`);
+                  await showToast(Toast.Style.Failure, `Content must have unique filename.`);
                   return;
                 }
                 const _isContentValid = checkGistFileContent(gistFiles);
                 if (!_isContentValid.valid) {
                   await showToast(
                     Toast.Style.Failure,
-                    `Contents can't be empty.`,
+                    `Content cannot be empty.`,
                     `Check content of file${_isContentValid.contentIndex}.`
                   );
                 } else {
@@ -100,10 +103,10 @@ export default function CreateGist(props: {
                   if (response.status === 201 || response.status === 200) {
                     const options: Toast.Options = {
                       style: Toast.Style.Success,
-                      title: isEdit ? "Update gist success!" : "Create gist success!",
+                      title: isEdit ? "Update gist successfully!" : "Create gist successfully!",
                       message: "Click to copy gist link.",
                       primaryAction: {
-                        title: "Copy gist Link",
+                        title: "Copy gist link",
                         onAction: (toast) => {
                           Clipboard.copy(String(response.data.html_url));
                           toast.title = "Link is copied to Clipboard.";
@@ -111,7 +114,7 @@ export default function CreateGist(props: {
                         },
                       },
                       secondaryAction: {
-                        title: "Open in Browser",
+                        title: "Open in browser",
                         onAction: (toast) => {
                           open(String(response.data.html_url));
                           toast.hide();
@@ -120,11 +123,9 @@ export default function CreateGist(props: {
                       },
                     };
                     await showToast(options);
-                    const _refresh = [...refresh];
-                    _refresh[0]++;
-                    setRefresh(_refresh);
+                    setRefresh(refreshNumber());
                   } else {
-                    await showToast(Toast.Style.Success, isEdit ? "Update gist failure." : "Create gist failure.");
+                    await showToast(Toast.Style.Failure, isEdit ? "Failed to update gist." : "Failed to create gist.");
                   }
                 }
               } catch (e) {
@@ -140,21 +141,21 @@ export default function CreateGist(props: {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={async () => {
                 setGistFiles([...gistFiles, { filename: "", content: "" }]);
-                await showToast(Toast.Style.Success, "Add file success!");
               }}
             />
             <Action
               title="Remove File"
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 const _gistFiles = [...gistFiles];
                 _gistFiles.pop();
                 setGistFiles(_gistFiles);
-                await showToast(Toast.Style.Success, "Remove file success!");
               }}
             />
           </ActionPanel.Section>
+
+          <ActionOpenPreferences command={false} />
         </ActionPanel>
       }
     >
@@ -176,39 +177,18 @@ export default function CreateGist(props: {
             setIsPublic(newValue == "true");
           }}
         >
-          <Form.Dropdown.Item key={"secret"} title={"Secret"} value={"false"} />
-          <Form.Dropdown.Item key={"public"} title={"Public"} value={"true"} />
+          <Form.Dropdown.Item key={"secret"} icon={Icon.EyeSlash} title={"Secret"} value={"false"} />
+          <Form.Dropdown.Item key={"public"} icon={Icon.Eye} title={"Public"} value={"true"} />
         </Form.Dropdown>
       )}
       {gistFiles.map((gistFile, index, array) => {
         return (
-          <React.Fragment key={"file_fragment" + index}>
-            <Form.Separator />
-            <Form.TextField
-              id={"file_name" + index}
-              key={"file_name" + index}
-              title={" Filename  " + (index + 1)}
-              placeholder={"Filename include extension..."}
-              value={array[index].filename}
-              onChange={(newValue) => {
-                const _gistFiles = [...gistFiles];
-                _gistFiles[index].filename = newValue;
-                setGistFiles(_gistFiles);
-              }}
-            />
-            <Form.TextArea
-              id={"file_content" + index}
-              key={"file_content" + index}
-              value={array[index].content}
-              title={"Content"}
-              placeholder={"File content can't be empty..."}
-              onChange={(newValue) => {
-                const _gistFiles = [...gistFiles];
-                _gistFiles[index].content = newValue;
-                setGistFiles(_gistFiles);
-              }}
-            />
-          </React.Fragment>
+          <GistFileForm
+            key={"file_fragment" + index}
+            array={array}
+            index={index}
+            useState={[gistFiles, setGistFiles]}
+          />
         );
       })}
     </Form>

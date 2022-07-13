@@ -14,6 +14,7 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     projectId: object.projectId as Task["projectId"],
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
+    tags: (object.tags || []) as Task["tags"],
   };
 };
 

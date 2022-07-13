@@ -116,7 +116,7 @@ const TranslateForm = () => {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
+      <Form.TextArea id="text" title="Text" onChange={handleChange} />
       <Form.Dropdown id="language_from" title="From" value={fromLang} onChange={setFromLang} storeValue>
         {languages.map((lang) => (
           <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />

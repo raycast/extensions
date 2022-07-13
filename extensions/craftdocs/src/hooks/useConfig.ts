@@ -20,5 +20,5 @@ export default function useConfig({ appExistsLoading, appExists }: UseAppExists)
     setState({ configLoading: false, config: new Config() });
   }, [appExistsLoading]);
 
-  return { ...state, appExists: appExists };
+  return state;
 }
