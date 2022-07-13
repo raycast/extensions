@@ -1,4 +1,4 @@
-import { getPreferenceValues, ActionPanel, List, OpenInBrowserAction, Detail } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
@@ -99,10 +99,9 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
       title={pipeline.name || "Unknown pipeline name"}
       subtitle={status}
       icon={`codepipeline/${status}.png`}
-      accessoryTitle={pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Browser"
             url={
               "https://console.aws.amazon.com/codesuite/codepipeline/pipelines/" +
@@ -113,6 +112,11 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
           />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined,
+        },
+      ]}
     />
   );
 }
