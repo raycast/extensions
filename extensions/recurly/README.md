@@ -4,6 +4,7 @@
 </p>
 
 The extension provides a Recurly integration.
+With it, you can quickly search for user accounts and check their subscriptions.
 
 To obtain an API key, sign in into your Recurly account and go to **Integrations > API Credentials**.
 You can add as many tenants as you like through tenant configuration.
