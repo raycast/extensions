@@ -24,11 +24,13 @@ export const getLibgenUrl = async () => {
 
 export const getLibgenSearchResult = async (searchContent: string) => {
   const libgenUrl = await libgen.mirror().then((url: string) => url.replace("http", "https"));
+  // const betterSearchContent = searchContent.replace(" ", "+");
   const options = {
     mirror: libgenUrl,
     count: 100,
     query: searchContent,
     sort_by: "year",
+    reverse: true,
   };
 
   console.log(`Libgen URL: ${libgenUrl}`);
