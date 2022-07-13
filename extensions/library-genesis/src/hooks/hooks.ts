@@ -24,6 +24,7 @@ export const searchBookOnLibgen = (searchContent: string) => {
         setLoading(false);
       })
       .catch((error: Error) => {
+        console.error(error);
         setLoading(false);
         showToast(Style.Failure, String(error));
       });

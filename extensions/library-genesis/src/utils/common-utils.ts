@@ -24,20 +24,22 @@ export const getLibgenUrl = async () => {
 
 export const getLibgenSearchResult = async (searchContent: string) => {
   const libgenUrl = await libgen.mirror().then((url: string) => url.replace("http", "https"));
-  const betterSearchContent = searchContent.replace(" ", "+");
   const options = {
     mirror: libgenUrl,
     count: 100,
-    query: betterSearchContent,
+    query: searchContent,
+    sort_by: "year",
   };
+
+  console.log(`Libgen URL: ${libgenUrl}`);
+
   const data = await libgen.search(options);
-  const uniques = libgen.utils.clean.dups(data);
-  const n = uniques.length;
+  const n = data.length;
   console.log(`${n} results for "${options.query}"`);
-  if (uniques.length === undefined) {
+  if (data.length === undefined) {
     throw new Error("No Result");
   }
-  const books: BookEntry[] = uniques.map((d: any) => ({
+  const books: BookEntry[] = data.map((d: any) => ({
     title: d.title,
     author: d.author,
     year: d.year,
