@@ -4,10 +4,8 @@ import { formatBytes } from "../utils/common-utils";
 
 export function BookItem(props: { book: BookEntry }, key: number) {
   const { book } = props;
-  const markdown = `
-  <img src="${book.coverUrl}" alt="cover" height="180"/>
+  const markdown = `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
-  `;
   return (
     <List.Item
       key={key}
