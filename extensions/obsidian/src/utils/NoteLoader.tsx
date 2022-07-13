@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 import { SearchNotePreferences, Note, Vault } from "./interfaces";
-import { getNoteFileContent } from "./utils";
+import { getNoteFileContent, tagsFor } from "./utils";
 
 class NoteLoader {
   vaultPath: string;
@@ -16,7 +16,6 @@ class NoteLoader {
     const notes: Note[] = [];
     const files = this.getFiles();
 
-    let key = 0;
     for (const f of files) {
       const comp = f.split("/");
       const f_name = comp.pop();
@@ -24,15 +23,17 @@ class NoteLoader {
       if (f_name) {
         name = f_name.split(".md")[0];
       }
-      const note = {
+
+      const noteContent = getNoteFileContent(f, false);
+
+      const note: Note = {
         title: name,
-        key: ++key,
         path: f,
-        content: getNoteFileContent(f),
+        tags: tagsFor(noteContent),
+        content: noteContent,
       };
       notes.push(note);
     }
-    // console.log("Loaded " + notes.length + " notes.");
     return notes;
   }
 
@@ -54,6 +55,7 @@ class NoteLoader {
         if (
           file.endsWith(".md") &&
           file !== ".md" &&
+          !file.includes(".excalidraw") &&
           !dirPath.includes(".obsidian") &&
           this.isValidFile(dirPath, exFolders)
         ) {

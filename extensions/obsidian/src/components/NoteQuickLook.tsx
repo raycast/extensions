@@ -1,28 +1,41 @@
 import { Detail, ActionPanel, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Note, Vault } from "../utils/interfaces";
 import { NoteActions, OpenNoteActions } from "../utils/actions";
-import { isNotePinned } from "../utils/PinNoteUtils";
+import { isNotePinned } from "../utils/pinNoteUtils";
 import { NoteAction } from "../utils/constants";
-import { getNoteFileContent } from "../utils/utils";
+import { filterContent, getNoteFileContent } from "../utils/utils";
 
-export function NoteQuickLook(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const note = props.note;
-  const vault = props.vault;
+export function NoteQuickLook(props: {
+  showTitle: boolean;
+  note: Note | undefined;
+  vault: Vault;
+  actionCallback?: (action: NoteAction) => void;
+}) {
+  const { note, showTitle, vault, actionCallback } = props;
   const { pop } = useNavigation();
 
-  const [pinned, setPinned] = useState(isNotePinned(note, vault));
-  const [content, setContent] = useState(note.content);
+  let noteContent = note?.content;
+  noteContent = filterContent(noteContent ?? "");
+
+  const [pinned, setPinned] = useState(note ? isNotePinned(note, vault) : false);
+  const [content, setContent] = useState(noteContent);
 
   function reloadContent() {
-    const newContent = getNoteFileContent(note.path);
-    note.content = newContent;
-    setContent(newContent);
+    if (note) {
+      const newContent = getNoteFileContent(note.path);
+      note.content = newContent;
+      setContent(newContent);
+    }
   }
 
-  function actionCallback(action: NoteAction, value: any = undefined) {
-    props.actionCallback(action);
+  useEffect(reloadContent, [note]);
+
+  function quickLookActionCallback(action: NoteAction, value: any = undefined) {
+    if (actionCallback) {
+      actionCallback(action);
+    }
     switch (+action) {
       case NoteAction.Pin:
         setPinned(!pinned);
@@ -40,13 +53,16 @@ export function NoteQuickLook(props: { note: Note; vault: Vault; actionCallback:
 
   return (
     <Detail
-      navigationTitle={pinned ? "⭐ " + note.title : note.title}
+      isLoading={note === undefined}
+      navigationTitle={showTitle ? (pinned ? "⭐ " + note?.title : note?.title) : ""}
       markdown={content}
       actions={
-        <ActionPanel>
-          <OpenNoteActions note={note} vault={vault} actionCallback={actionCallback} />
-          <NoteActions note={note} vault={vault} actionCallback={actionCallback} />
-        </ActionPanel>
+        note ? (
+          <ActionPanel>
+            <OpenNoteActions note={note} vault={vault} actionCallback={quickLookActionCallback} />
+            <NoteActions note={note} vault={vault} actionCallback={quickLookActionCallback} />
+          </ActionPanel>
+        ) : null
       }
     />
   );
