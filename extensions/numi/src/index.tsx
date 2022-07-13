@@ -79,6 +79,7 @@ export default function Command() {
       isLoading={state.isLoading}
     >
       <List.EmptyView
+        icon="empty-view.png"
         title={apiStatus === false ? "Numi is not running" : "Waiting for calculation..."}
         description={apiStatus === false ? "Start Numi and enable Alfred integration" : ""}
       />
