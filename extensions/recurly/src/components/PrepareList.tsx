@@ -30,7 +30,7 @@ export default function PrepareList({ Item }: PrepareListProps) {
       isLoading={tenantsLoading}
       onSearchTextChange={setQuery}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select the tenant" onChange={onSelectTenant}>
+        <List.Dropdown tooltip="Select the tenant" onChange={onSelectTenant} storeValue>
           {tenants.map((tenant) => (
             <List.Dropdown.Item key={tenant.name} title={tenant.name} value={tenant.name} />
           ))}
