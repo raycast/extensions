@@ -1,3 +1,3 @@
 # Nuget Changelog
 
-## [Initial Version] - 2022-06-27
+## [Initial Version] - 2022-07-13
