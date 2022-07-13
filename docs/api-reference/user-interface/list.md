@@ -801,6 +801,7 @@ export default function Command() {
           { text: `An Accessory Text`, icon: Icon.Hammer },
           { icon: Icon.Person, tooltip: "A person" },
           { text: "Just Do It!" },
+          { date: new Date() },
         ]}
       />
     </List>

@@ -10,8 +10,8 @@ Because its API tries to stick as closely to [List](list.md#list)'s as possible,
 - removing the `isShowingDetail` prop from the top-level `List` component, along with all [List.Item](list.md#list.item)s' `detail` prop
 - renaming all [List.Item](list.md#list.item)s' h`icon` prop to `content`
 - removing all [List.Item](list.md#list.item)s' `accessories`, `accessoryIcon` and `accessoryTitle props; [Grid.Item](#grid.item) does not _currently_ support accessories
-- finally, replacing all usages of `List` with `Grid`,
-  {% hint %}
+- finally, replacing all usages of `List` with `Grid`.
+{% endhint %}
 
 ![](../../.gitbook/assets/grid.png)
 

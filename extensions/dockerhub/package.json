@@ -6,6 +6,9 @@
   "icon": "docker-icon.png",
   "author": "k8scat",
   "license": "MIT",
+  "contributors": [
+    "tonka3000"
+  ],
   "commands": [
     {
       "name": "search-image",

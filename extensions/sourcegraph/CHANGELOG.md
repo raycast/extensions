@@ -1,5 +1,15 @@
 # Changelog
 
+## [Bug fix](https://github.com/raycast/extensions/pull/2210) - 2022-07-07
+
+- **search**: Fix issue where search results with lengthy details can cause Raycast to crash.
+
+## [Sourcegraph.com update, fix for match repository text](https://github.com/raycast/extensions/pull/2165) - 2022-07-04
+
+- **all**: [The future of Sourcegraph is single-tenant](https://about.sourcegraph.com/blog/single-tenant-cloud) - this means that support for private code on Sourcegraph.com will soon be going away. This means that soon, the default "Search code" command - which searches Sourcegraph.com - will only be able to search the 2.2m+ open source repositories available on Sourcegraph.com. To search your private code, please reach out to [get a demo of the single-tenant solution](https://about.sourcegraph.com/demo), or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted). Various documentation updates, renames, and internal changes have been made to reflect this upcoming change.
+- **search**: Fix issue where matches for which the associated repository is not tied to a specific revision associated would mistakenly have `@` appended.
+- **internal**: Dependency updates.
+
 ## [Improved revision search and result tooltips](https://github.com/raycast/extensions/pull/2108) - 2022-06-27
 
 - **search**: Results from revision matches (e.g. with `repo:sourcegraph@3.41`) now annotate results with which revision the match was on, and drilldowns (<kbd>Tab</kbd> on a result) now more consistently apply the appropriate revision to generated searches.
