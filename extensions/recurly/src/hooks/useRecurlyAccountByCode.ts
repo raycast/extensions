@@ -21,6 +21,13 @@ export default function useRecurlyAccountByCode({ recurly, recurlyValid }: UseRe
         .then(() => setState((prev) => ({ ...prev, accountLoading: true })))
         .then(() => recurly.getAccount(code))
         .then((account) => setState({ account, accountLoading: false }))
+        .catch(e => {
+          if (e.type !== "not_found") {
+            throw e;
+          }
+
+          setState({ account: null, accountLoading: false });
+        })
         .catch(showError);
   }, [recurly, recurlyValid, code]);
 
