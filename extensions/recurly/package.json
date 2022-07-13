@@ -26,6 +26,9 @@
       "mode": "view"
     }
   ],
+  "categories": [
+    "Finance"
+  ],
   "dependencies": {
     "@raycast/api": "^1.35.2",
     "recurly": "^4.17.0"
