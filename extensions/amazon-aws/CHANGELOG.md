@@ -1,5 +1,11 @@
 # Amazon AWS Changelog
 
+## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-13
+
+- Added ECS Clusters ([#2254](https://github.com/raycast/extensions/pull/2254))
+- Migrate to Raycast API 1.36.0 ([#2254](https://github.com/raycast/extensions/pull/2254))
+- Moved some subtitles to Raycast List Component accessories prop ([#2254](https://github.com/raycast/extensions/pull/2254))
+
 ## [Bug fix for EC2 Instances & UX improvement for SQS command] - 2022-05-23
 
 - Manage the case where there is no public ip in EC2 ([#1715](https://github.com/raycast/extensions/pull/1715))
