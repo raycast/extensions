@@ -11,12 +11,12 @@ export default function TenantsConfiguration() {
 
   const onCreateTenant = (tenant: TenantConfiguration) =>
     createTenant(tenant)
-      .then(() => pop())
+      .then(pop)
       .catch(showError);
 
   const onEditTenant = (current: TenantConfiguration) => (updated: TenantConfiguration) =>
     editTenant(current, updated)
-      .then(() => pop())
+      .then(pop)
       .catch(showError);
 
   const onDeleteTenant = (tenant: TenantConfiguration) => () => deleteTenant(tenant).catch(showError);
