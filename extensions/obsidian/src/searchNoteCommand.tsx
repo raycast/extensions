@@ -5,7 +5,7 @@ import { NoteListObsidian } from "./components/NoteListObsidian";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
-import { pathErrorToast } from "./components/Toasts";
+import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command() {
   const { ready, vaults } = useObsidianVaults();
@@ -15,10 +15,12 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListObsidian vault={vault} />} />;
+    return (
+      <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListObsidian vault={vault} showTitle={true} />} />
+    );
   } else if (vaults.length == 1) {
-    return <NoteListObsidian vault={vaults[0]} />;
+    return <NoteListObsidian vault={vaults[0]} showTitle={false} />;
   } else {
-    pathErrorToast();
+    noVaultPathsToast();
   }
 }
