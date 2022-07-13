@@ -5,6 +5,7 @@
   "description": "Generate placeholder content",
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
+  "contributors": ["pawelkontek"],
   "license": "MIT",
   "commands": [
     {
@@ -31,11 +32,28 @@
       "data": [
         {
           "value": "clipboard",
-          "title": "Copy to Clipboard"
+          "title": "✂️ Copy to Clipboard"
         },
         {
           "value": "paste",
-          "title": "Paste to Active App"
+          "title": "📋 Paste to Active App"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "type",
+      "type": "dropdown",
+      "title": "Ipsum Type",
+      "description": "What type of ipsum would you like to use?",
+      "data": [
+        {
+          "value": "lorem",
+          "title": "✍️ Lorem Ipsum"
+        },
+        {
+          "value": "corporate",
+          "title": "👔 Corporate Ipsum"
         }
       ],
       "required": false
@@ -43,6 +61,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "corporate-ipsum": "^1.0.1",
     "lorem-ipsum": "^2.0.4",
     "node-fetch": "^3.0.0"
   },
