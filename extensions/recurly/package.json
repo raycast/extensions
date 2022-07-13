@@ -18,6 +18,12 @@
       "title": "Account Search By Email",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "accountSearchByID",
+      "title": "Account Search By ID",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

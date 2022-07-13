@@ -1,6 +1,6 @@
 import {TenantConfiguration} from "../TenantConfiguration";
 import {Action, ActionPanel, List} from "@raycast/api";
-import AccountsList from "./AccountsList";
+import AccountsListByEmail from "./AccountsListByEmail";
 
 export type EmailItemProps = {
   tenant: TenantConfiguration;
@@ -15,7 +15,7 @@ export default function EmailItem({tenant, email}: EmailItemProps) {
       <ActionPanel>
         {email.length > 0 && <Action.Push
           title="Find"
-          target={<AccountsList tenant={tenant} email={email}/>}
+          target={<AccountsListByEmail tenant={tenant} email={email}/>}
         />}
       </ActionPanel>
     }

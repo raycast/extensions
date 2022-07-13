@@ -9,7 +9,7 @@ export type AccountsListProps = {
   email: string;
 };
 
-export default function AccountsList({tenant, email}: AccountsListProps) {
+export default function AccountsListByEmail({tenant, email}: AccountsListProps) {
   const recurly = useRecurly(tenant);
   const {accounts, accountsLoading} = useRecurlyAccounts(recurly, email);
 
