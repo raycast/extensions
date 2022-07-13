@@ -26,7 +26,7 @@ export default function Command() {
       searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
-      isShowingDetail
+      isShowingDetail={books.length !== 0}
     >
       <EmptyView title={emptyViewTitle()}></EmptyView>
       {books.map((book, index) => (
