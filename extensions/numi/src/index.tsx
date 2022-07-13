@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, showToast, Toast, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { checkNumiInstallation } from "./services/checkinstall";
 import { query } from "./services/requests";
 
 interface State {
@@ -9,7 +10,7 @@ interface State {
 }
 
 export default function Command() {
-  const [apiStatus, setApiStatus] = useState<boolean>(false);
+  const [apiStatus, setApiStatus] = useState<boolean | undefined>(undefined);
   const [state, setState] = useState<State>({ isLoading: true });
   const [toast, setToast] = useState<Toast | undefined>(undefined);
   const INTERVAL_TIME = 5000;
@@ -67,34 +68,38 @@ export default function Command() {
     queryOnNumi(q);
   }, [state]);
 
-  if (apiStatus) {
-    return (
-      <List
-        searchBarPlaceholder="Enter text to query"
-        onSearchTextChange={(searchValue) => {
-          setState((oldState) => ({ ...oldState, query: searchValue, isLoading: true }));
-        }}
-        isLoading={state.isLoading}
-      >
-        {state.results &&
-          state.results.map((result, index) => {
-            if (result) {
-              return (
-                <List.Item
-                  key={index}
-                  title={result}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard title="Copy" content={result} />
-                    </ActionPanel>
-                  }
-                />
-              );
-            }
-          })}
-      </List>
-    );
-  } else {
-    return <Detail markdown="# Numi is not running" />;
-  }
+  checkNumiInstallation();
+
+  return (
+    <List
+      searchBarPlaceholder="Enter text to query"
+      onSearchTextChange={(searchValue) => {
+        setState((oldState) => ({ ...oldState, query: searchValue, isLoading: true }));
+      }}
+      isLoading={state.isLoading}
+    >
+      <List.EmptyView
+        title={apiStatus === false ? "Numi is not running" : "Waiting for calculation..."}
+        description={apiStatus === false ? "Start Numi and enable Alfred integration" : ""}
+      />
+      {state.results &&
+        state.results.map((result, index) => {
+          if (result) {
+            return (
+              <List.Item
+                key={index}
+                title={result}
+                icon={Icon.Text}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard content={result} />
+                    <Action.Paste content={result} />
+                  </ActionPanel>
+                }
+              />
+            );
+          }
+        })}
+    </List>
+  );
 }

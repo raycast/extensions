@@ -1,5 +1,5 @@
 # Numi Changelog
 
-## [Initial Version] - 2022-05-24
+## [Initial Version] - {PR_MERGE_DATE}
 
-- Add suppor to query on numi
+- Add support to query Numi.
