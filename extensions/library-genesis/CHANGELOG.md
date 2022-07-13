@@ -1,3 +1,5 @@
-# Search on ZLibary  Changelog
+# Library Genesis Changelog
 
-## [Initial Version] - 2022-07-12
+## [Added Library Genesis] - 2022-07-13
+
+Initial version code
