@@ -5,6 +5,7 @@
   "description": "Generate placeholder content",
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
+  "contributors": ["pawelkontek"],
   "license": "MIT",
   "commands": [
     {
