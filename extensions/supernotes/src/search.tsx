@@ -2,10 +2,11 @@ import React from "react";
 
 import { List } from "@raycast/api";
 
-import CardListItem from "./components/CardListItem";
-import useSearch from "./hooks/useSearch";
-import { ICardCollection } from "./util/types";
-import { useRecentCards } from "./hooks/useRecent";
+import { useRecentCards } from "hooks/useRecent";
+import useSearch from "hooks/useSearch";
+import { ICardCollection } from "utils/types";
+
+import CardListItem from "components/CardListItem";
 
 const CardSearch = () => {
   const [resultCards, setResultCards] = React.useState<ICardCollection>();

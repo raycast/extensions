@@ -1,13 +1,15 @@
 import React from "react";
 
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 
-import CardDetail from "./components/CardDetail";
-import useCreate, { SimpleCardData } from "./hooks/useCreate";
+import useCreate, { SimpleCardData } from "hooks/useCreate";
+import { ICard } from "utils/types";
+
+import CardDetail from "components/CardDetail";
 
 const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
-  const { push, pop } = useNavigation();
   const [markupError, setMarkupError] = React.useState<string | undefined>();
+  const [createdCard, setCreatedCard] = React.useState<ICard>();
 
   const dropNameErrorIfNeeded = () => {
     if (markupError && markupError.length > 0) {
@@ -15,12 +17,11 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
     }
   };
 
-  const { create, loading } = useCreate((card) => {
-    pop();
-    push(<CardDetail card={card} />);
-  });
+  const { create, loading } = useCreate(setCreatedCard);
 
-  return (
+  return createdCard ? (
+    <CardDetail card={createdCard} />
+  ) : (
     <Form
       enableDrafts
       isLoading={loading}

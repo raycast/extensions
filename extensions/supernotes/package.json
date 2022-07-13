@@ -36,6 +36,11 @@
       "required": true
     }
   ],
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "supernotes"
+    }
+  },
   "dependencies": {
     "@raycast/api": "^1.37.1",
     "node-fetch": "^3.2.6"
@@ -45,6 +50,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "import-sort-style-supernotes": "^0.4.1",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

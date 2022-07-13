@@ -1,17 +1,17 @@
 import React from "react";
 
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 
-import { ICard, SupernotesErrorPayload } from "../util/types";
-import { SUPERNOTES_API_URL } from "../util/defines";
+import { SUPERNOTES_API_URL } from "utils/defines";
+import { ICard, SupernotesErrorPayload } from "utils/types";
 
 export interface SimpleCardData {
   name: string;
   markup: string;
 }
 
-const useCreate = (callback: (card: ICard) => void) => {
+const useCreate = (successCallback: (card: ICard) => void) => {
   const { apiKey } = getPreferenceValues();
 
   const [loading, setLoading] = React.useState(false);
@@ -31,19 +31,19 @@ const useCreate = (callback: (card: ICard) => void) => {
         headers: { "Api-Key": apiKey, "Content-Type": "application/json" },
       });
       const jsonData = await res.json();
-      setLoading(false);
       if (res.status !== 200) {
         throw new Error((jsonData as SupernotesErrorPayload).detail);
       }
-      callback(jsonData as ICard);
       toast.style = Toast.Style.Success;
       toast.title = "Success";
       toast.message = "Card created";
+      successCallback(jsonData as ICard);
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Card Creation Failed";
       toast.message = String(err);
     }
+    setLoading(false);
     setTimeout(() => toast.hide(), 3000);
   };
 

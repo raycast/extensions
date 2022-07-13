@@ -2,7 +2,7 @@ import React from "react";
 
 import { LocalStorage } from "@raycast/api";
 
-import { ICard } from "../util/types";
+import { ICard } from "utils/types";
 
 interface Recent {
   card: ICard;

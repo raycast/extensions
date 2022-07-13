@@ -1,10 +1,10 @@
 import React from "react";
 
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 
-import { SUPERNOTES_API_URL } from "../util/defines";
-import { SupernotesErrorPayload } from "../util/types";
+import { SUPERNOTES_API_URL } from "utils/defines";
+import { SupernotesErrorPayload } from "utils/types";
 
 const useJunk = (successCallback: () => void) => {
   const { apiKey } = getPreferenceValues();

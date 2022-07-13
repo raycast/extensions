@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Detail } from "@raycast/api";
 
-import { useStoreCard } from "../hooks/useRecent";
-import { PermMap } from "../util/mapping";
-import { ICard } from "../util/types";
-import CommonCardActions from "./CommonCardActions";
+import { useStoreCard } from "hooks/useRecent";
+import { PermMap } from "utils/mapping";
+import { ICard } from "utils/types";
+
+import CommonCardActions from "components/CommonCardActions";
 
 const CardDetail = ({ card }: { card: ICard }) => {
   useStoreCard(card);

@@ -1,8 +1,8 @@
 import { Action, Icon } from "@raycast/api";
 
-import useJunk from "../hooks/useJunk";
-import { useRecentRemover } from "../hooks/useRecent";
-import { ICard } from "../util/types";
+import useJunk from "hooks/useJunk";
+import { useRecentRemover } from "hooks/useRecent";
+import { ICard } from "utils/types";
 
 interface CommonCardActionsProps {
   card: ICard;

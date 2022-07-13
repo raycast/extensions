@@ -1,10 +1,10 @@
 import React from "react";
 
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 
-import { ICardCollection, SupernotesErrorPayload } from "../util/types";
-import { SUPERNOTES_API_URL } from "../util/defines";
+import { SUPERNOTES_API_URL } from "utils/defines";
+import { ICardCollection, SupernotesErrorPayload } from "utils/types";
 
 const useSearch = (callback: (cards?: ICardCollection) => void) => {
   const { apiKey } = getPreferenceValues();
