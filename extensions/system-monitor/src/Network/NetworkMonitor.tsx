@@ -102,12 +102,12 @@ export default function NetworkMonitor() {
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label
-                  title="Upload Speed"
-                  text={(state.processList.length === 0 ? "0 B" : formatBytes(state.upload)) + "/s"}
-                />
-                <List.Item.Detail.Metadata.Label
                   title="Download Speed"
                   text={(state.processList.length === 0 ? "0 B" : formatBytes(state.download)) + "/s"}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Upload Speed"
+                  text={(state.processList.length === 0 ? "0 B" : formatBytes(state.upload)) + "/s"}
                 />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" />
