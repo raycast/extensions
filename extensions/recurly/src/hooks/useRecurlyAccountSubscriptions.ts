@@ -1,6 +1,6 @@
-import {useEffect, useState} from "react";
-import {UseRecurly} from "./useRecurly";
-import {Client, Subscription} from "recurly";
+import { useEffect, useState } from "react";
+import { UseRecurly } from "./useRecurly";
+import { Client, Subscription } from "recurly";
 import showError from "../showError";
 
 export type UseRecurlyAccountSubscriptions = {
@@ -8,10 +8,10 @@ export type UseRecurlyAccountSubscriptions = {
   subscriptionsLoading: boolean;
 };
 
-export default function useRecurlyAccountSubscriptions({recurly, recurlyValid}: UseRecurly, id: string) {
+export default function useRecurlyAccountSubscriptions({ recurly, recurlyValid }: UseRecurly, id: string) {
   const [state, setState] = useState<UseRecurlyAccountSubscriptions>({
     subscriptionsLoading: true,
-    subscriptions: []
+    subscriptions: [],
   });
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function useRecurlyAccountSubscriptions({recurly, recurlyValid}: 
 
     Promise.resolve()
       .then(() => iterateAccountSubscriptions(recurly, id))
-      .then(subscriptions => setState({subscriptions, subscriptionsLoading: false}))
+      .then((subscriptions) => setState({ subscriptions, subscriptionsLoading: false }))
       .catch(showError);
   }, [recurly, recurlyValid, id]);
 
@@ -38,8 +38,8 @@ const iterateAccountSubscriptions = async (recurly: Client, id: string) => {
       break;
     }
 
-    subscriptions.push(subscription)
+    subscriptions.push(subscription);
   }
 
   return subscriptions;
-}
+};
