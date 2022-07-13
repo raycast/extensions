@@ -1,6 +1,5 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { BookEntry } from "../types";
-import React from "react";
 import { formatBytes } from "../utils/common-utils";
 
 export function BookItem(props: { book: BookEntry }, key: number) {
@@ -28,15 +27,17 @@ export function BookItem(props: { book: BookEntry }, key: number) {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Title" text={book.title} />
-              <List.Item.Detail.Metadata.Label title="Author(s)" text={book.author} />
-              <List.Item.Detail.Metadata.Label title="Publisher" text={book.publisher} />
-              <List.Item.Detail.Metadata.Label title="Year" text={book.year} />
-              <List.Item.Detail.Metadata.Label title="Language" text={book.language} />
-              <List.Item.Detail.Metadata.Label title="Pages" text={book.pages} />
+              {book.author && <List.Item.Detail.Metadata.Label title="Author(s)" text={book.author} />}
+              {book.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={book.publisher} />}
+              {book.year && <List.Item.Detail.Metadata.Label title="Year" text={book.year} />}
+              {book.language && <List.Item.Detail.Metadata.Label title="Language" text={book.language} />}
+              {book.pages && <List.Item.Detail.Metadata.Label title="Pages" text={book.pages} />}
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Time added" text={book.timeAdded} />
-              <List.Item.Detail.Metadata.Label title="Extension" text={book.extension} />
-              <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(+book.fileSize)} />
+              {book.timeAdded && <List.Item.Detail.Metadata.Label title="Time added" text={book.timeAdded} />}
+              {book.extension && (
+                <List.Item.Detail.Metadata.Label title="Extension" text={book.extension.toUpperCase()} />
+              )}
+              {book.fileSize && <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(+book.fileSize)} />}
             </List.Item.Detail.Metadata>
           }
         />
