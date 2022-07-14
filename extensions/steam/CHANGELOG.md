@@ -2,7 +2,7 @@
 
 ## [Update] - 2022-07-14
 
-Fixed so images in README
+Fixed path of the used images in README
 
 ## [Added Steam] - 2022-06-18
 
