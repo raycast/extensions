@@ -1,35 +1,10 @@
 {
-	"root": true,
-	"parser": "@typescript-eslint/parser",
-	"env": {
-		"es2020": true,
-		"node": true
-	},
-	"plugins": [
-		"@typescript-eslint",
-		"react",
-		"react-hooks"
-	],
-	"extends": [
-		"plugin:@typescript-eslint/recommended",
-		"plugin:prettier/recommended"
-	],
-	"rules": {
-		"prettier/prettier": [
-			"error",
-			{
-				"semi": false,
-				"singleQuote": true,
-				"tabWidth": 4,
-				"trailingComma": "all",
-				"useTabs": true,
-				"printWidth": 127
-			}
-		],
-		"@typescript-eslint/type-annotation-spacing": "error",
-		"@typescript-eslint/no-empty-function": "warn",
-		"@typescript-eslint/ban-ts-comment": "warn",
-		"@typescript-eslint/no-explicit-any": "warn",
-		"@typescript-eslint/explicit-module-boundary-types": "warn"
-	}
+  "root": true,
+  "env": {
+    "es2020": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
 }
