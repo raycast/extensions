@@ -4,7 +4,7 @@
 
 # Numi for Raycast
 
-This is a raycast extension with commands to query anything on numi app. To use it, install the extension from the [Raycast Store](https://www.raycast.com/andresmorelos/numi), [enable the Numi API](#enable-the-numi-api), open Raycast Search and type the following [commands](#query-on-numi)):
+This is a Raycast extension with commands to query anything on Numi app. To use it, install the extension from the [Raycast Store](https://www.raycast.com/andresmorelos/numi), [enable the Numi API](#enable-the-numi-api), open Raycast Search and type the following [commands](#query-on-numi)):
 
 ## Enable the Numi API
 
