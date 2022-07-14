@@ -22,8 +22,8 @@ To run the dev build, you can:
    tab (look for the +)
 4. Open an issue here if you get stuck and I'll try to help.
 
-<img src="media/screenshot-1.png" />
-<img src="media/screenshot-2.png" />
+<img src="media/steam-01.png" />
+<img src="media/steam-02.png" />
 
 ## Features
 
