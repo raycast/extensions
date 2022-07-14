@@ -54,7 +54,9 @@ export function useRepositories(searchText: string | undefined, searchFilter: st
       setState((oldState) => ({ ...oldState, isLoading: true }));
 
       try {
-        const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, { searchQuery: `${searchFilter} ${searchText}` });
+        const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, {
+          searchQuery: `${searchFilter} fork:true ${searchText}`,
+        });
 
         if (!isCanceled) {
           setState((oldState) => ({ ...oldState, data: search }));
