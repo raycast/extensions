@@ -141,8 +141,7 @@ export default function Command() {
     <List
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Tracks, Podcasts and more"
-      searchBarPlaceholder="Search your favorite track"
+      searchBarPlaceholder="Search your favorite track, podcast and more..."
     >
       {result && (
         <>
