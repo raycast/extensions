@@ -90,7 +90,7 @@ export default function Command(): ReactElement {
                 <Action
                   title="Toggle Full Text"
                   icon={Icon.Text}
-                  onAction={() => setIsShowingDetaichl(!isShowingDetail)}
+                  onAction={() => setIsShowingDetail(!isShowingDetail)}
                 />
                 <Action.OpenInBrowser
                   title="Open in Google Translate"
