@@ -8,7 +8,7 @@ let count = 0;
 export default function Command(): ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<{ text: string; languages: string }[]>([]);
+  const [results, setResults] = useState<{ text: string; languages: string, source_language: string, target_language: string }[]>([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   useEffect(() => {
