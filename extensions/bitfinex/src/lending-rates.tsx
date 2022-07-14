@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { List } from "@raycast/api";
 import useSWR from "swr";
 import fetch from "node-fetch";
+import { getCurrency } from "./preference";
 
 // ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
 const tfOptions = [
@@ -22,7 +23,7 @@ const tfOptions = [
 const candlesTimeFrame: Record<string, string> = tfOptions.reduce(
   (acc, tf) => ({
     ...acc,
-    [tf[0]]: `https://api-pub.bitfinex.com/v2/candles/trade:${tf[0]}:fUSD:a30:p2:p30/hist`,
+    [tf[0]]: `https://api-pub.bitfinex.com/v2/candles/trade:${tf[0]}:${getCurrency()}:a30:p2:p30/hist`,
   }),
   {}
 );
@@ -53,31 +54,33 @@ export default function LendingRates() {
       isLoading={isValidating}
       searchBarAccessory={<LendingRatesDropdown onChange={(value) => setTf(value as keyof typeof candlesTimeFrame)} />}
     >
-      {data.map((r) => {
-        const date = new Date(r[0]);
-        const averageRate = r[2] * 100 * 365;
+      <List.Section title={`Lending Rates for ${getCurrency()}`}>
+        {data.map((r) => {
+          const date = new Date(r[0]);
+          const averageRate = r[2] * 100 * 365;
 
-        const lowRate = r[1] * 100 * 365;
-        const highRate = r[3] * 100 * 365;
+          const lowRate = r[1] * 100 * 365;
+          const highRate = r[3] * 100 * 365;
 
-        return (
-          <List.Item
-            title={date.toLocaleString()}
-            key={date.getTime()}
-            accessories={[
-              {
-                text: averageRate.toFixed(2) + "%" + "(avg)",
-              },
-              {
-                text: highRate.toFixed(2) + "%" + "(hi)",
-              },
-              {
-                text: lowRate.toFixed(2) + "%" + "(lo)",
-              },
-            ]}
-          />
-        );
-      })}
+          return (
+            <List.Item
+              title={date.toLocaleString()}
+              key={date.getTime()}
+              accessories={[
+                {
+                  text: averageRate.toFixed(2) + "%" + "(avg)",
+                },
+                {
+                  text: highRate.toFixed(2) + "%" + "(hi)",
+                },
+                {
+                  text: lowRate.toFixed(2) + "%" + "(lo)",
+                },
+              ]}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

@@ -1,12 +1,7 @@
 import BFX from "bitfinex-api-node";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "./preference";
 
-type Preference = {
-  api_key: string;
-  api_secret: string;
-};
-
-const { api_key: apiKey, api_secret: apiSecret } = getPreferenceValues<Preference>();
+const { api_key: apiKey, api_secret: apiSecret } = getPreferenceValues();
 
 export default new BFX({
   apiKey,

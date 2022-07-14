@@ -3,6 +3,7 @@ import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "./lending-rates";
 import Bitfinex from "./api";
 import useSWR, { mutate } from "swr";
+import { getCurrency, getPreferenceValues } from "./preference";
 ("swr");
 
 function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?: boolean; canCancel?: boolean }) {
@@ -129,7 +130,11 @@ function CreateOfferForm() {
       });
       await rest.submitFundingOffer(newOffer);
     } catch (e) {
-      console.error(e);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Create Offer Failed",
+        message: String(e),
+      });
     }
 
     mutate("/api/funding-offers");
@@ -146,7 +151,7 @@ function CreateOfferForm() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="symbol" title="Symbol" defaultValue="fUSD" />
+      <Form.TextField id="symbol" title="Symbol" defaultValue={getCurrency()} />
 
       <Form.TextField id="amount" title="Amount" defaultValue="100" />
       <Form.TextField
@@ -162,24 +167,35 @@ function CreateOfferForm() {
 
 export default function FundingOffers() {
   const rest = Bitfinex.rest();
+  const { f_currency } = getPreferenceValues();
 
-  const { data = [], isValidating } = useSWR("/api/funding-credits", () => rest.fundingCredits() as Promise<any[]>);
+  const { data = [], isValidating } = useSWR(
+    "/api/funding-credits",
+    () => rest.fundingCredits(getCurrency()) as Promise<any[]>
+  );
 
   const { data: activeOffers = [], isValidating: activeOfferLoading } = useSWR(
     "/api/funding-offers",
-    () => rest.fundingOffers() as Promise<any[]>
+    () => rest.fundingOffers(getCurrency()) as Promise<any[]>
   );
 
   const { data: balanceInfo, isValidating: isBalanceLoading } = useSWR(
     "/api/balance",
-    () => rest.calcAvailableBalance("fUSD", 0, 0, "FUNDING") as Promise<any>
+    () => rest.calcAvailableBalance(getCurrency(), 0, 0, "FUNDING") as Promise<any>
   );
 
   return (
     <List isLoading={isValidating || activeOfferLoading || isBalanceLoading}>
       {balanceInfo && (
         <List.Section title="Available Funding">
-          <List.Item title={`${Math.abs(balanceInfo[0])} USD`} />
+          <List.Item
+            title={`${Math.abs(balanceInfo[0])} ${f_currency}`}
+            actions={
+              <ActionPanel>
+                <Action.Push icon={Icon.Plus} title="Create Offer" target={<CreateOfferForm />} />
+              </ActionPanel>
+            }
+          />
         </List.Section>
       )}
 
