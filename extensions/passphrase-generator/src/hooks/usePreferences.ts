@@ -9,8 +9,7 @@ export type Preferences = {
 };
 
 const usePreferences = (): Preferences => {
-  const { strength, length, maxWordLength, ...preferences } =
-    getPreferenceValues<Record<keyof Preferences, string>>();
+  const { strength, length, maxWordLength, ...preferences } = getPreferenceValues<Record<keyof Preferences, string>>();
 
   return {
     ...preferences,

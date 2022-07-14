@@ -16,11 +16,7 @@ const ListItem = ({ generator, generatePasswords }: Props): JSX.Element => (
     icon={getStrengthIcon(generator.strength)}
     actions={
       <ActionPanel>
-        <Action.CopyToClipboard
-          title="Copy password"
-          content={generator.password}
-          onCopy={generatePasswords}
-        />
+        <Action.CopyToClipboard title="Copy password" content={generator.password} onCopy={generatePasswords} />
       </ActionPanel>
     }
   />

@@ -20,13 +20,7 @@ export class PasswordGenerator {
     this.strength = passwordStrength;
   }
 
-  generate({
-    strength,
-    length,
-  }: {
-    strength?: number;
-    length?: number;
-  }): [string, number] {
+  generate({ strength, length }: { strength?: number; length?: number }): [string, number] {
     const pw = [];
     if (strength) {
       length = Math.ceil(strength / this.entropy);
@@ -98,10 +92,7 @@ export class DictionaryGenerator extends PasswordGenerator {
       pw.push(this.data[Math.floor(Math.random() * this.data.length)]);
     }
 
-    return [
-      pw.join(this.preferences.delimiter),
-      Math.floor(this.entropy * iterations),
-    ];
+    return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * iterations)];
   }
 
   private password_by_length(length: number): [string, number] {
@@ -114,19 +105,10 @@ export class DictionaryGenerator extends PasswordGenerator {
       pw_length += word.length + 1;
     }
 
-    return [
-      pw.join(this.preferences.delimiter),
-      Math.floor(this.entropy * pw.length),
-    ];
+    return [pw.join(this.preferences.delimiter), Math.floor(this.entropy * pw.length)];
   }
 
-  generate({
-    strength,
-    length,
-  }: {
-    strength?: number;
-    length?: number;
-  }): [string, number] {
+  generate({ strength, length }: { strength?: number; length?: number }): [string, number] {
     if (strength) {
       return this.password_by_iterations(Math.ceil(strength / this.entropy));
     } else {

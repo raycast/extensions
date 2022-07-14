@@ -48,11 +48,7 @@ export default function Command(): JSX.Element {
       searchBarPlaceholder="Generate password of given length"
     >
       {passwords.map((generator) => (
-        <ListItem
-          key={generator.id}
-          generator={generator}
-          generatePasswords={generatePasswords}
-        />
+        <ListItem key={generator.id} generator={generator} generatePasswords={generatePasswords} />
       ))}
     </List>
   );

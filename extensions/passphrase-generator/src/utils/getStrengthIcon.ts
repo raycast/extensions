@@ -1,8 +1,6 @@
 import { Color, Image } from "@raycast/api";
 
-export const getStrengthIcon = (
-  strength: number
-): { source: Image.Source; tintColor?: Color.ColorLike } => {
+export const getStrengthIcon = (strength: number): { source: Image.Source; tintColor?: Color.ColorLike } => {
   const entropy = [
     {
       bits: 28,
