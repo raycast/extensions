@@ -45,7 +45,7 @@ export default function PlayLibraryAlbum() {
     await pipe(
       next,
       S.trim,
-      music.track.search,
+      music.albums.search,
       TE.matchW(
         () => {
           showToast(Toast.Style.Failure, "Could not get albums");
