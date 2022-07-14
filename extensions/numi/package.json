@@ -2,19 +2,22 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "numi",
   "title": "Numi",
-  "description": "Use Numi app from raycast",
+  "description": "Query Numi from Raycast",
   "icon": "numi-icon.png",
   "author": "andresmorelos",
   "categories": [
     "Productivity",
     "Data"
   ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Query on Numi",
-      "description": "Search on numi any query",
+      "title": "Query Numi",
+      "description": "Query Numi right from Raycast",
       "mode": "view"
     }
   ],
