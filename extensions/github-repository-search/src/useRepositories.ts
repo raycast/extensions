@@ -1,6 +1,5 @@
 import { preferences } from "@raycast/api";
 import { Octokit } from "octokit";
-import { setUncaughtExceptionCaptureCallback } from "process";
 import { useEffect, useState } from "react";
 import { SearchRepositoriesResponse } from "./types";
 

@@ -2,7 +2,7 @@ import { preferences } from "@raycast/api";
 import { Cache } from "@raycast/api";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
-import { SearchRepositoriesResponse, UserDataResponse } from "./types";
+import { UserDataResponse } from "./types";
 
 const octokit = new Octokit({ auth: preferences.token.value });
 const cache = new Cache();
