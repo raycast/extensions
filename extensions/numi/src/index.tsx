@@ -26,11 +26,13 @@ export default function Command() {
       .catch((err) => {
         if (err.message.includes("ECONNREFUSED")) {
           setApiStatus(false);
+          setState((oldState) => ({ ...oldState, isLoading: false }));
         }
 
         showToast({
           style: Toast.Style.Failure,
-          title: err.message,
+          title: "Something went wrong",
+          message: "Please make sure Numi is running",
         })
           .then((toast) => setToast)
           .catch((err) => console.error("Error Creating Toast"));
@@ -80,8 +82,8 @@ export default function Command() {
     >
       <List.EmptyView
         icon="empty-view.png"
-        title={apiStatus === false ? "Numi is not running" : "Waiting for query..."}
-        description={apiStatus === false ? "Start Numi and enable Alfred integration" : "E.g.: 5+5..."}
+        title={apiStatus === false ? "Numi is not running" : "Waiting for calculation..."}
+        description={apiStatus === false ? "Start Numi and enable Alfred integration" : ""}
       />
       {state.results &&
         state.results.map((result, index) => {
