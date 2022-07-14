@@ -9,6 +9,9 @@
     "Developer Tools",
     "Security"
   ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
