@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "pwgen",
-  "title": "Random Password Generator",
+  "name": "passphrase-generator",
+  "title": "Passphrase Generator",
   "description": "Generates a set of random passwords using different generators.",
   "icon": "command-icon.png",
   "author": "omBratteng",

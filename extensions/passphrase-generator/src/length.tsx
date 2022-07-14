@@ -45,7 +45,6 @@ export default function Command(): JSX.Element {
 			isLoading={loading}
 			searchText={strengthLevel}
 			onSearchTextChange={setStrengthLevel}
-			navigationTitle="Generate password of given length"
 			searchBarPlaceholder="Generate password of given length"
 		>
 			{passwords.map((generator) => (

@@ -1,5 +1,5 @@
-# pwgen
+# Passphrase Generator
 
-## [Initial Version] - 2022-04-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release with six different password generation algorithms
