@@ -2,7 +2,7 @@
 
 ## [Add details view] - 2022-07-13
 
-- Adds option to commands to open a detail view of the bookmark
+- Adds action to open a detail view of the bookmark
 
 ## [Initial version] - 2021-10-19
 
