@@ -1,0 +1,80 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "tailwindcss-colors",
+	"title": "Tailwind CSS Colors",
+	"description": "Search Tailwind CSS color palette by name, shade, or hex code.",
+	"icon": "tailwindcss.png",
+	"author": "nav",
+	"categories": [
+		"Design Tools",
+		"Productivity",
+		"Developer Tools"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "index",
+			"title": "Palette Search",
+			"subtitle": "Tailwind CSS Colors",
+			"description": "Search Tailwind CSS color palette by name, shade, or hex code.",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "primaryActionBehavior",
+			"description": "Copy / Paste",
+			"type": "dropdown",
+			"required": true,
+			"title": "Primary Action",
+			"default": "copy",
+			"data": [
+				{
+					"value": "copy",
+					"title": "Copy"
+				},
+				{
+					"value": "paste",
+					"title": "Paste"
+				}
+			]
+		},
+		{
+			"name": "primaryActionValue",
+			"description": "Code / Hex",
+			"type": "dropdown",
+			"required": true,
+			"title": "Primary Value",
+			"default": "code",
+			"data": [
+				{
+					"value": "code",
+					"title": "Code (cyan-400)"
+				},
+				{
+					"value": "hex",
+					"title": "Hex (#a1b2c3)"
+				}
+			]
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.37.1"
+	},
+	"devDependencies": {
+		"@types/node": "~16.10.0",
+		"@types/react": "^17.0.28",
+		"@typescript-eslint/eslint-plugin": "^5.0.0",
+		"@typescript-eslint/parser": "^5.0.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"prettier": "^2.5.1",
+		"typescript": "^4.4.3"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint"
+	}
+}
