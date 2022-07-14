@@ -6,14 +6,14 @@ import { ICard } from "utils/types";
 
 interface CommonCardActionsProps {
   card: ICard;
-  refreshList?: () => void;
+  removeFromList?: (cardId: string) => void;
 }
 
-const CommonCardActions = ({ card, refreshList }: CommonCardActionsProps) => {
+const CommonCardActions = ({ card, removeFromList }: CommonCardActionsProps) => {
   const { found, removeFromRecents } = useRecentRemover(card);
   const removeFromRecentsAndList = () => {
     removeFromRecents();
-    refreshList && refreshList();
+    removeFromList && removeFromList(card.data.id);
   };
 
   const { junk } = useJunk(removeFromRecentsAndList);

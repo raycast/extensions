@@ -8,10 +8,10 @@ import CommonCardActions from "components/CommonCardActions";
 
 interface CardListItemProps {
   card: ICard;
-  refreshList?: () => void;
+  removeFromList?: (cardId: string) => void;
 }
 
-const CardListItem = ({ card, refreshList }: CardListItemProps) => {
+const CardListItem = ({ card, removeFromList }: CardListItemProps) => {
   return (
     <List.Item
       title={card.data.name}
@@ -22,7 +22,7 @@ const CardListItem = ({ card, refreshList }: CardListItemProps) => {
       actions={
         <ActionPanel>
           <Action.Push title="View Card" icon={Icon.TextDocument} target={<CardDetail card={card} />} />
-          <CommonCardActions card={card} refreshList={refreshList} />
+          <CommonCardActions card={card} removeFromList={removeFromList} />
         </ActionPanel>
       }
     />
