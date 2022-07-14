@@ -31,7 +31,7 @@
       "description": "The special characters to use in the password generator.",
       "type": "textfield",
       "default": "!\"#$%&'()*+,-./:;<=>?@[]^_`{|}~",
-      "required": true
+      "required": false
     },
     {
       "name": "length",
@@ -39,7 +39,7 @@
       "description": "Default length of password",
       "type": "textfield",
       "default": "20",
-      "required": true
+      "required": false
     },
     {
       "name": "strength",
@@ -47,7 +47,7 @@
       "description": "Default strength of password",
       "type": "textfield",
       "default": "3",
-      "required": true
+      "required": false
     },
     {
       "name": "delimiter",
@@ -55,7 +55,7 @@
       "description": "Word delimiter",
       "type": "textfield",
       "default": "-",
-      "required": true
+      "required": false
     },
     {
       "name": "maxWordLength",
@@ -63,7 +63,7 @@
       "description": "Max length of words from dictionary",
       "type": "textfield",
       "default": "8",
-      "required": true
+      "required": false
     }
   ],
   "dependencies": {
