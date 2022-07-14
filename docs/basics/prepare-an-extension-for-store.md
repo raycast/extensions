@@ -127,6 +127,12 @@ This tool will use your current background. Choose a background image with a goo
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
 
+### Specifications
+
+| Screenshot size                | Aspect ratio | Format | Dark mode support |
+| ------------------------------ | ------------ | ------ | ----------------- |
+| 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
+
 ### Do's & Dont's
 
 - ✅ Choose a background with good contrast, that makes it clear and easy to see the app and extension you’ve made
