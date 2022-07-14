@@ -29,7 +29,7 @@ export default function Command() {
     error: searchRepositoriesError,
     isLoading: isLoadingRepositories,
   } = useRepositories(debouncedSearchText, searchFilter);
-  const { data: userData, error: fetchUserDataError, isLoading: isLoadingUserData } = useUserData();
+  const { data: userData, error: fetchUserDataError } = useUserData();
 
   const {
     repositories: visitedRepositories,
@@ -71,7 +71,7 @@ export default function Command() {
               r.nameWithOwner.includes(searchText ?? "") &&
               r.nameWithOwner.match(
                 // Converting query filter string to regexp:
-                `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}\/.*`
+                `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`
               )
           )
           .map((repository) => (
