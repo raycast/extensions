@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Set Language",
-      "subtitle": "Code Blocks",
+      "subtitle": "CodeBlocks",
       "description": "Set or modify the programming language in markdown code blocks in batch.",
       "mode": "view"
     }
