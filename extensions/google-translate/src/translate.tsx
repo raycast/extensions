@@ -49,10 +49,14 @@ export default function Command(): ReactElement {
             {
               text: res[0].text,
               languages: `${lang1Rep} -> ${lang2Rep}`,
+              source_language: supportedLanguagesByCode[preferences.lang1].code,
+              target_language: supportedLanguagesByCode[preferences.lang2].code
             },
             {
               text: res[1].text,
               languages: `${lang2Rep} -> ${lang1Rep}`,
+              source_language: supportedLanguagesByCode[preferences.lang2].code,
+              target_language: supportedLanguagesByCode[preferences.lang1].code
             },
           ]);
         }
@@ -86,7 +90,12 @@ export default function Command(): ReactElement {
                 <Action
                   title="Toggle Full Text"
                   icon={Icon.Text}
-                  onAction={() => setIsShowingDetail(!isShowingDetail)}
+                  onAction={() => setIsShowingDetaichl(!isShowingDetail)}
+                />
+                <Action.OpenInBrowser
+                  title="Open in Google Translate"
+                  shortcut={{ modifiers: ["opt"], key: "enter" }}
+                  url={"https://translate.google.com/?sl=" + r.source_language + "&tl=" + r.target_language + "&text=" + toTranslate + "&op=translate"}
                 />
               </ActionPanel.Section>
             </ActionPanel>
