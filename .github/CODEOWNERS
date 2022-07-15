@@ -376,7 +376,7 @@
 /extensions/search-npm                               @mrmartineau @reloadedhead
 /extensions/search-rubygems                          @aleks
 /extensions/semantic-scholar                         @blainerothrock
-/extensions/send-to-flomo                            @ahonn
+/extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
 /extensions/sentry                                   @thomaspaulmann @mattisssa
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/sf-symbols-search                        @peteschaffner
