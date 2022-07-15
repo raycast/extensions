@@ -1,11 +1,4 @@
-import {
-  getPreferenceValues,
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  Detail,
-} from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
@@ -71,11 +64,31 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
   const preferences: Preferences = getPreferenceValues();
 
   const subtitle = useMemo(() => {
-    if (instance.PublicIpAddress) {
-      return `${instance.InstanceType} (🔒 ${instance.PrivateIpAddress} / 🌍 ${instance.PublicIpAddress})`;
-    }
-    return `${instance.InstanceType} (🔒 ${instance.PrivateIpAddress})`;
+    return `${instance.InstanceType}`;
   }, [instance]);
+
+  function getAccessories(): List.Item.Accessory[] {
+    const _acc: List.Item.Accessory[] = [];
+    _acc.push({
+      icon: "🔒",
+      text: instance.PrivateIpAddress,
+      tooltip: "Private Ip Address",
+    });
+    if (instance.PublicIpAddress) {
+      _acc.push({
+        icon: "🌍",
+        text: instance.PublicIpAddress,
+        tooltip: "Public Ip Address",
+      });
+    }
+    _acc.push({
+      icon: "⏰",
+      text: instance.LaunchTime ? instance.LaunchTime.toLocaleDateString() : undefined,
+      tooltip: "Launch Time",
+    });
+
+    return _acc;
+  }
 
   return (
     <List.Item
@@ -84,10 +97,9 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
       title={name || "Unknown Instance name"}
       subtitle={subtitle}
       icon="list-icon.png"
-      accessoryTitle={instance.LaunchTime ? instance.LaunchTime.toLocaleDateString() : undefined}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Browser"
             url={
               "https://" +
@@ -98,12 +110,13 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
               instance.InstanceId
             }
           />
-          <CopyToClipboardAction title="Copy Private IP" content={instance.PrivateIpAddress || ""} />
+          <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress || ""} />
           {instance.PublicIpAddress && (
-            <CopyToClipboardAction title="Copy Public IP" content={instance.PublicIpAddress} />
+            <Action.CopyToClipboard title="Copy Public IP" content={instance.PublicIpAddress} />
           )}
         </ActionPanel>
       }
+      accessories={getAccessories()}
     />
   );
 }
