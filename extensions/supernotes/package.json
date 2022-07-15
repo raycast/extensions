@@ -29,35 +29,35 @@
     },
     {
       "name": "home",
-      "title": "Open Home",
+      "title": "Go Home",
       "subtitle": "Supernotes",
       "description": "Open Home View.",
       "mode": "no-view"
     },
     {
       "name": "daily",
-      "title": "Open Daily",
+      "title": "Go to Daily",
       "subtitle": "Supernotes",
       "description": "Open Daily Collection.",
       "mode": "no-view"
     },
     {
       "name": "thoughts",
-      "title": "Open Thoughts",
+      "title": "Go to Thoughts",
       "subtitle": "Supernotes",
       "description": "Open Thoughts Collection.",
       "mode": "no-view"
     },
     {
       "name": "inbox",
-      "title": "Open Inbox",
+      "title": "Go to Inbox",
       "subtitle": "Supernotes",
       "description": "Open Inbox Collection.",
       "mode": "no-view"
     },
     {
       "name": "junk",
-      "title": "Open Junk",
+      "title": "Go to Junk",
       "subtitle": "Supernotes",
       "description": "Open Junk View.",
       "mode": "no-view"
