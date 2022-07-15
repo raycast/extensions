@@ -1,11 +1,12 @@
 import React from "react";
 
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, open } from "@raycast/api";
 
 import useCreate, { SimpleCardData } from "hooks/useCreate";
 import { ICard } from "utils/types";
 
 import CardDetail from "components/CardDetail";
+import { SUPERNOTES_VIEW_URL } from "utils/defines";
 
 const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
   const [markupError, setMarkupError] = React.useState<string | undefined>();
@@ -17,7 +18,7 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
     }
   };
 
-  const { create, loading } = useCreate(setCreatedCard);
+  const { create, loading } = useCreate();
 
   return createdCard ? (
     <CardDetail card={createdCard} />
@@ -27,7 +28,16 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Card" onSubmit={create} />
+          <Action.SubmitForm title="Create Card" onSubmit={(data) => create(data as SimpleCardData, setCreatedCard)} />
+          <Action.SubmitForm
+            title="Create Card and Open"
+            onSubmit={(data) =>
+              create(data as SimpleCardData, async (card) => {
+                await open(`${SUPERNOTES_VIEW_URL}/${card.data.id}/`);
+                await popToRoot();
+              })
+            }
+          />
         </ActionPanel>
       }
     >

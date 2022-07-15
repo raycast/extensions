@@ -1,9 +1,9 @@
 import React from "react";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast, open } from "@raycast/api";
 import fetch from "node-fetch";
 
-import { SUPERNOTES_API_URL } from "utils/defines";
+import { SUPERNOTES_API_URL, SUPERNOTES_VIEW_URL } from "utils/defines";
 import { ICard, SupernotesErrorPayload } from "utils/types";
 
 export interface SimpleCardData {
@@ -11,12 +11,12 @@ export interface SimpleCardData {
   markup: string;
 }
 
-const useCreate = (successCallback: (card: ICard) => void) => {
+const useCreate = () => {
   const { apiKey } = getPreferenceValues();
 
   const [loading, setLoading] = React.useState(false);
 
-  const create = async (data: SimpleCardData) => {
+  const create = async (data: SimpleCardData, successCallback: (card: ICard) => void) => {
     setLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
