@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast, confirmAlert } from "@raycast/api";
 import fetch from "node-fetch";
 
 import { SUPERNOTES_API_URL } from "utils/defines";
@@ -12,6 +12,9 @@ const useJunk = (successCallback: () => void) => {
   const [loading, setLoading] = React.useState(false);
 
   const junk = async (cardId: string) => {
+    if (!await confirmAlert({title: "Are you sure?"})) {
+      return;
+    }
     setLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
