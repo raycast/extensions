@@ -3,7 +3,7 @@
   "name": "chuck-norris-facts",
   "title": "Chuck Norris Facts",
   "description": "This extension uses the chucknorris.io site which is a free JSON API for hand curated Chuck Norris facts.",
-  "icon": "command-icon.png",
+  "icon": "chucknorris-icon.png",
   "author": "jorgecortesdev",
   "license": "MIT",
   "categories": [
