@@ -10,7 +10,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search dbt Documentation",
+      "title": "Search Documentation",
+      "subtitle": "dbt",
       "description": "Search dbt documentation from Raycast.",
       "mode": "view"
     }
