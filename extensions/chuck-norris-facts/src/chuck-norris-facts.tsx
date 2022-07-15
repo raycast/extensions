@@ -49,7 +49,7 @@ export default function Command() {
             <Detail.Metadata.Label title="Created At" text={`${fact?.created_at}`} icon={Icon.Clock} />
             <Detail.Metadata.Label title="Updated At" text={fact?.updated_at} icon={Icon.Clock} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Link title="Url" target={`${fact?.url}`} text={`${fact?.url}`} />
+            <Detail.Metadata.Link title="URL" target={`${fact?.url}`} text="Open in Browser" />
           </Detail.Metadata>
         )
       }
