@@ -307,6 +307,7 @@
 /extensions/parcel-tracker                           @jjhok
 /extensions/parrot-translate                         @Haojen
 /extensions/party-parrot                             @thomaspaulmann
+/extensions/passphrase-generator                     @omBratteng @pernielsentikaer
 /extensions/password-generator                       @joshuaiz
 /extensions/paste-as-plain-text                      @koinzhang
 /extensions/pastebin                                 @vimtor
