@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-13
+## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-15
 
 - Added ECS Clusters ([#2254](https://github.com/raycast/extensions/pull/2254))
 - Migrate to Raycast API 1.36.0 ([#2254](https://github.com/raycast/extensions/pull/2254))
