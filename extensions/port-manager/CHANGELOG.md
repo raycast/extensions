@@ -5,7 +5,7 @@
 - *Show Info* action (`⌘` + `i`) to display process information
 - *Show in Finder* action (`⌘` + `f`) to reveal the executable of a process in Finder
 - *Kill Parent* action (`⌘` + `p`) to kill the parent process of a process opening a port
-  - For obvious reasons not available if the PID of the parent process is either 0 (kernel) or 1 (launchd)
+  - For obvious reasons *not available* if the PID of the parent process is either `0` (`kernel`) or `1` (`launchd`)
 - Some changed wording
   - Navigation title of *Kill Port* command is now, well, *Kill Port*
   - Improved description of the extension
