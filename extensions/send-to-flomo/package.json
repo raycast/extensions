@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "ahonn",
   "license": "MIT",
+  "contributors": [
+    "fankaidev",
+    "pernielsentikaer"
+  ],
   "commands": [
     {
       "name": "send-to-flomo",
