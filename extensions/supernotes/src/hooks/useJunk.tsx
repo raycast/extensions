@@ -12,7 +12,7 @@ const useJunk = (successCallback: () => void) => {
   const [loading, setLoading] = React.useState(false);
 
   const junk = async (cardId: string) => {
-    if (!await confirmAlert({title: "Are you sure?"})) {
+    if (!(await confirmAlert({ title: "Are you sure?" }))) {
       return;
     }
     setLoading(true);
