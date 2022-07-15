@@ -29,7 +29,11 @@ const CardSearch = () => {
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search for cards..."
     >
-      {search ? <List.EmptyView icon={Icon.ExclamationMark} title="No matching item found" /> : <List.EmptyView icon={Icon.QuestionMark} title="Please provide a query" /> }
+      {search ? (
+        <List.EmptyView icon={Icon.ExclamationMark} title="No matching item found" />
+      ) : (
+        <List.EmptyView icon={Icon.QuestionMark} title="Please provide a query" />
+      )}
       {resultCards
         ? Object.values(resultCards).map((card) => (
             <CardListItem key={card.data.id} card={card} removeFromList={removeFromResults} />

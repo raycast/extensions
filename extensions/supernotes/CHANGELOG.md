@@ -6,6 +6,7 @@
 - Allow open cards in the browser from the search and create commands
 - Default to showing an HUD on new card creation, add shortcut to open the preview
 - add a confirmation alert on card deletion
+- add empty views to the seach commands
 
 ## [Initial Version] - 2022-07-15
 
