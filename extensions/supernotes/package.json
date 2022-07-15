@@ -26,6 +26,41 @@
       "subtitle": "Supernotes",
       "description": "Search your cards on Supernotes.",
       "mode": "view"
+    },
+    {
+      "name": "home",
+      "title": "Open Home",
+      "subtitle": "Supernotes",
+      "description": "Open Home View.",
+      "mode": "no-view"
+    },
+    {
+      "name": "daily",
+      "title": "Open Daily",
+      "subtitle": "Supernotes",
+      "description": "Open Daily Collection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "thoughts",
+      "title": "Open Thoughts",
+      "subtitle": "Supernotes",
+      "description": "Open Thoughts Collection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "inbox",
+      "title": "Open Inbox",
+      "subtitle": "Supernotes",
+      "description": "Open Inbox Collection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "junk",
+      "title": "Open Junk",
+      "subtitle": "Supernotes",
+      "description": "Open Junk View.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
