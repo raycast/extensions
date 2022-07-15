@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "kill-port",
+      "name": "open-ports",
       "title": "Kill Port",
       "description": "Show and Close Opened Ports",
       "mode": "view"
