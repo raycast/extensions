@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getStatus, getStatusFromOrgin, parseUrl } from "./lib/api";
+import { getStatus, getStatusFromOrgin } from "./lib/api";
 import { addPageId, getPageIds } from "./lib/store";
-import { Status } from "./lib/types";
+import { PageStatus } from "./lib/types";
+import { parseUrl } from "./lib/util";
 
 export const popularServices = [
   "s2k7tnzlhrpw", // DigitalOcean
@@ -19,7 +20,7 @@ export const popularServices = [
 
 export default function AddServiceList({ refreshStatus }: { refreshStatus?: () => void }) {
   const [isLoading, setLoading] = useState(true);
-  const [services, setServices] = useState<Status[]>([]);
+  const [services, setServices] = useState<PageStatus[]>([]);
 
   useEffect(() => {
     if (!services.length) fetchPopularData();
@@ -31,7 +32,7 @@ export default function AddServiceList({ refreshStatus }: { refreshStatus?: () =
     const fetchStatusPages = await Promise.all(
       popularServices.map(
         (id) =>
-          new Promise<Status | null>((res) => {
+          new Promise<PageStatus | null>((res) => {
             getStatus(id)
               .then(res)
               .catch(() => {
@@ -41,13 +42,13 @@ export default function AddServiceList({ refreshStatus }: { refreshStatus?: () =
       )
     );
 
-    const pages = fetchStatusPages.filter((p): p is Status => !!p);
+    const pages = fetchStatusPages.filter((p): p is PageStatus => !!p);
 
     setServices(pages);
     setLoading(false);
   }
 
-  function AddServiceActionPanel({ service }: { service: Status }) {
+  function AddServiceActionPanel({ service }: { service: PageStatus }) {
     return (
       <ActionPanel>
         <Action title="Add Service" icon={Icon.Plus} onAction={() => addService(service, refreshStatus)} />
@@ -146,7 +147,7 @@ export function AddCustomServiceForm({ refreshStatus }: { refreshStatus?: () => 
 }
 
 const addingList = new Set();
-export async function addService(service: Status, refresh?: () => void) {
+export async function addService(service: PageStatus, refresh?: () => void) {
   if (addingList.has(service.page.id)) return;
   addingList.add(service.page.id);
 
