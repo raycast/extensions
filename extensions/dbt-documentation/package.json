@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dbt-documentation",
-  "title": "dbt Documentation Search",
+  "title": "dbt Documentation",
   "description": "Search the dbt documentation website https://docs.getdbt.com/",
   "icon": "dbt-icon.png",
   "author": "b-per",
