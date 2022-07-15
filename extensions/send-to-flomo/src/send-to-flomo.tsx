@@ -58,7 +58,7 @@ export default function Command() {
       }
     >
       <Form.TextArea id="memo" title="MEMO" placeholder="What's on your mind?" defaultValue={text} onChange={setText} />
-      <Form.TextField id="tags" title="Tags" defaultValue={tags} onChange={setTags} info="Tags are separated by space" />
+      <Form.TextField id="tags" title="Tags" defaultValue={tags} onChange={setTags} info="Separated by space" />
     </Form>
   );
 }
