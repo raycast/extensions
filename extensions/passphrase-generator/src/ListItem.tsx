@@ -17,6 +17,7 @@ const ListItem = ({ generator, generatePasswords }: Props): JSX.Element => (
     actions={
       <ActionPanel>
         <Action.CopyToClipboard title="Copy Password" content={generator.password} onCopy={generatePasswords} />
+        <Action.Paste content={generator.password} onPaste={generatePasswords} />
       </ActionPanel>
     }
   />

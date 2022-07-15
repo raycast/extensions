@@ -16,13 +16,13 @@
   "commands": [
     {
       "name": "strength",
-      "title": "Generate Password Of Given Strength",
+      "title": "Generate Password by Strength",
       "description": "Generate password of given strength",
       "mode": "view"
     },
     {
       "name": "length",
-      "title": "Generate Password Of Given Length",
+      "title": "Generate Password by Length",
       "description": "Generate password of given length",
       "mode": "view"
     }
