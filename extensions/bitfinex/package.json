@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitfinex",
   "title": "Bitfinex",
-  "description": "A raycast extension built for Bitfinex margin funding",
+  "description": "A Raycast extension built for Bitfinex margin funding",
   "icon": "bitfinex-raycast.png",
   "author": "Yukai",
   "license": "MIT",
