@@ -35,7 +35,7 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
           <ActionPanel.Section title="Links">
             <Action.OpenInBrowser
               title="Open Libraries.io Page"
-              url={`https://libraries.io/${searchResult.platform}/${searchResult.name}`}
+              url={`https://libraries.io/${searchResult.platform.toLowerCase()}/${encodeURIComponent(searchResult.name)}`}
               icon={`libraries-io-icon.png`}
             />
             <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
