@@ -1,6 +1,6 @@
 import React from "react";
 
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
 import { useRecentCards } from "hooks/useRecent";
 import useSearch from "hooks/useSearch";
@@ -10,7 +10,7 @@ import CardListItem from "components/CardListItem";
 
 const CardSearch = () => {
   const [resultCards, setResultCards] = React.useState<ICardCollection>();
-  const { search, loading: searchLoading } = useSearch((results) => setResultCards(results));
+  const { search, setSearch, loading: searchLoading } = useSearch((results) => setResultCards(results));
 
   const { cards: recentCards, loading: recentsLoading, refresh: refreshRecents } = useRecentCards();
   const removeFromResults = (cardId: string) => {
@@ -26,9 +26,10 @@ const CardSearch = () => {
     <List
       throttle
       isLoading={searchLoading || recentsLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearch}
       searchBarPlaceholder="Search for cards..."
     >
+      {search ? <List.EmptyView icon={Icon.ExclamationMark} title="No matching item found" /> : <List.EmptyView icon={Icon.QuestionMark} title="Please provide a query" /> }
       {resultCards
         ? Object.values(resultCards).map((card) => (
             <CardListItem key={card.data.id} card={card} removeFromList={removeFromResults} />
