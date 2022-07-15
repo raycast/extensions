@@ -27,7 +27,7 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={create} />
+          <Action.SubmitForm title="Create Card" onSubmit={create} />
         </ActionPanel>
       }
     >

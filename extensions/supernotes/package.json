@@ -4,6 +4,7 @@
   "title": "Supernotes",
   "description": "Interact with the Supernotes platform in Raycast.",
   "icon": "supernotes-icon.png",
+  "contributors": ["pomdtr"],
   "author": "acnebs",
   "license": "MIT",
   "categories": [
