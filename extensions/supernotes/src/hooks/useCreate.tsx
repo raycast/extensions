@@ -1,9 +1,9 @@
 import React from "react";
 
-import { Toast, getPreferenceValues, showToast, open } from "@raycast/api";
+import { Toast, getPreferenceValues, showToast, Clipboard } from "@raycast/api";
 import fetch from "node-fetch";
 
-import { SUPERNOTES_API_URL, SUPERNOTES_VIEW_URL } from "utils/defines";
+import { SUPERNOTES_API_URL } from "utils/defines";
 import { ICard, SupernotesErrorPayload } from "utils/types";
 
 export interface SimpleCardData {
@@ -34,9 +34,7 @@ const useCreate = () => {
       if (res.status !== 200) {
         throw new Error((jsonData as SupernotesErrorPayload).detail);
       }
-      toast.style = Toast.Style.Success;
-      toast.title = "Success";
-      toast.message = "Card created";
+      toast.hide();
       successCallback(jsonData as ICard);
     } catch (err) {
       toast.style = Toast.Style.Failure;
