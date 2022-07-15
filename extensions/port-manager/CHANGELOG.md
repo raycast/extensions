@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [New Actions] - 2021-11-04
+## [New Actions] - 2022-07-15
 
 - *Show Info* action (`⌘` + `i`) to display process information
 - *Show in Finder* action (`⌘` + `f`) to reveal the executable of a process in Finder
