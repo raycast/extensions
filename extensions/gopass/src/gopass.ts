@@ -10,7 +10,7 @@ function gopass(args: string[]): Promise<string> {
           "/usr/bin", // pbcopy
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
-          "/opt/homebrew/bin", // homebroew on macOS Apple Silicon
+          "/opt/homebrew/bin", // homebrew on macOS Apple Silicon
         ].join(":"),
       },
     });
