@@ -26,6 +26,7 @@ export function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [searchText, setSearchText] = useState<string>('')
+  const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState<boolean>(true)
 
   const getInitialData = async () => {
@@ -48,18 +49,51 @@ export function useTodos() {
     }
   }
 
+  function wait(ms: any, opts: { signal?: any }) {
+    return new Promise((resolve, reject) => {
+      const timerId = setTimeout(resolve, ms)
+      if (opts.signal) {
+        // implement aborting logic for our async operation
+        opts.signal.addEventListener('abort', (event: any) => {
+          clearTimeout(timerId)
+          reject(event)
+        })
+      }
+    })
+  }
+
   const handleComplete = useCallback(
     async (todo: Todo) => {
+      const controller = new AbortController()
+      const options: Toast.Options = {
+        title: 'Completing...',
+        message: 'Press ⌘ + U to undo',
+        style: Toast.Style.Animated,
+        primaryAction: {
+          shortcut: { modifiers: ['cmd'], key: 'u' },
+          title: 'Undo',
+          onAction: () => {
+            controller.abort()
+          },
+        },
+      }
+      const oldData = [...(data || [])]
       try {
         if (todo.id.includes('fake-id-') || !data) return null
         storeHasDoneToday()
         setLoading(true)
         const optimisticData = data.filter((t) => t.id !== todo.id)
         setData(optimisticData)
+        showToast(options)
+        await wait(2000, { signal: controller.signal })
         await updateTodoStatus(todo.id, true)
         await storeTodos(optimisticData)
-        showToast(Toast.Style.Success, 'Marked as Done')
-      } catch (e) {
+        showToast(Toast.Style.Success, 'Completed')
+      } catch (e: any) {
+        if (e?.type === 'abort') {
+          showToast(Toast.Style.Success, 'Completing Undone')
+          return setData(oldData)
+        }
         showToast(Toast.Style.Failure, 'Error occurred')
       } finally {
         setLoading(false)
@@ -72,23 +106,25 @@ export function useTodos() {
     try {
       if (!data) return null
       setLoading(true)
+      const tag = tags.find((t) => t.id === filter)
       const optimisticTodo = {
         id: `fake-id-${Math.random() * 100}`,
         title: searchText,
         isCompleted: false,
-        tag: null,
+        tag: tag || null,
         url: '',
         contentUrl: getTitleUrl(searchText),
       }
 
-      setData([optimisticTodo, ...data])
+      setData([...data, optimisticTodo])
       setSearchText('')
 
       const validatedTodo = await createTodo({
         title: searchText,
+        tagId: tag?.id || null,
       })
 
-      const validatedData = [validatedTodo, ...data]
+      const validatedData = [...data, validatedTodo]
       setData(validatedData)
       await storeTodos(validatedData)
     } catch (e) {
@@ -124,10 +160,11 @@ export function useTodos() {
   )
 
   const handleSetDate = useCallback(
-    async (todo: Todo, dateValue: Date | null, name: string) => {
+    async (todo: Todo, dateValue: string | null, name: string) => {
       try {
         if (!data) return null
         setLoading(true)
+        showToast(Toast.Style.Animated, 'Scheduling...')
         const optimisticData = data.filter((t) => t.id !== todo.id)
         setData(optimisticData)
         await updateTodoDate(todo.id, dateValue)
@@ -204,17 +241,23 @@ export function useTodos() {
 
   useEffect(() => {
     if (data) {
-      if (searchText) {
+      if (searchText || filter !== 'all') {
         setTodos(
-          data.filter((item) =>
-            item.title.toUpperCase().includes(searchText.toUpperCase())
-          )
+          data.filter((item) => {
+            const isTagAllowed =
+              filter === 'all' ? true : item.tag?.id === filter
+
+            return (
+              item.title.toUpperCase().includes(searchText.toUpperCase()) &&
+              isTagAllowed
+            )
+          })
         )
       } else {
         setTodos(data)
       }
     }
-  }, [data, searchText])
+  }, [data, searchText, filter])
 
   return {
     todos,
@@ -223,6 +266,8 @@ export function useTodos() {
     notionDbUrl,
     searchText,
     setSearchText,
+    filter,
+    setFilter,
     loading,
     handleCreate,
     handleComplete,
