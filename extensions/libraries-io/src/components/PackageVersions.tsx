@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import type { Package } from ".././types";
 
 interface Props {
@@ -13,7 +13,18 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
           <List.Item
             key={version.number}
             title={version.number}
-            accessoryTitle={new Date(version.published_at).toLocaleDateString()}
+            accessories={[
+              {
+                icon: Icon.TextDocument,
+                text: version.spdx_expression,
+                tooltip: `License: ${version.spdx_expression}`,
+              },
+              {
+                icon: Icon.Calendar,
+                date: new Date(version.published_at),
+                tooltip: `Published: ${new Date(version.published_at).toLocaleDateString()}`,
+              }
+            ]}
           />
         )).reverse()}
       </List.Section>
