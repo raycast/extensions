@@ -3,7 +3,7 @@ import { deepLAuthKey } from "./crypto";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-16 15:57
+ * @lastEditTime: 2022-07-17 00:32
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -314,37 +314,9 @@ export function requestCaiyunTextTranslate(
   });
 }
 
-const myRandomId = 11000056;
-
 /**
  * DeepL translate API
  * https://www.deepl.com/zh/docs-api/translating-text
- * 
- * 浏览器模拟
- {
-  "jsonrpc": "2.0",
-  "method": "LMT_handle_jobs",
-  "params": {
-    "jobs": [
-      {
-        "kind": "default",
-        "sentences": [{ "text": "go", "id": 0, "prefix": "" }],
-        "raw_en_context_before": [],
-        "raw_en_context_after": [],
-        "preferred_num_beams": 4
-      }
-    ],
-    "lang": {
-      "preference": { "weight": {}, "default": "default" },
-      "source_lang_computed": "EN",
-      "target_lang": "ZH"
-    },
-    "priority": 1,
-    "commonJobParams": { "browserType": 1, "formality": null },
-    "timestamp": 1657597450312
-  },
-  "id": 11000022
-}
  */
 export async function requestDeepLTextTranslate(
   queryText: string,
@@ -401,120 +373,4 @@ export async function requestDeepLTextTranslate(
     console.warn("deepl error info: ", errorInfo);
     return Promise.reject(errorInfo);
   }
-}
-
-/**
- 现在我来告诉你，DeepL 到底是怎么认证的。（下面并不是 DeepL 客户端的代码，是我写的 Rust 利用代码，但逻辑不变）
-```rust
-fn gen_fake_timestamp(texts: &Vec<String>) -> u128 {
-    let ts = tool::get_epoch_ms();
-    let i_count = texts
-            .iter()
-            .fold(
-                1, 
-                |s, t| s + t.text.matches('i').count()
-            ) as u128;
-    ts - ts % i_count + i_count
-}
-```
-哈哈！没想到吧！人家的时间戳不是真的！
-
-DeepL 先计算了文本中所有 i 的数量，然后对真正的时间戳进行一个小小的运算 ts - ts % i_count + i_count，这个运算差不多仅会改变时间戳的毫秒部分，这个改变如果用人眼来验证根本无法发现，人类看来就是一个普通的时间戳，不会在意毫秒级的差别。
-
-但是 DeepL 拿到这个修改后的时间戳，既可以与真实时间对比(误差毫秒级)，又可以通过简单的运算（是否是 i_count 的整倍数）判断是否是伪造的请求。真是精妙啊！
- */
-function genFakeTimestamp(text: string) {
-  let timestamp = Date.now();
-  console.log(`timestamp: ${timestamp}`);
-  // calculate i count
-  let i_count = text.match("i")?.length ?? 0;
-  i_count += 1;
-  console.log(`i_count: ${i_count}`);
-  timestamp = timestamp - (timestamp % i_count) + i_count;
-  return timestamp;
-}
-
-/**
-还有更绝的！你接着看：
-```rust
-let req = req.replace(
-    "\"method\":\"",
-    if (self.id + 3) % 13 == 0 || (self.id + 5) % 29 == 0 {
-        "\"method\" : \""
-    } else {
-        "\"method\": \""
-    },
-);
-```
-怎么样？我觉得我一开始就被玩弄了，人家的 id 就是纯粹的随机数，只不过后续的请求会在第一次的随机 id 基础上加一，但是这个 id 还决定了文本中一个小小的、微不足道的空格。
-
-按照正常的思路，为了方便人类阅读和分析，拿到请求的第一时间，我都会先扔编辑器里格式化一下 Json，我怎么会想到，这恰恰会破坏掉人家用来认证的特征，因此无论我如何努力都难以发现。
- */
-
-function genFakeMethodParams(text: string, id: number) {
-  // const method = (id + 3) % 13 == 0 || (id + 5) % 29 == 0 ? '"method" : "' : '"method": "';
-  const method = (id + 3) % 13 == 0 || (id + 5) % 29 == 0 ? "method " : "method";
-
-  return method;
-}
-
-/**
- * JSON 
-  ```json
-  {
-    "jsonrpc": "2.0",
-    "method": "LMT_handle_texts",
-    "params": {
-        "texts": [{
-            "text": "translate this, my friend"
-        }],
-        "lang": {
-            "target_lang": "ZH",
-            "source_lang_user_selected": "EN",
-        },
-        "timestamp": 1648877491942
-    },
-    "id": 12345,
-  }
-```
- */
-export function fakeDeeplTranslate(text: string) {
-  const url = "https://www2.deepl.com/jsonrpc";
-  // const randomId = Math.floor(Math.random() * 1000000);
-  const randomId = myRandomId + 1;
-
-  const fakeTimestamp = genFakeTimestamp(text);
-  console.warn(`-----> timestamp: ${fakeTimestamp}`);
-  const fakeMethod = genFakeMethodParams(text, randomId);
-  console.warn(`-----> fakeMethod: ${fakeMethod}, length: ${fakeMethod.length}`);
-  const params = {
-    jsonrpc: "2.0",
-    method: "LMT_split_into_sentences",
-    params: {
-      texts: [
-        {
-          text: text,
-        },
-      ],
-      lang: {
-        target_lang: "ZH",
-        lang_user_selected: "EN",
-      },
-      timestamp: fakeTimestamp,
-    },
-    id: randomId,
-  };
-  console.log(`---> params: ${JSON.stringify(params, null, 4)}`);
-
-  axios
-    .post(url, params)
-    .then((response) => {
-      console.log(
-        `deep translate: ${response.data.result.translations[0].text}, cost: ${response.headers[requestCostTime]} ms`
-      );
-      console.log(`deep translate: ${response.data}`);
-    })
-    .catch((error) => {
-      console.error("deep error response: ", error.response);
-    });
 }
