@@ -53,9 +53,9 @@ export default function (): JSX.Element {
           title={entry}
           actions={
             <ActionPanel>
+              <Action.Push title="Show Details" icon={Icon.Document} target={<Details entry={entry} />} />
               <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
               <Action title="Paste Password to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
-              <Action.Push title="Show Details" icon={Icon.Document} target={<Details entry={entry} />} />
             </ActionPanel>
           }
         />
