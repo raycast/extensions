@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
+import Details from "./details";
 
-async function copyPassword(entry: string): Promise<void> {
+export async function copyPassword(entry: string): Promise<void> {
   try {
     const toast = await showToast({ title: "Copying password", style: Toast.Style.Animated });
     await gopass.clip(entry);
@@ -15,7 +16,7 @@ async function copyPassword(entry: string): Promise<void> {
   }
 }
 
-async function pastePassword(entry: string): Promise<void> {
+export async function pastePassword(entry: string): Promise<void> {
   try {
     const toast = await showToast({ title: "Pasting password", style: Toast.Style.Animated });
     const password = await gopass.password(entry);
@@ -54,6 +55,7 @@ export default function (): JSX.Element {
             <ActionPanel>
               <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
               <Action title="Paste Password to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
+              <Action.Push title="Show Details" icon={Icon.Document} target={<Details entry={entry} />} />
             </ActionPanel>
           }
         />

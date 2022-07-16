@@ -40,4 +40,9 @@ async function clip(entry: string): Promise<void> {
   await gopass(["show", "--clip", entry]);
 }
 
-export default { list, password, clip };
+async function show(entry: string): Promise<string[]> {
+  // gopass has no option to disable printing the password in the first, therefor we use `slice`
+  return await gopass(["show", entry]).then((data) => data.split(`\n`).slice(1));
+}
+
+export default { list, password, clip, show };
