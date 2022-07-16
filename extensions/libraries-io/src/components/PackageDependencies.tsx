@@ -1,21 +1,37 @@
 import { List } from "@raycast/api";
-import type { Package } from ".././types";
+import { useEffect, useState } from "react";
+import { useLibrariesDependencyDetail } from "../useLibrariesDependencyDetail";
+import type { Package, Dependency } from ".././types";
 
 interface Props {
   searchResult: Package;
 }
 
 export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const loadDependencies = async () => {
+    setLoading(true);
+    const dependencyDetails = await useLibrariesDependencyDetail(searchResult.platform, searchResult.name);
+    if (dependencyDetails?.dependencies) setDependencies(dependencyDetails.dependencies);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadDependencies();
+  }, []);
+
   return (
-    <List navigationTitle="Dependencies">
+    <List navigationTitle="Dependencies" isLoading={loading}>
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
-        {searchResult.versions.map(version => (
+        {dependencies.map(dependency => (
           <List.Item
-            key={version.number}
-            title={version.number}
-            accessoryTitle={new Date(version.published_at).toLocaleDateString()}
+            key={dependency.name}
+            title={dependency.name}
+            accessoryTitle={dependency.latest}
           />
-        )).reverse()}
+        ))}
       </List.Section>
     </List>
   );

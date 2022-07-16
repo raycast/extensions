@@ -18,14 +18,17 @@ export interface Version {
 }
 
 export interface Dependency {
-  projectName: string;
+  name: string;
   platform: string;
   requirements: string;
-  latestStable: string;
   latest: string;
   deprecated: boolean;
   kind: string;
 }
+
+export interface DependenciesResponse {
+  dependencies: Array<Dependency>;
+};
 
 export interface Platform {
   name: string;

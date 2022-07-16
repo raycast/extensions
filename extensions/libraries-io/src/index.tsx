@@ -2,6 +2,7 @@ import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api"
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { PackageVersions } from "./components/PackageVersions";
+import { PackageDependencies } from "./components/PackageDependencies";
 import type { Package, Version } from "./types";
 
 export default function Command() {
@@ -48,6 +49,7 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <Action.Push title="Show Versions" icon={Icon.List} target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
+            <Action.Push title="Show Dependencies" icon={Icon.List} target={<PackageDependencies key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
           </ActionPanel.Section>
         </ActionPanel>
       }
