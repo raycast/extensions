@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
-import { capitalize } from "./utils";
+import { humanize } from "./utils";
 import { copyPassword, pastePassword } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
@@ -42,7 +42,7 @@ export default function ({ entry }: { entry: string }): JSX.Element {
         return (
           <List.Item
             key={index}
-            title={capitalize(key)}
+            title={humanize(key)}
             subtitle={value}
             actions={
               <ActionPanel>
