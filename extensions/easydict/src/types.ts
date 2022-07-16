@@ -2,29 +2,61 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 20:02
+ * @lastEditTime: 2022-07-15 22:48
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { RequestType, SectionType, TranslateType } from "./consts";
+import { LanguageDetectType } from "./detectLanguage";
 import { IcibaDictionaryResult } from "./dict/iciba/interface";
 
-export interface TranslateTypeResult {
+export enum SectionType {
+  Translation = "Translate",
+  Explanations = "Explanation",
+  Forms = "Forms and Tenses",
+  WebTranslation = "Web Translation",
+  WebPhrase = "Web Phrase",
+}
+
+export enum TranslateType {
+  Youdao = "Youdao",
+  Baidu = "Baidu",
+  Tencent = "Tencent",
+  Caiyun = "Caiyun",
+  Apple = "Apple",
+  DeepL = "DeepL",
+}
+
+export enum DicionaryType {
+  Youdao = "Youdao Dictionary",
+  Iciba = "Iciba Dictionary",
+}
+
+export interface RequestTypeResult {
   type: RequestType;
-  result:
-    | YoudaoTranslateResult
-    | BaiduTranslateResult
-    | TencentTranslateResult
-    | CaiyunTranslateResult
-    | AppleTranslateResult
-    | IcibaDictionaryResult
-    | YoudaoDictionaryResult
-    | null;
+  result: RequestResult | null;
   errorInfo?: RequestErrorInfo;
 }
+
+type RequestResult =
+  | YoudaoTranslateResult
+  | BaiduTranslateResult
+  | TencentTranslateResult
+  | CaiyunTranslateResult
+  | AppleTranslateResult
+  | DeepLTranslateResult
+  | IcibaDictionaryResult
+  | YoudaoDictionaryResult;
+
+export interface RequestErrorInfo {
+  message: string;
+  code?: string;
+  type?: RequestType;
+}
+
+export type RequestType = TranslateType | DicionaryType | LanguageDetectType;
 
 export interface YoudaoTranslateResult {
   l: string;
@@ -85,22 +117,30 @@ export interface YoudaoTranslateReformatResultItem {
 export interface MyPreferences {
   language1: string;
   language2: string;
-  youdaoAppId: string;
-  youdaoAppSecret: string;
-  baiduAppId: string;
-  baiduAppSecret: string;
-  caiyunToken: string;
-  tencentSecretId: string;
-  tencentSecretKey: string;
-  tencentProjectId: string;
   isAutomaticQuerySelectedText: boolean;
   isAutomaticPlayWordAudio: boolean;
   isDisplayTargetTranslationLanguage: boolean;
+  translationDisplayOrder: string;
+
+  youdaoAppId: string;
+  youdaoAppSecret: string;
+
   enableBaiduTranslate: boolean;
+  baiduAppId: string;
+  baiduAppSecret: string;
+
   enableTencentTranslate: boolean;
-  enableCaiyunTranslate: boolean;
+  tencentSecretId: string;
+  tencentSecretKey: string;
+
   enableAppleLanguageDetect: boolean;
   enableAppleTranslate: boolean;
+
+  enableDeepLTranslate: boolean;
+  deepLAuthKey: string;
+
+  enableCaiyunTranslate: boolean;
+  caiyunToken: string;
 }
 
 export interface ActionListPanelProps {
@@ -108,16 +148,12 @@ export interface ActionListPanelProps {
   onLanguageUpdate: (language: LanguageItem) => void;
 }
 
-export interface RequestErrorInfo {
-  message: string;
-  code?: string;
-  type?: RequestType;
-}
-
 export interface LanguageItem {
   youdaoLanguageId: string;
   appleLanguageId?: string; // apple language id, apple translate support 12 languages
   appleChineseLanguageTitle?: string; // apple Chinese language title, 中文，英语
+  deepLSourceLanguageId?: string; // deepL language id, https://www.deepl.com/zh/docs-api/translating-text/
+  deepLTargetLanguageId?: string; // most are same as source language, some are different, such as "EN-GB" "EN-US" and so on.
   francLanguageId: string; // the languages represented by ISO 639-3
   aliyunLanguageId: string;
   tencentDetectLanguageId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
@@ -153,6 +189,17 @@ export interface CaiyunTranslateResult {
 
 export interface AppleTranslateResult {
   translatedText: string;
+}
+
+/**
+ * DeepL translate result
+ */
+export interface DeepLTranslateResult {
+  translations: DeepLTranslationItem[];
+}
+export interface DeepLTranslationItem {
+  detected_source_language: string;
+  text: string;
 }
 
 export interface TranslateSourceResult {

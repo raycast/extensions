@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 22:23
+ * @lastEditTime: 2022-07-16 17:25
  * @fileName: detectLanguage.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -54,6 +54,8 @@ let delayLocalDetectLanguageTimer: NodeJS.Timeout;
  */
 const detectedLanguageTypeResultList: LanguageDetectTypeResult[] = [];
 
+const defaultConfirmedConfidence = 0.8;
+
 /**
  * Detect language with the given text, callback with LanguageDetectTypeResult.
  *
@@ -64,7 +66,7 @@ export function detectLanguage(
   callback: (detectedLanguageResult: LanguageDetectTypeResult) => void
 ): void {
   console.log(`start detectLanguage`);
-  let localDetectResult = getLocalTextLanguageDetectResult(text, 0.6);
+  let localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
   if (localDetectResult.confirmed) {
     console.log("use local detect confirmed:", localDetectResult.type, localDetectResult.youdaoLanguageId);
     // Todo: may be do not need to clear timeout, when API detect success, callback once again.
@@ -78,7 +80,7 @@ export function detectLanguage(
   delayLocalDetectLanguageTimer = setTimeout(() => {
     console.log(`API detect over time, use local detect language`);
     isDetectedLanguage = true;
-    localDetectResult = getLocalTextLanguageDetectResult(text, 0.2);
+    localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
     console.log(`use local detect language --->: ${localDetectResult}`);
     callback(localDetectResult);
   }, delayDetectLanguageTime);
@@ -98,7 +100,7 @@ export function detectLanguage(
   // if local detect language is not confirmed, use API language detect
   try {
     raceDetectTextLanguage(detectActionMap, localDetectResult, (detectTypeResult) => {
-      const finalLanguageTypeResult = getFinalLanguageDetectResult(text, detectTypeResult, 0.6);
+      const finalLanguageTypeResult = getFinalLanguageDetectResult(text, detectTypeResult, defaultConfirmedConfidence);
       callback(finalLanguageTypeResult);
     });
   } catch (error) {
@@ -225,6 +227,7 @@ function handleDetectedLanguageTypeResult(
    */
   if (detectLanguageActionMap.size === 0) {
     console.log(`try compare API detected language list with local deteced list`);
+    console.log(`---> API detected language list: ${JSON.stringify(detectedLanguageTypeResultList, null, 4)}`);
 
     const detectedLanguageArray = localLanguageDetectTypeResult.detectedLanguageArray;
     if (detectedLanguageArray) {

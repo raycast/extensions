@@ -2,15 +2,21 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 18:19
+ * @lastEditTime: 2022-07-16 23:26
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { languageItemList, SectionType, TranslateType } from "./consts";
-import { ActionListPanelProps, YoudaoTranslateReformatResultItem } from "./types";
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, openCommandPreferences } from "@raycast/api";
+import { useState } from "react";
+import { sayTruncateCommand } from "./audio";
+import { languageItemList } from "./consts";
+import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
+import { ReleaseDetail } from "./releaseVersion/releaseDetail";
+import { Easydict } from "./releaseVersion/versionInfo";
+import { openInEudic } from "./scripts";
+import { ActionListPanelProps, SectionType, TranslateType, YoudaoTranslateReformatResultItem } from "./types";
 import {
   checkIsInstalledEudic,
   getEudicWebTranslateURL,
@@ -18,18 +24,16 @@ import {
   getYoudaoWebTranslateURL,
   myPreferences,
 } from "./utils";
-import { sayTruncateCommand } from "./audio";
-import { openInEudic } from "./scripts";
-import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
-import { ReleaseDetail } from "./releaseVersion/releaseDetail";
-import { useState } from "react";
-import { Easydict } from "./releaseVersion/versionInfo";
 
 export const eudicBundleId = "com.eusoft.freeeudic";
 
 export function ActionFeedback() {
   const easydict = new Easydict();
   return <Action.OpenInBrowser icon={Icon.QuestionMark} title="Feedback" url={easydict.getIssueUrl()} />;
+}
+
+export function ActionOpenCommandPreferences() {
+  return <Action icon={Icon.Gear} title="Open Preferences" onAction={openCommandPreferences} />;
 }
 
 export function ActionRecentUpdate(props: { title?: string }) {
@@ -51,17 +55,14 @@ export function ActionCurrentVersion() {
  * Get the list action panel item with ListItemActionPanelItem
  */
 export default function ListActionPanel(props: ActionListPanelProps) {
-  const currentEasydict = new Easydict();
-
   const [hasPrompted, setHasPrompted] = useState(false);
-  // const [easydict, setEasydict] = useState<Easydict>();
   const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
 
   checkIsInstalledEudic(setIsInstalledEudic);
 
+  const currentEasydict = new Easydict();
   currentEasydict.getCurrentVersionInfo().then((easydict) => {
-    console.log(`has prompted: ${easydict.hasPrompted}`);
-    setHasPrompted(easydict.hasPrompted);
+    setHasPrompted(easydict.isNeedPrompt && easydict.hasPrompted);
   });
 
   const eudicWebUrl = getEudicWebTranslateURL(props.displayItem.queryWordInfo);
@@ -156,6 +157,7 @@ export default function ListActionPanel(props: ActionListPanelProps) {
       <ActionPanel.Section>
         {hasPrompted && <ActionRecentUpdate />}
         <ActionCurrentVersion />
+        <ActionOpenCommandPreferences />
         <ActionFeedback />
       </ActionPanel.Section>
     </ActionPanel>

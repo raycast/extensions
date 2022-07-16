@@ -13,35 +13,39 @@
 
 ## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/wiki)
 
-`Easydict` is an easy dictionary, for looking up words or translate text in an easy way. Use it out of the box, automatically recognize the input text language, support Youdao dictionary, **MacOS system translate**, Baidu, Tencent, Youdao and Caiyun translation API.
-
-If you like this extension, please give a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!
+`Easydict` is an easy dictionary, for looking up words or translate text in an easy way. Use it out of the box, automatically detect the input text language, support Youdao dictionary, **MacOS system translate**, Baidu, Tencent, Youdao and Caiyun translation API.
 
 ![easydict-1](https://i.imgur.com/YYlIqTS.jpg)
 
 ## Features
 
 - [x] Out of the box, easy to look up words or translate text.
-- [x] Automatically recognize the language type of the input text and translate it into your preferred language.
+- [x] Automatically detect the input language and automatically query the preferred language.
 - [x] Provide word rich query information, including basic translation, pronunciation, the types of exams that include the word, multiple parts of speech and explanations, forms and tenses, web translations and web phrases.
 - [x] Support automatic query selected text, enabled by default.
 - [x] Support to open the [Eudic Application](https://www.eudic.net/v4/en/app/eudic) and quickly look up words, if installed on your Mac.
 - [x] Quick search query text online, supports Eudic, Youdao dictionary and Google translation.
-- [x] Support Text to Speech(aka TTS).
-- [x] Support shortcut `Cmd + S` to quickly play the pronunciation of query words.
-- [x] Support MacOS system translation.
-- [x] Support for displaying multiple translation results, currently supports Baidu, Tencent, Youdao and Caiyun translation API.
+- [x] Support automatic playback of word pronunciation, which can be turned on in Settings. Use `Cmd + S` to play the pronunciation of words manually.
+- [x] Support Youdao Text to Speech(TTS).
+- [x] Support to sort translation results manually.
+- [x] Support **MacOS system translation**. (_Note: this feature needs to install an apple translate shortcut on you mac, please see [Wiki](https://github.com/tisfeng/Raycast-Easydict/wiki/如何在-Easydict-中使用-macOS-🍎-系统翻译？) for more details_)
+- [x] Support DeepL, Baidu, Tencent, Youdao and Caiyun translation API.
+- [x] Support 22 translation languages.
 
 Next:
 
 - [ ] Support more dictionary API, such as homonyms, synonyms, antonyms, Iciba, etc.
 - [ ] Support to view query history.
 
+**_If you like this extension, please give a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
+
 ![easydict-2](https://i.imgur.com/L9aE9ke.jpg)
 
-![easydict-3](https://i.imgur.com/ycKif2c.jpg)
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/c93edb20a2655ba2b1d29c475bdf39ca8e4cfd13/uPic/easydict-3.png)
 
-![easydict-4](https://i.imgur.com/NOZgJtl.jpg)
+![easydict-4](https://raw.githubusercontent.com/tisfeng/ImageBed/c393f8bbb9e4a332e0058854494a08bd1e1bdc08/uPic/easydict-4.png)
+
+![easydict-5](https://raw.githubusercontent.com/tisfeng/ImageBed/c393f8bbb9e4a332e0058854494a08bd1e1bdc08/uPic/easydict-5.png)
 
 ---
 
@@ -49,7 +53,41 @@ Next:
 
 Actually, it works well without you having to do any extra work. The next are advanced documents for those who want to use `Easydict` better or understand how the extension works.
 
-![setting](https://i.imgur.com/KI9snFe.jpg)
+![setting](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2022-07-16_18.57.16.png)
+
+### Supported Languages
+
+Currently we support 22 languages: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+Details of the languages supported by each translation service are as follows:
+
+| language               | Youdao | DeepL | 🍎 Apple | Baidu | Tencent | Caiyun |
+| :--------------------- | :----: | :---: | :------: | :---: | :-----: | :----: |
+| Chinese (Simplified)   |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ✅   |
+| Chinese（Traditional） |   ✅   |  ⚠️   |    ⚠️    |  ✅   |   ✅    |   ⚠️   |
+| English                |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ✅   |
+| Japanese               |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ✅   |
+| Korean                 |   ✅   |  ❌   |    ✅    |  ✅   |   ✅    |   ❌   |
+| French                 |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Spanish                |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Portuguese             |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Italian                |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| German                 |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Russian                |   ✅   |  ✅   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Arabic                 |   ✅   |  ❌   |    ✅    |  ✅   |   ✅    |   ❌   |
+| Swedish                |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Romanian               |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Thai                   |   ✅   |  ❌   |    ❌    |  ✅   |   ✅    |   ❌   |
+| Slovak                 |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Dutch                  |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Hungarian              |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Greek                  |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Danish                 |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Finnish                |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Polish                 |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+| Czech                  |   ✅   |  ✅   |    ❌    |  ✅   |   ❌    |   ❌   |
+
+> Note: ⚠️ means the translation of source language to Traditional Chinese is not supported, such as DeepL. If you enter Traditional Chinese for translation, it will be treated as Simplified Chinese.
 
 ### Preferred Languages
 
@@ -97,17 +135,21 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 ### Automatic Play Query Word Pronunciation
 
-<details><summary> Automatically play the word voice after querying the word, turned off by default. </summary>
+<details><summary> Automatically play the word audio after querying the word, turned off by default. </summary>
 
 <p>
 
-Note that when this option is enabled, voice messages will be played automatically only if the content of the query is determined to be `good`, `look for`, `query`, etc. For other query contents, you can use the shortcut key `Cmd + S` to play voice.
+Note that when this option is enabled, voice messages will be played automatically only if the content of the query is determined to be `good`, `look for`, `query`, etc. For other query contents, you can use the shortcut key `Cmd + S` to play audio.
 
-Play voice content: English words are preferred to be pronounced in an online youdao dictionary, while others are pronounced using Youdao Translation's TTS service. Long text playback uses the say shell command.
+Play audio content: English words are preferred to be pronounced in an online youdao dictionary, while others are pronounced using Youdao Translation's TTS service. Long text playback uses the say shell command.
 
 </p>
 
 </details>
+
+Use `Cmd + S` to play the pronunciation of words manually.
+
+![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/log_action%E7%9A%84%E5%89%AF%E6%9C%AC-20220710180938330.png)
 
 ### Select Target Translation Language
 
@@ -116,6 +158,20 @@ Play voice content: English words are preferred to be pronounced in an online yo
 <p>
 
 By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can turn on the option `Select Target Translation Language` on the preference page, and then you can temporarily select another target language in the action panel.
+
+</p>
+
+</details>
+
+### Sort Translation Results Manually
+
+<details> <summary> You can sort the translation results by your preference, default is `DeepL,Apple,Baidu,Tencent,Youdao,Caiyun`. </summary>
+
+<p>
+
+Name case are insensitive, use comma to separate. Example: `deepl,apple,baidu,tencent,youdao,caiyun`. You can also specify a part of the sort, for example: `apple,tencent`，the actual sort is: `apple,tencent,deepl,baidu,youdao,caiyun`.
+
+> Note: This sort is the overall sort, if a translation service is not enabled, the sort will be automatically ignored.
 
 </p>
 
@@ -145,6 +201,8 @@ The following application tutorial is from [`Bob`](https://ripperhe.gitee.io/bob
 ## Friendly Recommendation
 
 [`Bob`](https://ripperhe.gitee.io/bob/#/) is a MacOS **translation** and **OCR** application. Bob is probably the best translation application on the MacOS platform, and it's free!
+
+> Update: Bob is now available on the Mac App Store, welcome to support: [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
 
 ![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
 

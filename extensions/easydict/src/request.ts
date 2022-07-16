@@ -1,55 +1,39 @@
+import { deepLAuthKey } from "./crypto";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 17:28
+ * @lastEditTime: 2022-07-16 15:57
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
-import {
-  defaultBaiduAppId,
-  defaultBaiduAppSecret,
-  defaultCaiyunToken,
-  defaultTencentSecretId,
-  defaultTencentSecretKey,
-  defaultYoudaoAppId,
-  defaultYoudaoAppSecret,
-  getLanguageItemFromYoudaoId,
-  myPreferences,
-} from "./utils";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
+import {
+  baiduAppId,
+  baiduAppSecret,
+  caiyunToken,
+  tencentSecretId,
+  tencentSecretKey,
+  youdaoAppId,
+  youdaoAppSecret,
+} from "./crypto";
+
+import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
 import {
   BaiduTranslateResult,
   CaiyunTranslateResult,
+  DeepLTranslateResult,
   RequestErrorInfo,
+  RequestTypeResult,
   TencentTranslateResult,
-  TranslateTypeResult,
+  TranslateType,
 } from "./types";
-import { TranslateType } from "./consts";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
-
-// youdao appid and appsecret
-const youdaoAppId = myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : defaultYoudaoAppId;
-const youdaoAppSecret =
-  myPreferences.youdaoAppSecret.trim().length > 0 ? myPreferences.youdaoAppSecret.trim() : defaultYoudaoAppSecret;
-
-// baidu app id and secret
-const baiduAppId = myPreferences.baiduAppId.trim().length > 0 ? myPreferences.baiduAppId.trim() : defaultBaiduAppId;
-const baiduAppSecret =
-  myPreferences.baiduAppSecret.trim().length > 0 ? myPreferences.baiduAppSecret.trim() : defaultBaiduAppSecret;
-
-// tencent secret id and key
-const tencentSecretId =
-  myPreferences.tencentSecretId.trim().length > 0 ? myPreferences.tencentSecretId.trim() : defaultTencentSecretId;
-const tencentSecretKey =
-  myPreferences.tencentSecretKey.trim().length > 0 ? myPreferences.tencentSecretKey.trim() : defaultTencentSecretKey;
-
-const caiyunToken = myPreferences.caiyunToken.trim().length > 0 ? myPreferences.caiyunToken.trim() : defaultCaiyunToken;
+import { getLanguageItemFromYoudaoId } from "./utils";
 
 const tencentEndpoint = "tmt.tencentcloudapi.com";
 const tencentRegion = "ap-guangzhou";
@@ -123,17 +107,21 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
 
 /**
  * 腾讯文本翻译，5次/秒
- * Docs: https://console.cloud.tencent.com/api/explorer?Product=tmt&Version=2018-03-21&Action=TextTranslate&SignVersion=
+ * Docs: https://cloud.tencent.com/document/api/551/15619
  */
 export async function requestTencentTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   const from = getLanguageItemFromYoudaoId(fromLanguage).tencentLanguageId || "auto";
   const to = getLanguageItemFromYoudaoId(targetLanguage).tencentLanguageId;
   if (!to) {
-    return Promise.reject(new Error("Target language is not supported by Tencent Translate"));
+    console.warn(`Tencent translate not support language: ${from} --> ${to}`);
+    return Promise.resolve({
+      type: TranslateType.Tencent,
+      result: null,
+    });
   }
   const params = {
     SourceText: queryText,
@@ -153,8 +141,9 @@ export async function requestTencentTextTranslate(
     };
     return Promise.resolve(typeResult);
   } catch (err) {
+    // console.error(`tencent translate error: ${JSON.stringify(err, null, 2)}`);
     const error = err as { code: string; message: string };
-    console.error(`tencent translate error, code: ${error.code}, message: ${error.message}`);
+    console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
       type: TranslateType.Tencent,
       code: error.code,
@@ -172,7 +161,7 @@ export function requestYoudaoDictionary(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   function truncate(q: string): string {
     const len = q.length;
     return len <= 20 ? q : q.substring(0, 10) + len + q.substring(len - 10, len);
@@ -221,7 +210,7 @@ export function requestBaiduTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   const salt = Math.round(new Date().getTime() / 1000);
   const md5Content = baiduAppId + queryText + salt + baiduAppSecret;
   const sign = CryptoJS.MD5(md5Content).toString();
@@ -275,7 +264,7 @@ export function requestCaiyunTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   const url = "https://api.interpreter.caiyunai.com/v1/translator";
   const from = getLanguageItemFromYoudaoId(fromLanguage).caiyunLanguageId || "auto";
   const to = getLanguageItemFromYoudaoId(targetLanguage).caiyunLanguageId;
@@ -284,7 +273,7 @@ export function requestCaiyunTextTranslate(
   // Note that Caiyun Translate only supports these types of translation at present.
   const supportedTranslatType = ["zh2en", "zh2ja", "en2zh", "ja2zh"];
   if (!supportedTranslatType.includes(trans_type)) {
-    console.log(`caiyun translate not support language: ${from} --> ${to}`);
+    console.warn(`Caiyun translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
       type: TranslateType.Caiyun,
       result: null,
@@ -316,11 +305,216 @@ export function requestCaiyunTextTranslate(
       .catch((error) => {
         const errorInfo: RequestErrorInfo = {
           type: TranslateType.Caiyun,
-          code: error.response.status,
+          code: error.response.status.toString(),
           message: error.response.statusText,
         };
         reject(errorInfo);
         console.error("caiyun error response: ", error.response);
       });
   });
+}
+
+const myRandomId = 11000056;
+
+/**
+ * DeepL translate API
+ * https://www.deepl.com/zh/docs-api/translating-text
+ * 
+ * 浏览器模拟
+ {
+  "jsonrpc": "2.0",
+  "method": "LMT_handle_jobs",
+  "params": {
+    "jobs": [
+      {
+        "kind": "default",
+        "sentences": [{ "text": "go", "id": 0, "prefix": "" }],
+        "raw_en_context_before": [],
+        "raw_en_context_after": [],
+        "preferred_num_beams": 4
+      }
+    ],
+    "lang": {
+      "preference": { "weight": {}, "default": "default" },
+      "source_lang_computed": "EN",
+      "target_lang": "ZH"
+    },
+    "priority": 1,
+    "commonJobParams": { "browserType": 1, "formality": null },
+    "timestamp": 1657597450312
+  },
+  "id": 11000022
+}
+ */
+export async function requestDeepLTextTranslate(
+  queryText: string,
+  fromLanguage: string,
+  targetLanguage: string
+): Promise<RequestTypeResult> {
+  const sourceLang = getLanguageItemFromYoudaoId(fromLanguage).deepLSourceLanguageId;
+  const targetLang =
+    getLanguageItemFromYoudaoId(targetLanguage).deepLSourceLanguageId ||
+    getLanguageItemFromYoudaoId(targetLanguage).deepLTargetLanguageId;
+
+  // if language is not supported, return null
+  if (!sourceLang || !targetLang) {
+    console.warn(`DeepL translate not support language: ${fromLanguage} --> ${targetLanguage}`);
+    return Promise.resolve({
+      type: TranslateType.DeepL,
+      result: null,
+    });
+  }
+
+  // * deepL api free and deepL pro api use different url host.
+  const url = deepLAuthKey.endsWith(":fx")
+    ? "https://api-free.deepl.com/v2/translate"
+    : "https://api.deepl.com/v2/translate";
+  const params = {
+    auth_key: deepLAuthKey,
+    text: queryText,
+    source_lang: sourceLang,
+    target_lang: targetLang,
+  };
+  // console.log(`---> deepL params: ${JSON.stringify(params, null, 4)}`);
+
+  try {
+    const response = await axios.post(url, querystring.stringify(params));
+    const deepLResult = response.data as DeepLTranslateResult;
+    const translatedText = deepLResult.translations[0].text;
+    console.log(
+      `deepl translate: ${JSON.stringify(translatedText, null, 4)}, length: ${translatedText.length}, cost: ${
+        response.headers[requestCostTime]
+      } ms`
+    );
+    return Promise.resolve({
+      type: TranslateType.DeepL,
+      result: deepLResult,
+    });
+  } catch (err) {
+    const error = err as { response: AxiosResponse };
+    console.error("deepl error: ", JSON.stringify(error.response, null, 4));
+    const errorInfo: RequestErrorInfo = {
+      type: TranslateType.DeepL,
+      code: error.response.status.toString(),
+      message: error.response.statusText,
+    };
+    console.warn("deepl error info: ", errorInfo);
+    return Promise.reject(errorInfo);
+  }
+}
+
+/**
+ 现在我来告诉你，DeepL 到底是怎么认证的。（下面并不是 DeepL 客户端的代码，是我写的 Rust 利用代码，但逻辑不变）
+```rust
+fn gen_fake_timestamp(texts: &Vec<String>) -> u128 {
+    let ts = tool::get_epoch_ms();
+    let i_count = texts
+            .iter()
+            .fold(
+                1, 
+                |s, t| s + t.text.matches('i').count()
+            ) as u128;
+    ts - ts % i_count + i_count
+}
+```
+哈哈！没想到吧！人家的时间戳不是真的！
+
+DeepL 先计算了文本中所有 i 的数量，然后对真正的时间戳进行一个小小的运算 ts - ts % i_count + i_count，这个运算差不多仅会改变时间戳的毫秒部分，这个改变如果用人眼来验证根本无法发现，人类看来就是一个普通的时间戳，不会在意毫秒级的差别。
+
+但是 DeepL 拿到这个修改后的时间戳，既可以与真实时间对比(误差毫秒级)，又可以通过简单的运算（是否是 i_count 的整倍数）判断是否是伪造的请求。真是精妙啊！
+ */
+function genFakeTimestamp(text: string) {
+  let timestamp = Date.now();
+  console.log(`timestamp: ${timestamp}`);
+  // calculate i count
+  let i_count = text.match("i")?.length ?? 0;
+  i_count += 1;
+  console.log(`i_count: ${i_count}`);
+  timestamp = timestamp - (timestamp % i_count) + i_count;
+  return timestamp;
+}
+
+/**
+还有更绝的！你接着看：
+```rust
+let req = req.replace(
+    "\"method\":\"",
+    if (self.id + 3) % 13 == 0 || (self.id + 5) % 29 == 0 {
+        "\"method\" : \""
+    } else {
+        "\"method\": \""
+    },
+);
+```
+怎么样？我觉得我一开始就被玩弄了，人家的 id 就是纯粹的随机数，只不过后续的请求会在第一次的随机 id 基础上加一，但是这个 id 还决定了文本中一个小小的、微不足道的空格。
+
+按照正常的思路，为了方便人类阅读和分析，拿到请求的第一时间，我都会先扔编辑器里格式化一下 Json，我怎么会想到，这恰恰会破坏掉人家用来认证的特征，因此无论我如何努力都难以发现。
+ */
+
+function genFakeMethodParams(text: string, id: number) {
+  // const method = (id + 3) % 13 == 0 || (id + 5) % 29 == 0 ? '"method" : "' : '"method": "';
+  const method = (id + 3) % 13 == 0 || (id + 5) % 29 == 0 ? "method " : "method";
+
+  return method;
+}
+
+/**
+ * JSON 
+  ```json
+  {
+    "jsonrpc": "2.0",
+    "method": "LMT_handle_texts",
+    "params": {
+        "texts": [{
+            "text": "translate this, my friend"
+        }],
+        "lang": {
+            "target_lang": "ZH",
+            "source_lang_user_selected": "EN",
+        },
+        "timestamp": 1648877491942
+    },
+    "id": 12345,
+  }
+```
+ */
+export function fakeDeeplTranslate(text: string) {
+  const url = "https://www2.deepl.com/jsonrpc";
+  // const randomId = Math.floor(Math.random() * 1000000);
+  const randomId = myRandomId + 1;
+
+  const fakeTimestamp = genFakeTimestamp(text);
+  console.warn(`-----> timestamp: ${fakeTimestamp}`);
+  const fakeMethod = genFakeMethodParams(text, randomId);
+  console.warn(`-----> fakeMethod: ${fakeMethod}, length: ${fakeMethod.length}`);
+  const params = {
+    jsonrpc: "2.0",
+    method: "LMT_split_into_sentences",
+    params: {
+      texts: [
+        {
+          text: text,
+        },
+      ],
+      lang: {
+        target_lang: "ZH",
+        lang_user_selected: "EN",
+      },
+      timestamp: fakeTimestamp,
+    },
+    id: randomId,
+  };
+  console.log(`---> params: ${JSON.stringify(params, null, 4)}`);
+
+  axios
+    .post(url, params)
+    .then((response) => {
+      console.log(
+        `deep translate: ${response.data.result.translations[0].text}, cost: ${response.headers[requestCostTime]} ms`
+      );
+      console.log(`deep translate: ${response.data}`);
+    })
+    .catch((error) => {
+      console.error("deep error response: ", error.response);
+    });
 }

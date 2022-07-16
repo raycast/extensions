@@ -1,32 +1,34 @@
+import { DeepLTranslateResult } from "./types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 16:18
+ * @lastEditTime: 2022-07-15 23:44
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { SectionType, TranslateType } from "./consts";
 import {
+  AppleTranslateResult,
+  BaiduTranslateResult,
+  CaiyunTranslateResult,
   QueryWordInfo,
+  RequestTypeResult,
+  SectionType,
+  TencentTranslateResult,
   TranslateDisplayResult,
   TranslateFormatResult,
   TranslateItem,
+  TranslateType,
   YoudaoTranslateResult,
-  TranslateTypeResult,
-  BaiduTranslateResult,
-  TencentTranslateResult,
-  CaiyunTranslateResult,
-  AppleTranslateResult,
 } from "./types";
-import { isShowMultipleTranslations } from "./utils";
+import { isShowMultipleTranslations, myPreferences } from "./utils";
 
 /**
  * Format the Youdao original data for later use.
  */
-export function formatYoudaoDictionaryResult(youdaoTypeResult: TranslateTypeResult): TranslateFormatResult {
+export function formatYoudaoDictionaryResult(youdaoTypeResult: RequestTypeResult): TranslateFormatResult {
   const youdaoResult = youdaoTypeResult.result as YoudaoTranslateResult;
   const translations = youdaoResult.translation.map((translationText) => {
     return {
@@ -66,25 +68,46 @@ export function formatYoudaoDictionaryResult(youdaoTypeResult: TranslateTypeResu
 }
 
 /**
- * update formated result with apple translate result
+ * Update format result with deepl translate result.
  */
-export function updateFormatResultWithAppleTranslateResult(
+export function updateFormatTranslateResultWithDeepLResult(
   formatResult: TranslateFormatResult,
-  appleTranslateResult: TranslateTypeResult
+  deepLTypeResult: RequestTypeResult
 ): TranslateFormatResult {
-  const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
-  formatResult.translations.push({
-    type: TranslateType.Apple,
-    text: appleTranslate.translatedText,
-  });
-  return sortTranslations(formatResult);
+  const deepLResult = deepLTypeResult.result as DeepLTranslateResult;
+  if (deepLResult) {
+    formatResult.translations.push({
+      type: TranslateType.DeepL,
+      text: deepLResult.translations[0].text, // deepl will autotically warp the text.
+    });
+    return sortTranslations(formatResult);
+  }
+  return formatResult;
 }
 
 /**
- * update formated result with baidu translate result
+ * update format result with apple translate result
  */
-export function updateFormateResultWithBaiduTranslation(
-  baiduTypeResult: TranslateTypeResult,
+export function updateFormatResultWithAppleTranslateResult(
+  formatResult: TranslateFormatResult,
+  appleTranslateResult: RequestTypeResult
+): TranslateFormatResult {
+  const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
+  if (appleTranslate.translatedText) {
+    formatResult.translations.push({
+      type: TranslateType.Apple,
+      text: appleTranslate.translatedText,
+    });
+    return sortTranslations(formatResult);
+  }
+  return formatResult;
+}
+
+/**
+ * update format result with baidu translate result
+ */
+export function updateFormatResultWithBaiduTranslation(
+  baiduTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
@@ -99,15 +122,16 @@ export function updateFormateResultWithBaiduTranslation(
       type: TranslateType.Baidu,
       text: baiduTranslation,
     });
+    return sortTranslations(formatResult);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * update formated result with tencent translate result
+ * update format result with tencent translate result
  */
-export function updateFormateResultWithTencentTranslation(
-  tencentTypeResult: TranslateTypeResult,
+export function updateFormatResultWithTencentTranslation(
+  tencentTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const tencentResult = tencentTypeResult.result as TencentTranslateResult;
@@ -117,15 +141,16 @@ export function updateFormateResultWithTencentTranslation(
       type: TranslateType.Tencent,
       text: tencentTranslation,
     });
+    return sortTranslations(formatResult);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * update formated result with caiyun translate result
+ * update format result with caiyun translate result
  */
-export function updateFormateResultWithCaiyunTranslation(
-  caiyunTypeResult: TranslateTypeResult,
+export function updateFormatResultWithCaiyunTranslation(
+  caiyunTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const caiyunResult = caiyunTypeResult.result as CaiyunTranslateResult;
@@ -134,24 +159,53 @@ export function updateFormateResultWithCaiyunTranslation(
       type: TranslateType.Caiyun,
       text: caiyunResult?.target.join("\n"),
     });
+    return sortTranslations(formatResult);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * sort formatResult translations, by type: apple > baidu > tencent > youdao > caiyun
+ * Translations display order, default is sorted by: deelp > apple > baidu > tencent > youdao > caiyun
+ *
+ * If user manually set the display order, prioritize the order.
+ *
+ * * NOTE: this function will be called many times, because translate results are async, so we need to sort every time.
  */
 export function sortTranslations(formatResult: TranslateFormatResult): TranslateFormatResult {
-  const sortByOrders = [
+  const defaultTypeOrder = [
+    TranslateType.DeepL,
     TranslateType.Apple,
     TranslateType.Baidu,
     TranslateType.Tencent,
     TranslateType.Youdao,
     TranslateType.Caiyun,
   ];
+
+  const defaultOrder = defaultTypeOrder.map((type) => type.toString().toLowerCase());
+
+  const userOrder: string[] = [];
+  // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
+  const manualOrder = myPreferences.translationDisplayOrder.toLowerCase().split(","); // "Baidu,DeepL,Tencent"
+  // console.log("manualOrder:", manualOrder);
+  if (manualOrder.length > 0) {
+    for (let translationName of manualOrder) {
+      translationName = translationName.trim();
+      // if the type name is in the default order, add it to user order, and remove it from defaultNameOrder.
+      if (defaultOrder.includes(translationName)) {
+        userOrder.push(translationName);
+        defaultOrder.splice(defaultOrder.indexOf(translationName), 1);
+      }
+    }
+  }
+  // console.log("defaultNameOrder:", defaultOrder);
+  // console.log("userOrder:", userOrder);
+
+  const finalOrder = [...userOrder, ...defaultOrder];
+  // console.log("finalOrder:", finalOrder);
+
   const sortTranslations: TranslateItem[] = [];
   for (const translationItem of formatResult.translations) {
-    const index = sortByOrders.indexOf(translationItem.type);
+    const index = finalOrder.indexOf(translationItem.type.toString().toLowerCase());
     sortTranslations[index] = translationItem;
   }
   // filter undefined

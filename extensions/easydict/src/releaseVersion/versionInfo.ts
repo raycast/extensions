@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 23:29
+ * @lastEditTime: 2022-07-16 23:28
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -23,9 +23,9 @@ export class Easydict {
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "1.2.0";
-  buildNumber = 3;
-  versionDate = "2022-07-04";
+  version = "1.3.0";
+  buildNumber = 4;
+  versionDate = "2022-07-16";
   isNeedPrompt = true;
   hasPrompted = false; // only show once, then will be set to true
   releaseMarkdown = changelog;

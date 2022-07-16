@@ -2,71 +2,74 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 22:23
+ * @lastEditTime: 2022-07-16 17:56
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
+import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
 import { Fragment, useEffect, useState } from "react";
 import ListActionPanel, {
   ActionCurrentVersion,
   ActionFeedback,
+  ActionOpenCommandPreferences,
   ActionRecentUpdate,
   getListItemIcon,
   getWordAccessories,
 } from "./components";
-import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
+import { BaiduRequestStateCode, getYoudaoErrorInfo, youdaoErrorCodeUrl, YoudaoRequestStateCode } from "./consts";
+import { detectLanguage } from "./detectLanguage";
+import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
+import {
+  formatTranslateDisplayResult,
+  formatYoudaoDictionaryResult,
+  updateFormatResultWithAppleTranslateResult,
+  updateFormatResultWithBaiduTranslation,
+  updateFormatResultWithCaiyunTranslation,
+  updateFormatResultWithTencentTranslation,
+  updateFormatTranslateResultWithDeepLResult,
+} from "./formatData";
+import {
+  requestBaiduTextTranslate,
+  requestCaiyunTextTranslate,
+  requestDeepLTextTranslate,
+  requestTencentTextTranslate,
+  requestYoudaoDictionary,
+} from "./request";
+import { appleTranslate } from "./scripts";
 import {
   LanguageItem,
-  TranslateDisplayResult,
-  TranslateTypeResult,
-  YoudaoTranslateResult,
-  TranslateFormatResult,
   QueryWordInfo,
   RequestErrorInfo,
-} from "./types";
-import {
-  BaiduRequestStateCode,
-  getYoudaoErrorInfo,
+  RequestTypeResult,
+  TranslateDisplayResult,
+  TranslateFormatResult,
   TranslateType,
-  youdaoErrorCodeUrl,
-  YoudaoRequestStateCode,
-} from "./consts";
+  YoudaoTranslateResult,
+} from "./types";
 import {
   defaultLanguage1,
   defaultLanguage2,
   getAutoSelectedTargetLanguageId,
-  myPreferences,
-  isTranslateResultTooLong,
-  isShowMultipleTranslations,
   getLanguageItemFromYoudaoId,
+  isShowMultipleTranslations,
+  isTranslateResultTooLong,
+  myPreferences,
   trimTextLength,
 } from "./utils";
-import {
-  requestBaiduTextTranslate,
-  requestCaiyunTextTranslate,
-  requestTencentTextTranslate,
-  requestYoudaoDictionary,
-} from "./request";
-import {
-  formatTranslateDisplayResult,
-  formatYoudaoDictionaryResult,
-  updateFormateResultWithBaiduTranslation,
-  updateFormateResultWithCaiyunTranslation,
-  updateFormateResultWithTencentTranslation,
-  updateFormatResultWithAppleTranslateResult,
-} from "./formatData";
-import { detectLanguage } from "./detectLanguage";
-import { appleTranslate } from "./scripts";
-import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
 
-let youdaoTranslateTypeResult: TranslateTypeResult | undefined;
+let youdaoTranslateTypeResult: RequestTypeResult | undefined;
 
 /**
- * when has new input text, need to cancel previous request
+ * when has new input text, need to cancel previous request.
  */
 let isLastQuery = true;
+
+/**
+ * when input text is empty, need to cancel previous request, and clear result.
+ */
+let shouldCancelQuery = false;
 
 let delayQueryTextTimer: NodeJS.Timeout;
 let delayQueryTextInfoTimer: NodeJS.Timeout;
@@ -91,7 +94,7 @@ export default function () {
   /**
    * use to display input text
    */
-  const [inputText, setInputText] = useState<string>("");
+  const [inputText, setInputText] = useState<string>();
   /**
    * searchText = inputText.trim(), avoid frequent request API with blank input
    */
@@ -116,13 +119,13 @@ export default function () {
     console.log("enter useEffect");
 
     startTime = Date.now();
-    if (searchText.length > 0) {
+    if (searchText) {
       queryText(searchText);
       return;
     }
 
     // try to query selected text when the extension is activated.
-    if (myPreferences.isAutomaticQuerySelectedText) {
+    if (inputText === undefined && myPreferences.isAutomaticQuerySelectedText) {
       tryQuerySelecedtText();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,9 +205,18 @@ export default function () {
      */
     try {
       youdaoTranslateTypeResult = await requestYoudaoDictionary(queryText, fromLanguage, toLanguage);
+      if (shouldCancelQuery) {
+        updateTranslateDisplayResult(null);
+        return;
+      }
+      if (!isLastQuery) {
+        console.log("---> queryTextWithTextInfo: isLastQuery is false, return");
+        return;
+      }
+
       const youdaoResult = youdaoTranslateTypeResult.result as YoudaoTranslateResult;
       console.log(`youdao translate result: ${JSON.stringify(youdaoResult, null, 2)}`);
-      console.warn(`query cost time: ${Date.now() - startTime} ms`);
+      console.warn(`---> Youdao cost time: ${Date.now() - startTime} ms`);
       const youdaoErrorCode = youdaoResult.errorCode;
       youdaoTranslateTypeResult.errorInfo = getYoudaoErrorInfo(youdaoErrorCode);
 
@@ -240,13 +252,30 @@ export default function () {
 
       // request other translate API to show multiple translations
       if (isShowMultipleTranslations(formatResult)) {
+        // check if enable deepl translate
+        if (myPreferences.enableDeepLTranslate) {
+          requestDeepLTextTranslate(queryText, fromLanguage, toLanguage)
+            .then((deepLTypeResult) => {
+              updateFormatTranslateResultWithDeepLResult(formatResult, deepLTypeResult);
+              updateTranslateDisplayResult(formatResult);
+            })
+            .catch((err) => {
+              const errorInfo = err as RequestErrorInfo;
+              showToast({
+                style: Toast.Style.Failure,
+                title: `${errorInfo.type}: ${errorInfo.code}`,
+                message: errorInfo.message,
+              });
+            });
+        }
+
         // check if enable apple translate
         if (myPreferences.enableAppleTranslate) {
           console.log("apple translate start");
           appleTranslate(queryTextInfo)
             .then((translatedText) => {
               if (translatedText) {
-                const appleTranslateResult: TranslateTypeResult = {
+                const appleTranslateResult: RequestTypeResult = {
                   type: TranslateType.Apple,
                   result: { translatedText },
                 };
@@ -255,7 +284,8 @@ export default function () {
               }
             })
             .catch((error) => {
-              console.warn(`apple translate error: ${error}`);
+              const errorInfo = error as RequestErrorInfo;
+              console.error(`Apple translate error: ${JSON.stringify(errorInfo, null, 4)}`);
             });
         }
 
@@ -263,8 +293,8 @@ export default function () {
         if (myPreferences.enableBaiduTranslate) {
           console.log("baidu translate start");
           requestBaiduTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((baiduRes) => {
-              formatResult = updateFormateResultWithBaiduTranslation(baiduRes, formatResult);
+            .then((baiduTypeResult) => {
+              formatResult = updateFormatResultWithBaiduTranslation(baiduTypeResult, formatResult);
               updateTranslateDisplayResult(formatResult);
             })
             .catch((err) => {
@@ -287,8 +317,8 @@ export default function () {
         if (myPreferences.enableTencentTranslate) {
           console.log(`tencent translate start`);
           requestTencentTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((tencentRes) => {
-              formatResult = updateFormateResultWithTencentTranslation(tencentRes, formatResult);
+            .then((tencentTypeResult) => {
+              formatResult = updateFormatResultWithTencentTranslation(tencentTypeResult, formatResult);
               updateTranslateDisplayResult(formatResult);
             })
             .catch((err) => {
@@ -305,8 +335,8 @@ export default function () {
         if (myPreferences.enableCaiyunTranslate) {
           console.log(`caiyun translate start`);
           requestCaiyunTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((caiyunRes) => {
-              formatResult = updateFormateResultWithCaiyunTranslation(caiyunRes, formatResult);
+            .then((caiyunTypeResult) => {
+              formatResult = updateFormatResultWithCaiyunTranslation(caiyunTypeResult, formatResult);
               updateTranslateDisplayResult(formatResult);
             })
             .catch((err) => {
@@ -439,7 +469,7 @@ export default function () {
   /**
    * Update input text and search text, then query text according to @isNow
    *
-   * @isNow if true, query text right now, fase will delay query.
+   * @isNow if true, query text right now, false will delay query.
    */
   function updateInputTextAndQueryTextNow(text: string, isNow: boolean) {
     setInputText(text);
@@ -447,11 +477,15 @@ export default function () {
     const trimText = trimTextLength(text);
     console.log(`update input text: ${text}`);
     if (trimText.length === 0) {
+      // fix bug: if input text is empty, need to update search text to empty
+      setSearchText("");
+      shouldCancelQuery = true;
       updateTranslateDisplayResult(null);
       return;
     }
 
     isLastQuery = false;
+    shouldCancelQuery = false;
     clearTimeout(delayQueryTextTimer);
 
     if (trimText !== searchText) {
@@ -480,6 +514,7 @@ export default function () {
       actions={
         <ActionPanel>
           <ActionFeedback />
+          <ActionOpenCommandPreferences />
           <ActionRecentUpdate />
           <ActionCurrentVersion />
         </ActionPanel>
@@ -490,3 +525,17 @@ export default function () {
     </List>
   );
 }
+
+/**
+ * Easter egg: if you use PopClip and have added a shortcut for `Easydict`, such as `Cmd + E`, then you can use PopClip to open Easydict!
+ * 
+ * Reference: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+ * 
+ * Usage: select following text, then PopClip will show "Install Easydict", click it! 
+
+  # popclip
+  name: Easydict
+  icon: search E
+  key combo: command E
+
+ */

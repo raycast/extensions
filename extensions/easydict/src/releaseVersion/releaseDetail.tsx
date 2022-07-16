@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 18:26
+ * @lastEditTime: 2022-07-16 23:29
  * @fileName: releaseDetail.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
