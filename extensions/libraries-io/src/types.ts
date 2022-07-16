@@ -17,6 +17,16 @@ export interface Version {
   repository_sources: string[];
 }
 
+export interface Dependency {
+  projectName: string;
+  platform: string;
+  requirements: string;
+  latestStable: string;
+  latest: string;
+  deprecated: boolean;
+  kind: string;
+}
+
 export interface Platform {
   name: string;
   projectCount: number;

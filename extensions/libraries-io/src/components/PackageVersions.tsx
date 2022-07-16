@@ -1,4 +1,5 @@
-import { List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { PackageDependencies } from "./PackageDependencies";
 import type { Package } from ".././types";
 
 interface Props {
@@ -13,7 +14,12 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
           <List.Item
             key={version.number}
             title={version.number}
-            accessoryTitle={version.published_at}
+            accessoryTitle={new Date(version.published_at).toLocaleDateString()}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Dependencies" icon={Icon.List} target={<PackageDependencies key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
+              </ActionPanel>
+            }
           />
         )).reverse()}
       </List.Section>
