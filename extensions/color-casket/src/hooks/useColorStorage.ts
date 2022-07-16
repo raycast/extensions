@@ -1,20 +1,9 @@
-import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
-import { createColor } from "../typeUtilities";
 
-import asyncEffect from "../utilities";
-
-export interface SerializedColor {
-  value: string;
-  savedAt: number;
-}
-
-export interface SavedColor {
-  instance: AvailableColor;
-  savedAt: number;
-}
+import { asyncEffect } from "../utilities";
+import { list, update, SavedColor } from "./colorSaver";
 
 export interface Storage {
   isLoading: boolean;
@@ -49,23 +38,6 @@ export type StorageAction =
 export const storageInitialState = {
   collection: [],
 };
-
-async function rawList(key: string): Promise<SerializedColor[]> {
-  return JSON.parse((await LocalStorage.getItem(key)) || "[]");
-}
-
-async function items(key: string): Promise<SavedColor[]> {
-  const items = await rawList(key);
-
-  return items.map((color: SerializedColor) => ({ instance: createColor(color.value), savedAt: color.savedAt }));
-}
-
-function update(key: string, items: SavedColor[]) {
-  LocalStorage.setItem(
-    key,
-    JSON.stringify(items.map((color) => ({ value: color.instance.stringValue(), savedAt: color.savedAt })))
-  );
-}
 
 function storageReducer(state: InitialState, action: StorageAction) {
   let newState = state;
@@ -112,7 +84,7 @@ export function useColorStorage(key: StorageKeys, initialCallback?: (state: Save
     update(key, state.collection);
   }, [state.collection]);
 
-  asyncEffect(items(key), (state) => {
+  asyncEffect(list(key), (state) => {
     dispatch({ type: StorageActions.Update, key, items: state });
     setIsLoading(false);
 

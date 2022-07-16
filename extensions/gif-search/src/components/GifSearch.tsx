@@ -1,8 +1,16 @@
 import { useEffect, useReducer, useState } from "react";
 
-import { showToast, Toast, Icon } from "@raycast/api";
+import { showToast, Toast, Icon, Grid } from "@raycast/api";
 
-import { ServiceName, getMaxResults, GIF_SERVICE, getServiceTitle, getLayoutType } from "../preferences";
+import {
+  ServiceName,
+  getMaxResults,
+  GIF_SERVICE,
+  getServiceTitle,
+  getLayoutType,
+  getGridItemSize,
+  getGridTrendingItemSize,
+} from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 
@@ -18,6 +26,8 @@ export function GifSearch() {
   const [searchService, setSearchService] = useState<ServiceName>();
   const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
 
+  const [itemSize, setItemSize] = useState(getGridTrendingItemSize());
+
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);
     setSearchTerm(searchTerm);
@@ -30,6 +40,12 @@ export function GifSearch() {
     }
 
     search(searchTerm, searchService);
+
+    if (searchTerm) {
+      setItemSize(getGridItemSize());
+    } else {
+      setItemSize(getGridTrendingItemSize());
+    }
   }, [searchTerm, searchService]);
 
   // Display any GIF API search errors
@@ -130,6 +146,7 @@ export function GifSearch() {
     searchList = (
       <GifSearchList
         layoutType={layoutType}
+        itemSize={itemSize}
         isLoading={isLoadingFavIds || isLoadingFavs}
         showDropdown={true}
         showDetail={(favItems?.items?.size ?? 0) !== 0}
@@ -148,6 +165,7 @@ export function GifSearch() {
     searchList = (
       <GifSearchList
         layoutType={layoutType}
+        itemSize={itemSize}
         isLoading={isLoadingRecentIds || isLoadingRecents}
         showDropdown={true}
         showDetail={(recentItems?.items?.size ?? 0) !== 0}
@@ -166,6 +184,7 @@ export function GifSearch() {
     searchList = (
       <GifSearchList
         layoutType={layoutType}
+        itemSize={itemSize}
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs || isLoadingRecents}
         showDropdown={true}
         showDetail={(results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}

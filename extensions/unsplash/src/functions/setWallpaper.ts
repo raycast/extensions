@@ -1,6 +1,7 @@
 import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { existsSync } from "fs";
+import { resolveHome } from "./utils";
 
 interface SetWallpaperProps {
   url: string;
@@ -9,11 +10,19 @@ interface SetWallpaperProps {
 }
 
 export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProps) => {
-  let toast;
-  if (!useHud) toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
+  const { downloadSize, applyTo, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
+  const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
 
-  const { downloadSize, applyTo } = getPreferenceValues<UnsplashPreferences>();
-  const selectedPath = environment.supportPath;
+  let toast;
+
+  if (existsSync(selectedPath)) {
+    const msg = "Downloading and setting wallpaper...";
+    useHud ? await showHUD(msg) : (toast = await showToast(Toast.Style.Animated, msg));
+  } else {
+    const msg = "The selected path does not exist. Please select a valid path.";
+    await (useHud ? showHUD(msg) : showToast(Toast.Style.Animated, msg));
+    return;
+  }
 
   const fixedPathName = selectedPath.endsWith("/")
     ? `${selectedPath}${id}-${downloadSize}.jpg`

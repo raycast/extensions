@@ -16,10 +16,12 @@ export function PrimaryActions(props: {
         icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
         title={"Connect Wi-Fi"}
         onAction={async () => {
-          if (curWifi[0].ssid === wifiNetwork.ssid) {
-            return;
+          if (curWifi.length > 0) {
+            if (curWifi[0].ssid === wifiNetwork.ssid) {
+              return;
+            }
+            await connectWifi(wifiNetwork.ssid, wifiNetwork.password, setRefresh);
           }
-          await connectWifi(wifiNetwork.ssid, wifiNetwork.password, setRefresh);
         }}
       />
       <Action.CopyToClipboard title={"Copy Wi-FI"} content={wifiNetwork.ssid} />

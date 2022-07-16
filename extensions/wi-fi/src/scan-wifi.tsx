@@ -1,27 +1,29 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { getWifiList } from "./hooks/hooks";
+import { getWifiList, getWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import EnterPassword from "./enter-password";
 import { WifiPassword } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
 import { PrimaryActions } from "./components/primary-actions";
 
-export default function SearchAllBunches() {
+export default function ScanWifi() {
   const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
   const { wifiPassword, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
+  const { wifiStatus } = getWifiStatus();
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
-      <EmptyView title={"No Wi-Fi"} />
+      <EmptyView title={"No Wi-Fi"} description={wifiStatus ? " " : "Wi-Fi is turned off"} />
+
       <List.Section title={"Preferred"}>
         {wifiWithPasswordList.map((value, index) => {
           return (
             <List.Item
               icon={{
                 source: "wifi-icon.svg",
-                tintColor: curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
+                tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
               title={value.ssid}
@@ -97,7 +99,7 @@ export default function SearchAllBunches() {
             <List.Item
               icon={{
                 source: "wifi-icon.svg",
-                tintColor: curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
+                tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
               title={value.ssid}
@@ -117,10 +119,12 @@ export default function SearchAllBunches() {
                     icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
                     title={"Connect Wi-Fi"}
                     onAction={() => {
-                      if (curWifi[0].ssid === value.ssid) {
-                        return;
+                      if (curWifi.length > 0) {
+                        if (curWifi[0].ssid === value.ssid) {
+                          return;
+                        }
+                        push(<EnterPassword wifiPassword={wifiPassword} wifiNetWork={value} setRefresh={setRefresh} />);
                       }
-                      push(<EnterPassword wifiPassword={wifiPassword} wifiNetWork={value} setRefresh={setRefresh} />);
                     }}
                   />
                   <Action.CopyToClipboard title={"Copy Wi-FI"} content={value.ssid} />
@@ -137,7 +141,7 @@ export default function SearchAllBunches() {
             <List.Item
               icon={{
                 source: "wifi-icon.svg",
-                tintColor: curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
+                tintColor: curWifi.length > 0 && curWifi[0].ssid === value.ssid ? Color.Green : Color.SecondaryText,
               }}
               key={index}
               title={value.ssid}

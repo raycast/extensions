@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { List, Detail, Icon, ActionPanel, showToast, Action, LocalStorage, Toast } from '@raycast/api';
 import { useCallback, useEffect, useState, Fragment } from 'react';
 import dayjs from 'dayjs';
-import { ListName, executeJxa, thingsNotRunningError } from './shared';
+import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
 import AddNewTodo from './add-new-todo';
 
 enum TodoStatus {
@@ -44,7 +44,7 @@ const listNameToListIdMapping = {
 
 const getListTodos = (listName: ListName) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${listNameToListIdMapping[listName]}').toDos();
   return todos.map(todo => ({
     id: todo.id(),
@@ -73,13 +73,13 @@ const getListTodos = (listName: ListName) =>
 
 const setTodoProperty = (todoId: string, key: string, value: string) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   things.toDos.byId('${todoId}').${key} = '${value}';
 `);
 
 const deleteTodo = (todoId: string) =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   things.delete(things.toDos.byId('${todoId}'));
 `);
 

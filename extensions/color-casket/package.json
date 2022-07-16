@@ -5,22 +5,76 @@
   "description": "Handy Color Utilities",
   "icon": "command-icon.png",
   "author": "slava.razum",
-  "categories": ["Design Tools", "Developer Tools", "Productivity"],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Render Color",
       "description": "Render color by string representation",
-      "keywords": ["color", "render", "render color", "color utilities", "color casket"],
+      "keywords": [
+        "color",
+        "render",
+        "render color",
+        "color utilities",
+        "color casket"
+      ],
       "mode": "view"
+    },
+    {
+      "name": "picker",
+      "title": "Pick Color",
+      "icon": "picker-icon.png",
+      "description": "Pick color from everywhere",
+      "keywords": [
+        "color",
+        "pick",
+        "eyedropper",
+        "dropper",
+        "pipette",
+        "color casket"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "title": "Default Format",
+      "description": "Default format for color picker",
+      "type": "dropdown",
+      "default": "HEX",
+      "required": false,
+      "data": [
+        {
+          "title": "HEX",
+          "value": "HEX"
+        },
+        {
+          "title": "RGB",
+          "value": "RGB"
+        },
+        {
+          "title": "HSL",
+          "value": "HSL"
+        },
+        {
+          "title": "Keyword",
+          "value": "KEYWORD"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
     "color-convert": "^2.0.1",
     "is-valid-css-color": "^2.0.3",
-    "javascript-time-ago": "^2.3.13"
+    "javascript-time-ago": "^2.3.13",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/color-convert": "^2.0.0",

@@ -1,5 +1,14 @@
 # GitLab Changelog
 
+## [Bugfix] - 2022-07-16
+
+- Fixes an issue in the GitLab extension that was preventing fetching all the pages from the API, even though the all parameter was enabled.
+
+## [Markdown Improvements] - 2022-07-08
+
+- Render emojis from GitLab Flavored Markdown.
+- Hide inline HTML tags from GitLab Flavored Markdown.
+
 ## [UI Improvements] - 2022-06-29
 
 - Add TagList items to MR details to show assignees and reviewers.
