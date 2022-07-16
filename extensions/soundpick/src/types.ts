@@ -10,4 +10,13 @@ export interface SoundOutputDevice {
     name: string
     isConnected: boolean
 }
-  
+
+export interface SoundOutputServiceConfig {
+    parser: AppleScriptParser
+}
+
+export interface SoundOutputService {
+    config: SoundOutputServiceConfig
+    fetchDevices(): Promise<Array<SoundOutputDevice>>
+    connectToDevice(name: string): Promise<boolean>
+}
