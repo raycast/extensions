@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 11:54
+ * @lastEditTime: 2022-07-18 00:37
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -66,7 +66,7 @@ export function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
 
 /**
  * Language item list.
- * Currently support 22 languages, includes two Chinese languages.
+ * Currently support 23 languages.
  * TODO: add more translation supported languages.
  * TODO: add more apple detect supported languages.
  */

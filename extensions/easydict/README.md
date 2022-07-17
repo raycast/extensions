@@ -30,7 +30,7 @@
 - [x] Support to sort translation results manually.
 - [x] Support **MacOS system translation**. (_Note: this feature needs to install an apple translate shortcut on you mac, please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F) for more details_)
 - [x] Support DeepL, Baidu, Tencent, Youdao and Caiyun translation API.
-- [x] Support 22 languages.
+- [x] Support 23 languages.
 
 Next:
 
@@ -57,7 +57,7 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 ### Supported Languages
 
-Currently we support 22 languages: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Currently we support 23 languages: Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 Details of the languages supported by each translation service are as follows:
 
