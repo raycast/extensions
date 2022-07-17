@@ -40,8 +40,8 @@ interface IPreferences {
     useEmojiAll: boolean
     isAutomaticPaste: boolean
     deepmojiURL: string
-    baiduAppId: string;
-    baiduAppSecret: string;
+    baiduAppId: string
+    baiduAppSecret: string
 }
 
 interface IListItemActionPanelItem {
@@ -66,7 +66,6 @@ interface ILanguageListItem {
     googleLanguageId?: string
 }
 
-
 interface EmojiScore {
     emoji: string
     prob: number
@@ -81,13 +80,13 @@ interface EmojiDataItem {
 }
 
 interface BaiduTranslateResult {
-    from?: string;
-    to?: string;
-    trans_result?: BaiduTranslateItem[];
-    error_code?: string;
-    error_msg?: string;
-  }
+    from?: string
+    to?: string
+    trans_result?: BaiduTranslateItem[]
+    error_code?: string
+    error_msg?: string
+}
 interface BaiduTranslateItem {
-    src: string;
-    dst: string;
+    src: string
+    dst: string
 }

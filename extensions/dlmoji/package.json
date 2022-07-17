@@ -62,22 +62,23 @@
             "required": false,
             "description": "Your Baidu App ID",
             "default": ""
-          },
-          {
+        },
+        {
             "title": "Baidu App Secret",
             "name": "baiduAppSecret",
             "type": "textfield",
             "required": false,
             "description": "Your Baidu App Secret",
             "default": ""
-          }
+        }
     ],
     "dependencies": {
         "@raycast/api": "^1.31.0",
         "axios": "^0.25.0",
         "cheerio": "^1.0.0-rc.12",
         "crypto-js": "^4.1.1",
-        "form-data": "^4.0.0"
+        "form-data": "^4.0.0",
+        "prettier": "^2.7.1"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.1.1",
