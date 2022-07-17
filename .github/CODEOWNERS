@@ -3,12 +3,13 @@
 /extensions/1loc                                     @kud @sxn
 /extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer
 /extensions/8ball                                    @Gitsack
+/extensions/CodeBlocks                               @tisfeng
 /extensions/airplane                                 @pradeepb28
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
 /extensions/alpinejs-doc-search                      @aurawindsurfing
-/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss
+/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it
 /extensions/amphetamine                              @gstvds
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/anybox                                   @francisfeng
@@ -34,6 +35,7 @@
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bing-wallpaper                           @koinzhang
 /extensions/bitbucket                                @Lp-Francois @esarmstrong
+/extensions/bitfinex                                 @Yukaii
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
 /extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
@@ -62,6 +64,7 @@
 /extensions/chess-com                                @joshfarrant
 /extensions/chinese-character                        @koinzhang
 /extensions/choose-a-license                         @sandypockets @Aayush9029
+/extensions/chuck-norris-facts                       @jorgecortesdev
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/citation-generator                       @AbhinavPalacharla
 /extensions/clash                                    @ciiiii
@@ -101,6 +104,7 @@
 /extensions/datadog                                  @kudrykv @rcruzper @aexvir @albertoxamin
 /extensions/datetime-format-converter                @yangxyo
 /extensions/days-until-christmas                     @MEGApixel23
+/extensions/dbt-documentation                        @b-per
 /extensions/dbtCloud                                 @zsombor-flds
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl @mooxl
@@ -248,6 +252,7 @@
 /extensions/lark-applink                             @chyroc
 /extensions/lastfm                                   @eggsy
 /extensions/latest-news                              @FilipeCerejo
+/extensions/library-genesis                          @yz3440
 /extensions/life-progress                            @koinzhang
 /extensions/linguee                                  @geekdada
 /extensions/linux-command                            @jaywcjlove
@@ -276,6 +281,7 @@
 /extensions/n8n                                      @koinzhang
 /extensions/nanoid                                   @roelvan
 /extensions/nativebase-docs                          @ShubhamVerma1811
+/extensions/nature-remo                              @uetchy
 /extensions/nba-game-viewer                          @AbhinavPalacharla
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner
@@ -286,6 +292,8 @@
 /extensions/noteplan-3                               @shakedlokits
 /extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
 /extensions/nsis-reference                           @idleberg
+/extensions/nuget                                    @hexpl0it
+/extensions/numi                                     @AndresMorelos @pernielsentikaer
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @marcjulianschwarz
 /extensions/obsidian-bookmarks                       @Dru89
@@ -302,6 +310,7 @@
 /extensions/parcel-tracker                           @jjhok
 /extensions/parrot-translate                         @Haojen
 /extensions/party-parrot                             @thomaspaulmann
+/extensions/passphrase-generator                     @omBratteng @pernielsentikaer
 /extensions/password-generator                       @joshuaiz
 /extensions/paste-as-plain-text                      @koinzhang
 /extensions/pastebin                                 @vimtor
@@ -370,7 +379,7 @@
 /extensions/search-npm                               @mrmartineau @reloadedhead
 /extensions/search-rubygems                          @aleks
 /extensions/semantic-scholar                         @blainerothrock
-/extensions/send-to-flomo                            @ahonn
+/extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
 /extensions/sentry                                   @thomaspaulmann @mattisssa
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/sf-symbols-search                        @peteschaffner
@@ -403,11 +412,12 @@
 /extensions/stock-lookup                             @jones-sam
 /extensions/stripe                                   @pradeepb28
 /extensions/supabase-docs                            @Isaiah-Hamilton
+/extensions/supernotes                               @acnebs
 /extensions/surge                                    @ysj151215
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
 /extensions/switchhosts                              @tiancheng92
-/extensions/system-monitor                           @hossammourad @pernielsentikaer @pernielsentikaer
+/extensions/system-monitor                           @hossammourad @Crayon144 @pernielsentikaer
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor @macbookandrew

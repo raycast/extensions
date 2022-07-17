@@ -23,6 +23,7 @@ You will need some additional steps to install this plugin.
   - **Download Size**: The sizes when downloading, copying, and saving image to disk. (Default: `full`)
   - **Custom Collections**: The collection IDs you want to get random images out of while setting a random wallpaper. The list should be comma & space seperated as in `ID1, ID2, ID3, etc.`. (Default: [`4324303`](https://unsplash.com/collections/4324303), [`8647859`](https://unsplash.com/collections/8647859), [`298137`](https://unsplash.com/collections/298137), [`2476111`](https://unsplash.com/collections/2476111), [`1065976`](https://unsplash.com/collections/1065976), [`3430431`](https://unsplash.com/collections/3430431), [`1114848`](https://unsplash.com/collections/1114848), [`2063295`](https://unsplash.com/collections/2063295), [`9389477`](https://unsplash.com/collections/9389477), [`932210`](https://unsplash.com/collections/932210))
   - **Include Default Collections**: When you set custom collections, you can choose to include the default collections as well. (Default: `no`)
+  - **Wallpaper Path**: The folder to store wallpapers. (Default: `~/Library/Application Support/com.raycast.macos/extensions/unsplash/`)
 
 ### FAQ
 
@@ -36,7 +37,7 @@ You will need some additional steps to install this plugin.
 
 **Q:** Where does it save the downloaded images?
 
-**A:** It uses your Application Support directory, which should be at `~/Library/Application Support/com.raycast.macos/extensions/unsplash/`.
+**A:** It uses your Application Support directory as default, which should be at `~/Library/Application Support/com.raycast.macos/extensions/unsplash/`.
 
 ---
 
