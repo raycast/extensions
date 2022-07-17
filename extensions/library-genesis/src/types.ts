@@ -5,7 +5,7 @@ export interface BookEntry {
   url: string;
   coverUrl: string;
   pages?: string;
-  language?: string;
+  language: string;
   publisher?: string;
   edition?: string;
   commentary?: string;
@@ -26,4 +26,6 @@ export interface LibgenSearchParams {
 
 export interface Preferences {
   copySearchContentFromClipboard: boolean;
+  preferredLanguages: string;
+  priotizePreferredLanguage: boolean;
 }

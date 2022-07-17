@@ -26,6 +26,23 @@
       "default": true,
       "label": "Automatically copy from clipboard",
       "required": true
+    },
+    {
+      "name": "preferredLanguages",
+      "title": "Preferred Languages",
+      "description": "A comma separated list of your preferred languages.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "English, Spanish, German, ...",
+      "required": false
+    },
+    {
+      "name": "priotizePreferredLanguage",
+      "description": "Prioritizes preferred languages in your searching results.",
+      "type": "checkbox",
+      "default": true,
+      "label": "Prioritize preferred languages in search",
+      "required": true
     }
   ],
   "dependencies": {
