@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Bugfix] - 2022-07-16
+
+- Fixes an issue in the GitLab extension that was preventing fetching all the pages from the API, even though the all parameter was enabled.
+
 ## [Markdown Improvements] - 2022-07-08
 
 - Render emojis from GitLab Flavored Markdown.

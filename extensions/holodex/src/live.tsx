@@ -3,9 +3,9 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import numeral from "numeral";
 import { useState } from "react";
 import { Actions } from "./components/Actions";
-import { DetailView } from "./components/Details";
+import { VideoDetail } from "./components/Details";
 import { apiRequest, useQuery } from "./lib/api";
-import { Live, Video } from "./lib/interfaces";
+import { HLive, Video } from "./lib/interfaces";
 import { getPreferences, OrgDropdown } from "./lib/preferences";
 
 export default function Command() {
@@ -35,16 +35,19 @@ export default function Command() {
 
 function Item({ video }: { video: Video }) {
   let icon = Icon.Circle;
-  let label = "";
+  let text: string | null = null;
+  let tooltip: string | null = null;
 
   if (video.status === "upcoming" && video.startAt) {
-    label = formatDistanceToNow(video.startAt, { addSuffix: true });
+    text = formatDistanceToNow(video.startAt, { addSuffix: true });
     icon = Icon.Clock;
+    tooltip = video.startAt.toLocaleString();
   } else if (video.status === "live" && video.liveViewers) {
-    label = numeral(video.liveViewers).format("0a");
+    text = numeral(video.liveViewers).format("0a");
     icon = Icon.Binoculars;
+    tooltip = video.liveViewers.toString();
   } else if (video.topic === "membersonly") {
-    label = "Mengen";
+    text = "Mengen";
     icon = Icon.Star;
   }
 
@@ -53,14 +56,13 @@ function Item({ video }: { video: Video }) {
   return (
     <List.Item
       title={video.channelName}
-      accessoryTitle={label}
-      accessoryIcon={icon}
+      accessories={[{ text, icon, tooltip }]}
       keywords={keywords}
       icon={video.avatarUrl ? { source: video.avatarUrl, mask: Image.Mask.Circle } : Icon.Person}
-      detail={<DetailView {...video} />}
+      detail={<VideoDetail {...video} />}
       actions={
         <ActionPanel title={video.title}>
-          <Actions isInDetail={true} video={video} />
+          <Actions video={video} />
         </ActionPanel>
       }
     />
@@ -69,8 +71,6 @@ function Item({ video }: { video: Video }) {
 
 function useSearch(org: string) {
   const { isLoading, data } = useQuery((signal) => performLiveVideoSearch(signal, org), [org]);
-
-  // console.log("useSearch", org, isLoading, data?.length);
 
   return {
     isLoading,
@@ -90,7 +90,7 @@ async function performLiveVideoSearch(signal: AbortSignal, org: string): Promise
       include: "description",
     },
     signal,
-  })) as Live[];
+  })) as HLive[];
 
   return response
     .map((video): Video => {
@@ -107,6 +107,8 @@ async function performLiveVideoSearch(signal: AbortSignal, org: string): Promise
         liveViewers: video.live_viewers ?? 0,
         avatarUrl: video.channel.photo,
         status: video.status,
+        mentions: [],
+        clips: [],
       };
     })
     .sort((a, b) => b.liveViewers - a.liveViewers);
