@@ -23,3 +23,7 @@ export interface BookEntry {
 export interface LibgenSearchParams {
   req: string;
 }
+
+export interface Preferences {
+  copySearchContentFromClipboard: boolean;
+}

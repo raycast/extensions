@@ -18,6 +18,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "copySearchContentFromClipboard",
+      "description": "Copy search content from clipboard",
+      "type": "checkbox",
+      "default": true,
+      "label": "Automatically copy from clipboard",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.37.1",
     "cheerio": "^1.0.0-rc.12",
