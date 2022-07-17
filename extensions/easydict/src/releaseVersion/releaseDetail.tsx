@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-16 23:29
+ * @lastEditTime: 2022-07-17 10:39
  * @fileName: releaseDetail.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,15 +24,7 @@ export function ReleaseDetail(props: { fallbackMarkdown?: string }) {
   console.log(`call ReleaseDetail function`);
   const easydict = new Easydict();
   easydict.fetchReleaseMarkdown().then((markdown) => {
-    if (markdown && markdown.length > 0) {
-      console.log(`fetched release markdown, url: ${easydict.getReleaseApiUrl()}`);
-      setReleaseMarkdown(markdown);
-    } else {
-      console.error("Failed to fetch GitHub release markdown, use local stored instead.");
-      easydict.getLocalStoredMarkdown().then((markdown) => {
-        setReleaseMarkdown(markdown);
-      });
-    }
+    setReleaseMarkdown(markdown);
   });
 
   return (
