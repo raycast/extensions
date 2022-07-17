@@ -1,6 +1,5 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { BookEntry } from "../types";
-import { formatBytes } from "../utils/common-utils";
 
 export function BookItem(props: { book: BookEntry }, key: number) {
   const { book } = props;
@@ -35,7 +34,7 @@ export function BookItem(props: { book: BookEntry }, key: number) {
               {book.extension && (
                 <List.Item.Detail.Metadata.Label title="Extension" text={book.extension.toUpperCase()} />
               )}
-              {book.fileSize && <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(+book.fileSize)} />}
+              {book.fileSize && <List.Item.Detail.Metadata.Label title="Size" text={book.fileSize} />}
             </List.Item.Detail.Metadata>
           }
         />

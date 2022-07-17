@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { isEmpty, getLibgenSearchResult } from "../utils/common-utils";
+import { isEmpty, getLibgenSearchResults } from "../utils/common-utils";
 import { BookEntry } from "../types";
 import { showToast, Toast } from "@raycast/api";
 import Style = Toast.Style;
@@ -18,7 +18,7 @@ export const searchBookOnLibgen = (searchContent: string) => {
     }
     setLoading(true);
 
-    getLibgenSearchResult(searchContent.trim())
+    getLibgenSearchResults(searchContent.trim())
       .then((books) => {
         setBooks(books);
         setLoading(false);
