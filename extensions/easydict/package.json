@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Look up words or translate text in an easy way, especially optimized for English and Chinese words.",
+  "description": "Look up words or translate text in an easy way. Support 22 languages, especially optimized for English and Chinese words.",
   "icon": "Eudic-icon.png",
   "author": "isfeng",
   "license": "MIT",

@@ -30,7 +30,7 @@
 - [x] Support to sort translation results manually.
 - [x] Support **MacOS system translation**. (_Note: this feature needs to install an apple translate shortcut on you mac, please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F) for more details_)
 - [x] Support DeepL, Baidu, Tencent, Youdao and Caiyun translation API.
-- [x] Support 22 translation languages.
+- [x] Support 22 languages.
 
 Next:
 
