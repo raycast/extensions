@@ -11,7 +11,7 @@ export interface BookEntry {
   commentary?: string;
   extension?: string;
   fileSize?: string;
-  md5?: string;
+  md5: string;
   timeAdded?: string;
   timeLastModified?: string;
   id?: string;
