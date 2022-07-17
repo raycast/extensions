@@ -90,7 +90,7 @@ class ListActionPanel extends Component<IListItemActionPanelItem> {
                     <Action.OpenInBrowser
                         icon={Icon.QuestionMark}
                         title="Feedback"
-                        url="https://github.com/Haojen/raycast-Parrot"
+                        url="https://github.com/Hydrapse/raycast-DLmoji"
                     />
                 </ActionPanel.Section>
             </ActionPanel>
