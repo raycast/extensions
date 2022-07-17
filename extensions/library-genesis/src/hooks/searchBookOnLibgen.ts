@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { isEmpty, getLibgenSearchResults } from "../utils/common-utils";
+import { isEmpty } from "../utils/common-utils";
+import { getLibgenSearchResults } from "../utils/libgen-api";
 import { BookEntry } from "../types";
 import { showToast, Toast } from "@raycast/api";
 import Style = Toast.Style;
 
-export const searchBookOnLibgen = (searchContent: string) => {
+export const searchBooksOnLibgen = (searchContent: string) => {
   const [books, setBooks] = useState<BookEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 

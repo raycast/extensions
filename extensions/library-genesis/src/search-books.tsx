@@ -1,13 +1,13 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { EmptyView } from "./components/empty-view";
-import { searchBookOnLibgen } from "./hooks/hooks";
+import { searchBooksOnLibgen } from "./hooks/searchBookOnLibgen";
 import { isEmpty } from "./utils/common-utils";
 import { BookItem } from "./components/book-item";
 
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");
-  const { books, loading } = searchBookOnLibgen(searchContent);
+  const { books, loading } = searchBooksOnLibgen(searchContent);
 
   const emptyViewTitle = () => {
     if (loading) {
