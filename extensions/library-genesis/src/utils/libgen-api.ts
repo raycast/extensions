@@ -2,6 +2,7 @@ import { BookEntry } from "../types";
 import libgen = require("libgen");
 import fetch from "node-fetch";
 import cheerio = require("cheerio");
+import { extractNumber } from "./common-utils";
 
 export const getLibgenUrl = async () => {
   const urlString = await libgen.mirror();
@@ -140,7 +141,7 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
     year: year,
     edition: edition,
     url: libgenUrl + "/" + downloadUrl || "",
-    pages: pages,
+    pages: extractNumber(pages),
     language: language,
     publisher: publisher,
     fileSize: fileSize,

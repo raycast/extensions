@@ -16,4 +16,8 @@ export const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
+// https://stackoverflow.com/questions/10003683/how-can-i-extract-a-number-from-a-string-in-javascript
+export const extractNumber = (string: string, index = 0) => {
+  const numbers = string.match(/\d+/);
+  return numbers ? numbers[index] : string; // replace all leading non-digits with nothing
 };
