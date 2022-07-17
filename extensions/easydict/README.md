@@ -177,7 +177,7 @@ Name case are insensitive, use comma to separate. Example: `deepl,apple,baidu,te
 
 </details>
 
-### Apple Translate
+### 🍎 Apple Translate
 
 `Easydict` support MacOS system translate, for more information, please see [How to use macOS Apple System Translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/%E5%A6%82%E4%BD%95%E5%9C%A8-Easydict-%E4%B8%AD%E4%BD%BF%E7%94%A8-macOS-%E8%8B%B9%E6%9E%9C%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91%EF%BC%9F)
 

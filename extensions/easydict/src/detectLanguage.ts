@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-16 17:25
+ * @lastEditTime: 2022-07-17 18:29
  * @fileName: detectLanguage.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -52,7 +52,7 @@ let delayLocalDetectLanguageTimer: NodeJS.Timeout;
 /**
  * Record all API detected language, if has detected two identical language id, use it.
  */
-const detectedLanguageTypeResultList: LanguageDetectTypeResult[] = [];
+const detectedAPILanguageTypeResultList: LanguageDetectTypeResult[] = [];
 
 const defaultConfirmedConfidence = 0.8;
 
@@ -66,7 +66,7 @@ export function detectLanguage(
   callback: (detectedLanguageResult: LanguageDetectTypeResult) => void
 ): void {
   console.log(`start detectLanguage`);
-  let localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
+  const localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
   if (localDetectResult.confirmed) {
     console.log("use local detect confirmed:", localDetectResult.type, localDetectResult.youdaoLanguageId);
     // Todo: may be do not need to clear timeout, when API detect success, callback once again.
@@ -78,10 +78,8 @@ export function detectLanguage(
   // Start a delay timer to detect local language, use it only if API detect over time.
   clearTimeout(delayLocalDetectLanguageTimer);
   delayLocalDetectLanguageTimer = setTimeout(() => {
-    console.log(`API detect over time, use local detect language`);
     isDetectedLanguage = true;
-    localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
-    console.log(`use local detect language --->: ${localDetectResult}`);
+    console.log(`API detect over time, use local detect language --->: ${localDetectResult}`);
     callback(localDetectResult);
   }, delayDetectLanguageTime);
 
@@ -122,6 +120,7 @@ function raceDetectTextLanguage(
   callback?: (detectTypeResult: LanguageDetectTypeResult) => void
 ) {
   console.log(`start raceDetectTextLanguage: ${[...detectLanguageActionMap.keys()]}`);
+  // console.log("race local detect language: ", localLanguageDetectTypeResult);
   isDetectedLanguage = false;
   const detectLanguageActionList = detectLanguageActionMap.values();
   Promise.race(detectLanguageActionList)
@@ -205,7 +204,7 @@ function handleDetectedLanguageTypeResult(
   }
 
   // Second, iterate detectedLanguageTypeList, check if has detected two identical language id, if true, use it.
-  for (const languageTypeReuslt of detectedLanguageTypeResultList as LanguageDetectTypeResult[]) {
+  for (const languageTypeReuslt of detectedAPILanguageTypeResultList as LanguageDetectTypeResult[]) {
     const detectedYoudaoLanguageId = detectedlanguageTypeResult.youdaoLanguageId;
     if (
       languageTypeReuslt.youdaoLanguageId === detectedYoudaoLanguageId &&
@@ -219,20 +218,23 @@ function handleDetectedLanguageTypeResult(
   }
 
   // If this API detected language is not confirmed, record it in the detectedLanguageTypeList.
-  detectedLanguageTypeResultList.push(detectedlanguageTypeResult);
+  detectedAPILanguageTypeResultList.push(detectedlanguageTypeResult);
 
   /**
-   * Finally, iterate detectedLanguageTypeList, to compare with the local detect language list, if true, use it.
+   * Finally, iterate API detectedLanguageTypeList, to compare with the local detect language list, if true, use it.
    * If matched, mark it as confirmed, else use it directly, but not confirmed.
    */
   if (detectLanguageActionMap.size === 0) {
     console.log(`try compare API detected language list with local deteced list`);
-    console.log(`---> API detected language list: ${JSON.stringify(detectedLanguageTypeResultList, null, 4)}`);
+    console.log(`---> API detected language list: ${JSON.stringify(detectedAPILanguageTypeResultList, null, 4)}`);
 
-    const detectedLanguageArray = localLanguageDetectTypeResult.detectedLanguageArray;
-    if (detectedLanguageArray) {
-      for (const [languageId, confidence] of detectedLanguageArray) {
-        for (const languageTypeReuslt of detectedLanguageTypeResultList) {
+    const detectedLocalLanguageArray = localLanguageDetectTypeResult.detectedLanguageArray;
+    // console.log(`---> local detected language list: ${JSON.stringify(detectedLocalLanguageArray, null, 4)}`);
+    if (detectedLocalLanguageArray?.length) {
+      for (const [languageId, confidence] of detectedLocalLanguageArray) {
+        // console.log(`---> local detected language: ${languageId}, confidence: ${confidence}`);
+        for (const languageTypeReuslt of detectedAPILanguageTypeResultList) {
+          // console.log(`---> API detected language: ${JSON.stringify(languageTypeReuslt, null, 4)}`);
           if (confidence > 0 && languageTypeReuslt.youdaoLanguageId === languageId && isValidLanguageId(languageId)) {
             languageTypeReuslt.confirmed = true;
             console.warn(`---> local detect identical language: ${JSON.stringify(languageTypeReuslt, null, 4)}`);
@@ -304,7 +306,7 @@ function getFinalLanguageDetectResult(
 function getLocalTextLanguageDetectResult(
   text: string,
   confirmedConfidence: number,
-  lowConfidence = 0.1
+  lowConfidence = 0.2
 ): LanguageDetectTypeResult {
   console.log(`start local detect language, confirmed confidence (>${confirmedConfidence})`);
 
@@ -326,6 +328,7 @@ function getLocalTextLanguageDetectResult(
           type: francDetectResult.type,
           youdaoLanguageId: languageId,
           confirmed: false,
+          detectedLanguageArray: francDetectResult.detectedLanguageArray,
         };
         return lowConfidenceDetectTypeResult;
       }
@@ -347,13 +350,12 @@ function getLocalTextLanguageDetectResult(
   }
 
   // finally, use "auto" as fallback.
+  console.log(`final use auto`);
   const finalAutoLanguageTypeResult: LanguageDetectTypeResult = {
     type: LanguageDetectType.Simple,
     youdaoLanguageId: "auto",
     confirmed: false,
   };
-
-  console.log(`final use auto`);
   return finalAutoLanguageTypeResult;
 }
 

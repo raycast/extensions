@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-16 17:56
+ * @lastEditTime: 2022-07-17 18:36
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -216,7 +216,8 @@ export default function () {
 
       const youdaoResult = youdaoTranslateTypeResult.result as YoudaoTranslateResult;
       console.log(`youdao translate result: ${JSON.stringify(youdaoResult, null, 2)}`);
-      console.warn(`---> Youdao cost time: ${Date.now() - startTime} ms`);
+      // From the input text query, to the end of Youdao translation request.
+      console.warn(`---> Entire request cost time: ${Date.now() - startTime} ms`);
       const youdaoErrorCode = youdaoResult.errorCode;
       youdaoTranslateTypeResult.errorInfo = getYoudaoErrorInfo(youdaoErrorCode);
 

@@ -3,7 +3,7 @@ import { DeepLTranslateResult } from "./types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-15 23:44
+ * @lastEditTime: 2022-07-17 11:30
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,6 +24,8 @@ import {
   YoudaoTranslateResult,
 } from "./types";
 import { isShowMultipleTranslations, myPreferences } from "./utils";
+
+const sortedOrder = getTranslationResultOrder();
 
 /**
  * Format the Youdao original data for later use.
@@ -59,7 +61,7 @@ export function formatYoudaoDictionaryResult(youdaoTypeResult: RequestTypeResult
 
   return {
     queryWordInfo: queryWordInfo,
-    translations: translations,
+    translationItems: translations,
     explanations: youdaoResult.basic?.explains,
     forms: youdaoResult.basic?.wfs,
     webTranslation: webTranslation,
@@ -76,11 +78,11 @@ export function updateFormatTranslateResultWithDeepLResult(
 ): TranslateFormatResult {
   const deepLResult = deepLTypeResult.result as DeepLTranslateResult;
   if (deepLResult) {
-    formatResult.translations.push({
+    formatResult.translationItems.push({
       type: TranslateType.DeepL,
       text: deepLResult.translations[0].text, // deepl will autotically warp the text.
     });
-    return sortTranslations(formatResult);
+    return sortTranslationItems(formatResult, sortedOrder);
   }
   return formatResult;
 }
@@ -94,11 +96,11 @@ export function updateFormatResultWithAppleTranslateResult(
 ): TranslateFormatResult {
   const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
   if (appleTranslate.translatedText) {
-    formatResult.translations.push({
+    formatResult.translationItems.push({
       type: TranslateType.Apple,
       text: appleTranslate.translatedText,
     });
-    return sortTranslations(formatResult);
+    return sortTranslationItems(formatResult, sortedOrder);
   }
   return formatResult;
 }
@@ -118,11 +120,11 @@ export function updateFormatResultWithBaiduTranslation(
       })
       .join("\n");
 
-    formatResult.translations.push({
+    formatResult.translationItems.push({
       type: TranslateType.Baidu,
       text: baiduTranslation,
     });
-    return sortTranslations(formatResult);
+    return sortTranslationItems(formatResult, sortedOrder);
   }
   return formatResult;
 }
@@ -137,11 +139,11 @@ export function updateFormatResultWithTencentTranslation(
   const tencentResult = tencentTypeResult.result as TencentTranslateResult;
   if (tencentResult) {
     const tencentTranslation = tencentResult.TargetText;
-    formatResult.translations.push({
+    formatResult.translationItems.push({
       type: TranslateType.Tencent,
       text: tencentTranslation,
     });
-    return sortTranslations(formatResult);
+    return sortTranslationItems(formatResult, sortedOrder);
   }
   return formatResult;
 }
@@ -155,23 +157,40 @@ export function updateFormatResultWithCaiyunTranslation(
 ): TranslateFormatResult {
   const caiyunResult = caiyunTypeResult.result as CaiyunTranslateResult;
   if (caiyunResult) {
-    formatResult.translations.push({
+    formatResult.translationItems.push({
       type: TranslateType.Caiyun,
       text: caiyunResult?.target.join("\n"),
     });
-    return sortTranslations(formatResult);
+    return sortTranslationItems(formatResult, sortedOrder);
   }
   return formatResult;
 }
 
 /**
- * Translations display order, default is sorted by: deelp > apple > baidu > tencent > youdao > caiyun
- *
- * If user manually set the display order, prioritize the order.
+ * Sort translation results by designated order.
  *
  * * NOTE: this function will be called many times, because translate results are async, so we need to sort every time.
  */
-export function sortTranslations(formatResult: TranslateFormatResult): TranslateFormatResult {
+export function sortTranslationItems(
+  formatResult: TranslateFormatResult,
+  sortedOrder: string[]
+): TranslateFormatResult {
+  const sortTranslations: TranslateItem[] = [];
+  for (const translationItem of formatResult.translationItems) {
+    const index = sortedOrder.indexOf(translationItem.type.toString().toLowerCase());
+    sortTranslations[index] = translationItem;
+  }
+  // filter undefined
+  const translations = sortTranslations.filter((item) => item);
+  formatResult.translationItems = translations;
+  return formatResult;
+}
+
+/**
+ * Get translation result order, defaulf is sorted by: deelp > apple > baidu > tencent > youdao > caiyun.
+ * If user set the order manually, prioritize the order.
+ */
+export function getTranslationResultOrder(): string[] {
   const defaultTypeOrder = [
     TranslateType.DeepL,
     TranslateType.Apple,
@@ -199,19 +218,9 @@ export function sortTranslations(formatResult: TranslateFormatResult): Translate
   }
   // console.log("defaultNameOrder:", defaultOrder);
   // console.log("userOrder:", userOrder);
-
   const finalOrder = [...userOrder, ...defaultOrder];
-  // console.log("finalOrder:", finalOrder);
-
-  const sortTranslations: TranslateItem[] = [];
-  for (const translationItem of formatResult.translations) {
-    const index = finalOrder.indexOf(translationItem.type.toString().toLowerCase());
-    sortTranslations[index] = translationItem;
-  }
-  // filter undefined
-  const translations = sortTranslations.filter((item) => item);
-  formatResult.translations = translations;
-  return formatResult;
+  console.log("finalOrder:", finalOrder);
+  return finalOrder;
 }
 
 /**
@@ -225,7 +234,7 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
 
   const showMultipleTranslations = isShowMultipleTranslations(formatResult);
 
-  for (const [i, translateItem] of formatResult.translations.entries()) {
+  for (const [i, translateItem] of formatResult.translationItems.entries()) {
     const sectionType = showMultipleTranslations ? translateItem.type : SectionType.Translation;
 
     let sectionTitle = SectionType.Translation.toString();
@@ -367,7 +376,7 @@ export function formatAllTypeTranslationToMarkdown(
   formatResult: TranslateFormatResult
 ) {
   const translations = [] as TranslateItem[];
-  for (const translation of formatResult.translations) {
+  for (const translation of formatResult.translationItems) {
     const formatTranslation = formatTranslationToMarkdown(translation.type, translation.text);
     translations.push({ type: translation.type, text: formatTranslation });
   }

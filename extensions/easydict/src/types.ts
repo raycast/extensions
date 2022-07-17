@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-15 22:48
+ * @lastEditTime: 2022-07-17 11:49
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -150,9 +150,9 @@ export interface ActionListPanelProps {
 
 export interface LanguageItem {
   youdaoLanguageId: string;
-  appleLanguageId?: string; // apple language id, apple translate support 12 languages
-  appleChineseLanguageTitle?: string; // apple Chinese language title, 中文，英语
-  deepLSourceLanguageId?: string; // deepL language id, https://www.deepl.com/zh/docs-api/translating-text/
+  appleDetectChineseLanguageTitle?: string; // such as 中文，英语. ⚠️: Apple detect more languages than apple translate.
+  appleLanguageId?: string; // used to translate, Apple translate support 12 languages?
+  deepLSourceLanguageId?: string; // deepL source language id
   deepLTargetLanguageId?: string; // most are same as source language, some are different, such as "EN-GB" "EN-US" and so on.
   francLanguageId: string; // the languages represented by ISO 639-3
   aliyunLanguageId: string;
@@ -212,7 +212,7 @@ export interface TranslateSourceResult {
 
 export interface TranslateFormatResult {
   queryWordInfo: QueryWordInfo;
-  translations: TranslateItem[];
+  translationItems: TranslateItem[];
   explanations?: string[];
   forms?: YoudaoTranslateResultBasicFormsItem[];
   webTranslation?: TranslateResultKeyValueItem;

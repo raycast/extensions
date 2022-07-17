@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-15 22:07
+ * @lastEditTime: 2022-07-17 12:04
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -53,7 +53,7 @@ export function getLanguageItemFromTencentId(tencentLanguageId: string): Languag
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem {
   for (const langItem of languageItemList) {
-    if (langItem.appleChineseLanguageTitle === chineseTitle) {
+    if (langItem.appleDetectChineseLanguageTitle === chineseTitle) {
       return langItem;
     }
   }
@@ -116,7 +116,7 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   const isChineseTextResult = formatResult.queryWordInfo.toLanguage === "zh-CHS";
   const isEnglishTextResult = formatResult.queryWordInfo.toLanguage === "en";
 
-  for (const translation of formatResult.translations) {
+  for (const translation of formatResult.translationItems) {
     const textLength = translation.text.length;
     if (isChineseTextResult) {
       if (textLength > maxLineLengthOfChineseTextDisplay) {

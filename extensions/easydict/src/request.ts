@@ -3,7 +3,7 @@ import { deepLAuthKey } from "./crypto";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 00:32
+ * @lastEditTime: 2022-07-17 18:40
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -114,10 +114,10 @@ export async function requestTencentTextTranslate(
   fromLanguage: string,
   targetLanguage: string
 ): Promise<RequestTypeResult> {
-  const from = getLanguageItemFromYoudaoId(fromLanguage).tencentLanguageId || "auto";
+  const from = getLanguageItemFromYoudaoId(fromLanguage).tencentLanguageId;
   const to = getLanguageItemFromYoudaoId(targetLanguage).tencentLanguageId;
-  if (!to) {
-    console.warn(`Tencent translate not support language: ${from} --> ${to}`);
+  if (!from || !to) {
+    console.warn(`Tencent translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
       type: TranslateType.Tencent,
       result: null,
@@ -134,7 +134,7 @@ export async function requestTencentTextTranslate(
   try {
     const response = await client.TextTranslate(params);
     const endTime = new Date().getTime();
-    console.log(`tencen translate: ${response.TargetText}, cost: ${endTime - startTime} ms`);
+    console.log(`Tencen translate: ${response.TargetText}, cost: ${endTime - startTime} ms`);
     const typeResult = {
       type: TranslateType.Tencent,
       result: response as TencentTranslateResult,
@@ -187,7 +187,7 @@ export function requestYoudaoDictionary(
     axios
       .post(url, params)
       .then((response) => {
-        console.log(`---> youdao translate cost: ${response.headers[requestCostTime]} ms`);
+        console.log(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
         resolve({
           type: TranslateType.Youdao,
           result: response.data,
@@ -233,7 +233,7 @@ export function requestBaiduTextTranslate(
         const baiduResult = response.data as BaiduTranslateResult;
         if (baiduResult.trans_result) {
           const translateText = baiduResult.trans_result[0].dst;
-          console.log(`baidu translate: ${translateText}, cost: ${response.headers[requestCostTime]} ms`);
+          console.log(`Baidu translate: ${translateText}, cost: ${response.headers[requestCostTime]} ms`);
           resolve({
             type: TranslateType.Baidu,
             result: baiduResult,
@@ -354,7 +354,7 @@ export async function requestDeepLTextTranslate(
     const deepLResult = response.data as DeepLTranslateResult;
     const translatedText = deepLResult.translations[0].text;
     console.log(
-      `deepl translate: ${JSON.stringify(translatedText, null, 4)}, length: ${translatedText.length}, cost: ${
+      `DeepL translate: ${JSON.stringify(translatedText, null, 4)}, length: ${translatedText.length}, cost: ${
         response.headers[requestCostTime]
       } ms`
     );
@@ -364,13 +364,13 @@ export async function requestDeepLTextTranslate(
     });
   } catch (err) {
     const error = err as { response: AxiosResponse };
-    console.error("deepl error: ", JSON.stringify(error.response, null, 4));
+    console.error("deepL error: ", JSON.stringify(error.response, null, 4));
     const errorInfo: RequestErrorInfo = {
       type: TranslateType.DeepL,
       code: error.response.status.toString(),
       message: error.response.statusText,
     };
-    console.warn("deepl error info: ", errorInfo);
+    console.warn("deepL error info: ", errorInfo);
     return Promise.reject(errorInfo);
   }
 }
