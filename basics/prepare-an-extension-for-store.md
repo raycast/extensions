@@ -117,9 +117,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
 
 #### How to use it?
-1) Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2) Open the command
-3) Press the hotkey, remember to tick `Save to Metadata`
+
+1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
+2. Open the command
+3. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
