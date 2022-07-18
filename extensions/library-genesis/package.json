@@ -20,16 +20,69 @@
   ],
   "preferences": [
     {
+      "name": "primaryAction",
+      "title": "Primary action",
+      "description": "Changing the primary action after a search.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open Download Page",
+          "value": "0"
+        },
+        {
+          "title": "Open Book Info",
+          "value": "1"
+        },
+        {
+          "title": "Download Book",
+          "value": "2"
+        }
+      ],
+      "default": "",
+      "required": true
+    },
+    {
       "name": "copySearchContentFromClipboard",
+      "title": "Search field from clipboard",
       "description": "Copy search content from clipboard",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "label": "Automatically copy from clipboard",
       "required": true
     },
     {
+      "name": "downloadGateway",
+      "title": "Download Gateway",
+      "description": "Choosing the default download gateway.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Default",
+          "value": "0"
+        },
+        {
+          "title": "Cloudflare",
+          "value": "1"
+        },
+        {
+          "title": "IPFS.io",
+          "value": "2"
+        },
+        {
+          "title": "Infura",
+          "value": "3"
+        },
+        {
+          "title": "Pinata",
+          "value": "4"
+        }
+      ],
+      "default": "",
+      "required": true
+    },
+    {
       "name": "preferredLanguages",
-      "title": "Preferred Languages",
+      "title": "Preferred languages for books",
       "description": "A comma separated list of your preferred languages.",
       "type": "textfield",
       "default": "",
@@ -50,7 +103,8 @@
     "cheerio": "^1.0.0-rc.12",
     "libgen": "^2.1.2",
     "node-fetch": "^3.2.8",
-    "node-html-parser": "^5.3.3"
+    "node-html-parser": "^5.3.3",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

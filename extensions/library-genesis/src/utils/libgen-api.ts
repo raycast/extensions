@@ -1,4 +1,4 @@
-import { BookEntry } from "../types";
+import { BookEntry, LibgenDownloadGateway } from "../types";
 import libgen = require("libgen");
 import fetch from "node-fetch";
 import cheerio = require("cheerio");
@@ -101,7 +101,7 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
   const md5 = downloadUrl.split("md5=")[1];
   const coverUrl = contentRows.eq(1).children("td").eq(0).children("a").first().children("img").first().attr("src");
   const title = contentRows.eq(1).children("td").eq(2).find("a").first().text().trim();
-  // const bookUrl = contentRows.eq(1).children("td").eq(2).find("a").first().attr("href");
+  const bookUrl = contentRows.eq(1).children("td").eq(2).find("a").first().attr("href");
 
   // data from 2nd row
   const author = contentRows.eq(2).children("td").eq(1).find("a").first().text().trim();
@@ -140,13 +140,14 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
     author: author,
     year: year,
     edition: edition,
-    url: libgenUrl + "/" + downloadUrl || "",
+    downloadUrl: libgenUrl + downloadUrl || "",
+    infoUrl: libgenUrl + bookUrl || "",
     pages: extractNumber(pages),
     language: language,
     publisher: publisher,
     fileSize: fileSize,
     extension: extension,
-    coverUrl: libgenUrl + "/" + coverUrl || "",
+    coverUrl: libgenUrl + coverUrl || "",
     md5: md5,
     id: id,
     timeAdded: timeAdded,
@@ -155,4 +156,16 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
   };
 
   return book;
+};
+
+export const getUrlFromDownloadPage = async (downloadUrl: string, gateWay: LibgenDownloadGateway) => {
+  const response = await fetch(downloadUrl);
+  const data = await response.text();
+
+  const $ = cheerio.load(data);
+  console.log(downloadUrl);
+  const downloadLinks = $("#download").find("a");
+
+  const downloadLink = downloadLinks.eq(gateWay).attr("href");
+  return downloadLink;
 };

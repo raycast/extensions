@@ -1,10 +1,10 @@
 import { List, Clipboard, getPreferenceValues } from "@raycast/api";
 import { useState, useCallback, useEffect } from "react";
 import { EmptyView } from "./components/empty-view";
-import { searchBooksOnLibgen } from "./hooks/searchBookOnLibgen";
+import { searchBooksOnLibgen } from "./hooks/search-books-on-libgen";
 import { isEmpty } from "./utils/common-utils";
 import { BookItem } from "./components/book-item";
-import { Preferences } from "./types";
+import { LibgenPreferences } from "./types";
 
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");
@@ -18,7 +18,7 @@ export default function Command() {
 
   useEffect(() => {
     // Read clipboard preferences
-    const { copySearchContentFromClipboard } = getPreferenceValues<Preferences>();
+    const { copySearchContentFromClipboard } = getPreferenceValues<LibgenPreferences>();
     if (copySearchContentFromClipboard) {
       void copyFromClipboard();
     }

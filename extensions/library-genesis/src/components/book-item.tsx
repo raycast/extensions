@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { BookEntry } from "../types";
+import { BookActionPanel } from "./book-action-panel";
 
 export function BookItem(props: { book: BookEntry }, key: number) {
   const { book } = props;
@@ -12,12 +13,7 @@ export function BookItem(props: { book: BookEntry }, key: number) {
       icon={{
         source: book.coverUrl,
       }}
-      actions={
-        <ActionPanel title="#1 in raycast/extensions">
-          <Action.OpenInBrowser url={book.url} />
-          <Action.CopyToClipboard title="Copy URL to Clipboard" content={book.url} />
-        </ActionPanel>
-      }
+      actions={<BookActionPanel book={book}></BookActionPanel>}
       detail={
         <List.Item.Detail
           markdown={markdown}
