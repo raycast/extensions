@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Icon, showHUD, showToast, Action, Toast } from "@raycast/api";
+import { ActionPanel, Detail, Icon, showHUD, showToast, Action, Toast, Alert, confirmAlert, Color } from "@raycast/api";
 import open from "open";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -13,15 +13,16 @@ available actions in the panel.
 ## Built-in actions
 
 Leverage one of the built-in actions to quickly add functionality to your commands:
-- Use the \`CopyToClipboardAction\` to copy text to the clipboard
-- Use the \`OpenInBrowserAction\` to open links in the browser
-- Use the \`ShowInFinderAction\` to show files or folders in the Finder
-- Use the \`PasteAction\` to paste text to the frontmost application
-
+- Use the \`Action.CopyToClipboard\` to copy text to the clipboard
+- Use the \`Action.OpenInBrowser\` to open links in the browser
+- Use the \`Action.ShowInFinder\` to show files or folders in the Finder
+- Use the \`Action.Paste\` to paste text to the frontmost application
+- Use the \`Action.OpenWith\` to open something with list of installed applications
 ## Custom actions
 
-Use the \`ActionPanel.Item\` to extend your commands even further. Specify a title, icon and action
+Use the \`Action\` to extend your commands even further. Specify a title, icon, style and action
 handler. Or wrap it in a separate React component to reuse it.
+Use Action.Style.Destructive 
 
 ## Keyboard shortcuts
 
@@ -55,6 +56,31 @@ export default function Command() {
                   title: "Performed custom action",
                 })
               }
+            />
+            <Action
+              title="Move to Trash"
+              style={Action.Style.Destructive}
+              icon={Icon.Trash}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={async () => {
+                const options: Alert.Options = {
+                  icon: { source: Icon.Trash, tintColor: Color.Red },
+                  title: "Are you sure?",
+                  message:
+                    "We won't move anything to Trash, it's just a showcase for the Action with the Destructive style",
+                  primaryAction: {
+                    title: "Confirm",
+                    style: Alert.ActionStyle.Destructive,
+                    onAction: () => {
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Performed 'Move to Trash' action",
+                      });
+                    },
+                  },
+                };
+                await confirmAlert(options);
+              }}
             />
             <ReusableAction title="Hey 👋" />
             <ActionPanel.Submenu title="Open With..." icon={Icon.Globe}>
