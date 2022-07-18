@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "night-light",
+  "title": "Night Light",
+  "description": "Manage Night Shift settings",
+  "icon": "command-icon.png",
+  "author": "devmoath",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-night-shift-on",
+      "title": "Turn night shift on",
+      "subtitle": "Night Light",
+      "description": "Turn night shift on until tomorrow",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-night-shift-off",
+      "title": "Turn night shift off",
+      "subtitle": "Night Light",
+      "description": "Turn night shift off",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-night-shift",
+      "title": "Toggle night shift",
+      "subtitle": "Night Light",
+      "description": "Toggle night shift on and off",
+      "mode": "no-view"
+    },
+    {
+      "name": "change-night-shift-color-temperature",
+      "title": "Change night shift color temperature",
+      "subtitle": "Night Light",
+      "description": "Change night shift color temperature",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
