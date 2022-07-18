@@ -5,7 +5,7 @@ import { humanize } from "./utils";
 import { copyPassword, pastePassword } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
-  Clipboard.copy(value);
+  await Clipboard.copy(value);
   await closeMainWindow();
   await showHUD(`${key} copied`);
 }
