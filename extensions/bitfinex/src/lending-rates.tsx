@@ -21,6 +21,13 @@ const tfOptions = [
   ["1M", "1 month"],
 ];
 
+const tfKeyToLabel: Record<string, string> = tfOptions.reduce((acc, [key, label]) => {
+  return {
+    ...acc,
+    [key]: label,
+  };
+}, {});
+
 const candlesTimeFrame: Record<string, string> = tfOptions.reduce(
   (acc, tf) => ({
     ...acc,
@@ -45,7 +52,7 @@ function LendingRatesDropdown(props: LendingRatesDropdownProps) {
 
 function LendingRatesSubMenu(props: LendingRatesDropdownProps) {
   return (
-    <ActionPanel.Submenu title="Set rates time frame">
+    <ActionPanel.Submenu title="Set rates time frame" icon={Icon.Calendar}>
       {tfOptions.map(([value, label]) => (
         <Action key={value} title={label} onAction={() => props.onChange(value)} />
       ))}
@@ -58,7 +65,7 @@ const useToggleChartView = () => {
   const onToggleChartView = useCallback(() => setIsChartView(!isChartView), [isChartView]);
 
   const action = (
-    <Action icon={Icon.List} title={`Change to ${isChartView ? "list" : "chart"} view`} onAction={onToggleChartView} />
+    <Action icon={Icon.List} title={`Switch to ${isChartView ? "list" : "chart"} view`} onAction={onToggleChartView} />
   );
 
   return {
@@ -180,7 +187,7 @@ function LendingRateChart({
   const [offset, setOffset] = useState(0);
   const windowSize = 90;
 
-  const moveForward = useCallback(() => {
+  const moveBackward = useCallback(() => {
     if (offset + windowSize === data.length) {
       return;
     }
@@ -188,7 +195,7 @@ function LendingRateChart({
     setOffset(offset + 1);
   }, [offset, data]);
 
-  const moveBackward = useCallback(() => {
+  const moveForward = useCallback(() => {
     if (offset <= 0) {
       return;
     }
@@ -197,7 +204,7 @@ function LendingRateChart({
   }, [offset]);
 
   const chartToView = useMemo(() => {
-    const ratesToPlot = viewingRates?.slice(offset, offset + windowSize) || [];
+    const ratesToPlot = viewingRates?.slice(offset, offset + windowSize).reverse() || [];
 
     if (!ratesToPlot.length) {
       return null;
@@ -209,7 +216,7 @@ function LendingRateChart({
     });
   }, [rates, offset, windowSize, viewingRates]);
 
-  const fromDate = useMemo(() => {
+  const toDate = useMemo(() => {
     if (!data.length) {
       return "";
     }
@@ -217,7 +224,7 @@ function LendingRateChart({
     return new Date(data[offset][0]).toLocaleString();
   }, [data, offset]);
 
-  const toDate = useMemo(() => {
+  const fromDate = useMemo(() => {
     if (!data.length) {
       return "";
     }
@@ -230,8 +237,8 @@ function LendingRateChart({
       return "";
     }
 
-    return `${fromDate} - ${toDate}`;
-  }, [fromDate, toDate]);
+    return `From **\`${fromDate}\`** to **\`${toDate}\`**`;
+  }, [toDate, fromDate]);
 
   return (
     <Detail
@@ -239,29 +246,31 @@ function LendingRateChart({
         <ActionPanel>
           {toggleAction}
 
-          <ActionPanel.Submenu title="View rates">
-            <Action title="View High Rates" onAction={() => setRateToView(RateToView.High)} />
-            <Action title="View Average Rates" onAction={() => setRateToView(RateToView.Average)} />
-            <Action title="View Low Rates" onAction={() => setRateToView(RateToView.Low)} />
+          <ActionPanel.Submenu title="Set Viewing Rates" icon={Icon.LevelMeter}>
+            <Action title="High Rates" onAction={() => setRateToView(RateToView.High)} />
+            <Action title="Average Rates" onAction={() => setRateToView(RateToView.Average)} />
+            <Action title="Low Rates" onAction={() => setRateToView(RateToView.Low)} />
           </ActionPanel.Submenu>
 
           <LendingRatesSubMenu onChange={setTf} />
 
           <Action
-            title="Next Time Frame"
-            onAction={moveForward}
-            shortcut={{
-              modifiers: ["cmd", "shift"],
-              key: "arrowRight",
-            }}
-          />
-
-          <Action
             title="Previous Time Frame"
+            icon={Icon.ChevronUp}
             onAction={moveBackward}
             shortcut={{
               modifiers: ["cmd", "shift"],
               key: "arrowLeft",
+            }}
+          />
+
+          <Action
+            title="Next Time Frame"
+            icon={Icon.ChevronDown}
+            onAction={moveForward}
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "arrowRight",
             }}
           />
         </ActionPanel>
@@ -269,7 +278,7 @@ function LendingRateChart({
       isLoading={!chartToView}
       markdown={
         chartToView
-          ? `## ${ratesText} Lending Rates by ${tf}
+          ? `## ${ratesText} Lending Rates by ${tfKeyToLabel[tf]}
 ${dateString}
 \`\`\`
 ${chartToView}
