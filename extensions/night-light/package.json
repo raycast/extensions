@@ -13,28 +13,28 @@
   "commands": [
     {
       "name": "turn-night-shift-on",
-      "title": "Turn night shift on",
+      "title": "Turn Night Shift On",
       "subtitle": "Night Light",
       "description": "Turn night shift on until tomorrow",
       "mode": "no-view"
     },
     {
       "name": "turn-night-shift-off",
-      "title": "Turn night shift off",
+      "title": "Turn Night Shift Off",
       "subtitle": "Night Light",
       "description": "Turn night shift off",
       "mode": "no-view"
     },
     {
       "name": "toggle-night-shift",
-      "title": "Toggle night shift",
+      "title": "Toggle Night Shift",
       "subtitle": "Night Light",
       "description": "Toggle night shift on and off",
       "mode": "no-view"
     },
     {
       "name": "change-night-shift-color-temperature",
-      "title": "Change night shift color temperature",
+      "title": "Change Night Shift Color Temperature",
       "subtitle": "Night Light",
       "description": "Change night shift color temperature",
       "mode": "view"
