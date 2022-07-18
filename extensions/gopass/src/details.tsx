@@ -40,11 +40,13 @@ export default function ({ entry }: { entry: string }): JSX.Element {
 
   return (
     <List isLoading={loading}>
-      <List.Item
-        title="Password"
-        subtitle="*****************"
-        actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
-      />
+      {!loading && (
+        <List.Item
+          title="Password"
+          subtitle="*****************"
+          actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
+        />
+      )}
 
       {details.map((item, index) => {
         const [key, value] = item.split(": ");
