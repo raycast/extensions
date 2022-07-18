@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Icon, List, Action, ActionPanel, showToast, Toast } from "@raycast/api"
-import { SoundOutputDevice } from "./types"
+import { SoundOutputDevice } from "./shared/types"
 import SoundOutputService from "./sound-output-service"
 import AppleScriptParser from "./apple-script-parser"
 

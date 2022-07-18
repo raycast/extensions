@@ -1,5 +1,5 @@
-import { stringToBool } from "./utils";
-import { AppleScriptResponse, SoundOutputDevice } from "./types";
+import { stringToBool } from "./shared/utils";
+import { AppleScriptResponse, SoundOutputDevice } from "./shared/types";
 
 export default class AppleScriptParser implements AppleScriptParser {
   parse(input: AppleScriptResponse): Array<SoundOutputDevice> {

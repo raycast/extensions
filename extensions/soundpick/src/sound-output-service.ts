@@ -1,10 +1,10 @@
 import { runAppleScript } from "run-applescript"
-import { stringToBool } from "./utils"
+import { stringToBool } from "./shared/utils"
 import { 
   SoundOutputDevice, 
   SoundOutputServiceConfig, 
   AppleScriptParser 
-} from "./types";
+} from "./shared/types";
 
 export default class SoundOutputService implements SoundOutputService {
   private config: SoundOutputServiceConfig;
