@@ -4,13 +4,13 @@ import { BookEntry, LibgenPreferences } from "../types";
 import { getUrlFromDownloadPage } from "../utils/libgen-api";
 
 export const downloadBook = async ({ downloadUrl, title, author, year, extension }: BookEntry) => {
-  const fileName = `${author} - ${title}${year && " (" + year + ")"}.${extension.toLowerCase()}`;
-
+  const fileName = `${author} - ${title}${year && " (" + year + ")"}.${extension.toLowerCase()}`.replace(/\//g, ""); // remove slashes
   const { downloadGateway } = getPreferenceValues<LibgenPreferences>();
 
   try {
     await showHUD("Please select a location to save the book...");
     const url = await getUrlFromDownloadPage(downloadUrl, downloadGateway);
+
     await runAppleScript(`
       set outputFolder to choose folder with prompt "Please select an output folder:"
       set temp_folder to (POSIX path of outputFolder) & "${fileName}"
