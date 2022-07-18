@@ -16,6 +16,13 @@ async function paste(key: string, value: string): Promise<void> {
   await closeMainWindow();
 }
 
+const Actions = ({ copy, paste }: { copy: () => void; paste: () => void }): JSX.Element => (
+  <ActionPanel>
+    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copy} />
+    <Action title="Paste to Active App" icon={Icon.Document} onAction={paste} />
+  </ActionPanel>
+);
+
 export default function ({ entry }: { entry: string }): JSX.Element {
   const [details, setDetails] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -23,7 +30,6 @@ export default function ({ entry }: { entry: string }): JSX.Element {
   useEffect((): void => {
     gopass
       .show(entry)
-      .then((data) => ["password: *****************"].concat(data))
       .then(setDetails)
       .catch(async (error) => {
         console.error(error);
@@ -34,22 +40,21 @@ export default function ({ entry }: { entry: string }): JSX.Element {
 
   return (
     <List isLoading={loading}>
+      <List.Item
+        title="Password"
+        subtitle="*****************"
+        actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
+      />
+
       {details.map((item, index) => {
         const [key, value] = item.split(": ");
-        const copyAction = () => (index === 0 ? copyPassword(entry) : copy(key, value));
-        const pasteAction = () => (index === 0 ? pastePassword(entry) : paste(key, value));
 
         return (
           <List.Item
             key={index}
             title={humanize(key)}
             subtitle={value}
-            actions={
-              <ActionPanel>
-                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copyAction} />
-                <Action title="Paste to Active App" icon={Icon.Document} onAction={pasteAction} />
-              </ActionPanel>
-            }
+            actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
           />
         );
       })}
