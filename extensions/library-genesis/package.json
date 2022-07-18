@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "library-genesis",
   "title": "Library Genesis",
-  "description": "Search books on Library Genesis and view them.",
+  "description": "Search books on Library Genesis and directly download them.",
   "icon": "command-icon.png",
   "author": "yz3440",
   "categories": [
