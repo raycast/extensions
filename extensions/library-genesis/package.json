@@ -77,7 +77,7 @@
           "value": "4"
         }
       ],
-      "default": "",
+      "default": "0",
       "required": true
     },
     {
