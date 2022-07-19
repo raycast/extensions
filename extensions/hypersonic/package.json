@@ -5,7 +5,7 @@
   "description": "Fastest Notion to-do app ever",
   "icon": "icon.png",
   "author": "reboot.studio",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -15,9 +15,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "My Todos",
+      "title": "Today's Todos",
       "subtitle": "Hypersonic",
-      "description": "The fastest Notion to-do app for Raycast",
+      "description": "The fastest Notion to-do app for Raycast.",
       "mode": "view"
     }
   ],
@@ -25,11 +25,61 @@
     {
       "name": "database_name",
       "type": "textfield",
-      "title": "Notion Page Name",
-      "label": "Notion Page Name",
-      "description": "Create, filter and complete all your to-do's",
+      "title": "Notion Database Name",
+      "label": "Notion Database Name",
+      "description": "Are you using your own Database? Add the names for the following properties.",
       "placeholder": "Hypersonic",
       "default": "Hypersonic",
+      "required": false
+    },
+    {
+      "name": "property_title",
+      "type": "textfield",
+      "title": "Title Property Name",
+      "label": "Title Property Name",
+      "description": "The database name of the Title Property",
+      "placeholder": "Title",
+      "default": "Title",
+      "required": false
+    },
+    {
+      "name": "property_date",
+      "type": "textfield",
+      "title": "Date Property Name",
+      "label": "Date Property Name",
+      "description": "The database name of the Date Property",
+      "placeholder": "Date",
+      "default": "Date",
+      "required": false
+    },
+    {
+      "name": "property_done",
+      "type": "textfield",
+      "title": "Completed Checkbox Property Name",
+      "label": "Completed Checkbox Property Name",
+      "description": "The database name of the Completed Checkbox Property",
+      "placeholder": "Done",
+      "default": "Done",
+      "required": false
+    },
+    {
+      "name": "property_cancel",
+      "type": "textfield",
+      "title": "Cancelled/Hidden Checkbox Property Name",
+      "label": "Cancelled/Hidden Checkbox Property Name",
+      "description": "The database name of the Cancelled/Hidden Checkbox Property",
+      "placeholder": "Cancelled",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "property_label",
+      "type": "textfield",
+      "title": "Select Property Name",
+      "label": "Select Property Name",
+      "description": "The database name of the Select Property",
+      "placeholder": "Label",
+      "default": "Label",
       "required": false
     },
     {

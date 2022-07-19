@@ -5,16 +5,17 @@ import { Todo } from '@/types/todo'
 import { notion } from '../client'
 import { TodoPage } from '@/types/todo-page'
 import { isNotionClientError } from '@notionhq/client'
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 
 export async function createTodo(props: any): Promise<Todo> {
   try {
     const database = await loadDatabase()
+    const preferences = getPreferenceValues()
 
     const arg: CreatePageParameters = {
       parent: { database_id: database.databaseId },
       properties: {
-        Title: {
+        [preferences.property_title]: {
           title: [
             {
               text: {
@@ -23,7 +24,10 @@ export async function createTodo(props: any): Promise<Todo> {
             },
           ],
         },
-        Date: {
+        [preferences.property_label]: {
+          select: props.tagId ? { id: props.tagId } : null,
+        },
+        [preferences.property_date]: {
           date: props.date
             ? {
                 start: props.date,

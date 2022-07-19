@@ -11,7 +11,7 @@ export function CompleteTodoAction({
   return (
     <Action
       icon={Icon.Checkmark}
-      title={'Mark as Done'}
+      title={'Mark as Completed'}
       onAction={() => onComplete(todo)}
     />
   )

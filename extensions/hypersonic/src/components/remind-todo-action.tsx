@@ -3,7 +3,8 @@ import { Todo } from '@/types/todo'
 
 type SetDateActionProps = {
   todo: Todo
-  onSetDate: (todo: Todo, dateValue: Date | null, name: string) => void
+  onSetDate: (todo: Todo, dateValue: string | null, name: string) => void
+  selectTask?: (todo: Todo) => void
 }
 
 const today = new Date()
@@ -14,7 +15,6 @@ t3.setDate(t3.getDate() + 1)
 const t4 = new Date(t3)
 t4.setDate(t4.getDate() + 5)
 const nextWeek = getNextMondayFromToday()
-const onWeekend = getNextSaturdayDayFromToday()
 
 function getNextMondayFromToday() {
   const today = new Date()
@@ -24,16 +24,6 @@ function getNextMondayFromToday() {
   const daysTillNextMonday = 8 - dayWithoutZero
   const date = new Date(today)
   date.setDate(date.getDate() + daysTillNextMonday)
-  return date
-}
-
-function getNextSaturdayDayFromToday() {
-  const today = new Date()
-  const day = today.getDay()
-  const daysTillSaturday = 6 - day
-  const daysTillNextSaturday = daysTillSaturday === 0 ? 7 : daysTillSaturday
-  const date = new Date(today)
-  date.setDate(date.getDate() + daysTillNextSaturday)
   return date
 }
 
@@ -49,22 +39,30 @@ const dates = [
     name: 'Next Week',
     value: nextWeek,
   },
-  {
-    name: 'On the Weekend',
-    value: onWeekend,
-  },
 ]
 
-export function RemindAction({ todo, onSetDate }: SetDateActionProps) {
+export function RemindAction({
+  todo,
+  onSetDate,
+  selectTask,
+}: SetDateActionProps) {
+  const handleSubmitDate = (date: typeof dates[number]) => {
+    const value = date.value.toISOString().split('T')[0]
+    onSetDate(todo, value, date.name)
+  }
+
   return (
     <ActionPanel.Submenu title="Remind Me" icon={Icon.Calendar}>
       {dates.map((date) => (
         <Action
           key={date.name}
           title={date.name}
-          onAction={() => onSetDate(todo, date.value, date.name)}
+          onAction={() => handleSubmitDate(date)}
         />
       ))}
+      {selectTask && (
+        <Action title="Set a specific time" onAction={() => selectTask(todo)} />
+      )}
     </ActionPanel.Submenu>
   )
 }

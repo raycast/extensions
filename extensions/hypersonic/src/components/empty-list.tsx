@@ -89,7 +89,7 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
               title="View Link"
               icon={Icon.Link}
               url={templateUrl}
-              shortcut={{ modifiers: ['cmd'], key: 'u' }}
+              shortcut={{ modifiers: ['cmd'], key: 'e' }}
             />
             <ReauthorizeAction getInitialData={getInitialData} />
           </ActionPanel>
