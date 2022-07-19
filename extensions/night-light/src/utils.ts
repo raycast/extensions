@@ -13,12 +13,15 @@ export async function nightlight(args: Array<string>): Promise<void> {
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },
     maxBuffer: 10 * 1024 * 1024, // 10 MB
+    shell: true,
   });
 
   if (command.status !== 0) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed";
-    toast.message = command.error?.message || command.stderr;
+    toast.message = command.stderr.includes("nightlight: command not found")
+        ? "Please install nightlight via homebrew."
+        : command.stderr;
   } else {
     toast.style = Toast.Style.Success;
     toast.title = "Done";
