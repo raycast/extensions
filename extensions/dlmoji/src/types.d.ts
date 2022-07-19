@@ -18,9 +18,9 @@ interface ITranslateReformatResult {
 
 interface ITranslateReformatResultItem {
     key: string
-    phonetic?: string
     title: string
     subtitle?: string
+    copyText: string
 }
 
 interface ITranslateResultWebItem {
@@ -37,6 +37,7 @@ interface ITranslateResultBasicItem {
 
 interface IPreferences {
     useVerbatimTranslate: boolean
+    useEmojiTranslate: boolean
     useEmojiAll: boolean
     isAutomaticPaste: boolean
     deepmojiURL: string

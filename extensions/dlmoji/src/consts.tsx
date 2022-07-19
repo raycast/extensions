@@ -3,3 +3,5 @@ export enum SECTION_TYPE {
     Emoji = "Related Emojis",
     Phrase = "Phrases",
 }
+
+export const COPY_SEPARATOR = "; "

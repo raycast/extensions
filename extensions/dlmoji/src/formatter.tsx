@@ -1,11 +1,15 @@
-import { SECTION_TYPE } from "./consts"
+import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
 import { load } from "cheerio"
 import { truncate } from "./utils"
 
 const MAX_LENGTH = 5
 
+export function formatEmojiTrans(emojis: string): ITranslateReformatResultItem {
+    return constructResultItem("Emoji Translate", emojis)
+}
+
 export function formatBaiduTrans(data: BaiduTranslateResult) {
-    if (data.trans_result) {
+    if (data?.trans_result) {
         return data.trans_result[0].dst
     }
     return ""
@@ -17,25 +21,17 @@ export function formatDeepmoji(preds: EmojiScore[]): ITranslateReformatResultIte
             return a.prob - b.prob
         })
         .reverse()
-    const emojis = preds
-        .slice(0, 5)
-        .map((value, idx) => {
-            return value.emoji
-        })
-        .join("; ")
+    const emojiArray = preds.slice(0, 5).map((value) => {
+        return value.emoji
+    })
+    const emojiText = emojiArray.join(" ")
+    const copyText = emojiArray.join(COPY_SEPARATOR)
 
     return {
         title: "Emotion Analysis",
-        subtitle: emojis,
-        key: emojis,
-    }
-}
-
-export function formatEmojiTrans(emojis: string): ITranslateReformatResultItem {
-    return {
-        title: "Emoji Translate",
-        subtitle: emojis,
-        key: emojis,
+        subtitle: emojiText,
+        key: emojiText,
+        copyText: copyText,
     }
 }
 
@@ -43,16 +39,20 @@ export function formatEmojiAll(data: EmojiDataItem[]): ITranslateReformatResult[
     if (!data) return
 
     function extract(item: EmojiDataItem) {
+        const emoji = item.emoji_symbol
+        const description = item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "") // 去掉换行,空格,html标签
+        const copyText = description ? emoji + COPY_SEPARATOR + description : emoji
         return {
-            title: truncate(item.value, 32) + "  " + item.emoji_symbol,
-            subtitle: item.description.replace(/<[^>]+>|\r|\n|\\s/gi, ""), // 去掉换行,空格,html标签
-            key: item.emoji_symbol,
+            title: truncate(item.value, 26) + "  " + item.emoji_symbol,
+            subtitle: description,
+            key: emoji,
+            copyText: copyText,
         }
     }
 
     const emojiList: ITranslateReformatResultItem[] = []
     const combineList: ITranslateReformatResultItem[] = []
-    data.forEach((item, idx) => {
+    data.forEach((item) => {
         if (item.type === "emoji") {
             emojiList.push(extract(item))
         } else if (item.type === "combine") {
@@ -85,10 +85,14 @@ export function formatChineseEmojiTrans(doc: string): ITranslateReformatResultIt
     const $ = load(doc)
     const text: string = $("meta[name=keywords]").attr("content")!
     const emojis: string = text.split(", ").slice(1).join(" ")
+    return constructResultItem("Verbatim Translate", emojis)
+}
 
+function constructResultItem(title: string, emojiText: string) {
     return {
-        title: "Verbatim Translate",
-        subtitle: emojis,
-        key: emojis,
+        title: title,
+        subtitle: emojiText,
+        key: emojiText,
+        copyText: emojiText,
     }
 }

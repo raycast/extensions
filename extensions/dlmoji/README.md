@@ -24,6 +24,8 @@
 
 ![Config Panel](./assets/Config-Panel.png)
 
+Some APIs might cause timeout errors and be unstable. To avoid these annoying alerts, you can uncheck the corresponding APIs in the following Configuration.
+
 To enable `Emotion Analysis`, you need to deploy deepmoji as a web service on your server. Here we offer an off-the-shelf [deepmoji docker image](https://hub.docker.com/r/thandaanda/deepmoji). If you want to use another model service, remember to follow the response format:
 
 ```json

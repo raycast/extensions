@@ -1,7 +1,17 @@
 import { Component, Fragment } from "react"
-import { SECTION_TYPE } from "./consts"
-import { Action, ActionPanel, Clipboard, Color, Icon, List, getPreferenceValues } from "@raycast/api"
-import { truncate } from "./utils"
+import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
+import {
+    Action,
+    ActionPanel,
+    Clipboard,
+    Color,
+    Icon,
+    List,
+    getPreferenceValues,
+    KeyEquivalent,
+    Keyboard,
+} from "@raycast/api"
+import { clamp, truncate } from "./utils"
 
 interface ITranslateResult {
     inputState?: string
@@ -19,7 +29,7 @@ function reformatCopyTextArray(data: string[], limitResultAmount = 10): IReforma
     return finalData.map((text, idx) => {
         return {
             // title: finalData.length - 1 === idx && idx > 0 ? "All" : truncate(text),
-            title: idx === 0 ? "All" : truncate(text),
+            title: idx === dataLength ? "All" : truncate(text, 40),
             value: text,
         }
     })
@@ -32,9 +42,9 @@ function ActionCopyListSection(props: IActionCopyListSection) {
         return null
     }
 
-    const SEPARATOR = "; "
-    const copyTextArray = props.copyText.split(SEPARATOR)
-    copyTextArray.length > 1 && copyTextArray.unshift(props.copyText)
+    const copyTextArray = props.copyText.split(COPY_SEPARATOR)
+    const newCopyText = copyTextArray.join(" ")
+    copyTextArray.length > 1 && copyTextArray.push(newCopyText)
     const finalTextArray = reformatCopyTextArray(copyTextArray, 6)
 
     // const shortcutKeyEquivalent: Keyboard.KeyEquivalent[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -67,10 +77,11 @@ function ActionCopyListSection(props: IActionCopyListSection) {
             {finalTextArray.map((textItem, key) => {
                 const title = textItem.title
                 const value = textItem.value
+                const shortcutKey = clamp(key + 1).toString() as Keyboard.KeyEquivalent
                 return (
                     <Action.CopyToClipboard
                         onCopy={() => preferences.isAutomaticPaste && Clipboard.paste(textItem.value)}
-                        // shortcut={{ modifiers: ["cmd"], key: [key] }}
+                        shortcut={{ modifiers: ["cmd"], key: shortcutKey }}
                         title={`Copy ${title}`}
                         content={value}
                         key={key}
@@ -125,12 +136,11 @@ export default function TranslateResult(props: ITranslateResult) {
                                     icon={iconMaps[result.type!]}
                                     title={item.title}
                                     subtitle={item?.subtitle}
-                                    accessoryTitle={item.phonetic}
                                     detail={<List.Item.Detail markdown={item.title} />}
                                     actions={
                                         <ListActionPanel
                                             queryText={props.inputState}
-                                            copyText={item?.key || item.subtitle || item.title}
+                                            copyText={item?.copyText || item.key || item.subtitle}
                                         />
                                     }
                                 />

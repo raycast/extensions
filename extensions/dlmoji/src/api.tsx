@@ -3,6 +3,7 @@ import axios from "axios"
 import querystring from "node:querystring"
 import CryptoJS from "crypto-js"
 import { checkURL, defaultBaiduAppId, defaultBaiduAppSecret, preferences, showErrorToast } from "./utils"
+import { getEmojiTransKey } from "./storage"
 
 // baidu app id and secret
 const baiduAppId = preferences.baiduAppId.trim().length > 0 ? preferences.baiduAppId.trim() : defaultBaiduAppId
@@ -13,6 +14,31 @@ const baiduAppSecret =
 const deepmojiURL = preferences.deepmojiURL.trim()
 if (deepmojiURL.length > 0 && !checkURL(deepmojiURL)) {
     showErrorToast("deepmoji", "invalid URL address")
+}
+
+export async function preConnect() {
+    const connects = []
+    if (preferences.useEmojiTranslate) {
+        connects.push(
+            getEmojiTransKey(false).then((key) => {
+                fetchEmojiTrans("", "en", key)
+            })
+        )
+    }
+    if (preferences.useVerbatimTranslate) {
+        connects.push(fetchChineseEmojiTrans(""))
+    }
+    if (preferences.useEmojiAll) {
+        connects.push(fetchEmojiAll("", "en"))
+    }
+    return axios.all(connects)
+}
+
+export function setAxiosTimeout(seconds = 6) {
+    axios.interceptors.request.use((config) => {
+        config.timeout = seconds * 1000
+        return config
+    })
 }
 
 /**
@@ -35,7 +61,10 @@ export async function fetchBaiduTrans(queryText: string): Promise<any> {
         salt: salt,
         sign: sign,
     }
-    return axios.get(url, { params })
+    return axios.get(url, { params }).catch((err) => {
+        showErrorToast("Baidu Translate", err.message)
+        return
+    })
 }
 
 export async function fetchDeepl(queryText: string): Promise<any> {
@@ -98,12 +127,8 @@ export async function fetchEmojiAll(queryText: string, fromLanguage: string): Pr
                 lang: lang,
             }),
             {
-                timeout: 6 * 1000,
                 headers: {
-                    // 'User-Agent': 'apifox/1.0.0 (https://www.apifox.cn)',
-                    // 'Accept': '*/*',
                     // 'Content-Type': 'multipart/form-data',
-                    // 'Connection': 'keep-alive',
                     referer: "https://www.emojiall.com/",
                 },
             }

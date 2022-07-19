@@ -38,3 +38,7 @@ export function truncate(string: string, length = 16, separator = "..") {
 
     return string.substring(0, length) + separator
 }
+
+export function clamp(num: number, min = 0, max = 9) {
+    return Math.min(Math.max(num, min), max)
+}
