@@ -116,6 +116,23 @@ export const useOnboarding = () => {
     [data]
   )
 
+  const handleCreateGeneral = useCallback(async () => {
+    const optimisticTodo = {
+      id: `fake-id-${Math.random() * 100}`,
+      title: searchText,
+      isCompleted: false,
+      isCancelled: false,
+      tag: null,
+      isOverdue: false,
+      url: '',
+      contentUrl: '',
+      dueDate: null,
+    }
+
+    setData([optimisticTodo, ...data])
+    setSearchText('')
+  }, [searchText])
+
   const handleSetDate = useCallback(
     async (todo: Todo, dateValue: string | null, name: string) => {
       const optimisticData = data.filter((t) => t.id !== todo.id)
@@ -175,6 +192,7 @@ export const useOnboarding = () => {
     searchText,
     setSearchText,
     handleCreate,
+    handleCreateGeneral,
     handleComplete,
     handleCancel,
     handleSetTag,

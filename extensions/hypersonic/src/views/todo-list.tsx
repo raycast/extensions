@@ -31,6 +31,7 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
     setSearchText,
     loading,
     handleCreate,
+    handleCreateGeneral,
     handleComplete,
     handleCancel,
     handleSetTag,
@@ -81,6 +82,11 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
               <Action
                 icon={Icon.Plus}
                 title="Create To-do"
+                onAction={handleCreateGeneral}
+              />
+              <Action
+                icon={Icon.Plus}
+                title="Create To-do For Today"
                 onAction={handleCreate}
               />
               <Action.OpenInBrowser

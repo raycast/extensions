@@ -9,6 +9,7 @@ import {
 } from '@/services/storage'
 import { getTodos } from '../services/notion/operations/get-todos'
 import { createTodo } from '../services/notion/operations/create-todo'
+import { createTodoGeneral } from '@/services/notion/operations/create-todo-general'
 import { updateTodoStatus } from '../services/notion/operations/update-todo-status'
 
 import { Todo } from '@/types/todo'
@@ -178,6 +179,41 @@ export function useTodos() {
     }
   }, [searchText])
 
+  const handleCreateGeneral = useCallback(async () => {
+    try {
+      if (!data) return null
+      setLoading(true)
+      const tag = tags.find((t) => t.id === filter)
+      const optimisticTodo = {
+        id: `fake-id-${Math.random() * 100}`,
+        title: searchText,
+        isCompleted: false,
+        isCancelled: false,
+        tag: tag || null,
+        isOverdue: false,
+        url: '',
+        contentUrl: getTitleUrl(searchText),
+        dueDate: null,
+      }
+
+      setData([...data, optimisticTodo])
+      setSearchText('')
+
+      const validatedTodo = await createTodoGeneral({
+        title: searchText,
+        tagId: tag?.id || null,
+      })
+
+      const validatedData = [...data, validatedTodo]
+      setData(validatedData)
+      await storeTodos(validatedData)
+    } catch (e) {
+      showToast(Toast.Style.Failure, 'Error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }, [searchText])
+
   const handleSetTag = useCallback(
     async (todo: Todo, tag: Tag | null) => {
       try {
@@ -314,6 +350,7 @@ export function useTodos() {
     setFilter,
     loading,
     handleCreate,
+    handleCreateGeneral,
     handleComplete,
     handleCancel,
     handleSetTag,
