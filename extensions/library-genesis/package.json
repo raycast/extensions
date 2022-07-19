@@ -43,7 +43,7 @@
     },
     {
       "name": "copySearchContentFromClipboard",
-      "title": "Search field from clipboard",
+      "title": "Search Field from Clipboard",
       "description": "Copy search content from clipboard",
       "type": "checkbox",
       "default": false,
@@ -82,7 +82,7 @@
     },
     {
       "name": "preferredLanguages",
-      "title": "Preferred languages for books",
+      "title": "Preferred Languages for Books",
       "description": "A comma separated list of your preferred languages.",
       "type": "textfield",
       "default": "",
@@ -94,7 +94,7 @@
       "description": "Prioritizes preferred languages in your searching results.",
       "type": "checkbox",
       "default": true,
-      "label": "Prioritize preferred languages in search",
+      "label": "Prioritize Preferred Languages in Search",
       "required": true
     }
   ],
