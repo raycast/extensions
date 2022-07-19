@@ -1,6 +1,6 @@
 export function formatDateForList(dateDue: string): string | null {
-	var time_todo = new Date(dateDue)
-	var time_todo_locale = new Date(time_todo.getTime() - time_todo.getTimezoneOffset() * 60000)
+	let time_todo = new Date(dateDue)
+	let time_todo_locale = new Date(time_todo.getTime() - time_todo.getTimezoneOffset() * 60000)
 	//console.log('time_now_iso'+time_now_locale.toISOString())
 	if (
 	dateDue.indexOf('T') == -1

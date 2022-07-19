@@ -12,9 +12,9 @@ export async function getTodos(
   try {
     const notionClient = await notion()
     const preferences = getPreferenceValues()
-    var time_now = new Date()
-    var time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
-    var today_now = time_now_locale.toISOString().split("T")[0]
+    let time_now = new Date()
+    let time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
+    let today_now = time_now_locale.toISOString().split("T")[0]
     const response =
       preferences.property_cancel == ''
         ? await notionClient.databases.query({
