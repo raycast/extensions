@@ -101,7 +101,9 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
   const md5 = downloadUrl.split("md5=")[1];
   const coverUrl = contentRows.eq(1).children("td").eq(0).children("a").first().children("img").first().attr("src");
   const title = contentRows.eq(1).children("td").eq(2).find("a").first().text().trim();
-  const bookUrl = contentRows.eq(1).children("td").eq(2).find("a").first().attr("href");
+  // book url need clean up
+  // sample: ../book/index.php?md5=765E68B6A05373020ACE192312B56859
+  const bookUrl = contentRows.eq(1).children("td").eq(2).find("a").first().attr("href")?.replace("..", "");
 
   // data from 2nd row
   const author = contentRows.eq(2).children("td").eq(1).find("a").first().text().trim();
@@ -135,6 +137,7 @@ export const parseBookFromTableInDetailedView = (table: cheerio.Cheerio<cheerio.
   const extension = contentRows.eq(9).children("td").eq(3).text().trim();
 
   libgenUrl = libgenUrl ? libgenUrl : "libgen.rs";
+
   const book: BookEntry = {
     title: title,
     author: author,
