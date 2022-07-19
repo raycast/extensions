@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Sonarr Shows",
+      "title": "View Upcoming Shows",
       "subtitle": "Sonarr",
       "description": "All upcoming shows dates",
       "mode": "view"
