@@ -50,7 +50,7 @@
     {
       "name": "bcrypt",
       "title": "Encode Bcrypt",
-      "description": "Encoding Bcrypt password hash from clipboard contents.",
+      "description": "Calculate Bcrypt hash from clipboard contents.",
       "mode": "no-view"
     }
   ],
