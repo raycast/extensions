@@ -9,19 +9,19 @@
   "commands": [
     {
       "name": "configureTenants",
-      "title": "Tenants Configuration",
+      "title": "Configure Tenants",
       "description": "Configure tenants",
       "mode": "view"
     },
     {
       "name": "searchAccountsByEmail",
-      "title": "Account Search By Email",
+      "title": "Search Accounts By Email",
       "description": "Search for accounts by email",
       "mode": "view"
     },
     {
       "name": "searchAccountByCode",
-      "title": "Account Search By Code",
+      "title": "Search Accounts By Code",
       "description": "Search for an account by account code",
       "mode": "view"
     }
