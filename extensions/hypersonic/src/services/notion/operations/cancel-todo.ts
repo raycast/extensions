@@ -4,18 +4,15 @@ import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { notion } from '../client'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 
-export async function updateTodoTag(
-  pageId: string,
-  labelId: string | null
-): Promise<any> {
+export async function cancelTodo(pageId: string, value: boolean): Promise<any> {
   try {
     const notionClient = await notion()
-    const labelProperty = getPreferenceValues().property_label
+    const cancelProperty = getPreferenceValues().property_cancel
     const page = await notionClient.pages.update({
       page_id: pageId,
       properties: {
-        [labelProperty]: {
-          select: labelId ? { id: labelId } : null,
+        [cancelProperty]: {
+          checkbox: value,
         },
       },
     })
@@ -27,7 +24,7 @@ export async function updateTodoTag(
     } else {
       showToast(
         Toast.Style.Failure,
-        'Error occurred check that you have a Label property'
+        'Error occurred check that you have a Cancel property'
       )
     }
     return undefined

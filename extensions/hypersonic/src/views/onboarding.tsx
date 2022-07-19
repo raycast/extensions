@@ -1,11 +1,12 @@
 import { AuthorizationAction } from '@/components/authorization-action'
 import { CompleteTodoAction } from '@/components/complete-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
+import { CancelTodoAction } from '@/components/cancel-todo-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
 import { useOnboarding } from '@/hooks/use-onboarding'
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from '@raycast/api'
 
 export function Onboarding() {
   const {
@@ -15,12 +16,15 @@ export function Onboarding() {
     setSearchText,
     handleCreate,
     handleComplete,
+    handleCancel,
     handleSetTag,
     handleSetDate,
     handleDelete,
     handleMoveUp,
     handleMoveDown,
   } = useOnboarding()
+
+  const preferences = getPreferenceValues()
 
   return (
     <List
@@ -70,6 +74,9 @@ export function Onboarding() {
                 tags={tags}
                 onSetLabel={handleSetTag}
               />
+              {preferences.property_cancel != '' ? (
+                    <CancelTodoAction todo={todo} onCancel={handleCancel} />
+                  ) : null}
               <Action
                 icon={Icon.ChevronUp}
                 title={'Move Up'}
@@ -89,7 +96,7 @@ export function Onboarding() {
                     title="View Link"
                     icon={Icon.Link}
                     url={todo.contentUrl}
-                    shortcut={{ modifiers: ['cmd'], key: 'u' }}
+                    shortcut={{ modifiers: ['cmd'], key: 'e' }}
                   />
                 ) : null}
                 <CopyToDoAction todo={todo} />

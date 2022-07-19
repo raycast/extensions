@@ -9,41 +9,56 @@ const ONBOARDING_DATA: Todo[] = [
     id: '1',
     title: '👋 Hey there! - Press ↵ to complete your first to-do',
     isCompleted: false,
+    isCancelled: false,
     tag: null,
+    isOverdue: false,
     url: '',
     contentUrl: '',
+    dueDate: null,
   },
   {
     id: '2',
     title: '😴 Press ⌘ + ↵ to remind this to-do for later ',
     isCompleted: false,
+    isCancelled: false,
     tag: null,
     url: '',
+    isOverdue: false,
     contentUrl: '',
+    dueDate: null,
   },
   {
     id: '3',
     title: '🏷️ Press ⌘ + L to add a label of your choice',
     isCompleted: false,
+    isCancelled: false,
     tag: null,
     url: '',
+    isOverdue: false,
     contentUrl: '',
+    dueDate: null,
   },
   {
     id: '4',
     title: '🔗 Press ⌘ + U and duplicate Hypersonic template to your workspace',
     isCompleted: false,
+    isCancelled: false,
     tag: null,
     url: '',
+    isOverdue: false,
     contentUrl: templateUrl,
+    dueDate: null,
   },
   {
     id: '5',
     title: '👤️ Press ⌘ + S and Log into your Notion account',
     isCompleted: false,
+    isCancelled: false,
     tag: null,
+    isOverdue: false,
     url: '',
     contentUrl: '',
+    dueDate: null,
   },
 ]
 
@@ -66,14 +81,25 @@ export const useOnboarding = () => {
     [data]
   )
 
+  const handleCancel = useCallback(
+    async (todo: Todo) => {
+      const optimisticData = data.filter((t) => t.id !== todo.id)
+      setData(optimisticData)
+    },
+    [data]
+  )
+
   const handleCreate = useCallback(async () => {
     const optimisticTodo = {
       id: `fake-id-${Math.random() * 100}`,
       title: searchText,
       isCompleted: false,
+      isCancelled: false,
       tag: null,
+      isOverdue: false,
       url: '',
       contentUrl: '',
+      dueDate:null
     }
 
     setData([optimisticTodo, ...data])
@@ -91,7 +117,7 @@ export const useOnboarding = () => {
   )
 
   const handleSetDate = useCallback(
-    async (todo: Todo, dateValue: Date | null, name: string) => {
+    async (todo: Todo, dateValue: string | null, name: string) => {
       const optimisticData = data.filter((t) => t.id !== todo.id)
       setData(optimisticData)
     },
@@ -150,6 +176,7 @@ export const useOnboarding = () => {
     setSearchText,
     handleCreate,
     handleComplete,
+    handleCancel,
     handleSetTag,
     handleSetDate,
     handleDelete,

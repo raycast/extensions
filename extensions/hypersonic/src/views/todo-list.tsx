@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   openCommandPreferences,
@@ -16,8 +17,11 @@ import { WhatHaveIDoneAction } from '@/components/what-have-i-done-action'
 import { OpenNotionAction } from '@/components/open-notion-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { TransparentEmpty } from '@/components/transparent-empty'
+import { Todo } from '@/types/todo'
+import { CancelTodoAction } from '@/components/cancel-todo-action'
+import { formatDateForList } from '@/services/notion/utils/format-date-for-list'
 
-export function ToDoList() {
+export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
   const {
     todos,
     data,
@@ -28,13 +32,18 @@ export function ToDoList() {
     loading,
     handleCreate,
     handleComplete,
+    handleCancel,
     handleSetTag,
     handleSetDate,
     handleDelete,
     handleMoveUp,
     handleMoveDown,
+    setFilter,
+    filter,
     getInitialData,
   } = useTodos()
+
+  const preferences = getPreferenceValues()
 
   return (
     <List
@@ -42,6 +51,26 @@ export function ToDoList() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Filter or create to-do"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by tag"
+          value={filter}
+          onChange={setFilter}
+        >
+          <List.Dropdown.Item title="All" value={'all'} />
+          {tags.map((tag) => (
+            <List.Dropdown.Item
+              key={tag.id}
+              icon={{
+                source: 'dot.png',
+                tintColor: tag.color,
+              }}
+              title={tag.name}
+              value={tag.id}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
       {searchText ? (
         <List.Item
@@ -68,7 +97,27 @@ export function ToDoList() {
         ? todos.map((todo, index) => (
             <List.Item
               key={todo.id}
-              icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
+              // icon={
+              //   todo.isCompleted
+              //     ? { source: Icon.Checkmark, tintColor: Color.Green }
+              //     : todo.isOverdue
+              //     ? todo.tag
+              //       ? { source: Icon.Clock, tintColor: todo.tag.color }
+              //       : Icon.Clock
+              //     : todo.tag
+              //     ? { source: Icon.Circle, tintColor: todo.tag.color }
+              //     : Icon.Circle
+              // }
+              icon=
+              {
+                todo.isCompleted 
+                  ? { source: Icon.Checkmark, tintColor: Color.Green }
+                  : todo.isOverdue
+                  ? { source: Icon.Circle}
+                    //, tintColor: Color.Red }
+                  : { source: Icon.Circle}
+                    //, tintColor: Color.Blue }
+              }
               title={todo.title}
               accessories={
                 todo.tag
@@ -80,18 +129,47 @@ export function ToDoList() {
                           tintColor: todo.tag.color,
                         },
                       },
+                      {
+                        text: todo.dueDate?(todo.isOverdue?formatDateForList(todo.dueDate):null):null,
+                        icon: todo.dueDate?(todo.isOverdue?{
+                          source: Icon.Calendar,
+                          tintColor: Color.Red
+                        }:Icon.Clock):{
+                          source: Icon.Calendar,
+                          tintColor: Color.Yellow
+                        },
+                      },
                     ]
-                  : []
+                  : [
+                    {
+                      text: todo.dueDate?(todo.isOverdue?formatDateForList(todo.dueDate):null):null,
+                      icon: todo.dueDate?(todo.isOverdue?{
+                        source: Icon.Calendar,
+                        tintColor: Color.Red
+                      }:Icon.Clock):{
+                        source: Icon.Calendar,
+                        tintColor: Color.Yellow
+                      },
+                    },
+                  ]
               }
               actions={
                 <ActionPanel>
                   <CompleteTodoAction todo={todo} onComplete={handleComplete} />
-                  <RemindAction todo={todo} onSetDate={handleSetDate} />
+                  <RemindAction
+                    todo={todo}
+                    onSetDate={handleSetDate}
+                    selectTask={selectTask}
+                  />
                   <SetLabelAction
                     todo={todo}
                     tags={tags}
                     onSetLabel={handleSetTag}
                   />
+                  {preferences.property_cancel != '' ? (
+                    <CancelTodoAction todo={todo} onCancel={handleCancel} />
+                  ) : null}
+
                   <Action
                     icon={Icon.ChevronUp}
                     title={'Move Up'}
@@ -111,7 +189,7 @@ export function ToDoList() {
                         title="View Link"
                         icon={Icon.Link}
                         url={todo.contentUrl}
-                        shortcut={{ modifiers: ['cmd'], key: 'u' }}
+                        shortcut={{ modifiers: ['cmd'], key: 'e' }}
                       />
                     ) : null}
                     <CopyToDoAction todo={todo} />

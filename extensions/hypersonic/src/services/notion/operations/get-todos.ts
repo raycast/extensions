@@ -1,4 +1,4 @@
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { isNotionClientError } from '@notionhq/client'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
@@ -11,35 +11,76 @@ export async function getTodos(
 ): Promise<Todo[]> {
   try {
     const notionClient = await notion()
-    const response = await notionClient.databases.query({
-      database_id: databaseId,
-      filter: {
-        and: [
-          {
-            property: 'Done',
-            checkbox: {
-              equals: false,
-            },
-          },
-          {
-            or: [
-              {
-                property: 'Date',
-                date: {
-                  before: new Date() as any,
+    const preferences = getPreferenceValues()
+    var time_now = new Date()
+    var time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
+    var today_now = time_now_locale.toISOString().split("T")[0]
+    const response =
+      preferences.property_cancel == ''
+        ? await notionClient.databases.query({
+            database_id: databaseId,
+            filter: {
+              and: [
+                {
+                  property: preferences.property_done,
+                  checkbox: {
+                    equals: false,
+                  },
                 },
+                {
+                  or: [
+                    {
+                      property: preferences.property_date,
+                      date: {
+                        on_or_before: today_now,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            sorts: [
+              {
+                timestamp: 'created_time',
+                direction: 'ascending',
               },
             ],
-          },
-        ],
-      },
-      sorts: [
-        {
-          timestamp: 'created_time',
-          direction: 'descending',
-        },
-      ],
-    })
+          })
+        : await notionClient.databases.query({
+            database_id: databaseId,
+            filter: {
+              and: [
+                {
+                  property: preferences.property_done,
+                  checkbox: {
+                    equals: false,
+                  },
+                },
+                {
+                  property: preferences.property_cancel,
+                  checkbox: {
+                    equals: false,
+                  },
+                },
+                {
+                  or: [
+                    {
+                      property: preferences.property_date,
+                      date: {
+                        on_or_before: new Date().toISOString().split('T')[0],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            sorts: [
+              {
+                timestamp: 'created_time',
+                direction: 'ascending',
+              },
+            ],
+          })
 
     const todos = response.results.map(mapPageToTodo)
 
