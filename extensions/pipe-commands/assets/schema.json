@@ -59,7 +59,6 @@
         }
     },
     "required": [
-        "argument1",
         "mode",
         "schemaVersion",
         "title"
