@@ -9,19 +9,19 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchVods = async () => {
+    setIsLoading(true);
     const response = await fetch("https://api.xqc.wtf/vods?$limit=20&$sort[createdAt]=-1");
     const data = (await response.json()) as VODModel;
     setVods(data.data);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    setIsLoading(true);
     fetchVods();
-    setIsLoading(false);
   }, []);
 
   return (
-    <List enableFiltering={false} navigationTitle="Search Vods">
+    <List enableFiltering={false} navigationTitle="Search Vods" isLoading={isLoading}>
       {vods.map((vod) => (
         <List.Item
           key={vod.id}
