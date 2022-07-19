@@ -3,11 +3,9 @@ import AccountsListByEmail from "./AccountsListByEmail";
 import { ItemProps } from "./PrepareList";
 
 export default function UseEmailItem(): [string, (props: ItemProps) => JSX.Element] {
-
   return [
     "Search by Email",
-    ({ tenant, query }: ItemProps) =>
-    (
+    ({ tenant, query }: ItemProps) => (
       <List.Item
         title="Email:"
         subtitle={`${query} ➡️`}
@@ -19,6 +17,6 @@ export default function UseEmailItem(): [string, (props: ItemProps) => JSX.Eleme
           </ActionPanel>
         }
       />
-    )
+    ),
   ];
 }

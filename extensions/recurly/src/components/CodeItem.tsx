@@ -19,6 +19,6 @@ export default function UseCodeItem(): [string, (props: ItemProps) => JSX.Elemen
           }
         />
       );
-    }
-  ]
+    },
+  ];
 }

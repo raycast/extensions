@@ -20,9 +20,9 @@ export default function configureTenants() {
     <List
       isLoading={tenantsLoading}
       actions={
-      <ActionPanel>
-        <AddTenantAction onCreate={onCreateTenant} />
-      </ActionPanel>
+        <ActionPanel>
+          <AddTenantAction onCreate={onCreateTenant} />
+        </ActionPanel>
       }
     >
       <TenantsListSection onCreate={onCreateTenant} list={tenants} onEdit={onEditTenant} onDelete={onDeleteTenant} />
@@ -61,9 +61,10 @@ const TenantsListSection = ({
   </List.Section>
 );
 
-const AddTenantAction = ({onCreate}: {onCreate: (t: TenantConfiguration) => Promise<void>}) => (
+const AddTenantAction = ({ onCreate }: { onCreate: (t: TenantConfiguration) => Promise<void> }) => (
   <Action.Push
-    title={"Add Tenant"} target={<TenantConfigurationForm onSubmit={onCreate} />}
-    shortcut={{key: "n", modifiers: ["cmd"]}}
+    title={"Add Tenant"}
+    target={<TenantConfigurationForm onSubmit={onCreate} />}
+    shortcut={{ key: "n", modifiers: ["cmd"] }}
   />
-)
+);
