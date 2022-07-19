@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonarr",
   "title": "Sonarr",
-  "description": "View your Sonarr instance, upcoming shows and more",
+  "description": "View your Sonarr upcoming shows.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [
