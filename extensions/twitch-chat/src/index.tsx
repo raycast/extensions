@@ -1,6 +1,6 @@
 import { Icon, List, getPreferenceValues, ActionPanel } from "@raycast/api";
 import { useState, useEffect } from "react";
-import tmi from "tmi.js";
+import tmi, { ChatUserstate } from "tmi.js";
 
 export default function Command() {
   const [chats, setChats] = useState<SingleChat[]>([]);
@@ -11,15 +11,18 @@ export default function Command() {
     });
 
     client.connect();
-    client.on("message", (channel: string, tags: Tags, message: string, self: boolean) => {
-      const newChat: SingleChat = {
-        channel,
-        user: tags["display-name"],
+    client.on("chat", (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
+      if (self) {
+        return;
+      }
+      const chat: SingleChat = {
+        channel: channel,
+        user: userstate.username || "",
         message: message,
-        color: tags["color"],
-        self,
+        color: userstate.color || "",
+        self: self,
       };
-      setChats((chats) => [newChat, ...chats].slice(0, 10));
+      setChats((prevChats) => [chat, ...prevChats]);
     });
   }, []);
 
@@ -45,9 +48,4 @@ interface SingleChat {
   message: string;
   color: string;
   self: boolean;
-}
-
-interface Tags {
-  "display-name": string;
-  color: string;
 }
