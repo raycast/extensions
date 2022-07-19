@@ -1,6 +1,6 @@
 # pass Changelog
 
-## [New Additions] - 2022-07-16
+## [New Additions] - 2022-07-19
 
 - Add action to display the content of a secret.
 - Add action to copy or paste values from the selected secret content.
