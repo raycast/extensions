@@ -48,7 +48,7 @@
       "name": "futureDays",
       "title": "Future Days",
       "required": false,
-      "description": "The number of days to show upcoming shows",
+      "description": "The number of days from now to show upcoming shows for",
       "type": "dropdown",
       "default": "14",
       "data": [
