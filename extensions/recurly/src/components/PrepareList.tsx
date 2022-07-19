@@ -5,6 +5,7 @@ import { List } from "@raycast/api";
 import NoTenantsItem from "./NoTenantsItem";
 
 export type PrepareListProps = {
+  placeholder: string;
   Item: (props: ItemProps) => JSX.Element;
 };
 
@@ -14,7 +15,7 @@ export type ItemProps = {
 };
 
 // noinspection JSUnusedGlobalSymbols
-export default function PrepareList({ Item }: PrepareListProps) {
+export default function PrepareList({ placeholder, Item }: PrepareListProps) {
   const [query, setQuery] = useState<string>("");
   const [tenant, setTenant] = useState<TenantConfiguration>({ name: "", subdomain: "", apiKey: "" });
   const { tenants, tenantsLoading } = useTenants();
@@ -28,6 +29,7 @@ export default function PrepareList({ Item }: PrepareListProps) {
   return (
     <List
       isLoading={tenantsLoading}
+      searchBarPlaceholder={placeholder}
       onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Select the tenant" onChange={onSelectTenant} storeValue>
