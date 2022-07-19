@@ -2,8 +2,8 @@ import { getPreferenceValues } from '@raycast/api'
 
 export function getDateOverdue(dateDue: string): boolean {
 	const preferences = getPreferenceValues()
-	let time_now = new Date()
-	let time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
+	const time_now = new Date()
+	const time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
 	//console.log('time_now_iso'+time_now_locale.toISOString())
 	let isOverdueVal = false
 	  if (
