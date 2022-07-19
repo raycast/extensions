@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Sonarr Shows",
-      "subtitle": "List of upcoming shows",
+      "subtitle": "Sonarr",
       "description": "All upcoming shows date for 2 weeks from now",
       "mode": "view"
     }
