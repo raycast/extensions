@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xqc",
-  "title": "xQc",
+  "title": "Xqc",
   "description": "Search and Explore Vods for twitch.tv/xqc",
   "icon": "command-icon.png",
   "author": "Aayush9029",
