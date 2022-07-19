@@ -49,7 +49,8 @@ export default function ({ entry }: { entry: string }): JSX.Element {
       )}
 
       {details.map((item, index) => {
-        const [key, value] = item.split(": ");
+        const [key, ...values] = item.split(": ");
+        const value = values.join(": ");
 
         return (
           <List.Item
