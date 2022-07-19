@@ -64,7 +64,7 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
   if (script.metadatas.icon) {
     return buildIcon(script.metadatas.icon);
   }
-  return "➡️";
+  return script.metadatas.mode === "pipe" ? "pipe-icon.png" : "script-icon.png";
 }
 
 async function getInput(inputType: InputType) {

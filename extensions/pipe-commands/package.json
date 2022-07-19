@@ -3,7 +3,7 @@
   "name": "pipe-commands",
   "title": "Pipe Commands",
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
-  "icon": "command-icon.png",
+  "icon": "pipe-icon.png",
   "author": "pomdtr",
   "contributors": [
     "gasolin"
