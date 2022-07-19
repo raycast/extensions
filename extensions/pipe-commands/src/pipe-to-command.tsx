@@ -112,7 +112,7 @@ export function PipeCommand(props: {
             {command.user ? (
               <React.Fragment>
                 <Action.Open
-                  icon={Icon.TextDocument}
+                  icon={Icon.BlankDocument}
                   title="Open Command"
                   target={command.path}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}

@@ -40,14 +40,18 @@ export default function managePipeCommands() {
         ))}
       </List.Section>
       <List.Section title="User Commands">
-        {state?.commands?.filter(cmd => cmd.user).map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
-        ))}
+        {state?.commands
+          ?.filter((cmd) => cmd.user)
+          .map((cmd) => (
+            <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
+          ))}
       </List.Section>
       <List.Section title="Built-in Commands">
-        {state?.commands?.filter(cmd => !cmd.user).map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
-        ))}
+        {state?.commands
+          ?.filter((cmd) => !cmd.user)
+          .map((cmd) => (
+            <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
+          ))}
       </List.Section>
     </List>
   );
