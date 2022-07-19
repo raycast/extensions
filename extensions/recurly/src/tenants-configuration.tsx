@@ -17,24 +17,32 @@ export default function TenantsConfiguration() {
   const onDeleteTenant = (tenant: TenantConfiguration) => () => deleteTenant(tenant).catch(showError);
 
   return (
-    <List isLoading={tenantsLoading}>
-      <TenantsListSection tenants={tenants} onEditTenant={onEditTenant} onDeleteTenant={onDeleteTenant} />
-      <AddTenantSection onCreateTenant={onCreateTenant} />
+    <List
+      isLoading={tenantsLoading}
+      actions={
+      <ActionPanel>
+        <AddTenantAction onCreate={onCreateTenant} />
+      </ActionPanel>
+      }
+    >
+      <TenantsListSection onCreate={onCreateTenant} list={tenants} onEdit={onEditTenant} onDelete={onDeleteTenant} />
     </List>
   );
 }
 
 const TenantsListSection = ({
-  tenants,
-  onEditTenant,
-  onDeleteTenant,
+  list,
+  onCreate,
+  onEdit,
+  onDelete,
 }: {
-  tenants: TenantConfiguration[];
-  onEditTenant: (t: TenantConfiguration) => (t: TenantConfiguration) => Promise<void>;
-  onDeleteTenant: (t: TenantConfiguration) => () => Promise<void>;
+  list: TenantConfiguration[];
+  onCreate: (t: TenantConfiguration) => Promise<void>;
+  onEdit: (t: TenantConfiguration) => (t: TenantConfiguration) => Promise<void>;
+  onDelete: (t: TenantConfiguration) => () => Promise<void>;
 }) => (
   <List.Section>
-    {tenants.map((tenant) => (
+    {list.map((tenant) => (
       <List.Item
         key={tenant.name}
         title={tenant.name}
@@ -42,9 +50,10 @@ const TenantsListSection = ({
           <ActionPanel>
             <Action.Push
               title="Edit Tenant"
-              target={<TenantConfigurationForm tenant={tenant} onSubmit={onEditTenant(tenant)} />}
+              target={<TenantConfigurationForm tenant={tenant} onSubmit={onEdit(tenant)} />}
             />
-            <Action.SubmitForm title="Delete tenant" onSubmit={onDeleteTenant(tenant)} />
+            <AddTenantAction onCreate={onCreate} />
+            <Action.SubmitForm title="Delete tenant" onSubmit={onDelete(tenant)} />
           </ActionPanel>
         }
       />
@@ -52,15 +61,9 @@ const TenantsListSection = ({
   </List.Section>
 );
 
-const AddTenantSection = ({ onCreateTenant }: { onCreateTenant: (t: TenantConfiguration) => Promise<void> }) => (
-  <List.Section title="—">
-    <List.Item
-      title="Add new item"
-      actions={
-        <ActionPanel>
-          <Action.Push title={"Add Tenant"} target={<TenantConfigurationForm onSubmit={onCreateTenant} />} />
-        </ActionPanel>
-      }
-    />
-  </List.Section>
-);
+const AddTenantAction = ({onCreate}: {onCreate: (t: TenantConfiguration) => Promise<void>}) => (
+  <Action.Push
+    title={"Add Tenant"} target={<TenantConfigurationForm onSubmit={onCreate} />}
+    shortcut={{key: "n", modifiers: ["cmd"]}}
+  />
+)
