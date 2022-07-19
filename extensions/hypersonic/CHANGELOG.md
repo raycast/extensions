@@ -1,6 +1,6 @@
 # Hypersonic Changelog
 
-## [0.0.2] - 2022-07-15
+## [0.0.2] - 2022-07-19
 - Added custom reminder. Now You can set custom reminder for each task.
 - Added filter by label.
 - Added `undo` command for undoing last mark as completed todo action.
