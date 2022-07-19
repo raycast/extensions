@@ -8,6 +8,7 @@ import * as crypto from "crypto";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import urljoin from "url-join";
+import { emojiSymbol } from "./components/status/utils";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -112,6 +113,12 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
 
   // <br> to markdown new line
   result = replaceAll(result, /<br>/g, "  \n");
+
+  // replace all emojis
+  result = result.replace(/:(\w+):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
+
+  // remove inline HTML tags
+  result = replaceAll(result, /<[^>]+>/g, "");
 
   if (baseUrl) {
     // replace relative links with absolute ones

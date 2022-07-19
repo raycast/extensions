@@ -1,6 +1,10 @@
-import { showHUD, Clipboard, open, showToast, Toast } from "@raycast/api";
+import { showHUD, Clipboard, open, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import invariant from "tiny-invariant";
+
+interface Preferences {
+  ttl: string;
+}
 
 export default async function main() {
   const text = await Clipboard.readText();
@@ -40,6 +44,12 @@ export default async function main() {
   }
 }
 
+const getTTL = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const ttl = parseInt(preferences.ttl);
+  return ttl > 0 ? ttl : null;
+};
+
 async function createNewDocument(title: string, json: unknown): Promise<{ id: string; location: string }> {
   const options = {
     method: "POST",
@@ -50,6 +60,7 @@ async function createNewDocument(title: string, json: unknown): Promise<{ id: st
     body: JSON.stringify({
       title,
       content: json,
+      ttl: getTTL(),
     }),
   };
 

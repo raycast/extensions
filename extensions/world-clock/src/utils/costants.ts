@@ -4,9 +4,10 @@ export const TIMEZONE_BASE_URL = "https://worldtimeapi.org/api/timezone";
 export const IP_BASE_URL = "http://worldtimeapi.org/api/ip/";
 export const IP_GEOLOCATION_API = "http://ip-api.com/json/";
 
-export enum LOCALSTORAGE_KEY {
+export enum localStorageKey {
   STAR_TIMEZONE = "StarTimeZone",
   TIMEZONE_CACHE = "TimezoneCache",
+  SHOW_DETAILS = "ShowDetails",
 }
 
 export const filterTag = [
@@ -26,4 +27,31 @@ export const icons = [
   Icon.List,
   Icon.Star,
   Icon.Terminal,
+];
+
+export const clockIcons = [
+  "0.svg",
+  "1.svg",
+  "2.svg",
+  "3.svg",
+  "4.svg",
+  "5.svg",
+  "6.svg",
+  "7.svg",
+  "8.svg",
+  "9.svg",
+  "10.svg",
+  "11.svg",
+  "12.svg",
+  "13.svg",
+  "14.svg",
+  "15.svg",
+  "16.svg",
+  "17.svg",
+  "18.svg",
+  "19.svg",
+  "20.svg",
+  "21.svg",
+  "22.svg",
+  "23.svg",
 ];

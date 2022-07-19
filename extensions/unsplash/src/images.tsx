@@ -1,10 +1,12 @@
-import { List, Icon, ImageMask } from "@raycast/api";
+import { Grid } from "@raycast/api";
+import { getGridItemSize, showImageTitle, toTitleCase } from "./functions/utils";
 
 // Hooks
 import { useSearch } from "./hooks/useSearch";
 
 // Components
 import Actions from "./components/Actions";
+import { useEffect } from "react";
 
 // Types
 interface SearchListItemProps {
@@ -13,15 +15,22 @@ interface SearchListItemProps {
 
 const Unsplash: React.FC = () => {
   const { state, search } = useSearch("photos");
+  const itemSize = getGridItemSize();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search wallpapers..." throttle>
-      <List.Section title="Results" subtitle={String(state?.results?.length)}>
+    <Grid
+      isLoading={state.isLoading}
+      itemSize={itemSize}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search wallpapers..."
+      throttle
+    >
+      <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
         {state.results.map((result) => (
           <SearchListItem key={result.id} searchResult={result} />
         ))}
-      </List.Section>
-    </List>
+      </Grid.Section>
+    </Grid>
   );
 };
 
@@ -33,16 +42,9 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
     searchResult?.user?.profile_image?.small,
   ];
 
-  return (
-    <List.Item
-      title={title}
-      icon={image}
-      subtitle={description}
-      accessoryTitle={searchResult.user.name}
-      accessoryIcon={{ source: avatar || Icon.Person, mask: ImageMask.Circle }}
-      actions={<Actions item={searchResult} details />}
-    />
-  );
+  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
+
+  return <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={searchResult} details />} />;
 };
 
 export default Unsplash;

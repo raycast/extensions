@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlabgql } from "../common";
+import { getGitLabGQL } from "../common";
 import { Group, Project } from "../gitlabapi";
 import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -119,7 +119,7 @@ export function useSearch(
 
       try {
         const query = isGroup ? GET_GROUP_MILESTONES : GET_MILESTONES;
-        const data = await gitlabgql.client.query({ query: query, variables: { fullPath: projectFullPath } });
+        const data = await getGitLabGQL().client.query({ query: query, variables: { fullPath: projectFullPath } });
         let milestoneRoot;
         if (isGroup) {
           milestoneRoot = data.data.group;
@@ -132,7 +132,7 @@ export function useSearch(
           dueDate: p.dueDate,
           state: p.state,
           expired: p.expired,
-          webUrl: `${gitlabgql.url}/${p.webPath}`,
+          webUrl: `${getGitLabGQL().url}/${p.webPath}`,
           closedIssuesCount: p.stats.closedIssuesCount,
           totalIssuesCount: p.stats.totalIssuesCount,
         }));

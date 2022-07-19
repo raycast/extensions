@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import plist from "plist";
@@ -43,6 +43,15 @@ export default function Command() {
     }
   }
 
+  function editMacro(macro: TypeMacro) {
+    runAppleScript(
+      `tell application "Keyboard Maestro"
+        editMacro "${macro.uid}"
+        activate
+      end tell`
+    );
+  }
+
   useEffect(() => {
     init();
   }, []);
@@ -62,7 +71,15 @@ export default function Command() {
                   title={macro?.name ?? ""}
                   actions={
                     <ActionPanel>
-                      <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} />
+                      <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} icon={Icon.Terminal} />
+                      <Action
+                        title="Edit Macro"
+                        onAction={() => {
+                          editMacro(macro);
+                        }}
+                        icon={Icon.Pencil}
+                        shortcut={{ key: "e", modifiers: ["cmd"] }}
+                      />
                     </ActionPanel>
                   }
                 />
