@@ -1,6 +1,6 @@
 # Encoding Tools Changelog
 
-## [New command] - 2022-06-16
+## [New command] - 2022-07-19
 
 - Add Bcrypt encoding
 
