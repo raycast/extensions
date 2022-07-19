@@ -11,7 +11,9 @@ export const mapPageToTodo = (page: any): Todo => {
     id: page.id,
     title: page.properties[preferences.property_title].title[0].text.content,
     isCompleted: page.properties[preferences.property_done].checkbox,
-    isOverdue:page.properties[preferences.property_date].date?getDateOverdue(page.properties[preferences.property_date].date.start):false,
+    isOverdue: page.properties[preferences.property_date].date
+      ? getDateOverdue(page.properties[preferences.property_date].date.start)
+      : false,
     isCancelled:
       preferences.property_cancel != ''
         ? page.properties[preferences.property_cancel].checkbox
@@ -23,6 +25,8 @@ export const mapPageToTodo = (page: any): Todo => {
     contentUrl: getTitleUrl(
       page.properties[preferences.property_title].title[0].text.content
     ),
-    dueDate: page.properties[preferences.property_date].date?page.properties[preferences.property_date].date.start:null,
+    dueDate: page.properties[preferences.property_date].date
+      ? page.properties[preferences.property_date].date.start
+      : null,
   }
 }

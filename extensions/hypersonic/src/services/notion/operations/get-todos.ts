@@ -13,8 +13,10 @@ export async function getTodos(
     const notionClient = await notion()
     const preferences = getPreferenceValues()
     const time_now = new Date()
-    const time_now_locale = new Date(time_now.getTime() - time_now.getTimezoneOffset() * 60000)
-    const today_now = time_now_locale.toISOString().split("T")[0]
+    const time_now_locale = new Date(
+      time_now.getTime() - time_now.getTimezoneOffset() * 60000
+    )
+    const today_now = time_now_locale.toISOString().split('T')[0]
     const response =
       preferences.property_cancel == ''
         ? await notionClient.databases.query({
@@ -67,7 +69,7 @@ export async function getTodos(
                     {
                       property: preferences.property_date,
                       date: {
-                        on_or_before: new Date().toISOString().split('T')[0],
+                        on_or_before: today_now,
                       },
                     },
                   ],

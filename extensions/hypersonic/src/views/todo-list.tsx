@@ -108,15 +108,14 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
               //     ? { source: Icon.Circle, tintColor: todo.tag.color }
               //     : Icon.Circle
               // }
-              icon=
-              {
-                todo.isCompleted 
+              icon={
+                todo.isCompleted
                   ? { source: Icon.Checkmark, tintColor: Color.Green }
                   : todo.isOverdue
-                  ? { source: Icon.Circle}
-                    //, tintColor: Color.Red }
-                  : { source: Icon.Circle}
-                    //, tintColor: Color.Blue }
+                  ? { source: Icon.Circle }
+                  : //, tintColor: Color.Red }
+                    { source: Icon.Circle }
+                //, tintColor: Color.Blue }
               }
               title={todo.title}
               accessories={
@@ -130,28 +129,44 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
                         },
                       },
                       {
-                        text: todo.dueDate?(todo.isOverdue?formatDateForList(todo.dueDate):null):null,
-                        icon: todo.dueDate?(todo.isOverdue?{
-                          source: Icon.Calendar,
-                          tintColor: Color.Red
-                        }:Icon.Clock):{
-                          source: Icon.Calendar,
-                          tintColor: Color.Yellow
-                        },
+                        text: todo.dueDate
+                          ? todo.isOverdue
+                            ? formatDateForList(todo.dueDate)
+                            : null
+                          : null,
+                        icon: todo.dueDate
+                          ? todo.isOverdue
+                            ? {
+                                source: Icon.Calendar,
+                                tintColor: Color.Red,
+                              }
+                            : Icon.Clock
+                          : {
+                              source: Icon.Calendar,
+                              tintColor: Color.Yellow,
+                            },
                       },
                     ]
                   : [
-                    {
-                      text: todo.dueDate?(todo.isOverdue?formatDateForList(todo.dueDate):null):null,
-                      icon: todo.dueDate?(todo.isOverdue?{
-                        source: Icon.Calendar,
-                        tintColor: Color.Red
-                      }:Icon.Clock):{
-                        source: Icon.Calendar,
-                        tintColor: Color.Yellow
+                      {
+                        text: todo.dueDate
+                          ? todo.isOverdue
+                            ? formatDateForList(todo.dueDate)
+                            : null
+                          : null,
+                        icon: todo.dueDate
+                          ? todo.isOverdue
+                            ? {
+                                source: Icon.Calendar,
+                                tintColor: Color.Red,
+                              }
+                            : Icon.Clock
+                          : {
+                              source: Icon.Calendar,
+                              tintColor: Color.Yellow,
+                            },
                       },
-                    },
-                  ]
+                    ]
               }
               actions={
                 <ActionPanel>

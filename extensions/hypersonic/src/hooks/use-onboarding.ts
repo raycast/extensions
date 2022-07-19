@@ -99,7 +99,7 @@ export const useOnboarding = () => {
       isOverdue: false,
       url: '',
       contentUrl: '',
-      dueDate:null
+      dueDate: null,
     }
 
     setData([optimisticTodo, ...data])

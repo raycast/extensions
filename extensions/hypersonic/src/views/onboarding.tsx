@@ -6,7 +6,14 @@ import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
 import { useOnboarding } from '@/hooks/use-onboarding'
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from '@raycast/api'
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+} from '@raycast/api'
 
 export function Onboarding() {
   const {
@@ -75,8 +82,8 @@ export function Onboarding() {
                 onSetLabel={handleSetTag}
               />
               {preferences.property_cancel != '' ? (
-                    <CancelTodoAction todo={todo} onCancel={handleCancel} />
-                  ) : null}
+                <CancelTodoAction todo={todo} onCancel={handleCancel} />
+              ) : null}
               <Action
                 icon={Icon.ChevronUp}
                 title={'Move Up'}
