@@ -1,3 +1,3 @@
 # Sonarr Changelog
 
-## [Initial Version] - 2022-07-15
+## [Initial Version] - 2022-07-19
