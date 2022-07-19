@@ -1,6 +1,6 @@
 import { TodoPage } from '@/types/todo-page'
 import { isNotionClientError } from '@notionhq/client'
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { notion } from '../client'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 
@@ -10,10 +10,11 @@ export async function updateTodoStatus(
 ): Promise<any> {
   try {
     const notionClient = await notion()
+    const doneProperty = getPreferenceValues().property_done
     const page = await notionClient.pages.update({
       page_id: pageId,
       properties: {
-        Done: {
+        [doneProperty]: {
           checkbox: value,
         },
       },

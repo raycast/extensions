@@ -1,4 +1,4 @@
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { isNotionClientError } from '@notionhq/client'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
@@ -11,12 +11,13 @@ export async function getTodos(
 ): Promise<Todo[]> {
   try {
     const notionClient = await notion()
+    const preferences = getPreferenceValues()
     const response = await notionClient.databases.query({
       database_id: databaseId,
       filter: {
         and: [
           {
-            property: 'Done',
+            property: preferences.property_done,
             checkbox: {
               equals: false,
             },
@@ -24,9 +25,9 @@ export async function getTodos(
           {
             or: [
               {
-                property: 'Date',
+                property: preferences.property_date,
                 date: {
-                  before: new Date() as any,
+                  before: new Date().toISOString(),
                 },
               },
             ],
@@ -36,7 +37,7 @@ export async function getTodos(
       sorts: [
         {
           timestamp: 'created_time',
-          direction: 'descending',
+          direction: 'ascending',
         },
       ],
     })
