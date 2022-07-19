@@ -8,7 +8,7 @@ export default function Command() {
   const [movies, setMovies] = useState<MovieResult[]>([]);
   const [page, setPage] = useState("1");
   const STAR = "⭐";
-  
+
   const prefrences = getPreferenceValues();
   const moviedb = new MovieDb(prefrences.apiKey);
 

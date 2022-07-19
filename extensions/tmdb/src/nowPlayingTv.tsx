@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues} from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues } from "@raycast/api";
 import { MovieDb } from "moviedb-promise";
 import { TvResult } from "moviedb-promise/dist/./request-types";
 

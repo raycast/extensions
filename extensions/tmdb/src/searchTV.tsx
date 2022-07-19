@@ -7,7 +7,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [tvs, setTVs] = useState<TvResult[]>([]);
   const STAR = "⭐";
-  
+
   const prefrences = getPreferenceValues();
   const moviedb = new MovieDb(prefrences.apiKey);
 
