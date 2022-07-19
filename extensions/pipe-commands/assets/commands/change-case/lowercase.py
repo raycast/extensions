@@ -4,8 +4,7 @@
 # @raycast.title Switch to Lowercase
 # @raycast.packageName Text Actions
 # @raycast.mode pipe
-# @raycast.argument1 {"type": "text", "placeholder": "Text"}
 
 import sys
 
-sys.stdout.write(sys.argv[1].lower())
+sys.stdout.write(sys.stdin.read().lower())

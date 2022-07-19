@@ -5,12 +5,11 @@
 # @raycast.icon 🔗
 # @raycast.packageName Developer Utils
 # @raycast.mode pipe
-# @raycast.argument1 {"type": "text", "placeholder": "URL"}
 
 from urllib.parse import urlparse
 import sys
 
-url = sys.argv[1].strip()
+url = sys.stdin.read()
 domain = urlparse(url).netloc
 
 print(domain, end="")

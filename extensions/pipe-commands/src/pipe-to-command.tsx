@@ -111,7 +111,12 @@ export function PipeCommand(props: {
           <ActionPanel.Section>
             {command.user ? (
               <React.Fragment>
-                <Action.Open icon={Icon.TextDocument} title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                <Action.Open
+                  icon={Icon.TextDocument}
+                  title="Open Command"
+                  target={command.path}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
                 <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
                 <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
                 <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
@@ -131,13 +136,19 @@ export function PipeCommand(props: {
 async function runCommand(command: ScriptCommand, inputType: InputType) {
   const toast = await showToast(Toast.Style.Animated, "Running...");
   const input = await getInput(inputType);
-  const argument1 = command.metadatas.argument1.percentEncoded ? encodeURIComponent(input) : input;
+  let args: string[];
+  if (command.metadatas.argument1) {
+    args = command.metadatas.argument1.percentEncoded ? [encodeURIComponent(input)] : [input];
+  } else {
+    args = [];
+  }
   chmodSync(command.path, "755");
-  const { stdout, stderr, status } = spawnSync(command.path, [argument1], {
+  const { stdout, stderr, status } = spawnSync(command.path, args, {
     encoding: "utf-8",
     cwd: command.metadatas.currentDirectoryPath
       ? untildify(command.metadatas.currentDirectoryPath)
       : dirname(command.path),
+    input: command.metadatas.mode === "pipe" ? input : undefined,
     env: {
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },

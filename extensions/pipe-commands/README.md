@@ -4,25 +4,25 @@
 
 Select / Copy some text and use the `Pipe [Selection, Clipboard] to Command` command.
 
-Depending on the input type, different actions will be shown.
-
 ## Adding Additional Pipe Commands
 
 Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
-- The `inline`, `fullOutput` and `compact` modes are not supported.
-- A new `pipe` mode is introduced
-- The `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
+- The `mode` field must be set to pipe.
+- The `refreshTime`, `argument1`, `argument2`, `argument3` fields are not supported and will be ignored.
 
 ![mode illustration](./medias/modes.excalidraw.png)
 
 ## Pipe Mode Logic
 
-The user input (text selection or clipboard) will be passed as the script first argument.
-
+The user input (text selection or clipboard) will be passed as stdin.
 If it is not empty, the standard output stream of the script will be copied to the clipboard or replace the current selection depending on the user choice.
+
+## Supported Script Commands
+
+The `silent` script commands with a single argument are supported. The user input will be used as first argument to the script.
 
 ## Example Commands
 
