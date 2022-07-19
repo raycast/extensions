@@ -1,18 +1,15 @@
 # Library Genesis Changelog
 
-## [Added quick download] - 2022-07-17
+## [Added search features & quick download] - 2022-07-20
 
+- Added two features that are configurable in preferences
+  - Automatically copy text from clipboard to the search field
+  - Set preferred languages and prioritize them in the search results
 - Added an action to quickly download the selected book to a local directory specified in a pop-up window.
 - Make the primary action customizable in user preference. The options are:
   - Open Download Page
   - Open Book Info Page
   - Download Book
-
-## [Added search features] - 2022-07-17
-
-- Added two features that are configurable in preferences
-  - Automatically copy text from clipboard to the search field
-  - Set preferred languages and prioritize them in the search results
 
 ## [Updated search books] - 2022-07-16
 
