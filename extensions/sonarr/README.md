@@ -2,7 +2,7 @@
 
 View your Sonarr instance, upcoming shows and much more
 
-#### Instance Setup
+### Instance Setup
 - Website: https://sonarr.tv/
 - Sonarr docs: https://wiki.servarr.com/sonarr
 - Github: https://github.com/Sonarr/Sonarr
