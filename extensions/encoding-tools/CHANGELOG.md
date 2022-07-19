@@ -1,5 +1,9 @@
 # Encoding Tools Changelog
 
+## [New command] - 2022-07-19
+
+- Add Bcrypt encoding
+
 ## [Initial version] - 2022-04-14
 
 - Add Base64 encoding
