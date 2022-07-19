@@ -41,12 +41,15 @@ export async function parseScriptCommands(): Promise<{
     (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
   );
 
-  const commands = await Promise.all(
+  let commands = await Promise.all(
     scriptPaths.map(async (scriptPath) => {
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, content: script, metadatas };
     })
+  );
+  commands = commands.filter(
+    (command) => !(command.metadatas.mode === "silent" && command.metadatas.argument1 == undefined)
   );
 
   const schema = JSON.parse(readFileSync(resolve(environment.assetsPath, "schema.json"), "utf-8"));
