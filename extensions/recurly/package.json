@@ -8,19 +8,19 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "tenants-configuration",
+      "name": "configureTenants",
       "title": "Tenants Configuration",
       "description": "Configure tenants",
       "mode": "view"
     },
     {
-      "name": "accountSearchByEmail",
+      "name": "searchAccountsByEmail",
       "title": "Account Search By Email",
       "description": "Search for accounts by email",
       "mode": "view"
     },
     {
-      "name": "accountSearchByCode",
+      "name": "searchAccountByCode",
       "title": "Account Search By Code",
       "description": "Search for an account by account code",
       "mode": "view"

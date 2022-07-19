@@ -5,7 +5,7 @@ import showError from "./showError";
 import { TenantConfiguration } from "./TenantConfiguration";
 
 // noinspection JSUnusedGlobalSymbols
-export default function TenantsConfiguration() {
+export default function configureTenants() {
   const { tenantsLoading, tenants, createTenant, editTenant, deleteTenant } = useTenants();
   const { pop } = useNavigation();
 
