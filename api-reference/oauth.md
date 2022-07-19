@@ -31,9 +31,9 @@ Note: Make sure to choose an app type that supports PKCE. Some providers still s
 
 ## Authorizing
 
-An extension can initiate the OAuth flow and authorize by using the methods on `OAuth.PKCEClient`.
+An extension can initiate the OAuth flow and authorize by using the methods on [OAuth.PKCEClient](#oauth.pkceclient).
 
-You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods–depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the `OAuth.RedirectMethod` docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider).
+You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods–depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the [OAuth.RedirectMethod](#oauth.redirectmethod) docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider).
 
 ```typescript
 import { OAuth } from "@raycast/api";
@@ -48,7 +48,7 @@ const client = new OAuth.PKCEClient({
 
 Next you create an authorization request with the authorization endpoint, client ID, and scope values. You receive all values from your provider's docs and when you register a new OAuth app.
 
-The returned `AuthorizationRequest` contains parameters such as the code challenge, verifier, state and redirect URI as standard OAuth authorization request. You can also customize the authorization URL through `OAuth.AuthorizationOptions` if you need to.
+The returned [AuthorizationRequest](#oauth.authorizationrequest) contains parameters such as the code challenge, verifier, state and redirect URI as standard OAuth authorization request. You can also customize the authorization URL through [OAuth.AuthorizationOptions](#oauth.authorizationoptions) if you need to.
 
 ```typescript
 const authRequest = await client.authorizationRequest({
@@ -58,7 +58,7 @@ const authRequest = await client.authorizationRequest({
 });
 ```
 
-To get the authorization code needed for the token exchange, you call `authorize` with the request from the previous step.
+To get the authorization code needed for the token exchange, you call [authorize](#oauth.pkceclient-authorize) with the request from the previous step.
 This call shows the Raycast OAuth overlay and provides the user with an option to open the consent page in the web browser.
 The authorize promise is resolved after the redirect back to Raycast and into the extension:
 
@@ -66,15 +66,14 @@ The authorize promise is resolved after the redirect back to Raycast and into th
 const { authorizationCode } = await client.authorize(authRequest);
 ```
 
-**Important**: When in development mode, make sure not to trigger auto-reloading (e.g. by saving a file) while you're testing an active OAuth authorization and redirect. This would cause an OAuth state mismatch when you're redirected back into the extension since the client would be reinitialized on reload.
+{% hint style="info" %}
+When in development mode, make sure not to trigger auto-reloading (e.g. by saving a file) while you're testing an active OAuth authorization and redirect. This would cause an OAuth state mismatch when you're redirected back into the extension since the client would be reinitialized on reload.
+{% endhint %}
 
 Now that you have received the authorization code, you can exchange this code for an access token using your provider's token endpoint. This token exchange (and the following API calls) can be done with your preferred Node HTTP client library. Example using `node-fetch`:
 
 ```typescript
-async function fetchTokens(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string
-): Promise<OAuth.TokenResponse> {
+async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", "YourClientId");
   params.append("code", authCode);
@@ -96,7 +95,7 @@ async function fetchTokens(
 
 ## Token Storage
 
-The PKCE client exposes methods for storing, retrieving and deleting token sets. A `TokenSet` contains an access token and typically also a refresh token, expires value, and the current scope. Since this data is returned by the provider's token endpoint as standard OAuth JSON response, you can directly store the response (`OAuth.TokenResponse`) or alternatively use `OAuth.TokenSetOptions`:
+The PKCE client exposes methods for storing, retrieving and deleting token sets. A [TokenSet](#oauth.tokenset) contains an access token and typically also a refresh token, expires value, and the current scope. Since this data is returned by the provider's token endpoint as standard OAuth JSON response, you can directly store the response ([OAuth.TokenResponse](#oauth.tokenresponse)) or alternatively use [OAuth.TokenSetOptions](#oauth.tokensetoptions):
 
 ```typescript
 await client.setTokens(tokenResponse);
@@ -104,7 +103,7 @@ await client.setTokens(tokenResponse);
 
 Once the token set is stored, Raycast will automatically show a logout preference for the extension. When the user logs out, the token set gets removed.
 
-The `TokenSet` also enables you to check whether the user is logged in before starting the authorization flow:
+The [TokenSet](#oauth.tokenset) also enables you to check whether the user is logged in before starting the authorization flow:
 
 ```typescript
 const tokenSet = await client.getTokens();
@@ -127,12 +126,10 @@ if (tokenSet?.accessToken) {
 // authorize...
 ```
 
-This code would run before starting the authorization flow. It checks the presence of a token set to see whether the user is logged in and then checks whether there is a refresh token and the token set is expired (through the convenience method `isExpired()` on the `TokenSet`). If it is expired, the token is refreshed and updated in the token set. Example using `node-fetch`:
+This code would run before starting the authorization flow. It checks the presence of a token set to see whether the user is logged in and then checks whether there is a refresh token and the token set is expired (through the convenience method `isExpired()` on the [TokenSet](#oauth.tokenset)). If it is expired, the token is refreshed and updated in the token set. Example using `node-fetch`:
 
 ```typescript
-async function refreshTokens(
-  refreshToken: string
-): Promise<OAuth.TokenResponse> {
+async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", "YourClientId");
   params.append("refresh_token", refreshToken);
@@ -161,6 +158,14 @@ We've provided [OAuth example integrations for Google, Twitter, and Dropbox](htt
 
 ### OAuth.PKCEClient
 
+Use [OAuth.PKCEClient.Options](#oauth.pkceclient.options) to configure what's shown on the OAuth overlay.
+
+#### Signature
+
+```typescript
+constructor(options: OAuth.PKCEClient.Options): OAuth.PKCEClient
+```
+
 #### Example
 
 ```typescript
@@ -174,30 +179,26 @@ const client = new OAuth.PKCEClient({
 });
 ```
 
-### OAuth.PKCEClient.Options
+#### Methods
 
-The options for creating a new [PKCEClient](#oauth.pkceclient).
+| Method                                                                                                                                           |
+| :----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| <code>[authorizationRequest(options: AuthorizationRequestOptions): Promise<AuthorizationRequest>](#oauth.pkceclient-authorizationrequest)</code> |
+| <code>[authorize(options: AuthorizationRequest                                                                                                   | AuthorizationOptions): Promise<AuthorizationResponse>](#oauth.pkceclient-authorize)</code> |
+| <code>[setTokens(options: TokenSetOptions                                                                                                        | TokenResponse): Promise<void>](#oauth.pkceclient-settokens)</code>                         |
+| <code>[getTokens(): Promise<TokenSet                                                                                                             | undefined>](#oauth.pkceclient-gettokens)</code>                                            |
+| <code>[removeTokens(): Promise<void>](#oauth.pkceclient-removetokens)</code>                                                                     |
 
-#### Properties
+### OAuth.PKCEClient#authorizationRequest
 
-| Property | Description | Type |
-| :--- | :--- | :--- |
-| providerIcon<mark style="color:red;">*</mark> | An icon referenced from the assets folder, displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels. | <code>string</code> |
-| providerName<mark style="color:red;">*</mark> | The name of the provider, displayed in the OAuth overlay. | <code>string</code> |
-| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow. Make sure to set this to the correct method for the provider, see [OAuth.RedirectMethod](oauth.md#oauth.redirectmethod) for more information. | <code>[OAuth.RedirectMethod](oauth.md#oauth.redirectmethod)</code> |
-| description | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. | <code>string</code> |
-| providerId | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension. | <code>string</code> |
-
-### authorizationRequest
-
-Creates an authorization request for the provided authorization endpoint, client ID, and scopes. You need to first create the authorization request before calling [authorize](#authorize).
+Creates an authorization request for the provided authorization endpoint, client ID, and scopes. You need to first create the authorization request before calling [authorize](#oauth.pkceclient-authorize).
 
 The generated code challenge for the PKCE request uses the S256 method.
 
 #### Signature
 
 ```typescript
-async authorizationRequest(options: AuthorizationRequestOptions): Promise<AuthorizationRequest>;
+authorizationRequest(options: AuthorizationRequestOptions): Promise<AuthorizationRequest>;
 ```
 
 #### Example
@@ -218,16 +219,16 @@ const authRequest = await client.authorizationRequest({
 
 #### Return
 
-A promise for an [AuthorizationRequest](#oauth.authorizationrequest) that you can use as input for [authorize](#authorize).
+A promise for an [AuthorizationRequest](#oauth.authorizationrequest) that you can use as input for [authorize](#oauth.pkceclient-authorize).
 
-### authorize
+### OAuth.PKCEClient#authorize
 
 Starts the authorization and shows the OAuth overlay in Raycast. As parameter you can either directly use the returned request from [authorizationRequest](#oauth.authorizationrequest), or customize the URL by extracting parameters from [AuthorizationRequest](#oauth.authorizationrequest) and providing your own URL via [AuthorizationOptions](#oauth.authorizationoptions). Eventually the URL will be used to open the authorization page of the provider in the web browser.
 
 #### Signature
 
 ```typescript
-async authorize(options: AuthorizationRequest | AuthorizationOptions): Promise<AuthorizationResponse>;
+authorize(options: AuthorizationRequest | AuthorizationOptions): Promise<AuthorizationResponse>;
 ```
 
 #### Example
@@ -246,7 +247,7 @@ const { authorizationCode } = await client.authorize(authRequest);
 
 A promise for an [AuthorizationResponse](#oauth.authorizationresponse), which contains the authorization code needed for the token exchange. The promise is resolved when the user was redirected back from the provider's authorization page to the Raycast extension.
 
-### setTokens
+### OAuth.PKCEClient#setTokens
 
 Securely stores a [TokenSet](#oauth.tokenset) for the provider. Use this after fetching the access token from the provider. If the provider returns a a standard OAuth JSON token response, you can directly pass the [TokenResponse](#oauth.tokenresponse).
 At a minimum, you need to set the `accessToken`, and typically you also set `refreshToken` and `isExpired`.
@@ -258,7 +259,7 @@ If you want to make use of the convenience `isExpired()` method, the property `e
 #### Signature
 
 ```typescript
-async setTokens(options: TokenSetOptions | TokenResponse): Promise<void>;
+setTokens(options: TokenSetOptions | TokenResponse): Promise<void>;
 ```
 
 #### Example
@@ -277,14 +278,14 @@ await client.setTokens(tokenResponse);
 
 A promise that resolves when the token set has been stored.
 
-### getTokens
+### OAuth.PKCEClient#getTokens
 
 Retrieves the stored [TokenSet](#oauth.tokenset) for the client. You can use this to initially check whether the authorization flow should be initiated or the user is already logged in and you might have to refresh the access token.
 
 #### Signature
 
 ```typescript
-async getTokens(): Promise<TokenSet | undefined>;
+getTokens(): Promise<TokenSet | undefined>;
 ```
 
 #### Example
@@ -297,7 +298,7 @@ const tokenSet = await client.getTokens();
 
 A promise that resolves when the token set has been retrieved.
 
-### removeTokens
+### OAuth.PKCEClient#removeTokens
 
 Removes the stored [TokenSet](#oauth.tokenset) for the client.
 Raycast automatically shows a logout preference that removes the token set. Use this method only if you need to provide an additional logout option in your extension or you want to remove the token set because of a migration.
@@ -305,7 +306,7 @@ Raycast automatically shows a logout preference that removes the token set. Use 
 #### Signature
 
 ```typescript
-async removeTokens(): Promise<void>;
+removeTokens(): Promise<void>;
 ```
 
 #### Example
@@ -317,6 +318,22 @@ await client.removeTokens();
 #### Return
 
 A promise that resolves when the token set has been removed.
+
+## Types
+
+### OAuth.PKCEClient.Options
+
+The options for creating a new [PKCEClient](#oauth.pkceclient).
+
+#### Properties
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| providerIcon<mark style="color:red;">*</mark> | An icon referenced from the assets folder, displayed in the OAuth overlay. Make sure to provide at least a size of 64x64 pixels. | <code>string</code> |
+| providerName<mark style="color:red;">*</mark> | The name of the provider, displayed in the OAuth overlay. | <code>string</code> |
+| redirectMethod<mark style="color:red;">*</mark> | The redirect method for the OAuth flow. Make sure to set this to the correct method for the provider, see [OAuth.RedirectMethod](oauth.md#oauth.redirectmethod) for more information. | <code>[OAuth.RedirectMethod](oauth.md#oauth.redirectmethod)</code> |
+| description | An optional description, shown in the OAuth overlay. You can use this to customize the message for the end user, for example for handling scope changes or other migrations. Raycast shows a default message if this is not configured. | <code>string</code> |
+| providerId | An optional ID for associating the client with a provider. Only set this if you use multiple different clients in your extension. | <code>string</code> |
 
 ### OAuth.RedirectMethod
 
@@ -332,7 +349,7 @@ Defines the supported redirect methods for the OAuth flow. You can choose betwee
 
 ### OAuth.AuthorizationRequestOptions
 
-The options for an authorization request via [authorizationRequest](#authorizationrequest).
+The options for an authorization request via [authorizationRequest](#oauth.authorizationrequest).
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -344,7 +361,7 @@ The options for an authorization request via [authorizationRequest](#authorizati
 ### OAuth.AuthorizationRequestURLParams
 
 Values of [AuthorizationRequest](#oauth.authorizationrequest).
-The PKCE client automatically generates the values for you and returns them for [authorizationRequest](#authorizationrequest)
+The PKCE client automatically generates the values for you and returns them for [authorizationRequest](#oauth.authorizationrequest)
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -355,8 +372,8 @@ The PKCE client automatically generates the values for you and returns them for 
 
 ### OAuth.AuthorizationRequest
 
-The request returned by [authorizationRequest](#authorizationrequest).
-Can be used as direct input to [authorize](#authorize), or to extract parameters for constructing a custom URL in [AuthorizationOptions](#oauth.authorizationoptions).
+The request returned by [authorizationRequest](#oauth.authorizationrequest).
+Can be used as direct input to [authorize](#oauth.pkceclient-authorize), or to extract parameters for constructing a custom URL in [AuthorizationOptions](#oauth.authorizationoptions).
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -374,7 +391,7 @@ Can be used as direct input to [authorize](#authorize), or to extract parameters
 
 ### OAuth.AuthorizationOptions
 
-Options for customizing [authorize](#authorize).
+Options for customizing [authorize](#oauth.pkceclient-authorize).
 You can use values from [AuthorizationRequest](#oauth.authorizationrequest) to build your own URL.
 
 | Property | Description | Type |
@@ -383,7 +400,7 @@ You can use values from [AuthorizationRequest](#oauth.authorizationrequest) to b
 
 ### OAuth.AuthorizationResponse
 
-The response returned by [authorize](#authorize), containing the authorization code after the provider redirect. You can then exchange the authorization code for an access token using the provider's token endpoint.
+The response returned by [authorize](#oauth.pkceclient-authorize), containing the authorization code after the provider redirect. You can then exchange the authorization code for an access token using the provider's token endpoint.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -392,7 +409,7 @@ The response returned by [authorize](#authorize), containing the authorization c
 ### OAuth.TokenSet
 
 Describes the TokenSet created from an OAuth provider's token response. The `accessToken` is the only required parameter but typically OAuth providers also return a refresh token, an expires value, and the scope.
-Securely store a token set via [setTokens](#settokens) and retrieve it via [getTokens](#gettokens).
+Securely store a token set via [setTokens](#oauth.pkceclient-settokens) and retrieve it via [getTokens](#oauth.pkceclient-gettokens).
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -412,7 +429,7 @@ Securely store a token set via [setTokens](#settokens) and retrieve it via [getT
 
 ### OAuth.TokenSetOptions
 
-Options for a [TokenSet](#oauth.tokenset) to store via [setTokens](#settokens).
+Options for a [TokenSet](#oauth.tokenset) to store via [setTokens](#oauth.pkceclient-settokens).
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
@@ -425,7 +442,7 @@ Options for a [TokenSet](#oauth.tokenset) to store via [setTokens](#settokens).
 ### OAuth.TokenResponse
 
 Defines the standard JSON response for an OAuth token request.
-The response can be directly used to store a [TokenSet](#oauth.tokenset) via [setTokens](#settokens).
+The response can be directly used to store a [TokenSet](#oauth.tokenset) via [setTokens](#oauth.pkceclient-settokens).
 
 | Property | Description | Type |
 | :--- | :--- | :--- |

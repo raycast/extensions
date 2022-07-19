@@ -41,6 +41,7 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
 | icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the item. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| style | Defines the visual style of the Action. | <code>[Alert.ActionStyle](../feedback/alert.md#alert.actionstyle)</code> | [Action.Style.Regular](actions.md#action.style) |
 | onAction | Callback that is triggered when the item is selected. | <code>() => void</code> | - |
 
 ### Action.CopyToClipboard
@@ -491,3 +492,11 @@ export default function Command() {
 | link<mark style="color:red;">*</mark> | The URL or file path, optionally including placeholders such as in "https://google.com/search?q=\{Query\}" | <code>string</code> |
 | application | The application that the quicklink should be opened in. | <code>string</code> or <code>[Application](../utilities.md#application)</code> |
 | name | The quicklink name | <code>string</code> |
+
+### Action.Style
+
+Defines the visual style of the Action.
+
+Use [Action.Style.Regular](#action.style) for displaying a regular actions.
+Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
+Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.

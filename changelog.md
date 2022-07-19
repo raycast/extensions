@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.38.0 – 2022-07-19
+
+### ✨ New
+
+- **Redesign**: Along side the app’s redesign, we are introducing a whole set of [new icons](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) for you to pick to illustrate the actions in your extensions.
+- **New Destructive Action:**  You can now specify the `style` of an `Action` to highlight it in the Action Panel as destructive. Use it for actions where an end-user should be cautious with proceeding.
+
+### 💎 Improvements
+
+- **DevTools**: Turning on the “Use Node production environment” in the Advanced Preferences will also hide the debug actions. Previously it was only hiding them when there was no Action Panel specified.
+- **DevTools**: The “Clear Local Storage” debug action has been renamed to “Clear Local Storage & Cache” and will clear the [Cache](https://developers.raycast.com/api-reference/cache) along side the [Local Storage](https://developers.raycast.com/api-reference/storage).
+- **Dev Tools**: The “Start Development” action now quotes the extension folder path.
+- **Dev Tools**: Added a new development advanced preference to keep the Raycast window always visible during development.
+- **Dev Tools**: Added a new build status tooltip to the accessory icon of a development command in root search.
+- **Dev Tools**: Improved the error handling for failed extension updates after invalid manifest changes; improved the error messages for general rendering errors.
+
+### 🐞 Fixes
+
+- `require('os').tmpdir()` will now properly return the path to a temp directory.
+- Fixed a rarely occurring crash happening when using some SVGs with a path that contains an arc where the ending point is the same as the starting point.
+- Forms: Fixed a bug where stored form values could get cleared after extension updates.
+- Forms: Fixed inconsistent behaviour of the `onBlur` handler that could get triggered for the `Form.TextField` when the form screen is popped in a navigation stack.
+- List: Fixed the updating of tooltips for list accessory items.
+
 ## 1.37.0 – 2022-06-29
 
 ### ✨ New

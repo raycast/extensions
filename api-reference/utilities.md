@@ -1,6 +1,6 @@
-# Utilities
+# System Utilities
 
-This list of Utility APIs makes your life easier as a developer. They also expose some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deep-link into it.
+This set of utilities exposes some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deep-link into it.
 
 ## API Reference
 
@@ -53,9 +53,7 @@ import { getDefaultApplication } from "@raycast/api";
 
 export default async () => {
   const defaultApplication = await getDefaultApplication(__filename);
-  console.log(
-    `Default application for JavaScript is: ${defaultApplication.name}`
-  );
+  console.log(`Default application for JavaScript is: ${defaultApplication.name}`);
 };
 ```
 
@@ -141,10 +139,7 @@ Opens a target with the default application or specified application.
 #### Signature
 
 ```typescript
-async function open(
-  target: string,
-  application?: Application | string
-): Promise<void>;
+async function open(target: string, application?: Application | string): Promise<void>;
 ```
 
 #### Example

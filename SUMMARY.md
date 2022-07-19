@@ -66,7 +66,7 @@
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [Utilities](api-reference/utilities.md)
+- [System Utilities](api-reference/utilities.md)
 - [Window & Search Bar](api-reference/window-and-search-bar.md)
 
 ---
