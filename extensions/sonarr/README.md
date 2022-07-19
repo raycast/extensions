@@ -14,6 +14,6 @@ View your Sonarr instance, upcoming shows and much more
 3. Copy API Key
 ![CleanShot 2022-07-19 at 08 32 40](https://user-images.githubusercontent.com/43297314/179751488-12bd4658-fa5d-43d5-82da-e9499db21357.png)
 
-#### Extension Usage
+### Extension Usage
 https://user-images.githubusercontent.com/43297314/179749726-0919e1d8-686f-4e45-8440-85fecdc35414.mp4
 
