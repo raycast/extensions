@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import { Icon, List, Action, ActionPanel, showToast, Toast } from "@raycast/api"
 import { SoundOutputDevice } from "./shared/types"
+import EmptyListView from "./components/EmptyListView"
 import SoundOutputService from "./sound-output-service"
 import AppleScriptParser from "./apple-script-parser"
 
 export default function Soundpick() {
-  
+
   // MARK: - Services
 
   const soundOutputService = new SoundOutputService({
@@ -16,14 +17,6 @@ export default function Soundpick() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [listOfDevices, setListOfDevices] = useState(Array<SoundOutputDevice>)
-
-  function showEmptyListView(): JSX.Element {
-    return <List.EmptyView
-      icon={Icon.ExclamationMark}
-      title="Woopsie"
-      description="Failed to find available devices"
-    /> 
-  }
 
   function showDeviceListView(): JSX.Element[] {
     return listOfDevices.map((device, index) => (
@@ -48,9 +41,10 @@ export default function Soundpick() {
 
   async function connectToDeviceActionHandler(newDevice: SoundOutputDevice): Promise<void> {
     const connectedDevice = listOfDevices.at(0);
-    const newDeviceIsConnected = connectedDevice && connectedDevice.name === newDevice.name && connectedDevice.isConnected === true
-    
-    if (newDeviceIsConnected) {
+    const newDeviceIsTheConnectedDevice =
+      connectedDevice?.name === newDevice.name && connectedDevice?.isConnected === true;
+
+    if (newDeviceIsTheConnectedDevice) {
       await showToast({
         style: Toast.Style.Success,
         title: `Playing on ${newDevice.name}`
@@ -88,14 +82,13 @@ export default function Soundpick() {
   }, [])
 
   return (
-      <List 
-        enableFiltering={true} 
-        isLoading={isLoading} 
-        navigationTitle="Manage Sound Output"
-        searchBarPlaceholder="Search for devices...">
-          {
-            listOfDevices.length == 0 ? showEmptyListView() : showDeviceListView()
-          }
-      </List>
-    )
-  }
+    <List
+      enableFiltering={true}
+      isLoading={isLoading}
+      navigationTitle="Change Sound Output"
+      searchBarPlaceholder="Search for devices..."
+    >
+      {listOfDevices.length == 0 ? EmptyListView() : showDeviceListView()}
+    </List>
+  )
+}
