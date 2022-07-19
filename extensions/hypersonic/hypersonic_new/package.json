@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hypersonic",
+  "title": "Hypersonic",
+  "description": "Fastest Notion to-do app ever",
+  "icon": "icon.png",
+  "author": "reboot.studio",
+  "version": "0.0.2",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today's Todos",
+      "subtitle": "Hypersonic",
+      "description": "The fastest Notion to-do app for Raycast.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "database_name",
+      "type": "textfield",
+      "title": "Notion Database Name",
+      "label": "Notion Database Name",
+      "description": "Are you using your own Database? Add the names for the following properties.",
+      "placeholder": "Hypersonic",
+      "default": "Hypersonic",
+      "required": false
+    },
+    {
+      "name": "property_title",
+      "type": "textfield",
+      "title": "Title Property Name",
+      "label": "Title Property Name",
+      "description": "The database name of the Title Property",
+      "placeholder": "Title",
+      "default": "Title",
+      "required": false
+    },
+    {
+      "name": "property_date",
+      "type": "textfield",
+      "title": "Date Property Name",
+      "label": "Date Property Name",
+      "description": "The database name of the Date Property",
+      "placeholder": "Date",
+      "default": "Date",
+      "required": false
+    },
+    {
+      "name": "property_done",
+      "type": "textfield",
+      "title": "Completed Checkbox Property Name",
+      "label": "Completed Checkbox Property Name",
+      "description": "The database name of the Completed Checkbox Property",
+      "placeholder": "Done",
+      "default": "Done",
+      "required": false
+    },
+    {
+      "name": "property_cancel",
+      "type": "textfield",
+      "title": "Cancelled/Hidden Checkbox Property Name",
+      "label": "Cancelled/Hidden Checkbox Property Name",
+      "description": "The database name of the Cancelled/Hidden Checkbox Property",
+      "placeholder": "Cancelled",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "property_label",
+      "type": "textfield",
+      "title": "Select Property Name",
+      "label": "Select Property Name",
+      "description": "The database name of the Select Property",
+      "placeholder": "Label",
+      "default": "Label",
+      "required": false
+    },
+    {
+      "name": "open_in_native_app",
+      "type": "checkbox",
+      "title": "Open links in the desktop app",
+      "label": "Open links in the desktop app",
+      "description": "Enable if you want to open links in the desktop app instead of the browser",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^1.0.4",
+    "@raycast/api": "^1.36.1",
+    "node-fetch": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
