@@ -48,9 +48,7 @@ export async function parseScriptCommands(): Promise<{
       return { path: scriptPath, content: script, metadatas };
     })
   );
-  commands = commands.filter(
-    (command) => !(command.metadatas.mode === "silent" && command.metadatas.argument1 == undefined)
-  );
+  commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
 
   const schema = JSON.parse(readFileSync(resolve(environment.assetsPath, "schema.json"), "utf-8"));
   const validator = new Validator();
