@@ -1,10 +1,7 @@
 import {
   Action,
   ActionPanel,
-  Alert,
-  confirmAlert,
   Detail,
-  Form,
   Icon,
   List,
   popToRoot,
@@ -21,6 +18,7 @@ import {
   getSiteUrl,
   handleNetworkError,
 } from './utils';
+import { CachePurgeView, purgeEverything } from './view-cache-purge';
 
 const service = new Service(getEmail(), getKey());
 
@@ -116,7 +114,7 @@ function Command() {
   );
 }
 
-interface SiteProps {
+export interface SiteProps {
   accountId: string;
   id: string;
 }
@@ -220,95 +218,6 @@ function DnsRecordView(props: DnsRecordProps) {
       ))}
     </List>
   );
-}
-
-function CachePurgeView(props: SiteProps) {
-  const { id } = props;
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Purge Files"
-            onSubmit={(values) => clearUrlsFromCache(id, values.urls)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextArea
-        id="urls"
-        title="List of URL(s)"
-        placeholder="Separate URL(s) one per line"
-      />
-    </Form>
-  );
-}
-
-async function clearUrlsFromCache(zoneId: string, urls: string) {
-  if (
-    !(await confirmAlert({
-      title: 'Do you really want to purge the files from cache?',
-      primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
-    }))
-  ) {
-    return;
-  }
-
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: 'Purging URL(s)',
-  });
-
-  // Split URLs by newline
-  const urlList = urls.split('\n');
-
-  const result = await service.purgeFilesbyURL(zoneId, urlList);
-
-  if (result.success) {
-    toast.style = Toast.Style.Success;
-    toast.title = 'URL(s) purged';
-    return;
-  }
-
-  toast.style = Toast.Style.Failure;
-  toast.title = 'Failed to purge URL(s)';
-  if (result.errors.length > 0) {
-    toast.message = result.errors[0].message;
-  }
-}
-
-async function purgeEverything(zone: Zone) {
-  if (
-    !(await confirmAlert({
-      title:
-        'Do you really want to purge everything from cache for ' +
-        zone.name +
-        '?',
-      primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
-    }))
-  ) {
-    return;
-  }
-
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: 'Purging cache',
-  });
-
-  const result = await service.purgeEverything(zone.id);
-
-  if (result.success) {
-    toast.style = Toast.Style.Success;
-    toast.title = 'Cache purged';
-    return;
-  }
-
-  toast.style = Toast.Style.Failure;
-  toast.title = 'Failed to purge cache';
-  if (result.errors.length > 0) {
-    toast.message = result.errors[0].message;
-  }
 }
 
 async function clearSiteCache() {
