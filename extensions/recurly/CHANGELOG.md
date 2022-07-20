@@ -2,6 +2,6 @@
 
 ## [Initial Version] - 2022-05-05
 
-- `Tenants configuration` command;
-- `Accounts Search By Code` command;
-- `Accounts Search by Email` command.
+- `Configure Tenants` command
+- `Search Accounts By Code` command
+- `Search Accounts by Email` command
