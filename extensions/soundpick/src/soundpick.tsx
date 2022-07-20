@@ -1,25 +1,24 @@
-import { useEffect, useState } from "react"
-import { Icon, List, Action, ActionPanel, showToast, Toast } from "@raycast/api"
-import { SoundOutputDevice } from "./shared/types"
-import EmptyListView from "./components/EmptyListView"
-import SoundOutputService from "./sound-output-service"
-import AppleScriptParser from "./apple-script-parser"
+import { useEffect, useState } from "react";
+import { Icon, List, Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { SoundOutputDevice } from "./shared/types";
+import EmptyListView from "./components/EmptyListView";
+import SoundOutputService from "./sound-output-service";
+import AppleScriptParser from "./apple-script-parser";
 
 export default function Soundpick() {
-
   // MARK: - Services
 
   const soundOutputService = new SoundOutputService({
-    parser: new AppleScriptParser()
-  })
+    parser: new AppleScriptParser(),
+  });
 
   // MARK: - Hooks
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [listOfDevices, setListOfDevices] = useState(Array<SoundOutputDevice>)
+  const [isLoading, setIsLoading] = useState(true);
+  const [listOfDevices, setListOfDevices] = useState(Array<SoundOutputDevice>);
 
   function showDeviceListView(): JSX.Element[] {
-    return listOfDevices.map((device, index) => (
+    return listOfDevices.map((device) => (
       <List.Item
         key={device.name}
         title={device.name}
@@ -29,14 +28,14 @@ export default function Soundpick() {
             <Action
               title="Connect"
               icon={Icon.ArrowRight}
-              onAction={() => { 
-                connectToDeviceActionHandler(device)
+              onAction={() => {
+                connectToDeviceActionHandler(device);
               }}
             />
           </ActionPanel>
         }
       />
-    ))
+    ));
   }
 
   async function connectToDeviceActionHandler(newDevice: SoundOutputDevice): Promise<void> {
@@ -55,32 +54,32 @@ export default function Soundpick() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: `Connecting to ${newDevice.name}`
-    })
+      title: `Connecting to ${newDevice.name}`,
+    });
 
-    const didConnect = await soundOutputService.connectToDevice(newDevice.name)
+    const didConnect = await soundOutputService.connectToDevice(newDevice.name);
 
     if (didConnect) {
-      await fetchSoundOutputDevices()
-      toast.style = Toast.Style.Success
-      toast.title = `Playing on ${newDevice.name}`
+      await fetchSoundOutputDevices();
+      toast.style = Toast.Style.Success;
+      toast.title = `Playing on ${newDevice.name}`;
     } else {
-      toast.style = Toast.Style.Failure
-      toast.title = `Failed connecting to ${newDevice.name}`
+      toast.style = Toast.Style.Failure;
+      toast.title = `Failed connecting to ${newDevice.name}`;
     }
 
-    await soundOutputService.closeSystemPreferences()
+    await soundOutputService.closeSystemPreferences();
   }
 
   async function fetchSoundOutputDevices(): Promise<void> {
-    const response: Array<SoundOutputDevice> = await soundOutputService.fetchDevices()
-    setListOfDevices(response)
-    setIsLoading(false)
+    const response: Array<SoundOutputDevice> = await soundOutputService.fetchDevices();
+    setListOfDevices(response);
+    setIsLoading(false);
   }
 
   useEffect(() => {
-    fetchSoundOutputDevices()
-  }, [])
+    fetchSoundOutputDevices();
+  }, []);
 
   return (
     <List
@@ -91,5 +90,5 @@ export default function Soundpick() {
     >
       {listOfDevices.length == 0 ? EmptyListView() : showDeviceListView()}
     </List>
-  )
+  );
 }

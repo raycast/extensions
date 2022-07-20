@@ -1,18 +1,14 @@
-import { runAppleScript } from "run-applescript"
-import { stringToBool } from "./shared/utils"
-import { 
-  SoundOutputDevice, 
-  SoundOutputServiceConfig, 
-  AppleScriptParser 
-} from "./shared/types";
+import { runAppleScript } from "run-applescript";
+import { stringToBool } from "./shared/utils";
+import { SoundOutputDevice, SoundOutputServiceConfig, AppleScriptParser } from "./shared/types";
 
 export default class SoundOutputService implements SoundOutputService {
   private config: SoundOutputServiceConfig;
-  private parser: AppleScriptParser
+  private parser: AppleScriptParser;
 
   constructor(config: SoundOutputServiceConfig) {
-    this.config = config
-    this.parser = this.config.parser
+    this.config = config;
+    this.parser = this.config.parser;
   }
 
   async fetchDevices(): Promise<Array<SoundOutputDevice>> {
@@ -53,23 +49,23 @@ export default class SoundOutputService implements SoundOutputService {
           end tell
         end tell
       end tell
-      `)
+      `);
 
       console.log(`[INFO]: Got response from runAppleScript: ${scriptResponse}`);
-      
-      let response = this.parser.parse(scriptResponse)
-      console.log(`[INFO]: Did successfully parse: ${JSON.stringify(response)}`)
 
-      return response
+      const response = this.parser.parse(scriptResponse);
+      console.log(`[INFO]: Did successfully parse: ${JSON.stringify(response)}`);
+
+      return response;
     } catch (error) {
-      console.log(`[ERROR]: Could not fetch sound output devices from runAppleScript: ${error}`) 
-      return Array<SoundOutputDevice>()
+      console.log(`[ERROR]: Could not fetch sound output devices from runAppleScript: ${error}`);
+      return Array<SoundOutputDevice>();
     }
   }
 
   async connectToDevice(name: string): Promise<boolean> {
-    console.log(`[INFO]: Attempting to connect to ${name}`)
-    const strippedName = name.trim()
+    console.log(`[INFO]: Attempting to connect to ${name}`);
+    const strippedName = name.trim();
 
     try {
       const response: string = await runAppleScript(`
@@ -111,13 +107,13 @@ export default class SoundOutputService implements SoundOutputService {
           end tell
         end tell
       end tell
-      `)
+      `);
 
       console.log(`[INFO]: Got response from runAppleScript: ${response}`);
-      return stringToBool(response)
+      return stringToBool(response);
     } catch (error) {
-      console.log(`[ERROR]: Could not set selected ${strippedName} to true from runAppleScript: ${error}`)
-      return false
+      console.log(`[ERROR]: Could not set selected ${strippedName} to true from runAppleScript: ${error}`);
+      return false;
     }
   }
 
@@ -126,6 +122,6 @@ export default class SoundOutputService implements SoundOutputService {
     tell application "System Preferences"
       quit
     end tell
-    `)
+    `);
   }
 }
