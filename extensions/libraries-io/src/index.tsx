@@ -36,7 +36,9 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
           <ActionPanel.Section title="Links">
             <Action.OpenInBrowser
               title="Open Libraries.io Page"
-              url={`https://libraries.io/${searchResult.platform.toLowerCase()}/${encodeURIComponent(searchResult.name)}`}
+              url={`https://libraries.io/${searchResult.platform.toLowerCase()}/${encodeURIComponent(
+                searchResult.name
+              )}`}
               icon={`libraries-io-icon.png`}
             />
             <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
@@ -48,8 +50,18 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
-            <Action.Push title="Show Versions" icon={Icon.List} target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
-            <Action.Push title="Show Dependencies" icon={Icon.List} target={<PackageDependencies key={searchResult.name + searchResult.platform} searchResult={searchResult} />} />
+            <Action.Push
+              title="Show Versions"
+              icon={Icon.List}
+              target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />}
+            />
+            <Action.Push
+              title="Show Dependencies"
+              icon={Icon.List}
+              target={
+                <PackageDependencies key={searchResult.name + searchResult.platform} searchResult={searchResult} />
+              }
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

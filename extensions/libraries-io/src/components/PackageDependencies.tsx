@@ -25,18 +25,20 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
   return (
     <List navigationTitle="Dependencies" isLoading={loading}>
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
-        {dependencies.sort((a, b) => b.kind.localeCompare(a.kind)).map(dependency => (
-          <List.Item
-            key={dependency.name}
-            title={dependency.name}
-            accessories={[
-              {
-                tooltip: dependency.kind,
-                text: dependency.kind,
-              }
-            ]}
-          />
-        ))}
+        {dependencies
+          .sort((a, b) => b.kind.localeCompare(a.kind))
+          .map((dependency) => (
+            <List.Item
+              key={dependency.name}
+              title={dependency.name}
+              accessories={[
+                {
+                  tooltip: dependency.kind,
+                  text: dependency.kind,
+                },
+              ]}
+            />
+          ))}
       </List.Section>
     </List>
   );

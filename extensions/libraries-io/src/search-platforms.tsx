@@ -7,12 +7,7 @@ export default function Command() {
   const { state } = useSearch();
 
   return (
-    <List
-      isLoading={state.isLoading}
-      searchBarPlaceholder="Filter platforms..."
-      enableFiltering
-      throttle
-    >
+    <List isLoading={state.isLoading} searchBarPlaceholder="Filter platforms..." enableFiltering throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />
@@ -32,7 +27,8 @@ function SearchListItem({ searchResult }: { searchResult: Platform }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open Libraries.io Page"
+            <Action.OpenInBrowser
+              title="Open Libraries.io Page"
               url={`https://libraries.io/${searchResult.name}`}
               icon={`libraries-io-icon.png`}
             />
@@ -100,7 +96,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<P
   });
 
   const json = (await response.json()) as
-    | { name: string; project_count: number; homepage: string; default_language: string; }[]
+    | { name: string; project_count: number; homepage: string; default_language: string }[]
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
