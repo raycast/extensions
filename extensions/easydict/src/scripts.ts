@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-01 17:40
+ * @lastEditTime: 2022-07-16 17:47
  * @fileName: scripts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,11 +10,11 @@
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
-import { QueryWordInfo, RequestErrorInfo } from "./types";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
-import { eudicBundleId } from "./components";
-import { getLanguageItemFromYoudaoId } from "./utils";
 import querystring from "node:querystring";
+import { eudicBundleId } from "./components";
+import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
+import { QueryWordInfo, RequestErrorInfo, TranslationType } from "./types";
+import { getLanguageItemFromYoudaoId } from "./utils";
 
 /**
  * run LanguageDetect shortcuts with the given text, return promise
@@ -29,6 +29,7 @@ export function appleLanguageDetect(text: string): Promise<LanguageDetectTypeRes
     // * NOTE: osascript -e param only support single quote 'xxx'
     exec(`osascript -e '${appleScript}'`, (error, stdout) => {
       if (error) {
+        console.error(`Apple detect error: ${error}`);
         const errorInfo: RequestErrorInfo = {
           type: LanguageDetectType.Apple,
           message: error.message,
@@ -57,7 +58,7 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
   const appleFromLanguageId = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage).appleLanguageId;
   const appleToLanguageId = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage).appleLanguageId;
   if (!appleFromLanguageId || !appleToLanguageId) {
-    console.warn(`apple translate language not support: ${appleFromLanguageId} -> ${appleToLanguageId}`);
+    console.warn(`apple translate language not support: ${queryTextInfo.fromLanguage} -> ${queryTextInfo.toLanguage}`);
     return Promise.resolve(undefined);
   }
 
@@ -71,6 +72,7 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
    * * If use auto detect and detected language is outside of 12 languages, it will throw language not support error.
    *
    * ? execution error: “Shortcuts Events”遇到一个错误：“翻译”可能不支持所提供文本的语言。 (-1753)
+   * ? execution error: “Shortcuts Events”遇到一个错误：Translation from 英语（美国） to 中文（台湾） is not supported. (-1753)\n"
    */
   if (appleFromLanguageId === "auto") {
     map.delete("from"); // means use apple language auto detect
@@ -90,18 +92,21 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
   const appleScript = getShortcutsScript("Easydict-Translate-V1.2.0", queryString);
   return new Promise((resolve, reject) => {
     const command = `osascript -e '${appleScript}'`;
-    exec(command, (error, stdout) => {
+    exec(command, (error, stdout, stderr) => {
       if (error) {
-        reject(error);
+        // console.error(`error: ${JSON.stringify(error, null, 4)}`);
+        // console.error(`apple stderr: ${stderr}`);
+        console.warn(`Apple translate error: ${command}`);
+        const errorInfo: RequestErrorInfo = {
+          type: TranslationType.Apple,
+          message: stderr,
+        };
+        reject(errorInfo);
       }
+
       const translateText = stdout.trim();
+      console.warn(`Apple translate: ${translateText}, cost: ${new Date().getTime() - startTime} ms`);
       resolve(translateText);
-      const endTime = new Date().getTime();
-      console.warn(`apple translate: ${translateText}, cost: ${endTime - startTime} ms`);
-      if (translateText.length === 0) {
-        console.log(`apple translate error?: ${translateText}`);
-        console.log(`${command}`);
-      }
     });
   });
 }
@@ -152,5 +157,23 @@ export function postNotification(content: string, title: string, subtitle = "") 
     if (error) {
       console.log("postNotification error:", error);
     }
+  });
+}
+
+export function exitExtension() {
+  console.log("exit extension");
+  // use cmd+W to close the extension, maybe delay a little bit, 0.5s
+  const appleScript = `
+    tell application "System Events"
+    key code 13 using {command down}
+    end tell
+    `;
+
+  exec(`osascript -e '${appleScript}'`, (err, stdout) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
   });
 }

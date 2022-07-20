@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 23:29
+ * @lastEditTime: 2022-07-20 02:00
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,6 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
-import { requestCostTime } from "../request";
 import { changelog } from "./changelog";
 
 const versionInfoKey = "EasydictVersionInfoKey";
@@ -23,9 +22,9 @@ export class Easydict {
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "1.2.0";
-  buildNumber = 3;
-  versionDate = "2022-07-04";
+  version = "1.3.0";
+  buildNumber = 4;
+  versionDate = "2022-07-16";
   isNeedPrompt = true;
   hasPrompted = false; // only show once, then will be set to true
   releaseMarkdown = changelog;
@@ -102,10 +101,7 @@ export class Easydict {
   }
 
   /**
-   * Fetch release markdown, return a promise string.
-   * First, fetech markdown from github, if failed, then read from localStorage.
-   *
-   * * NOTE: if fetch markdown from github success, then will store `this`(Easydict) to localStorage.
+   * Fetch release markdown, return a promise string. First, fetech markdown from github, if failed, then read from localStorage.
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
@@ -115,17 +111,18 @@ export class Easydict {
       console.log("fetch release markdown from github success");
       if (releaseMarkdown) {
         this.releaseMarkdown = releaseMarkdown;
-        this.hasPrompted = true; // need to set hasPrompted to true when user viewed `ReleaseDetail` page.
-        this.storeCurrentVersionInfo(); // store the value to local storage.
         return Promise.resolve(releaseMarkdown);
       } else {
-        console.log("fetch release markdown from github failed");
+        console.error("fetch release markdown from github failed");
         return this.getLocalStoredMarkdown();
       }
     } catch (error) {
-      console.error(`fetch release markdown error: ${error}`);
-      console.log(`use local storaged markdown`);
+      console.error(`fetch release error: ${error}`);
       return this.getLocalStoredMarkdown();
+    } finally {
+      // only show prompt once, whether fetch release markdown from github successful or failed.
+      this.hasPrompted = true; // need to set hasPrompted to true when user viewed `ReleaseDetail` page.
+      this.storeCurrentVersionInfo(); // store the value to local storage.
     }
   }
 
@@ -133,6 +130,7 @@ export class Easydict {
    * Get local stored markdown, return a promise string.
    */
   public async getLocalStoredMarkdown(): Promise<string> {
+    console.log(`get local storaged markdown`);
     const currentVersionInfo = await this.getCurrentVersionInfo();
     return Promise.resolve(currentVersionInfo.releaseMarkdown);
   }
@@ -144,7 +142,7 @@ export class Easydict {
     try {
       // console.log(`fetch release url: ${releaseUrl}`);
       const response = await axios.get(releaseUrl);
-      console.log(`fetch github cost time: ${response.headers[requestCostTime]} ms`);
+      console.log(`fetch github cost time: ${response.headers["x-request-cost"]} ms`);
 
       return Promise.resolve(response.data);
     } catch (error) {
