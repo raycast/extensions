@@ -56,3 +56,8 @@ export enum VSCodeBuild {
 export interface Preferences {
   build: VSCodeBuild;
 }
+
+export interface Preferences {
+  build: VSCodeBuild;
+  split: boolean;
+}

@@ -40,6 +40,15 @@
           "title": "Visual Studio Code - Insiders"
         }
       ]
+    },
+    {
+      "name": "split",
+      "type": "checkbox",
+      "required": false,
+      "title": "Split Search",
+      "default": false,
+      "label": "Enable",
+      "description": "Enable search with multiple strings separated by whitespace"
     }
   ],
   "dependencies": {
