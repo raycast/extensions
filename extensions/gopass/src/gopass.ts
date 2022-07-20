@@ -27,8 +27,8 @@ function gopass(args: string[]): Promise<string> {
   });
 }
 
-async function list(): Promise<string[]> {
-  const entries = await gopass(["list", "--flat"]);
+async function list({ limit = -1, prefix = "" } = {}): Promise<string[]> {
+  const entries = await gopass(["list", `--limit=${limit}`, "--flat", prefix]);
   return entries.split(`\n`).filter((item) => item.length);
 }
 
