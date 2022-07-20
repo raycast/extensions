@@ -25,7 +25,7 @@ export default function main() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Change color temperature"
+            title="Change Color Temperature"
             onSubmit={async ({ temperature }) => {
               if (validate(temperature)) {
                 await nightlight(["temp", temperature]);
