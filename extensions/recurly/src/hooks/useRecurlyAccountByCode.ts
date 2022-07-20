@@ -19,7 +19,7 @@ export default function useRecurlyAccountByCode({ recurly, recurlyValid }: UseRe
     code.length > 0 &&
       Promise.resolve()
         .then(() => setState((prev) => ({ ...prev, accountLoading: true })))
-        .then(() => recurly.getAccount(code))
+        .then(() => recurly.getAccount(`code-${code}`))
         .then((account) => setState({ account, accountLoading: false }))
         .catch((e) => {
           if (e.type !== "not_found") {
