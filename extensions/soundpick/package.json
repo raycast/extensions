@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "soundpick",
-      "title": "Manage Sound Output",
+      "title": "Change Sound Output",
       "subtitle": "Soundpick",
-      "description": "Change sound output",
+      "description": "Change the device you are playing sound from",
       "mode": "view"
     }
   ],

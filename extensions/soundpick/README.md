@@ -1,3 +1,3 @@
 # Soundpick
 
-Change Sound Output through Raycast
+Change the device your are playing sound from right in Raycast
