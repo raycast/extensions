@@ -30,7 +30,7 @@
     "Finance"
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
+    "@raycast/api": "^1.38.0",
     "recurly": "^4.17.0"
   },
   "devDependencies": {
