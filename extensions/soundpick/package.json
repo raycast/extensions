@@ -3,7 +3,7 @@
   "name": "soundpick",
   "title": "Soundpick",
   "description": "Soundpick extension for raycast.com",
-  "icon": "command-icon.png",
+  "icon": "sound-icon.png",
   "author": "robinsalehjan",
   "categories": [
     "Productivity"
