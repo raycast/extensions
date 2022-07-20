@@ -1,6 +1,6 @@
 # Night Light Changelog
 
-## [Initial Version] - 2022-07-19
+## [Initial Version] - 2022-07-20
 
 - Added turn night shift on command
 - Added turn night shift off command
