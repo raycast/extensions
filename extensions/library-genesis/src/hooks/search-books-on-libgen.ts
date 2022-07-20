@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { isEmpty, getLibgenSearchResult } from "../utils/common-utils";
-import { BookEntry } from "../types";
-import { showToast, Toast } from "@raycast/api";
+import { isEmpty, sortBooksByPreferredLanguages } from "../utils/common-utils";
+import { getLibgenSearchResults } from "../utils/libgen-api";
+import { BookEntry, LibgenPreferences } from "../types";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import Style = Toast.Style;
 
-export const searchBookOnLibgen = (searchContent: string) => {
+export const searchBooksOnLibgen = (searchContent: string) => {
   const [books, setBooks] = useState<BookEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -18,8 +19,14 @@ export const searchBookOnLibgen = (searchContent: string) => {
     }
     setLoading(true);
 
-    getLibgenSearchResult(searchContent.trim())
+    getLibgenSearchResults(searchContent.trim())
       .then((books) => {
+        const { preferredLanguages, priotizePreferredLanguage } = getPreferenceValues<LibgenPreferences>();
+
+        if (priotizePreferredLanguage) {
+          books = sortBooksByPreferredLanguages(books, preferredLanguages);
+        }
+
         setBooks(books);
         setLoading(false);
       })
