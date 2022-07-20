@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 17:18
+ * @lastEditTime: 2022-07-20 21:49
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -51,7 +51,7 @@ export function ActionCurrentVersion() {
   const easydict = new Easydict();
   return (
     <Action.OpenInBrowser
-      icon={Icon.Link}
+      icon={Icon.Eye}
       title={`Version: ${easydict.version}`}
       url={easydict.getCurrentReleaseTagUrl()}
     />

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 21:17
+ * @lastEditTime: 2022-07-20 21:34
  * @fileName: changelog.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -42,7 +42,7 @@ export const changelog = `
 
 ### 💎 Improvements
 
-- Used the new icons to adapted to the new raycast API.
+- Used some new icons to adapted to the new raycast API.
 
 ### 🐞 Fixes
 
