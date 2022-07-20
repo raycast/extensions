@@ -14,6 +14,7 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
             <List.Item
               key={version.number}
               title={version.number}
+              icon={Icon.Tag}
               accessories={[
                 {
                   icon: Icon.BlankDocument,

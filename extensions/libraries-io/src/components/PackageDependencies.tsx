@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useLibrariesDependencyDetail } from "../useLibrariesDependencyDetail";
 import type { Package, Dependency } from ".././types";
@@ -31,10 +31,11 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
             <List.Item
               key={dependency.name}
               title={dependency.name}
+              icon={Icon.Box}
               accessories={[
                 {
+                  icon: dependency.kind === "runtime" ? Icon.Cog : Icon.Hammer,
                   tooltip: dependency.kind,
-                  text: dependency.kind,
                 },
               ]}
             />
