@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { TenantConfiguration } from "../TenantConfiguration";
-import {useState} from "react";
+import { useState } from "react";
 
 export type TenantConfigurationFormProps = {
   tenant?: TenantConfiguration;
@@ -34,7 +34,7 @@ export default function TenantConfigurationForm({ tenant = emptyTenant, onSubmit
         title="Name"
         error={nameError}
         onChange={unsetNameError}
-        onBlur={event => event.target.value?.length === 0 && setNameError("Name is required.")}
+        onBlur={(event) => event.target.value?.length === 0 && setNameError("Name is required.")}
         defaultValue={name}
       />
       <Form.TextField
@@ -42,7 +42,7 @@ export default function TenantConfigurationForm({ tenant = emptyTenant, onSubmit
         title="Subdomain"
         error={subdomainError}
         onChange={unsetSubdomainError}
-        onBlur={event => event.target.value?.length === 0 && setSubdomainError("Subdomain is required.")}
+        onBlur={(event) => event.target.value?.length === 0 && setSubdomainError("Subdomain is required.")}
         defaultValue={subdomain}
       />
       <Form.PasswordField
@@ -50,7 +50,7 @@ export default function TenantConfigurationForm({ tenant = emptyTenant, onSubmit
         title="API Key"
         error={apiKeyError}
         onChange={unsetApiKeyError}
-        onBlur={event => event.target.value?.length === 0 && setApiKeyError("API Key is required.")}
+        onBlur={(event) => event.target.value?.length === 0 && setApiKeyError("API Key is required.")}
         defaultValue={apiKey}
       />
     </Form>
