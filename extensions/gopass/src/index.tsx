@@ -2,6 +2,7 @@ import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, s
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import Details from "./details";
+import { isDirectory } from "./utils";
 
 export async function copyPassword(entry: string): Promise<void> {
   try {
@@ -51,6 +52,7 @@ export default function (): JSX.Element {
         <List.Item
           key={i}
           title={entry}
+          icon={isDirectory(entry) ? Icon.Folder : Icon.Key}
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" icon={Icon.Document} target={<Details entry={entry} />} />
