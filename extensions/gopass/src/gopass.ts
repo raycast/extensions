@@ -29,7 +29,7 @@ function gopass(args: string[]): Promise<string> {
 
 async function list(): Promise<string[]> {
   const entries = await gopass(["list", "--flat"]);
-  return entries.split(`\n`);
+  return entries.split(`\n`).filter((item) => item.length);
 }
 
 async function password(entry: string): Promise<string> {
