@@ -37,7 +37,7 @@ export function IterationStories({ iterationId }: { iterationId: number }) {
           return (
             <List.Section key={state.id} title={state.name} subtitle={`${stories.length} stories`}>
               {stories?.map((story) => {
-                return <StoryListItem story={story} project={projectIdMap[story.project_id!]} />;
+                return <StoryListItem story={story} project={projectIdMap[story.project_id!]} key={story.id} />;
               })}
             </List.Section>
           );

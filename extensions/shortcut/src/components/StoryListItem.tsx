@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Project, Story, StorySlim } from "@useshortcut/client";
+import { Project, StorySlim } from "@useshortcut/client";
 
 export default function StoryListItem({ project, story }: { project?: Project; story: StorySlim }) {
   return (
@@ -7,15 +7,20 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       key={story.id}
       title={story.name}
       icon={Icon.Ellipsis}
-      subtitle={String(story.id)}
+      subtitle={`#${story.id}`}
       accessories={
         [
-          project && {
-            icon: {
-              source: Icon.CircleFilled,
-              tintColor: project.color,
-            },
+          story.estimate && {
+            icon: `number-${story.estimate.toString().padStart(2, "0")}-16`,
           },
+          project
+            ? {
+                icon: {
+                  source: Icon.CircleFilled,
+                  tintColor: project.color,
+                },
+              }
+            : Icon.Circle,
         ].filter(Boolean) as List.Item.Accessory[]
       }
       actions={
