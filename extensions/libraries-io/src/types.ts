@@ -28,7 +28,7 @@ export interface Dependency {
 
 export interface DependenciesResponse {
   dependencies: Array<Dependency>;
-};
+}
 
 export interface Platform {
   name: string;
