@@ -41,12 +41,18 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
               )}`}
               icon={`libraries-io-icon.png`}
             />
-            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
-            <Action.OpenInBrowser title="Open Repository" url={searchResult.repositoryUrl} />
+            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} icon={Icon.House} />
+            <Action.OpenInBrowser
+              title="Open Repository"
+              url={searchResult.repositoryUrl}
+              icon={Icon.Book}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+            />
             <Action.OpenInBrowser
               title="Open Package Manager Page"
               url={searchResult.packageManagerUrl}
               icon={`package_manager_icons/${searchResult.platform.toLowerCase()}.png`}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">

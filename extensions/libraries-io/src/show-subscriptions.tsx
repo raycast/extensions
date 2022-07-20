@@ -34,7 +34,7 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
               )}`}
               icon={`libraries-io-icon.png`}
             />
-            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
+            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} icon={Icon.House} />
           </ActionPanel.Section>
         </ActionPanel>
       }
