@@ -1,4 +1,4 @@
-import { ActionPanel, Action, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import type { Package, Version } from "./types";
@@ -21,18 +21,20 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
   return (
     <List.Item
       title={searchResult.name}
-      icon={`package_manager_icons/${searchResult.name.toLowerCase()}.png`}
+      icon={Icon.Bookmark}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.platform}
+      accessories={[{ text: searchResult.platform }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Open Libraries.io Page"
-              url={`https://libraries.io/${searchResult.name}`}
+              url={`https://libraries.io/${searchResult.platform.toLowerCase()}/${encodeURIComponent(
+                searchResult.name
+              )}`}
               icon={`libraries-io-icon.png`}
             />
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.homepage} />
+            <Action.OpenInBrowser title="Open Homepage" url={searchResult.homepage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
