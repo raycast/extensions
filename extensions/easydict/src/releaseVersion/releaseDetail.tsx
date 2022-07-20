@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 10:39
+ * @lastEditTime: 2022-07-20 20:50
  * @fileName: releaseDetail.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -32,7 +32,7 @@ export function ReleaseDetail(props: { fallbackMarkdown?: string }) {
       markdown={releaseMarkdown || props.fallbackMarkdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon={Icon.Globe} title="View Details on GitHub" url={easydict.getChineseWikiUrl()} />
+          <Action.OpenInBrowser icon={Icon.Eye} title="View Details on GitHub" url={easydict.getChineseWikiUrl()} />
         </ActionPanel>
       }
     />
@@ -49,7 +49,7 @@ export function MarkdownPage(props: { markdown: string }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            icon={Icon.Globe}
+            icon={Icon.Link}
             title="View Details on GitHub"
             url="https://github.com/tisfeng/Raycast-Easydict#readme"
           />

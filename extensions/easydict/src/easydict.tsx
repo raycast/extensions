@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 18:36
+ * @lastEditTime: 2022-07-20 16:39
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,14 +10,7 @@
 
 import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
 import { Fragment, useEffect, useState } from "react";
-import ListActionPanel, {
-  ActionCurrentVersion,
-  ActionFeedback,
-  ActionOpenCommandPreferences,
-  ActionRecentUpdate,
-  getListItemIcon,
-  getWordAccessories,
-} from "./components";
+import ListActionPanel, { ActionFeedback, getListItemIcon, getWordAccessories } from "./components";
 import { BaiduRequestStateCode, getYoudaoErrorInfo, youdaoErrorCodeUrl, YoudaoRequestStateCode } from "./consts";
 import { detectLanguage } from "./detectLanguage";
 import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
@@ -45,15 +38,17 @@ import {
   RequestTypeResult,
   TranslateDisplayResult,
   TranslateFormatResult,
-  TranslateType,
+  TranslationType,
   YoudaoTranslateResult,
 } from "./types";
 import {
+  checkIfEudicIsInstalled,
+  checkIfNeedShowReleasePrompt,
+  checkIfShowMultipleTranslations,
   defaultLanguage1,
   defaultLanguage2,
   getAutoSelectedTargetLanguageId,
   getLanguageItemFromYoudaoId,
-  isShowMultipleTranslations,
   isTranslateResultTooLong,
   myPreferences,
   trimTextLength,
@@ -90,6 +85,8 @@ export default function () {
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
+  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
+  const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
 
   /**
    * use to display input text
@@ -124,12 +121,23 @@ export default function () {
       return;
     }
 
-    // try to query selected text when the extension is activated.
-    if (inputText === undefined && myPreferences.isAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
+    if (inputText === undefined) {
+      setup();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText]);
+
+  /**
+   * Do something setup when the extension is activated. Only run once.
+   */
+  function setup() {
+    console.log("enter setup");
+    if (myPreferences.isAutomaticQuerySelectedText) {
+      tryQuerySelecedtText();
+    }
+    checkIfEudicIsInstalled(setIsInstalledEudic);
+    checkIfNeedShowReleasePrompt(setIsShowingReleasePrompt);
+  }
 
   /**
    * Try to detect the selected text, if detect success, then query the selected text.
@@ -154,7 +162,7 @@ export default function () {
    * Query text, automatically detect the language of input text
    */
   function queryText(text: string) {
-    console.log("start queryText");
+    console.log("start queryText: " + text);
 
     setLoadingState(true);
     clearTimeout(delayQueryTextInfoTimer);
@@ -252,13 +260,16 @@ export default function () {
       updateTranslateDisplayResult(formatResult);
 
       // request other translate API to show multiple translations
-      if (isShowMultipleTranslations(formatResult)) {
+      if (checkIfShowMultipleTranslations(formatResult)) {
         // check if enable deepl translate
         if (myPreferences.enableDeepLTranslate) {
           requestDeepLTextTranslate(queryText, fromLanguage, toLanguage)
             .then((deepLTypeResult) => {
-              updateFormatTranslateResultWithDeepLResult(formatResult, deepLTypeResult);
-              updateTranslateDisplayResult(formatResult);
+              // Todo: should use axios.CancelToken to cancel the request!
+              if (!shouldCancelQuery) {
+                updateFormatTranslateResultWithDeepLResult(formatResult, deepLTypeResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -277,11 +288,13 @@ export default function () {
             .then((translatedText) => {
               if (translatedText) {
                 const appleTranslateResult: RequestTypeResult = {
-                  type: TranslateType.Apple,
+                  type: TranslationType.Apple,
                   result: { translatedText },
                 };
-                updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
-                updateTranslateDisplayResult(formatResult);
+                if (!shouldCancelQuery) {
+                  updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
+                  updateTranslateDisplayResult(formatResult);
+                }
               }
             })
             .catch((error) => {
@@ -295,8 +308,10 @@ export default function () {
           console.log("baidu translate start");
           requestBaiduTextTranslate(queryText, fromLanguage, toLanguage)
             .then((baiduTypeResult) => {
-              formatResult = updateFormatResultWithBaiduTranslation(baiduTypeResult, formatResult);
-              updateTranslateDisplayResult(formatResult);
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithBaiduTranslation(baiduTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -319,8 +334,10 @@ export default function () {
           console.log(`tencent translate start`);
           requestTencentTextTranslate(queryText, fromLanguage, toLanguage)
             .then((tencentTypeResult) => {
-              formatResult = updateFormatResultWithTencentTranslation(tencentTypeResult, formatResult);
-              updateTranslateDisplayResult(formatResult);
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithTencentTranslation(tencentTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -337,8 +354,10 @@ export default function () {
           console.log(`caiyun translate start`);
           requestCaiyunTextTranslate(queryText, fromLanguage, toLanguage)
             .then((caiyunTypeResult) => {
-              formatResult = updateFormatResultWithCaiyunTranslation(caiyunTypeResult, formatResult);
-              updateTranslateDisplayResult(formatResult);
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithCaiyunTranslation(caiyunTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -374,6 +393,7 @@ export default function () {
   }
 
   function ListDetail() {
+    // console.log("call ListDetail()");
     if (!youdaoTranslateTypeResult) {
       return null;
     }
@@ -392,10 +412,10 @@ export default function () {
               text: `Error Code: ${youdaoErrorCode}`,
             },
           ]}
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="See Error Code Meaning" icon={Icon.QuestionMark} url={youdaoErrorCodeUrl} />
+              <Action.OpenInBrowser title="See Error Code Meaning" icon={Icon.Info} url={youdaoErrorCodeUrl} />
               <ActionFeedback />
             </ActionPanel>
           }
@@ -439,7 +459,14 @@ export default function () {
                     subtitle={item.subtitle}
                     accessories={getWordAccessories(resultItem.type, item)}
                     detail={<List.Item.Detail markdown={item.translationMarkdown} />}
-                    actions={<ListActionPanel displayItem={item} onLanguageUpdate={updateSelectedTargetLanguageItem} />}
+                    actions={
+                      <ListActionPanel
+                        displayItem={item}
+                        isShowingReleasePrompt={isShowingReleasePrompt}
+                        isInstalledEudic={isInstalledEudic}
+                        onLanguageUpdate={updateSelectedTargetLanguageItem}
+                      />
+                    }
                   />
                 );
               })}
@@ -459,7 +486,7 @@ export default function () {
         <List>
           <List.Item
             title={"Language Conflict"}
-            icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
             subtitle={"Your first Language with second Language must be different."}
           />
         </List>
@@ -476,12 +503,14 @@ export default function () {
     setInputText(text);
 
     const trimText = trimTextLength(text);
-    console.log(`update input text: ${text}`);
     if (trimText.length === 0) {
       // fix bug: if input text is empty, need to update search text to empty
-      setSearchText("");
       shouldCancelQuery = true;
-      updateTranslateDisplayResult(null);
+      if (searchText) {
+        console.log(`set search text to empty`);
+        setSearchText("");
+        updateTranslateDisplayResult(null);
+      }
       return;
     }
 
@@ -489,7 +518,8 @@ export default function () {
     shouldCancelQuery = false;
     clearTimeout(delayQueryTextTimer);
 
-    if (trimText !== searchText) {
+    if (text !== searchText) {
+      console.log(`update input text: ${text}, ${text.length}`);
       if (isNow) {
         setSearchText(trimText);
       } else {
@@ -501,9 +531,11 @@ export default function () {
     }
   }
 
-  function onInputChangeEvent(text: string) {
+  function onInputChange(text: string) {
     updateInputTextAndQueryTextNow(text, false);
   }
+
+  // console.log(`render interface`);
 
   return (
     <List
@@ -511,17 +543,10 @@ export default function () {
       isShowingDetail={isShowingDetail}
       searchBarPlaceholder={"Search word or translate text..."}
       searchText={inputText}
-      onSearchTextChange={onInputChangeEvent}
-      actions={
-        <ActionPanel>
-          <ActionFeedback />
-          <ActionOpenCommandPreferences />
-          <ActionRecentUpdate />
-          <ActionCurrentVersion />
-        </ActionPanel>
-      }
+      onSearchTextChange={onInputChange}
+      actions={null}
     >
-      <List.EmptyView icon={Icon.TextDocument} title="Type a word to look up or translate" />
+      <List.EmptyView icon={Icon.BlankDocument} title="Type a word to look up or translate" />
       <ListDetail />
     </List>
   );

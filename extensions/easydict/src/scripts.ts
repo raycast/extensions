@@ -13,7 +13,7 @@ import { exec, execFile } from "child_process";
 import querystring from "node:querystring";
 import { eudicBundleId } from "./components";
 import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
-import { QueryWordInfo, RequestErrorInfo, TranslateType } from "./types";
+import { QueryWordInfo, RequestErrorInfo, TranslationType } from "./types";
 import { getLanguageItemFromYoudaoId } from "./utils";
 
 /**
@@ -98,7 +98,7 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
         // console.error(`apple stderr: ${stderr}`);
         console.warn(`Apple translate error: ${command}`);
         const errorInfo: RequestErrorInfo = {
-          type: TranslateType.Apple,
+          type: TranslationType.Apple,
           message: stderr,
         };
         reject(errorInfo);

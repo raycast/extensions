@@ -3,7 +3,7 @@ import { deepLAuthKey } from "./crypto";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 18:40
+ * @lastEditTime: 2022-07-20 01:59
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,7 +31,7 @@ import {
   RequestErrorInfo,
   RequestTypeResult,
   TencentTranslateResult,
-  TranslateType,
+  TranslationType,
 } from "./types";
 import { getLanguageItemFromYoudaoId } from "./utils";
 
@@ -57,7 +57,7 @@ const client = new TmtClient(clientConfig);
 /**
  * Caclulate axios request cost time
  */
-export const requestCostTime = "x-request-cost";
+const requestCostTime = "x-request-cost";
 axios.interceptors.request.use(function (config: AxiosRequestConfig) {
   if (config.headers) {
     config.headers["request-startTime"] = new Date().getTime();
@@ -97,7 +97,7 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
     const error = err as { code: string; message: string };
     console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       code: error.code,
       message: error.message,
     };
@@ -119,7 +119,7 @@ export async function requestTencentTextTranslate(
   if (!from || !to) {
     console.warn(`Tencent translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       result: null,
     });
   }
@@ -136,7 +136,7 @@ export async function requestTencentTextTranslate(
     const endTime = new Date().getTime();
     console.log(`Tencen translate: ${response.TargetText}, cost: ${endTime - startTime} ms`);
     const typeResult = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       result: response as TencentTranslateResult,
     };
     return Promise.resolve(typeResult);
@@ -145,7 +145,7 @@ export async function requestTencentTextTranslate(
     const error = err as { code: string; message: string };
     console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       code: error.code,
       message: error.message,
     };
@@ -189,7 +189,7 @@ export function requestYoudaoDictionary(
       .then((response) => {
         console.log(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
         resolve({
-          type: TranslateType.Youdao,
+          type: TranslationType.Youdao,
           result: response.data,
         });
       })
@@ -235,13 +235,13 @@ export function requestBaiduTextTranslate(
           const translateText = baiduResult.trans_result[0].dst;
           console.log(`Baidu translate: ${translateText}, cost: ${response.headers[requestCostTime]} ms`);
           resolve({
-            type: TranslateType.Baidu,
+            type: TranslationType.Baidu,
             result: baiduResult,
           });
         } else {
           console.error(`baidu translate error: ${JSON.stringify(baiduResult)}`);
           const errorInfo: RequestErrorInfo = {
-            type: TranslateType.Baidu,
+            type: TranslationType.Baidu,
             code: baiduResult.error_code || "",
             message: baiduResult.error_msg || "",
           };
@@ -275,7 +275,7 @@ export function requestCaiyunTextTranslate(
   if (!supportedTranslatType.includes(trans_type)) {
     console.warn(`Caiyun translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
-      type: TranslateType.Caiyun,
+      type: TranslationType.Caiyun,
       result: null,
     });
   }
@@ -298,13 +298,13 @@ export function requestCaiyunTextTranslate(
         const caiyunResult = response.data as CaiyunTranslateResult;
         console.log(`caiyun translate: ${caiyunResult.target}, cost: ${response.headers[requestCostTime]} ms`);
         resolve({
-          type: TranslateType.Caiyun,
+          type: TranslationType.Caiyun,
           result: caiyunResult,
         });
       })
       .catch((error) => {
         const errorInfo: RequestErrorInfo = {
-          type: TranslateType.Caiyun,
+          type: TranslationType.Caiyun,
           code: error.response.status.toString(),
           message: error.response.statusText,
         };
@@ -332,7 +332,7 @@ export async function requestDeepLTextTranslate(
   if (!sourceLang || !targetLang) {
     console.warn(`DeepL translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
-      type: TranslateType.DeepL,
+      type: TranslationType.DeepL,
       result: null,
     });
   }
@@ -359,14 +359,14 @@ export async function requestDeepLTextTranslate(
       } ms`
     );
     return Promise.resolve({
-      type: TranslateType.DeepL,
+      type: TranslationType.DeepL,
       result: deepLResult,
     });
   } catch (err) {
     const error = err as { response: AxiosResponse };
     console.error("deepL error: ", JSON.stringify(error.response, null, 4));
     const errorInfo: RequestErrorInfo = {
-      type: TranslateType.DeepL,
+      type: TranslationType.DeepL,
       code: error.response.status.toString(),
       message: error.response.statusText,
     };

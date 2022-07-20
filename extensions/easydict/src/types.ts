@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 11:49
+ * @lastEditTime: 2022-07-20 12:58
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -20,19 +20,24 @@ export enum SectionType {
   WebPhrase = "Web Phrase",
 }
 
-export enum TranslateType {
+export enum TranslationType {
   Youdao = "Youdao",
   Baidu = "Baidu",
   Tencent = "Tencent",
   Caiyun = "Caiyun",
   Apple = "Apple",
   DeepL = "DeepL",
+  Google = "Google",
 }
 
 export enum DicionaryType {
-  Youdao = "Youdao Dictionary",
-  Iciba = "Iciba Dictionary",
+  Youdao = "Youdao",
+  Iciba = "Iciba",
+  Eudic = "Eudic",
 }
+
+export type QueryType = TranslationType | DicionaryType;
+export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
 
 export interface RequestTypeResult {
   type: RequestType;
@@ -56,8 +61,6 @@ export interface RequestErrorInfo {
   type?: RequestType;
 }
 
-export type RequestType = TranslateType | DicionaryType | LanguageDetectType;
-
 export interface YoudaoTranslateResult {
   l: string;
   query: string;
@@ -76,7 +79,7 @@ export interface QueryWordInfo {
   word: string;
   fromLanguage: string;
   toLanguage: string;
-  isWord?: boolean; // * NOTE: youdao return must be have value.
+  isWord?: boolean; // * NOTE: youdao reqeust must have the return value.
   phonetic?: string;
   speech?: string;
   examTypes?: string[];
@@ -145,6 +148,8 @@ export interface MyPreferences {
 
 export interface ActionListPanelProps {
   displayItem: TranslateDisplayItem;
+  isShowingReleasePrompt: boolean;
+  isInstalledEudic: boolean;
   onLanguageUpdate: (language: LanguageItem) => void;
 }
 
@@ -220,7 +225,7 @@ export interface TranslateFormatResult {
 }
 
 export interface TranslateItem {
-  type: TranslateType;
+  type: TranslationType;
   text: string;
 }
 export interface TranslateResultKeyValueItem {
@@ -229,8 +234,8 @@ export interface TranslateResultKeyValueItem {
 }
 
 export interface TranslateDisplayResult {
-  type: SectionType | TranslateType;
-  sectionTitle?: SectionType | TranslateType | string;
+  type: SectionType | TranslationType;
+  sectionTitle?: SectionType | TranslationType | string;
   items?: TranslateDisplayItem[];
 }
 export interface TranslateDisplayItem {

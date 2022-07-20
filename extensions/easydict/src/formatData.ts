@@ -3,7 +3,7 @@ import { DeepLTranslateResult } from "./types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 11:30
+ * @lastEditTime: 2022-07-19 21:11
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -20,10 +20,10 @@ import {
   TranslateDisplayResult,
   TranslateFormatResult,
   TranslateItem,
-  TranslateType,
+  TranslationType,
   YoudaoTranslateResult,
 } from "./types";
-import { isShowMultipleTranslations, myPreferences } from "./utils";
+import { checkIfShowMultipleTranslations, myPreferences } from "./utils";
 
 const sortedOrder = getTranslationResultOrder();
 
@@ -34,7 +34,7 @@ export function formatYoudaoDictionaryResult(youdaoTypeResult: RequestTypeResult
   const youdaoResult = youdaoTypeResult.result as YoudaoTranslateResult;
   const translations = youdaoResult.translation.map((translationText) => {
     return {
-      type: TranslateType.Youdao,
+      type: TranslationType.Youdao,
       text: translationText,
     };
   });
@@ -79,7 +79,7 @@ export function updateFormatTranslateResultWithDeepLResult(
   const deepLResult = deepLTypeResult.result as DeepLTranslateResult;
   if (deepLResult) {
     formatResult.translationItems.push({
-      type: TranslateType.DeepL,
+      type: TranslationType.DeepL,
       text: deepLResult.translations[0].text, // deepl will autotically warp the text.
     });
     return sortTranslationItems(formatResult, sortedOrder);
@@ -97,7 +97,7 @@ export function updateFormatResultWithAppleTranslateResult(
   const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
   if (appleTranslate.translatedText) {
     formatResult.translationItems.push({
-      type: TranslateType.Apple,
+      type: TranslationType.Apple,
       text: appleTranslate.translatedText,
     });
     return sortTranslationItems(formatResult, sortedOrder);
@@ -121,7 +121,7 @@ export function updateFormatResultWithBaiduTranslation(
       .join("\n");
 
     formatResult.translationItems.push({
-      type: TranslateType.Baidu,
+      type: TranslationType.Baidu,
       text: baiduTranslation,
     });
     return sortTranslationItems(formatResult, sortedOrder);
@@ -140,7 +140,7 @@ export function updateFormatResultWithTencentTranslation(
   if (tencentResult) {
     const tencentTranslation = tencentResult.TargetText;
     formatResult.translationItems.push({
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       text: tencentTranslation,
     });
     return sortTranslationItems(formatResult, sortedOrder);
@@ -158,7 +158,7 @@ export function updateFormatResultWithCaiyunTranslation(
   const caiyunResult = caiyunTypeResult.result as CaiyunTranslateResult;
   if (caiyunResult) {
     formatResult.translationItems.push({
-      type: TranslateType.Caiyun,
+      type: TranslationType.Caiyun,
       text: caiyunResult?.target.join("\n"),
     });
     return sortTranslationItems(formatResult, sortedOrder);
@@ -192,12 +192,12 @@ export function sortTranslationItems(
  */
 export function getTranslationResultOrder(): string[] {
   const defaultTypeOrder = [
-    TranslateType.DeepL,
-    TranslateType.Apple,
-    TranslateType.Baidu,
-    TranslateType.Tencent,
-    TranslateType.Youdao,
-    TranslateType.Caiyun,
+    TranslationType.DeepL,
+    TranslationType.Apple,
+    TranslationType.Baidu,
+    TranslationType.Tencent,
+    TranslationType.Youdao,
+    TranslationType.Caiyun,
   ];
 
   const defaultOrder = defaultTypeOrder.map((type) => type.toString().toLowerCase());
@@ -219,7 +219,7 @@ export function getTranslationResultOrder(): string[] {
   // console.log("defaultNameOrder:", defaultOrder);
   // console.log("userOrder:", userOrder);
   const finalOrder = [...userOrder, ...defaultOrder];
-  console.log("finalOrder:", finalOrder);
+  // console.log("finalOrder:", finalOrder);
   return finalOrder;
 }
 
@@ -232,7 +232,7 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
     return displayResult;
   }
 
-  const showMultipleTranslations = isShowMultipleTranslations(formatResult);
+  const showMultipleTranslations = checkIfShowMultipleTranslations(formatResult);
 
   for (const [i, translateItem] of formatResult.translationItems.entries()) {
     const sectionType = showMultipleTranslations ? translateItem.type : SectionType.Translation;
@@ -270,7 +270,7 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
       ],
     });
 
-    if (!isShowMultipleTranslations) {
+    if (!checkIfShowMultipleTranslations) {
       break;
     }
   }
@@ -372,7 +372,7 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
  * Convert multiple translated result texts to markdown format and display them in the same list details page.
  */
 export function formatAllTypeTranslationToMarkdown(
-  type: TranslateType | SectionType,
+  type: TranslationType | SectionType,
   formatResult: TranslateFormatResult
 ) {
   const translations = [] as TranslateItem[];
@@ -399,7 +399,7 @@ export function formatAllTypeTranslationToMarkdown(
 /**
  *  format type translation result to markdown format.
  */
-export function formatTranslationToMarkdown(type: TranslateType | SectionType, text: string) {
+export function formatTranslationToMarkdown(type: TranslationType | SectionType, text: string) {
   const string = text.replace(/\n/g, "\n\n");
   const markdown = `
   ## ${type}

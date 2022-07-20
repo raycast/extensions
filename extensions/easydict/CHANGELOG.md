@@ -7,6 +7,10 @@
 - Added support for DeepL translation.
 - Supported to sort translation results manually.
 
+### 💎 Improvements
+
+- Used the new icons to adapted to the new `raycast` API.
+
 ### 🐞 Fixes
 
 - Fixed deleting input box text will cause repeated query selected text problem.

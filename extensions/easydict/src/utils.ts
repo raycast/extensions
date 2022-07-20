@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 12:04
+ * @lastEditTime: 2022-07-20 11:25
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,6 +11,7 @@
 import { Clipboard, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
+import { Easydict } from "./releaseVersion/versionInfo";
 import { LanguageItem, MyPreferences, QueryRecoredItem, QueryWordInfo, TranslateFormatResult } from "./types";
 
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
@@ -161,6 +162,22 @@ export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
 }
 
 /**
+ * Get DeepL web translate url
+ * https://www.deepl.com/translator#en/zh/look
+ */
+export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+  const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
+  const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
+  const fromLanguageId = fromLanguageItem.deepLSourceLanguageId;
+  const toLanguageId = toLanguageItem.deepLSourceLanguageId;
+  const text = encodeURI(queryTextInfo.word);
+  if (fromLanguageId && toLanguageId) {
+    return `https://www.deepl.com/translator#${fromLanguageId}/${toLanguageId}/${text}`;
+  }
+  return "";
+}
+
+/**
  * query the clipboard text from LocalStorage
  * * deprecate
  */
@@ -240,10 +257,9 @@ async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInsta
   }
 }
 
-export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean) => void) {
+export function checkIfEudicIsInstalled(setIsInstalledEudic: (isInstalled: boolean) => void) {
   LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    // console.log("is install Eudic: ", isInstalledEudic);
-
+    console.log("is install Eudic: ", isInstalledEudic);
     if (isInstalledEudic == true) {
       setIsInstalledEudic(true);
     } else if (isInstalledEudic == false) {
@@ -254,7 +270,16 @@ export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean
   });
 }
 
-export function isShowMultipleTranslations(formatResult: TranslateFormatResult) {
+export function checkIfNeedShowReleasePrompt(setIsShowingReleasePrompt: (isShowing: boolean) => void) {
+  const currentEasydict = new Easydict();
+  currentEasydict.getCurrentVersionInfo().then((easydict) => {
+    const isShowingReleasePrompt = easydict.isNeedPrompt && !easydict.hasPrompted;
+    console.log("isShowingReleasePrompt: ", isShowingReleasePrompt);
+    setIsShowingReleasePrompt(isShowingReleasePrompt);
+  });
+}
+
+export function checkIfShowMultipleTranslations(formatResult: TranslateFormatResult) {
   return !formatResult.explanations && !formatResult.forms && !formatResult.webPhrases && !formatResult.webTranslation;
 }
 

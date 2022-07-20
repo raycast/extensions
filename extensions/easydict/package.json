@@ -3,7 +3,7 @@
   "name": "easydict",
   "title": "Easy Dictionary",
   "description": "Look up words or translate text in an easy way. Support 23 languages, especially optimized for English and Chinese words.",
-  "icon": "Eudic-icon.png",
+  "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
   "commands": [
@@ -34,7 +34,7 @@
     "shortcuts"
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.38.0",
     "axios": "^0.25.0",
     "crypto-js": "^4.1.1",
     "franc": "^6.0.0",
