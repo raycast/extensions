@@ -29,7 +29,7 @@
       "name": "toggle-night-shift",
       "title": "Toggle Night Shift",
       "subtitle": "Night Light",
-      "description": "Toggle night shift on and off",
+      "description": "Toggle Night Shift on and off",
       "mode": "no-view"
     },
     {
