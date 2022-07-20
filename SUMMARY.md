@@ -19,7 +19,7 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 
-## Teams (Beta)
+## Teams
 
 - [Getting Started](teams/getting-started.md)
 - [Publish a Private Extension](teams/publish-a-private-extension.md)
