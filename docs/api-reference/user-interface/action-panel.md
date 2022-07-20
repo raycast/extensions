@@ -13,6 +13,7 @@ sections and can have keyboard shortcuts assigned.
 
 The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
 In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+Keep in mind that overriding the shortcuts for the primary and secondary actions of [Form](./form.md) won't be applied.
 
 #### Example
 
@@ -65,24 +66,15 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <ActionPanel.Section title="Copy">
-              <Action.CopyToClipboard
-                title="Copy Pull Request Number"
-                content="#1"
-              />
+              <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
               <Action.CopyToClipboard
                 title="Copy Pull Request URL"
                 content="https://github.com/raycast/extensions/pull/1"
               />
-              <Action.CopyToClipboard
-                title="Copy Pull Request Title"
-                content="Docs: Update API Reference"
-              />
+              <Action.CopyToClipboard title="Copy Pull Request Title" content="Docs: Update API Reference" />
             </ActionPanel.Section>
             <ActionPanel.Section title="Danger zone">
-              <Action
-                title="Close Pull Request"
-                onAction={() => console.log("Close PR #1")}
-              />
+              <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
             </ActionPanel.Section>
           </ActionPanel>
         }
