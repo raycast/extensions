@@ -1,16 +1,11 @@
-import { useMemo } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useMemberInfo, useAssignedStories, useProjects } from "./hooks";
+import { useMemberInfo, useAssignedStories, useProjectMap } from "./hooks";
 import { Project } from "@useshortcut/client";
 
 export default function AssignedStories() {
   const { data: memberInfo } = useMemberInfo();
-  const { data: projects } = useProjects();
+  const projectIdMap = useProjectMap();
   const { data: assignedStories, isValidating } = useAssignedStories(memberInfo?.mention_name);
-
-  const projectIdMap = useMemo(() => {
-    return projects?.reduce((map, project) => ({ ...map, [project.id]: project }), {} as Record<number, Project>) || {};
-  }, [projects]);
 
   return (
     <List isLoading={!assignedStories || isValidating}>

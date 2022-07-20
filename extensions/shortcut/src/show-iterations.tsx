@@ -1,5 +1,6 @@
-import { Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { IterationSlim } from "@useshortcut/client";
+import { IterationStories } from "./components/IterationStories";
 import { useIterations } from "./hooks";
 
 const sortIterationByStartDateDesc = (a: IterationSlim, b: IterationSlim) => {
@@ -35,6 +36,7 @@ export default function ListIterationStories() {
         return (
           <List.Item
             title={iteration.name}
+            key={iteration.id}
             subtitle={iteration.status}
             accessories={[
               {
@@ -44,6 +46,15 @@ export default function ListIterationStories() {
                 icon: statusIcon,
               },
             ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  target={<IterationStories iterationId={iteration.id} />}
+                  title="Open Stories"
+                  icon={Icon.List}
+                />
+              </ActionPanel>
+            }
           />
         );
       })}
