@@ -1,4 +1,8 @@
 <p align="center">
+  <h1 align="center">Library Genesis</h1>
+</p>
+
+<p align="center">
   <a title="Install Library Genesis Raycast Extension" href="https://www.raycast.com/yz3440/library-genesis#install">
     <img height="64" style="height: 64px" src="https://assets.raycast.com/yz3440/library-genesis/install_button@2x.png">
   </a>
