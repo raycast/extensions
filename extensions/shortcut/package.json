@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shortcut",
+  "title": "Shortcut",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "assigned-stories",
+      "title": "Assigned Stories",
+      "subtitle": "Shortcut",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "open-project-stories",
+      "title": "Open Project Stories",
+      "subtitle": "Shortcut",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "show-iterations",
+      "title": "Show Iterations",
+      "subtitle": "Shortcut",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "description": "The API token for the Shortcut",
+      "required": true,
+      "title": "API Token",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "@useshortcut/client": "^1.0.0",
+    "swr": "^1.3.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
