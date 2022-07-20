@@ -1,6 +1,6 @@
 # Night Light
 
-Manage Night Shift settings
+Manage Night Shift System Settings
 
 ## Requirements
 
