@@ -3,7 +3,7 @@
   "name": "night-light",
   "title": "Night Light",
   "description": "Manage Night Shift System Settings",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "devmoath",
   "categories": [
     "Productivity",
