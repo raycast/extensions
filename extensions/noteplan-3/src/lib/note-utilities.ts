@@ -39,7 +39,7 @@ export const notesExtension = () => {
 };
 
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/**/*.${notesExtension()}`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${notesExtension()}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
