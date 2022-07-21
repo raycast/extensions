@@ -10,7 +10,7 @@ const INDEX = "dbt";
 
 export function ListCodeSnippets(props: { url: string }) {
   const url = props.url;
-  const [listSnippets, setListSnippets] = useState<Array<string>>();
+  const [listSnippets, setListSnippets] = useState<Array<string>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function fetchSnippets() {
@@ -54,33 +54,37 @@ export function ListCodeSnippets(props: { url: string }) {
     fetchSnippets();
   }, [url]);
 
-  return (
-    <List isShowingDetail isLoading={isLoading} navigationTitle="Code snippets">
-      {listSnippets?.map((item, index) => (
-        <List.Item
-          key={index}
-          title={item.replaceAll("\n", " ").replaceAll("    ", "  ")}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={item} title="Copy Code to Clipboard" />
-              <Action.Push
-                title="Show Code in Full Page"
-                icon={Icon.AppWindowList}
-                target={<SnippetDetails code_snippet={item} />}
-              />
-              <Action.OpenInBrowser
-                url={url}
-                title="Open Page in Browser"
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-              <Action.CopyToClipboard content={url} title="Copy Page URL" />
-            </ActionPanel>
-          }
-          detail={<List.Item.Detail markdown={["```", item, "```"].join("\n")} />}
-        />
-      ))}
-    </List>
-  );
+  if (listSnippets.length > 0) {
+    return (
+      <List isShowingDetail isLoading={isLoading} navigationTitle="Code Snippets">
+        {listSnippets?.map((item, index) => (
+          <List.Item
+            key={index}
+            title={item.replaceAll("\n", " ").replaceAll("    ", "  ")}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={item} title="Copy Code to Clipboard" />
+                <Action.Push
+                  title="Show Code in Full Page"
+                  icon={Icon.AppWindowList}
+                  target={<SnippetDetails code_snippet={item} />}
+                />
+                <Action.OpenInBrowser
+                  url={url}
+                  title="Open Page in Browser"
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <Action.CopyToClipboard content={url} title="Copy Page URL" />
+              </ActionPanel>
+            }
+            detail={<List.Item.Detail markdown={["```", item, "```"].join("\n")} />}
+          />
+        ))}
+      </List>
+    );
+  } else {
+    return <List isLoading={isLoading} navigationTitle="Code Snippets"></List>;
+  }
 }
 
 export function SnippetDetails(props: { code_snippet: string }) {
@@ -157,6 +161,7 @@ export default function main() {
               <Action.CopyToClipboard content={result.url} title="Copy URL" />
               <Action.Push
                 title="Show Code Snippets"
+                icon={Icon.AppWindowList}
                 target={<ListCodeSnippets url={result.url} />}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               />
