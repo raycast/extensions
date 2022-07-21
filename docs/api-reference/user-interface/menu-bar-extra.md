@@ -198,7 +198,7 @@ import { Icon, MenuBarExtra } from "@raycast/api";
 export default function Command() {
   return (
     <MenuBarExtra icon={Icon.Bookmark}>
-      <MenuBarExtra.Item title="Raycast.com" />
+      <MenuBarExtra.Item icon="raycast.png" title="Raycast.com" />
     </MenuBarExtra>
   );
 }
