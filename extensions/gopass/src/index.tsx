@@ -42,7 +42,7 @@ export default function Main({ prefix = "" }): JSX.Element {
 
   useEffect((): void => {
     gopass
-      .list({ limit: searchText ? -1 : 0, prefix })
+      .list({ limit: searchText ? -1 : 0, prefix, directoriesFirst: true })
       .then((data) => data.filter((item) => item.toLowerCase().includes(searchText.toLowerCase())))
       .then(setEntries)
       .catch(async (error) => {
