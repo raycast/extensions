@@ -6,12 +6,17 @@ import { sync as find } from "fast-glob";
 import { enGB } from "date-fns/locale";
 import { capitalize } from "lodash";
 import { Icon } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 const NOTE_PLAN_URI = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
 
 export enum NoteType {
   Calendar = "calendar",
   Project = "project",
+}
+
+interface Preferences {
+  extension: string;
 }
 
 export interface NoteEntry {
@@ -25,8 +30,16 @@ export interface Note {
   content: string;
 }
 
+const getPreferences = () => {
+  return getPreferenceValues<Preferences>();
+};
+
+export const notesExtension = () => {
+  return getPreferences().extension;
+};
+
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/**/*.txt`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/**/*.${notesExtension()}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
