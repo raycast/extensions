@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
 
@@ -84,6 +84,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
       isLoading={isValidating}
       navigationTitle={story?.name}
       markdown={storyMarkdown}
+      actions={<ActionPanel>{story && <Action.OpenInBrowser url={story?.app_url} />}</ActionPanel>}
       metadata={
         story && (
           <Detail.Metadata>

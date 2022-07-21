@@ -54,7 +54,7 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       }
       actions={
         <ActionPanel>
-          <Action.Push title="View Story" target={<StoryDetail storyId={story.id} />} />
+          <Action.Push icon={Icon.Sidebar} title="View Story" target={<StoryDetail storyId={story.id} />} />
           <Action.OpenInBrowser url={story.app_url} />
         </ActionPanel>
       }
