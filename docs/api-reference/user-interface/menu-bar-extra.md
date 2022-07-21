@@ -117,7 +117,7 @@ This case should work exactly the same as when Raycast is restarted.
 
 ## Best practices
 
-- make generous use of the [Cache API](../cache.md) and our [Utilities](../../utils-reference/README.md) in order to provide quick feedback and ensure action handlers work as expected
+- make generous use of the [Cache API](../cache.md) and our [Utilities](../../utils-reference/getting-started.md) in order to provide quick feedback and ensure action handlers work as expected
 - make sure you set `isLoading` to false when your command finishes executing
 - avoid setting long titles in `MenuBarExtra`, `MenuBarExtra.Submenu` or `MenuBarExtra.Item`
 - don't put identical `MenuBarExtra.Item`s at the same level (direct children of `MenuBarExtra` or in the same `Submenu`) as their `onAction` handlers will not be executed correctly
