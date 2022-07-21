@@ -54,7 +54,7 @@ export default function Main({ prefix = "" }): JSX.Element {
 
   useEffect((): void => {
     gopass
-      .list({ limit: searchText ? -1 : 0, prefix, directoriesFirst: true })
+      .list({ limit: searchText ? -1 : 0, prefix, directoriesFirst: true, stripPrefix: true })
       .then((data) => data.filter((item) => item.toLowerCase().includes(searchText.toLowerCase())))
       .then(setEntries)
       .catch(async (error) => {
@@ -75,7 +75,7 @@ export default function Main({ prefix = "" }): JSX.Element {
             accessories={[{ icon: Icon.ChevronRight }]}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(entry)} />
+                <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(prefix + entry)} />
                 {!isDirectory(entry) && passwordActions(entry)}
               </ActionPanel>
             }

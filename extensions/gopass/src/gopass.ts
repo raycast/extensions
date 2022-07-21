@@ -28,8 +28,10 @@ function gopass(args: string[]): Promise<string> {
   });
 }
 
-async function list({ limit = -1, prefix = "", directoriesFirst = false } = {}): Promise<string[]> {
-  return await gopass(["list", `--limit=${limit}`, "--flat", prefix])
+async function list({ limit = -1, prefix = "", directoriesFirst = false, stripPrefix = false } = {}): Promise<
+  string[]
+> {
+  return await gopass(["list", `--limit=${limit}`, "--flat", `--strip-prefix=${stripPrefix}`, prefix])
     .then((data) => data.split(`\n`))
     .then((data) => data.filter((item) => item.length))
     .then((data) => (directoriesFirst ? sortDirectoriesFirst(data) : data));
