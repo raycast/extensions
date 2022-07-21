@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, Image, List } from "@raycast/api";
 import { Member } from "@useshortcut/client";
 
 export default function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
@@ -8,6 +8,7 @@ export default function getOwnersAccessoryItems(owners: (Member | undefined)[]) 
         ({
           icon: {
             source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
+            mask: Image.Mask.Circle,
           },
           tooltip: owner?.profile?.name,
         } as List.Item.Accessory)

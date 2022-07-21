@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, showToast, Toast } from "@raycast/api";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
 import shortcut from "../utils/shortcut";
@@ -197,6 +197,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                   text={requester?.profile.name || ""}
                   icon={{
                     source: `https://www.gravatar.com/avatar/${requester?.profile?.gravatar_hash}`,
+                    mask: Image.Mask.Circle,
                   }}
                 />
               </Detail.Metadata.TagList>
@@ -211,6 +212,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                       text={owner?.profile?.name || ""}
                       icon={{
                         source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
+                        mask: Image.Mask.Circle,
                       }}
                     />
                   );
