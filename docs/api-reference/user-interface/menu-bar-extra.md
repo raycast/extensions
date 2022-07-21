@@ -1,7 +1,7 @@
 # Menu Bar Extra (Beta)
 
 {% hint style="info" %}
-As of version 1.38.0, you can use Raycast commands to place items in your menu bar!
+As of version 1.38.1, you can use Raycast commands to place items in your menu bar!
 {% endhint %}
 
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-extras) section of macOS' menu bar.
