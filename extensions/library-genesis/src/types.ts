@@ -38,6 +38,11 @@ export enum BookAction {
   "DownloadBook" = 2,
 }
 
+export enum SearchPriority {
+  "None" = 0,
+  "PreferredLanguages" = 1,
+  "PreferredFileFormats" = 2,
+}
 export interface LibgenPreferences {
   primaryAction: BookAction;
   copySearchContentFromClipboard: boolean;
