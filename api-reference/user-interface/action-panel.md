@@ -13,7 +13,7 @@ sections and can have keyboard shortcuts assigned.
 
 The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
 In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
-Keep in mind that overriding the shortcuts for the primary and secondary actions of [Form](./form.md) won't be applied.
+Keep in mind that overriding shortcuts for the primary and secondary actions won't be displayed in the Action Panel.
 
 #### Example
 
