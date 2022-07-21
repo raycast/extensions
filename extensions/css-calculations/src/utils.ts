@@ -47,18 +47,26 @@ function parseKey(key: string): string | undefined {
   }
 }
 
-export function validateValues(values: Values): void {
+export function validateValue(key: string, value: number): string | undefined {
+  if (isNaN(value)) {
+    return parseKey(key) + " is not a number!";
+  }
+
+  if (value < 0) {
+    return parseKey(key) + " must be grater than 0!";
+  }
+
+  if (!value) {
+    return parseKey(key) + " can not be empty!";
+  }
+
+  return undefined;
+}
+
+export function validateAllValues(values: Values) {
   Object.entries(values).forEach(([key, value]) => {
-    if (!value) {
-      throw new Error(parseKey(key) + " can not be empty!");
-    }
+    const error = validateValue(key, value);
 
-    if (isNaN(value)) {
-      throw new Error(parseKey(key) + " is not a number!");
-    }
-
-    if (value < 0) {
-      throw new Error(parseKey(key) + " must be grater than 0!");
-    }
+    if (error) throw new Error(error);
   });
 }

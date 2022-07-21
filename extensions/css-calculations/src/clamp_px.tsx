@@ -1,11 +1,17 @@
-import React from "react";
 import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
-import { calculateClamp, validateValues, Values } from "./utils";
+import React, { useState } from "react";
+import { calculateClamp, validateAllValues, validateValue, Values } from "./utils";
 
 export default function Command() {
+  const [minFontSizeError, setMinFontSizeError] = useState<string | undefined>();
+  const [maxFontSizeError, setMaxFontSizeError] = useState<string | undefined>();
+  const [minViewportWidthError, setMinViewportWidthError] = useState<string | undefined>();
+  const [maxViewportWidthError, setMaxViewportWidthError] = useState<string | undefined>();
+  const [pxPerRemError, setPxPerRemError] = useState<string | undefined>();
+
   async function handleSubmit(values: Values) {
     try {
-      validateValues(values);
+      validateAllValues(values);
 
       const clamp = calculateClamp(values, "px");
       await Clipboard.copy(clamp);
@@ -24,25 +30,63 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Calculate" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Copy Clamp" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="min_font_size" title="Min Font Size" placeholder="Minimal Value In Pixels" />
-      <Form.TextField id="max_font_size" title="Max Font Size" placeholder="Maximal Value In Pixels" />
+      <Form.TextField
+        id="min_font_size"
+        title="Min Font Size"
+        placeholder="Minimal Value In Pixels"
+        error={minFontSizeError}
+        onChange={(value) => {
+          const error = validateValue("min_font_size", Number(value));
+          setMinFontSizeError(error);
+        }}
+      />
+      <Form.TextField
+        id="max_font_size"
+        title="Max Font Size"
+        placeholder="Maximal Value In Pixels"
+        error={maxFontSizeError}
+        onChange={(value) => {
+          const error = validateValue("max_font_size", Number(value));
+          setMaxFontSizeError(error);
+        }}
+      />
       <Form.TextField
         id="min_vw_width"
         title="Min Viewport Width"
         placeholder="Minimal Value In Pixels"
         defaultValue="375"
+        error={minViewportWidthError}
+        onChange={(value) => {
+          const error = validateValue("min_vw_width", Number(value));
+          setMinViewportWidthError(error);
+        }}
       />
       <Form.TextField
         id="max_vw_width"
         title="Max Viewport Width"
         placeholder="Maximal Value In Pixels"
         defaultValue="1400"
+        error={maxViewportWidthError}
+        onChange={(value) => {
+          const error = validateValue("max_vw_width", Number(value));
+          setMaxViewportWidthError(error);
+        }}
       />
-      <Form.TextField id="pixels_per_rem" title="Base Font Size" placeholder="Pixels Per Rem" defaultValue="16" />
+      <Form.TextField
+        id="pixels_per_rem"
+        title="Base Font Size"
+        placeholder="Pixels Per Rem"
+        defaultValue="16"
+        error={pxPerRemError}
+        onChange={(value) => {
+          const error = validateValue("pixels_per_rem", Number(value));
+          setPxPerRemError(error);
+        }}
+      />
     </Form>
   );
 }
