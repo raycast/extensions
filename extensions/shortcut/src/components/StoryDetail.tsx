@@ -95,7 +95,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
 
             {story.labels.map((label) => {
               return (
-                <Detail.Metadata.TagList title="Labels">
+                <Detail.Metadata.TagList title="Labels" key={label.id}>
                   <Detail.Metadata.TagList.Item text={label.name} color={label.color} />
                 </Detail.Metadata.TagList>
               );
@@ -112,13 +112,14 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
             <Detail.Metadata.Separator />
 
             {requester && (
-              <Detail.Metadata.Label
-                title="Requester"
-                text={requester?.profile.name || ""}
-                icon={{
-                  source: `https://www.gravatar.com/avatar/${requester?.profile?.gravatar_hash}`,
-                }}
-              />
+              <Detail.Metadata.TagList title="Requester">
+                <Detail.Metadata.TagList.Item
+                  text={requester?.profile.name || ""}
+                  icon={{
+                    source: `https://www.gravatar.com/avatar/${requester?.profile?.gravatar_hash}`,
+                  }}
+                />
+              </Detail.Metadata.TagList>
             )}
 
             {owners && (
@@ -126,6 +127,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                 {owners?.map((owner) => {
                   return (
                     <Detail.Metadata.TagList.Item
+                      key={owner.id}
                       text={owner?.profile?.name || ""}
                       icon={{
                         source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
@@ -136,7 +138,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
               </Detail.Metadata.TagList>
             )}
 
-            <Detail.Metadata.Separator />
+            {(story.estimate || story.deadline) && <Detail.Metadata.Separator />}
 
             {story.estimate && <Detail.Metadata.Label title="Estimate" text={String(story.estimate)} />}
 

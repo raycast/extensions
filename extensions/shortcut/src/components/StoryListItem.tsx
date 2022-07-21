@@ -16,12 +16,11 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       subtitle={`#${story.id}`}
       accessories={
         [
-          story.estimate && {
-            icon: {
-              source: `number-${story.estimate.toString().padStart(2, "0")}-16`,
-            },
-            tooltip: "Estimate",
-          },
+          story.estimate &&
+            ({
+              text: story.estimate.toString(),
+              tooltip: "Estimate",
+            } as List.Item.Accessory),
 
           ...owners.map(
             (owner) =>
@@ -41,7 +40,10 @@ export default function StoryListItem({ project, story }: { project?: Project; s
                 },
                 tooltip: project.name,
               }
-            : Icon.Circle,
+            : ({
+                icon: Icon.Circle,
+                tooltip: "No project",
+              } as List.Item.Accessory),
         ].filter(Boolean) as List.Item.Accessory[]
       }
       actions={

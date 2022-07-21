@@ -33,17 +33,23 @@ export default function ListIterationStories() {
           }
         })();
 
+        const { num_stories_done, num_stories_unstarted, num_stories_started } = iteration.stats;
+        const totalStories = num_stories_done + num_stories_unstarted + num_stories_started;
+
         return (
           <List.Item
             title={iteration.name}
+            icon={Icon.Repeat}
             key={iteration.id}
-            subtitle={iteration.status}
+            subtitle={`${totalStories} stories`}
             accessories={[
               {
                 date: new Date(iteration.start_date),
+                tooltip: "Start Date",
               },
               {
                 icon: statusIcon,
+                tooltip: iteration.status,
               },
             ]}
             actions={
