@@ -118,3 +118,14 @@ export const useProject = (projectId?: number) => {
     () => shortcut.getProject(projectId!).then((res) => res.data)
   );
 };
+
+export const useEpics = () => {
+  return useSWR("/api/v3/epics", () => shortcut.listEpics({}).then((res) => res.data));
+};
+
+export const useEpicStories = (epicId?: number) => {
+  return useSWR(
+    () => epicId && `/api/v3/stories/epic/${epicId}`,
+    () => shortcut.listEpicStories(epicId!, {}).then((res) => res.data)
+  );
+};

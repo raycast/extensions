@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Project, StorySlim } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
+import getOwnersAccessoryItems from "../utils/getOwnersAccessoryItems";
 import StoryDetail from "./StoryDetail";
 
 export default function StoryListItem({ project, story }: { project?: Project; story: StorySlim }) {
@@ -22,21 +23,7 @@ export default function StoryListItem({ project, story }: { project?: Project; s
               tooltip: "Estimate",
             } as List.Item.Accessory),
 
-          ...owners.map(
-            (owner) =>
-              ({
-                icon: {
-                  source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
-                },
-                tooltip: owner?.profile?.name,
-              } as List.Item.Accessory)
-          ),
-
-          owners.length === 0 &&
-            ({
-              icon: Icon.Person,
-              tooltip: "No owners",
-            } as List.Item.Accessory),
+          ...getOwnersAccessoryItems(owners),
 
           project
             ? {

@@ -23,6 +23,13 @@
       "subtitle": "Shortcut",
       "description": "Show iterations",
       "mode": "view"
+    },
+    {
+      "name": "show-epics",
+      "title": "Show Epics",
+      "subtitle": "Shortcut",
+      "description": "Show Epics in current workspace",
+      "mode": "view"
     }
   ],
   "preferences": [
