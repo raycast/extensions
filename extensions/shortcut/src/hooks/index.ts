@@ -1,7 +1,7 @@
 import shortcut from "../utils/shortcut";
 import { useMemo } from "react";
 import useSWR from "swr";
-import { Member, Project, Workflow } from "@useshortcut/client";
+import { Group, IterationSlim, Member, Project, Workflow } from "@useshortcut/client";
 
 export const useMemberInfo = () => {
   return useSWR("/api/v3/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
@@ -59,6 +59,19 @@ export const useIterations = () => {
   return useSWR("/api/v3/iterations", () => shortcut.listIterations().then((res) => res.data));
 };
 
+export const useIterationMap = () => {
+  const { data: iterations } = useIterations();
+
+  return useMemo(() => {
+    return (
+      iterations?.reduce(
+        (map, iteration) => ({ ...map, [iteration.id]: iteration }),
+        {} as Record<number, IterationSlim>
+      ) || {}
+    );
+  }, [iterations]);
+};
+
 export const useIterationStories = (iterationId?: number) => {
   return useSWR(
     () => iterationId && `/api/v3/stories/iteration/${iterationId}`,
@@ -78,4 +91,30 @@ export const useWorkflowMap = () => {
       workflows?.reduce((map, workflow) => ({ ...map, [workflow.id]: workflow }), {} as Record<number, Workflow>) || {}
     );
   }, [workflows]);
+};
+
+export const useStory = (storyId?: number) => {
+  return useSWR(
+    () => storyId && `/api/v3/stories/${storyId}`,
+    () => shortcut.getStory(storyId!).then((res) => res.data)
+  );
+};
+
+export const useGroups = () => {
+  return useSWR("/api/v3/groups", () => shortcut.listGroups().then((res) => res.data));
+};
+
+export const useGroupsMap = () => {
+  const { data } = useGroups();
+
+  return useMemo(() => {
+    return data?.reduce((map, group) => ({ ...map, [group.id]: group }), {} as Record<number, Group>) || {};
+  }, [data]);
+};
+
+export const useProject = (projectId?: number) => {
+  return useSWR(
+    () => projectId && `/api/v3/projects/${projectId}`,
+    () => shortcut.getProject(projectId!).then((res) => res.data)
+  );
 };

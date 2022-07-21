@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Project, StorySlim } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
+import StoryDetail from "./StoryDetail";
 
 export default function StoryListItem({ project, story }: { project?: Project; story: StorySlim }) {
   const memberMap = useMemberMap();
@@ -45,6 +46,7 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       }
       actions={
         <ActionPanel>
+          <Action.Push title="View Story" target={<StoryDetail storyId={story.id} />} />
           <Action.OpenInBrowser url={story.app_url} />
         </ActionPanel>
       }
