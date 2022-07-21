@@ -5,7 +5,6 @@
   "description": "Search and Play Spotify music from the Raycast, control your library with convenient commands like Like",
   "icon": "icon.png",
   "author": "mattisssa",
-  "owner": "raycast",
   "license": "MIT",
   "contributors": [
     "dillionverma",
