@@ -34,7 +34,7 @@ export default function searchAccountsByEmail() {
           ))}
         </List.Dropdown>
       }
-      isShowingDetail
+      isShowingDetail={accounts.length > 0}
       throttle
     >
       {showItems(tenant, recurly, accounts)}

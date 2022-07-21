@@ -34,7 +34,7 @@ export default function searchAccountByCode() {
           ))}
         </List.Dropdown>
       }
-      isShowingDetail
+      isShowingDetail={account !== null}
       throttle
     >
       {showFound(tenant, recurly, account)}
