@@ -31,6 +31,18 @@ export async function pastePassword(entry: string): Promise<void> {
   }
 }
 
+const passwordActions = (entry: string) => (
+  <>
+    <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
+    <Action
+      title="Paste Password to Active App"
+      icon={Icon.Document}
+      onAction={() => pastePassword(entry)}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+    />
+  </>
+);
+
 const getIcon = (entry: string) => (isDirectory(entry) ? Icon.Folder : Icon.Key);
 
 const getTarget = (entry: string) => (isDirectory(entry) ? <Main prefix={entry} /> : <Details entry={entry} />);
@@ -63,13 +75,7 @@ export default function Main({ prefix = "" }): JSX.Element {
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(entry)} />
-              <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
-              <Action
-                title="Paste Password to Active App"
-                icon={Icon.Document}
-                onAction={() => pastePassword(entry)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              />
+              {!isDirectory(entry) && passwordActions(entry)}
             </ActionPanel>
           }
         />
