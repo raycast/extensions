@@ -4,11 +4,11 @@ import useSWR from "swr";
 import { Group, IterationSlim, Member, Project, Workflow } from "@useshortcut/client";
 
 export const useMemberInfo = () => {
-  return useSWR("/api/v3/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
+  return useSWR("/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
 };
 
 export const useMembers = () => {
-  return useSWR("/api/v3/members", () => shortcut.listMembers({}).then((res) => res.data));
+  return useSWR("/members", () => shortcut.listMembers({}).then((res) => res.data));
 };
 
 export const useMemberMap = () => {
@@ -26,7 +26,7 @@ export const useMemberMap = () => {
 
 export const useAssignedStories = (owner?: string) => {
   return useSWR(
-    () => owner && `/api/v3/stories/owner/${owner}`,
+    () => owner && `/stories/owner/${owner}`,
     () =>
       shortcut
         .searchStories({
@@ -37,7 +37,7 @@ export const useAssignedStories = (owner?: string) => {
 };
 
 export const useProjects = () => {
-  return useSWR("/api/v3/projects", () => shortcut.listProjects().then((res) => res.data));
+  return useSWR("/projects", () => shortcut.listProjects().then((res) => res.data));
 };
 
 export const useProjectMap = () => {
@@ -50,13 +50,13 @@ export const useProjectMap = () => {
 
 export const useProjectStories = (projectId?: number) => {
   return useSWR(
-    () => projectId && `/api/v3/stories/project/${projectId}`,
+    () => projectId && `/stories/project/${projectId}`,
     () => shortcut.listStories(projectId!, {}).then((res) => res.data)
   );
 };
 
 export const useIterations = () => {
-  return useSWR("/api/v3/iterations", () => shortcut.listIterations().then((res) => res.data));
+  return useSWR("/iterations", () => shortcut.listIterations().then((res) => res.data));
 };
 
 export const useIterationMap = () => {
@@ -74,13 +74,13 @@ export const useIterationMap = () => {
 
 export const useIterationStories = (iterationId?: number) => {
   return useSWR(
-    () => iterationId && `/api/v3/stories/iteration/${iterationId}`,
+    () => iterationId && `/stories/iteration/${iterationId}`,
     () => shortcut.listIterationStories(iterationId!, {}).then((res) => res.data)
   );
 };
 
 export const useWorkflows = () => {
-  return useSWR("/api/v3/workflows", () => shortcut.listWorkflows().then((res) => res.data));
+  return useSWR("/workflows", () => shortcut.listWorkflows().then((res) => res.data));
 };
 
 export const useWorkflowMap = () => {
@@ -95,13 +95,13 @@ export const useWorkflowMap = () => {
 
 export const useStory = (storyId?: number) => {
   return useSWR(
-    () => storyId && `/api/v3/stories/${storyId}`,
+    () => storyId && `/stories/${storyId}`,
     () => shortcut.getStory(storyId!).then((res) => res.data)
   );
 };
 
 export const useGroups = () => {
-  return useSWR("/api/v3/groups", () => shortcut.listGroups().then((res) => res.data));
+  return useSWR("/groups", () => shortcut.listGroups().then((res) => res.data));
 };
 
 export const useGroupsMap = () => {
@@ -114,18 +114,18 @@ export const useGroupsMap = () => {
 
 export const useProject = (projectId?: number) => {
   return useSWR(
-    () => projectId && `/api/v3/projects/${projectId}`,
+    () => projectId && `/projects/${projectId}`,
     () => shortcut.getProject(projectId!).then((res) => res.data)
   );
 };
 
 export const useEpics = () => {
-  return useSWR("/api/v3/epics", () => shortcut.listEpics({}).then((res) => res.data));
+  return useSWR("/epics", () => shortcut.listEpics({}).then((res) => res.data));
 };
 
 export const useEpicStories = (epicId?: number) => {
   return useSWR(
-    () => epicId && `/api/v3/stories/epic/${epicId}`,
+    () => epicId && `/stories/epic/${epicId}`,
     () => shortcut.listEpicStories(epicId!, {}).then((res) => res.data)
   );
 };
