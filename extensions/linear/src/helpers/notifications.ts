@@ -73,3 +73,15 @@ export function getNotificationTitle(notification: NotificationResult) {
 
   return notificationTitles[notification.type];
 }
+
+export function getNotificationMenuBarIcon(unreadNotifications: NotificationResult[]) {
+  return {
+    source: { dark: "dark/linear.svg", light: "light/linear.svg" },
+    tintColor:
+      unreadNotifications.length !== 0 ? { dark: "#5E6AD2", light: "#5E6AD2", adjustContrast: false } : undefined,
+  };
+}
+
+export function getNotificationMenuBarTitle(unreadNotifications: NotificationResult[]) {
+  return unreadNotifications.length !== 0 ? String(unreadNotifications.length) : undefined;
+}
