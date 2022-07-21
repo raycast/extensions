@@ -94,7 +94,8 @@
           "type": "textfield",
           "title": "Preferred Team",
           "placeholder": "RAY",
-          "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used."
+          "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
         },
         {
           "name": "shouldCloseMainWindow",
@@ -102,7 +103,8 @@
           "title": "Advanced",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
-          "default": false
+          "default": false,
+          "required": false
         }
       ],
       "arguments": [
