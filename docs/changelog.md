@@ -1,17 +1,27 @@
 # Changelog
 
-## 1.38.0 – 2022-07-19
+## 1.38.1 - 2022-07-21
 
 ### ✨ New
 
-- **Redesign**: Along side the app’s redesign, we are introducing a whole set of [new icons](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) for you to pick to illustrate the actions in your extensions.
-- **New Destructive Action:**  You can now specify the `style` of an `Action` to highlight it in the Action Panel as destructive. Use it for actions where an end-user should be cautious with proceeding.
+- 🍫 **Menu Bar Commands (Beta)**: For a long time, Commands could only live in the Raycast window. From today, Commands can put glanceable information in the Menu Bar 💪. Check out our [new docs section](https://developers.raycast.com/api-reference/user-interface/menu-bar-extra) on how to develop your first native macOS menu bar command with hot reloading 🔥.
+- 🔄 **Background Refresh (Beta)**: To keep Menu Bar Commands up-to-date, we ported Background Refresh from [Script Commands](https://github.com/raycast/script-commands) to Extensions. Background Refresh is configured with a new interval option in the Extension's [manifest](https://developers.raycast.com/information/manifest) and also works for "no-view" mode commands. Read more about it in a [new docs guide](https://developers.raycast.com/information/background-refresh).
+- 🪝 **Utils**: We've released new React hooks to make it faster to build extensions that follow best practices. To do this, we looked at the Extension's repository for use cases and how we can improve them. Most Extensions connect to APIs: they make network requests, show a toast to handle errors, and add caching and optimistic updates to speed up interactions. Utils are available via a [new public npm package](https://github.com/raycast/utils).
+- 🤬 **Arguments**: We also ported more functionality from Script Commands. Extensions can now define arguments, which enable simple forms that live in the root search of Raycast. Arguments can be defined via the [manifest](https://developers.raycast.com/information/manifest), and their entered values are passed to the main function of a command.
+- ✍️ **Subtitle Updates**: We've added a new method `updateCommandMetadata` that allows you to update the subtitle of a command in root search. Combined with Background Refresh, this is another way to present information to the user as dashboard-like items in the root search.
+
+## 1.38.0 - 2022-07-19
+
+### ✨ New
+
+- **Redesign**: Along side the app's redesign, we are introducing a whole set of [new icons](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) for you to pick to illustrate the actions in your extensions.
+- **New Destructive Action:** You can now specify the `style` of an `Action` to highlight it in the Action Panel as destructive. Use it for actions where an end-user should be cautious with proceeding.
 
 ### 💎 Improvements
 
-- **DevTools**: Turning on the “Use Node production environment” in the Advanced Preferences will also hide the debug actions. Previously it was only hiding them when there was no Action Panel specified.
-- **DevTools**: The “Clear Local Storage” debug action has been renamed to “Clear Local Storage & Cache” and will clear the [Cache](https://developers.raycast.com/api-reference/cache) along side the [Local Storage](https://developers.raycast.com/api-reference/storage).
-- **Dev Tools**: The “Start Development” action now quotes the extension folder path.
+- **DevTools**: Turning on the "Use Node production environment" in the Advanced Preferences will also hide the debug actions. Previously it was only hiding them when there was no Action Panel specified.
+- **DevTools**: The "Clear Local Storage" debug action has been renamed to "Clear Local Storage & Cache" and will clear the [Cache](https://developers.raycast.com/api-reference/cache) along side the [Local Storage](https://developers.raycast.com/api-reference/storage).
+- **Dev Tools**: The "Start Development" action now quotes the extension folder path.
 - **Dev Tools**: Added a new development advanced preference to keep the Raycast window always visible during development.
 - **Dev Tools**: Added a new build status tooltip to the accessory icon of a development command in root search.
 - **Dev Tools**: Improved the error handling for failed extension updates after invalid manifest changes; improved the error messages for general rendering errors.
@@ -24,56 +34,56 @@
 - Forms: Fixed inconsistent behaviour of the `onBlur` handler that could get triggered for the `Form.TextField` when the form screen is popped in a navigation stack.
 - List: Fixed the updating of tooltips for list accessory items.
 
-## 1.37.0 – 2022-06-29
+## 1.37.0 - 2022-06-29
 
 ### ✨ New
 
 - **React 18**: React Suspense, `useSyncExternalStore`, etc.. A whole bunch of new features are available with the newest version of React. See the [migration guide](https://developers.raycast.com/migration/v1.37.0) for more information.
 - **Quick Look:** Use the new `<Action.ToggleQuickLook />` action to show additional information with a Quick Look preview.
 - **Forms:** Use the new validation feature to check if entered data is correctly formatted and show failure messages with a nice UX
-- **Forms:** Drafts support – use the feature if you want Raycast to preserve non-submitted data, to provide the best experience for users
+- **Forms:** Drafts support - use the feature if you want Raycast to preserve non-submitted data, to provide the best experience for users
 - **DevX:** Check out the new screenshot tool that takes a photo of Raycast from the best possible angle
 
 ### 💎 Improvements
 
-- **List Accessories**: You can now pass `{date: Date}` as an accessory and it will be rendered nicely by Raycast.
-- **Detail View:** Add support for `- [ ] task` and `- [x] task` in markdown views.
-- **Action Panel**: Add a new `onOpen` callback on `ActionPanel.Submenu`. It can, for example, be used to lazily fetch the content of the Submenu.
-- **Grid**: Add support for `ColorLike` as Grid.Item’s content.
+- **List Accessories**: You can now pass `{date: Date}` as an accessory and it will be rendered nicely by Raycast.
+- **Detail View:** Add support for `- [ ] task` and `- [x] task` in markdown views.
+- **Action Panel**: Add a new `onOpen` callback on `ActionPanel.Submenu`. It can, for example, be used to lazily fetch the content of the Submenu.
+- **Grid**: Add support for `ColorLike` as Grid.Item's content.
 - **Forms:** New callbacks `onFocus` and `onBlur` for all the items
 - **Forms:** Markdown highlighting for the `Form.TextArea`
 
 ### 🐞 Fixes
 
-- **Misc:** Fixed a crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1845](https://github.com/raycast/extensions/issues/1845)).
+- **Misc:** Fixed a crash when using `<List>{response?.website && <List.Item title={response.website} />}</List>` and `website` is an empty string ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1845](https://github.com/raycast/extensions/issues/1845)).
 - **Dev Tools**: Fixed uninstalling of local development extensions via the Action Panel
 - **Markdown**: Fixed rendering of transparent animated gifs in markdown
 - **Forms:** Fixed an issue when entering characters with IME ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 739](https://github.com/raycast/extensions/issues/739)) in controlled text inputs
 - **List Accessories:** Fixed the tooltip for grouped accessories; now the tooltip will be shown for the group instead of separately for the items
 
-## 1.36.0 – 2022-06-01
+## 1.36.0 - 2022-06-01
 
 ### ✨ New
 
-The `<Grid />` component’s made its way to our API. It’s perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component  for smooth adoption.
+The `<Grid />` component's made its way to our API. It's perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component for smooth adoption.
 
 ![](.gitbook/assets/grid.png)
 
 ### 🐞 Fixes
 
 - Fixed the controlled mode for `Form.DatePicker`
-- Fixed the dynamic appearance of form item’s `info` accessory
+- Fixed the dynamic appearance of form item's `info` accessory
 - Fixed the OAuth logout preference not being shown for single-command extensions
 - Fixed a bug where components that are pushed with the same properties values would not be updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1843](https://github.com/raycast/extensions/issues/1843))
 - Fixed a bug where updated list metadata items would cause unnecessary list reloading
 - Fixed an issue with tinted, resized icons appearing blurred in some cases (e.g. Alerts)
 
-## 1.35.0 – 2022-05-18
+## 1.35.0 - 2022-05-18
 
 ### ✨ New
 
-- **List Item Metadata**: we’ve added a new `metadata` property to the `List.Item.Detail` component, allowing you to add structured metadata. The `metadata` property can be used together with `markdown`, in which case the detail view will be split horizontally, with the markdown being displayed in the top half and the metadata displayed in the bottom half (similar to the `File Search`, `Clipboard History` or `Search Contacts` commands). Alternatively, it can be used by itself, in which case the metadata will take up the entire height of the detail view.
-- **Preferences**: We’ve added two new top-level methods `openExtensionPreferences` and `openCommandPreferences` that allow you to open both extension and command preferences, for example, via an Action ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 179](https://github.com/raycast/extensions/issues/179))
+- **List Item Metadata**: we've added a new `metadata` property to the `List.Item.Detail` component, allowing you to add structured metadata. The `metadata` property can be used together with `markdown`, in which case the detail view will be split horizontally, with the markdown being displayed in the top half and the metadata displayed in the bottom half (similar to the `File Search`, `Clipboard History` or `Search Contacts` commands). Alternatively, it can be used by itself, in which case the metadata will take up the entire height of the detail view.
+- **Preferences**: We've added two new top-level methods `openExtensionPreferences` and `openCommandPreferences` that allow you to open both extension and command preferences, for example, via an Action ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 179](https://github.com/raycast/extensions/issues/179))
 
 ### 💎 Improvements
 
@@ -86,7 +96,7 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 - Fixed a bug where a fully controlled form TextField/PasswordField behaves as stateful ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1093](https://github.com/raycast/extensions/issues/1093))
 - Fixed `EmptyView` not being displayed when it would be reused in a navigation stack
 
-## 1.34.0 – 2022-05-04
+## 1.34.0 - 2022-05-04
 
 ### 💎 Improvements
 
@@ -96,18 +106,18 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 ### 🐞 Fixes
 
 - Fixed an issue where updating the search bar accessory would result in the search bar text being selected
-- Forms: We’ve fixed some inconsistencies around form item properties and added new warnings (e.g. when `defaultValue` and `value` are set at the same time); this also fixes [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1104](https://github.com/raycast/extensions/issues/1104)
+- Forms: We've fixed some inconsistencies around form item properties and added new warnings (e.g. when `defaultValue` and `value` are set at the same time); this also fixes [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1104](https://github.com/raycast/extensions/issues/1104)
 - Forms: Fixed an issue where updating form items would lead to unwanted scrolling; fixed the `autoFocus` property not scrolling to the focused item
-- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it’s still mounted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1495](https://github.com/raycast/extensions/issues/1495)).
+- Fixed an issue with `Action.OpenWith` trying to perform a state update without checking whether it's still mounted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue 1495](https://github.com/raycast/extensions/issues/1495)).
 - Fixed an issue where `adjustContrast` would not be respected for colored TagPicker items.
 
-## 1.33.0 – 2022-04-20
+## 1.33.0 - 2022-04-20
 
 ### ✨ New
 
 - **OAuth**: we've added a new API that enables you to authorize extensions through OAuth providers such as Google, Twitter, Dropbox or Spotify ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #178](https://github.com/raycast/extensions/issues/178)). The docs contain a [new detailed guide](https://developers.raycast.com/api-reference/oauth) and we've added some integration examples to the extensions repository. (Note that we currently only support OAuth 2.0 with PKCE, more on that in the [guide](https://developers.raycast.com/api-reference/oauth).)
 - **Form Focus**: use the new imperative form API to programmatically focus form items. Want to make sure a particular input is focused on mount? Form items now accept an `autoFocus` prop! ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #66](https://github.com/raycast/extensions/issues/66))
-- **Form Reset**: use the new imperative form API to reset form items’ values to their initial values.
+- **Form Reset**: use the new imperative form API to reset form items' values to their initial values.
 - **Form Info:** Use the new `info` prop on form items to show additional information about an item, e.g. to explain what this field is used for.
 - The Raycast window opens automatically when you start a development session for an extension. You can turn the behavior off in the Advanced preferences tab.
 
@@ -122,7 +132,7 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 - Fixed an issue where animated gifs would be incorrectly scaled when size attributes are specified in markdown.
 - Form Checkbox now returns proper boolean values on submit
 
-## 1.32.0 – 2022-04-06
+## 1.32.0 - 2022-04-06
 
 ### ✨ New
 
@@ -145,29 +155,29 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 - **SVG**: Fixed rendering base64 encoded SVG images
 - Fixed loading when a new command is launched by hotkey while another command is open
 
-## 1.31.0 – 2022-03-23
+## 1.31.0 - 2022-03-23
 
 ### ✨ New
 
-- **Detail Metadata**: we’ve added a new property `metadata` to the `Detail` component; this allows you to add structured metadata that is displayed on the right side in a detail view (similar to the Linear, Asana or Jira extensions). We support types such as labels, coloured tags, links, and separators. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #219](https://github.com/raycast/extensions/issues/219))
+- **Detail Metadata**: we've added a new property `metadata` to the `Detail` component; this allows you to add structured metadata that is displayed on the right side in a detail view (similar to the Linear, Asana or Jira extensions). We support types such as labels, coloured tags, links, and separators. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #219](https://github.com/raycast/extensions/issues/219))
 - **List Accessories**: list components can now show multiple accessory items through the new `accessories` property. (Previously you could only configure one `accessoryTitle` and `accesoryIcon`, both of which continue to work but have been marked deprecated.) Each item can be configured as text-only, icon-only, or icon + text. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72))
-- **List Empty View**: list components can define a new `EmptyView` that gives you control over the icon, title, description and optional actions to use when there are no items in a list. (Previously we would default to a “No results” view.) You can use the component to show a custom image and text when the search does not return results or the user is required to first perform some setup. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #447](https://github.com/raycast/extensions/issues/447))
+- **List Empty View**: list components can define a new `EmptyView` that gives you control over the icon, title, description and optional actions to use when there are no items in a list. (Previously we would default to a "No results" view.) You can use the component to show a custom image and text when the search does not return results or the user is required to first perform some setup. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #447](https://github.com/raycast/extensions/issues/447))
 
 ### 💎 Improvements
 
 - **Environment**: the current theme (`"dark" | "light"`) configured via Raycast appearance preferences is now globally accessible through `environment.theme`
 - **SVG**: You can now specify width and height attributes for images in markdown (`<img>` tag).
-- **Dev Tools:** the “Create Extension” command lets you add categories to your extension; the categories are displayed alongside the new metadata on our revamped details page in the store.
+- **Dev Tools:** the "Create Extension" command lets you add categories to your extension; the categories are displayed alongside the new metadata on our revamped details page in the store.
 - **Dev Tools**: added a new development action to clear the local assets cache, e.g. to render an updated list icon without having to restart Raycast. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #1095](https://github.com/raycast/extensions/issues/1095))
 - **Preferences**: the `required` property in manifest preferences is now optional.
 
 ### 🐞 Fixes
 
 - Fixed the extension icon not being updated during development.
-- Fixed an extension’s cached icon not being cleared when updated from the store. (Note that other dynamically loaded images in the assets folder may still be cached, so if you want to enforce an update for end users you need to rename them.)
+- Fixed an extension's cached icon not being cleared when updated from the store. (Note that other dynamically loaded images in the assets folder may still be cached, so if you want to enforce an update for end users you need to rename them.)
 - Fixed an edge case where some search bar characters would be wrongly passed to pushed lists in a navigation stack.
 
-## 1.30.2 – 2022-03-11
+## 1.30.2 - 2022-03-11
 
 ### 🐞 Fixes
 
@@ -178,23 +188,23 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 
 ### ✨ New
 
-- We’ve added the highly requested **search bar dropdown** 🎉 ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72)): you can now add a dropdown component as an accessory to the search bar; the dropdown shows up in the top-right corner and can be used for filtering lists and toggling list states. (So it’s a good time to remove any workarounds with actions or navigation for showing a different set of items in the list.)
-- The **search bar text** 🔎 can now be programmatically updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #281](https://github.com/raycast/extensions/issues/281)) while you can still opt into built-in filtering at the same time
+- We've added the highly requested **search bar dropdown** 🎉 ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72)): you can now add a dropdown component as an accessory to the search bar; the dropdown shows up in the top-right corner and can be used for filtering lists and toggling list states. (So it's a good time to remove any workarounds with actions or navigation for showing a different set of items in the list.)
+- The **search bar text** 🔎 can now be programmatically updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #281](https://github.com/raycast/extensions/issues/281)) while you can still opt into built-in filtering at the same time
 - **List-detail views**: list views now support a `detail` property that allows you to display a detail view on the right-hand side of list items ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #83](https://github.com/raycast/extensions/issues/83)) 👯‍♂️; you can use the feature to display additional content side-by-side as users scroll through the list
-- Support for rendering **SVG files** 🖼️ where images are accepted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #77](https://github.com/raycast/extensions/issues/77)), including in the `Detail` view’s markdown
-- New method `Clipboard.readText()` to read the last copied text from the system’s clipboard 📋
-- Added a new prop `type` to `Form.DatePicker` 📅 to control the date components asked from the user
+- Support for rendering **SVG files** 🖼️ where images are accepted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #77](https://github.com/raycast/extensions/issues/77)), including in the `Detail` view's markdown
+- New method `Clipboard.readText()` to read the last copied text from the system's clipboard 📋
+- Added a new prop `type` to `Form.DatePicker` 📅 to control the date components asked from the user
 
 ### 💎 Improvements
 
 - **Toast action handlers** 🍞 can now still be called if the toast outlives a dismissed extension
-- Support for multiple actions of type `Action.SubmitForm` in a form’s Action Panel
+- Support for multiple actions of type `Action.SubmitForm` in a form's Action Panel
 
 ### 🐞 Fixes
 
 - Fixed some flickering that could happen when using `React.memo`
 - Fixed a few edge cases around Action Panels
-- Fixed duplicated shortcut shown in the Action Panel’s tooltip when setting the default shortcut explicitly on the primary action
+- Fixed duplicated shortcut shown in the Action Panel's tooltip when setting the default shortcut explicitly on the primary action
 - Fixed updating a `Form.Description` component
 
 ## 1.29.0 - 2022-02-23
@@ -219,21 +229,21 @@ The `<Grid />` component’s made its way to our API. It’s perfect to layout m
 
 ### 💎 Improvements
 
-- Completely **revised (backwards-compatible) API** – new namespaces, better organisation, more consistency, updated templates, revamped docs. Check out the full [migration guide](https://developers.raycast.com/migration/v1.28.0) and get rid of those deprecation warnings. (At the same time, don’t worry, your extension is going to work as before, even if you don’t take immediate action.)
-- We’ve **prettified the CLI output** 💅: all output is now more colourful, cleaner and easier to parse. Update the npm package to v1.28.0 to get the latest CLI for development.
+- Completely **revised (backwards-compatible) API** - new namespaces, better organisation, more consistency, updated templates, revamped docs. Check out the full [migration guide](https://developers.raycast.com/migration/v1.28.0) and get rid of those deprecation warnings. (At the same time, don't worry, your extension is going to work as before, even if you don't take immediate action.)
+- We've **prettified the CLI output** 💅: all output is now more colourful, cleaner and easier to parse. Update the npm package to v1.28.0 to get the latest CLI for development.
 - **Fallback images**: You can now specify local asset files or built-in icons that are displayed when image loading fails, for example when a remote file is missing (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)[Issue #108](https://github.com/raycast/extensions/issues/108)); [see the docs](https://developers.raycast.com/api-reference/user-interface/icons-and-images)
 - **Toasts** are now passed as argument to their action callback, so you can directly act on them in the handler function (for example, hiding them)
-- **Extensions feedback:** We’ve added **better bug report and feature request actions** both to the store details page of an extension and to the error screen; the actions prefill some data already in the templates so that reporting issues and feature requests becomes easier for end users.
+- **Extensions feedback:** We've added **better bug report and feature request actions** both to the store details page of an extension and to the error screen; the actions prefill some data already in the templates so that reporting issues and feature requests becomes easier for end users.
 
 ### 🐞 Bugfixes
 
-- Fixed tag picker images and emojis not being properly displayed (​​![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)[Issue #493](https://github.com/raycast/extensions/issues/493))
+- Fixed tag picker images and emojis not being properly displayed (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)[Issue #493](https://github.com/raycast/extensions/issues/493))
 
 ## 1.27.1 - 2022-01-28
 
 ### 💎 Improvements
 
-- **Preferences:** Added a new app picker preference type – useful if you want to let users customize their apps to use for opening files, folders and URLs [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #98](https://github.com/raycast/extensions/issues/98)
+- **Preferences:** Added a new app picker preference type - useful if you want to let users customize their apps to use for opening files, folders and URLs [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #98](https://github.com/raycast/extensions/issues/98)
 - **Forms:** Added new `Form.PasswordField` that allows you to show secure text fields ([Issue #319](https://github.com/raycast/extensions/issues/319) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #44](https://github.com/raycast/extensions/issues/44))
 - **Forms:** Added new `Form.Description` component that allows you to show a simple label
 - Added a new top-level `open` method that gives you more flexibility for opening files, folders, and URLs with default apps or specified apps, often making using an external npm package unnecessary (the built-in open action use our method under the hood)
