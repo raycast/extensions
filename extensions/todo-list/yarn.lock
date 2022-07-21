@@ -89,7 +89,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@raycast/api@^1.30.1":
+"@raycast/api@^1.30.1", "@raycast/api@^1.38.1":
   version "1.38.1"
   resolved "https://registry.yarnpkg.com/@raycast/api/-/api-1.38.1.tgz#474f4ab988bdbd8025d646342a9cd403fcf27926"
   integrity sha512-xAmMn9EWfJwsuzMwtShbbYB+VNPs1+liI/jmKI7mLaXnyd/9Dpa/3ixPxrvqIND+TLee6bPQap9vhNK0oMjLcg==
