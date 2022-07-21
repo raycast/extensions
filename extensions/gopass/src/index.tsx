@@ -38,20 +38,22 @@ const getTarget = (entry: string) => (isDirectory(entry) ? <Main prefix={entry} 
 export default function Main({ prefix = "" }): JSX.Element {
   const [entries, setEntries] = useState<string[]>();
   const [loading, setLoading] = useState<boolean>(true);
+  const [searchText, setSearchText] = useState("");
 
   useEffect((): void => {
     gopass
-      .list({ limit: 0, prefix })
+      .list({ limit: searchText ? -1 : 0, prefix })
+      .then((data) => data.filter((item) => item.toLowerCase().includes(searchText.toLowerCase())))
       .then(setEntries)
       .catch(async (error) => {
         console.error(error);
         await showToast({ title: "Could not load passwords", style: Toast.Style.Failure });
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [searchText]);
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} enableFiltering={false} onSearchTextChange={setSearchText}>
       {entries?.map((entry, i) => (
         <List.Item
           key={i}
