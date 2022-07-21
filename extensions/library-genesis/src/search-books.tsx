@@ -1,13 +1,28 @@
-import { List } from "@raycast/api";
-import { useState } from "react";
+import { List, Clipboard, getPreferenceValues } from "@raycast/api";
+import { useState, useCallback, useEffect } from "react";
 import { EmptyView } from "./components/empty-view";
-import { searchBookOnLibgen } from "./hooks/hooks";
+import { searchBooksOnLibgen } from "./hooks/search-books-on-libgen";
 import { isEmpty } from "./utils/common-utils";
 import { BookItem } from "./components/book-item";
+import { LibgenPreferences } from "./types";
 
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");
-  const { books, loading } = searchBookOnLibgen(searchContent);
+  const { books, loading } = searchBooksOnLibgen(searchContent);
+
+  const copyFromClipboard = useCallback(async () => {
+    // Get the clipboard content
+    const text = await Clipboard.readText();
+    setSearchContent(text?.trim() ?? "");
+  }, []);
+
+  useEffect(() => {
+    // Read clipboard preferences
+    const { copySearchContentFromClipboard } = getPreferenceValues<LibgenPreferences>();
+    if (copySearchContentFromClipboard) {
+      void copyFromClipboard();
+    }
+  }, [copyFromClipboard]);
 
   const emptyViewTitle = () => {
     if (loading) {

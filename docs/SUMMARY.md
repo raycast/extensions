@@ -19,7 +19,7 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 
-## Teams (Beta)
+## Teams
 
 - [Getting Started](teams/getting-started.md)
 - [Publish a Private Extension](teams/publish-a-private-extension.md)
@@ -66,7 +66,7 @@
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [Utilities](api-reference/utilities.md)
+- [System Utilities](api-reference/utilities.md)
 - [Window & Search Bar](api-reference/window-and-search-bar.md)
 
 ---

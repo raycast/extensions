@@ -1,18 +1,34 @@
 # `Easydict` Changelog
 
+## [1.3.0] - 2022-07-20
+
+### ✨ New
+
+- Added support for DeepL translation.
+- Supported to sort translation results manually.
+
+### 💎 Improvements
+
+- Used some new icons to adapted to the new `raycast` API.
+
+### 🐞 Fixes
+
+- Fixed deleting input box text will cause repeated query selected text problem.
+- Fixed the bug of "✨ New Version Released" flashing when rendering action button.
+
 ## [1.2.0] - 2022-07-04
 
 ### ✨ New
 
-- Added Apple 🍎 system translation.
+- Added Apple 🍎 system translation. (Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F))
 - Added Apple 🍎 system language detection.
 - Added view recent version changelog feature.
 
 ### 💎 Improvements
 
 - Used the logo of Youdao, Baidu, Tencent and other translation services to increase icon recognition.
-- Optimized the response speed of querying selected text.
-- Optimized the response speed and accuracy of automatic language detection.
+- Improved the response speed of querying selected text.
+- Improved the response speed and accuracy of automatic language detection.
 
 ### ✅ Recent Updates
 
@@ -32,12 +48,12 @@
 
 ### 💎 Improvements
 
-- Improved request response speed: no longer send concurrent requests together, change to first request Youdao dictionary API. If input text is not a `word`, continue to request other translation APIs.
+- Improved request response speed.
 - Improved the accuracy of input text language detect, used Tencent language detect API first.
-- Improved the display of long text translation results. Multiple translation results are displayed in the list details page for mutual comparison.
-- Improved the text pronunciation. The online Youdao dictionary pronunciation is preferred for English words, and the TTS service of Youdao translation is used for others. Long text playback uses the say shell command.
-- Improved word phonetic symbol display. When a word has multiple American phonetic symbols, only show the last one.
-- Improved the handling of translation interface exceptions. Only when there is a Youdao translation exception, an error prompt is reported. Other translation exceptions only display toast prompt.
+- Improved the display of long text translation results.
+- Improved the text pronunciation..
+- Improved word phonetic symbol display.
+- Improved the handling of translation interface exceptions.
 
 ### 🐞 Fixes
 

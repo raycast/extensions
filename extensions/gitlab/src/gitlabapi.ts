@@ -149,6 +149,11 @@ function paramString(params: { [key: string]: string }): string {
   return prefix + p.join("&");
 }
 
+function getNextPageNumber(page_response: Response): number | undefined {
+  const header = page_response.headers.get("x-next-page");
+  return header ? parseInt(header) : undefined;
+}
+
 export enum EpicState {
   opened = "opened",
   closed = "closed",
@@ -357,17 +362,19 @@ export class GitLab {
       return response;
     };
     try {
-      let page = 1;
-      const response = await fetchPage(page);
-      const json = await toJsonOrError(response);
-      if (all) {
-        const next_page = response.headers.get("x-next-page");
-        if (next_page && next_page.length > 0) {
-          logAPI(next_page);
-          page++;
-          const jsonpage = await fetchPage(page);
-          json.concat(jsonpage);
-        }
+      const response = await fetchPage(1);
+      let json = await toJsonOrError(response);
+      if (!all) {
+        return json;
+      }
+
+      let next_page = getNextPageNumber(response);
+      while (next_page) {
+        logAPI(next_page);
+        const page_response = await fetchPage(next_page);
+        const page_content = await toJsonOrError(page_response);
+        json = json.concat(page_content);
+        next_page = getNextPageNumber(page_response);
       }
       return json;
     } catch (error: any) {

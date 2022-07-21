@@ -203,7 +203,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.33.0",
+    "@raycast/api": "1.38.0",
     "node-fetch": "^3.0.0",
     "open": "^8.3.0"
   },
