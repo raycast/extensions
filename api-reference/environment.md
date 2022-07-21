@@ -31,6 +31,7 @@ console.log(`LaunchType: ${environment.launchType}`);
 | commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
 | extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
 | isDevelopment<mark style="color:red;">*</mark> | Indicates whether the command is a development command (vs. an installed command from the Store). | <code>boolean</code> |
+| launchType<mark style="color:red;">*</mark> | The type of launch for the command (user initiated or background). | <code>[LaunchType](environment.md#launchtype)</code> |
 | raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |

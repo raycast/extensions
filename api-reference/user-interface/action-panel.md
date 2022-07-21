@@ -12,8 +12,8 @@ Often items are context-aware, e.g., based on the selected list item. Actions ca
 sections and can have keyboard shortcuts assigned.
 
 The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
-In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
-Keep in mind that overriding shortcuts for the primary and secondary actions won't be displayed in the Action Panel.
+In [List](./list.md), [Grid](./grid.md), and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+Keep in mind that while you can specify an alternative shortcut for the primary and secondary actions, it won't be displayed in the Action Panel.
 
 #### Example
 
