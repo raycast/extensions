@@ -4,7 +4,7 @@
 
 ### 🐞 Fixes
 
-- fixed new release prompt may be shown multiple times.
+- Fixed new release prompt being shown multiple times.
 - Handled the exceptional error of request to Youdao translation.
 
 ### ✅ Recent Updates
