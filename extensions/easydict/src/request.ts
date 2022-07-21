@@ -1,9 +1,10 @@
+import { getYoudaoErrorInfo, YoudaoRequestStateCode } from "./consts";
 import { deepLAuthKey } from "./crypto";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 01:59
+ * @lastEditTime: 2022-07-21 15:42
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -32,6 +33,7 @@ import {
   RequestTypeResult,
   TencentTranslateResult,
   TranslationType,
+  YoudaoTranslateResult,
 } from "./types";
 import { getLanguageItemFromYoudaoId } from "./utils";
 
@@ -187,16 +189,29 @@ export function requestYoudaoDictionary(
     axios
       .post(url, params)
       .then((response) => {
-        console.log(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
-        resolve({
+        const youdaoResult = response.data as YoudaoTranslateResult;
+        const youdaoErrorInfo = getYoudaoErrorInfo(youdaoResult.errorCode);
+        const youdaoTypeResult = {
           type: TranslationType.Youdao,
-          result: response.data,
-        });
+          result: youdaoResult,
+          errorInfo: youdaoErrorInfo,
+        };
+        console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
+        if (youdaoResult.errorCode !== YoudaoRequestStateCode.Success.toString()) {
+          reject(youdaoErrorInfo);
+        } else {
+          resolve(youdaoTypeResult);
+        }
       })
       .catch((error) => {
         // It seems that Youdao will never reject, always resolve...
+        // ? Error: write EPROTO 6180696064:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:../deps/openssl/openssl/ssl/statem/statem_lib.c:1994:
         console.error(`youdao translate error: ${error}`);
-        reject(error);
+        reject({
+          type: TranslationType.Youdao,
+          code: error.response.status.toString(),
+          message: error.response.statusText,
+        });
       });
   });
 }
@@ -248,10 +263,14 @@ export function requestBaiduTextTranslate(
           reject(errorInfo);
         }
       })
-      .catch((err) => {
+      .catch((error) => {
         // It seems that Baidu will never reject, always resolve...
-        console.error(`baidu translate error: ${err}`);
-        reject(err);
+        console.error(`---> baidu translate error: ${error}`);
+        reject({
+          type: TranslationType.Baidu,
+          code: error.response.status.toString(),
+          message: error.response.statusText,
+        });
       });
   });
 }
