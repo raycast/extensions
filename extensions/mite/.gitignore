@@ -1,0 +1,11 @@
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# dependencies
+/node_modules
+
+# IntelliJ / WebStorm
+.idea/

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mite",
+  "title": "Mite",
+  "description": "Create mite entries and start/switch timers",
+  "icon": "mite-icon.ico",
+  "author": "deee",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "main",
+      "title": "Mite",
+      "description": "Create mite entries and start/switch timers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "miteApiServer",
+      "title": "Mite API Server URL",
+      "description": "Mite API Server URL",
+      "type": "textfield",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "miteApiKey",
+      "title": "Mite API Key",
+      "description": "Mite API Key",
+      "type": "textfield",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "excludedTerms",
+      "title": "Excluded terms (comma separated)",
+      "description": "Mite entries containing on of these terms will be excluded in the popular entries list",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
