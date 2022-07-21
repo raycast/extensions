@@ -1,6 +1,9 @@
 import getStandings from "../utils/getStandings";
 import { useState, useEffect } from "react";
 import { Team, Conferences } from "../types/standings.types";
+import { Cache } from "@raycast/api";
+
+const cache = new Cache();
 
 const useStandings = (): {
   standings: Conferences;
@@ -14,6 +17,12 @@ const useStandings = (): {
   useEffect(() => {
     const getTeamStandings = async () => {
       let data: any = null;
+
+      const cachedData = cache.get("standings");
+      if (cachedData) {
+        const cachedStandings = JSON.parse(cachedData);
+        setStandings(cachedStandings);
+      }
 
       try {
         data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
@@ -56,6 +65,8 @@ const useStandings = (): {
 
       setStandings({ eastern, western });
       setLoading(false);
+
+      cache.set("standings", JSON.stringify({ eastern, western }));
     };
 
     getTeamStandings();

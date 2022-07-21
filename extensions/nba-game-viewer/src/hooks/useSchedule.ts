@@ -2,6 +2,9 @@ import getSchedule from "../utils/getSchedule";
 import { useState, useEffect } from "react";
 import { Day, Game, Competitor } from "../types/schedule.types";
 import convertDate from "../utils/convertDate";
+import { Cache } from "@raycast/api";
+
+const cache = new Cache();
 
 const useSchedule = (): {
   schedule: Day[];
@@ -18,6 +21,12 @@ const useSchedule = (): {
 
       let data: any = null;
 
+      const cachedData = cache.get("schedule");
+      if (cachedData) {
+        const cachedSchedule = JSON.parse(cachedData);
+        setSchedule(cachedSchedule);
+      }
+
       try {
         data = await getSchedule({
           year: currentDate.getUTCFullYear(),
@@ -30,7 +39,11 @@ const useSchedule = (): {
       }
 
       Object.keys(data).map((key) => {
-        if (!Object.prototype.hasOwnProperty.call(data[key], "games")) {
+        if (
+          !Object.prototype.hasOwnProperty.call(data[key], "games") ||
+          data[key].games?.length == 0 ||
+          data[key]?.games[0].data == undefined
+        ) {
           delete data[key];
         }
       });
@@ -74,6 +87,8 @@ const useSchedule = (): {
 
       setSchedule(scheduledGames);
       setLoading(false);
+
+      cache.set("schedule", JSON.stringify(scheduledGames));
     };
 
     getGames();

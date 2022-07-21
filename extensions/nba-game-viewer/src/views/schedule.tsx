@@ -13,8 +13,9 @@ const Schedue = () => {
 
   return (
     <List isLoading={data.loading}>
+      <List.EmptyView title="No upcoming matches" icon="empty-view.png" />
       {data.schedule.map((day: Day) => (
-        <DayComponent key={day.date} day={day} />
+        <DayComponent key={day?.date} day={day} />
       ))}
     </List>
   );

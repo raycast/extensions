@@ -1,6 +1,9 @@
 import getNews from "../utils/getNews";
 import { useState, useEffect } from "react";
 import type { Article, Category } from "../types/news.types";
+import { Cache } from "@raycast/api";
+
+const cache = new Cache();
 
 const useNews = () => {
   const [news, setNews] = useState<Array<Article>>([]);
@@ -10,6 +13,12 @@ const useNews = () => {
   useEffect(() => {
     const fetchNews = async () => {
       let data: any = null;
+
+      const cachedData = cache.get("news");
+      if (cachedData) {
+        const cachedNews = JSON.parse(cachedData);
+        setNews(cachedNews);
+      }
 
       try {
         data = await getNews();
@@ -38,6 +47,8 @@ const useNews = () => {
 
       setNews(articles);
       setLoading(false);
+
+      cache.set("news", JSON.stringify(articles));
     };
 
     fetchNews();
