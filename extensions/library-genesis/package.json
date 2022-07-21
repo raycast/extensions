@@ -81,8 +81,30 @@
       "required": true
     },
     {
+      "name": "searchPriority",
+      "title": "Priotitize Search By",
+      "description": "Prioritizes searching results by the following fields.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "Preferred Languages",
+          "value": "1"
+        },
+        {
+          "title": "Preferred File Formats",
+          "value": "2"
+        }
+      ],
+      "default": "0",
+      "required": false
+    },
+    {
       "name": "preferredLanguages",
-      "title": "Preferred Languages for Books",
+      "title": "Preferred Languages",
       "description": "A comma separated list of your preferred languages.",
       "type": "textfield",
       "default": "",
@@ -90,12 +112,13 @@
       "required": false
     },
     {
-      "name": "priotizePreferredLanguage",
-      "description": "Prioritizes preferred languages in your searching results.",
-      "type": "checkbox",
-      "default": true,
-      "label": "Prioritize Preferred Languages in Search",
-      "required": true
+      "name": "preferredFormats",
+      "title": "Preferred File Formats",
+      "description": "A comma separated list of your preferred file formats.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "PDF, EPUB, MOBI, ...",
+      "required": false
     }
   ],
   "dependencies": {

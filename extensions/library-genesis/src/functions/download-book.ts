@@ -11,7 +11,6 @@ export const downloadBook = async ({ downloadUrl, title, author, year, extension
     await showHUD("Please select a location to save the book...");
     const url = await getUrlFromDownloadPage(downloadUrl, downloadGateway);
     console.log(url);
-
     await runAppleScript(`
       set outputFolder to choose folder with prompt "Please select an output folder:"
       set temp_folder to (POSIX path of outputFolder) & "${fileName}"
@@ -19,10 +18,10 @@ export const downloadBook = async ({ downloadUrl, title, author, year, extension
       set cmd to "curl -o " & q_temp_folder & " " & "${url}"
         do shell script cmd
     `);
-    await showHUD("Download complete.");
+    await showHUD("Download Complete");
   } catch (err) {
     console.error(err);
-    await showHUD("Couldn't download the book...");
+    await showHUD("Download Failed. Try with a different download gateway.");
   }
 };
 

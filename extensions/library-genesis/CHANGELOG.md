@@ -1,5 +1,9 @@
 # Library Genesis Changelog
 
+## [Added sort by file formats] - 2022-07-21
+
+User can sort the search result based on the preferred file formats.
+
 ## [Updated search books & added features] - 2022-07-20
 
 - Updated seasch implementation
