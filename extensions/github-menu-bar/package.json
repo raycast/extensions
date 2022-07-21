@@ -5,7 +5,6 @@
   "description": "Show new Git commits in the macOS menu bar.",
   "icon": "command-icon.png",
   "author": "fe9lix",
-  "owner": "raycast",
   "license": "MIT",
   "commands": [
     {
