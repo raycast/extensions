@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 02:00
+ * @lastEditTime: 2022-07-21 16:12
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -16,17 +16,22 @@ const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
 const githubApiUrl = "https://api.github.com";
 
+/**
+ * Used for new release prompt.
+ *
+ * Todo: need to optimize the structure of this class.
+ */
 export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "1.3.0";
-  buildNumber = 4;
-  versionDate = "2022-07-16";
-  isNeedPrompt = true;
-  hasPrompted = false; // only show once, then will be set to true
+  version = "1.3.1";
+  buildNumber = 5;
+  versionDate = "2022-07-21";
+  isNeedPrompt = false;
+  hasPrompted = false; // always default false, only show once, then should be set to true.
   releaseMarkdown = changelog;
 
   getRepoUrl() {
@@ -71,6 +76,14 @@ export class Easydict {
   }
 
   /**
+   * Manually hide prompt when viewed,, and store hasPrompted.
+   */
+  public hideReleasePrompt() {
+    this.hasPrompted = true;
+    return this.storeCurrentVersionInfo();
+  }
+
+  /**
    * Get version info with version key, return a promise EasydictInfo.
    */
   async getVersionInfo(versionKey: string): Promise<Easydict | undefined> {
@@ -90,6 +103,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -102,6 +116,8 @@ export class Easydict {
 
   /**
    * Fetch release markdown, return a promise string. First, fetech markdown from github, if failed, then read from localStorage.
+   *
+   * * only show prompt once, whether fetch release markdown from github successful or failed.
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
@@ -111,6 +127,7 @@ export class Easydict {
       console.log("fetch release markdown from github success");
       if (releaseMarkdown) {
         this.releaseMarkdown = releaseMarkdown;
+        this.hasPrompted = true; // need to set hasPrompted to true when user viewed `ReleaseDetail` page.
         return Promise.resolve(releaseMarkdown);
       } else {
         console.error("fetch release markdown from github failed");
@@ -118,11 +135,8 @@ export class Easydict {
       }
     } catch (error) {
       console.error(`fetch release error: ${error}`);
-      return this.getLocalStoredMarkdown();
-    } finally {
-      // only show prompt once, whether fetch release markdown from github successful or failed.
-      this.hasPrompted = true; // need to set hasPrompted to true when user viewed `ReleaseDetail` page.
-      this.storeCurrentVersionInfo(); // store the value to local storage.
+      this.hasPrompted = true;
+      return this.getLocalStoredMarkdown(); // getLocalStoredMarkdown() will store this info first.
     }
   }
 

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 12:58
+ * @lastEditTime: 2022-07-21 15:29
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -148,7 +148,6 @@ export interface MyPreferences {
 
 export interface ActionListPanelProps {
   displayItem: TranslateDisplayItem;
-  isShowingReleasePrompt: boolean;
   isInstalledEudic: boolean;
   onLanguageUpdate: (language: LanguageItem) => void;
 }

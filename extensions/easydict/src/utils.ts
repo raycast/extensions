@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 11:25
+ * @lastEditTime: 2022-07-21 11:53
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -270,12 +270,12 @@ export function checkIfEudicIsInstalled(setIsInstalledEudic: (isInstalled: boole
   });
 }
 
-export function checkIfNeedShowReleasePrompt(setIsShowingReleasePrompt: (isShowing: boolean) => void) {
+export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => void) {
   const currentEasydict = new Easydict();
   currentEasydict.getCurrentVersionInfo().then((easydict) => {
     const isShowingReleasePrompt = easydict.isNeedPrompt && !easydict.hasPrompted;
-    console.log("isShowingReleasePrompt: ", isShowingReleasePrompt);
-    setIsShowingReleasePrompt(isShowingReleasePrompt);
+    // console.log("isShowingReleasePrompt: ", isShowingReleasePrompt);
+    callback(isShowingReleasePrompt);
   });
 }
 
