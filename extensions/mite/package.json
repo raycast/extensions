@@ -3,7 +3,7 @@
   "name": "mite",
   "title": "Mite",
   "description": "Create mite entries and start/switch timers",
-  "icon": "mite-icon.ico",
+  "icon": "mite-icon.png",
   "author": "deee",
   "categories": [
     "Productivity"
