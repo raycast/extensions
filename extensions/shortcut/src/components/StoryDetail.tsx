@@ -47,8 +47,6 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
     return workflow.states.find((state) => state.id === story.workflow_state_id);
   }, [workflow, story]);
 
-  console.log(groupMap);
-
   const storyTeam = useMemo(() => {
     if (!groupMap || !story?.group_id) {
       return;
@@ -164,7 +162,7 @@ function useStoryMarkdown(story?: Story) {
       .map((comment) => {
         const author = memberMap?.[comment.author_id!];
         const commentLines = comment.text.split("\n");
-        console.log(comment.text);
+
         const commentText = commentLines
           .map((line) => {
             if (line.length === 0) {

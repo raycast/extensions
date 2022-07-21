@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemberInfo, useAssignedStories, useProjectMap } from "./hooks";
 import { Project } from "@useshortcut/client";
+import StoryDetail from "./components/StoryDetail";
 
 export default function AssignedStories() {
   const { data: memberInfo } = useMemberInfo();
@@ -29,6 +30,7 @@ export default function AssignedStories() {
             ].filter(Boolean)}
             actions={
               <ActionPanel>
+                <Action.Push title="View Story" target={<StoryDetail storyId={story.id} />} />
                 <Action.OpenInBrowser url={story.app_url} />
               </ActionPanel>
             }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shortcut",
   "title": "Shortcut",
-  "description": "",
+  "description": "Raycast extension for Shortcut",
   "icon": "command-icon.png",
   "author": "Yukai",
   "categories": [
@@ -14,21 +14,14 @@
       "name": "assigned-stories",
       "title": "Assigned Stories",
       "subtitle": "Shortcut",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "open-project-stories",
-      "title": "Open Project Stories",
-      "subtitle": "Shortcut",
-      "description": "",
+      "description": "Show assigned stories",
       "mode": "view"
     },
     {
       "name": "show-iterations",
       "title": "Show Iterations",
       "subtitle": "Shortcut",
-      "description": "",
+      "description": "Show iterations",
       "mode": "view"
     }
   ],
