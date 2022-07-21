@@ -72,17 +72,17 @@
 - [System Utilities](api-reference/utilities.md)
 - [Window & Search Bar](api-reference/window-and-search-bar.md)
 
----
+## Utilities
 
-- [Utilities](utils-reference/README.md)
-  - [Icons](utils-reference/icons/README.md)
-    - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
-    - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
-  - [React hooks](utils-reference/react-hooks/README.md)
-    - [useCachedState](utils-reference/react-hooks/useCachedState.md)
-    - [usePromise](utils-reference/react-hooks/usePromise.md)
-    - [useCachedPromise](utils-reference/react-hooks/useCachedPromise.md)
-    - [useFetch](utils-reference/react-hooks/useFetch.md)
+- [Getting Started](utils-reference/getting-started.md)
+- [Icons](utils-reference/icons/README.md)
+  - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
+  - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
+- [React hooks](utils-reference/react-hooks/README.md)
+  - [useCachedState](utils-reference/react-hooks/useCachedState.md)
+  - [usePromise](utils-reference/react-hooks/usePromise.md)
+  - [useCachedPromise](utils-reference/react-hooks/useCachedPromise.md)
+  - [useFetch](utils-reference/react-hooks/useFetch.md)
 
 ---
 
