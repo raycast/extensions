@@ -7,4 +7,8 @@
 - Update the description of search items when Algolia returns different hierarchy levels
 - Update the version of @raycast/api
 
+## [Update] - 2022-07-16
+
+Updated icon
+
 ## [Initial Version] - 2022-07-15
