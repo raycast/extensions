@@ -82,7 +82,7 @@
     },
     {
       "name": "searchPriority",
-      "title": "Priotitized Search By",
+      "title": "Priotitize Search By",
       "description": "Prioritizes searching results by the following fields.",
       "type": "dropdown",
       "data": [
