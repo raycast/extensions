@@ -113,7 +113,7 @@
     },
     {
       "name": "preferredFormats",
-      "title": "Preferred File Formats for",
+      "title": "Preferred File Formats",
       "description": "A comma separated list of your preferred file formats.",
       "type": "textfield",
       "default": "",
