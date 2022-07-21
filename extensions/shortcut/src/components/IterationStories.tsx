@@ -31,7 +31,7 @@ export function IterationStories({ iterationId }: { iterationId: number }) {
       {possibleWorkflowIdsFromStories.map((workflowId) => {
         const workflow = workflowMap[workflowId];
 
-        return workflow.states.map((state) => {
+        return workflow?.states.map((state) => {
           const stories = groupedStoriesByWorkflowStateId[state.id] || [];
 
           return (
