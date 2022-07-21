@@ -1,5 +1,5 @@
 import { useIterationStories } from "../hooks";
-import { StoriesList } from "./StoriesList";
+import StoriesList from "./StoriesList";
 
 export function IterationStories({ iterationId }: { iterationId: number }) {
   const { data: stories, isValidating } = useIterationStories(iterationId);

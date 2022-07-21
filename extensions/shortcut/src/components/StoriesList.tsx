@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useProjectMap, useWorkflowMap } from "../hooks";
 import StoryListItem from "./StoryListItem";
 
-export function StoriesList({ stories, isLoading }: { stories: StorySlim[] | undefined; isLoading: boolean }) {
+export default function StoriesList({ stories, isLoading }: { stories: StorySlim[] | undefined; isLoading: boolean }) {
   const projectIdMap = useProjectMap();
   const workflowMap = useWorkflowMap();
 

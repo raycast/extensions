@@ -32,6 +32,12 @@ export default function StoryListItem({ project, story }: { project?: Project; s
               } as List.Item.Accessory)
           ),
 
+          owners.length === 0 &&
+            ({
+              icon: Icon.Person,
+              tooltip: "No owners",
+            } as List.Item.Accessory),
+
           project
             ? {
                 icon: {
