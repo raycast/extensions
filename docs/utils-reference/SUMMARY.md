@@ -1,5 +1,5 @@
 - [Utilities](utils-reference/README.md)
-  - [icons](utils-reference/icons/README.md)
+  - [Icons](utils-reference/icons/README.md)
     - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
     - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
   - [React hooks](utils-reference/react-hooks/README.md)
