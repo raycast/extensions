@@ -2,53 +2,85 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-player",
   "title": "Spotify Player",
-  "description": "Search and Play Spotify music from the Raycast, control your library with convinient commands like Like",
+  "description": "Search and Play Spotify music from the Raycast, control your library with convenient commands like Like",
   "icon": "icon.png",
   "author": "mattisssa",
+  "owner": "raycast",
+  "license": "MIT",
   "contributors": [
     "dillionverma",
-    "andreaselia"
+    "andreaselia",
+    "stuart"
   ],
-  "license": "MIT",
   "commands": [
     {
       "name": "searchTracks",
       "title": "Search Tracks",
-      "subtitle": "Spotify Player",
+      "subtitle": "Spotify",
       "description": "Search & Play tracks in Spotify",
       "mode": "view"
     },
     {
+      "name": "justPlay",
+      "title": "Just Play",
+      "subtitle": "Spotify",
+      "description": "Starts the song by query straightway in Spotify",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Track / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "nowPlaying",
+      "title": "Now Playing",
+      "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
+      "subtitle": "Spotify",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "playSimilar",
+      "title": "Play Similar",
+      "subtitle": "Spotify",
+      "description": "Starts playing similar tracks to the currently playing. The command initiate kind a Song's Radio",
+      "mode": "no-view"
+    },
+    {
       "name": "searchAlbums",
       "title": "Search Albums",
-      "subtitle": "Spotify Player",
+      "subtitle": "Spotify",
       "description": "Search & Play albums in Spotify",
       "mode": "view"
     },
     {
       "name": "searchPlaylists",
       "title": "Search Playlists",
-      "subtitle": "Spotify Player",
+      "subtitle": "Spotify",
       "description": "Search & Play playlists in Spotify",
       "mode": "view"
     },
     {
       "name": "searchArtists",
       "title": "Search Artists",
-      "subtitle": "Spotify Player",
+      "subtitle": "Spotify",
       "description": "Search Artists in Spotify",
       "mode": "view"
     },
     {
       "name": "like_current_song",
+      "subtitle": "Spotify",
       "title": "Like Current Song",
-      "subtitle": "Spotify Player",
       "description": "Likes currently playing song",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "1.38.1",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.3",
     "run-applescript": "^6.0.0"
