@@ -1,7 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Project, StorySlim } from "@useshortcut/client";
+import { useMemberMap } from "../hooks";
 
 export default function StoryListItem({ project, story }: { project?: Project; story: StorySlim }) {
+  const memberMap = useMemberMap();
+
+  const owners = story.owner_ids.map((ownerId) => memberMap?.[ownerId]);
+
   return (
     <List.Item
       key={story.id}
@@ -11,14 +16,29 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       accessories={
         [
           story.estimate && {
-            icon: `number-${story.estimate.toString().padStart(2, "0")}-16`,
+            icon: {
+              source: `number-${story.estimate.toString().padStart(2, "0")}-16`,
+            },
+            tooltip: "Estimate",
           },
+
+          ...owners.map(
+            (owner) =>
+              ({
+                icon: {
+                  source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
+                },
+                tooltip: owner?.profile?.name,
+              } as List.Item.Accessory)
+          ),
+
           project
             ? {
                 icon: {
                   source: Icon.CircleFilled,
                   tintColor: project.color,
                 },
+                tooltip: project.name,
               }
             : Icon.Circle,
         ].filter(Boolean) as List.Item.Accessory[]

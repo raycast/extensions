@@ -1,10 +1,27 @@
 import shortcut from "../utils/shortcut";
 import { useMemo } from "react";
 import useSWR from "swr";
-import { Project, Workflow } from "@useshortcut/client";
+import { Member, Project, Workflow } from "@useshortcut/client";
 
 export const useMemberInfo = () => {
   return useSWR("/api/v3/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
+};
+
+export const useMembers = () => {
+  return useSWR("/api/v3/members", () => shortcut.listMembers({}).then((res) => res.data));
+};
+
+export const useMemberMap = () => {
+  const { data } = useMembers();
+  return useMemo(() => {
+    return data?.reduce(
+      (acc, member) => ({
+        ...acc,
+        [member.id]: member,
+      }),
+      {} as Record<string, Member>
+    );
+  }, [data]);
 };
 
 export const useAssignedStories = (owner?: string) => {
