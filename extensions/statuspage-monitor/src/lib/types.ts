@@ -1,3 +1,5 @@
+// Types (stolen with permission) from https://github.com/Benricheson101/statuspage.js
+
 /** Component status indicators */
 export type Indicator = "none" | "minor" | "major" | "critical" | "maintenance";
 

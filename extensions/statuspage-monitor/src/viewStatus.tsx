@@ -1,9 +1,9 @@
-import { ActionPanel, Detail, List, Action, Icon, Color, Image } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
 
 import { useState, useEffect } from "react";
 import AddServiceList from "./addService";
-import { getStatus, getFavicon } from "./lib/api";
-import { getPageIds, removePageId, setPageIds } from "./lib/store";
+import { getStatus } from "./lib/api";
+import { getPageIds, removePageId } from "./lib/store";
 import { PageStatus } from "./lib/types";
 import { capitalizeFirstLetter, iconForIndicator } from "./lib/util";
 import ServiceStatusList from "./service";
@@ -55,7 +55,8 @@ export default function ViewStatusList() {
   function ServiceActionPanel({ id }: { id: string }) {
     return (
       <ActionPanel>
-        <Action.Push title="View Status" icon={Icon.ArrowRight} target={<ServiceStatusList id={id} />} />
+        <Action.Push title="View Status" icon={Icon.Clock} target={<ServiceStatusList id={id} />} />
+        <Action.OpenInBrowser title="Visit Statuspage" url={`https://${id}.statuspage.io`} />
         <Action
           title="Delete Service"
           icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -87,7 +88,10 @@ export default function ViewStatusList() {
                 key={index}
                 title={service.page.name}
                 subtitle={service.status.description}
-                icon={`https://www.google.com/s2/favicons?domain=${service.page.url}&sz=64`}
+                icon={{
+                  source: `https://www.google.com/s2/favicons?domain=${service.page.url}&sz=64`,
+                  fallback: Icon.Globe,
+                }}
                 accessories={[
                   {
                     icon: iconForIndicator(service.status.indicator),

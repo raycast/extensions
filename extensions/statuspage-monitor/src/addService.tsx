@@ -16,6 +16,10 @@ export const popularServices = [
   "gpkpyklzq55q", // Twilio
   "kr0djjh0jyy9", // Coinbase
   "yh6f0r4529hb", // Cloudflare
+  "zjttvm6ql9lp", // Twitter API
+  "kgl53swp0yg1", // Notion
+  "lvglq8h0mdyh", // Vercel
+  "rxpksf93ynw6", // Figma
 ];
 
 export default function AddServiceList({ refreshStatus }: { refreshStatus?: () => void }) {
@@ -30,16 +34,18 @@ export default function AddServiceList({ refreshStatus }: { refreshStatus?: () =
     setLoading(true);
 
     const fetchStatusPages = await Promise.all(
-      popularServices.map(
-        (id) =>
-          new Promise<PageStatus | null>((res) => {
-            getStatus(id)
-              .then(res)
-              .catch(() => {
-                res(null);
-              });
-          })
-      )
+      popularServices
+        .sort(() => (Math.random() > 0.5 ? 1 : -1))
+        .map(
+          (id) =>
+            new Promise<PageStatus | null>((res) => {
+              getStatus(id)
+                .then(res)
+                .catch(() => {
+                  res(null);
+                });
+            })
+        )
     );
 
     const pages = fetchStatusPages.filter((p): p is PageStatus => !!p);
@@ -82,7 +88,10 @@ export default function AddServiceList({ refreshStatus }: { refreshStatus?: () =
             <List.Item
               key={index}
               title={service.page.name}
-              icon={`https://www.google.com/s2/favicons?domain=${service.page.url}&sz=64`}
+              icon={{
+                source: `https://www.google.com/s2/favicons?domain=${service.page.url}&sz=64`,
+                fallback: Icon.Globe,
+              }}
               actions={<AddServiceActionPanel service={service} />}
             />
           ))}
@@ -136,7 +145,7 @@ export function AddCustomServiceForm({ refreshStatus }: { refreshStatus?: () => 
       <Form.TextField
         id="url"
         title="Page URL"
-        placeholder="https://githubstatus.com"
+        placeholder="https://www.redditstatus.com"
         info="The URL of the service's status page."
         error={urlError}
         onChange={validateForm}

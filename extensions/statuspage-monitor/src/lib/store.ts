@@ -1,7 +1,6 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import { environment, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
-export const defaultPagesConfig = ["kctbh9vrtdwd", "srhpyqt94yxb", "yh6f0r4529hb"];
+export const defaultPagesConfig = [];
 
 export async function getPageIds() {
   const pageIdStore = await LocalStorage.getItem<string>("pages");

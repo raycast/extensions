@@ -1,4 +1,4 @@
-import { AllIncidents, Component, ComponentGroup, Incident, PageStatus, Summary } from "./lib/types";
+import { AllIncidents, ComponentGroup, Incident, Summary } from "./lib/types";
 import { useState, useEffect } from "react";
 import { getAllIncidents, getSummary } from "./lib/api";
 import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
@@ -44,7 +44,10 @@ export default function ServiceStatusList({ id }: { id: string }) {
         <List.Item
           title={summary.page.name}
           subtitle={summary.status.description}
-          icon={`https://www.google.com/s2/favicons?domain=${summary.page.url}&sz=64`}
+          icon={{
+            source: `https://www.google.com/s2/favicons?domain=${summary.page.url}&sz=64`,
+            fallback: Icon.Globe,
+          }}
           accessories={[
             {
               icon: iconForIndicator(summary.status.indicator),

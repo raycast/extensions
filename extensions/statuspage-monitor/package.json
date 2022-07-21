@@ -15,6 +15,7 @@
     {
       "name": "viewStatus",
       "title": "View Status",
+      "subtitle": "Statuspage",
       "description": "View the status of your added services",
       "mode": "view"
     }
