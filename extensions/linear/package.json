@@ -5,6 +5,7 @@
   "description": "Create, search and modify issues.",
   "icon": "linear.png",
   "owner": "raycast",
+  "access": "public",
   "author": "thomaslombart",
   "contributors": [
     "mathieudutour"
