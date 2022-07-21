@@ -57,6 +57,7 @@ export default function Main({ prefix = "" }): JSX.Element {
           key={i}
           title={entry}
           icon={getIcon(entry)}
+          accessories={[{ icon: Icon.ChevronRight }]}
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(entry)} />
