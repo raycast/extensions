@@ -74,6 +74,18 @@
 
 ---
 
+- [Utilities](utils-reference/README.md)
+  - [icons](utils-reference/icons/README.md)
+    - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
+    - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
+  - [React hooks](utils-reference/react-hooks/README.md)
+    - [useCachedState](utils-reference/react-hooks/useCachedState.md)
+    - [usePromise](utils-reference/react-hooks/usePromise.md)
+    - [useCachedPromise](utils-reference/react-hooks/useCachedPromise.md)
+    - [useFetch](utils-reference/react-hooks/useFetch.md)
+
+---
+
 - [Changelog](changelog.md)
 - [Migration](migration/README.md)
   - [v1.28.0](migration/v1.28.0.md)
