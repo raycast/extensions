@@ -5,7 +5,7 @@
 ### 🐞 Fixes
 
 - fixed new release prompt may be shown multiple times.
-- handled the exceptional error of request to Youdao translation.
+- Handled the exceptional error of request to Youdao translation.
 
 ### ✅ Recent Updates
 
