@@ -82,6 +82,6 @@ export const sortBooksByPreferredFileFormats = (books: BookEntry[], preferredFor
 
     return weightB - weightA;
   });
-
+  
   return books;
 };
