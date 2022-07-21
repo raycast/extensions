@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "statuspage-monitor",
   "title": "Statuspage Monitor",
-  "description": "Monitor the status and view incidents of services using Atlassian Statuspage",
+  "description": "View and monitor the status of services using Atlassian Statuspage inside Raycast! View specific component and overall status and current issues of many services on the web.",
   "icon": "command-icon.png",
   "author": "coding",
   "categories": [
