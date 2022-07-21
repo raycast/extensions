@@ -1,5 +1,10 @@
 # pass Changelog
 
+## [New Additions / Fix] - 2022-07-20
+
+- Remove extra blank lines form password list.
+- Add the functionality to navigate through the directories tree.
+
 ## [New Additions] - 2022-07-19
 
 - Add action to display the content of a secret.
