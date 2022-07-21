@@ -31,13 +31,17 @@ export async function pastePassword(entry: string): Promise<void> {
   }
 }
 
-export default function (): JSX.Element {
+const getIcon = (entry: string) => (isDirectory(entry) ? Icon.Folder : Icon.Key);
+
+const getTarget = (entry: string) => (isDirectory(entry) ? <Main prefix={entry} /> : <Details entry={entry} />);
+
+export default function Main({ prefix = "" }): JSX.Element {
   const [entries, setEntries] = useState<string[]>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect((): void => {
     gopass
-      .list()
+      .list({ limit: 0, prefix })
       .then(setEntries)
       .catch(async (error) => {
         console.error(error);
@@ -52,10 +56,10 @@ export default function (): JSX.Element {
         <List.Item
           key={i}
           title={entry}
-          icon={isDirectory(entry) ? Icon.Folder : Icon.Key}
+          icon={getIcon(entry)}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" icon={Icon.Document} target={<Details entry={entry} />} />
+              <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(entry)} />
               <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
               <Action
                 title="Paste Password to Active App"
