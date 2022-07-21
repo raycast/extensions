@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
+import shortcut from "../utils/shortcut";
 
 const storyTasksMarkdown = (story: Story) => {
   if (story.tasks.length === 0) {
@@ -23,7 +24,7 @@ ${tasklist}
 };
 
 export default function StoryDetail({ storyId }: { storyId: number }) {
-  const { data: story, isValidating } = useStory(storyId);
+  const { data: story, isValidating, mutate: mutateStory } = useStory(storyId);
   const workflowMap = useWorkflowMap();
   const storyMarkdown = useStoryMarkdown(story);
   const groupMap = useGroupsMap();
@@ -84,7 +85,85 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
       isLoading={isValidating}
       navigationTitle={story?.name}
       markdown={storyMarkdown}
-      actions={<ActionPanel>{story && <Action.OpenInBrowser url={story?.app_url} />}</ActionPanel>}
+      actions={
+        <ActionPanel title="Story Actions">
+          <ActionPanel.Section>
+            {story && (
+              <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
+            )}
+          </ActionPanel.Section>
+
+          {story && (
+            <>
+              <ActionPanel.Submenu
+                title="Set Status..."
+                icon={Icon.Pencil}
+                shortcut={{
+                  modifiers: ["cmd", "shift"],
+                  key: "s",
+                }}
+              >
+                {workflow?.states.map((state) => {
+                  const onAction = async () => {
+                    try {
+                      await shortcut.updateStory(story.id, { workflow_state_id: state.id });
+                      await mutateStory();
+                    } catch (error) {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to update story",
+                        message: String(error),
+                      });
+                    }
+                  };
+
+                  return (
+                    <Action
+                      title={state.name}
+                      onAction={onAction}
+                      key={state.id}
+                      icon={state.id !== story.workflow_state_id ? Icon.Circle : Icon.CircleFilled}
+                    />
+                  );
+                })}
+              </ActionPanel.Submenu>
+
+              <ActionPanel.Submenu
+                title="Set Type..."
+                icon={Icon.Bookmark}
+                shortcut={{
+                  modifiers: ["cmd", "shift"],
+                  key: "t",
+                }}
+              >
+                {["bug", "chore", "feature"].map((type) => {
+                  const onAction = async () => {
+                    try {
+                      await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" });
+                      await mutateStory();
+                    } catch (error) {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to update story",
+                        message: String(error),
+                      });
+                    }
+                  };
+
+                  return (
+                    <Action
+                      title={type}
+                      onAction={onAction}
+                      key={type}
+                      icon={type !== story.story_type ? Icon.Circle : Icon.CircleFilled}
+                    />
+                  );
+                })}
+              </ActionPanel.Submenu>
+            </>
+          )}
+        </ActionPanel>
+      }
       metadata={
         story && (
           <Detail.Metadata>
