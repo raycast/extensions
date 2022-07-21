@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { isEmpty, sortBooksByPreferredLanguages } from "../utils/common-utils";
+import { isEmpty, sortBooksByPreferredLanguages, sortBooksByPreferredFileFormats } from "../utils/common-utils";
 import { getLibgenSearchResults } from "../utils/libgen-api";
-import { BookEntry, LibgenPreferences } from "../types";
+import { BookEntry, LibgenPreferences, SearchPriority } from "../types";
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import Style = Toast.Style;
 
@@ -21,10 +21,17 @@ export const searchBooksOnLibgen = (searchContent: string) => {
 
     getLibgenSearchResults(searchContent.trim())
       .then((books) => {
-        const { preferredLanguages, priotizePreferredLanguage } = getPreferenceValues<LibgenPreferences>();
+        const { searchPriority, preferredLanguages, preferredFormats } = getPreferenceValues<LibgenPreferences>();
 
-        if (priotizePreferredLanguage) {
+        // sort books by search priority
+        if (+searchPriority === SearchPriority.PreferredLanguages) {
+          console.log("Sorting by preferred languages:", preferredLanguages);
           books = sortBooksByPreferredLanguages(books, preferredLanguages);
+        }
+
+        if (+searchPriority === SearchPriority.PreferredFileFormats) {
+          console.log("Sorting by preferred formats:", preferredFormats);
+          books = sortBooksByPreferredFileFormats(books, preferredFormats);
         }
 
         setBooks(books);

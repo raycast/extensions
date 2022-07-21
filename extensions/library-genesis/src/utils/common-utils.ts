@@ -60,3 +60,28 @@ export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLangu
 
   return books;
 };
+
+export const sortBooksByPreferredFileFormats = (books: BookEntry[], preferredFormats: string) => {
+  // parse the formats to a list in lower case
+  const preferredFormatList = parseLowerCaseArray(preferredFormats);
+  // generate a weight table based on the order of formats
+  const formatWeights: { [format: string]: number } = {};
+  preferredFormatList.forEach((pf, i) => {
+    formatWeights[pf] = preferredFormatList.length - i;
+  });
+
+  // sort books based on the format weight
+  books.sort((a, b) => {
+    // https://stackoverflow.com/questions/20864893/replace-all-non-alphanumeric-characters-new-lines-and-multiple-white-space-wit
+    // clean up the file format string
+    const extensionA = a.extension.replace(/[\W_]+/g, "");
+    const weightA = extensionA in formatWeights ? formatWeights[extensionA] : 0;
+
+    const extensionB = b.extension.replace(/[\W_]+/g, "");
+    const weightB = extensionB in formatWeights ? formatWeights[extensionB] : 0;
+
+    return weightB - weightA;
+  });
+
+  return books;
+};
