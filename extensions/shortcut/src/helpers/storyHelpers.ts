@@ -1,4 +1,5 @@
 import { Icon, Image, List } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { Member } from "@useshortcut/client";
 
 export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
@@ -6,10 +7,7 @@ export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
     ...owners.filter(Boolean).map(
       (owner) =>
         ({
-          icon: {
-            source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
-            mask: Image.Mask.Circle,
-          },
+          icon: getMemberAvatar(owner!),
           tooltip: owner?.profile?.name,
         } as List.Item.Accessory)
     ),
@@ -20,4 +18,15 @@ export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
         tooltip: "No owners",
       } as List.Item.Accessory),
   ].filter(Boolean);
+}
+
+export function getMemberAvatar(member: Member): Image.ImageLike {
+  if (member.profile?.display_icon?.url) {
+    return {
+      source: member.profile?.display_icon.url,
+      mask: Image.Mask.Circle,
+    };
+  } else {
+    return getAvatarIcon(member.profile.name || member.profile.mention_name);
+  }
 }

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Detail, Icon, Image, showToast, Toast } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
+import { getMemberAvatar } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
 import shortcut from "../utils/shortcut";
@@ -194,13 +194,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
 
             {requester && (
               <Detail.Metadata.TagList title="Requester">
-                <Detail.Metadata.TagList.Item
-                  text={requester?.profile.name || ""}
-                  icon={{
-                    source: `https://www.gravatar.com/avatar/${requester?.profile?.gravatar_hash}`,
-                    mask: Image.Mask.Circle,
-                  }}
-                />
+                <Detail.Metadata.TagList.Item text={requester?.profile.name || ""} icon={getMemberAvatar(requester)} />
               </Detail.Metadata.TagList>
             )}
 
@@ -211,10 +205,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                     <Detail.Metadata.TagList.Item
                       key={owner.id}
                       text={owner?.profile?.name || ""}
-                      icon={{
-                        source: `https://www.gravatar.com/avatar/${owner?.profile?.gravatar_hash}`,
-                        mask: Image.Mask.Circle,
-                      }}
+                      icon={getMemberAvatar(owner)}
                     />
                   );
                 })}
