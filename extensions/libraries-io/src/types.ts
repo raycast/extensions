@@ -32,7 +32,7 @@ export interface DependenciesResponse {
 
 export interface Platform {
   name: string;
-  projectCount: number;
+  project_count: number;
   homepage: string;
   defaultLanguage: string;
 }
