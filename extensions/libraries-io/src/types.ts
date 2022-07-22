@@ -36,3 +36,7 @@ export interface Platform {
   homepage: string;
   defaultLanguage: string;
 }
+
+export interface Subscription {
+  project: Package;
+}
