@@ -40,27 +40,29 @@ export default function ({ entry }: { entry: string }): JSX.Element {
 
   return (
     <List isLoading={loading}>
-      {!loading && (
-        <List.Item
-          title="Password"
-          subtitle="*****************"
-          actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
-        />
-      )}
-
-      {details.map((item, index) => {
-        const [key, ...values] = item.split(": ");
-        const value = values.join(": ");
-
-        return (
+      <List.Section title={"/" + entry}>
+        {!loading && (
           <List.Item
-            key={index}
-            title={humanize(key)}
-            subtitle={value}
-            actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
+            title="Password"
+            subtitle="*****************"
+            actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
           />
-        );
-      })}
+        )}
+
+        {details.map((item, index) => {
+          const [key, ...values] = item.split(": ");
+          const value = values.join(": ");
+
+          return (
+            <List.Item
+              key={index}
+              title={humanize(key)}
+              subtitle={value}
+              actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }
