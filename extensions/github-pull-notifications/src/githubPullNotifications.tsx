@@ -16,6 +16,15 @@ export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
+  const [recentPulls, setRecentPulls] = useState<PullSearchResultShort[]>([]);
+
+  const addRecentPull = (pull: PullSearchResultShort) => {
+    setRecentPulls(recentPulls => [...recentPulls, pull]);
+    cache.set("recentPulls", JSON.stringify(recentPulls));
+  };
+
+  const onAction = (pull: PullSearchResultShort) =>
+    () => open(pull.html_url).then(() => addRecentPull(pull));
 
   console.log("main func");
 
@@ -25,9 +34,11 @@ export default function githubPullNotifications() {
     console.debug("get from cache...");
     const myPulls = cache.get("myPulls");
     const participatedPulls = cache.get("participatedPulls");
+    const recentPulls = cache.get("recentPulls");
 
     myPulls && setMyPulls(JSON.parse(myPulls));
     participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
+    recentPulls && setRecentPulls(JSON.parse(recentPulls));
     console.debug("maybe got something from cache");
 
     if (environment.launchType === LaunchType.UserInitiated) {
@@ -80,8 +91,15 @@ export default function githubPullNotifications() {
         key={pull.id}
         title={pull.title}
         icon={pull.user?.avatar_url}
-        onAction={() => open(pull.html_url)}
+        onAction={onAction(pull)}
       />)}
+      {recentPulls.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
+        {recentPulls.map(pull => <MenuBarExtra.Item
+          title={pull.title}
+          icon={pull.user?.avatar_url}
+          onAction={() => open(pull.html_url)}
+        />)}
+      </MenuBarExtra.Submenu>}
     </MenuBarExtra>
   );
 }
@@ -97,7 +115,7 @@ function filterPulls(login: string, myPulls: PullSearchResultShort[]) {
           .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop())
           .then(comment => {
             if (comment && comment.user?.login !== login) {
-              pull.html_url = comment.html_url
+              pull.html_url = comment.html_url;
 
               return pull;
             }
