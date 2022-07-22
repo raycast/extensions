@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
 import React from "react";
-import { useErrors } from "./composables";
+import { useErrors } from "./hooks";
 import { calculateClamp, validateAllValues, validateValue, Values } from "./utils";
 
 export default function Command() {
@@ -19,28 +19,18 @@ export default function Command() {
   } = useErrors();
 
   async function handleSubmit(values: Values) {
-    try {
-      const errors = validateAllValues(values);
+    const errors = validateAllValues(values);
 
-      if (errors.length) {
-        errors.forEach(({ key, value }) => {
-          setErrorByKey(key, value);
-        });
-
-        return false;
-      }
-
-      const clamp = calculateClamp(values, "rem");
-      await Clipboard.copy(clamp);
-
-      await showHUD("Clamp Copied 🎊");
-    } catch (error: any) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error!",
-        message: error.message,
+    if (errors.length) {
+      errors.forEach(({ key, value }) => {
+        setErrorByKey(key, value);
       });
     }
+
+    const clamp = calculateClamp(values, "rem");
+    await Clipboard.copy(clamp);
+
+    await showHUD("Clamp Copied 🎊");
   }
 
   return (
