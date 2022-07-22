@@ -9,29 +9,37 @@ import { PullRequestLastVisit, PullSearchResultShort } from "./integration/types
 import { getLogin } from "./integration/getLogin";
 import { pullSearch } from "./integration/pullSearch";
 
+function getTimestampISOInSeconds() {
+  return new Date().toISOString().substring(0, 19) + "Z";
+}
+
 // noinspection JSUnusedGlobalSymbols
 export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
-  const [recentPullVisits, setRecentPullVisits] = useState<PullRequestLastVisit[]>([]);
+  const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
 
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
-      .then(() => recentPullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
-      .then(filtered => [{pull, last_visit: new Date().toISOString().substring(0, 19) + "Z"}, ...filtered])
-      .then(visits => Promise.all([
-        Promise.resolve().then(() => setRecentPullVisits(visits)),
-        LocalStorage.setItem("recentPulls", JSON.stringify(visits)),
-        Promise.resolve().then(() => myPulls.filter(myPull => myPull.number !== pull.number)).then(myPulls => {
-          setMyPulls(myPulls);
-          return LocalStorage.setItem("myPulls", JSON.stringify(myPulls));
-        }),
-        Promise.resolve().then(() => participatedPulls.filter(participatedPull => participatedPull.number !== pull.number)).then(participatedPulls => {
-          setParticipatedPulls(participatedPulls);
-          return LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPulls));
-        })
-      ]));
+      .then(() => pullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
+      .then(filtered => [{pull, last_visit: getTimestampISOInSeconds()}, ...filtered])
+      .then(pullVisits => {
+        const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
+        const participatedPullsFiltered = participatedPulls.filter(
+          participatedPull => participatedPull.number !== pull.number
+        );
+
+        setPullVisits(pullVisits);
+        setMyPulls(myPullsFiltered);
+        setParticipatedPulls(participatedPullsFiltered);
+
+        return Promise.all([
+          LocalStorage.setItem("recentPulls", JSON.stringify(pullVisits)),
+          LocalStorage.setItem("myPulls", JSON.stringify(myPullsFiltered)),
+          LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPullsFiltered)),
+        ])
+      });
 
   const onAction = (pull: PullSearchResultShort) =>
     Promise.resolve()
@@ -40,7 +48,7 @@ export default function githubPullNotifications() {
 
   useEffect(() => {
     Promise.resolve()
-      // .then(() => LocalStorage.removeItem("recentPulls"))
+      // .then(() => LocalStorage.clear())
       .then(() => console.debug("initializing..."))
       .then(() => Promise.all([
         LocalStorage.getItem("myPulls").then(data => data as string | undefined),
@@ -51,7 +59,7 @@ export default function githubPullNotifications() {
         myPulls && setMyPulls(JSON.parse(myPulls));
         participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
         const parse = JSON.parse(recentPulls || "[]") as PullRequestLastVisit[];
-        recentPulls && setRecentPullVisits(parse);
+        recentPulls && setPullVisits(parse);
 
         return parse;
       })
@@ -114,9 +122,9 @@ export default function githubPullNotifications() {
         icon={pull.user?.avatar_url}
         onAction={() => onAction(pull)}
       />)}
-      {(myPulls.length > 0 || participatedPulls.length > 0) && recentPullVisits.length > 0 && <MenuBarExtra.Separator />}
-      {recentPullVisits.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
-        {recentPullVisits.map(({pull: {id, title, user, html_url}}) => <MenuBarExtra.Item
+      {(myPulls.length > 0 || participatedPulls.length > 0) && pullVisits.length > 0 && <MenuBarExtra.Separator />}
+      {pullVisits.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
+        {pullVisits.map(({pull: {id, title, user, html_url}}) => <MenuBarExtra.Item
           key={id}
           title={title}
           icon={user?.avatar_url}
