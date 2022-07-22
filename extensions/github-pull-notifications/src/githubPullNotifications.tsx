@@ -5,7 +5,7 @@ import {
   getPullComments,
   pullToCommentsParams
 } from "./integration/getComments";
-import { PullSearchResultShort } from "./integration/types";
+import { PullRequestLastVisit, PullSearchResultShort } from "./integration/types";
 import { getLogin } from "./integration/getLogin";
 import { pullSearch } from "./integration/pullSearch";
 
@@ -14,17 +14,17 @@ export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
-  const [recentPulls, setRecentPulls] = useState<PullSearchResultShort[]>([]);
+  const [recentPullVisits, setRecentPullVisits] = useState<PullRequestLastVisit[]>([]);
 
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
-      .then(() => recentPulls.filter(recentPull => recentPull.number !== pull.number))
-      .then(filteredPulls => {
-        const pulls = [pull, ...filteredPulls];
+      .then(() => recentPullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
+      .then(filteredVisits => {
+        const visits = [{pull, last_visit: new Date().toISOString().substring(0, 19) + "Z"}, ...filteredVisits];
 
-        setRecentPulls(pulls);
+        setRecentPullVisits(visits);
 
-        return LocalStorage.setItem("recentPulls", JSON.stringify(pulls));
+        return LocalStorage.setItem("recentPulls", JSON.stringify(visits));
       });
 
   const onAction = (pull: PullSearchResultShort) =>
@@ -44,7 +44,7 @@ export default function githubPullNotifications() {
       .then(([myPulls, participatedPulls, recentPulls]) => {
         myPulls && setMyPulls(JSON.parse(myPulls));
         participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
-        recentPulls && setRecentPulls(JSON.parse(recentPulls));
+        recentPulls && setRecentPullVisits(JSON.parse(recentPulls));
       })
       .then(() => {
         if (environment.launchType === LaunchType.UserInitiated) {
@@ -105,12 +105,13 @@ export default function githubPullNotifications() {
         icon={pull.user?.avatar_url}
         onAction={() => onAction(pull)}
       />)}
-      {recentPulls.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
-        {recentPulls.map(pull => <MenuBarExtra.Item
-          key={pull.id}
-          title={pull.title}
-          icon={pull.user?.avatar_url}
-          onAction={() => open(pull.html_url)}
+      {(myPulls.length > 0 || participatedPulls.length > 0) && recentPullVisits.length > 0 && <MenuBarExtra.Separator />}
+      {recentPullVisits.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
+        {recentPullVisits.map(({pull: {id, title, user, html_url}}) => <MenuBarExtra.Item
+          key={id}
+          title={title}
+          icon={user?.avatar_url}
+          onAction={() => open(html_url)}
         />)}
 
       </MenuBarExtra.Submenu>}

@@ -30,3 +30,8 @@ export type CommentShort = {
   html_url: string;
   user: UserShort | null;
 };
+
+export type PullRequestLastVisit = {
+  pull: PullSearchResultShort;
+  last_visit: string;
+}
