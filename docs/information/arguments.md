@@ -1,41 +1,20 @@
-## Arguments
+# Arguments
 
 Raycast supports arguments for your commands so that users can enter values right from Root Search before opening the command.
 
 ![](../.gitbook/assets/arguments.png)
 
-Arguments are configured in the [manifest](../information/manifest.md#argument-properties) per command.
+Arguments are configured in the [manifest](./manifest.md#argument-properties) per command.
 
 {% hint style="info" %}
 
 - **Maximum number of arguments:** 3 (if you have a use case that requires more, please let us know via feedback or in the [Slack community](https://www.raycast.com/community))
-- The order of the arguments specified in manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before optional ones.
+- The order of the arguments specified in the manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before optional ones.
   {% endhint %}
 
-Here's an example of a simple command with two arguments:
+## Example
 
-```typescript
-import { Form } from "@raycast/api";
-
-interface TodoArguments {
-  title: string;
-  subtitle?: string;
-}
-
-export default function Todoist(props: { arguments: TodoArguments }) {
-  const { title, subtitle } = props.arguments;
-  console.log(`title: ${title}, subtitle: ${subtitle}`);
-
-  return (
-    <Form>
-      <Form.TextField id="title" title="Title" defaultValue={title} />
-      <Form.TextField id="subtitle" title="Subtitle" defaultValue={subtitle} />
-    </Form>
-  );
-}
-```
-
-And the `package.json` will look like this:
+Let's say we want a command with two arguments. Its `package.json` will look like this:
 
 ```json
 {
@@ -78,11 +57,34 @@ And the `package.json` will look like this:
 }
 ```
 
-#### Return
+The command itself will receive the arguments' values via the `arguments` prop:
 
-An object with the argument name as property key and the typed value as property value.
+```typescript
+import { Form } from "@raycast/api";
 
-Depending on the type of the argument, the type of its value will be different. For `text` and `password`, the value type is `string`.
+interface TodoArguments {
+  title: string;
+  subtitle?: string;
+}
+
+export default function Todoist(props: { arguments: TodoArguments }) {
+  const { title, subtitle } = props.arguments;
+  console.log(`title: ${title}, subtitle: ${subtitle}`);
+
+  return (
+    <Form>
+      <Form.TextField id="title" title="Title" defaultValue={title} />
+      <Form.TextField id="subtitle" title="Subtitle" defaultValue={subtitle} />
+    </Form>
+  );
+}
+```
+
+## Top-level `arguments` prop
+
+A command receives the values of its arguments via a top-level prop named `arguments`. It is an object with the arguments' `name` as keys and their values as the property values.
+
+Depending on the `type` of the argument, the type of its value will be different.
 
 | Argument type         | Value type          |
 | :-------------------- | :------------------ |
