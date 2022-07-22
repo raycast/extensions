@@ -5,7 +5,7 @@ import { Assignment } from "./components/assignment";
 import { Announcement } from "./components/announcement";
 import { EmptyView } from "./components/error-view";
 import { checkApi, getCourses, getAssignments, getAnnouncements } from "./utils/api";
-import { course, announcement } from "./utils/types";
+import { course, announcement, assignment } from "./utils/types";
 import { Error } from "./utils/utils";
 
 export default function main() {
@@ -53,8 +53,8 @@ export default function main() {
           </List.Section>
           <List.Section title="Assignments">
             {!isLoading &&
-              courses.map((course: any) =>
-                course.assignments?.map((assignment: any) => <Assignment key={assignment.id} {...assignment} />)
+              courses.map((course: course) =>
+                course.assignments?.map((assignment: assignment) => <Assignment key={assignment.id} {...assignment} />)
               )}
           </List.Section>
           <List.Section title="Announcements">
