@@ -92,7 +92,7 @@ Same as any other commands, `menu-bar` commands can be run directly from Raycast
 
 {% hint style="danger" %}
 If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` - in which case Raycast will render and immediately unload the command, or set it to `true` while it's performing an async task (such as an API call) and then set it to `false` once it's done. Same as above, Raycast will load the command code, execute it, wait for `MenuBarExtra`'s `isLoading` prop to switch to `false`, and then unload the command.
-{% endhint %]
+{% endhint %}
 
 ### At a set interval
 
@@ -131,7 +131,7 @@ Adds an item to the menu bar, optionally with a menu attached in case its `child
 
 {% hint style="info" %}
 `menu-bar` commands don't always need to return a `MenuBarExtra`. Sometimes it makes sense to remove an item from the menu bar, in which case you can write your command logic to return `null` instead.
-{% %}
+{% endhint %}
 
 #### Example
 
