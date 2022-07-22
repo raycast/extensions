@@ -27,7 +27,7 @@ export function PipelineListItem({ pipeline }: PipelineListItemProps) {
       title={pipeline.name}
       subtitle={pipeline.description}
       icon={getStateIcon(state)}
-      accessoryIcon={favoriteIcon}
+      accessories={[{ icon: favoriteIcon }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={pipeline.url} />
