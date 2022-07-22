@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [MR Details] - 2022-07-23
+
+- Add a new setting to show details in merge request list via a metadata view.
+- Switch `My Reviews` to use `MRListItem` to display merge requests.
+- Upgrade Raycast API and fix resulting compilation errors.
+
 ## [Bugfix] - 2022-07-16
 
 - Fixes an issue in the GitLab extension that was preventing fetching all the pages from the API, even though the all parameter was enabled.
