@@ -1,7 +1,7 @@
-import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
-import { Group, MergeRequest, Project } from "../gitlabapi";
+import { ActionPanel, List, Color, Detail, Action, Image, Icon } from "@raycast/api";
+import { Group, MergeRequest, Project, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getGitLabGQL, gitlab } from "../common";
+import { getGitLabGQL, getListDetailsPreference, gitlab } from "../common";
 import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
@@ -149,6 +149,66 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   );
 }
 
+export function MRListDetail(props: { mr: MergeRequest; subtitle: string }): JSX.Element {
+  const mr = props.mr;
+  const { mrdetail, error, isLoading } = useDetail(props.mr.id);
+  if (error) {
+    showErrorToast(error, "Could not get Merge Request Details");
+  }
+
+  const lines: string[] = [];
+  lines.push(`# ${mr.title}`);
+
+  const desc = mrdetail?.description ?? props.mr.description ?? "";
+  lines.push(optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
+
+  return (
+    <List.Item.Detail
+      markdown={lines.join("\n")}
+      isLoading={isLoading}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title={`${mr.source_branch} ➜ ${mr.target_branch}`} text={props.subtitle} />
+          <List.Item.Detail.Metadata.Separator />
+          {mr.author && (
+            <List.Item.Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />
+          )}
+          <UserMetadataLabel users={mr.assignees} singular="Assignee" plural="Assignees" />
+          <UserMetadataLabel users={mr.reviewers} singular="Reviewer" plural="Reviewers" />
+          {mr.milestone && <List.Item.Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+          {mr.labels.length > 0 && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              {mr.labels.map((m) => (
+                <List.Item.Detail.Metadata.Label
+                  key={m.id}
+                  title={m.name}
+                  icon={{ source: Icon.CircleFilled, tintColor: m.color }}
+                />
+              ))}
+            </>
+          )}
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+function UserMetadataLabel(props: { users: User[]; singular: string; plural: string }): JSX.Element | null {
+  const users = props.users;
+  const numUsers = users.length;
+  if (numUsers <= 0) {
+    return null;
+  }
+
+  const user = users[0];
+  const additional = numUsers - 1;
+  const hasMultiple = additional > 0;
+  const title = hasMultiple ? props.plural : props.singular;
+  const text = hasMultiple ? `${user.name} +${additional}` : user.name;
+  return <List.Item.Detail.Metadata.Label key={user.id} title={title} text={text} icon={userIcon(user)} />;
+}
+
 function useDetail(issueID: number): {
   mrdetail?: MRDetailData;
   error?: string;
@@ -250,6 +310,7 @@ export function MRList({
       throttle={true}
       searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
+      isShowingDetail={getListDetailsPreference()}
     >
       <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
         {mrs.map((mr) => (
@@ -277,8 +338,10 @@ export function MRListItem(props: {
       return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle };
     }
   };
+
   const icon = getIcon();
   const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
+
   let cistatusEmoji: string | undefined;
   if (props.showCIStatus === undefined || props.showCIStatus === true) {
     const { mrpipelines } = useMRPipelines(mr);
@@ -286,29 +349,37 @@ export function MRListItem(props: {
       cistatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
     }
   }
-  const subtitle: string[] = [`!${mr.iid}`];
+
+  const extraInfo: string[] = [`!${mr.iid}`];
   if (cistatusEmoji) {
-    subtitle.push(cistatusEmoji);
+    extraInfo.push(cistatusEmoji);
   }
+  const subtitle = extraInfo.join("    ");
+
+  const accessories: List.Item.Accessory[] = [];
+  if (!getListDetailsPreference()) {
+    accessories.push({ text: mr.milestone?.title }, { text: toDateString(mr.updated_at) });
+  }
+  accessories.push({ icon: accessoryIcon });
+
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
-      subtitle={subtitle.join("    ")}
+      subtitle={!getListDetailsPreference() ? subtitle : undefined}
       icon={icon}
-      accessories={ensureCleanAccessories([
-        { text: mr.milestone?.title },
-        { text: toDateString(mr.updated_at) },
-        { icon: accessoryIcon },
-      ])}
+      accessories={ensureCleanAccessories(accessories)}
+      detail={getListDetailsPreference() && <MRListDetail mr={mr} subtitle={subtitle} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push
-              title="Show Details"
-              target={<MRDetail mr={mr} />}
-              icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
-            />
+            {!getListDetailsPreference() && (
+              <Action.Push
+                title="Show Details"
+                target={<MRDetail mr={mr} />}
+                icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+              />
+            )}
             <GitLabOpenInBrowserAction url={mr.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>

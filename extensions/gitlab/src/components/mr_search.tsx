@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
 import { MRScope, MRState, MRListItem } from "./mr";
@@ -36,7 +36,13 @@ export function SearchMyMergeRequests(): JSX.Element {
   }
   const title = search ? "Search Results" : "Created Recently";
   return (
-    <List isLoading={isLoading} searchText={search} onSearchTextChange={setSearch} throttle>
+    <List
+      isLoading={isLoading}
+      searchText={search}
+      onSearchTextChange={setSearch}
+      isShowingDetail={getListDetailsPreference()}
+      throttle
+    >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
           <MRListItem key={m.id} mr={m} refreshData={performRefetch} showCIStatus={true} />
