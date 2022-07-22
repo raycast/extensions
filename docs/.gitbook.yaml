@@ -1,5 +1,5 @@
 redirects:
   basics/import-an-extension: basics/contribute-to-an-extension.md
   api-reference/arguments: information/arguments.md
-  api-reference/user-interface/menu-bar-extra: api-reference/menu-bar-commands.md
+  api-reference/user-interface/menu-bar-extra: api-reference/menu-bar-extra.md
   api-reference/menu-bar-extra: api-reference/menu-bar-commands.md
