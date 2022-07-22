@@ -4,10 +4,10 @@ import { PullRequestLastVisit, PullSearchResultShort } from "../integration/type
 import { getLogin } from "../integration/getLogin";
 import { getIssueComments, getPullComments, pullToCommentsParams } from "../integration/getComments";
 import { pullSearch } from "../integration/pullSearch";
+import { loadPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
 
 const myPullsKey = "myPulls";
 const participatedPullsKey = "participatedPulls";
-const pullVisitsKey = "pullVisits";
 
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,11 +29,7 @@ export default function usePulls() {
         setMyPulls(myPullsFiltered);
         setParticipatedPulls(participatedPullsFiltered);
 
-        return Promise.all([
-          LocalStorage.setItem(pullVisitsKey, JSON.stringify(pullVisits)),
-          LocalStorage.setItem(myPullsKey, JSON.stringify(myPullsFiltered)),
-          LocalStorage.setItem(participatedPullsKey, JSON.stringify(participatedPullsFiltered)),
-        ])
+        return setPullsToLocalStorage(myPullsFiltered, participatedPullsFiltered, pullVisits);
       })
       .then(() => console.debug(`addRecentPull completed`));
 
@@ -46,18 +42,13 @@ export default function usePulls() {
     Promise.resolve()
       // .then(() => LocalStorage.clear())
       .then(() => console.debug("initializing..."))
-      .then(() => Promise.all([
-        LocalStorage.getItem(myPullsKey).then(data => data as string | undefined),
-        LocalStorage.getItem(participatedPullsKey).then(data => data as string | undefined),
-        LocalStorage.getItem(pullVisitsKey).then(data => data as string | undefined)
-      ]))
-      .then(([myPulls, participatedPulls, recentPulls]) => {
-        myPulls && setMyPulls(JSON.parse(myPulls));
-        participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
-        const parse = JSON.parse(recentPulls || "[]") as PullRequestLastVisit[];
-        recentPulls && setPullVisits(parse);
+      .then(() => loadPullsFromLocalStorage())
+      .then(({myPulls, participatedPulls, pullVisits}) => {
+        setMyPulls(myPulls);
+        setPullVisits(pullVisits);
+        setParticipatedPulls(participatedPulls);
 
-        return parse;
+        return pullVisits;
       })
       .then((recentPullVisits) => {
         if (environment.launchType === LaunchType.UserInitiated) {
