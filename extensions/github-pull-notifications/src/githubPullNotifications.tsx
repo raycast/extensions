@@ -1,4 +1,4 @@
-import { Cache, Color, environment, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { Color, environment, LaunchType, LocalStorage, MenuBarExtra, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   getIssueComments,
@@ -9,8 +9,6 @@ import { PullSearchResultShort } from "./integration/types";
 import { getLogin } from "./integration/getLogin";
 import { pullSearch } from "./integration/pullSearch";
 
-const cache = new Cache();
-
 // noinspection JSUnusedGlobalSymbols
 export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,53 +17,61 @@ export default function githubPullNotifications() {
   const [recentPulls, setRecentPulls] = useState<PullSearchResultShort[]>([]);
 
   const addRecentPull = (pull: PullSearchResultShort) => {
-    setRecentPulls(recentPulls => [...recentPulls, pull]);
-    cache.set("recentPulls", JSON.stringify(recentPulls));
+    setRecentPulls(recentPulls => ([...recentPulls, pull]));
+    LocalStorage.setItem("recentPulls", JSON.stringify(recentPulls))
+      .then(() => console.debug("recentPulls saved"))
+      .then(() => LocalStorage.getItem("recentPulls"))
+      .then(recentPulls => console.debug(recentPulls));
   };
 
   const onAction = (pull: PullSearchResultShort) =>
-    () => open(pull.html_url).then(() => addRecentPull(pull));
-
-  console.log("main func");
+    open(pull.html_url).then(() => addRecentPull(pull));
 
   useEffect(() => {
-    console.debug("initializing...");
+    Promise.resolve()
+      .then(() => console.debug("initializing..."))
+      .then(() => Promise.all([
+        LocalStorage.getItem("myPulls").then(data => data as string | undefined),
+        LocalStorage.getItem("participatedPulls").then(data => data as string | undefined),
+        LocalStorage.getItem("recentPulls").then(data => data as string | undefined)
+      ]))
+      .then(([myPulls, participatedPulls, recentPulls]) => {
+        myPulls && setMyPulls(JSON.parse(myPulls));
+        participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
+        recentPulls && setRecentPulls(JSON.parse(recentPulls));
+      })
+      .then(() => {
+        if (environment.launchType === LaunchType.UserInitiated) {
+          console.debug("initiated by user; exiting");
 
-    console.debug("get from cache...");
-    const myPulls = cache.get("myPulls");
-    const participatedPulls = cache.get("participatedPulls");
-    const recentPulls = cache.get("recentPulls");
+          return Promise.resolve();
+        }
 
-    myPulls && setMyPulls(JSON.parse(myPulls));
-    participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
-    recentPulls && setRecentPulls(JSON.parse(recentPulls));
-    console.debug("maybe got something from cache");
+        return getLogin()
+          .then(login =>
+            Promise.all([
+              fetchMyPulls(),
+              fetchParticipatedPulls()
+            ])
+              .then(([myPulls, participatedPulls]) =>
+                Promise.all([
+                  filterPulls(login, myPulls),
+                  filterPulls(login, participatedPulls)
+                ]))
+              .then(([myPulls, participatedPulls]) => {
+                console.log("got my pulls", myPulls.length);
+                console.log("got participated pulls", participatedPulls.length);
 
-    if (environment.launchType === LaunchType.UserInitiated) {
-      console.debug("user initiated; exiting");
-      setIsLoading(false);
-      return;
-    }
+                setMyPulls(myPulls);
+                setParticipatedPulls(participatedPulls);
 
-    getLogin().then(login =>
-      Promise.all([
-        fetchMyPulls(),
-        fetchParticipatedPulls()
-      ])
-        .then(([myPulls, participatedPulls]) =>
-          Promise.all([
-            filterPulls(login, myPulls),
-            filterPulls(login, participatedPulls)
-          ]))
-        .then(([myPulls, participatedPulls]) => {
-          console.log("got my pulls", myPulls.length);
-          console.log("got participated pulls", participatedPulls.length);
-
-          setMyPulls(myPulls);
-          setParticipatedPulls(participatedPulls);
-          cache.set("myPulls", JSON.stringify(myPulls));
-          cache.set("participatedPulls", JSON.stringify(participatedPulls));
-        }))
+                return Promise.all([
+                  LocalStorage.setItem("myPulls", JSON.stringify(myPulls)),
+                  LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPulls))
+                ])
+                  .then(() => console.debug("stored my pulls and participated pulls"))
+              }));
+      })
       .finally(() => {
         setIsLoading(false);
         console.debug("done");
@@ -91,7 +97,7 @@ export default function githubPullNotifications() {
         key={pull.id}
         title={pull.title}
         icon={pull.user?.avatar_url}
-        onAction={onAction(pull)}
+        onAction={async () => onAction(pull)}
       />)}
       {recentPulls.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
         {recentPulls.map(pull => <MenuBarExtra.Item
