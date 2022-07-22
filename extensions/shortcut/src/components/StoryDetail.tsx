@@ -1,8 +1,16 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Detail, Icon, Image, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { getMemberAvatar } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
-import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
+import {
+  useGroupsMap,
+  useIterationMap,
+  useMemberInfo,
+  useMemberMap,
+  useProject,
+  useStory,
+  useWorkflowMap,
+} from "../hooks";
 import shortcut from "../utils/shortcut";
 
 const storyTasksMarkdown = (story: Story) => {
@@ -32,6 +40,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
   const { data: project } = useProject(story?.project_id as number);
   const iterationMap = useIterationMap();
   const memberMap = useMemberMap();
+  const { data: memberInfo } = useMemberInfo();
 
   const workflow = useMemo(() => {
     if (!story || !workflowMap) {
@@ -161,6 +170,41 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                   );
                 })}
               </ActionPanel.Submenu>
+
+              {memberInfo && memberInfo.workspace2.estimate_scale && (
+                <ActionPanel.Submenu
+                  title="Set Estimate..."
+                  icon={Icon.Clock}
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: "e",
+                  }}
+                >
+                  {memberInfo.workspace2.estimate_scale.map((estimate) => {
+                    const onAction = async () => {
+                      try {
+                        await shortcut.updateStory(story.id, { estimate: estimate });
+                        await mutateStory();
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to update story",
+                          message: String(error),
+                        });
+                      }
+                    };
+
+                    return (
+                      <Action
+                        title={`${estimate}`}
+                        onAction={onAction}
+                        key={estimate}
+                        icon={estimate !== story.estimate ? Icon.Circle : Icon.CircleFilled}
+                      />
+                    );
+                  })}
+                </ActionPanel.Submenu>
+              )}
             </>
           )}
         </ActionPanel>
