@@ -2,12 +2,12 @@ import { Cache, Color, environment, LaunchType, MenuBarExtra, open } from "@rayc
 import { useEffect, useState } from "react";
 import {
   getIssueComments,
-  getLogin,
   getPullComments,
-  pullSearch,
   pullToCommentsParams
-} from "./integration/pullActions";
+} from "./integration/getComments";
 import { PullSearchResultShort } from "./integration/types";
+import { getLogin } from "./integration/getLogin";
+import { pullSearch } from "./integration/pullSearch";
 
 const cache = new Cache();
 
