@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 import Bitfinex from "./api";
 import useSWR from "swr";
@@ -41,6 +41,7 @@ export default function FundingOffers() {
             <List.Item
               key={interest.id}
               title={`$${amount} ${interest.currency}`}
+              icon={Icon.Coins}
               subtitle={`${roi}%`}
               accessories={[
                 {
