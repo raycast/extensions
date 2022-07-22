@@ -1,36 +1,37 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { Octokit } from "octokit";
-import { useState, useEffect } from "react";
 import {components} from "@octokit/openapi-types"
 
-const octokit = new Octokit({ auth: (getPreferenceValues())["githubAPIToken"] });
+const githubAPIToken = getPreferenceValues()["githubAPIToken"];
+const octokit = new Octokit({ auth: githubAPIToken });
 
-export type UsePullSearchParams = {
-  query: string;
-};
 
-export default function usePullSearch({query}: UsePullSearchParams) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [pulls, setPulls] = useState<PullSearchResultShort[]>([]);
+export function getLogin() {
+  return Promise.resolve()
+    .then(() => console.debug("getLogin"))
+    .then(() => LocalStorage.getItem("githubAPITokenLastValue"))
+    .then(res => res as string | undefined || "")
+    .then(token => {
+      if (token && token === githubAPIToken) {
+        return LocalStorage
+          .getItem("githubLogin")
+          .then(login => login as string)
+          .then(login => {
+            console.debug("resolved login from local storage", login)
 
-  useEffect(() => {
-    if (query === "") {
-      setIsLoading(false);
+            return login;
+          });
+      }
 
-      return;
-    }
-
-    const q = `is:pr ${query}`
-
-    octokit.rest.search.issuesAndPullRequests({per_page: 100, q})
-      .then(res => res.data.items || [])
-      .then(items => items.map(mapPullSearchResultToShort))
-      .then(setPulls)
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
-  }, [query]);
-
-  return {isLoading, pulls };
+      return Promise.resolve()
+        .then(() => console.debug("new or updated token detected - resolve user via API"))
+        .then(() => octokit.request("GET /user"))
+        .then(res => res.data.login)
+        .then(login => Promise.all([
+          LocalStorage.setItem("githubLogin", login),
+          LocalStorage.setItem("githubAPITokenLastValue", githubAPIToken),
+        ]).then(() => login));
+    })
 }
 
 export function pullSearch(query: string): Promise<PullSearchResultShort[]> {
@@ -89,7 +90,7 @@ export type PullSearchResultShort = {
   id: number;
   url: string;
   repository_url: string;
-  comments_url: string;
+  html_url: string;
   number: number;
   title: string;
   state: string;
@@ -113,9 +114,9 @@ export type CommentShort = {
 
 const mapPullSearchResultToShort =
   ({
-    id, url, repository_url, comments_url, number, title, state, created_at, updated_at, closed_at, user
+    id, url, repository_url, html_url, number, title, state, created_at, updated_at, closed_at, user
 }: PullSearchResult): PullSearchResultShort => ({
-  id, url, repository_url, comments_url, number, title, state, created_at, updated_at, closed_at,
+  id, url, repository_url, html_url, number, title, state, created_at, updated_at, closed_at,
   user: mapUserShort(user),
 })
 

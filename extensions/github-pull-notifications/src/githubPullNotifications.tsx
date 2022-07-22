@@ -1,6 +1,7 @@
-import { Cache, Color, MenuBarExtra } from "@raycast/api";
+import { Cache, Color, environment, LaunchType, MenuBarExtra, open } from "@raycast/api";
 import {
   getIssueComments,
+  getLogin,
   getPullComments,
   pullSearch,
   PullSearchResultShort,
@@ -10,12 +11,12 @@ import { useEffect, useState } from "react";
 
 const cache = new Cache();
 
-const login = "kudrykv";
-
 export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
+
+  console.log("main func");
 
   useEffect(() => {
     console.debug("initializing...");
@@ -28,23 +29,36 @@ export default function githubPullNotifications() {
     participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
     console.debug("maybe got something from cache");
 
-    Promise.all([
-      fetchMyPulls(),
-      fetchParticipatedPulls()
-    ])
-      .then(([myPulls, participatedPulls]) =>
-        Promise.all([
-          filterPulls(myPulls),
-          filterPulls(participatedPulls)
-        ]))
-      .then(([myPulls, participatedPulls]) => {
-        console.log("got my pulls", myPulls.length);
-        console.log("got participated pulls", participatedPulls.length);
+    if (environment.launchType === LaunchType.UserInitiated) {
+      console.debug("user initiated; exiting");
+      setIsLoading(false);
+      return;
+    }
 
-        setMyPulls(myPulls);
-        setParticipatedPulls(participatedPulls);
-      })
-      .finally(() => setIsLoading(false));
+    getLogin().then(login => {
+      Promise.all([
+        fetchMyPulls(),
+        fetchParticipatedPulls()
+      ])
+        .then(([myPulls, participatedPulls]) =>
+          Promise.all([
+            filterPulls(login, myPulls),
+            filterPulls(login, participatedPulls)
+          ]))
+        .then(([myPulls, participatedPulls]) => {
+          console.log("got my pulls", myPulls.length);
+          console.log("got participated pulls", participatedPulls.length);
+
+          setMyPulls(myPulls);
+          setParticipatedPulls(participatedPulls);
+          cache.set("myPulls", JSON.stringify(myPulls));
+          cache.set("participatedPulls", JSON.stringify(participatedPulls));
+        })
+    })
+      .finally(() => {
+        setIsLoading(false);
+        console.debug("done");
+      });
   }, []);
 
   return (
@@ -66,12 +80,13 @@ export default function githubPullNotifications() {
         key={pull.id}
         title={pull.title}
         icon={pull.user?.avatar_url}
+        onAction={() => open(pull.html_url)}
       />)}
     </MenuBarExtra>
   );
 }
 
-function filterPulls(myPulls: PullSearchResultShort[]) {
+function filterPulls(login: string, myPulls: PullSearchResultShort[]) {
   return Promise.all(
     myPulls.map(
       pull =>
@@ -79,11 +94,15 @@ function filterPulls(myPulls: PullSearchResultShort[]) {
           getPullComments(pullToCommentsParams(pull)),
           getIssueComments(pullToCommentsParams(pull))
         ]).then(([pullComments, issueComments]) => pullComments.concat(issueComments))
-          .then(comments => comments.sort((a, b) => a.created_at > b.created_at ? -1 : 1).pop())
+          .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop())
           .then(comment => {
-            console.log("comment:", pull.url, comment);
+            if (comment && comment.user?.login !== login) {
+              pull.html_url = comment.html_url
 
-            return comment && comment.user?.login !== login ? pull : undefined;
+              return pull;
+            }
+
+            return undefined;
           })
     )
   )
