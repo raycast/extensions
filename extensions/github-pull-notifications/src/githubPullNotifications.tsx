@@ -50,9 +50,12 @@ export default function githubPullNotifications() {
       .then(([myPulls, participatedPulls, recentPulls]) => {
         myPulls && setMyPulls(JSON.parse(myPulls));
         participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
-        recentPulls && setRecentPullVisits(JSON.parse(recentPulls));
+        const parse = JSON.parse(recentPulls || "[]") as PullRequestLastVisit[];
+        recentPulls && setRecentPullVisits(parse);
+
+        return parse;
       })
-      .then(() => {
+      .then((recentPullVisits) => {
         if (environment.launchType === LaunchType.UserInitiated) {
           console.debug("initiated by user; exiting");
 
@@ -140,8 +143,6 @@ function filterPulls(login: string, recentVisits: PullRequestLastVisit[], myPull
             }
 
             const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
-
-            console.log(lastVisit?.last_visit, comment.created_at);
 
             if (lastVisit && lastVisit.last_visit > comment.created_at) {
               return undefined;
