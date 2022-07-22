@@ -169,6 +169,7 @@
 /extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
+/extensions/github-menu-bar                          @fe9lix
 /extensions/github-repository-search                 @thomaspaulmann @immint023
 /extensions/github-review-requests                   @resessh
 /extensions/github-stars                             @mrmartineau
@@ -254,6 +255,7 @@
 /extensions/latest-news                              @FilipeCerejo
 /extensions/library-genesis                          @yz3440
 /extensions/life-progress                            @koinzhang
+/extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann
 /extensions/linguee                                  @geekdada
 /extensions/linux-command                            @jaywcjlove
 /extensions/liveblocks                               @andreaselia
@@ -287,6 +289,7 @@
 /extensions/netlify                                  @Destiner
 /extensions/nextcloud                                @uetchy
 /extensions/nextjs-docs                              @PrasadChinwal
+/extensions/night-light                              @devmoath
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits
@@ -356,6 +359,7 @@
 /extensions/raynab                                   @gogocharli
 /extensions/readwise                                 @natterstefan
 /extensions/rebrandly                                @grikomsn
+/extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redmine                                  @jwickers
 /extensions/refresh-wifi                             @natterstefan
@@ -399,13 +403,14 @@
 /extensions/snake                                    @tonka3000
 /extensions/social-network-trends                    @koinzhang
 /extensions/solana-explorer                          @TrGiLong
+/extensions/sonarr                                   @Aayush9029
 /extensions/sourcegraph                              @bobheadxi
 /extensions/spaces                                   @pradeepb28
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7
-/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia
+/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @mattisssa
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
 /extensions/steam                                    @KevinBatdorf

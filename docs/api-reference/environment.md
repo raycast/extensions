@@ -20,6 +20,7 @@ console.log(`Assets path: ${environment.assetsPath}`);
 console.log(`Support path: ${environment.supportPath}`);
 console.log(`Is development mode: ${environment.isDevelopment}`);
 console.log(`Theme: ${environment.theme}`);
+console.log(`LaunchType: ${environment.launchType}`);
 ```
 
 #### Properties
@@ -104,3 +105,14 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 #### Properties
 
 <InterfaceTableFromJSDoc name="FileSystemItem" />
+
+### LaunchType
+
+Indicates the type of command launch. Use this to detect whether the command has been launched from the background.
+
+#### Enumeration members
+
+| Name          | Description                                                |
+| :------------ | :--------------------------------------------------------- |
+| UserInitiated | A regular launch through user interaction                  |
+| Background    | Scheduled through an interval and launched from background |
