@@ -30,14 +30,10 @@ function metadata(state: TranslationState | null): JSX.Element | null {
       return language.code == state.translation?.detected_source_language;
     });
 
-
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label
-        title="Source Language"
-        text={sourceLanguage?.name ?? "Unknown"}
-      />
-      {state.usage != null &&
+      <Detail.Metadata.Label title="Source Language" text={sourceLanguage?.name ?? "Unknown"} />
+      {state.usage != null && (
         <Detail.Metadata.Label
           title={`${plan} usage this period`}
           text={(state.usage.character_count / state.usage.character_limit).toLocaleString(undefined, {
@@ -45,13 +41,13 @@ function metadata(state: TranslationState | null): JSX.Element | null {
             maximumFractionDigits: 2,
           })}
         />
-      }
-      {state.usage != null &&
+      )}
+      {state.usage != null && (
         <Detail.Metadata.Label
           title="Characters used"
           text={`${state.usage.character_count.toLocaleString()} / ${state.usage.character_limit.toLocaleString()}`}
         />
-      }
+      )}
     </Detail.Metadata>
   );
 }

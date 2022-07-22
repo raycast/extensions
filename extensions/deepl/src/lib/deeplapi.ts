@@ -41,11 +41,11 @@ export function setUpTranslation(targetLanguage: Language): {
         const translation =
           state.text.length > 0
             ? await getTranslation(
-              state.text,
-              state.sourceLanguage,
-              targetLanguage,
-              abortControllerRef.current?.signal ?? null
-            )
+                state.text,
+                state.sourceLanguage,
+                targetLanguage,
+                abortControllerRef.current?.signal ?? null
+              )
             : null;
 
         const usage = translation != null ? await getUsage(abortControllerRef.current?.signal ?? null) : null;
