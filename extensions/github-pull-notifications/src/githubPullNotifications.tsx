@@ -16,13 +16,16 @@ export default function githubPullNotifications() {
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
   const [recentPulls, setRecentPulls] = useState<PullSearchResultShort[]>([]);
 
-  const addRecentPull = (pull: PullSearchResultShort) => {
-    return Promise.resolve()
-      .then(() => setRecentPulls(recentPulls => ([...recentPulls, pull])))
-      .then(() => LocalStorage.setItem("recentPulls", JSON.stringify([...recentPulls, pull])))
-      .then(() => LocalStorage.getItem("recentPulls"))
-      .then(recentPulls => console.debug(recentPulls));
-  };
+  const addRecentPull = (pull: PullSearchResultShort) =>
+    Promise.resolve()
+      .then(() => recentPulls.filter(recentPull => recentPull.number !== pull.number))
+      .then(filteredPulls => {
+        const pulls = [pull, ...filteredPulls];
+
+        setRecentPulls(pulls);
+
+        return LocalStorage.setItem("recentPulls", JSON.stringify(pulls));
+      });
 
   const onAction = (pull: PullSearchResultShort) =>
     Promise.resolve()
@@ -34,6 +37,7 @@ export default function githubPullNotifications() {
 
   useEffect(() => {
     Promise.resolve()
+      // .then(() => LocalStorage.removeItem("recentPulls"))
       .then(() => console.debug("initializing..."))
       .then(() => Promise.all([
         LocalStorage.getItem("myPulls").then(data => data as string | undefined),
@@ -102,14 +106,16 @@ export default function githubPullNotifications() {
         key={pull.id}
         title={pull.title}
         icon={pull.user?.avatar_url}
-        onAction={async () => onAction(pull)}
+        onAction={() => onAction(pull)}
       />)}
       {recentPulls.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
         {recentPulls.map(pull => <MenuBarExtra.Item
+          key={pull.id}
           title={pull.title}
           icon={pull.user?.avatar_url}
           onAction={() => open(pull.html_url)}
         />)}
+
       </MenuBarExtra.Submenu>}
     </MenuBarExtra>
   );
