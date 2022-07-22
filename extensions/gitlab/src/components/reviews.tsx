@@ -1,19 +1,15 @@
-import { ActionPanel, List, Color, Image } from "@raycast/api";
+import { List } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
-import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { daysInSeconds, ensureCleanAccessories, showErrorToast, toDateString } from "../utils";
-import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
-import { ShowReviewMRAction } from "./review_actions";
-import { getCIJobStatusEmoji } from "./jobs";
+import { getListDetailsPreference, gitlab } from "../common";
+import { daysInSeconds, showErrorToast } from "../utils";
 import { useCache } from "../cache";
 import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
-import { useMRPipelines } from "./mr";
+import { MRListItem } from "./mr";
 
 export function ReviewList(): JSX.Element {
   const [project, setProject] = useState<Project>();
-  const { mrs, error, isLoading } = useMyReviews(project);
+  const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
   if (error) {
     showErrorToast(error, "Cannot search Reviews");
@@ -28,41 +24,12 @@ export function ReviewList(): JSX.Element {
       searchBarPlaceholder="Filter Reviews by name..."
       isLoading={isLoading}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+      isShowingDetail={getListDetailsPreference()}
     >
       {mrs?.map((mr) => (
-        <ReviewListItem key={mr.id} mr={mr} />
+        <MRListItem key={mr.id} mr={mr} refreshData={performRefetch} />
       ))}
     </List>
-  );
-}
-
-function ReviewListItem(props: { mr: MergeRequest }) {
-  const mr = props.mr;
-  const subtitle: string[] = [`!${mr.iid}`];
-  const { mrpipelines } = useMRPipelines(mr);
-  if (mrpipelines && mrpipelines.length > 0) {
-    const ciStatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
-    if (ciStatusEmoji) {
-      subtitle.push(ciStatusEmoji);
-    }
-  }
-  const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
-  return (
-    <List.Item
-      id={mr.id.toString()}
-      title={mr.title}
-      subtitle={subtitle.join("    ")}
-      icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
-      accessories={ensureCleanAccessories([{ text: toDateString(mr.updated_at) }, { icon: accessoryIcon }])}
-      actions={
-        <ActionPanel>
-          <DefaultActions
-            action={<ShowReviewMRAction mr={mr} />}
-            webAction={<GitLabOpenInBrowserAction url={mr.web_url} />}
-          />
-        </ActionPanel>
-      }
-    />
   );
 }
 
