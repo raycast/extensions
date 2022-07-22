@@ -29,11 +29,8 @@ export default function githubPullNotifications() {
 
   const onAction = (pull: PullSearchResultShort) =>
     Promise.resolve()
-      .then(() => console.debug("action fired"))
       .then(() => open(pull.html_url))
-      .then(() => console.debug("browser opened"))
-      .then(() => addRecentPull(pull))
-      .then(() => console.debug("pull added to recent pulls"))
+      .then(() => addRecentPull(pull));
 
   useEffect(() => {
     Promise.resolve()
