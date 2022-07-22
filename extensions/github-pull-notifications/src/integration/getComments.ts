@@ -11,26 +11,32 @@ export type GetCommentsParams = {
 export const pullToCommentsParams = (pull: PullSearchResultShort): GetCommentsParams => ({
   owner: pull.repository_url.split("/")[4],
   repo: pull.repository_url.split("/")[5],
-  pull_number: pull.number,
-})
+  pull_number: pull.number
+});
 
 export const getPullComments = (params: GetCommentsParams): Promise<CommentShort[]> => Promise.resolve()
-  .then(() => console.debug(`getPullComments for ${params.owner}/${params.repo}#${params.pull_number}`))
-  .then(() => octokit.paginate(octokit.rest.pulls.listReviewComments, params))
-  .then(res => res.map(mapPullCommentToShort))
-  .then(comments => {
-    console.debug(`getPullComments for ${params.owner}/${params.repo}#${params.pull_number} done (${comments.length})`);
+  .then(logParams("getPullComments", params))
+  .then(paginateListReviewComments(params))
+  .then(comments => comments.map(mapPullCommentToShort))
+  .then(teeShortComments("getPullComments", params))
 
-    return comments;
-  });
+const paginateListReviewComments = (params: GetCommentsParams) =>
+  () => octokit.paginate(octokit.rest.pulls.listReviewComments, params);
 
-export const getIssueComments = ({ owner, repo, pull_number }: GetCommentsParams): Promise<CommentShort[]> => Promise.resolve()
-  .then(() => console.debug(`getIssueComments for ${owner}/${repo}#${pull_number}`))
-  .then(() => octokit.paginate(octokit.rest.issues.listComments, {owner, repo, issue_number: pull_number, per_page: 100}))
+export const getIssueComments = (params: GetCommentsParams): Promise<CommentShort[]> => Promise.resolve()
+  .then(logParams("getIssueComments", params))
+  .then(paginateListIssuesComments(params))
   .then(res => res.map(mapIssueCommentToShort))
-  .then(comments => {
-    console.debug(`getIssueComments for ${owner}/${repo}#${pull_number} done (${comments.length})`);
+  .then(teeShortComments("getIssueComments", params));
 
-    return comments;
-  });
+const paginateListIssuesComments = ({ owner, pull_number, repo }: GetCommentsParams) =>
+  () => octokit.paginate(octokit.rest.issues.listComments, { owner, repo, issue_number: pull_number, per_page: 100 });
 
+const teeShortComments = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
+  (comments: CommentShort[]) => Promise
+    .resolve()
+    .then(() => console.debug(`${prefix} ${owner}/${repo}#${pull_number}: ${comments.length} comments`))
+    .then(() => comments);
+
+const logParams = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
+  () => console.debug(`${prefix} for ${owner}/${repo}#${pull_number}`);
