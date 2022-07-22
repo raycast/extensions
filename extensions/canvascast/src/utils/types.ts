@@ -12,7 +12,7 @@ export interface assignment {
   name: string;
   id: number;
   description: string;
-  date: any;
+  date: string;
   course: string;
   course_id: number;
   color: Color;
@@ -25,7 +25,7 @@ export interface announcement {
   course: string;
   id: number;
   markdown: string;
-  date: any;
+  date: string;
 }
 
 export interface modulesection {
