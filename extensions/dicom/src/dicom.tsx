@@ -21,7 +21,7 @@ export default function Command() {
     });
 
     timeoutRef.current = setTimeout(() => {
-      setFilteredList(filteredKeys.map((key) => ({ tag: key, name: dictionary[key].name })));
+      setFilteredList(filteredKeys.map((key) => ({ tag: key, name: dictionary[key].name as string })));
     }, 10);
 
     return () => {

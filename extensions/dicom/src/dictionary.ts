@@ -3,9 +3,9 @@
 type Dictionary = {
   [key: string]: {
     tag: string;
-    vr: string;
-    name: string;
-    vm: string;
+    vr?: string;
+    name?: string;
+    vm?: string;
   };
 };
 
