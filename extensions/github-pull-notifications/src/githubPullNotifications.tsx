@@ -19,13 +19,19 @@ export default function githubPullNotifications() {
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
       .then(() => recentPullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
-      .then(filteredVisits => {
-        const visits = [{pull, last_visit: new Date().toISOString().substring(0, 19) + "Z"}, ...filteredVisits];
-
-        setRecentPullVisits(visits);
-
-        return LocalStorage.setItem("recentPulls", JSON.stringify(visits));
-      });
+      .then(filtered => [{pull, last_visit: new Date().toISOString().substring(0, 19) + "Z"}, ...filtered])
+      .then(visits => Promise.all([
+        Promise.resolve().then(() => setRecentPullVisits(visits)),
+        LocalStorage.setItem("recentPulls", JSON.stringify(visits)),
+        Promise.resolve().then(() => myPulls.filter(myPull => myPull.number !== pull.number)).then(myPulls => {
+          setMyPulls(myPulls);
+          return LocalStorage.setItem("myPulls", JSON.stringify(myPulls));
+        }),
+        Promise.resolve().then(() => participatedPulls.filter(participatedPull => participatedPull.number !== pull.number)).then(participatedPulls => {
+          setParticipatedPulls(participatedPulls);
+          return LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPulls));
+        })
+      ]));
 
   const onAction = (pull: PullSearchResultShort) =>
     Promise.resolve()
@@ -61,8 +67,8 @@ export default function githubPullNotifications() {
             ])
               .then(([myPulls, participatedPulls]) =>
                 Promise.all([
-                  filterPulls(login, myPulls),
-                  filterPulls(login, participatedPulls)
+                  filterPulls(login, recentPullVisits, myPulls),
+                  filterPulls(login, recentPullVisits, participatedPulls)
                 ]))
               .then(([myPulls, participatedPulls]) => {
                 console.log("got my pulls", myPulls.length);
@@ -119,7 +125,7 @@ export default function githubPullNotifications() {
   );
 }
 
-function filterPulls(login: string, myPulls: PullSearchResultShort[]) {
+function filterPulls(login: string, recentVisits: PullRequestLastVisit[], myPulls: PullSearchResultShort[]) {
   return Promise.all(
     myPulls.map(
       pull =>
@@ -129,13 +135,21 @@ function filterPulls(login: string, myPulls: PullSearchResultShort[]) {
         ]).then(([pullComments, issueComments]) => pullComments.concat(issueComments))
           .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop())
           .then(comment => {
-            if (comment && comment.user?.login !== login) {
-              pull.html_url = comment.html_url;
-
-              return pull;
+            if (!comment || comment.user?.login === login) {
+              return undefined;
             }
 
-            return undefined;
+            const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
+
+            console.log(lastVisit?.last_visit, comment.created_at);
+
+            if (lastVisit && lastVisit.last_visit > comment.created_at) {
+              return undefined;
+            }
+
+            pull.html_url = comment.html_url;
+
+            return pull;
           })
     )
   )
