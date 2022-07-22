@@ -64,9 +64,15 @@ export function validateValue(key: string, value: number): string | undefined {
 }
 
 export function validateAllValues(values: Values) {
+  const errors = [] as { key: string; value: string }[];
+
   Object.entries(values).forEach(([key, value]) => {
     const error = validateValue(key, value);
 
-    if (error) throw new Error(error);
+    if (error) {
+      errors.push({ key: key, value: error });
+    }
   });
+
+  return errors;
 }

@@ -1,17 +1,34 @@
 import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast } from "@raycast/api";
-import React, { useState } from "react";
+import React from "react";
+import { useErrors } from "./composables";
 import { calculateClamp, validateAllValues, validateValue, Values } from "./utils";
 
 export default function Command() {
-  const [minFontSizeError, setMinFontSizeError] = useState<string | undefined>();
-  const [maxFontSizeError, setMaxFontSizeError] = useState<string | undefined>();
-  const [minViewportWidthError, setMinViewportWidthError] = useState<string | undefined>();
-  const [maxViewportWidthError, setMaxViewportWidthError] = useState<string | undefined>();
-  const [pxPerRemError, setPxPerRemError] = useState<string | undefined>();
+  const {
+    minFontSizeError,
+    setMinFontSizeError,
+    maxFontSizeError,
+    setMaxFontSizeError,
+    minViewportWidthError,
+    setMinViewportWidthError,
+    maxViewportWidthError,
+    setMaxViewportWidthError,
+    pxPerRemError,
+    setPxPerRemError,
+    setErrorByKey,
+  } = useErrors();
 
   async function handleSubmit(values: Values) {
     try {
-      validateAllValues(values);
+      const errors = validateAllValues(values);
+
+      if (errors.length) {
+        errors.forEach(({ key, value }) => {
+          setErrorByKey(key, value);
+        });
+
+        return false;
+      }
 
       const clamp = calculateClamp(values, "px");
       await Clipboard.copy(clamp);
