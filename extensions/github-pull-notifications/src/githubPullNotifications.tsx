@@ -17,15 +17,20 @@ export default function githubPullNotifications() {
   const [recentPulls, setRecentPulls] = useState<PullSearchResultShort[]>([]);
 
   const addRecentPull = (pull: PullSearchResultShort) => {
-    setRecentPulls(recentPulls => ([...recentPulls, pull]));
-    LocalStorage.setItem("recentPulls", JSON.stringify(recentPulls))
-      .then(() => console.debug("recentPulls saved"))
+    return Promise.resolve()
+      .then(() => setRecentPulls(recentPulls => ([...recentPulls, pull])))
+      .then(() => LocalStorage.setItem("recentPulls", JSON.stringify([...recentPulls, pull])))
       .then(() => LocalStorage.getItem("recentPulls"))
       .then(recentPulls => console.debug(recentPulls));
   };
 
   const onAction = (pull: PullSearchResultShort) =>
-    open(pull.html_url).then(() => addRecentPull(pull));
+    Promise.resolve()
+      .then(() => console.debug("action fired"))
+      .then(() => open(pull.html_url))
+      .then(() => console.debug("browser opened"))
+      .then(() => addRecentPull(pull))
+      .then(() => console.debug("pull added to recent pulls"))
 
   useEffect(() => {
     Promise.resolve()
