@@ -7,7 +7,9 @@ interface Props {
 }
 
 export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
-  const { data, isLoading } = useFetch<DependenciesResponse>(`https://libraries.io/api/${searchResult.platform}/${searchResult.name}/latest/dependencies`);
+  const { data, isLoading } = useFetch<DependenciesResponse>(
+    `https://libraries.io/api/${searchResult.platform}/${searchResult.name}/latest/dependencies`
+  );
 
   return (
     <List navigationTitle="Dependencies" isLoading={isLoading}>

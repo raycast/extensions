@@ -4,7 +4,9 @@ import type { Package, Subscription } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data, isLoading } = useFetch<Subscription[]>(`https://libraries.io/api/subscriptions?api_key=${preferences.token}`);
+  const { data, isLoading } = useFetch<Subscription[]>(
+    `https://libraries.io/api/subscriptions?api_key=${preferences.token}`
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter subscriptions..." enableFiltering throttle>
