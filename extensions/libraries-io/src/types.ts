@@ -3,8 +3,8 @@ export interface Package {
   description?: string;
   platform: string;
   homepage: string;
-  repositoryUrl: string;
-  packageManagerUrl: string;
+  repository_url: string;
+  package_manager_url: string;
   versions: Array<Version>;
 }
 
