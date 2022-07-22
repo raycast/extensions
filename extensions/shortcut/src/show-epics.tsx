@@ -33,6 +33,7 @@ export default function ShowEpics() {
             <List.Item
               title={epic.name}
               subtitle={`#${epic.id}`}
+              key={epic.id}
               icon={Icon.Tag}
               actions={
                 <ActionPanel>
