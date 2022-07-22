@@ -21,11 +21,12 @@
       "type": "password",
       "required": true,
       "title": "Personal Access Token",
-      "description": "Create a token with repository access"
+      "description": "Required scopes: repo, read:org, read:user"
     }
   ],
   "contributors": [
-    "immint023"
+    "immint023",
+    "jberglinds"
   ],
   "categories": [
     "Developer Tools"
