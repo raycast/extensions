@@ -1,12 +1,10 @@
 import {
   Action,
   ActionPanel,
-  Alert,
-  confirmAlert,
   Detail,
-  Form,
   Icon,
   List,
+  popToRoot,
   showToast,
   Toast,
 } from '@raycast/api';
@@ -20,6 +18,7 @@ import {
   getSiteUrl,
   handleNetworkError,
 } from './utils';
+import { CachePurgeView, purgeEverything } from './view-cache-purge';
 
 const service = new Service(getEmail(), getKey());
 
@@ -83,10 +82,23 @@ function Command() {
                         }
                         shortcut={{ modifiers: ['cmd'], key: 'p' }}
                       />
+                      <Action
+                        icon={Icon.Hammer}
+                        title="Purge Everything from Cache"
+                        shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                        onAction={async () => {
+                          purgeEverything(site);
+                        }}
+                      ></Action>
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
                         url={getSiteUrl(accountId, site.name)}
                         shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                      />
+                      <Action
+                        icon={Icon.ArrowClockwise}
+                        title="Reload sites from Cloudflare"
+                        onAction={clearSiteCache}
                       />
                     </ActionPanel>
                   }
@@ -102,7 +114,7 @@ function Command() {
   );
 }
 
-interface SiteProps {
+export interface SiteProps {
   accountId: string;
   id: string;
 }
@@ -208,60 +220,13 @@ function DnsRecordView(props: DnsRecordProps) {
   );
 }
 
-function CachePurgeView(props: SiteProps) {
-  const { id } = props;
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Purge Files"
-            onSubmit={(values) => clearUrlsFromCache(id, values.urls)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextArea
-        id="urls"
-        title="List of URL(s)"
-        placeholder="Separate URL(s) one per line"
-      />
-    </Form>
-  );
-}
-
-async function clearUrlsFromCache(zoneId: string, urls: string) {
-  if (
-    !(await confirmAlert({
-      title: 'Do you really want to purge the files from cache?',
-      primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
-    }))
-  ) {
-    return;
-  }
-
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: 'Purging URL(s)',
+async function clearSiteCache() {
+  service.clearCache();
+  showToast({
+    style: Toast.Style.Success,
+    title: 'Local site cache cleared',
   });
-
-  // Split URLs by newline
-  const urlList = urls.split('\n');
-
-  const result = await service.purgeFilesbyURL(zoneId, urlList);
-
-  if (result.success) {
-    toast.style = Toast.Style.Success;
-    toast.title = 'URL(s) purged';
-    return;
-  }
-
-  toast.style = Toast.Style.Failure;
-  toast.title = 'Failed to purge URL(s)';
-  if (result.errors.length > 0) {
-    toast.message = result.errors[0].message;
-  }
+  popToRoot({ clearSearchBar: true });
 }
 
 export default Command;
