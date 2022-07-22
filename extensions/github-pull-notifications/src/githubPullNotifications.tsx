@@ -1,105 +1,9 @@
-import { Color, environment, LaunchType, LocalStorage, MenuBarExtra, open } from "@raycast/api";
-import { useEffect, useState } from "react";
-import {
-  getIssueComments,
-  getPullComments,
-  pullToCommentsParams
-} from "./integration/getComments";
-import { PullRequestLastVisit, PullSearchResultShort } from "./integration/types";
-import { getLogin } from "./integration/getLogin";
-import { pullSearch } from "./integration/pullSearch";
-
-function getTimestampISOInSeconds() {
-  return new Date().toISOString().substring(0, 19) + "Z";
-}
+import { Color, MenuBarExtra, open } from "@raycast/api";
+import usePulls from "./hooks/usePulls";
 
 // noinspection JSUnusedGlobalSymbols
 export default function githubPullNotifications() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
-  const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
-  const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
-
-  const addRecentPull = (pull: PullSearchResultShort) =>
-    Promise.resolve()
-      .then(() => pullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
-      .then(filtered => [{pull, last_visit: getTimestampISOInSeconds()}, ...filtered])
-      .then(pullVisits => {
-        const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
-        const participatedPullsFiltered = participatedPulls.filter(
-          participatedPull => participatedPull.number !== pull.number
-        );
-
-        setPullVisits(pullVisits);
-        setMyPulls(myPullsFiltered);
-        setParticipatedPulls(participatedPullsFiltered);
-
-        return Promise.all([
-          LocalStorage.setItem("recentPulls", JSON.stringify(pullVisits)),
-          LocalStorage.setItem("myPulls", JSON.stringify(myPullsFiltered)),
-          LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPullsFiltered)),
-        ])
-      });
-
-  const onAction = (pull: PullSearchResultShort) =>
-    Promise.resolve()
-      .then(() => open(pull.html_url))
-      .then(() => addRecentPull(pull));
-
-  useEffect(() => {
-    Promise.resolve()
-      // .then(() => LocalStorage.clear())
-      .then(() => console.debug("initializing..."))
-      .then(() => Promise.all([
-        LocalStorage.getItem("myPulls").then(data => data as string | undefined),
-        LocalStorage.getItem("participatedPulls").then(data => data as string | undefined),
-        LocalStorage.getItem("recentPulls").then(data => data as string | undefined)
-      ]))
-      .then(([myPulls, participatedPulls, recentPulls]) => {
-        myPulls && setMyPulls(JSON.parse(myPulls));
-        participatedPulls && setParticipatedPulls(JSON.parse(participatedPulls));
-        const parse = JSON.parse(recentPulls || "[]") as PullRequestLastVisit[];
-        recentPulls && setPullVisits(parse);
-
-        return parse;
-      })
-      .then((recentPullVisits) => {
-        if (environment.launchType === LaunchType.UserInitiated) {
-          console.debug("initiated by user; exiting");
-
-          return Promise.resolve();
-        }
-
-        return getLogin()
-          .then(login =>
-            Promise.all([
-              fetchMyPulls(),
-              fetchParticipatedPulls()
-            ])
-              .then(([myPulls, participatedPulls]) =>
-                Promise.all([
-                  filterPulls(login, recentPullVisits, myPulls),
-                  filterPulls(login, recentPullVisits, participatedPulls)
-                ]))
-              .then(([myPulls, participatedPulls]) => {
-                console.log("got my pulls", myPulls.length);
-                console.log("got participated pulls", participatedPulls.length);
-
-                setMyPulls(myPulls);
-                setParticipatedPulls(participatedPulls);
-
-                return Promise.all([
-                  LocalStorage.setItem("myPulls", JSON.stringify(myPulls)),
-                  LocalStorage.setItem("participatedPulls", JSON.stringify(participatedPulls))
-                ])
-                  .then(() => console.debug("stored my pulls and participated pulls"))
-              }));
-      })
-      .finally(() => {
-        setIsLoading(false);
-        console.debug("done");
-      });
-  }, []);
+  const {isLoading, myPulls, pullVisits, participatedPulls, visitPull} = usePulls();
 
   return (
     <MenuBarExtra
@@ -120,7 +24,7 @@ export default function githubPullNotifications() {
         key={pull.id}
         title={pull.title}
         icon={pull.user?.avatar_url}
-        onAction={() => onAction(pull)}
+        onAction={() => visitPull(pull)}
       />)}
       {(myPulls.length > 0 || participatedPulls.length > 0) && pullVisits.length > 0 && <MenuBarExtra.Separator />}
       {pullVisits.length > 0 && <MenuBarExtra.Submenu title="Recent Pulls">
@@ -135,35 +39,3 @@ export default function githubPullNotifications() {
     </MenuBarExtra>
   );
 }
-
-function filterPulls(login: string, recentVisits: PullRequestLastVisit[], myPulls: PullSearchResultShort[]) {
-  return Promise.all(
-    myPulls.map(
-      pull =>
-        Promise.all([
-          getPullComments(pullToCommentsParams(pull)),
-          getIssueComments(pullToCommentsParams(pull))
-        ]).then(([pullComments, issueComments]) => pullComments.concat(issueComments))
-          .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop())
-          .then(comment => {
-            if (!comment || comment.user?.login === login) {
-              return undefined;
-            }
-
-            const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
-
-            if (lastVisit && lastVisit.last_visit > comment.created_at) {
-              return undefined;
-            }
-
-            pull.html_url = comment.html_url;
-
-            return pull;
-          })
-    )
-  )
-    .then(pulls => (pulls.filter(pull => pull) || []) as PullSearchResultShort[]);
-}
-
-const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
-const fetchParticipatedPulls = () => pullSearch("is:open archived:false commenter:@me");
