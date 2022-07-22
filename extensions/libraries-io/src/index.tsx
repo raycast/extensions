@@ -7,7 +7,9 @@ import type { Package } from "./types";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useFetch<Package[]>(`https://libraries.io/api/search?q=${searchText}`);
+  const { data, isLoading } = useFetch<Package[]>(`https://libraries.io/api/search?q=${searchText}`, {
+    execute: searchText !== "",
+  });
 
   return (
     <List
