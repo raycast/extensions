@@ -27,9 +27,44 @@ async function authorizeIfNeeded(): Promise<void> {
   }
 }
 
-const notPlayingErrorMessage = "Spotify Is Not Playing";
+export const notPlayingErrorMessage = "Spotify Is Not Playing";
 
-export async function currentPlayingTrack(): Promise<string | undefined> {
+export enum SpotifyPlayingState {
+  Playing = "playing",
+  Paused = "paused",
+  Stopped = "stopped",
+}
+
+export async function isSpotifyPlaying(): Promise<SpotifyPlayingState> {
+  const script = `
+  if application "Spotify" is not running then
+	return "stopped"
+end if
+
+property playerState : "stopped"
+
+tell application "Spotify"
+	try
+		set playerState to player state as string
+	end try
+end tell
+
+return playerState`;
+
+  try {
+    const response = await runAppleScript(script);
+    const result = response as SpotifyPlayingState;
+    return result;
+  } catch (err) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed getting playback",
+    });
+    return SpotifyPlayingState.Stopped;
+  }
+}
+
+export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
   const script = `
   if application "Spotify" is not running then
 	return "${notPlayingErrorMessage}"
@@ -57,9 +92,15 @@ else if playerState is "paused" then
 else
 	return "${notPlayingErrorMessage}"
 end if`;
-
   try {
-    return await runAppleScript(script);
+    const response = await runAppleScript(script);
+    const error = response as string;
+    if (error == notPlayingErrorMessage) {
+      return { error };
+    }
+
+    const track = JSON.parse(response as string) as CurrentlyPlayingTrack;
+    return { result: track };
   } catch (err) {
     await showToast({
       style: Toast.Style.Failure,
@@ -91,13 +132,7 @@ export async function likeCurrentlyPlayingTrack(): Promise<Response<CurrentlyPla
 
   await authorizeIfNeeded();
   try {
-    const response = await currentPlayingTrack();
-    const error = response as string;
-    if (error == notPlayingErrorMessage) {
-      return { error };
-    }
-
-    const track = JSON.parse(response as string) as CurrentlyPlayingTrack;
+    const track = (await currentPlayingTrack())?.result;
     if (track && track.id) {
       const trackId = track.id.replace("spotify:track:", "");
       try {
@@ -166,6 +201,26 @@ export function getArtistAlbums(artistId: string | undefined): Response<SpotifyA
   }, [artistId]);
 
   return response;
+}
+
+export async function startPlaySimilar(trackId: string | undefined): Promise<void> {
+  try {
+    await authorizeIfNeeded();
+    const response =
+      (await spotifyApi
+        .getRecommendations({ seed_tracks: trackId })
+        .then((response: { body: any }) => response.body as SpotifyApi.RecommendationsFromSeedsResponse)) ?? undefined;
+    const tracks = response.tracks.flatMap((track) => track.uri);
+    if (tracks) {
+      await spotifyApi.play({ uris: tracks });
+    }
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Playing Similar",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
 }
 
 export function useArtistsSearch(query: string | undefined): Response<SpotifyApi.ArtistSearchResponse> {
@@ -337,7 +392,6 @@ export function useTrackSearch(query: string | undefined): Response<SpotifyApi.T
         return;
       }
       setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
       try {
         const response =
           (await spotifyApi
@@ -369,6 +423,21 @@ export function useTrackSearch(query: string | undefined): Response<SpotifyApi.T
   }, [query]);
 
   return response;
+}
+
+export async function searchTracks(query: string, limit: number): Promise<Response<SpotifyApi.TrackSearchResponse>> {
+  await authorizeIfNeeded();
+  try {
+    const response = (await spotifyApi
+      .searchTracks(query, { limit })
+      .then((response: { body: any }) => response.body as SpotifyApi.TrackSearchResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.TrackSearchResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
 }
 
 export function usePlaylistSearch(query: string | undefined): Response<SpotifyApi.PlaylistSearchResponse> {

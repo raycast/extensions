@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 18:26
+ * @lastEditTime: 2022-07-21 15:05
  * @fileName: releaseDetail.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,15 +24,7 @@ export function ReleaseDetail(props: { fallbackMarkdown?: string }) {
   console.log(`call ReleaseDetail function`);
   const easydict = new Easydict();
   easydict.fetchReleaseMarkdown().then((markdown) => {
-    if (markdown && markdown.length > 0) {
-      console.log(`fetched release markdown, url: ${easydict.getReleaseApiUrl()}`);
-      setReleaseMarkdown(markdown);
-    } else {
-      console.error("Failed to fetch GitHub release markdown, use local stored instead.");
-      easydict.getLocalStoredMarkdown().then((markdown) => {
-        setReleaseMarkdown(markdown);
-      });
-    }
+    setReleaseMarkdown(markdown);
   });
 
   return (
@@ -40,7 +32,7 @@ export function ReleaseDetail(props: { fallbackMarkdown?: string }) {
       markdown={releaseMarkdown || props.fallbackMarkdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon={Icon.Globe} title="View Details on GitHub" url={easydict.getChineseWikiUrl()} />
+          <Action.OpenInBrowser icon={Icon.Eye} title="View on GitHub" url={easydict.getChineseWikiUrl()} />
         </ActionPanel>
       }
     />
@@ -57,7 +49,7 @@ export function MarkdownPage(props: { markdown: string }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            icon={Icon.Globe}
+            icon={Icon.Link}
             title="View Details on GitHub"
             url="https://github.com/tisfeng/Raycast-Easydict#readme"
           />

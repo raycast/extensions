@@ -1,55 +1,41 @@
+import { getYoudaoErrorInfo, YoudaoRequestStateCode } from "./consts";
+import { deepLAuthKey } from "./crypto";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 17:28
+ * @lastEditTime: 2022-07-21 15:42
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
-import {
-  defaultBaiduAppId,
-  defaultBaiduAppSecret,
-  defaultCaiyunToken,
-  defaultTencentSecretId,
-  defaultTencentSecretKey,
-  defaultYoudaoAppId,
-  defaultYoudaoAppSecret,
-  getLanguageItemFromYoudaoId,
-  myPreferences,
-} from "./utils";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
+import {
+  baiduAppId,
+  baiduAppSecret,
+  caiyunToken,
+  tencentSecretId,
+  tencentSecretKey,
+  youdaoAppId,
+  youdaoAppSecret,
+} from "./crypto";
+
+import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
 import {
   BaiduTranslateResult,
   CaiyunTranslateResult,
+  DeepLTranslateResult,
   RequestErrorInfo,
+  RequestTypeResult,
   TencentTranslateResult,
-  TranslateTypeResult,
+  TranslationType,
+  YoudaoTranslateResult,
 } from "./types";
-import { TranslateType } from "./consts";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
-
-// youdao appid and appsecret
-const youdaoAppId = myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : defaultYoudaoAppId;
-const youdaoAppSecret =
-  myPreferences.youdaoAppSecret.trim().length > 0 ? myPreferences.youdaoAppSecret.trim() : defaultYoudaoAppSecret;
-
-// baidu app id and secret
-const baiduAppId = myPreferences.baiduAppId.trim().length > 0 ? myPreferences.baiduAppId.trim() : defaultBaiduAppId;
-const baiduAppSecret =
-  myPreferences.baiduAppSecret.trim().length > 0 ? myPreferences.baiduAppSecret.trim() : defaultBaiduAppSecret;
-
-// tencent secret id and key
-const tencentSecretId =
-  myPreferences.tencentSecretId.trim().length > 0 ? myPreferences.tencentSecretId.trim() : defaultTencentSecretId;
-const tencentSecretKey =
-  myPreferences.tencentSecretKey.trim().length > 0 ? myPreferences.tencentSecretKey.trim() : defaultTencentSecretKey;
-
-const caiyunToken = myPreferences.caiyunToken.trim().length > 0 ? myPreferences.caiyunToken.trim() : defaultCaiyunToken;
+import { getLanguageItemFromYoudaoId } from "./utils";
 
 const tencentEndpoint = "tmt.tencentcloudapi.com";
 const tencentRegion = "ap-guangzhou";
@@ -73,7 +59,7 @@ const client = new TmtClient(clientConfig);
 /**
  * Caclulate axios request cost time
  */
-export const requestCostTime = "x-request-cost";
+const requestCostTime = "x-request-cost";
 axios.interceptors.request.use(function (config: AxiosRequestConfig) {
   if (config.headers) {
     config.headers["request-startTime"] = new Date().getTime();
@@ -113,7 +99,7 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
     const error = err as { code: string; message: string };
     console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       code: error.code,
       message: error.message,
     };
@@ -123,17 +109,21 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
 
 /**
  * 腾讯文本翻译，5次/秒
- * Docs: https://console.cloud.tencent.com/api/explorer?Product=tmt&Version=2018-03-21&Action=TextTranslate&SignVersion=
+ * Docs: https://cloud.tencent.com/document/api/551/15619
  */
 export async function requestTencentTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
-  const from = getLanguageItemFromYoudaoId(fromLanguage).tencentLanguageId || "auto";
+): Promise<RequestTypeResult> {
+  const from = getLanguageItemFromYoudaoId(fromLanguage).tencentLanguageId;
   const to = getLanguageItemFromYoudaoId(targetLanguage).tencentLanguageId;
-  if (!to) {
-    return Promise.reject(new Error("Target language is not supported by Tencent Translate"));
+  if (!from || !to) {
+    console.warn(`Tencent translate not support language: ${fromLanguage} --> ${targetLanguage}`);
+    return Promise.resolve({
+      type: TranslationType.Tencent,
+      result: null,
+    });
   }
   const params = {
     SourceText: queryText,
@@ -146,17 +136,18 @@ export async function requestTencentTextTranslate(
   try {
     const response = await client.TextTranslate(params);
     const endTime = new Date().getTime();
-    console.log(`tencen translate: ${response.TargetText}, cost: ${endTime - startTime} ms`);
+    console.log(`Tencen translate: ${response.TargetText}, cost: ${endTime - startTime} ms`);
     const typeResult = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       result: response as TencentTranslateResult,
     };
     return Promise.resolve(typeResult);
   } catch (err) {
+    // console.error(`tencent translate error: ${JSON.stringify(err, null, 2)}`);
     const error = err as { code: string; message: string };
-    console.error(`tencent translate error, code: ${error.code}, message: ${error.message}`);
+    console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
-      type: TranslateType.Tencent,
+      type: TranslationType.Tencent,
       code: error.code,
       message: error.message,
     };
@@ -172,7 +163,7 @@ export function requestYoudaoDictionary(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   function truncate(q: string): string {
     const len = q.length;
     return len <= 20 ? q : q.substring(0, 10) + len + q.substring(len - 10, len);
@@ -198,16 +189,29 @@ export function requestYoudaoDictionary(
     axios
       .post(url, params)
       .then((response) => {
-        console.log(`---> youdao translate cost: ${response.headers[requestCostTime]} ms`);
-        resolve({
-          type: TranslateType.Youdao,
-          result: response.data,
-        });
+        const youdaoResult = response.data as YoudaoTranslateResult;
+        const youdaoErrorInfo = getYoudaoErrorInfo(youdaoResult.errorCode);
+        const youdaoTypeResult = {
+          type: TranslationType.Youdao,
+          result: youdaoResult,
+          errorInfo: youdaoErrorInfo,
+        };
+        console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
+        if (youdaoResult.errorCode !== YoudaoRequestStateCode.Success.toString()) {
+          reject(youdaoErrorInfo);
+        } else {
+          resolve(youdaoTypeResult);
+        }
       })
       .catch((error) => {
         // It seems that Youdao will never reject, always resolve...
+        // ? Error: write EPROTO 6180696064:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:../deps/openssl/openssl/ssl/statem/statem_lib.c:1994:
         console.error(`youdao translate error: ${error}`);
-        reject(error);
+        reject({
+          type: TranslationType.Youdao,
+          code: error.response.status.toString(),
+          message: error.response.statusText,
+        });
       });
   });
 }
@@ -221,7 +225,7 @@ export function requestBaiduTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   const salt = Math.round(new Date().getTime() / 1000);
   const md5Content = baiduAppId + queryText + salt + baiduAppSecret;
   const sign = CryptoJS.MD5(md5Content).toString();
@@ -244,25 +248,29 @@ export function requestBaiduTextTranslate(
         const baiduResult = response.data as BaiduTranslateResult;
         if (baiduResult.trans_result) {
           const translateText = baiduResult.trans_result[0].dst;
-          console.log(`baidu translate: ${translateText}, cost: ${response.headers[requestCostTime]} ms`);
+          console.log(`Baidu translate: ${translateText}, cost: ${response.headers[requestCostTime]} ms`);
           resolve({
-            type: TranslateType.Baidu,
+            type: TranslationType.Baidu,
             result: baiduResult,
           });
         } else {
           console.error(`baidu translate error: ${JSON.stringify(baiduResult)}`);
           const errorInfo: RequestErrorInfo = {
-            type: TranslateType.Baidu,
+            type: TranslationType.Baidu,
             code: baiduResult.error_code || "",
             message: baiduResult.error_msg || "",
           };
           reject(errorInfo);
         }
       })
-      .catch((err) => {
+      .catch((error) => {
         // It seems that Baidu will never reject, always resolve...
-        console.error(`baidu translate error: ${err}`);
-        reject(err);
+        console.error(`---> baidu translate error: ${error}`);
+        reject({
+          type: TranslationType.Baidu,
+          code: error.response.status.toString(),
+          message: error.response.statusText,
+        });
       });
   });
 }
@@ -275,7 +283,7 @@ export function requestCaiyunTextTranslate(
   queryText: string,
   fromLanguage: string,
   targetLanguage: string
-): Promise<TranslateTypeResult> {
+): Promise<RequestTypeResult> {
   const url = "https://api.interpreter.caiyunai.com/v1/translator";
   const from = getLanguageItemFromYoudaoId(fromLanguage).caiyunLanguageId || "auto";
   const to = getLanguageItemFromYoudaoId(targetLanguage).caiyunLanguageId;
@@ -284,9 +292,9 @@ export function requestCaiyunTextTranslate(
   // Note that Caiyun Translate only supports these types of translation at present.
   const supportedTranslatType = ["zh2en", "zh2ja", "en2zh", "ja2zh"];
   if (!supportedTranslatType.includes(trans_type)) {
-    console.log(`caiyun translate not support language: ${from} --> ${to}`);
+    console.warn(`Caiyun translate not support language: ${fromLanguage} --> ${targetLanguage}`);
     return Promise.resolve({
-      type: TranslateType.Caiyun,
+      type: TranslationType.Caiyun,
       result: null,
     });
   }
@@ -309,18 +317,79 @@ export function requestCaiyunTextTranslate(
         const caiyunResult = response.data as CaiyunTranslateResult;
         console.log(`caiyun translate: ${caiyunResult.target}, cost: ${response.headers[requestCostTime]} ms`);
         resolve({
-          type: TranslateType.Caiyun,
+          type: TranslationType.Caiyun,
           result: caiyunResult,
         });
       })
       .catch((error) => {
         const errorInfo: RequestErrorInfo = {
-          type: TranslateType.Caiyun,
-          code: error.response.status,
+          type: TranslationType.Caiyun,
+          code: error.response.status.toString(),
           message: error.response.statusText,
         };
         reject(errorInfo);
         console.error("caiyun error response: ", error.response);
       });
   });
+}
+
+/**
+ * DeepL translate API
+ * https://www.deepl.com/zh/docs-api/translating-text
+ */
+export async function requestDeepLTextTranslate(
+  queryText: string,
+  fromLanguage: string,
+  targetLanguage: string
+): Promise<RequestTypeResult> {
+  const sourceLang = getLanguageItemFromYoudaoId(fromLanguage).deepLSourceLanguageId;
+  const targetLang =
+    getLanguageItemFromYoudaoId(targetLanguage).deepLSourceLanguageId ||
+    getLanguageItemFromYoudaoId(targetLanguage).deepLTargetLanguageId;
+
+  // if language is not supported, return null
+  if (!sourceLang || !targetLang) {
+    console.warn(`DeepL translate not support language: ${fromLanguage} --> ${targetLanguage}`);
+    return Promise.resolve({
+      type: TranslationType.DeepL,
+      result: null,
+    });
+  }
+
+  // * deepL api free and deepL pro api use different url host.
+  const url = deepLAuthKey.endsWith(":fx")
+    ? "https://api-free.deepl.com/v2/translate"
+    : "https://api.deepl.com/v2/translate";
+  const params = {
+    auth_key: deepLAuthKey,
+    text: queryText,
+    source_lang: sourceLang,
+    target_lang: targetLang,
+  };
+  // console.log(`---> deepL params: ${JSON.stringify(params, null, 4)}`);
+
+  try {
+    const response = await axios.post(url, querystring.stringify(params));
+    const deepLResult = response.data as DeepLTranslateResult;
+    const translatedText = deepLResult.translations[0].text;
+    console.log(
+      `DeepL translate: ${JSON.stringify(translatedText, null, 4)}, length: ${translatedText.length}, cost: ${
+        response.headers[requestCostTime]
+      } ms`
+    );
+    return Promise.resolve({
+      type: TranslationType.DeepL,
+      result: deepLResult,
+    });
+  } catch (err) {
+    const error = err as { response: AxiosResponse };
+    console.error("deepL error: ", JSON.stringify(error.response, null, 4));
+    const errorInfo: RequestErrorInfo = {
+      type: TranslationType.DeepL,
+      code: error.response.status.toString(),
+      message: error.response.statusText,
+    };
+    console.warn("deepL error info: ", errorInfo);
+    return Promise.reject(errorInfo);
+  }
 }

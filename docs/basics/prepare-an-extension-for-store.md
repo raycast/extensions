@@ -21,7 +21,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Extensions and Commands Naming
 
-- Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/#NYT) convention
+- Extension and command titles should follow [**Apple Style Guide**](https://help.apple.com/applestyleguide/#/apsgb744e4a3?sub=apdca93e113f1d64) convention
   - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
   - ❌ `Hacker news`, `my issues`
   - 🤔 It's okay to use lower case for names and trademarks that are canonically written with lower case letters. E.g. `iOS` , `macOS` , `npm`.
@@ -117,9 +117,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
 
 #### How to use it?
-1) Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2) Open the command
-3) Press the hotkey, remember to tick `Save to Metadata`
+
+1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
+2. Open the command
+3. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.

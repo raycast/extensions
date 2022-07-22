@@ -8,7 +8,9 @@ let count = 0;
 export default function Command(): ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<{ text: string; languages: string }[]>([]);
+  const [results, setResults] = useState<
+    { text: string; languages: string; source_language: string; target_language: string }[]
+  >([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   useEffect(() => {
@@ -49,10 +51,14 @@ export default function Command(): ReactElement {
             {
               text: res[0].text,
               languages: `${lang1Rep} -> ${lang2Rep}`,
+              source_language: supportedLanguagesByCode[preferences.lang1].code,
+              target_language: supportedLanguagesByCode[preferences.lang2].code,
             },
             {
               text: res[1].text,
               languages: `${lang2Rep} -> ${lang1Rep}`,
+              source_language: supportedLanguagesByCode[preferences.lang2].code,
+              target_language: supportedLanguagesByCode[preferences.lang1].code,
             },
           ]);
         }
@@ -87,6 +93,19 @@ export default function Command(): ReactElement {
                   title="Toggle Full Text"
                   icon={Icon.Text}
                   onAction={() => setIsShowingDetail(!isShowingDetail)}
+                />
+                <Action.OpenInBrowser
+                  title="Open in Google Translate"
+                  shortcut={{ modifiers: ["opt"], key: "enter" }}
+                  url={
+                    "https://translate.google.com/?sl=" +
+                    r.source_language +
+                    "&tl=" +
+                    r.target_language +
+                    "&text=" +
+                    toTranslate +
+                    "&op=translate"
+                  }
                 />
               </ActionPanel.Section>
             </ActionPanel>

@@ -1,36 +1,40 @@
+import { DeepLTranslateResult } from "./types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 16:18
+ * @lastEditTime: 2022-07-19 21:11
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { SectionType, TranslateType } from "./consts";
 import {
+  AppleTranslateResult,
+  BaiduTranslateResult,
+  CaiyunTranslateResult,
   QueryWordInfo,
+  RequestTypeResult,
+  SectionType,
+  TencentTranslateResult,
   TranslateDisplayResult,
   TranslateFormatResult,
   TranslateItem,
+  TranslationType,
   YoudaoTranslateResult,
-  TranslateTypeResult,
-  BaiduTranslateResult,
-  TencentTranslateResult,
-  CaiyunTranslateResult,
-  AppleTranslateResult,
 } from "./types";
-import { isShowMultipleTranslations } from "./utils";
+import { checkIfShowMultipleTranslations, myPreferences } from "./utils";
+
+const sortedOrder = getTranslationResultOrder();
 
 /**
  * Format the Youdao original data for later use.
  */
-export function formatYoudaoDictionaryResult(youdaoTypeResult: TranslateTypeResult): TranslateFormatResult {
+export function formatYoudaoDictionaryResult(youdaoTypeResult: RequestTypeResult): TranslateFormatResult {
   const youdaoResult = youdaoTypeResult.result as YoudaoTranslateResult;
   const translations = youdaoResult.translation.map((translationText) => {
     return {
-      type: TranslateType.Youdao,
+      type: TranslationType.Youdao,
       text: translationText,
     };
   });
@@ -57,7 +61,7 @@ export function formatYoudaoDictionaryResult(youdaoTypeResult: TranslateTypeResu
 
   return {
     queryWordInfo: queryWordInfo,
-    translations: translations,
+    translationItems: translations,
     explanations: youdaoResult.basic?.explains,
     forms: youdaoResult.basic?.wfs,
     webTranslation: webTranslation,
@@ -66,25 +70,46 @@ export function formatYoudaoDictionaryResult(youdaoTypeResult: TranslateTypeResu
 }
 
 /**
- * update formated result with apple translate result
+ * Update format result with deepl translate result.
  */
-export function updateFormatResultWithAppleTranslateResult(
+export function updateFormatTranslateResultWithDeepLResult(
   formatResult: TranslateFormatResult,
-  appleTranslateResult: TranslateTypeResult
+  deepLTypeResult: RequestTypeResult
 ): TranslateFormatResult {
-  const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
-  formatResult.translations.push({
-    type: TranslateType.Apple,
-    text: appleTranslate.translatedText,
-  });
-  return sortTranslations(formatResult);
+  const deepLResult = deepLTypeResult.result as DeepLTranslateResult;
+  if (deepLResult) {
+    formatResult.translationItems.push({
+      type: TranslationType.DeepL,
+      text: deepLResult.translations[0].text, // deepl will autotically warp the text.
+    });
+    return sortTranslationItems(formatResult, sortedOrder);
+  }
+  return formatResult;
 }
 
 /**
- * update formated result with baidu translate result
+ * update format result with apple translate result
  */
-export function updateFormateResultWithBaiduTranslation(
-  baiduTypeResult: TranslateTypeResult,
+export function updateFormatResultWithAppleTranslateResult(
+  formatResult: TranslateFormatResult,
+  appleTranslateResult: RequestTypeResult
+): TranslateFormatResult {
+  const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
+  if (appleTranslate.translatedText) {
+    formatResult.translationItems.push({
+      type: TranslationType.Apple,
+      text: appleTranslate.translatedText,
+    });
+    return sortTranslationItems(formatResult, sortedOrder);
+  }
+  return formatResult;
+}
+
+/**
+ * update format result with baidu translate result
+ */
+export function updateFormatResultWithBaiduTranslation(
+  baiduTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
@@ -95,69 +120,107 @@ export function updateFormateResultWithBaiduTranslation(
       })
       .join("\n");
 
-    formatResult.translations.push({
-      type: TranslateType.Baidu,
+    formatResult.translationItems.push({
+      type: TranslationType.Baidu,
       text: baiduTranslation,
     });
+    return sortTranslationItems(formatResult, sortedOrder);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * update formated result with tencent translate result
+ * update format result with tencent translate result
  */
-export function updateFormateResultWithTencentTranslation(
-  tencentTypeResult: TranslateTypeResult,
+export function updateFormatResultWithTencentTranslation(
+  tencentTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const tencentResult = tencentTypeResult.result as TencentTranslateResult;
   if (tencentResult) {
     const tencentTranslation = tencentResult.TargetText;
-    formatResult.translations.push({
-      type: TranslateType.Tencent,
+    formatResult.translationItems.push({
+      type: TranslationType.Tencent,
       text: tencentTranslation,
     });
+    return sortTranslationItems(formatResult, sortedOrder);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * update formated result with caiyun translate result
+ * update format result with caiyun translate result
  */
-export function updateFormateResultWithCaiyunTranslation(
-  caiyunTypeResult: TranslateTypeResult,
+export function updateFormatResultWithCaiyunTranslation(
+  caiyunTypeResult: RequestTypeResult,
   formatResult: TranslateFormatResult
 ): TranslateFormatResult {
   const caiyunResult = caiyunTypeResult.result as CaiyunTranslateResult;
   if (caiyunResult) {
-    formatResult.translations.push({
-      type: TranslateType.Caiyun,
+    formatResult.translationItems.push({
+      type: TranslationType.Caiyun,
       text: caiyunResult?.target.join("\n"),
     });
+    return sortTranslationItems(formatResult, sortedOrder);
   }
-  return sortTranslations(formatResult);
+  return formatResult;
 }
 
 /**
- * sort formatResult translations, by type: apple > baidu > tencent > youdao > caiyun
+ * Sort translation results by designated order.
+ *
+ * * NOTE: this function will be called many times, because translate results are async, so we need to sort every time.
  */
-export function sortTranslations(formatResult: TranslateFormatResult): TranslateFormatResult {
-  const sortByOrders = [
-    TranslateType.Apple,
-    TranslateType.Baidu,
-    TranslateType.Tencent,
-    TranslateType.Youdao,
-    TranslateType.Caiyun,
-  ];
+export function sortTranslationItems(
+  formatResult: TranslateFormatResult,
+  sortedOrder: string[]
+): TranslateFormatResult {
   const sortTranslations: TranslateItem[] = [];
-  for (const translationItem of formatResult.translations) {
-    const index = sortByOrders.indexOf(translationItem.type);
+  for (const translationItem of formatResult.translationItems) {
+    const index = sortedOrder.indexOf(translationItem.type.toString().toLowerCase());
     sortTranslations[index] = translationItem;
   }
   // filter undefined
   const translations = sortTranslations.filter((item) => item);
-  formatResult.translations = translations;
+  formatResult.translationItems = translations;
   return formatResult;
+}
+
+/**
+ * Get translation result order, defaulf is sorted by: deelp > apple > baidu > tencent > youdao > caiyun.
+ * If user set the order manually, prioritize the order.
+ */
+export function getTranslationResultOrder(): string[] {
+  const defaultTypeOrder = [
+    TranslationType.DeepL,
+    TranslationType.Apple,
+    TranslationType.Baidu,
+    TranslationType.Tencent,
+    TranslationType.Youdao,
+    TranslationType.Caiyun,
+  ];
+
+  const defaultOrder = defaultTypeOrder.map((type) => type.toString().toLowerCase());
+
+  const userOrder: string[] = [];
+  // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
+  const manualOrder = myPreferences.translationDisplayOrder.toLowerCase().split(","); // "Baidu,DeepL,Tencent"
+  // console.log("manualOrder:", manualOrder);
+  if (manualOrder.length > 0) {
+    for (let translationName of manualOrder) {
+      translationName = translationName.trim();
+      // if the type name is in the default order, add it to user order, and remove it from defaultNameOrder.
+      if (defaultOrder.includes(translationName)) {
+        userOrder.push(translationName);
+        defaultOrder.splice(defaultOrder.indexOf(translationName), 1);
+      }
+    }
+  }
+  // console.log("defaultNameOrder:", defaultOrder);
+  // console.log("userOrder:", userOrder);
+  const finalOrder = [...userOrder, ...defaultOrder];
+  // console.log("finalOrder:", finalOrder);
+  return finalOrder;
 }
 
 /**
@@ -169,9 +232,9 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
     return displayResult;
   }
 
-  const showMultipleTranslations = isShowMultipleTranslations(formatResult);
+  const showMultipleTranslations = checkIfShowMultipleTranslations(formatResult);
 
-  for (const [i, translateItem] of formatResult.translations.entries()) {
+  for (const [i, translateItem] of formatResult.translationItems.entries()) {
     const sectionType = showMultipleTranslations ? translateItem.type : SectionType.Translation;
 
     let sectionTitle = SectionType.Translation.toString();
@@ -207,7 +270,7 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
       ],
     });
 
-    if (!isShowMultipleTranslations) {
+    if (!checkIfShowMultipleTranslations) {
       break;
     }
   }
@@ -309,11 +372,11 @@ export function formatTranslateDisplayResult(formatResult: TranslateFormatResult
  * Convert multiple translated result texts to markdown format and display them in the same list details page.
  */
 export function formatAllTypeTranslationToMarkdown(
-  type: TranslateType | SectionType,
+  type: TranslationType | SectionType,
   formatResult: TranslateFormatResult
 ) {
   const translations = [] as TranslateItem[];
-  for (const translation of formatResult.translations) {
+  for (const translation of formatResult.translationItems) {
     const formatTranslation = formatTranslationToMarkdown(translation.type, translation.text);
     translations.push({ type: translation.type, text: formatTranslation });
   }
@@ -336,7 +399,7 @@ export function formatAllTypeTranslationToMarkdown(
 /**
  *  format type translation result to markdown format.
  */
-export function formatTranslationToMarkdown(type: TranslateType | SectionType, text: string) {
+export function formatTranslationToMarkdown(type: TranslationType | SectionType, text: string) {
   const string = text.replace(/\n/g, "\n\n");
   const markdown = `
   ## ${type}

@@ -19,7 +19,7 @@
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
 
-## Teams (Beta)
+## Teams
 
 - [Getting Started](teams/getting-started.md)
 - [Publish a Private Extension](teams/publish-a-private-extension.md)
@@ -34,14 +34,15 @@
 
 ## Information
 
+- [Background Refresh (Beta)](information/background-refresh.md)
 - [Best Practices](information/best-practices.md)
 - [CLI](information/cli.md)
 - [File Structure](information/file-structure.md)
 - [Lifecycle](information/lifecycle.md)
 - [Manifest](information/manifest.md)
-- [Versioning](information/versioning.md)
 - [Security](information/security.md)
 - [Terminology](information/terminology.md)
+- [Versioning](information/versioning.md)
 
 ## API Reference
 
@@ -55,6 +56,7 @@
 - [Keyboard](api-reference/keyboard.md)
 - [OAuth](api-reference/oauth.md)
 - [Preferences](api-reference/preferences.md)
+- [Arguments](api-reference/arguments.md)
 - [Storage](api-reference/storage.md)
 - [User Interface](api-reference/user-interface/README.md)
   - [Action Panel](api-reference/user-interface/action-panel.md)
@@ -62,11 +64,12 @@
   - [Detail](api-reference/user-interface/detail.md)
   - [Form](api-reference/user-interface/form.md)
   - [List](api-reference/user-interface/list.md)
+  - [Menu Bar Extra (Beta)](api-reference/user-interface/menu-bar-extra.md)
   - [Grid](api-reference/user-interface/grid.md)
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [Utilities](api-reference/utilities.md)
+- [System Utilities](api-reference/utilities.md)
 - [Window & Search Bar](api-reference/window-and-search-bar.md)
 
 ---

@@ -10,6 +10,7 @@ function gopass(args: string[]): Promise<string> {
           "/usr/bin", // pbcopy
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
+          "/opt/homebrew/bin", // homebrew on macOS Apple Silicon
         ].join(":"),
       },
     });
@@ -39,4 +40,12 @@ async function clip(entry: string): Promise<void> {
   await gopass(["show", "--clip", entry]);
 }
 
-export default { list, password, clip };
+async function show(entry: string): Promise<string[]> {
+  // gopass has no option to disable printing the password in the first, therefor we use `slice`
+  return await gopass(["show", entry])
+    .then((data) => data.split(`\n`).slice(1))
+    // Filter out details not in YAML colon syntax "key: value", such as GOPASS-SECRET-1.0
+    .then((data) => data.filter((item) => item.includes(":")));
+}
+
+export default { list, password, clip, show };

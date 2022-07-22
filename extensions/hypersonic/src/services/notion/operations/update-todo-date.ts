@@ -1,22 +1,23 @@
 import { TodoPage } from '@/types/todo-page'
 import { isNotionClientError } from '@notionhq/client'
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { notion } from '../client'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 
 export async function updateTodoDate(
   pageId: string,
-  date: Date | null
+  date: string | null
 ): Promise<any> {
+  const dateProperty = getPreferenceValues().property_date
   try {
     const notionClient = await notion()
     const page = await notionClient.pages.update({
       page_id: pageId,
       properties: {
-        Date: {
+        [dateProperty]: {
           date: date
             ? {
-                start: date.toISOString().split('T')[0],
+                start: date,
               }
             : null,
         },

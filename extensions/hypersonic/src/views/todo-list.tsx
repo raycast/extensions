@@ -16,8 +16,9 @@ import { WhatHaveIDoneAction } from '@/components/what-have-i-done-action'
 import { OpenNotionAction } from '@/components/open-notion-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { TransparentEmpty } from '@/components/transparent-empty'
+import { Todo } from '@/types/todo'
 
-export function ToDoList() {
+export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
   const {
     todos,
     data,
@@ -33,6 +34,8 @@ export function ToDoList() {
     handleDelete,
     handleMoveUp,
     handleMoveDown,
+    setFilter,
+    filter,
     getInitialData,
   } = useTodos()
 
@@ -42,6 +45,26 @@ export function ToDoList() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Filter or create to-do"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by tag"
+          value={filter}
+          onChange={setFilter}
+        >
+          <List.Dropdown.Item title="All" value={'all'} />
+          {tags.map((tag) => (
+            <List.Dropdown.Item
+              key={tag.id}
+              icon={{
+                source: 'dot.png',
+                tintColor: tag.color,
+              }}
+              title={tag.name}
+              value={tag.id}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
       {searchText ? (
         <List.Item
@@ -86,7 +109,11 @@ export function ToDoList() {
               actions={
                 <ActionPanel>
                   <CompleteTodoAction todo={todo} onComplete={handleComplete} />
-                  <RemindAction todo={todo} onSetDate={handleSetDate} />
+                  <RemindAction
+                    todo={todo}
+                    onSetDate={handleSetDate}
+                    selectTask={selectTask}
+                  />
                   <SetLabelAction
                     todo={todo}
                     tags={tags}
@@ -111,7 +138,7 @@ export function ToDoList() {
                         title="View Link"
                         icon={Icon.Link}
                         url={todo.contentUrl}
-                        shortcut={{ modifiers: ['cmd'], key: 'u' }}
+                        shortcut={{ modifiers: ['cmd'], key: 'e' }}
                       />
                     ) : null}
                     <CopyToDoAction todo={todo} />
