@@ -45,6 +45,6 @@ export interface moduleitem {
 export interface Preferences {
   token: string;
   domain: string;
-  recent: boolean;
+  showRecent: boolean;
   numRecent: string;
 }
