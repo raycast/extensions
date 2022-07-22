@@ -1,0 +1,258 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deepl",
+  "title": "DeepL",
+  "description": "Translate text using the DeepL API.",
+  "icon": "command-icon.png",
+  "author": "pindab0ter",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bg",
+      "title": "Translate to Bulgarian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Bulgarian.",
+      "mode": "view"
+    },
+    {
+      "name": "cs",
+      "title": "Translate to Czech",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Czech.",
+      "mode": "view"
+    },
+    {
+      "name": "da",
+      "title": "Translate to Danish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Danish.",
+      "mode": "view"
+    },
+    {
+      "name": "de",
+      "title": "Translate to German",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to German.",
+      "mode": "view"
+    },
+    {
+      "name": "el",
+      "title": "Translate to Greek",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Greek.",
+      "mode": "view"
+    },
+    {
+      "name": "en-gb",
+      "title": "Translate to British English",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to English.",
+      "mode": "view"
+    },
+    {
+      "name": "en-us",
+      "title": "Translate to American English",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to English.",
+      "mode": "view"
+    },
+    {
+      "name": "es",
+      "title": "Translate to Spanish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Spanish.",
+      "mode": "view"
+    },
+    {
+      "name": "et",
+      "title": "Translate to Estonian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Estonian.",
+      "mode": "view"
+    },
+    {
+      "name": "fi",
+      "title": "Translate to Finnish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Finnish.",
+      "mode": "view"
+    },
+    {
+      "name": "fr",
+      "title": "Translate to French",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to French.",
+      "mode": "view"
+    },
+    {
+      "name": "hu",
+      "title": "Translate to Hungarian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Hungarian.",
+      "mode": "view"
+    },
+    {
+      "name": "id",
+      "title": "Translate to Indonesian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Indonesian.",
+      "mode": "view"
+    },
+    {
+      "name": "it",
+      "title": "Translate to Italian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Italian.",
+      "mode": "view"
+    },
+    {
+      "name": "ja",
+      "title": "Translate to Japanese",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Japanese.",
+      "mode": "view"
+    },
+    {
+      "name": "lt",
+      "title": "Translate to Lithuanian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Lithuanian.",
+      "mode": "view"
+    },
+    {
+      "name": "lv",
+      "title": "Translate to Latvian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Latvian.",
+      "mode": "view"
+    },
+    {
+      "name": "nl",
+      "title": "Translate to Dutch",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Dutch.",
+      "mode": "view"
+    },
+    {
+      "name": "pl",
+      "title": "Translate to Polish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Polish.",
+      "mode": "view"
+    },
+    {
+      "name": "pt-pt",
+      "title": "Translate to Portuguese",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Portuguese.",
+      "mode": "view"
+    },
+    {
+      "name": "pt-br",
+      "title": "Translate to Brazilian Portuguese",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Portuguese.",
+      "mode": "view"
+    },
+    {
+      "name": "ro",
+      "title": "Translate to Romanian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Romanian.",
+      "mode": "view"
+    },
+    {
+      "name": "ru",
+      "title": "Translate to Russian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Russian.",
+      "mode": "view"
+    },
+    {
+      "name": "sk",
+      "title": "Translate to Slovak",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Slovak.",
+      "mode": "view"
+    },
+    {
+      "name": "sl",
+      "title": "Translate to Slovenian",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Slovenian.",
+      "mode": "view"
+    },
+    {
+      "name": "sv",
+      "title": "Translate to Swedish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Swedish.",
+      "mode": "view"
+    },
+    {
+      "name": "tr",
+      "title": "Translate to Turkish",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Turkish.",
+      "mode": "view"
+    },
+    {
+      "name": "zh",
+      "title": "Translate to Chinese",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Chinese.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "plan",
+      "type": "dropdown",
+      "title": "Subscription Plan",
+      "description": "Specify what DeepL Plan are you on.",
+      "required": true,
+      "default": "free",
+      "data": [
+        {
+          "title": "DeepL API Free",
+          "value": "free"
+        },
+        {
+          "title": "DeepL API Pro",
+          "value": "pro"
+        }
+      ]
+    },
+    {
+      "name": "apikey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your DeepL API key. Find this in your account details.",
+      "link": "https://www.deepl.com/account/summary",
+      "placeholder": "Enter you DeepL API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.1",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
