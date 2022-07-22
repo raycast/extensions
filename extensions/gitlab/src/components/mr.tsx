@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
   daysInSeconds,
-  ensureCleanAccessories,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -368,7 +367,7 @@ export function MRListItem(props: {
       title={mr.title}
       subtitle={!getListDetailsPreference() ? subtitle : undefined}
       icon={icon}
-      accessories={ensureCleanAccessories(accessories)}
+      accessories={accessories}
       detail={getListDetailsPreference() && <MRListDetail mr={mr} subtitle={subtitle} />}
       actions={
         <ActionPanel>
