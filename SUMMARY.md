@@ -34,7 +34,8 @@
 
 ## Information
 
-- [Background Refresh (Beta)](information/background-refresh.md)
+- [Arguments](information/arguments.md)
+- [Background Refresh ᵇᵉᵗᵃ](information/background-refresh.md)
 - [Best Practices](information/best-practices.md)
 - [CLI](information/cli.md)
 - [File Structure](information/file-structure.md)
@@ -54,22 +55,21 @@
   - [HUD](api-reference/feedback/hud.md)
   - [Toast](api-reference/feedback/toast.md)
 - [Keyboard](api-reference/keyboard.md)
+- [Menu Bar Extra ᵇᵉᵗᵃ](api-reference/menu-bar-extra.md)
 - [OAuth](api-reference/oauth.md)
 - [Preferences](api-reference/preferences.md)
-- [Arguments](api-reference/arguments.md)
 - [Storage](api-reference/storage.md)
+- [System Utilities](api-reference/utilities.md)
 - [User Interface](api-reference/user-interface/README.md)
   - [Action Panel](api-reference/user-interface/action-panel.md)
   - [Actions](api-reference/user-interface/actions.md)
   - [Detail](api-reference/user-interface/detail.md)
   - [Form](api-reference/user-interface/form.md)
   - [List](api-reference/user-interface/list.md)
-  - [Menu Bar Extra (Beta)](api-reference/user-interface/menu-bar-extra.md)
   - [Grid](api-reference/user-interface/grid.md)
   - [Colors](api-reference/user-interface/colors.md)
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
-- [System Utilities](api-reference/utilities.md)
 - [Window & Search Bar](api-reference/window-and-search-bar.md)
 
 ## Utilities

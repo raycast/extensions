@@ -1,4 +1,4 @@
-# Menu Bar Extra (Beta)
+# Menu Bar Extra ᵇᵉᵗᵃ
 
 {% hint style="info" %}
 As of version 1.38.1, you can use Raycast commands to place items in your menu bar!
@@ -8,7 +8,7 @@ The `MenuBarExtra` component can be used to create commands which populate the [
 
 ## Getting Started
 
-If you don't have an extension yet, follow the [getting started](../../basics/getting-started.md) guide and then return to this page.
+If you don't have an extension yet, follow the [getting started](../basics/getting-started.md) guide and then return to this page.
 Now that your extension is ready, let's open its `package.json` file and add a new entry to its `commands` array, ensuring its `mode` property is set to `menu-bar`. For this guide, let's add the following:
 
 ```JSON
@@ -22,7 +22,7 @@ Now that your extension is ready, let's open its `package.json` file and add a n
 ```
 
 {% hint style="info" %}
-Check out the [command properties entry](../../information/manifest.md#command-properties) in the manifest file documentation for more detailed information on each of those properties.
+Check out the [command properties entry](../information/manifest.md#command-properties) in the manifest file documentation for more detailed information on each of those properties.
 {% endhint %}
 
 Create `github-pull-requests.tsx` in your extensions `src/` folder and add the following:
@@ -54,13 +54,13 @@ export default function Command() {
 
 If your development server is running, the command should appear in your root search, and running the command should result in the `GitHub` icon appearing in your menu bar.
 
-![GitHub Pull Requests menu bar command](../../.gitbook/assets/menu-bar-command.gif)
+![GitHub Pull Requests menu bar command](../.gitbook/assets/menu-bar-command.gif)
 
 {% hint style="info" %}
 macOS has the final say on whether a given menu bar extra is displayed. If you have a lot of items there, it is possible that the command we just ran doesn't show up. If that's the case, try to clear up some space in the menu bar, either by closing some of the items you don't need or by hiding them using [HiddenBar](https://github.com/dwarvesf/hidden), [Bartender](https://www.macbartender.com/), or similar apps.
 {% endhint %}
 
-Of course, our pull request command wouldn't be of that much use if we had to tell it to update itself every single time. To add [background refresh](../../information/background-refresh.md) to our command, we need to open the `package.json` file we modified earlier and add an `interval` key to the command configuration object:
+Of course, our pull request command wouldn't be of that much use if we had to tell it to update itself every single time. To add [background refresh](../information/background-refresh.md) to our command, we need to open the `package.json` file we modified earlier and add an `interval` key to the command configuration object:
 
 ```JSON
 {
@@ -75,11 +75,11 @@ Of course, our pull request command wouldn't be of that much use if we had to te
 
 Your root search should look similar to:
 
-![Menu Bar Command - Activate Background Refresh](../../.gitbook/assets/menu-bar-activate-command.png)
+![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.png)
 
 Running it once should activate it to:
 
-![Menu Bar Command - Refresh](../../.gitbook/assets/menu-bar-refresh.png)
+![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.png)
 
 ## Lifecycle
 
@@ -88,19 +88,19 @@ There are five distinct events that can result in a `menu-bar`'s item being plac
 
 ### From the root search
 
-Same as any other commands, `menu-bar` commands can be run directly from Raycast's root search. Eventually they may result in a new item showing up in your menu bar (if you have enough room and if the command returns a `MenuBarExtra`), or in a previous item disappearing, if the command returns `null`. In this case, Raycast will load your command code, execute it, wait for the `MenuBarExtra`'s `isLoading` prop to switch to `false` and unload the command.
+Same as any other commands, `menu-bar` commands can be run directly from Raycast's root search. Eventually, they may result in a new item showing up in your menu bar (if you have enough room and if the command returns a `MenuBarExtra`), or in a previous item disappearing, if the command returns `null`. In this case, Raycast will load your command code, execute it, wait for the `MenuBarExtra`'s `isLoading` prop to switch to `false`, and unload the command.
 
 {% hint style="danger" %}
-If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` - in which case Raycast will render and immediately unload the command, or set it to `true` while it's performing an async task (such as an API call) and then set it to `false` once it's done. Same as above, Raycast will load the command code, execute it, wait for `MenuBarExtra`'s `isLoading` prop to switch to `false` and then unload the command.
-{% endhint %]
+If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` - in which case Raycast will render and immediately unload the command, or set it to `true` while it's performing an async task (such as an API call) and then set it to `false` once it's done. Same as above, Raycast will load the command code, execute it, wait for `MenuBarExtra`'s `isLoading` prop to switch to `false`, and then unload the command.
+{% endhint %}
 
 ### At a set interval
 
-If your `menu-bar` command also makes use of [background refresh](../../information/background-refresh.md) _and_ it has background refresh activated, Raycast will run the command at set intervals. In your command, you can use `environment.launchType` to check whether it is launched in the background or by the user.
+If your `menu-bar` command also makes use of [background refresh](../information/background-refresh.md) _and_ it has background refresh activated, Raycast will run the command at set intervals. In your command, you can use `environment.launchType` to check whether it is launched in the background or by the user.
 
 {% hint style="info" %}
 To ease testing, commands configured to run in the background have an extra action in development mode:
-![Menu Bar Command - Run in Background](../../.gitbook/assets/menu-bar-run-in-background.png)
+![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.png)
 {% endhint %}
 
 ### When the user clicks the command's icon / title in the menu bar
@@ -113,11 +113,11 @@ This case assumes that your command has run at least once, resulting in an item 
 
 ### When a menu bar command is re-enabled in preferences
 
-This case should work exactly the same as when Raycast is restarted.
+This case should work the same as when Raycast is restarted.
 
 ## Best practices
 
-- make generous use of the [Cache API](../cache.md) and our [Utilities](../../utils-reference/getting-started.md) in order to provide quick feedback and ensure action handlers work as expected
+- make generous use of the [Cache API](./cache.md) and our [Utilities](../utils-reference/getting-started.md) in order to provide quick feedback and ensure action handlers work as expected
 - make sure you set `isLoading` to false when your command finishes executing
 - avoid setting long titles in `MenuBarExtra`, `MenuBarExtra.Submenu` or `MenuBarExtra.Item`
 - don't put identical `MenuBarExtra.Item`s at the same level (direct children of `MenuBarExtra` or in the same `Submenu`) as their `onAction` handlers will not be executed correctly
@@ -131,7 +131,7 @@ Adds an item to the menu bar, optionally with a menu attached in case its `child
 
 {% hint style="info" %}
 `menu-bar` commands don't always need to return a `MenuBarExtra`. Sometimes it makes sense to remove an item from the menu bar, in which case you can write your command logic to return `null` instead.
-{% %}
+{% endhint %}
 
 #### Example
 
@@ -163,7 +163,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | children |  | <code>React.ReactNode</code> | - |
-| icon |  | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| icon |  | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 | isLoading |  | <code>boolean</code> | `false` |
 | title |  | <code>string</code> | - |
 | tooltip |  | <code>string</code> | - |
@@ -237,8 +237,8 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> |  | <code>string</code> | - |
-| icon |  | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| shortcut |  | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| icon |  | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
+| shortcut |  | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
 | tooltip |  | <code>string</code> | - |
 | onAction |  | <code>() => void</code> | - |
 
@@ -297,7 +297,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> |  | <code>string</code> or <code>{ tooltip: string; value: string }</code> | - |
 | children |  | <code>React.ReactNode</code> | - |
-| icon |  | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| icon |  | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 
 ### MenuBarExtra.Separator
 
