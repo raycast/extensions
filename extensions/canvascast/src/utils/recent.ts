@@ -18,7 +18,7 @@ export const getPinnedModuleItems = async (key: number): Promise<moduleitem[]> =
   return await getModuleItems(key, "pinned");
 };
 
-const appendModuleItem = async (key: number, type: string, item: moduleitem, limit: boolean = false): Promise<void> => {
+const appendModuleItem = async (key: number, type: string, item: moduleitem, limit = false): Promise<void> => {
   let items = await getModuleItems(key, type);
   items = removeItem(items, item.id);
   items.unshift(item);
