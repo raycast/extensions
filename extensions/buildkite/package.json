@@ -5,6 +5,9 @@
   "description": "Search Buildkite pipelines and builds",
   "icon": "buildkite.png",
   "author": "mskelton",
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
