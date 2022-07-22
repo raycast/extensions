@@ -21,12 +21,13 @@ export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
 }
 
 export function getMemberAvatar(member: Member): Image.ImageLike {
-  if (member.profile?.display_icon?.url) {
-    return {
-      source: member.profile?.display_icon.url,
-      mask: Image.Mask.Circle,
-    };
-  } else {
-    return getAvatarIcon(member.profile.name || member.profile.mention_name);
-  }
+  // !FIXME: the image url is authenticated
+  // if (member.profile?.display_icon?.url) {
+  //   return {
+  //     source: member.profile?.display_icon.url,
+  //     mask: Image.Mask.Circle,
+  //   };
+  // } else {
+  return getAvatarIcon(member.profile.name || member.profile.mention_name);
+  // }
 }
