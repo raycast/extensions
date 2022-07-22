@@ -1,16 +1,17 @@
 import { Cache, Color, environment, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { useEffect, useState } from "react";
 import {
   getIssueComments,
   getLogin,
   getPullComments,
   pullSearch,
-  PullSearchResultShort,
   pullToCommentsParams
-} from "./hooks/usePullSearch";
-import { useEffect, useState } from "react";
+} from "./integration/pullActions";
+import { PullSearchResultShort } from "./integration/types";
 
 const cache = new Cache();
 
+// noinspection JSUnusedGlobalSymbols
 export default function githubPullNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
@@ -35,7 +36,7 @@ export default function githubPullNotifications() {
       return;
     }
 
-    getLogin().then(login => {
+    getLogin().then(login =>
       Promise.all([
         fetchMyPulls(),
         fetchParticipatedPulls()
@@ -53,8 +54,7 @@ export default function githubPullNotifications() {
           setParticipatedPulls(participatedPulls);
           cache.set("myPulls", JSON.stringify(myPulls));
           cache.set("participatedPulls", JSON.stringify(participatedPulls));
-        })
-    })
+        }))
       .finally(() => {
         setIsLoading(false);
         console.debug("done");
