@@ -182,11 +182,11 @@ const client = new OAuth.PKCEClient({
 #### Methods
 
 | Method                                                                                                                                           |
-| :----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| :----------------------------------------------------------------------------------------------------------------------------------------------- |
 | <code>[authorizationRequest(options: AuthorizationRequestOptions): Promise<AuthorizationRequest>](#oauth.pkceclient-authorizationrequest)</code> |
-| <code>[authorize(options: AuthorizationRequest                                                                                                   | AuthorizationOptions): Promise<AuthorizationResponse>](#oauth.pkceclient-authorize)</code> |
-| <code>[setTokens(options: TokenSetOptions                                                                                                        | TokenResponse): Promise<void>](#oauth.pkceclient-settokens)</code>                         |
-| <code>[getTokens(): Promise<TokenSet                                                                                                             | undefined>](#oauth.pkceclient-gettokens)</code>                                            |
+| <code>[authorize(options: AuthorizationRequest \| AuthorizationOptions): Promise<AuthorizationResponse>](#oauth.pkceclient-authorize)</code>     |
+| <code>[setTokens(options: TokenSetOptions \| TokenResponse): Promise<void>](#oauth.pkceclient-settokens)</code>                                  |
+| <code>[getTokens(): Promise<TokenSet \| undefined>](#oauth.pkceclient-gettokens)</code>                                                          |
 | <code>[removeTokens(): Promise<void>](#oauth.pkceclient-removetokens)</code>                                                                     |
 
 ### OAuth.PKCEClient#authorizationRequest
