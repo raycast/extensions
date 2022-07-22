@@ -1,31 +1,18 @@
 import { Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { useLibrariesDependencyDetail } from "../useLibrariesDependencyDetail";
-import type { Package, Dependency } from ".././types";
+import { useFetch } from "@raycast/utils";
+import type { Package, DependenciesResponse } from ".././types";
 
 interface Props {
   searchResult: Package;
 }
 
 export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
-  const [dependencies, setDependencies] = useState<Dependency[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const loadDependencies = async () => {
-    setLoading(true);
-    const dependencyDetails = await useLibrariesDependencyDetail(searchResult.platform, searchResult.name);
-    if (dependencyDetails?.dependencies) setDependencies(dependencyDetails.dependencies);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadDependencies();
-  }, []);
+  const { data, isLoading } = useFetch<DependenciesResponse>(`https://libraries.io/api/${searchResult.platform}/${searchResult.name}/latest/dependencies`);
 
   return (
-    <List navigationTitle="Dependencies" isLoading={loading}>
+    <List navigationTitle="Dependencies" isLoading={isLoading}>
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
-        {dependencies
+        {data?.dependencies
           .sort((a, b) => b.kind.localeCompare(a.kind))
           .map((dependency) => (
             <List.Item
