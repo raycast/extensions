@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Detail, Icon, Image, showToast, Toast } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useWorkflowMap } from "../hooks";
 import shortcut from "../utils/shortcut";
@@ -284,6 +285,9 @@ ${comments}
     return `# ${story.name}
   
 ${story.description}
+
+---
+
 ${storyTasksMarkdown(story)}
 ${storyCommentsMarkdown(story)}
   `;

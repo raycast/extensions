@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { Project, StorySlim } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
-import getOwnersAccessoryItems from "../utils/getOwnersAccessoryItems";
+import { getOwnersAccessoryItems } from "../helpers/storyHelpers";
 import StoryDetail from "./StoryDetail";
 
 const getStoryColor = (storyType: StorySlim["story_type"]) => {

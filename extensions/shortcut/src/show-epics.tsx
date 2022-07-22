@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import EpicStories from "./components/EpicStories";
+import { getOwnersAccessoryItems } from "./helpers/storyHelpers";
 import { useEpics, useMemberMap } from "./hooks";
-import getOwnersAccessoryItems from "./utils/getOwnersAccessoryItems";
 
 const getProgressIcon = (progress: number) => {
   if (progress === 1) {

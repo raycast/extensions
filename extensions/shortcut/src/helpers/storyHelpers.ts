@@ -1,7 +1,7 @@
 import { Icon, Image, List } from "@raycast/api";
 import { Member } from "@useshortcut/client";
 
-export default function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
+export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
   return [
     ...owners.filter(Boolean).map(
       (owner) =>
