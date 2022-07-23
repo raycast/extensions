@@ -22,7 +22,6 @@
   ],
   "dependencies": {
     "@raycast/api": "1.25.5",
-    "js-base64": "3.7.2",
     "run-applescript": "6.0.0"
   },
   "devDependencies": {

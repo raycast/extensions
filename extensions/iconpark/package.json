@@ -22,8 +22,7 @@
   "dependencies": {
     "@icon-park/svg": "^1.4.0",
     "@raycast/api": "^1.36.0",
-    "d3-color": "^3.1.0",
-    "js-base64": "^3.7.2"
+    "d3-color": "^3.1.0"
   },
   "devDependencies": {
     "@types/d3-color": "^3.1.0",

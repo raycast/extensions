@@ -93,7 +93,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "js-base64": "^3.6.1",
     "open": "^8.2.1",
     "prettier": "^2.6.2",
     "react-devtools": "^4.19.2",

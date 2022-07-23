@@ -1,5 +1,3 @@
-import { encode } from "js-base64";
-
 export { kebabToOtherCase, toBase64 };
 
 function kebabToOtherCase(str: string, join: string) {
@@ -15,5 +13,5 @@ function kebabToOtherCase(str: string, join: string) {
 }
 
 function toBase64(svg: string): string {
-  return `data:image/svg+xml;base64,${encode(svg)}`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
 }
