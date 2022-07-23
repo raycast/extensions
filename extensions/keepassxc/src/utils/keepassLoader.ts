@@ -5,15 +5,14 @@ const spawn = child_process.spawn;
 
 interface Preference {
   keepassxcRootPath: {
-    name: string,
-    path: string,
-    bundleId: string
+    name: string;
+    path: string;
+    bundleId: string;
   };
   database: string;
   dbPassword: string;
-  keyFile:string;
+  keyFile: string;
 }
-
 
 const getKeepassXCVersion = () =>
   new Promise<number>((resolve, reject) => {
@@ -42,9 +41,9 @@ const keyFile = preferences.keyFile;
 const keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli");
 // search entry command, since version 2.7 command 'locate' has been renamed to 'search'
 const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 ? "search" : "locate");
-const keyFileOption = keyFile != "" && keyFile != null ? ["-k",`${keyFile}`] : []
+const keyFileOption = keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 // cli options
-const cliOptions = [...keyFileOption ,"-q", "-a"]
+const cliOptions = [...keyFileOption, "-q", "-a"];
 const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
@@ -61,7 +60,7 @@ const loadEntries = () =>
     (cmd) =>
       new Promise<string[]>((resolve, reject) => {
         const search_keywrod = cmd === "search" ? "" : "/";
-        const cli = spawn(`${keepassxcCli}`, [cmd,...keyFileOption ,"-q", `${database}`, search_keywrod]);
+        const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
         cli.stdin.write(`${dbPassword}\n`);
         cli.stdin.end();
         cli.on("error", reject);
@@ -86,7 +85,6 @@ const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
 
 const getPassword = (entry: string) =>
   new Promise<string>((resolve, reject) => {
-
     const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
     cli.stdin.write(`${dbPassword}\n`);
     cli.stdin.end();
@@ -105,7 +103,7 @@ const getPassword = (entry: string) =>
 
 const getUsername = (entry: string) =>
   new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions , "Username", `${database}`, `${entry}`]);
+    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Username", `${database}`, `${entry}`]);
     cli.stdin.write(`${dbPassword}\n`);
     cli.stdin.end();
     cli.on("error", reject);
@@ -135,7 +133,7 @@ const copyPassword = async (entry: string) =>
   });
 
 const pasteUsername = async (entry: string) => {
-  console.log("paste username of entry:",entry)
+  console.log("paste username of entry:", entry);
   return getUsername(entry).then((username) => {
     return Clipboard.paste(username).then(() => username);
   });

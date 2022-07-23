@@ -14,7 +14,7 @@ const errorHandler = (e: { message: string }) => {
     e.message.includes("Error while reading the database: Not a KeePass database")
   ) {
     invalidPreference = "Keepass Database File";
-  } 
+  }
   let toastTitle = "Error";
   let toastMessage = e.message.trim();
   if (invalidPreference !== "") {
