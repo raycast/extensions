@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, Icon8, Style } from "../types/types";
-import { svgToImage, defaultStyles } from "../utils/utils";
+import { svgToImage, svgToMdImage, defaultStyles } from "../utils/utils";
 import fetch from "node-fetch";
 
 const preferences: Preferences = getPreferenceValues();
@@ -54,9 +54,8 @@ export const getIconDetail = async (icon8: Icon8): Promise<Icon8 | undefined> =>
       name: icon.name,
       url: `https://img.icons8.com/${icon.platform}/2x/${icon.commonName}.png`,
       link: `https://icons8.com/icon/${icon.id}/${icon.name}`,
-      color: icon.color,
+      color: icon8.color,
       svg: icon.svg,
-      mdImage: svgToImage(icon.svg, 256, 256, icon.color ? undefined : "#ffffff"),
       description: icon.description,
       style: icon.platformName,
       category: icon.categoryName,
@@ -65,6 +64,8 @@ export const getIconDetail = async (icon8: Icon8): Promise<Icon8 | undefined> =>
       isAnimated: icon.isAnimated,
       published: new Date(icon.publishedAt),
     };
+    icon8.png = await svgToImage(icon8.svg, icon8.color ? undefined : "#ffffff");
+    icon8.mdImage = svgToMdImage(icon8.png, 256, 256);
     return icon8;
   } catch (e: any) {
     console.error(e);

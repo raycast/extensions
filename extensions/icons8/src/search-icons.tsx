@@ -4,7 +4,7 @@ import { getGridItemSize } from "./utils/grid";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
-import { IconDetail } from "./components/icon";
+import { Icon8Item } from "./components/icon";
 
 export default function SearchIcons() {
   const gridSize: Grid.ItemSize = getGridItemSize();
@@ -58,7 +58,7 @@ export default function SearchIcons() {
                   title={style.title}
                   value={style.code}
                   icon={{
-                    source: style.url ? style.url : Icon.MinusCircle,
+                    source: style.url ? style.url : Icon.Warning,
                     tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
                   }}
                 />
@@ -69,29 +69,8 @@ export default function SearchIcons() {
     >
       {!isLoading &&
         icons &&
-        icons.map((icon: Icon8) => (
-          <Grid.Item
-            key={icon.id}
-            content={{
-              value: { source: icon.url, tintColor: icon.color ? null : Color.PrimaryText },
-              tooltip: icon.name,
-            }}
-            subtitle={icon.name}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="View Icon"
-                  target={<IconDetail icon={icon} />}
-                  icon={{ source: icon.url, tintColor: icon.color ? null : Color.PrimaryText }}
-                />
-                <Action.OpenInBrowser
-                  url={icon.link}
-                  icon={{ source: "../assets/Icons8-Open.png", tintColor: Color.PrimaryText }}
-                />
-                <Action.CopyToClipboard content={icon.name} />
-              </ActionPanel>
-            }
-          />
+        icons.map((icon: Icon8, index: number) => (
+          <Icon8Item key={index} { ...icon } />
         ))}
     </Grid>
   );

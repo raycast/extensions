@@ -68,10 +68,36 @@
         {
           "value": "256",
           "title": "256"
+        }
+      ]
+    },
+    {
+      "name": "downloadPath", 
+      "title": "Download Directory",
+      "description": "Directory to download SVG and PNG icons.",
+      "type": "textfield",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "numRecent", 
+      "title": "Number of Recent Icons", 
+      "description": "Number of recent icons to show.",
+      "type": "dropdown",
+      "default": "16",
+      "required": false,
+      "data": [
+        {
+          "value": "8",
+          "title": "8"
         },
         {
-          "value": "512",
-          "title": "512"
+          "value": "16",
+          "title": "16"
+        },
+        {
+          "value": "32",
+          "title": "32"
         }
       ]
     }
@@ -79,8 +105,7 @@
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "javascript-time-ago": "^2.5.6",
-    "node-fetch": "^3.2.9",
-    "svg-parser": "^2.0.4"
+    "node-fetch": "^3.2.9"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

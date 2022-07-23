@@ -2,6 +2,8 @@ export interface Preferences {
   apiKey: string; 
   gridSize: string; 
   numResults: number;
+  downloadPath: string; 
+  numRecent: number; 
 }
 
 export interface Icon8 {
@@ -11,6 +13,7 @@ export interface Icon8 {
   link: string; 
   color: boolean; 
   svg: string; 
+  png?: Buffer;
   mdImage?: string; 
   description?: string; 
   style?: string; 

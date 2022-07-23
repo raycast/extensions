@@ -1,7 +1,6 @@
 import { Color } from "@raycast/api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { parse, ElementNode, RootNode } from "svg-parser";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -24,16 +23,19 @@ export const formatDate = (input: Date | string): string => {
   return timeAgo.format(date) as string;
 };
 
-export const svgToImage = (svg: string, height: number, width?: number, color?: string): string => {
-  if (!width) width = height;
+export const svgToImage = async (svg: string, color?: string): Promise<Buffer> => {
   if (color) {
     const index = svg.indexOf("<svg") + 4;
     svg = `${svg.substring(0, index)} fill="${color}" ${svg.substring(index)}`;
   }
-  const svgBase64 = Buffer.from(svg, "utf-8").toString("base64");
-  const image = `<img src="data:image/svg+xml;base64,${svgBase64}" width="${width}" height="${height}" />`;
-  return image;
+  return Buffer.from(svg, "utf-8");
 }
+
+export const svgToMdImage = (image: Buffer, height: number, width?: number): string => {
+  if (!width) width = height;
+  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${width}" height="${height}" />`; 
+  return md;  
+};
 
 // boolean represents whether the preview image for the style requires color tint
 export const defaultStyles: any = {
