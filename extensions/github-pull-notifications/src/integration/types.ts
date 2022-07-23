@@ -23,7 +23,9 @@ export type PullSearchResultShort = {
 export type PullRequestReviewShort = {
   id: number;
   state: string;
+  html_url: string;
   submitted_at?: string;
+  user: UserShort | null;
 };
 
 export type UserShort = {

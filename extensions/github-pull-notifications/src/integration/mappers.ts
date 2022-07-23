@@ -16,7 +16,7 @@ export const mapPullSearchResultToShort =
     user: mapUserShort(user)
   });
 
-const mapUserShort = (user: NullableSimpleUser): UserShort | null =>
+export const mapUserShort = (user: NullableSimpleUser): UserShort | null =>
   user === null ? null : ({
     login: user.login,
     avatar_url: user.avatar_url,

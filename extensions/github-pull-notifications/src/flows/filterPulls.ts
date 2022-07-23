@@ -7,6 +7,7 @@ import {
 import { getIssueComments, getPullComments } from "../integration/getComments";
 import { mapPullSearchResultToPRID } from "../tools/mapPullSearchResultToPRID";
 import getReviews from "../integration/getReviews";
+import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 
 export const filterPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
   Promise.resolve()
@@ -19,7 +20,7 @@ const testPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: P
   Promise.all(pulls.map(pull => testPull(login, recentVisits, pull)));
 
 const testPull = (login: string, recentVisits: PullRequestLastVisit[], pull: PullSearchResultShort) =>
-  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull(pull, login, recentVisits, comment));
+  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({pull, login, recentVisits, comment, review}));
 
 const fetchAllItems = (pull: PullSearchResultShort) =>
   Promise.all([
@@ -33,18 +34,53 @@ const fetchAllItems = (pull: PullSearchResultShort) =>
       reviews.sort(compareShortReviews).pop()
     ] as [CommentShort | undefined, PullRequestReviewShort | undefined]);
 
-const keepApplicablePull = (pull: PullSearchResultShort, login: string, recentVisits: PullRequestLastVisit[], comment: CommentShort | undefined) => {
-  const {owner, repo, pull_number} = mapPullSearchResultToPRID(pull);
+type KeepApplicablePullParams = {
+  pull: PullSearchResultShort;
+  login: string;
+  recentVisits: PullRequestLastVisit[];
+  comment: CommentShort | undefined;
+  review: PullRequestReviewShort | undefined;
+}
+
+const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: KeepApplicablePullParams) => {
+  const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull);
   const logPrefix = `keepApplicablePull: pull=${owner}/${repo}#${pull_number}`;
 
+  const commentTimestamp = isCommentFresh({ comment, login, recentVisits, logPrefix, pull });
+  const reviewTimestamp = isReviewFresh({ review, login, recentVisits, logPrefix, pull });
+
+  if (!commentTimestamp && !reviewTimestamp) {
+    console.debug(`${logPrefix} action=drop`);
+
+    return false;
+  }
+
+  if (commentTimestamp > reviewTimestamp) {
+    pull.html_url = comment?.html_url || '';
+  } else {
+    pull.html_url = review?.html_url || '';
+  }
+
+  console.debug(`${logPrefix} action=keep`);
+
+  return pull;
+};
+
+function isCommentFresh({
+                          logPrefix,
+                          comment,
+                          login,
+                          recentVisits,
+                          pull
+                        }: { pull: PullSearchResultShort, comment: CommentShort | undefined; logPrefix: string; login: string; recentVisits: PullRequestLastVisit[] }) {
   if (!comment) {
-    console.debug(`${logPrefix} action=drop comment=none`);
+    console.debug(`${logPrefix} comment=none`);
 
     return false;
   }
 
   if (comment.user?.login === login) {
-    console.debug(`${logPrefix} action=drop comment=own`);
+    console.debug(`${logPrefix} comment=own`);
 
     return false;
   }
@@ -52,16 +88,49 @@ const keepApplicablePull = (pull: PullSearchResultShort, login: string, recentVi
   const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
 
   if (lastVisit && lastVisit.last_visit > comment.created_at) {
-    console.debug(`${logPrefix} action=drop comment.created_at=${comment.created_at} last_visit=${lastVisit.last_visit}`);
+    console.debug(`${logPrefix} comment.created_at=${comment.created_at} last_visit=${lastVisit.last_visit}`);
 
     return false;
   }
 
-  pull.html_url = comment.html_url;
-  console.debug(`${logPrefix} action=keep comment=${comment.user?.login}`);
+  console.debug(`${logPrefix} comment=fresh user=${comment.user?.login}`);
 
-  return pull;
-};
+  return comment.created_at;
+}
+
+function isReviewFresh({pull, review, login, recentVisits, logPrefix}: {pull: PullSearchResultShort; review: PullRequestReviewShort | undefined; logPrefix: string; login: string; recentVisits: PullRequestLastVisit[]}) {
+  if (!review) {
+    console.debug(`${logPrefix} review=none`);
+
+    return false;
+  }
+
+  // pending, not yet submitted review?
+  // if so, it should always be kept
+  if (review.submitted_at === null) {
+    console.debug(`${logPrefix} review.submitted_at=null`);
+
+    return getTimestampISOInSeconds();
+  }
+
+  if (review.user?.login === login) {
+    console.debug(`${logPrefix} review=own`);
+
+    return false;
+  }
+
+  const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
+
+  if (lastVisit && lastVisit.last_visit > (review.submitted_at as string)) {
+    console.debug(`${logPrefix} review.submitted_at=${review.submitted_at} last_visit=${lastVisit.last_visit}`);
+
+    return false;
+  }
+
+  console.debug(`${logPrefix} review=fresh user=${review.user?.login}`);
+
+  return review.submitted_at || getTimestampISOInSeconds();
+}
 
 const weedOutNonPulls = (pulls: (PullSearchResultShort | false)[]) =>
   (pulls.filter(pull => pull) || []) as PullSearchResultShort[];

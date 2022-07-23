@@ -1,5 +1,6 @@
 import octokit from "./octokit";
 import { PullRequestID, PullRequestReview, PullRequestReviewShort } from "./types";
+import { mapUserShort } from "./mappers";
 
 const getReviews = ({ owner, repo, pull_number }: PullRequestID): Promise<PullRequestReviewShort[]> =>
   Promise.resolve()
@@ -10,6 +11,7 @@ const getReviews = ({ owner, repo, pull_number }: PullRequestID): Promise<PullRe
 
 export default getReviews;
 
-const toShortReview = ({ id, state, submitted_at }: PullRequestReview): PullRequestReviewShort => ({
-  id, state, submitted_at
+const toShortReview = ({ id, state, user, html_url, submitted_at }: PullRequestReview): PullRequestReviewShort => ({
+  id, state, html_url, submitted_at,
+  user: mapUserShort(user)
 });
