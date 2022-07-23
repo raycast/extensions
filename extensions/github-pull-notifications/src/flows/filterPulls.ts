@@ -20,19 +20,23 @@ const testPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: P
   Promise.all(pulls.map(pull => testPull(login, recentVisits, pull)));
 
 const testPull = (login: string, recentVisits: PullRequestLastVisit[], pull: PullSearchResultShort) =>
-  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({pull, login, recentVisits, comment, review}));
+  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({ pull, login, recentVisits, comment, review }));
 
-const fetchAllItems = (pull: PullSearchResultShort) =>
-  Promise.all([
-    getPullComments(mapPullSearchResultToPRID(pull)),
-    getIssueComments(mapPullSearchResultToPRID(pull)),
-    getReviews(mapPullSearchResultToPRID(pull))
-  ])
-    .then(([pullComments, issueComments, reviews]) => [pullComments.concat(issueComments), reviews] as [CommentShort[], PullRequestReviewShort[]])
-    .then(([comments, reviews]) => [
-      comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop(),
-      reviews.sort(compareShortReviews).pop()
-    ] as [CommentShort | undefined, PullRequestReviewShort | undefined]);
+const fetchAllItems = (pull: PullSearchResultShort) => Promise.resolve()
+  .then(() => mapPullSearchResultToPRID(pull))
+  .then(pullID => Promise.all([
+    getPullComments(pullID),
+    getIssueComments(pullID),
+    getReviews(pullID)
+  ]))
+  .then(([pullComments, issueComments, reviews]) => [
+    pullComments.concat(issueComments),
+    reviews
+  ] as [CommentShort[], PullRequestReviewShort[]])
+  .then(([comments, reviews]) => [
+    comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop(),
+    reviews.sort(compareShortReviews).pop()
+  ] as [CommentShort | undefined, PullRequestReviewShort | undefined]);
 
 type KeepApplicablePullParams = {
   pull: PullSearchResultShort;
@@ -46,8 +50,8 @@ const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: Keep
   const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull);
   const logPrefix = `keepApplicablePull: pull=${owner}/${repo}#${pull_number}`;
 
-  const commentTimestamp = isCommentFresh({ comment, login, recentVisits, logPrefix, pull });
-  const reviewTimestamp = isReviewFresh({ review, login, recentVisits, logPrefix, pull });
+  const commentTimestamp = getCommentTimestamp({ comment, login, recentVisits, logPrefix, pull });
+  const reviewTimestamp = getReviewTimestamp({ review, login, recentVisits, logPrefix, pull });
 
   if (!commentTimestamp && !reviewTimestamp) {
     console.debug(`${logPrefix} action=drop`);
@@ -55,10 +59,16 @@ const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: Keep
     return false;
   }
 
-  if (commentTimestamp > reviewTimestamp) {
-    pull.html_url = comment?.html_url || '';
+  if (commentTimestamp && !reviewTimestamp) {
+    pull.html_url = comment?.html_url || "";
+  } else if (!commentTimestamp && reviewTimestamp) {
+    pull.html_url = review?.html_url || "";
   } else {
-    pull.html_url = review?.html_url || '';
+    if (commentTimestamp > reviewTimestamp) {
+      pull.html_url = comment?.html_url || "";
+    } else {
+      pull.html_url = review?.html_url || "";
+    }
   }
 
   console.debug(`${logPrefix} action=keep`);
@@ -66,13 +76,17 @@ const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: Keep
   return pull;
 };
 
-function isCommentFresh({
-                          logPrefix,
-                          comment,
-                          login,
-                          recentVisits,
-                          pull
-                        }: { pull: PullSearchResultShort, comment: CommentShort | undefined; logPrefix: string; login: string; recentVisits: PullRequestLastVisit[] }) {
+type GetCommentTimestampParams = { comment: CommentShort | undefined; } & FilterParams;
+type GetReviewTimestampParams = { review: PullRequestReviewShort | undefined; } & FilterParams;
+
+type FilterParams = {
+  logPrefix: string;
+  login: string;
+  recentVisits: PullRequestLastVisit[];
+  pull: PullSearchResultShort;
+};
+
+function getCommentTimestamp({ logPrefix, comment, login, recentVisits, pull }: GetCommentTimestampParams) {
   if (!comment) {
     console.debug(`${logPrefix} comment=none`);
 
@@ -98,7 +112,7 @@ function isCommentFresh({
   return comment.created_at;
 }
 
-function isReviewFresh({pull, review, login, recentVisits, logPrefix}: {pull: PullSearchResultShort; review: PullRequestReviewShort | undefined; logPrefix: string; login: string; recentVisits: PullRequestLastVisit[]}) {
+function getReviewTimestamp({ pull, review, login, recentVisits, logPrefix }: GetReviewTimestampParams) {
   if (!review) {
     console.debug(`${logPrefix} review=none`);
 
@@ -145,4 +159,4 @@ const compareShortReviews = (a: PullRequestReviewShort, b: PullRequestReviewShor
   } else {
     return (a.submitted_at as string) < (b.submitted_at as string) ? -1 : 1;
   }
-}
+};
