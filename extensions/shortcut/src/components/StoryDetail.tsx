@@ -205,6 +205,49 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                 </ActionPanel.Submenu>
               )}
 
+              {memberMap && Object.entries(memberMap).length > 0 && (
+                <ActionPanel.Submenu
+                  title="Assign Owner..."
+                  icon={Icon.PersonCircle}
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: "o",
+                  }}
+                >
+                  {Object.entries(memberMap).map(([memberId, member]) => {
+                    const existingOwnerIds = story.owner_ids || [];
+                    const newOwnerIds = existingOwnerIds.includes(memberId)
+                      ? existingOwnerIds.filter((id) => id !== memberId)
+                      : [...existingOwnerIds, memberId];
+
+                    const onAction = async () => {
+                      try {
+                        await shortcut.updateStory(story.id, { owner_ids: newOwnerIds });
+                        await mutateStory();
+                        if (refreshList) {
+                          refreshList();
+                        }
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to update story",
+                          message: String(error),
+                        });
+                      }
+                    };
+
+                    return (
+                      <Action
+                        title={member.profile.name || member.profile.mention_name}
+                        onAction={onAction}
+                        key={memberId}
+                        icon={existingOwnerIds.includes(memberId) ? Icon.CircleFilled : Icon.Circle}
+                      />
+                    );
+                  })}
+                </ActionPanel.Submenu>
+              )}
+
               <ActionPanel.Section>
                 <Action
                   style={Action.Style.Destructive}
@@ -287,6 +330,8 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                     />
                   );
                 })}
+
+                {owners?.length === 0 && <Detail.Metadata.TagList.Item text="No owners" />}
               </Detail.Metadata.TagList>
             )}
 
