@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, showHUD, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, useNavigation, showHUD } from "@raycast/api";
 import {
   addLeadingTimeToContentIfNecessary,
   appendContentToFile,
@@ -23,7 +23,7 @@ export default function Command() {
       });
     }
 
-    const content = addLeadingTimeToContentIfNecessary(values.content)
+    const content = addLeadingTimeToContentIfNecessary(values.content);
 
     validateUserConfigGraphPath()
       .catch((e) => {

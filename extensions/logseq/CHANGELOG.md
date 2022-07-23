@@ -1,5 +1,9 @@
 # Logseq Changelog
 
+## [Support insert leading time when using quick note] - 2022-07-23
+- Add support for insert leading time when using quick note.
+- Disabled by default, enable it in the extension settings.
+
 ## [Support org mode & custom journal folder name] - 2022-04-15
 
 - Support org mode!
