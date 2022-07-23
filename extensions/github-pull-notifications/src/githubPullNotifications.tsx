@@ -22,7 +22,7 @@ export default function githubPullNotifications() {
       {myPulls.length > 0 && participatedPulls.length > 0 && <MenuBarExtra.Separator />}
 
       {participatedPulls.length > 0 && <MenuBarExtra.Item title="Participated Pulls" />}
-      {participatedPulls.map(pull => <PullRequestItem pull={pull} onAction={() => visitPull(pull)} />)}
+      {participatedPulls.map(pull => <PullRequestItem key={pull.id} pull={pull} onAction={() => visitPull(pull)} />)}
 
       {shouldSeparateRecentPulls && <MenuBarExtra.Separator />}
 

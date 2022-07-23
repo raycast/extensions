@@ -7,4 +7,8 @@ export const pullSearch = (query: string): Promise<PullSearchResultShort[]> => P
   .then(() => octokit.rest.search.issuesAndPullRequests({ per_page: 100, q: `is:pr ${query}` }))
   .then(res => res.data.items || [])
   .then(items => items.map(mapPullSearchResultToShort))
-  .finally(() => console.debug(`pullSearch: ${query} done`));
+  .then(items => {
+    console.debug(`pullSearch: ${query} => ${items.length}`);
+
+    return items;
+  });

@@ -50,6 +50,14 @@ const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: Keep
   const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull);
   const logPrefix = `keepApplicablePull: pull=${owner}/${repo}#${pull_number}`;
 
+  const iAmAuthor = pull.user?.login === login;
+
+  if (!comment && !review && !iAmAuthor) {
+    console.debug(`${logPrefix} action=keep`);
+
+    return pull;
+  }
+
   const commentTimestamp = getCommentTimestamp({ comment, login, recentVisits, logPrefix, pull });
   const reviewTimestamp = getReviewTimestamp({ review, login, recentVisits, logPrefix, pull });
 

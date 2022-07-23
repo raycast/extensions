@@ -11,8 +11,13 @@ export const checkPullsForUpdates = ({ pullVisits }: AllPulls) => getLogin()
   ]))
   .then(([login, myPulls, participatedPulls]) => Promise.all([
     filterPulls(login, pullVisits, myPulls),
-    filterPulls(login, pullVisits, participatedPulls)
+    filterPulls(login, pullVisits, participatedPulls.filter(pull => !myPulls.find(myPull => myPull.number === pull.number)))
   ]));
 
 const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
-const fetchParticipatedPulls = () => pullSearch("is:open archived:false commenter:@me");
+const fetchParticipatedPulls = () =>
+  Promise.all([
+    pullSearch("is:open archived:false commenter:@me"),
+    pullSearch("is:open archived:false review-requested:@me")
+  ])
+    .then(pulls => pulls.flat().filter((pull, index, pulls) => pulls.findIndex(p => p.number === pull.number) === index));
