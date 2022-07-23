@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 15:47
+ * @lastEditTime: 2022-07-24 00:42
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
 import { Fragment, useEffect, useState } from "react";
-import ListActionPanel, { ActionFeedback, getListItemIcon, getWordAccessories } from "./components";
+import { ActionFeedback, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { BaiduRequestStateCode, youdaoErrorCodeUrl, YoudaoRequestStateCode } from "./consts";
 import { detectLanguage } from "./detectLanguage";
 import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";

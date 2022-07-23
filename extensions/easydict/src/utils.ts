@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 23:29
+ * @lastEditTime: 2022-07-23 23:46
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -94,18 +94,6 @@ export function isValidLanguageId(languageId: string): boolean {
   }
   return true;
 }
-
-/**
- * get another language item expcept chinese from language item array
- */
-export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
-  if (youdaoLanguageIds[0] === "zh-CHS") {
-    return youdaoLanguageIds[1];
-  } else {
-    return youdaoLanguageIds[0];
-  }
-}
-
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
@@ -134,38 +122,45 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   return false;
 }
 
-export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
   const eudicWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
   if (eudicWebLanguageId) {
     return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
   const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).youdaoWebLanguageId;
   if (youdaoWebLanguageId) {
     return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+/**
+ * Get another language item expcept chinese from language item array
+ */
+export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
+  return youdaoLanguageIds[0] === "zh-CHS" ? youdaoLanguageIds[1] : youdaoLanguageIds[0];
+}
+
+export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
+  const text = encodeURI(queryTextInfo.word);
   const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
   const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
   const fromLanguageId = fromLanguageItem.googleLanguageId || fromLanguageItem.youdaoLanguageId;
   const toLanguageId = toLanguageItem.googleLanguageId || toLanguageItem.youdaoLanguageId;
-  const text = encodeURI(queryTextInfo.word);
-  return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  if (fromLanguageId && toLanguageId) {
+    return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  }
 }
 
 /**
  * Get DeepL web translate url
  * https://www.deepl.com/translator#en/zh/look
  */
-export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
   const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
   const fromLanguageId = fromLanguageItem.deepLSourceLanguageId;
@@ -174,7 +169,6 @@ export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string {
   if (fromLanguageId && toLanguageId) {
     return `https://www.deepl.com/translator#${fromLanguageId}/${toLanguageId}/${text}`;
   }
-  return "";
 }
 
 /**
