@@ -25,12 +25,13 @@ const paginateListReviewComments = (params: GetCommentsParams) =>
 
 export const getIssueComments = (params: GetCommentsParams): Promise<CommentShort[]> => Promise.resolve()
   .then(logParams("getIssueComments", params))
-  .then(paginateListIssuesComments(params))
+  .then(listLatestIssueComments(params))
   .then(res => res.map(mapIssueCommentToShort))
   .then(teeShortComments("getIssueComments", params));
 
-const paginateListIssuesComments = ({ owner, pull_number, repo }: GetCommentsParams) =>
-  () => octokit.paginate(octokit.rest.issues.listComments, { owner, repo, issue_number: pull_number, per_page: 100 });
+const listLatestIssueComments = ({ owner, pull_number, repo }: GetCommentsParams) =>
+  () => octokit.rest.issues.listComments({ owner, repo, issue_number: pull_number, sort: "created", direction: "desc" })
+    .then(res => res.data);
 
 const teeShortComments = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
   (comments: CommentShort[]) => Promise
