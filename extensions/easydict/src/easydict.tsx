@@ -258,6 +258,7 @@ export default function () {
       if (checkIfShowMultipleTranslations(formatResult)) {
         // check if enable deepl translate
         if (myPreferences.enableDeepLTranslate) {
+          console.log("---> deep translate start");
           requestDeepLTextTranslate(queryText, fromLanguage, toLanguage)
             .then((deepLTypeResult) => {
               // Todo: should use axios.CancelToken to cancel the request!
@@ -278,6 +279,7 @@ export default function () {
 
         // check if enable google translate
         if (myPreferences.enableGoogleTranslate) {
+          console.log("---> google translate start");
           requestGoogleTranslate(queryText, fromLanguage, toLanguage)
             .then((googleTypeResult) => {
               if (!shouldCancelQuery) {

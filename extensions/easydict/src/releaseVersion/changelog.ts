@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 18:25
+ * @lastEditTime: 2022-07-23 21:49
  * @fileName: changelog.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -15,7 +15,7 @@ export const changelog = `
 
 - 支持 Google 翻译。
 
-![Google](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1658571181.png)
+![Google](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1658584161.png)
 
 ### ✅ 最近更新
 
