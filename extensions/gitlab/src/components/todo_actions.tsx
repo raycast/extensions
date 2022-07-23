@@ -36,7 +36,7 @@ export function CloseTodoAction(props: { todo: Todo; finished?: () => void }): J
   return (
     <ActionPanel.Item
       title="Mark as Done"
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
       onAction={handleAction}
     />

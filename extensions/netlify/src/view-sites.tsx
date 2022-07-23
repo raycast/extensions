@@ -171,7 +171,7 @@ function SiteView(props: SiteProps) {
   ## Last publish date
 
   ${formatDate(publishDate)}
-
+  
   ## Creation date
 
   ${formatDate(createDate)}
@@ -243,7 +243,7 @@ function DeployListView(props: DeployListProps) {
       case 'ok':
         return Icon.Checkmark;
       case 'error':
-        return Icon.XMarkCircle;
+        return Icon.XmarkCircle;
       case 'skipped':
         return Icon.Circle;
     }

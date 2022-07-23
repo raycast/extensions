@@ -63,7 +63,7 @@ export default function () {
             <List.Item
               key="disable"
               title="Disable indefinitely"
-              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
                   <Action title="Disable indefinitely" onAction={() => piholeToggle("disable")} />

@@ -125,7 +125,7 @@ export default function SearchPinnedDirectories() {
                               shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                               onAction={async () => {
                                 await alertDialog(
-                                  Icon.XMarkCircle,
+                                  Icon.XmarkCircle,
                                   "Remove Directory",
                                   `Are you sure you want to remove the ${directory.directory.name} directory?`,
                                   "Remove",

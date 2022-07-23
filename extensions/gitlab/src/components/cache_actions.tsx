@@ -14,7 +14,7 @@ export function ClearLocalCacheAction(): JSX.Element {
   return (
     <Action
       title="Clear local cache"
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
       onAction={handleAction}
     />
   );

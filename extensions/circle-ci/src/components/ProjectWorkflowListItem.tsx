@@ -46,15 +46,15 @@ const getWorkflowAccessoryIcon = ({ status }: { status: WorkflowStatus }): Image
     case WorkflowStatus.not_run:
       return { source: Icon.Circle, tintColor: Color.SecondaryText };
     case WorkflowStatus.failed:
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      return { source: Icon.XmarkCircle, tintColor: Color.Red };
     case WorkflowStatus.error:
-      return { source: Icon.XMarkCircle, tintColor: Color.Orange };
+      return { source: Icon.XmarkCircle, tintColor: Color.Orange };
     case WorkflowStatus.failing:
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      return { source: Icon.XmarkCircle, tintColor: Color.Red };
     case WorkflowStatus.on_hold:
       return { source: Icon.Clock, tintColor: Color.Blue };
     case WorkflowStatus.canceled:
-      return { source: Icon.XMarkCircle, tintColor: Color.SecondaryText };
+      return { source: Icon.XmarkCircle, tintColor: Color.SecondaryText };
     case WorkflowStatus.unauthorized:
       return { source: Icon.ExclamationMark, tintColor: Color.Red };
     default:

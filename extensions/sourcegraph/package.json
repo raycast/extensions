@@ -146,7 +146,7 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.37.1",
     "cross-fetch": "^3.1.5",
     "eventsource": "^2.0.2",
     "graphql": "^16.5.0",

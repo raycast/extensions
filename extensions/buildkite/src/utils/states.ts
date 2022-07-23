@@ -28,6 +28,6 @@ export function getStateIcon(state: State): Image.ImageLike | undefined {
     case "CANCELED":
     case "CANCELING":
     case "FAILED":
-      return { tintColor: Color.Red, source: Icon.XMarkCircle };
+      return { tintColor: Color.Red, source: Icon.XmarkCircle };
   }
 }

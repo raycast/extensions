@@ -305,7 +305,7 @@ function ChangesetItem({
           icon.source = Icon.Checkmark;
           break;
         case "CHANGES_REQUESTED":
-          icon.source = Icon.XMarkCircle;
+          icon.source = Icon.XmarkCircle;
           break;
         default:
           icon.source = Icon.Circle;
@@ -358,7 +358,7 @@ function ChangesetItem({
       break;
 
     case "CLOSED":
-      icon.source = Icon.XMarkCircle;
+      icon.source = Icon.XmarkCircle;
       icon.tintColor = Color.Red;
       break;
 

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api"
 
-const icon = { source: Icon.XMarkCircle, tintColor: Color.Red }
+const icon = { source: Icon.XmarkCircle, tintColor: Color.Red }
 
 interface ITranslateError {
     errorCode: string

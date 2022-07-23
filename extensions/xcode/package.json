@@ -124,7 +124,7 @@
     "Apple Developer"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.33.2",
     "dedent": "^0.7.0",
     "node-fetch": "^3.0.0",
     "rxjs": "^7.4.0",

@@ -54,7 +54,7 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
           )}
           {canCancel && (
             <Action
-              icon={Icon.XMarkCircle}
+              icon={Icon.XmarkCircle}
               title="Cancel Offer"
               onAction={async () => {
                 await rest.cancelFundingOffer(offer.id);

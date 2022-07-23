@@ -29,7 +29,7 @@ export function DeleteAnnotationAction(props: { annotation: any }) {
   return (
     <ActionPanel.Item
       title="Delete Annotation"
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
       onAction={deleteAnnotation}
     />
   );

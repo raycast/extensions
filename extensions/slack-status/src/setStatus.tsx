@@ -222,7 +222,7 @@ function ClearStatusAction(props: { slackClient: SlackClient; currentStatusRespo
     <ActionPanel.Item
       id="clearStatus"
       title="Clear Status"
-      icon={Icon.XMarkCircle}
+      icon={Icon.XmarkCircle}
       onAction={() => props.slackClient.clearStatus(props.currentStatusResponseState)}
     />
   );

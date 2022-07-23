@@ -155,7 +155,7 @@ export default function Command() {
               />
             );
           } else {
-            return <List.Item icon={Icon.XMarkCircle} key={service.id} title={service.name} />;
+            return <List.Item icon={Icon.XmarkCircle} key={service.id} title={service.name} />;
           }
         })}
       </List.Section>

@@ -5,10 +5,7 @@
   "description": "Search and view your Cloudflare sites, pages, domains, and more",
   "icon": "icon.png",
   "author": "destiner",
-  "categories": [
-    "Developer Tools",
-    "Web"
-  ],
+  "categories": ["Developer Tools", "Web"],
   "license": "MIT",
   "contributors": [
     "niklaswa"
@@ -55,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.28.0",
     "axios": "^0.25.0"
   },
   "devDependencies": {

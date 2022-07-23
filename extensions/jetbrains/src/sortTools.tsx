@@ -90,7 +90,7 @@ export function SortTools({
                 />
                 {pop && (
                   <Action
-                    icon={Icon.XMarkCircle}
+                    icon={Icon.XmarkCircle}
                     title="Cancel"
                     shortcut={{ modifiers: ["ctrl"], key: "c" }}
                     onAction={pop}

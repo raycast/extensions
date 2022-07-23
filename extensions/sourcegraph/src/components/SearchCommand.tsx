@@ -259,7 +259,7 @@ function SearchResultItem({
         matchTypeDetails.push("forked");
       }
       if (match.archived) {
-        icon.source = Icon.XMarkCircle;
+        icon.source = Icon.XmarkCircle;
         matchTypeDetails.push("archived");
       }
       // TODO color results of all matches based on repo privacy

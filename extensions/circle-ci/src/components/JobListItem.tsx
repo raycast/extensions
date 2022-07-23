@@ -30,7 +30,7 @@ const getJobAccessoryIcon = ({ status }: { status: JobStatus }): ImageLike => {
     case JobStatus.success:
       return { source: Icon.Checkmark, tintColor: Color.Green };
     case JobStatus.failed:
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      return { source: Icon.XmarkCircle, tintColor: Color.Red };
     default:
       return { source: Icon.Gear, tintColor: Color.Blue };
   }

@@ -23,7 +23,7 @@ export const IconConstants: Constants = {
     tintColor: Color.Orange,
   },
   ClearFilter: {
-    source: Icon.XMarkCircle,
+    source: Icon.XmarkCircle,
     tintColor: Color.Red,
   },
   ConfirmChange: Icon.TextDocument,
@@ -53,7 +53,7 @@ export const IconConstants: Constants = {
     source: Icon.Terminal,
   },
   Uninstall: {
-    source: Icon.XMarkCircle,
+    source: Icon.XmarkCircle,
     tintColor: Color.Red,
   },
 };

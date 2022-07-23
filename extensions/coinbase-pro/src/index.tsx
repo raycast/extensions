@@ -18,7 +18,7 @@ export default function App() {
 
   const renderTotalBalance = () => {
     if (isLoading) return null;
-    if (!accounts[0]) return <List.Item icon={Icon.XMarkCircle} title="No Results" />;
+    if (!accounts[0]) return <List.Item icon={Icon.XmarkCircle} title="No Results" />;
 
     const total = Object.values(balances).reduce((a, b) => a + b, 0);
     return (

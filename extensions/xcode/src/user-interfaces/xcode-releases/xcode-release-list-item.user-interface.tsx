@@ -1,5 +1,6 @@
 import { XcodeRelease } from "../../models/release/xcode-release.model";
 import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { ReactElement, ReactNode } from "react";
 
 /**
  * Xcode Release List Item
@@ -113,9 +114,9 @@ function keywords(xcodeRelease: XcodeRelease): string[] {
  * Retrieve actions from XcodeRelease, if available
  * @param xcodeRelease The XcodeRelease
  */
-function actions(xcodeRelease: XcodeRelease): JSX.Element | undefined {
+function actions(xcodeRelease: XcodeRelease): ReactElement<ReactNode> | undefined {
   // Initialize ReactElements
-  const elements: JSX.Element[] = [];
+  const elements: ReactElement[] = [];
   // Check if a download link is available
   if (xcodeRelease.downloadLink) {
     // Push OpenAction to download the Xcode Release from the Apple Developer portal

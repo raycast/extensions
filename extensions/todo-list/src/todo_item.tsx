@@ -113,7 +113,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             {item.completed ? (
               <Action
                 title="Mark as Uncompleted"
-                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
                 onAction={() => markTodo()}
               />
             ) : (

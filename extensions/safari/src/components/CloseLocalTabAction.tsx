@@ -15,7 +15,7 @@ const CloseLocalTabAction = (props: { tab: Tab; refresh: () => void }) => {
   return props.tab.is_local ? (
     <Action
       title="Close Tab"
-      icon={Icon.XMarkCircle}
+      icon={Icon.XmarkCircle}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={async () => {
         await closeLocalTab(props.tab as LocalTab);

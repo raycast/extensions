@@ -123,7 +123,7 @@ export function PinNoteAction(props: { note: Note; vault: Vault; actionCallback:
           actionCallback(NoteAction.Pin);
         }
       }}
-      icon={pinned ? Icon.XMarkCircle : Icon.Pin}
+      icon={pinned ? Icon.XmarkCircle : Icon.Pin}
     />
   );
 }

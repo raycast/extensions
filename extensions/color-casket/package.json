@@ -70,7 +70,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.28.0",
     "color-convert": "^2.0.1",
     "is-valid-css-color": "^2.0.3",
     "javascript-time-ago": "^2.3.13",

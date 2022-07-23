@@ -104,7 +104,7 @@ const formatDueDate = (dueDate: string) => {
 const statusIcons = {
   open: Icon.Circle,
   completed: Icon.Checkmark,
-  canceled: Icon.XMarkCircle,
+  canceled: Icon.XmarkCircle,
 };
 
 function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: ListName }) {

@@ -80,7 +80,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.36.0",
     "node-fetch": "^3.0.0",
     "twitter-api-v2": "^1.12.2"
   },

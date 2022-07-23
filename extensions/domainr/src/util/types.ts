@@ -82,6 +82,6 @@ export const getStatusIcon = (status: string) =>
       tintColor: Color.Yellow,
     }))
     .otherwise(() => ({
-      source: Icon.XMarkCircle,
+      source: Icon.XmarkCircle,
       tintColor: Color.Red,
     }));

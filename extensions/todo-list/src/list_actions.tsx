@@ -60,7 +60,7 @@ const ListActions = () => {
             setEditing(false);
             setSearchBarText("");
           }}
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
         />
       </ActionPanel>
     );

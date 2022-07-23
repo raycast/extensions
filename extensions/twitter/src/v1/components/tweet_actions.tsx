@@ -56,7 +56,7 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
   };
   if (user === t.user.screen_name) {
     return (
-      <Action title="Delete Tweet" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={deleteTweet} />
+      <Action title="Delete Tweet" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={deleteTweet} />
     );
   } else {
     return null;

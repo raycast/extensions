@@ -5,10 +5,7 @@
   "description": "View your Netlify sites, domains, and team members",
   "icon": "icon.png",
   "author": "destiner",
-  "categories": [
-    "Developer Tools",
-    "Web"
-  ],
+  "categories": ["Developer Tools", "Web"],
   "license": "MIT",
   "commands": [
     {
@@ -44,7 +41,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.28.0",
     "axios": "^0.24.0"
   },
   "devDependencies": {

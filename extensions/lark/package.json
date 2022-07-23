@@ -56,7 +56,7 @@
     "dev": "ray develop"
   },
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.35.2",
     "dayjs": "^1.11.2",
     "got": "^12.1.0",
     "qrcode": "^1.5.0",

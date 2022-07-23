@@ -15,7 +15,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.33.0",
     "download": "^8.0.0",
     "sha256-file": "^1.0.0",
     "tar": "^6.1.11"

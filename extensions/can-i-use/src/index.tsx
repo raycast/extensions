@@ -25,7 +25,7 @@ export default function CanIUse() {
         if (browsers && browsers.length > 0) {
           const icon = caniuse.isSupported(featureName, browsers)
             ? { source: Icon.Checkmark, tintColor: Color.Green }
-            : { source: Icon.XMarkCircle, tintColor: Color.Red };
+            : { source: Icon.XmarkCircle, tintColor: Color.Red };
 
           accessories.push({ icon });
         }

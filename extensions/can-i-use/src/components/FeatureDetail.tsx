@@ -20,7 +20,7 @@ export default function FeatureDetail({ feature }: FeatureDetailProps) {
         const agentSupport = supportTable[agentName];
 
         let text = "Not supported";
-        let icon: Image.ImageLike = { source: Icon.XMarkCircle, tintColor: Color.Red };
+        let icon: Image.ImageLike = { source: Icon.XmarkCircle, tintColor: Color.Red };
 
         if ("u" in agentSupport) {
           text = "Unknown support";

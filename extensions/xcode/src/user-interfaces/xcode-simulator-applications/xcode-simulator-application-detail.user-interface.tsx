@@ -38,7 +38,7 @@ export function xcodeSimulatorApplicationDetail(
       <List.Section title={"Other"}>
         <List.Item
           key={"back-to-list"}
-          icon={Icon.XMarkCircle}
+          icon={Icon.XmarkCircle}
           title={"Back to list"}
           actions={
             <ActionPanel>

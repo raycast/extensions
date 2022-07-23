@@ -51,7 +51,7 @@ export function ProjectList() {
     }
 
     if (!isLoading && !projects[0]) {
-      return <List.Item title="No projects found" icon={Icon.XMarkCircle} />;
+      return <List.Item title="No projects found" icon={Icon.XmarkCircle} />;
     }
   };
 

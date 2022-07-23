@@ -2,6 +2,7 @@ import { XcodeProject } from "../../models/project/xcode-project.model";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { XcodeProjectType } from "../../models/project/xcode-project-type.model";
 import tildify from "tildify";
+import { ReactNode } from "react";
 
 /**
  * Xcode Project List Item
@@ -10,7 +11,7 @@ import tildify from "tildify";
  */
 export function xcodeProjectListItem(
   xcodeProject: XcodeProject,
-  customActionsProvider: ((xcodeProject: XcodeProject) => JSX.Element) | null = null
+  customActionsProvider: ((xcodeProject: XcodeProject) => ReactNode) | null = null
 ): JSX.Element {
   return (
     <List.Item
@@ -33,7 +34,7 @@ export function xcodeProjectListItem(
  * Default Actions for a given XcodeProject
  * @param xcodeProject The XcodeProject
  */
-function defaultActions(xcodeProject: XcodeProject): JSX.Element[] {
+function defaultActions(xcodeProject: XcodeProject): ReactNode {
   return [
     <Action.Open
       application="com.apple.dt.Xcode"
