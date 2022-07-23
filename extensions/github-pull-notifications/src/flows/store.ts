@@ -5,11 +5,13 @@ const myPullsKey = "myPulls";
 const participatedPullsKey = "participatedPulls";
 const pullVisitsKey = "pullVisits";
 
+type UndefinedString = string | undefined
+
 export const loadPullsFromLocalStorage = () =>
   Promise.all([
-    LocalStorage.getItem(myPullsKey).then(data => data as string | undefined),
-    LocalStorage.getItem(participatedPullsKey).then(data => data as string | undefined),
-    LocalStorage.getItem(pullVisitsKey).then(data => data as string | undefined)
+    LocalStorage.getItem(myPullsKey).then(data => data as UndefinedString),
+    LocalStorage.getItem(participatedPullsKey).then(data => data as UndefinedString),
+    LocalStorage.getItem(pullVisitsKey).then(data => data as UndefinedString)
   ])
     .then(([myPullsSerialized, participatedPullsSerialized, pullVisitsSerialized]) => {
       let myPulls: PullSearchResultShort[] = [];
@@ -37,9 +39,9 @@ export const setPullsToLocalStorage = (
   pullVisits: PullRequestLastVisit[]
 ) =>
   Promise.all([
-    LocalStorage.setItem(myPullsKey, JSON.stringify(myPulls)),
-    LocalStorage.setItem(participatedPullsKey, JSON.stringify(participatedPulls)),
-    LocalStorage.setItem(pullVisitsKey, JSON.stringify(pullVisits))
+    storeMyPulls(myPulls),
+    storeParticipatedPulls(participatedPulls),
+    storePullVisits(pullVisits),
   ]);
 
 export const storeMyPulls = (myPulls: PullSearchResultShort[]) =>
@@ -47,3 +49,6 @@ export const storeMyPulls = (myPulls: PullSearchResultShort[]) =>
 
 export const storeParticipatedPulls = (participatedPulls: PullSearchResultShort[]) =>
   LocalStorage.setItem(participatedPullsKey, JSON.stringify(participatedPulls));
+
+const storePullVisits = (pullVisits: PullRequestLastVisit[]) =>
+  LocalStorage.setItem(pullVisitsKey, JSON.stringify(pullVisits));
