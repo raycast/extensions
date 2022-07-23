@@ -1,5 +1,6 @@
 import { closeMainWindow, copyTextToClipboard, pasteText, showHUD } from "@raycast/api";
 import { LoremIpsum } from "lorem-ipsum";
+import createIpsum from "corporate-ipsum";
 
 const generator = new LoremIpsum({
   sentencesPerParagraph: {
@@ -12,19 +13,16 @@ const generator = new LoremIpsum({
   },
 });
 
-// generator.generateWords(1);
-// generator.generateParagraphs(7);
-
-export const generateParagraph = () => {
-  return generator.generateSentences(10);
+export const generateParagraph = (type: string) => {
+  return type == "lorem" ? generator.generateSentences(10) : createIpsum(10);
 };
 
-export const generateSentence = () => {
-  return generator.generateSentences(1);
+export const generateSentence = (type: string) => {
+  return type == "lorem" ? generator.generateSentences(1) : createIpsum(1);
 };
 
 export const notify = () => {
-  showHUD("Copied to clipboard");
+  showHUD("📋  Copied to clipboard");
 };
 
 export const preformAction = async (action: string, output: string) => {

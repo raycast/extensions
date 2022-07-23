@@ -3,7 +3,9 @@ import { generateSentence, preformAction } from "./utils";
 
 export default async function SentenceCommand() {
   const { action = "clipboard" } = getPreferenceValues();
-  const output = generateSentence();
+  const { type = "lorem" } = getPreferenceValues();
+
+  const output = generateSentence(type);
 
   await preformAction(action, output);
 
