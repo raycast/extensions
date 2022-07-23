@@ -1,7 +1,7 @@
 import shortcut from "../utils/shortcut";
 import { useMemo } from "react";
 import useSWR from "swr";
-import { Group, IterationSlim, Member, Project, Workflow } from "@useshortcut/client";
+import { Group, IterationSlim, Label, Member, Project, Workflow } from "@useshortcut/client";
 
 export const useMemberInfo = () => {
   return useSWR("/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
@@ -128,4 +128,16 @@ export const useEpicStories = (epicId?: number) => {
     () => epicId && `/stories/epic/${epicId}`,
     () => shortcut.listEpicStories(epicId!, {}).then((res) => res.data)
   );
+};
+
+export const useLabels = () => {
+  return useSWR("/labels", () => shortcut.listLabels({}).then((res) => res.data));
+};
+
+export const useLabelsMap = () => {
+  const { data } = useLabels();
+
+  return useMemo(() => {
+    return data?.reduce((map, label) => ({ ...map, [label.id]: label }), {} as Record<number, Label>) || {};
+  }, [data]);
 };

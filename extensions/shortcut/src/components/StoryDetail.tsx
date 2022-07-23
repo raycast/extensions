@@ -6,6 +6,7 @@ import {
   useGroupsMap,
   useIterationMap,
   useIterations,
+  useLabelsMap,
   useMemberInfo,
   useMemberMap,
   useProject,
@@ -43,6 +44,7 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
   const { data: iterations } = useIterations();
   const memberMap = useMemberMap();
   const { data: memberInfo } = useMemberInfo();
+  const labelsMap = useLabelsMap();
   const { pop } = useNavigation();
 
   const workflow = useMemo(() => {
@@ -288,6 +290,57 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                 </ActionPanel.Submenu>
               )}
 
+              {labelsMap && Object.keys(labelsMap).length > 0 && (
+                <ActionPanel.Submenu
+                  title="Assign Label..."
+                  icon={Icon.Tag}
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: "l",
+                  }}
+                >
+                  {Object.entries(labelsMap).map(([labelId, label]) => {
+                    const existingLabelIds = story.label_ids || [];
+                    const newLabelIds = existingLabelIds.includes(label.id)
+                      ? existingLabelIds.filter((id) => id !== label.id)
+                      : [...existingLabelIds, label.id];
+
+                    const onAction = async () => {
+                      try {
+                        await shortcut.updateStory(story.id, {
+                          labels: newLabelIds.map((id) => {
+                            const label = labelsMap[id];
+
+                            return {
+                              name: label.name,
+                            };
+                          }),
+                        });
+                        await mutateStory();
+                        if (refreshList) {
+                          refreshList();
+                        }
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to update story",
+                          message: String(error),
+                        });
+                      }
+                    };
+
+                    return (
+                      <Action
+                        title={label.name}
+                        onAction={onAction}
+                        key={label.id}
+                        icon={existingLabelIds.includes(label.id) ? Icon.CircleFilled : Icon.Circle}
+                      />
+                    );
+                  })}
+                </ActionPanel.Submenu>
+              )}
+
               <ActionPanel.Section>
                 <Action
                   style={Action.Style.Destructive}
@@ -335,13 +388,13 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
 
             {storyState && <Detail.Metadata.Label title="Status" text={storyState.name} />}
 
-            {story.labels.map((label) => {
-              return (
-                <Detail.Metadata.TagList title="Labels" key={label.id}>
-                  <Detail.Metadata.TagList.Item text={label.name} color={label.color} />
-                </Detail.Metadata.TagList>
-              );
-            })}
+            {story.labels.length > 0 && (
+              <Detail.Metadata.TagList title="Labels">
+                {story.labels.map((label) => (
+                  <Detail.Metadata.TagList.Item text={label.name} color={label.color} key={label.id} />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
 
             {project && <Detail.Metadata.Label title="Project" text={project.name} />}
 
