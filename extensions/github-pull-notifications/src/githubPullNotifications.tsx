@@ -17,7 +17,7 @@ export default function githubPullNotifications() {
       title={prCount > 0 ? `${myPulls.length + participatedPulls.length} PRs to check` : "All good"}
     >
       {myPulls.length > 0 && <MenuBarExtra.Item title="My Pulls" />}
-      {myPulls.map(pull => <PullRequestItem pull={pull} onAction={() => visitPull(pull)} />)}
+      {myPulls.map(pull => <PullRequestItem key={pull.id} pull={pull} onAction={() => visitPull(pull)} />)}
 
       {myPulls.length > 0 && participatedPulls.length > 0 && <MenuBarExtra.Separator />}
 
