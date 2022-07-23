@@ -1,12 +1,6 @@
-import { CommentShort, PullRequestID, PullSearchResultShort } from "./types";
+import { CommentShort, PullRequestID } from "./types";
 import octokit from "./octokit";
 import { mapIssueCommentToShort, mapPullCommentToShort } from "./mappers";
-
-export const pullToCommentsParams = (pull: PullSearchResultShort): PullRequestID => ({
-  owner: pull.repository_url.split("/")[4],
-  repo: pull.repository_url.split("/")[5],
-  pull_number: pull.number
-});
 
 export const getPullComments = (params: PullRequestID): Promise<CommentShort[]> => Promise.resolve()
   .then(logParams("getPullComments", params))
