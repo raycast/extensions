@@ -10,6 +10,7 @@ import {
   storeParticipatedPulls
 } from "../flows/store";
 import { filterPulls } from "../flows/filterPulls";
+import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
@@ -112,4 +113,3 @@ const actionIsUserInitiated = () => {
 
 const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
 const fetchParticipatedPulls = () => pullSearch("is:open archived:false commenter:@me");
-const getTimestampISOInSeconds = () => new Date().toISOString().substring(0, 19) + "Z";
