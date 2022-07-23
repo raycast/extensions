@@ -3,15 +3,15 @@ import { pullSearch } from "../integration/pullSearch";
 import { AllPulls } from "../hooks/usePulls";
 import { filterPulls } from "./filterPulls";
 
-export const checkPullsForUpdates = ({ pullVisits }: AllPulls) => getLogin()
+export const checkPullsForUpdates = ({ hiddenPulls }: AllPulls) => getLogin()
   .then(login => Promise.all([
     login,
     fetchMyPulls(),
     fetchParticipatedPulls()
   ]))
   .then(([login, myPulls, participatedPulls]) => Promise.all([
-    filterPulls(login, pullVisits, myPulls),
-    filterPulls(login, pullVisits, participatedPulls.filter(pull => !myPulls.find(myPull => myPull.number === pull.number)))
+    filterPulls(login, hiddenPulls, myPulls),
+    filterPulls(login, hiddenPulls, participatedPulls.filter(pull => !myPulls.find(myPull => myPull.number === pull.number)))
   ]));
 
 const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");

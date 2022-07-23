@@ -9,6 +9,7 @@ import {
 } from "../flows/store";
 import { AllPulls } from "./usePulls";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
+import { LocalStorage } from "@raycast/api";
 
 const usePullsState = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -68,19 +69,23 @@ const usePullsState = () => {
 
     arrangeRecentPull: (pull: PullSearchResultShort) =>
       Promise.resolve()
-        .then(() => hiddenPulls.filter(recentVisit => recentVisit.pull.number !== pull.number))
-        .then(filtered => [{ pull, last_visit: getTimestampISOInSeconds() }, ...filtered])
+        .then(() => hiddenPulls.filter(hiddenPull => hiddenPull.pull.number !== pull.number))
+        .then(hiddenPulls => hiddenPulls.concat({ pull, last_visit: getTimestampISOInSeconds() }))
         .then(hiddenPulls => {
-          const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
-          const participatedPullsFiltered = participatedPulls.filter(
-            participatedPull => participatedPull.number !== pull.number
-          );
+          const apply = {
+            myPulls: myPulls.filter(myPull => myPull.number !== pull.number),
+            participatedPulls: participatedPulls.filter(
+              participatedPull => participatedPull.number !== pull.number
+            ),
+            hiddenPulls,
+            pullVisits
+          };
 
-          setAllPullsToState({ myPulls: myPullsFiltered, participatedPulls: participatedPullsFiltered, hiddenPulls, pullVisits });
+          setAllPullsToState(apply);
 
-          return setPullsToLocalStorage(myPullsFiltered, participatedPullsFiltered, pullVisits);
+          return setPullsToLocalStorage(apply);
         })
-        .then(() => console.debug(`addRecentPull completed`))
+        .then(() => console.debug(`arrangeRecentPull completed`))
   };
 };
 

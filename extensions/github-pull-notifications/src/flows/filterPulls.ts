@@ -9,18 +9,18 @@ import { mapPullSearchResultToPRID } from "../tools/mapPullSearchResultToPRID";
 import getReviews from "../integration/getReviews";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 
-export const filterPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
+export const filterPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
   Promise.resolve()
-    .then(() => console.debug(`filterPulls: login=${login}, recentVisits=${recentVisits.length}, pulls=${pulls.length}`))
-    .then(() => testPulls(login, recentVisits, pulls))
+    .then(() => console.debug(`filterPulls: login=${login}, hiddenPulls=${hiddenPulls.length}, pulls=${pulls.length}`))
+    .then(() => testPulls(login, hiddenPulls, pulls))
     .then(weedOutNonPulls)
     .finally(() => console.debug(`filterPulls: done`));
 
-const testPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
-  Promise.all(pulls.map(pull => testPull(login, recentVisits, pull)));
+const testPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
+  Promise.all(pulls.map(pull => testPull(login, hiddenPulls, pull)));
 
-const testPull = (login: string, recentVisits: PullRequestLastVisit[], pull: PullSearchResultShort) =>
-  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({ pull, login, recentVisits, comment, review }));
+const testPull = (login: string, hiddenPulls: PullRequestLastVisit[], pull: PullSearchResultShort) =>
+  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({ pull, login, hiddenPulls, comment, review }));
 
 const fetchAllItems = (pull: PullSearchResultShort) => Promise.resolve()
   .then(() => mapPullSearchResultToPRID(pull))
@@ -41,12 +41,12 @@ const fetchAllItems = (pull: PullSearchResultShort) => Promise.resolve()
 type KeepApplicablePullParams = {
   pull: PullSearchResultShort;
   login: string;
-  recentVisits: PullRequestLastVisit[];
+  hiddenPulls: PullRequestLastVisit[];
   comment: CommentShort | undefined;
   review: PullRequestReviewShort | undefined;
 }
 
-const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: KeepApplicablePullParams) => {
+const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepApplicablePullParams) => {
   const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull);
   const logPrefix = `keepApplicablePull: pull=${owner}/${repo}#${pull_number}`;
 
@@ -58,8 +58,8 @@ const keepApplicablePull = ({ pull, login, recentVisits, comment, review }: Keep
     return pull;
   }
 
-  const commentTimestamp = getCommentTimestamp({ comment, login, recentVisits, logPrefix, pull });
-  const reviewTimestamp = getReviewTimestamp({ review, login, recentVisits, logPrefix, pull });
+  const commentTimestamp = getCommentTimestamp({ comment, login, hiddenPulls, logPrefix, pull });
+  const reviewTimestamp = getReviewTimestamp({ review, login, hiddenPulls, logPrefix, pull });
 
   if (!commentTimestamp && !reviewTimestamp) {
     console.debug(`${logPrefix} action=drop`);
@@ -90,11 +90,11 @@ type GetReviewTimestampParams = { review: PullRequestReviewShort | undefined; } 
 type FilterParams = {
   logPrefix: string;
   login: string;
-  recentVisits: PullRequestLastVisit[];
+  hiddenPulls: PullRequestLastVisit[];
   pull: PullSearchResultShort;
 };
 
-function getCommentTimestamp({ logPrefix, comment, login, recentVisits, pull }: GetCommentTimestampParams) {
+function getCommentTimestamp({ logPrefix, comment, login, hiddenPulls, pull }: GetCommentTimestampParams) {
   if (!comment) {
     console.debug(`${logPrefix} comment=none`);
 
@@ -107,7 +107,7 @@ function getCommentTimestamp({ logPrefix, comment, login, recentVisits, pull }: 
     return false;
   }
 
-  const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
+  const lastVisit = hiddenPulls.find(hidden => hidden.pull.id === pull.id);
 
   if (lastVisit && lastVisit.last_visit > comment.created_at) {
     console.debug(`${logPrefix} comment.created_at=${comment.created_at} last_visit=${lastVisit.last_visit}`);
@@ -120,7 +120,7 @@ function getCommentTimestamp({ logPrefix, comment, login, recentVisits, pull }: 
   return comment.created_at;
 }
 
-function getReviewTimestamp({ pull, review, login, recentVisits, logPrefix }: GetReviewTimestampParams) {
+function getReviewTimestamp({ pull, review, login, hiddenPulls, logPrefix }: GetReviewTimestampParams) {
   if (!review) {
     console.debug(`${logPrefix} review=none`);
 
@@ -141,7 +141,7 @@ function getReviewTimestamp({ pull, review, login, recentVisits, logPrefix }: Ge
     return false;
   }
 
-  const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
+  const lastVisit = hiddenPulls.find(hidden => hidden.pull.id === pull.id);
 
   if (lastVisit && lastVisit.last_visit > (review.submitted_at as string)) {
     console.debug(`${logPrefix} review.submitted_at=${review.submitted_at} last_visit=${lastVisit.last_visit}`);
