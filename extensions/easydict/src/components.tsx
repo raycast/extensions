@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 13:28
+ * @lastEditTime: 2022-07-23 23:34
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -44,13 +44,15 @@ export default function ListActionPanel(props: ActionListPanelProps) {
   const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
 
   const queryWordInfo = props.displayItem.queryWordInfo;
-  const googleWebItem = getWebTranslationItem(TranslationType.Google, queryWordInfo) as WebTranslationItem;
-  const deepLWebItem = getWebTranslationItem(TranslationType.DeepL, queryWordInfo) as WebTranslationItem;
-  const youdaoWebItem = getWebTranslationItem(DicionaryType.Youdao, queryWordInfo) as WebTranslationItem;
-  const eudicWebItem = getWebTranslationItem(DicionaryType.Eudic, queryWordInfo) as WebTranslationItem;
+  const googleWebItem = getWebTranslationItem(TranslationType.Google, queryWordInfo);
+  const deepLWebItem = getWebTranslationItem(TranslationType.DeepL, queryWordInfo);
+  const youdaoWebItem = getWebTranslationItem(DicionaryType.Youdao, queryWordInfo);
+  const eudicWebItem = getWebTranslationItem(DicionaryType.Eudic, queryWordInfo);
 
-  const isShowingYoudaoWebAction = youdaoWebItem.webUrl && queryWordInfo.isWord;
-  const isShowingEudicWebAction = eudicWebItem.webUrl && queryWordInfo.isWord;
+  const isShowingYoudaoWebAction = youdaoWebItem?.webUrl && queryWordInfo.isWord;
+  console.log(`is showing youdao web action: ${isShowingYoudaoWebAction}`);
+  const isShowingEudicWebAction = eudicWebItem?.webUrl && queryWordInfo.isWord;
+  console.log(`is showing eudic web action: ${isShowingEudicWebAction}`);
 
   checkIfNeedShowReleasePrompt((isShowing) => {
     setIsShowingReleasePrompt(isShowing);
@@ -82,10 +84,12 @@ export default function ListActionPanel(props: ActionListPanelProps) {
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Search Query Text Online">
-        {deepLWebItem.webUrl.length && (
+        {deepLWebItem?.webUrl.length && (
           <Action.OpenInBrowser icon={deepLWebItem.icon} title={deepLWebItem.title} url={deepLWebItem.webUrl} />
         )}
-        <Action.OpenInBrowser icon={googleWebItem.icon} title={googleWebItem.title} url={googleWebItem.webUrl} />
+        {googleWebItem?.webUrl.length && (
+          <Action.OpenInBrowser icon={googleWebItem.icon} title={googleWebItem.title} url={googleWebItem.webUrl} />
+        )}
         {isShowingYoudaoWebAction && (
           <Action.OpenInBrowser icon={youdaoWebItem.icon} title={youdaoWebItem.title} url={youdaoWebItem.webUrl} />
         )}
@@ -307,6 +311,6 @@ export function getWebTranslationItem(
       break;
     }
   }
-  // console.log("---> getWebTranslationItem", webUrl);
+  // console.log(`---> type: ${queryType}, webUrl: ${webUrl}`);
   return webUrl ? { type: queryType, webUrl, icon, title } : undefined;
 }

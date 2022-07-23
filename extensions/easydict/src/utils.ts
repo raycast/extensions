@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 13:26
+ * @lastEditTime: 2022-07-23 23:29
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -137,7 +137,7 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
 export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
   const eudicWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
-  if (languageId) {
+  if (eudicWebLanguageId) {
     return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
   return "";
