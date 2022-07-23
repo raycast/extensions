@@ -2,14 +2,17 @@ import { CommentShort, PullRequestLastVisit, PullSearchResultShort } from "../in
 import { getIssueComments, getPullComments, pullToCommentsParams } from "../integration/getComments";
 
 export const filterPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
-  Promise.all(
-    pulls.map(
-      pull =>
-        fetchAllComments(pull)
-          .then(comment => keepApplicablePull(pull, login, recentVisits, comment))
-    )
-  )
-    .then(weedOutNonPulls);
+  Promise.resolve()
+    .then(() => console.debug(`filterPulls: login=${login}, recentVisits=${recentVisits.length}, pulls=${pulls.length}`))
+    .then(() => Promise.all(
+      pulls.map(
+        pull =>
+          fetchAllComments(pull)
+            .then(comment => keepApplicablePull(pull, login, recentVisits, comment))
+      )
+    ))
+    .then(weedOutNonPulls)
+    .finally(() => console.debug(`filterPulls: done`));
 
 const fetchAllComments = (pull: PullSearchResultShort) =>
   Promise.all([
