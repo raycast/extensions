@@ -5,17 +5,21 @@ import browserslist from "browserslist";
 import { statusToName, resolvePath, getCanIUseLink } from "./utils";
 import FeatureDetail from "./components/FeatureDetail";
 
-const { showReleaseDate, showPartialSupport, briefMode, environment, path } = getPreferenceValues<{
+const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } = getPreferenceValues<{
   showReleaseDate: boolean;
   showPartialSupport: boolean;
   briefMode: boolean;
+  defaultQuery: string;
   environment: string;
   path: string;
 }>();
 
 const env = environment || "production";
 
-let browsers: string[] | null = null;
+let browsers: string[] = [];
+try {
+  browsers = browserslist(defaultQuery);
+} catch (e) {}
 if (path) {
   browsers = browserslist(null, { path: resolvePath(path), env });
 }
@@ -30,7 +34,7 @@ export default function CanIUse() {
           { text: briefMode ? feat.status.toUpperCase() : statusToName[feat.status] },
         ];
 
-        if (browsers && browsers.length > 0) {
+        if (browsers.length > 0) {
           const icon = caniuse.isSupported(featureName, browsers)
             ? { source: Icon.Checkmark, tintColor: Color.Green }
             : { source: Icon.XMarkCircle, tintColor: Color.Red };

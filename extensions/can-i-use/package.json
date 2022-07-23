@@ -46,6 +46,14 @@
       "default": false
     },
     {
+      "name": "defaultQuery",
+      "description": "Default Browserlist query when no project is configured",
+      "title": "Default Query",
+      "required": false,
+      "type": "textfield",
+      "default": "defaults"
+    },
+    {
       "name": "path",
       "description": "Path to project configured with Browserlist",
       "title": "Project path",
@@ -64,7 +72,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.1",
-    "browserslist": "^4.20.2",
+    "browserslist": "^4.21.2",
     "caniuse-api": "^3.0.0",
     "caniuse-lite": "^1.0.30001369"
   },
