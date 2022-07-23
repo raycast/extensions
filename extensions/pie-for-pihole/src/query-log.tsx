@@ -63,7 +63,7 @@ export default function () {
           title={item.domain}
           icon={
             item.blockStatus == QueryBlockStatus.Blocked
-              ? { source: Icon.XmarkCircle, tintColor: Color.Red }
+              ? { source: Icon.XMarkCircle, tintColor: Color.Red }
               : item.blockStatus == QueryBlockStatus.Cached
               ? { source: Icon.MemoryChip, tintColor: Color.Blue }
               : { source: Icon.Checkmark, tintColor: Color.Green }

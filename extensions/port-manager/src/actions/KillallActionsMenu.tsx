@@ -5,7 +5,7 @@ import { killall, KillSignal } from "../utilities/killProcess";
 
 export default function KillallActionsMenu(props: { process: IProcessInfo; reloadCallback?: () => Promise<void> }) {
   return (
-    <ActionPanel.Submenu title="Killall" icon={Icon.XmarkCircle}>
+    <ActionPanel.Submenu title="Killall" icon={Icon.XMarkCircle}>
       <Action
         title="With SIGTERM"
         onAction={async () =>

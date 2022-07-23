@@ -58,12 +58,12 @@ export function ActionOnBunches(props: {
         />
         {openBunches.length > 0 && (
           <Action
-            icon={Icon.XmarkCircle}
+            icon={Icon.XMarkCircle}
             title={"Close All Bunches"}
             shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
             onAction={() => {
               alertDialog(
-                Icon.XmarkCircle,
+                Icon.XMarkCircle,
                 "Close All Bunches",
                 "Are you sure you want to close all bunches?",
                 "Close All",

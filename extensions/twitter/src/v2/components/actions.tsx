@@ -13,7 +13,7 @@ export function LogoutAction(): ReactElement {
     await resetOAuthTokens();
     await popToRoot();
   };
-  return <Action title="Logout" icon={{ source: Icon.XmarkCircle }} onAction={handle} />;
+  return <Action title="Logout" icon={{ source: Icon.XMarkCircle }} onAction={handle} />;
 }
 
 export function ShowDetailV2Action(props: { tweet: Tweet }): ReactElement {
@@ -137,7 +137,7 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
     return (
       <Action
         title="Delete Tweet"
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         onAction={deleteTweet}
       />

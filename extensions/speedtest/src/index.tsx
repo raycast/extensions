@@ -25,7 +25,7 @@ function ClearCacheAction(): JSX.Element {
       // ignore
     }
   };
-  return <Action title="Clear CLI Cache" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
+  return <Action title="Clear CLI Cache" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
 }
 
 function ISPListItem(props: { name: string | undefined; summary: JSX.Element }): JSX.Element {

@@ -64,7 +64,7 @@ export function getDeployStatusIcon(status: DeployStatus): Icon | undefined {
     case 'canceled':
       return Icon.Dot;
     case 'build_failed':
-      return Icon.XmarkCircle;
+      return Icon.XMarkCircle;
   }
 }
 
@@ -73,7 +73,7 @@ export function getCommitUrl(repoUrl: string, commitId: string) {
 }
 
 export function getDomainIcon(isVerified: boolean): Icon {
-  return isVerified ? Icon.Checkmark : Icon.XmarkCircle;
+  return isVerified ? Icon.Checkmark : Icon.XMarkCircle;
 }
 
 export function formatDate(date: Date) {

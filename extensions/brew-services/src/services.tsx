@@ -161,7 +161,7 @@ export async function runService(service: string) {
 
 export function createIcon(status: string): ImageLike {
   if (status === "started" || status === "running") return { source: Icon.Checkmark, tintColor: Color.Green };
-  else if (status === "stopped") return { source: Icon.XmarkCircle, tintColor: Color.Red };
+  else if (status === "stopped") return { source: Icon.XMarkCircle, tintColor: Color.Red };
   else return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
 }
 

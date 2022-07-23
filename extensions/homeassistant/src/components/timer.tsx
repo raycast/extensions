@@ -53,7 +53,7 @@ export function TimerCancelAction(props: { state: State }): JSX.Element | null {
       title="Cancel"
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       onAction={handle}
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
     />
   );
 }

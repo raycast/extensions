@@ -471,7 +471,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopCover(props.state.entity_id)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attribtues">
@@ -597,7 +597,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopMedia(entityID)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
             <Action
               title="Next"

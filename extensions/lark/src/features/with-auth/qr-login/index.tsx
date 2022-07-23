@@ -82,7 +82,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
             ) : status === QRCodeStatus.Scanned ? (
               <Detail.Metadata.Label title="Status" icon={Icon.Checkmark} text="Scanned" />
             ) : status === QRCodeStatus.Canceled ? (
-              <Detail.Metadata.Label title="Status" icon={Icon.XmarkCircle} text="Cancelled" />
+              <Detail.Metadata.Label title="Status" icon={Icon.XMarkCircle} text="Cancelled" />
             ) : (
               <Detail.Metadata.Label title="Status" text={QRCodeStatus[status]} />
             )}

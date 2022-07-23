@@ -30,7 +30,7 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.38.2",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1"
   },

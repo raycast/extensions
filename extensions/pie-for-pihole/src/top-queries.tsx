@@ -71,7 +71,7 @@ export default function () {
               <List.Item
                 key={item.domainURL}
                 title={item.domainURL}
-                icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                 accessories={[{ text: item.blockCount }]}
                 actions={
                   <ActionPanel title="Actions">

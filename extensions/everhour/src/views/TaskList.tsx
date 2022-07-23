@@ -78,7 +78,7 @@ export function TaskList({
     }
 
     if (!isLoading && tasks[0]) {
-      return <List.Item title="No tasks found" icon={Icon.XmarkCircle} />;
+      return <List.Item title="No tasks found" icon={Icon.XMarkCircle} />;
     }
   };
 

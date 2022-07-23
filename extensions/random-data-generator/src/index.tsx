@@ -100,7 +100,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
           {unpin && (
             <ActionPanel.Item
               title="Unpin Entry"
-              icon={Icon.XmarkCircle}
+              icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
               onAction={() => unpin(item)}
             />

@@ -64,7 +64,7 @@ export const statusIconSource = (torrent: Torrent): string => {
     case TorrentStatus.Seeding:
       return Icon.ChevronUp;
     default:
-      return Icon.XmarkCircle;
+      return Icon.XMarkCircle;
   }
 };
 

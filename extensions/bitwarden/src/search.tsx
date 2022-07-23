@@ -307,7 +307,7 @@ function VaultActions(props: { syncItems: () => void; lockVault: () => void; log
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         onAction={props.lockVault}
       />
-      <Action title="Logout" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
+      <Action title="Logout" icon={Icon.XMarkCircle} onAction={props.logoutVault} />
     </Fragment>
   );
 }

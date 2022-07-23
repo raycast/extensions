@@ -27,7 +27,7 @@ export function NoteListPinned(props: { vault: Vault; showTitle: boolean }) {
     return (
       <Action
         title="Reset Pinned Notes"
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
         shortcut={{ modifiers: ["opt"], key: "r" }}
         onAction={async () => {
           if (await resetPinnedNotes(vault)) {

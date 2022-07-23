@@ -81,7 +81,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
           <List.Section title={trackData.completeYN ? "Delivery completed" : "Delivery NOT completed"}>
             <List.Item
               title={"Item : " + (trackData.itemName || "UNKNOWN")}
-              icon={trackData.completeYN ? Icon.Checkmark : Icon.XmarkCircle}
+              icon={trackData.completeYN ? Icon.Checkmark : Icon.XMarkCircle}
               accessoryTitle={vendorName}
               actions={
                 !defaultTrackNumber && (

@@ -72,7 +72,7 @@ export function AlertListItem(props: { alert: Alert; goBackToSavedSearches?: () 
         <ActionPanel>
           <OpenInBrowserAction url={`${preferences.url}/alert/detail/${alert.id}/details`} />
           <ActionPanel.Item title="Acknowledge" icon={Icon.Checkmark} onAction={() => acknowledgedAlert(alert.id)} />
-          <ActionPanel.Item title="Close" icon={Icon.XmarkCircle} onAction={() => closeAlert(alert.id)} />
+          <ActionPanel.Item title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id)} />
           <ActionPanel.Item
             title="Snooze for 1 Hour"
             icon={Icon.SpeakerSlash}

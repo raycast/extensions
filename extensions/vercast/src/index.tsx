@@ -68,11 +68,11 @@ function Main(): JSX.Element {
             iconTintColor = Color.Yellow;
             break;
           case DeploymentState.failed:
-            iconSource = Icon.XmarkCircle;
+            iconSource = Icon.XMarkCircle;
             iconTintColor = Color.Red;
             break;
           case DeploymentState.canceled:
-            iconSource = Icon.XmarkCircle;
+            iconSource = Icon.XMarkCircle;
             iconTintColor = Color.SecondaryText;
             break;
         }

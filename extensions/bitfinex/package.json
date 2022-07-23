@@ -1308,7 +1308,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.38.2",
     "asciichart": "^1.5.25",
     "bfx-api-node-models": "^1.6.3",
     "bitfinex-api-node": "^5.0.4",

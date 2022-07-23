@@ -72,7 +72,7 @@
     "GoLand"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.38.2",
     "fast-glob": "^3.2.7",
     "raycast-hooks": "^1.0.4",
     "which": "^2.0.2",

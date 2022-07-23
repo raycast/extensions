@@ -139,7 +139,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.38.2",
     "@types/ramda": "^0.28.1",
     "bitfield": "^4.0.0",
     "bytes": "^3.1.2",

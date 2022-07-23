@@ -121,7 +121,7 @@ export default function ProcessList() {
               accessoryTitle={`${process.cpu}%`}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Item title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />
+                  <ActionPanel.Item title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                   {copyToClipboardAction(process)}
                   <ActionPanel.Item
                     title="Reload"

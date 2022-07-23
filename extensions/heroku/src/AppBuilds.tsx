@@ -10,7 +10,7 @@ const getBuildAccessoryIcon = ({ status }: { status: AppBuild["status"] }): Imag
     case "succeeded":
       return { source: Icon.Checkmark, tintColor: Color.Green };
     case "failed":
-      return { source: Icon.XmarkCircle, tintColor: Color.Red };
+      return { source: Icon.XMarkCircle, tintColor: Color.Red };
     default:
       return { source: Icon.Gear, tintColor: Color.Blue };
   }
