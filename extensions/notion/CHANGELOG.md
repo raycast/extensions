@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [New Command] - 2022-07-11
+
+- Added `Open Link using Notion` and `Convert to App Link` commands
+
 ## [Markdown parsing] - 2022-07-08
 
 - Improve markdown parsing when create a page
