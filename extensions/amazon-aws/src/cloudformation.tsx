@@ -1,12 +1,14 @@
-import { getPreferenceValues, ActionPanel, List, OpenInBrowserAction, Detail } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
 import { StackSummary } from "aws-sdk/clients/cloudformation";
+import setupAws from "./util/setupAws";
+
+setupAws();
 
 export default function ListStacks() {
   const preferences: Preferences = getPreferenceValues();
-  AWS.config.update({ region: preferences.region });
   const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{
@@ -60,10 +62,9 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
       id={stack.StackName}
       key={stack.StackId}
       title={stack.StackName}
-      accessoryTitle={stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Browser"
             url={
               "https://console.aws.amazon.com/cloudformation/home?region=" +
@@ -74,6 +75,11 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
           />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined,
+        },
+      ]}
     />
   );
 }

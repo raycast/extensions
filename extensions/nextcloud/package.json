@@ -31,21 +31,21 @@
       "name": "activity",
       "title": "Show Activity",
       "subtitle": "Nextcloud",
-      "description": "Show activity.",
+      "description": "Show activity. You need to activate Activity app on Nextcloud beforehand.",
       "mode": "view"
     },
     {
       "name": "deck",
       "title": "Show Deck",
       "subtitle": "Nextcloud",
-      "description": "Show tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
+      "description": "Show tasks in Nextcloud Deck. You need to activate Deck app on Nextcloud beforehand.",
       "mode": "view"
     },
     {
       "name": "notes",
       "title": "Show Notes",
       "subtitle": "Nextcloud",
-      "description": "Manage notes in Nextcloud.",
+      "description": "Manage notes in Nextcloud. You need to activate Notes app on Nextcloud beforehand.",
       "mode": "view"
     }
   ],
@@ -84,9 +84,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.2",
+    "@raycast/api": "^1.31.0",
     "date-fns": "^2.28.0",
-    "fast-xml-parser": "^4.0.6",
+    "fast-xml-parser": "^4.0.7",
     "file-size": "^1.0.0",
     "node-fetch": "^3.2.3"
   },
@@ -94,16 +94,16 @@
     "@types/file-size": "^1.0.1",
     "@types/jsdom": "^16.2.14",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.11.0",
+    "@types/react": "^17.0.43",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "eslint": "^8.12.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "prettier": "^2.6.1",
+    "react-devtools": "^4.24.2",
+    "typescript": "^4.6.3"
   },
   "license": "MIT"
 }

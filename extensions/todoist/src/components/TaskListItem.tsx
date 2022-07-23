@@ -1,17 +1,14 @@
-import { ActionPanel, Icon, List, confirmAlert, showToast, Toast, Action } from "@raycast/api";
-import { addDays } from "date-fns";
-import { Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import { mutate } from "swr";
-import { ViewMode, SWRKeys } from "../types";
-import { isRecurring, displayDueDate, getAPIDate, getToday, isExactTimeTask } from "../utils";
+import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
+import { format } from "date-fns";
+import { Project, Task } from "@doist/todoist-api-typescript";
+import { ViewMode } from "../types";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers";
 import { priorities } from "../constants";
-import { todoist, handleError } from "../api";
+import TaskDetail from "./TaskDetail";
 
-const schedules = [
-  { name: "Today", amount: 0 },
-  { name: "Tomorrow", amount: 1 },
-  { name: "Next Week", amount: 7 },
-];
+import TaskActions from "./TaskActions";
+import CreateTask from "../create-task";
+
 interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
@@ -19,69 +16,44 @@ interface TaskListItemProps {
 }
 
 export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
-  async function completeTask(task: Task) {
-    await showToast({ style: Toast.Style.Animated, title: "Completing task" });
+  const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[]; accessories: List.Item.Accessory[] } =
+    { keywords: [], accessories: [] };
 
-    try {
-      await todoist.closeTask(task.id);
-      await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
-      mutate(SWRKeys.tasks);
-    } catch (error) {
-      handleError({ error, title: "Unable to complete task" });
-    }
-  }
+  if (mode === ViewMode.date || mode === ViewMode.search) {
+    if (projects && projects.length > 0) {
+      const project = projects.find((project) => project.id === task.projectId);
 
-  async function updateTask(task: Task, payload: UpdateTaskArgs) {
-    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
-
-    try {
-      await todoist.updateTask(task.id, payload);
-      await showToast({ style: Toast.Style.Success, title: "Task updated" });
-      mutate(SWRKeys.tasks);
-    } catch (error) {
-      handleError({ error, title: "Unable to update task" });
-    }
-  }
-
-  async function deleteTask(task: Task) {
-    if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
-      await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
-
-      try {
-        await todoist.deleteTask(task.id);
-        await showToast({ style: Toast.Style.Success, title: "Task deleted" });
-        mutate(SWRKeys.tasks);
-      } catch (error) {
-        handleError({ error, title: "Unable to delete task" });
+      if (project) {
+        additionalListItemProps.accessories.push({ text: project.name });
+        additionalListItemProps.keywords.push(project.name);
       }
     }
   }
 
-  const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[] } = { keywords: [] };
-
-  switch (mode) {
-    case ViewMode.project:
-      if (task.due?.date) {
-        additionalListItemProps.accessoryTitle = displayDueDate(task.due.date);
-      }
-      break;
-    case ViewMode.date:
-      if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.projectId);
-
-        if (project) {
-          additionalListItemProps.accessoryTitle = project.name;
-          additionalListItemProps.keywords.push(project.name);
-        }
-      }
-  }
-
-  if (isRecurring(task)) {
-    additionalListItemProps.accessoryIcon = Icon.ArrowClockwise;
+  if (mode === ViewMode.project || mode === ViewMode.search) {
+    if (task.due?.date) {
+      additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+    }
   }
 
   if (isExactTimeTask(task)) {
-    additionalListItemProps.accessoryIcon = Icon.Clock;
+    const time = task.due?.datetime as string;
+    additionalListItemProps.accessories.push({
+      icon: Icon.Clock,
+      text: format(new Date(time), "HH:mm"),
+    });
+  }
+
+  if (isRecurring(task)) {
+    additionalListItemProps.accessories.push({ icon: Icon.ArrowClockwise });
+  }
+
+  if (task.labelIds.length > 0) {
+    additionalListItemProps.accessories.push({ icon: { source: "tag.svg", tintColor: Color.SecondaryText } });
+  }
+
+  if (task.commentCount > 0) {
+    additionalListItemProps.accessories.push({ icon: Icon.Bubble });
   }
 
   const priority = priorities.find((p) => p.value === task.priority);
@@ -99,54 +71,18 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={task.url} />
+          <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
 
-          <Action
-            id="completeTask"
-            title="Complete Task"
-            icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            onAction={() => completeTask(task)}
-          />
+          <TaskActions task={task} />
 
-          <ActionPanel.Submenu
-            icon={Icon.Calendar}
-            title="Schedule..."
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          >
-            {schedules.map(({ name, amount }) => (
-              <Action
-                key={name}
-                id={name}
-                title={name}
-                onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
-              />
-            ))}
-          </ActionPanel.Submenu>
-
-          <ActionPanel.Submenu
-            icon={Icon.LevelMeter}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            title="Change priority..."
-          >
-            {priorities.map(({ value, name, color }) => (
-              <Action
-                key={name}
-                id={name}
-                title={name}
-                icon={{ source: Icon.Circle, tintColor: color }}
-                onAction={() => updateTask(task, { priority: value })}
-              />
-            ))}
-          </ActionPanel.Submenu>
-
-          <Action
-            id="deleteTask"
-            title="Delete Task"
-            icon={Icon.Trash}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={() => deleteTask(task)}
-          />
+          {mode === ViewMode.project ? (
+            <Action.Push
+              title="Add New Task"
+              target={<CreateTask fromProjectId={task.projectId} />}
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

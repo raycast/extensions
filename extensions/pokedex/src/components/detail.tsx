@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
+import { Color, Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import json2md from "json2md";
 import { getPokemon } from "../api";
@@ -22,6 +22,27 @@ enum GrowthRate {
   "Erratic" = 5,
   "Fluctuating" = 6,
 }
+
+const typeColor: { [key: string]: string } = {
+  normal: "#a8a77a",
+  fire: "#ee8130",
+  water: "#6390f0",
+  electric: "#f7d02c",
+  grass: "#7ac74c",
+  ice: "#96d9d6",
+  fighting: "#c22e28",
+  poison: "#a33ea1",
+  ground: "#e2bf65",
+  flying: "#a98ff3",
+  psychic: "#f95587",
+  bug: "#a6b91a",
+  rock: "#b6a136",
+  ghost: "#735797",
+  dragon: "#6f35fc",
+  dark: "#705746",
+  steel: "#b7b7ce",
+  fairy: "#d685ad",
+};
 
 function random(lower: number, upper: number) {
   return lower + Math.floor(Math.random() * (upper - lower + 1));
@@ -85,12 +106,7 @@ export default function PokemonDetail(props: { id?: number }) {
   const dataObject: json2md.DataObject = useMemo(() => {
     if (!pokemon) return [];
 
-    const {
-      pokemon_v2_pokemonabilities,
-      pokemon_v2_pokemonspecy,
-      pokemon_v2_pokemontypes,
-      pokemon_v2_pokemonstats,
-    } = pokemon;
+    const { pokemon_v2_pokemonspecy } = pokemon;
 
     const {
       pokemon_v2_evolutionchain,
@@ -101,14 +117,39 @@ export default function PokemonDetail(props: { id?: number }) {
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
 
     // excluding forms that unavailable in pokemon.com
-    let forms = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
+    let pokemons = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
     let formNames: string[] = [];
+    let varieties: string[] = [];
     switch (pokemon.id) {
       case 25:
         formNames = ["pikachu", "pikachu-gmax"];
         break;
       case 555:
         formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
+        break;
+      case 666:
+        varieties = [
+          "meadow",
+          "continental",
+          "garden",
+          "elegant",
+          "marine",
+          "high-plains",
+          "river",
+        ];
+        break;
+      // case 668:
+      //   // male, female
+      //   break
+      case 670:
+        formNames = ["floette"];
+        varieties = ["red"];
+        break;
+      case 671:
+        varieties = ["red"];
+        break;
+      case 676:
+        varieties = ["natural", "heart", "star", "diamond"];
         break;
       case 744:
         formNames = ["rockruff"];
@@ -135,8 +176,28 @@ export default function PokemonDetail(props: { id?: number }) {
     }
 
     if (formNames.length) {
-      forms = forms.filter((f) => formNames.includes(f.name));
+      pokemons = pokemons.filter((p) => formNames.includes(p.name));
     }
+
+    const forms: { name: string; type: string; img: string }[] = [];
+    pokemons.forEach((p, pIdx) => {
+      let pokemonForms = p.pokemon_v2_pokemonforms;
+      if (varieties.length) {
+        pokemonForms = pokemonForms.filter((f) =>
+          varieties.includes(f.form_name)
+        );
+      }
+      pokemonForms.forEach((f, fIdx) => {
+        forms.push({
+          name:
+            f.pokemon_v2_pokemonformnames[0]?.name || nameByLang[language].name,
+          type: p.pokemon_v2_pokemontypes
+            .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
+            .join(", "),
+          img: formImg(pokemon.id, pIdx + fIdx),
+        });
+      });
+    });
 
     let gender;
     if (pokemon_v2_pokemonspecy.gender_rate === -1) {
@@ -178,49 +239,6 @@ export default function PokemonDetail(props: { id?: number }) {
         ],
       },
       {
-        h2: "Pokédex data",
-      },
-      {
-        p:
-          "_Type:_ " +
-          pokemon_v2_pokemontypes
-            .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-            .join(", "),
-      },
-      { p: `_Height:_ ${pokemon.height / 10}m` },
-      { p: `_Weight:_ ${pokemon.weight / 10}kg` },
-      {
-        p: `_Abilities:_ ${pokemon_v2_pokemonabilities
-          .map((a) => {
-            if (a.is_hidden) {
-              return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`;
-            }
-
-            return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name;
-          })
-          .join(", ")}`,
-      },
-      {
-        h2: "Base stats",
-      },
-      ...pokemon_v2_pokemonstats.map((n) => {
-        if (n.effort) {
-          ev.push(
-            `${n.effort} ${n.pokemon_v2_stat.pokemon_v2_statnames[0].name}`
-          );
-        }
-
-        return {
-          p: `_${n.pokemon_v2_stat.pokemon_v2_statnames[0].name}_: ${n.base_stat}`,
-        };
-      }),
-      {
-        p: `Total: **${pokemon_v2_pokemonstats.reduce(
-          (prev, cur) => prev + cur.base_stat,
-          0
-        )}**`,
-      },
-      {
         h2: "Training",
       },
       {
@@ -245,7 +263,11 @@ export default function PokemonDetail(props: { id?: number }) {
       },
       {
         p: `_Egg groups:_ ${pokemon_v2_pokemonegggroups
-          .map((g) => g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0].name)
+          .map(
+            (g) =>
+              g.pokemon_v2_egggroup.pokemon_v2_egggroupnames[0]?.name ||
+              g.pokemon_v2_egggroup.name
+          )
           .join(", ")}`,
       },
       {
@@ -258,28 +280,15 @@ export default function PokemonDetail(props: { id?: number }) {
         h2: forms.length > 1 ? "Forms" : "",
       },
       ...(forms.length > 1
-        ? forms.map((p, idx) => {
+        ? forms.map((f) => {
             return [
-              {
-                h3:
-                  p.pokemon_v2_pokemonforms[0].pokemon_v2_pokemonformnames[0]
-                    ?.name || nameByLang[language].name,
-              },
-              {
-                p:
-                  "_Type:_ " +
-                  p.pokemon_v2_pokemontypes
-                    .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-                    .join(", "),
-              },
+              { h3: f.name },
+              { p: "_Type:_ " + f.type },
               {
                 img: [
                   {
-                    title:
-                      p.pokemon_v2_pokemonforms[0]
-                        .pokemon_v2_pokemonformnames[0]?.name ||
-                      nameByLang[language].name,
-                    source: formImg(pokemon.id, idx),
+                    title: f.name,
+                    source: f.img,
                   },
                 ],
               },
@@ -311,28 +320,20 @@ export default function PokemonDetail(props: { id?: number }) {
       {
         h2: "Pokédex entries",
       },
-      ...pokemon_v2_pokemonspeciesflavortexts
-        .filter((f) => f.pokemon_v2_version.pokemon_v2_versionnames.length)
-        .map((flavor) => {
-          return {
-            p: `**${
-              flavor.pokemon_v2_version.pokemon_v2_versionnames[0].name
-            }:** ${flavor.flavor_text
-              .split("\n")
-              .join(" ")
-              .split("")
-              .join(" ")}`,
-          };
-        }),
+      ...pokemon_v2_pokemonspeciesflavortexts.map((flavor) => {
+        return {
+          p: `**${
+            flavor.pokemon_v2_version.pokemon_v2_versionnames[0]?.name ||
+            flavor.pokemon_v2_version.name
+          }:** ${flavor.flavor_text.split("\n").join(" ").split("").join(" ")}`,
+        };
+      }),
     ];
 
     return data;
   }, [pokemon]);
 
-  const englishName = () => {
-    // 9 is language_id for English
-    return nameByLang["9"].name.replace(/ /g, "_");
-  };
+  const englishName = nameByLang["9"]?.name.replace(/ /g, "_");
 
   return (
     <Detail
@@ -341,22 +342,63 @@ export default function PokemonDetail(props: { id?: number }) {
         pokemon ? `${nameByLang[language].name} | Pokédex` : "Pokédex"
       }
       markdown={json2md(dataObject)}
-      actions={
+      metadata={
         pokemon && (
-          <ActionPanel>
-            <ActionPanel.Section title="Pokémon">
-              <Action.OpenInBrowser
-                title="Open in the Official Pokémon Website"
-                icon="pokeball.svg"
-                url={`https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`}
-              />
-              <Action.OpenInBrowser
-                title="Open in Bulbapedia"
-                icon="bulbapedia.svg"
-                url={`https://bulbapedia.bulbagarden.net/wiki/${englishName()}_(Pok%C3%A9mon)`}
-              />
-            </ActionPanel.Section>
-          </ActionPanel>
+          <Detail.Metadata>
+            <Detail.Metadata.Link
+              title="Official Pokémon Website"
+              text={nameByLang[language].name}
+              target={`https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`}
+            />
+            <Detail.Metadata.Link
+              title="Bulbapedia"
+              text={englishName}
+              target={`https://bulbapedia.bulbagarden.net/wiki/${englishName}_(Pok%C3%A9mon)`}
+            />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label
+              title="Height"
+              text={`${pokemon.height / 10}m`}
+            />
+            <Detail.Metadata.Label
+              title="Weight"
+              text={`${pokemon.weight / 10}kg`}
+            />
+            <Detail.Metadata.TagList title="Type">
+              {pokemon.pokemon_v2_pokemontypes.map((t) => {
+                return (
+                  <Detail.Metadata.TagList.Item
+                    key={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
+                    text={t.pokemon_v2_type.pokemon_v2_typenames[0].name}
+                    color={typeColor[t.pokemon_v2_type.name]}
+                  />
+                );
+              })}
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.TagList title="Abilities">
+              {pokemon.pokemon_v2_pokemonabilities.map((t) => {
+                return (
+                  <Detail.Metadata.TagList.Item
+                    key={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
+                    text={t.pokemon_v2_ability.pokemon_v2_abilitynames[0].name}
+                    color={
+                      t.is_hidden ? Color.SecondaryText : Color.PrimaryText
+                    }
+                  />
+                );
+              })}
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Separator />
+            {pokemon.pokemon_v2_pokemonstats.map((stat, idx) => {
+              return (
+                <Detail.Metadata.Label
+                  key={idx}
+                  title={stat.pokemon_v2_stat.pokemon_v2_statnames[0].name}
+                  text={stat.base_stat.toString()}
+                />
+              );
+            })}
+          </Detail.Metadata>
         )
       }
     />

@@ -1,20 +1,12 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  Image,
-  Color,
-  showToast,
-  ToastStyle,
-  ListSection,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
 import { gql } from "@apollo/client";
-import { getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 
 export interface Job {
@@ -24,7 +16,7 @@ export interface Job {
 }
 
 const GET_PIPELINE_JOBS = gql`
-  query GetProjectPipeplines($fullPath: ID!, $pipelineIID: ID!) {
+  query GetProjectPipelines($fullPath: ID!, $pipelineIID: ID!) {
     project(fullPath: $fullPath) {
       pipeline(iid: $pipelineIID) {
         stages {
@@ -44,7 +36,7 @@ const GET_PIPELINE_JOBS = gql`
   }
 `;
 
-function getIcon(status: string): Image {
+export function getCIJobStatusIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
       return { source: GitLabIcons.status_success, tintColor: Color.Green };
@@ -81,6 +73,46 @@ function getIcon(status: string): Image {
   */
 }
 
+export function getCIJobStatusEmoji(status: string): string {
+  switch (status.toLowerCase()) {
+    case "success": {
+      return "✅";
+    }
+    case "created": {
+      return "🔨";
+    }
+    case "pending": {
+      return "⏰";
+    }
+    case "running": {
+      return "🔄";
+    }
+    case "failed": {
+      return "❌";
+    }
+    case "canceled": {
+      return "🛑";
+    }
+    case "skipped": {
+      return "➡️";
+    }
+    case "scheduled": {
+      return "🕐";
+    }
+    case "manual": {
+      return "👨‍💼";
+    }
+    default:
+      console.log(status);
+      return "💼";
+  }
+  /*
+  missing 
+  * WAITING_FOR_RESOURCE
+  * PREPARING
+  */
+}
+
 function getStatusText(status: string) {
   const s = status.toLowerCase();
   if (s === "success") {
@@ -90,9 +122,9 @@ function getStatusText(status: string) {
   }
 }
 
-export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }) {
+export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }): JSX.Element {
   const job = props.job;
-  const icon = getIcon(job.status);
+  const icon = getCIJobStatusIcon(job.status);
   const subtitle = "#" + getIdFromGqlId(job.id);
   const status = getStatusText(job.status.toLowerCase());
   return (
@@ -101,11 +133,13 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
       icon={icon}
       title={job.name}
       subtitle={subtitle}
-      accessoryTitle={status}
+      accessories={ensureCleanAccessories([{ text: status }])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
+            <GitLabOpenInBrowserAction
+              url={getGitLabGQL().urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
@@ -116,40 +150,60 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
   );
 }
 
-export function JobList(props: { projectFullPath: string; pipelineIID: string }) {
-  const { stages, error, isLoading, refresh } = useSearch("", props.projectFullPath, props.pipelineIID);
+export function JobList(props: {
+  projectFullPath: string;
+  pipelineID: string;
+  pipelineIID?: string | undefined;
+}): JSX.Element {
+  const { stages, error, isLoading, refresh } = useSearch(
+    "",
+    props.projectFullPath,
+    props.pipelineID,
+    props.pipelineIID
+  );
   useInterval(() => {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
+  }
+  if (!stages) {
+    return <List isLoading={isLoading} navigationTitle="Jobs" />;
   }
   return (
     <List isLoading={isLoading} navigationTitle="Jobs">
       {Object.keys(stages).map((stagekey) => (
-        <ListSection key={stagekey} title={stagekey}>
+        <List.Section key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (
-            <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} />
+            <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} key={job.id} />
           ))}
-        </ListSection>
+        </List.Section>
       ))}
     </List>
   );
 }
 
+interface RESTJob {
+  id: number;
+  status: string;
+  stage: string;
+  name: string;
+}
+
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  pipelineIID: string
+  pipelineID: string,
+  pipelineIID?: string | undefined
 ): {
-  stages: Record<string, Job[]>;
+  stages?: Record<string, Job[]>;
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [stages, setStages] = useState<Record<string, Job[]>>({});
+  const [stages, setStages] = useState<Record<string, Job[]> | undefined>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -170,26 +224,44 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
-          query: GET_PIPELINE_JOBS,
-          variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
-          fetchPolicy: "network-only",
-        });
-        const stages: Record<string, Job[]> = {};
-        for (const stage of data.data.project.pipeline.stages.nodes) {
-          if (!stages[stage.name]) {
-            stages[stage.name] = [];
+        if (pipelineIID) {
+          const data = await getGitLabGQL().client.query({
+            query: GET_PIPELINE_JOBS,
+            variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
+            fetchPolicy: "network-only",
+          });
+          const stages: Record<string, Job[]> = {};
+          for (const stage of data.data.project.pipeline.stages.nodes) {
+            if (!stages[stage.name]) {
+              stages[stage.name] = [];
+            }
+            for (const job of stage.jobs.nodes) {
+              stages[stage.name].push({ id: job.id, name: job.name, status: job.status });
+            }
           }
-          for (const job of stage.jobs.nodes) {
-            stages[stage.name].push({ id: job.id, name: job.name, status: job.status });
+          if (!didUnmount) {
+            setStages(stages);
+          }
+        } else if (pipelineID) {
+          const projectUE = encodeURIComponent(projectFullPath);
+          const jobs: RESTJob[] = await gitlab
+            .fetch(`projects/${projectUE}/pipelines/${pipelineID}/jobs`)
+            .then((data) => data as RESTJob[]);
+          jobs.sort((a, b) => a.id - b.id);
+          const stages: Record<string, Job[]> = {};
+          for (const job of jobs) {
+            if (!stages[job.stage]) {
+              stages[job.stage] = [];
+            }
+            stages[job.stage].push({ id: `${job.id}`, name: job.name, status: job.status });
+          }
+          if (!didUnmount) {
+            setStages(stages);
           }
         }
+      } catch (e) {
         if (!didUnmount) {
-          setStages(stages);
-        }
-      } catch (e: any) {
-        if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -206,4 +278,103 @@ export function useSearch(
   }, [query, projectFullPath, pipelineIID, timestamp]);
 
   return { stages, error, isLoading, refresh };
+}
+
+interface Pipeline {
+  id: number;
+  iid: number;
+  project_id: number;
+  sha: string;
+  ref: string;
+  status: string;
+  source: string;
+}
+
+interface Commit {
+  id: string;
+  short_id: string;
+  title: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  status?: string;
+  project_id: number;
+  last_pipeline?: Pipeline;
+}
+
+export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
+  const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
+  if (error) {
+    showErrorToast(error, "Could not fetch Commit Details");
+  }
+  if (isLoading || !commit) {
+    return <List isLoading={isLoading} />;
+  }
+  if (commit.last_pipeline) {
+    return (
+      <JobList
+        projectFullPath={props.project.fullPath}
+        pipelineID={`${commit.last_pipeline.id}`}
+        pipelineIID={commit.last_pipeline.iid ? `${commit.last_pipeline.iid}` : undefined}
+      />
+    );
+  }
+  return (
+    <List>
+      <List.Item title="No pipelines attached" />
+    </List>
+  );
+}
+
+function useCommit(
+  projectID: number,
+  sha: string
+): {
+  commit?: Commit;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [commit, setCommit] = useState<Commit>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glCommit = await gitlab.fetch(`projects/${projectID}/repository/commits/${sha}`).then((data) => {
+          return data as Commit;
+        });
+        if (!didUnmount) {
+          setCommit(glCommit);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, sha]);
+
+  return { commit, error, isLoading };
 }

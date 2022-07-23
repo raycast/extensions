@@ -9,7 +9,7 @@ import {
   allLocalStorageItems,
   setLocalStorageItem,
 } from '@raycast/api';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
 import { useCallback, useEffect, useState } from 'react';
@@ -37,6 +37,7 @@ const blacklistPaths = [
   'localeFallback',
   'definitions',
   'fake',
+  'faker',
   'unique',
   'helpers',
   'mersenne',
@@ -55,9 +56,12 @@ const buildItems = (path: string) => {
       }
 
       if (_.isFunction(func)) {
-        const getValue = (): string => func().toString();
+        const getValue = (): string => {
+          const value = func();
+          return value ? value.toString() : '';
+        };
         acc.push({ section: path, id: key, value: getValue(), getValue });
-      } else {
+      } else if (_.isObject(func)) {
         acc.push(...buildItems(path ? `${path}.${key}` : key));
       }
 
@@ -79,7 +83,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
       title={_.startCase(item.id)}
       icon={Icon.Dot}
       keywords={[item.section]}
-      accessoryTitle={value}
+      detail={<List.Item.Detail markdown={value} />}
       actions={
         <ActionPanel>
           <CopyToClipboardAction title="Copy to Clipboard" content={value} />
@@ -152,7 +156,7 @@ export default function FakerList() {
   };
 
   return (
-    <List>
+    <List isShowingDetail>
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (

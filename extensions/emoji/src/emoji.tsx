@@ -1,5 +1,5 @@
 import { ActionPanel, List, closeMainWindow, popToRoot, getPreferenceValues, Action } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { createEmojiList } from "generate-emoji-list";
 import { UnicodeVersion } from "generate-emoji-list/dist/createEmojiList";
@@ -29,8 +29,7 @@ const filterList = (list: Category[], searchText: string, category: string): Cat
 
 export default function Main(): ReactElement {
   const [list, setList] = usePersistentState<Emoji[]>("emoji-list-v2", []);
-  const [categories, setCategories] = useState<string[]>([]);
-
+  const [categories, setCategories] = usePersistentState<string[]>("emoji-categories", []);
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
     // https://github.com/facebook/react/pull/22114
@@ -62,14 +61,11 @@ export default function Main(): ReactElement {
   }, []);
 
   const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = usePersistentState<Emoji[]>("recently-used", []);
-  const addToRecentlyUsed = useCallback(
-    (emoji: Emoji) => {
-      setRecentlyUsed((list) =>
-        list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
-      );
-    },
-    [setRecentlyUsed]
-  );
+  const addToRecentlyUsed = (emoji: Emoji) => {
+    setRecentlyUsed((list) =>
+      list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
+    );
+  };
 
   const [category, setCategory] = useState<string>("");
   const [searchText, setSearchText] = useState("");
@@ -97,9 +93,9 @@ export default function Main(): ReactElement {
       {!isLoading
         ? filterList(
             [
-              { category: "Recently Used", emojis: recentlyUsed },
+              !searchText && { category: "Recently Used", emojis: recentlyUsed },
               { category: category || "Emojis", emojis: list },
-            ],
+            ].filter(Boolean) as Category[],
             searchText,
             category
           ).map((category: Category) => (

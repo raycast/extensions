@@ -1,5 +1,43 @@
 # Todoist Changelog
 
+## [New tasks from projects and task actions in detail] - 2022-05-13
+
+- Added the ability to add a new task from a project
+- Shared the task actions between the task detail and the task list item
+- Add flag icon for priorities in the detail view as well as in the action panel
+
+## [Edit your projects] - 2022-04-30
+
+- Added a new action on projects to edit them
+- Added a new action on projects to add/remove them to/from favorites
+- Added the project's color on the Search Projects command
+- Removed the custom ordering of the tasks since Todoist already performs them
+- Displayed the sub-tasks back in the project view
+
+## [Add support for comments] - 2022-04-23
+
+- Added support for comments on each task. It's now possible to add a new comment, edit it, delete it, or search through every comment's content.
+- Reset the form focus to the first field when creating a project or a task.
+
+## [New command for searching tasks] - 2022-04-13
+
+- Added a new command to search across all your tasks with the ability to filter by project
+- Added new scheduling options: "in two days" and "no due date"
+
+## [More details and empty screens] - 2022-04-06
+
+- Added detailed view of a task with metadata: title, description, project, due date (with time if any), priority, labels
+- Added the ability to display many accessories of a task item in a list
+- Added support for tasks due for a particular time
+- Added empty screen when there are no tasks left for today
+- Added empty screen when there are no tasks in a project. The user is prompted to create one.
+- Added the possibility to edit a task's title and description
+- Added support for sections in task creation. The sections change based on the selected project.
+- Added the project info in the upcoming view
+- Added the possibility to copy to clipboard a project or a task URL
+- Fixed the date picker by allowing to pick only plain dates
+- Improved the getting started documentation
+
 ## [Metadata] - 2022-03-23
 
 - Add screenshots, categories, and changelog for the Raycast store
@@ -26,7 +64,7 @@
 - Remember the color value in "Create project" form
 - Upgrade the dependencies
 
-## [Create and delete projects] - 2022-12-22
+## [Create and delete projects] - 2021-12-22
 
 - New command to create a Todoist project
 - New action panel item to delete a project in the project's search with confirmation alert

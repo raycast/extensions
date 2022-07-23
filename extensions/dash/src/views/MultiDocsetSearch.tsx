@@ -17,12 +17,19 @@ export default function MultiDocsetSearch() {
   const [docsets, isLoadingDocsets] = useDocsets();
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
   const filteredDocsets = getFilteredDocsets(docsets, searchText);
+  const docsetKeywords = docsets.map((item) => item.docsetKeyword);
 
   return (
     <List
       isLoading={isLoadingDocsets || isLoadingSearchResults}
       searchBarPlaceholder="Filter docsets by name or keyword..."
-      onSearchTextChange={(newValue) => setSearchText(newValue.trim())}
+      onSearchTextChange={(newValue) => {
+        const setKeywordRegex = /(^\w+) /;
+        const setKeyword = setKeywordRegex.test(newValue) && newValue.match(setKeywordRegex)?.[1];
+        const isSetKeyWord = docsetKeywords.includes(setKeyword || "");
+        const formattedNewValue = isSetKeyWord ? newValue.replace(setKeywordRegex, "$1:") : newValue;
+        setSearchText(formattedNewValue.trim());
+      }}
     >
       <List.Section title="Docsets">
         {filteredDocsets.map((docset) => (

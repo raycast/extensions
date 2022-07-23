@@ -1,5 +1,10 @@
 # Pokédex Changelog
 
+## [Improvements] - 2022-06-16
+
+- Using new Grid layout
+- Using new list item metadata
+
 ## [Improvements] - 2022-03-12
 
 - Added type filter, split view for Moves
@@ -19,9 +24,9 @@
 
 - Added more Pokémon details: Training, Breeding, Forms
 - Added Pokémon type icon
-- Added Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
+- Added Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
 - Fixed extension icon
 
-## [Pokédex] - 2022-02-18
+## [Initial Version] - 2022-02-18
 
-Initial Version
+- Added Pokédex

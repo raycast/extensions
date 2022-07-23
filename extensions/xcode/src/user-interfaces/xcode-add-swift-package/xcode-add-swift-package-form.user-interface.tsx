@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Icon, List, Navigation, showHUD, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Icon, List, Navigation, showHUD, showToast, Toast } from "@raycast/api";
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
 import { XcodeSwiftPackageMetadata } from "../../models/swift-package/xcode-swift-package-metadata.model";
 import { swiftPackageMetadataSection } from "./xcode-add-swift-package-metadata-section.user-interface";
@@ -82,7 +82,7 @@ async function addSwiftPackage(
     console.error(error);
     // Show a failure HUD as main Raycast window
     // has already been closed
-    showHUD("⚠️ An error occurred while trying to add the Swift Package");
+    await showHUD("⚠️ An error occurred while trying to add the Swift Package");
   }
 }
 
@@ -97,7 +97,10 @@ async function launchXcodeIfNeeded(xcodeService: XcodeService) {
     return;
   }
   // Show loading Toast
-  const loadingToast = await showToast(ToastStyle.Animated, "Launching Xcode");
+  const loadingToast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Launching Xcode",
+  });
   try {
     // Launch Xcode
     await xcodeService.launchXcode();
@@ -105,6 +108,6 @@ async function launchXcodeIfNeeded(xcodeService: XcodeService) {
     // Ignore error
   } finally {
     // Hide loading Toast
-    loadingToast.hide();
+    await loadingToast.hide();
   }
 }

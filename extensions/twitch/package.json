@@ -5,6 +5,11 @@
   "description": "Search for Streams, Channels or Games on Twitch",
   "icon": "icon.png",
   "author": "dieserRobin",
+  "contributors": [
+    "suth",
+    "pernielsentikaer",
+    "MiracleXYZ"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -116,7 +121,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.33.2",
     "node-fetch": "^3.1.0"
   },
   "devDependencies": {
@@ -132,6 +137,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

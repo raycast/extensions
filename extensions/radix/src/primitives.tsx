@@ -13,7 +13,7 @@ export default function Command() {
               <List.Item
                 key={item.slug}
                 title={item.title}
-                subtitle={item.deprecated ? "Deprecated" : ""}
+                subtitle={getSubtitle(item)}
                 keywords={[item.title, label]}
                 actions={
                   <ActionPanel>
@@ -59,19 +59,19 @@ const primitivesRoutes = [
       { title: "Dialog", slug: "docs/primitives/components/dialog" },
       { title: "Dropdown Menu", slug: "docs/primitives/components/dropdown-menu" },
       { title: "Hover Card", slug: "docs/primitives/components/hover-card" },
-      { title: "Hover Menu", slug: "docs/primitives/components/hover-menu", draft: true },
       { title: "Label", slug: "docs/primitives/components/label" },
       { title: "Menubar", slug: "docs/primitives/components/menubar", draft: true },
+      { title: "Navigation Menu", slug: "docs/primitives/components/navigation-menu", beta: true },
       { title: "Popover", slug: "docs/primitives/components/popover" },
       { title: "Progress", slug: "docs/primitives/components/progress" },
       { title: "Radio Group", slug: "docs/primitives/components/radio-group" },
       { title: "Scroll Area", slug: "docs/primitives/components/scroll-area" },
-      { title: "Select", slug: "docs/primitives/components/select", draft: true },
+      { title: "Select", slug: "docs/primitives/components/select", beta: true },
       { title: "Separator", slug: "docs/primitives/components/separator" },
       { title: "Slider", slug: "docs/primitives/components/slider" },
       { title: "Switch", slug: "docs/primitives/components/switch" },
       { title: "Tabs", slug: "docs/primitives/components/tabs" },
-      { title: "Toast", slug: "docs/primitives/components/toast", draft: true },
+      { title: "Toast", slug: "docs/primitives/components/toast", beta: true },
       { title: "Toggle", slug: "docs/primitives/components/toggle" },
       { title: "Toggle Group", slug: "docs/primitives/components/toggle-group" },
       { title: "Toolbar", slug: "docs/primitives/components/toolbar" },
@@ -84,20 +84,28 @@ const primitivesRoutes = [
     pages: [
       { title: "Accessible Icon", slug: "docs/primitives/utilities/accessible-icon" },
       { title: "Announce", slug: "docs/primitives/utilities/announce" },
-      { title: "Id Provider", slug: "docs/primitives/utilities/id-provider" },
+      { title: "Id Provider", slug: "docs/primitives/utilities/id-provider", deprecated: true },
       { title: "Polymorphic", slug: "docs/primitives/utilities/polymorphic", deprecated: true },
       { title: "Portal", slug: "docs/primitives/utilities/portal" },
-      { title: "Slot", slug: "docs/primitives/utilities/slot", deprecated: true },
+      { title: "Slot", slug: "docs/primitives/utilities/slot" },
       { title: "Visually Hidden", slug: "docs/primitives/utilities/visually-hidden" },
     ],
   },
 ];
+
+function getSubtitle(item: PageProps) {
+  if (item.deprecated) return "Deprecated";
+  if (item.beta) return "Beta";
+
+  return "";
+}
 
 type PageProps = {
   title: string;
   slug: string;
   draft?: boolean;
   deprecated?: boolean;
+  beta?: boolean;
 };
 
 type RouteProps = {

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obs-control",
+  "title": "OBS Control",
+  "description": "Control OBS Studio with websocket API",
+  "icon": "obs-control.png",
+  "author": "Yukai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-scene",
+      "title": "Set Scene",
+      "subtitle": "OBS Control",
+      "description": "Set Current Scene",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-stream",
+      "title": "Toggle Stream",
+      "subtitle": "OBS Control",
+      "description": "Toggle Stream",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "obs-url",
+      "description": "OBS Websocket URL",
+      "title": "OBS Websocket URL",
+      "type": "textfield",
+      "default": "ws://localhost:4455",
+      "required": false
+    },
+    {
+      "name": "obs-password",
+      "description": "OBS Websocket Password",
+      "title": "OBS Websocket Password",
+      "type": "password",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "obs-websocket-js": "^5.0.0-beta.1",
+    "swr": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

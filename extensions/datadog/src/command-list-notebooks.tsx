@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useNotebooks } from "./useNotebooks";
 import { linkDomain } from "./util";
 
@@ -14,10 +14,10 @@ export default function CommandListNotebooks() {
           icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
           title={notebook.attributes.name}
           subtitle={notebook.attributes.metadata?.type}
-          accessoryTitle={notebook.attributes.author?.email}
+          accessories={[{ text: notebook.attributes.author?.email }]}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}/notebook/${notebook.id}`} />
+              <Action.OpenInBrowser url={`https://${linkDomain()}/notebook/${notebook.id}`} />
             </ActionPanel>
           }
         />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { AppleDeveloperDocumentationService } from "./services/apple-developer-documentation.service";
 import { AppleDeveloperDocumentationEntry } from "./models/apple-developer-documentation/apple-developer-documentation-entry.model";
 import { appleDeveloperDocumentationList } from "./user-interfaces/apple-developer-documentation/apple-developer-documentation-list.user-interface";
@@ -76,7 +76,10 @@ export default () => {
   // Check if an error is available
   if (error) {
     // Show failure Toast
-    showToast(ToastStyle.Failure, "An error occurred while searching", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "An error occurred while searching",
+    });
   }
   // Return Apple Developer Documentation List
   return appleDeveloperDocumentationList(appleDeveloperDocumentationEntries, isLoading, setSearchText);

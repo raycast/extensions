@@ -1,26 +1,16 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
+import { getErrorMessage, showErrorToast } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
-export function UserList() {
+export function UserList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { users, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
-  }
-
-  if (!users) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   return (
@@ -32,20 +22,20 @@ export function UserList() {
   );
 }
 
-export function UserListItem(props: { user: User }) {
+export function UserListItem(props: { user: User }): JSX.Element {
   const user = props.user;
   return (
     <List.Item
       id={user.id.toString()}
       title={user.name}
       subtitle={"#" + user.username}
-      icon={{ source: user.avatar_url, mask: ImageMask.Circle }}
+      icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={user.web_url} />
-          <CopyToClipboardAction title="Copy User ID" content={user.id} />
-          <CopyToClipboardAction title="Copy Username" content={user.username} />
-          <CopyToClipboardAction title="Copy Name" content={user.name} />
+          <GitLabOpenInBrowserAction url={user.web_url} />
+          <Action.CopyToClipboard title="Copy User ID" content={user.id} />
+          <Action.CopyToClipboard title="Copy Username" content={user.username} />
+          <Action.CopyToClipboard title="Copy Name" content={user.name} />
         </ActionPanel>
       }
     />
@@ -59,7 +49,7 @@ export function useSearch(query: string | undefined): {
 } {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -80,9 +70,9 @@ export function useSearch(query: string | undefined): {
         if (!didUnmount) {
           setUsers(glUsers);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -99,4 +89,8 @@ export function useSearch(query: string | undefined): {
   }, [query]);
 
   return { users, error, isLoading };
+}
+
+export function userIcon(user: User): Image.ImageLike {
+  return { source: user.avatar_url, mask: Image.Mask.Circle };
 }

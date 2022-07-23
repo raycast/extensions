@@ -6,31 +6,29 @@ import en from "javascript-time-ago/locale/en.json";
 
 TimeAgo.addDefaultLocale(en);
 
-const SEPERATOR = "    ";
-
 const numberFormatter = new Intl.NumberFormat(undefined, { notation: "compact" });
 const timeFormatter = new TimeAgo("en-US");
 
-function getFormattedCount(issue: Issue) {
+function getEventsCount(issue: Issue): List.Item.Accessory {
   const formattedCount = numberFormatter.format(issue.count);
-  return `🔄 ${formattedCount}`;
+  return { icon: Icon.TwoArrowsClockwise, text: formattedCount };
 }
 
-function getFormattedUserCount(issue: Issue) {
+function getAffectedUsersCount(issue: Issue): List.Item.Accessory {
   const formattedUserCount = numberFormatter.format(issue.userCount);
-  return `🧑 ${formattedUserCount}`;
+  return { icon: Icon.Person, text: formattedUserCount };
 }
 
-function getFormattedLastSeen(issue: Issue) {
+function getFormattedLastSeen(issue: Issue): List.Item.Accessory {
   const formattedLastSeen = timeFormatter.format(new Date(issue.lastSeen), "twitter");
-  return `🕒 ${formattedLastSeen}`;
+  return { icon: Icon.Clock, text: `${formattedLastSeen}` };
 }
 
-function getAccessories(issue: Issue) {
-  const count = getFormattedCount(issue);
-  const userCount = getFormattedUserCount(issue);
+function getAccessories(issue: Issue): List.Item.Accessory[] {
+  const count = getEventsCount(issue);
+  const userCount = getAffectedUsersCount(issue);
   const lastSeen = getFormattedLastSeen(issue);
-  return `${count}${SEPERATOR}${userCount}${SEPERATOR}${lastSeen}`;
+  return [count, userCount, lastSeen];
 }
 
 function getIcon(issue: Issue) {
@@ -66,7 +64,7 @@ export function IssueListItem(props: { issue: Issue }) {
       icon={getIcon(props.issue)}
       title={props.issue.title}
       subtitle={props.issue.shortId}
-      accessoryTitle={getAccessories(props.issue)}
+      accessories={getAccessories(props.issue)}
       actions={<Actions issue={props.issue} />}
     />
   );

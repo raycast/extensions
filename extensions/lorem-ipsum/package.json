@@ -22,6 +22,25 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "What you would like to happen when running the command",
+      "data": [
+        {
+          "value": "clipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "paste",
+          "title": "Paste to Active App"
+        }
+      ],
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "lorem-ipsum": "^2.0.4",

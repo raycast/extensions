@@ -18,14 +18,15 @@ export const renderDetails = async (torrent: Torrent, downloadStats: string) => 
     **Creator**: ${torrent.creator}
     **Created On**: ${formatDate(torrent.dateCreated)}
     **Download dir**: ${torrent.downloadDir}
-    **Comment**:
-    ${torrent.comment}
+    **Comment**: ${torrent.comment}
 
     ## Transfer
 
-    ${downloadStats}
+    <img src="data:image/svg+xml,${encodeURIComponent(img)}" />
 
-    <img src="data:image/svg+xml;base64,${Buffer.from(img).toString("base64")}" />
+    ${torrent.errorString && `**Error**: ${torrent.errorString}`}
+
+    ${downloadStats}
 
     ## Files
 

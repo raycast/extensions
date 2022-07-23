@@ -1,23 +1,28 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  Image,
-  Color,
-  Detail,
-  PushAction,
-  ImageMask,
-  ImageLike,
-} from "@raycast/api";
+import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import {
+  capitalizeFirstLetter,
+  daysInSeconds,
+  ensureCleanAccessories,
+  getErrorMessage,
+  now,
+  optimizeMarkdownText,
+  Query,
+  showErrorToast,
+  toDateString,
+  tokenizeQueryText,
+} from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { getCIJobStatusEmoji } from "./jobs";
+import { useCache } from "../cache";
+import { userIcon } from "./users";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export enum MRScope {
   created_by_me = "created_by_me",
@@ -34,26 +39,63 @@ export enum MRState {
 }
 
 const GET_MR_DETAIL = gql`
-  query GetMRDetail($id: ID!) {
+  query GetMRDetail($id: MergeRequestID!) {
     mergeRequest(id: $id) {
       description
+      project {
+        webUrl
+      }
     }
   }
 `;
 
-export function MRDetail(props: { mr: MergeRequest }) {
-  const { description, error, isLoading } = useDetail(props.mr.id);
+export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
+  const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not get merge request details", error);
+    showErrorToast(error, "Could not fetch Merge Request Details");
+  }
+  if (isLoading || !mr) {
+    return <Detail isLoading={isLoading} />;
+  } else {
+    return <MRDetail mr={mr} />;
+  }
+}
+
+interface MRDetailData {
+  description: string;
+  projectWebUrl: string;
+}
+
+function stateColor(state: string): Color.ColorLike {
+  switch (state) {
+    case "closed": {
+      return Color.Red;
+    }
+    case "merged": {
+      return Color.Purple;
+    }
+    default: {
+      return Color.Green;
+    }
+  }
+}
+
+export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
+  const mr = props.mr;
+  const { mrdetail, error, isLoading } = useDetail(props.mr.id);
+  if (error) {
+    showErrorToast(error, "Could not get Merge Request Details");
   }
 
-  const desc = (description ? description : props.mr.description) || "";
+  const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
 
-  let md = "";
-  if (props.mr) {
-    md = props.mr.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
+  const lines: string[] = [];
+  if (mr) {
+    lines.push(`# ${mr.title}`);
+    lines.push(optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
   }
-  md += "## Description\n" + optimizeMarkdownText(desc);
+
+  const md = lines.join("  \n");
 
   return (
     <Detail
@@ -62,22 +104,59 @@ export function MRDetail(props: { mr: MergeRequest }) {
       navigationTitle={`${props.mr.reference_full}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={props.mr.web_url} />
+          <GitLabOpenInBrowserAction url={props.mr.web_url} />
           <MRItemActions mr={props.mr} />
+          <Action.CopyToClipboard title="Copy Merge Request Description" content={props.mr.description} />
         </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(mr.state)} color={stateColor(mr.state)} />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label title="From" text={mr.source_branch} />
+          <Detail.Metadata.Label title="Into" text={mr.target_branch} />
+          {mr.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={mr.author.name} icon={userIcon(mr.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {mr.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {mr.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.reviewers.length > 0 && (
+            <Detail.Metadata.TagList title="Reviewer">
+              {mr.reviewers.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.milestone && <Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+          {mr.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {mr.labels.map((m) => (
+                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
       }
     />
   );
 }
 
-export function useDetail(issueID: number): {
-  description?: string;
+function useDetail(issueID: number): {
+  mrdetail?: MRDetailData;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>();
+  const [mrdetail, setMRDetail] = useState<MRDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -93,17 +172,21 @@ export function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_MR_DETAIL,
           variables: { id: `gid://gitlab/MergeRequest/${issueID}` },
         });
         const desc = data.data.mergeRequest.description || "<no description>";
+        const projectWebUrl = data.data.mergeRequest.project.webUrl;
         if (!didUnmount) {
-          setDescription(desc);
+          setMRDetail({
+            projectWebUrl: projectWebUrl,
+            description: desc,
+          });
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -119,7 +202,7 @@ export function useDetail(issueID: number): {
     };
   }, [issueID]);
 
-  return { description, error, isLoading };
+  return { mrdetail, error, isLoading };
 }
 
 interface MRListProps {
@@ -127,6 +210,10 @@ interface MRListProps {
   state?: MRState;
   project?: Project;
   group?: Group;
+  searchBarAccessory?:
+    | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
+    | null
+    | undefined;
 }
 
 function navTitle(project?: Project, group?: Group): string | undefined {
@@ -144,16 +231,13 @@ export function MRList({
   state = MRState.all,
   project = undefined,
   group = undefined,
-}: MRListProps) {
+  searchBarAccessory = undefined,
+}: MRListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
-  }
-
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
@@ -164,10 +248,11 @@ export function MRList({
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
-      <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
-        {mrs?.map((mr) => (
+      <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
+        {mrs.map((mr) => (
           <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
@@ -175,40 +260,61 @@ export function MRList({
   );
 }
 
-export function MRListItem(props: { mr: MergeRequest; refreshData: () => void }) {
+export function MRListItem(props: {
+  mr: MergeRequest;
+  refreshData: () => void;
+  action?: JSX.Element;
+  showCIStatus?: boolean;
+}): JSX.Element {
   const mr = props.mr;
 
-  const getIcon = (): ImageLike => {
+  const getIcon = (): Image.ImageLike => {
     if (mr.state === "merged") {
-      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: ImageMask.Circle };
+      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: Image.Mask.Circle };
     } else if (mr.state === "closed") {
-      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: ImageMask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle };
     } else {
-      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: ImageMask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle };
     }
   };
   const icon = getIcon();
+  const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
+  let cistatusEmoji: string | undefined;
+  if (props.showCIStatus === undefined || props.showCIStatus === true) {
+    const { mrpipelines } = useMRPipelines(mr);
+    if (mrpipelines && mrpipelines.length > 0) {
+      cistatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
+    }
+  }
+  const subtitle: string[] = [`!${mr.iid}`];
+  if (cistatusEmoji) {
+    subtitle.push(cistatusEmoji);
+  }
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
-      subtitle={"#" + mr.iid}
+      subtitle={subtitle.join("    ")}
       icon={icon}
-      accessoryIcon={{ source: mr.author?.avatar_url || "", mask: ImageMask.Circle }}
-      accessoryTitle={toDateString(mr.updated_at)}
+      accessories={ensureCleanAccessories([
+        { text: mr.milestone?.title },
+        { text: toDateString(mr.updated_at) },
+        { icon: accessoryIcon },
+      ])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Details"
               target={<MRDetail mr={mr} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={mr.web_url} />
+            <GitLabOpenInBrowserAction url={mr.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MRItemActions mr={mr} onDataChange={props.refreshData} />
           </ActionPanel.Section>
+          <ActionPanel.Section>{props.action ?? props.action}</ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -284,14 +390,14 @@ export function useSearch(
   project?: Project,
   group?: Group
 ): {
-  mrs?: MergeRequest[];
+  mrs: MergeRequest[];
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
+  const [mrs, setMRs] = useState<MergeRequest[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -333,9 +439,9 @@ export function useSearch(
             setMRs(glMRs);
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -352,4 +458,94 @@ export function useSearch(
   }, [query, project, timestamp]);
 
   return { mrs, error, isLoading, refresh };
+}
+
+export function useMR(
+  projectID: number,
+  mrID: number
+): {
+  mr?: MergeRequest;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [mr, setMR] = useState<MergeRequest>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glMr = await gitlab.getMergeRequest(projectID, mrID, {});
+        if (!didUnmount) {
+          setMR(glMr);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, mrID]);
+
+  return { mr, error, isLoading };
+}
+
+interface MRPipeline {
+  id: number;
+  sha: string;
+  ref: string;
+  status: string;
+}
+
+export function useMRPipelines(mr: MergeRequest): {
+  mrpipelines: MRPipeline[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
+} {
+  const {
+    data: mrpipelines,
+    isLoading,
+    error,
+    performRefetch,
+  } = useCache<MRPipeline[] | undefined>(
+    `mrpipelines_${mr.project_id}_${mr.iid}`,
+    async (): Promise<MRPipeline[] | undefined> => {
+      const result: MRPipeline[] | undefined = await gitlab
+        .fetch(`projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`)
+        .then((data) => {
+          return data?.map((m: any) => {
+            return m as MRPipeline;
+          });
+        });
+      return result;
+    },
+    {
+      deps: [mr],
+      secondsToRefetch: 10,
+      secondsToInvalid: daysInSeconds(7),
+    }
+  );
+  return { mrpipelines, isLoading, error, performRefetch };
 }

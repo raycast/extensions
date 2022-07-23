@@ -19,18 +19,13 @@ console.log(`Command name: ${environment.commandName}`);
 console.log(`Assets path: ${environment.assetsPath}`);
 console.log(`Support path: ${environment.supportPath}`);
 console.log(`Is development mode: ${environment.isDevelopment}`);
+console.log(`Theme: ${environment.theme}`);
+console.log(`LaunchType: ${environment.launchType}`);
 ```
 
 #### Properties
 
-| Name           | Type                 | Description                                                                                                                       |
-| :------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| assetsPath     | <code>string</code>  | The absolute path to the assets directory of the extension.                                                                       |
-| commandName    | <code>string</code>  | The name of the launched command, as specified in package.json                                                                    |
-| extensionName  | <code>string</code>  | The name of the extension, as specified in package.json                                                                           |
-| isDevelopment  | <code>boolean</code> | Indicates whether the command is a development command (vs. an installed command from the Store).                                 |
-| raycastVersion | <code>string</code>  | The version of the main Raycast app                                                                                               |
-| supportPath    | <code>string</code>  | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
+<InterfaceTableFromJSDoc name="Environment" />
 
 ### getSelectedFinderItems
 
@@ -45,7 +40,7 @@ async function getSelectedFinderItems(): Promise<FileSystemItem[]>;
 #### Example
 
 ```typescript
-import { getSelectedFinderItems, Clipboard, Feedback } from "@raycast/api";
+import { getSelectedFinderItems, Clipboard, showToast, Toast } from "@raycast/api";
 
 export default async () => {
   try {
@@ -54,8 +49,8 @@ export default async () => {
       await Clipboard.paste(selectedItems[0].path);
     }
   } catch (error) {
-    await Feedback.toast({
-      style: Feedback.Toast.Style.Failure,
+    await showToast({
+      style: Toast.Style.Failure,
       title: "Cannot copy file path",
       message: String(error),
     });
@@ -80,7 +75,7 @@ async function getSelectedText(): Promise<string>;
 #### Example
 
 ```typescript
-import { getSelectedText, Clipboard, Feedback } from "@raycast/api";
+import { getSelectedText, Clipboard, showToast, Toast } from "@raycast/api";
 
 export default async () => {
   try {
@@ -88,8 +83,8 @@ export default async () => {
     const transformedText = selectedText.toUpperCase();
     await Clipboard.paste(transformedText);
   } catch (error) {
-    await Feedback.toast({
-      style: Feedback.Toast.Style.Failure,
+    await showToast({
+      style: Toast.Style.Failure,
       title: "Cannot transform text",
       message: String(error),
     });
@@ -109,6 +104,15 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 
 #### Properties
 
-| Name | Type                | Description          |
-| :--- | :------------------ | :------------------- |
-| path | <code>string</code> | The path to the item |
+<InterfaceTableFromJSDoc name="FileSystemItem" />
+
+### LaunchType
+
+Indicates the type of command launch. Use this to detect whether the command has been launched from the background.
+
+#### Enumeration members
+
+| Name          | Description                                                |
+| :------------ | :--------------------------------------------------------- |
+| UserInitiated | A regular launch through user interaction                  |
+| Background    | Scheduled through an interval and launched from background |

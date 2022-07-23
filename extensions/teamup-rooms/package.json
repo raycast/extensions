@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "teamup-rooms",
+  "title": "Teamup Rooms",
+  "description": "Check for open rooms and book using Teamup",
+  "icon": "command-icon.png",
+  "author": "drewwatkins11",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "token",
+      "description": "Your personal API token for Teamup",
+      "type": "password",
+      "required": true,
+      "title": "Teamup API Token"
+    },
+    {
+      "name": "calendar",
+      "description": "The calendar ID to use for booking",
+      "type": "textfield",
+      "required": true,
+      "title": "Teamup Calendar ID"
+    },
+    {
+      "name": "default_title",
+      "description": "This will be used when adding an event using Quick Add",
+      "type": "textfield",
+      "required": true,
+      "title": "Default Event Title"
+    },
+    {
+      "name": "calendar_password",
+      "description": "The password for the calendar, if required",
+      "type": "password",
+      "required": false,
+      "title": "Calendar Password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Check for Open Rooms",
+      "subtitle": "Teamup",
+      "description": "Check what rooms are open right now and quickly book them",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "got": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.29.3",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

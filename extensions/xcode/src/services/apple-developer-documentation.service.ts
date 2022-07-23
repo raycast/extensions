@@ -25,8 +25,7 @@ export class AppleDeveloperDocumentationService {
       {
         method: "GET",
         headers: {
-          // Important search_data endpoint requires
-          // an refer HTTP header
+          // Important search_data endpoint requires a refer HTTP header
           Referer: this.hostUrl,
         },
       }
