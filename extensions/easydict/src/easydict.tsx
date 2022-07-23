@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 15:42
+ * @lastEditTime: 2022-07-23 15:47
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -22,7 +22,9 @@ import {
   updateFormatResultWithCaiyunTranslation,
   updateFormatResultWithTencentTranslation,
   updateFormatTranslateResultWithDeepLResult,
+  updateFormatTranslateResultWithGoogleResult,
 } from "./formatData";
+import { requestGoogleTranslate } from "./google";
 import {
   requestBaiduTextTranslate,
   requestCaiyunTextTranslate,
@@ -177,33 +179,33 @@ export default function () {
   /**
    * query text with from youdao language id
    */
-  function queryTextWithFromLanguageId(youdaoLanguageId: string) {
-    console.log("queryTextWithFromLanguageId:", youdaoLanguageId);
-    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(youdaoLanguageId));
+  function queryTextWithFromLanguageId(fromYoudaoLanguageId: string) {
+    console.log("queryTextWithFromLanguageId:", fromYoudaoLanguageId);
+    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(fromYoudaoLanguageId));
 
     // priority to use user selected target language, if conflict, use auto selected target language
     let targetLanguageId = userSelectedTargetLanguageItem.youdaoLanguageId;
     console.log("userSelectedTargetLanguage:", targetLanguageId);
-    if (youdaoLanguageId === targetLanguageId) {
-      targetLanguageId = getAutoSelectedTargetLanguageId(youdaoLanguageId);
+    if (fromYoudaoLanguageId === targetLanguageId) {
+      targetLanguageId = getAutoSelectedTargetLanguageId(fromYoudaoLanguageId);
       setAutoSelectedTargetLanguageItem(getLanguageItemFromYoudaoId(targetLanguageId));
       console.log("autoSelectedTargetLanguage: ", targetLanguageId);
     }
     const queryTextInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: youdaoLanguageId,
+      fromLanguage: fromYoudaoLanguageId,
       toLanguage: targetLanguageId,
-      isWord: false,
     };
     queryTextWithTextInfo(queryTextInfo);
   }
 
+  /**
+   * Query text with text info, query dictionary API or tranalsate API.
+   *
+   * Todo: need to optimize, change it to class.
+   */
   async function queryTextWithTextInfo(queryTextInfo: QueryWordInfo) {
-    const [queryText, fromLanguage, toLanguage] = [
-      queryTextInfo.word,
-      queryTextInfo.fromLanguage,
-      queryTextInfo.toLanguage,
-    ];
+    const { word: queryText, fromLanguage, toLanguage } = queryTextInfo;
     console.log(`---> query text fromTo: ${fromLanguage} -> ${toLanguage}`);
     /**
      * first, request youdao translate API, check if should show multiple translations, if not, then end.
@@ -274,6 +276,20 @@ export default function () {
             });
         }
 
+        // check if enable google translate
+        if (myPreferences.enableGoogleTranslate) {
+          requestGoogleTranslate(queryText, fromLanguage, toLanguage)
+            .then((googleTypeResult) => {
+              if (!shouldCancelQuery) {
+                updateFormatTranslateResultWithGoogleResult(formatResult, googleTypeResult);
+                updateTranslateDisplayResult(formatResult);
+              }
+            })
+            .catch((err) => {
+              console.error(`google error: ${JSON.stringify(err, null, 2)}`);
+            });
+        }
+
         // check if enable apple translate
         if (myPreferences.enableAppleTranslate) {
           console.log("apple translate start");
@@ -282,7 +298,7 @@ export default function () {
               if (translatedText) {
                 const appleTranslateResult: RequestTypeResult = {
                   type: TranslationType.Apple,
-                  result: { translatedText },
+                  result: translatedText,
                 };
                 if (!shouldCancelQuery) {
                   updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
