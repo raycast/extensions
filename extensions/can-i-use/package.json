@@ -36,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.38.1",
     "browserslist": "^4.20.2",
     "caniuse-api": "^3.0.0",
     "caniuse-lite": "^1.0.30001325"
@@ -45,8 +45,6 @@
     "@types/browserslist": "^4.15.0",
     "@types/caniuse-api": "^3.0.2",
     "@types/caniuse-lite": "^1.0.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
