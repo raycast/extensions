@@ -5,10 +5,20 @@ import { getCanIUseLink } from "../utils";
 
 interface FeatureDetailProps {
   feature: string;
+  showReleaseDate: boolean;
+  showPartialSupport: boolean;
+  briefMode: boolean;
 }
 
-export default function FeatureDetail({ feature }: FeatureDetailProps) {
+const formatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+export default function FeatureDetail({ feature, showReleaseDate, showPartialSupport, briefMode }: FeatureDetailProps) {
   const supportTable = caniuse.getSupport(feature);
+  const formatDate = (date: number) => ` (${briefMode ? "" : "Released "}${formatter.format(date * 1e3)})`;
 
   return (
     <List searchBarPlaceholder="Search browsers...">
@@ -19,22 +29,36 @@ export default function FeatureDetail({ feature }: FeatureDetailProps) {
 
         const agentSupport = supportTable[agentName];
 
-        let text = "Not supported";
+        let text = briefMode ? "" : "Not supported";
         let icon: Image.ImageLike = { source: Icon.XMarkCircle, tintColor: Color.Red };
+        let version: number | null = null;
 
         if ("u" in agentSupport) {
-          text = "Unknown support";
+          text = briefMode ? "" : "Unknown support";
           icon = Icon.QuestionMark;
         }
 
         if ("a" in agentSupport || "x" in agentSupport) {
-          text = "Partial support";
+          if (showPartialSupport) {
+            version = (agentSupport.a || agentSupport.x)!;
+            text = briefMode ? String(version) : `Partial support in version ${version}`;
+          } else {
+            text = briefMode ? "" : "Partial support";
+          }
           icon = { source: Icon.Checkmark, tintColor: Color.Orange };
         }
 
         if ("y" in agentSupport) {
-          text = `Support since version ${agentSupport.y}`;
+          version = agentSupport.y!;
+          text = briefMode ? String(version) : `Support since version ${version}`;
           icon = { source: Icon.Checkmark, tintColor: Color.Green };
+        }
+
+        if (showReleaseDate && version) {
+          const releaseDate = agentInfos.release_date[version];
+          if (releaseDate) {
+            text += formatDate(releaseDate);
+          }
         }
 
         return (
