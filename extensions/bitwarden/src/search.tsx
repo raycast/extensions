@@ -21,7 +21,7 @@ import { TroubleshootingGuide, UnlockForm } from "./components";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
-function useSession() {
+export function useSession() {
   const [state, setState] = useState<{ isLoading: boolean; token?: string }>({ isLoading: true });
 
   useEffect(() => {

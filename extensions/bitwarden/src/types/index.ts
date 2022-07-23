@@ -130,3 +130,28 @@ export interface PasswordOptionField {
 }
 
 export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];
+
+export type SendCreateOptions = {
+  name?: string;
+  notes?: string;
+  type?: number;
+  text?: { text: string; hidden: boolean };
+  maxAccessCount?: number;
+  deletionDate: string;
+  expirationDate?: string;
+  password?: string;
+  disabled?: boolean;
+  hideEmail?: boolean;
+};
+
+export type SendCreateResult = {
+  object: string;
+  id: string;
+  accessId: string;
+  accessUrl: string;
+  key: string;
+  accessCount: number;
+  revisionDate: string;
+  passwordSet: boolean;
+  file: null;
+} & SendCreateOptions;
