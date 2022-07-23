@@ -4,6 +4,7 @@ export type PullSearchResult = components["schemas"]["issue-search-result-item"]
 export type NullableSimpleUser = components["schemas"]["nullable-simple-user"];
 export type PullRequestReviewComment = components["schemas"]["pull-request-review-comment"];
 export type IssueComment = components["schemas"]["issue-comment"];
+export type PullRequestReview = components["schemas"]["pull-request-review"];
 
 export type PullSearchResultShort = {
   id: number;
@@ -18,6 +19,12 @@ export type PullSearchResultShort = {
   closed_at: string | null;
   user: UserShort | null;
 }
+
+export type PullRequestReviewShort = {
+  id: number;
+  state: string;
+  submitted_at?: string;
+};
 
 export type UserShort = {
   login: string;
