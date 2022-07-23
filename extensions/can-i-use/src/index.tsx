@@ -19,7 +19,9 @@ const env = environment || "production";
 let browsers: string[] = [];
 try {
   browsers = browserslist(defaultQuery);
-} catch (e) {}
+} catch (e) {
+  console.error("Failed to query Browserslist:", e);
+}
 if (path) {
   browsers = browserslist(null, { path: resolvePath(path), env });
 }
