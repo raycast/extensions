@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { environment, LaunchType, open } from "@raycast/api";
+import { open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
 import { loadAllPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 import usePullsState from "./usePullsState";
+import { isActionUserInitiated } from "../tools/isActionUserInitiated";
 
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
@@ -44,7 +45,7 @@ export default function usePulls() {
       .then(() => console.debug("usePulls hook"))
       .then(loadAllPullsFromLocalStorage)
       .then(setAllPullsToState)
-      .then((allPulls) => actionIsUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
+      .then((allPulls) => isActionUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
       .finally(() => {
         setIsLoading(false);
         console.debug("done");
@@ -53,12 +54,4 @@ export default function usePulls() {
 
   return { isLoading, myPulls, participatedPulls, pullVisits, visitPull };
 }
-
-const actionIsUserInitiated = () => {
-  const userInitiated = environment.launchType === LaunchType.UserInitiated;
-
-  console.debug(`actionIsUserInitiated: ${userInitiated}`);
-
-  return userInitiated;
-};
 
