@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { environment, LaunchType, open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
 import { getLogin } from "../integration/getLogin";
-import { getIssueComments, getPullComments, pullToCommentsParams } from "../integration/getComments";
 import { pullSearch } from "../integration/pullSearch";
 import {
   loadPullsFromLocalStorage,
@@ -10,6 +9,7 @@ import {
   storeMyPulls,
   storeParticipatedPulls
 } from "../flows/store";
+import { filterPulls } from "../flows/filterPulls";
 
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +44,7 @@ export default function usePulls() {
     Promise.resolve()
       // .then(() => LocalStorage.clear())
       .then(() => console.debug("initializing..."))
-      .then(() => loadPullsFromLocalStorage())
+      .then(loadPullsFromLocalStorage)
       .then(({myPulls, participatedPulls, pullVisits}) => {
         setMyPulls(myPulls);
         setPullVisits(pullVisits);
@@ -91,35 +91,6 @@ export default function usePulls() {
   }, []);
 
   return {isLoading, myPulls, participatedPulls, pullVisits, visitPull};
-}
-
-function filterPulls(login: string, recentVisits: PullRequestLastVisit[], myPulls: PullSearchResultShort[]) {
-  return Promise.all(
-    myPulls.map(
-      pull =>
-        Promise.all([
-          getPullComments(pullToCommentsParams(pull)),
-          getIssueComments(pullToCommentsParams(pull))
-        ]).then(([pullComments, issueComments]) => pullComments.concat(issueComments))
-          .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop())
-          .then(comment => {
-            if (!comment || comment.user?.login === login) {
-              return undefined;
-            }
-
-            const lastVisit = recentVisits.find(visit => visit.pull.id === pull.id);
-
-            if (lastVisit && lastVisit.last_visit > comment.created_at) {
-              return undefined;
-            }
-
-            pull.html_url = comment.html_url;
-
-            return pull;
-          })
-    )
-  )
-    .then(pulls => (pulls.filter(pull => pull) || []) as PullSearchResultShort[]);
 }
 
 const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
