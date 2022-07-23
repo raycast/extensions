@@ -1,4 +1,4 @@
-# TMDB
+# The Movie Database
 Browse through hundreds of thousands of movies and tv shows, see new releases, parental guide and much more.
 
 Requirements:
