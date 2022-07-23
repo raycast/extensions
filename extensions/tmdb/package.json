@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "searchMovie",
-      "title": "Search Movie",
+      "title": "Search Movies",
       "subtitle": "The Movie Database",
       "description": "Search for movies by name",
       "mode": "view"
