@@ -3,7 +3,7 @@ import { useState } from "react";
 import DashResult from "../components/DashResult";
 import { useDocsets, useDocsetSearch } from "../hooks";
 import SingleDocsetSearch from "./SingleDocsetSearch";
-import {DashArgumentes, Docset} from "../types";
+import { DashArgumentes, Docset } from "../types";
 
 const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
   docsets.filter(
@@ -12,7 +12,7 @@ const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
       docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase())
   );
 
-export default function MultiDocsetSearch(props: {arguments: DashArgumentes}) {
+export default function MultiDocsetSearch(props: { arguments: DashArgumentes }) {
   const [searchText, setSearchText] = useState(props.arguments.searchstring);
   const [docsets, isLoadingDocsets] = useDocsets();
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
