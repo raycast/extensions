@@ -4,13 +4,14 @@ import usePulls from "./hooks/usePulls";
 // noinspection JSUnusedGlobalSymbols
 export default function githubPullNotifications() {
   const {isLoading, myPulls, pullVisits, participatedPulls, visitPull} = usePulls();
+  const prCount = myPulls.length + participatedPulls.length;
 
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: "https://github.githubassets.com/favicons/favicon.png", tintColor: Color.Purple }}
       tooltip="Your Pull Requests"
-      title={`${myPulls.length + participatedPulls.length} PRs to check`}
+      title={prCount > 0 ? `${myPulls.length + participatedPulls.length} PRs to check`: undefined}
     >
       {myPulls.length > 0 && <MenuBarExtra.Item title="My Pulls" />}
       {myPulls.map(pull => <MenuBarExtra.Item
