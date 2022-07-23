@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "icons8",
+  "title": "Icons8",
+  "description": "Search and download icons using Icons8 large library.",
+  "icon": "Icons8.png",
+  "author": "yug2005",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "Icons8",
+      "description": "Search and preview icons.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API Key for Icons8.",
+      "type": "textfield",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Grid size for displaying Icons8.",
+      "type": "dropdown",
+      "default": "small",
+      "required": false,
+      "data": [
+        {
+          "value": "small",
+          "title": "Small"
+        },
+        {
+          "value": "medium",
+          "title": "Medium"
+        }
+      ]
+    },
+    {
+      "name": "numResults",
+      "title": "Number of Results",
+      "description": "Number of results to show.",
+      "type": "dropdown",
+      "default": "50",
+      "required": false,
+      "data": [
+        {
+          "value": "32",
+          "title": "32"
+        },
+        {
+          "value": "64",
+          "title": "64"
+        },
+        {
+          "value": "128",
+          "title": "128"
+        },
+        {
+          "value": "256",
+          "title": "256"
+        },
+        {
+          "value": "512",
+          "title": "512"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "javascript-time-ago": "^2.5.6",
+    "node-fetch": "^3.2.9",
+    "svg-parser": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/svg-parser": "^2.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
