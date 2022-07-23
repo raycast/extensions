@@ -11,6 +11,12 @@ import {
 } from "../flows/store";
 import { filterPulls } from "../flows/filterPulls";
 
+export type AllPulls = {
+  myPulls: PullSearchResultShort[];
+  participatedPulls: PullSearchResultShort[];
+  pullVisits: PullRequestLastVisit[];
+}
+
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
@@ -39,51 +45,50 @@ export default function usePulls() {
     open(pull.html_url)
       .then(() => addRecentPull(pull));
 
+  const setAllPullsToState = ({myPulls, participatedPulls, pullVisits}: AllPulls) => {
+    setMyPulls(myPulls);
+    setParticipatedPulls(participatedPulls);
+    setPullVisits(pullVisits);
+
+    return {myPulls, participatedPulls, pullVisits};
+  };
+
+  const notifyShortcutExit = () => Promise.resolve()
+    .then(() => console.debug(`shortcut exit`));
+
+  const checkForUpdates = ({pullVisits}: AllPulls) =>
+    getLogin()
+      .then(login =>
+        Promise.all([
+          fetchMyPulls(),
+          fetchParticipatedPulls()
+        ])
+          .then(([myPulls, participatedPulls]) =>
+            Promise.all([
+              filterPulls(login, pullVisits, myPulls),
+              filterPulls(login, pullVisits, participatedPulls)
+            ]))
+          .then(([myPulls, participatedPulls]) => {
+            console.log("got my pulls", myPulls.length);
+            console.log("got participated pulls", participatedPulls.length);
+
+            setMyPulls(myPulls);
+            setParticipatedPulls(participatedPulls);
+
+            return Promise.all([
+              storeMyPulls(myPulls),
+              storeParticipatedPulls(participatedPulls),
+            ])
+              .then(() => console.debug("stored my pulls and participated pulls"))
+          }));
 
   useEffect(() => {
     Promise.resolve()
       // .then(() => LocalStorage.clear())
-      .then(() => console.debug("initializing..."))
+      .then(() => console.debug("begin initialization flow"))
       .then(loadPullsFromLocalStorage)
-      .then(({myPulls, participatedPulls, pullVisits}) => {
-        setMyPulls(myPulls);
-        setPullVisits(pullVisits);
-        setParticipatedPulls(participatedPulls);
-
-        return pullVisits;
-      })
-      .then((recentPullVisits) => {
-        if (environment.launchType === LaunchType.UserInitiated) {
-          console.debug("initiated by user; exiting");
-
-          return Promise.resolve();
-        }
-
-        return getLogin()
-          .then(login =>
-            Promise.all([
-              fetchMyPulls(),
-              fetchParticipatedPulls()
-            ])
-              .then(([myPulls, participatedPulls]) =>
-                Promise.all([
-                  filterPulls(login, recentPullVisits, myPulls),
-                  filterPulls(login, recentPullVisits, participatedPulls)
-                ]))
-              .then(([myPulls, participatedPulls]) => {
-                console.log("got my pulls", myPulls.length);
-                console.log("got participated pulls", participatedPulls.length);
-
-                setMyPulls(myPulls);
-                setParticipatedPulls(participatedPulls);
-
-                return Promise.all([
-                  storeMyPulls(myPulls),
-                  storeParticipatedPulls(participatedPulls),
-                ])
-                  .then(() => console.debug("stored my pulls and participated pulls"))
-              }));
-      })
+      .then(setAllPullsToState)
+      .then((allPulls) => actionIsUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
       .finally(() => {
         setIsLoading(false);
         console.debug("done");
@@ -91,6 +96,14 @@ export default function usePulls() {
   }, []);
 
   return {isLoading, myPulls, participatedPulls, pullVisits, visitPull};
+}
+
+const actionIsUserInitiated = () => {
+  const userInitiated = environment.launchType === LaunchType.UserInitiated;
+
+  console.debug(`actionIsUserInitiated: ${userInitiated}`);
+
+  return userInitiated;
 }
 
 const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
