@@ -35,7 +35,7 @@ Note that the actual scheduling is not exact and might vary within a tolerance l
 
 ## Running in the background
 
-The entry point of your command stays the same when launched from the background. For no-view commands, a command will run until the Promise of the main async. function resolves. Menu bar commands render a React component and run until the `isLoading` property is set to `false` – which can be set programmatically or via React Suspense.
+The entry point of your command stays the same when launched from the background. For no-view commands, a command will run until the Promise of the main async function resolves. Menu bar commands render a React component and run until the `isLoading` property is set to `false` – which can be set programmatically or via React Suspense.
 
 You can use the global `environment.launchType` in your command to determine whether the command has been launched by the user (`LaunchType.UserInitiated`) or via background refresh (`LaunchType.Background`).
 
