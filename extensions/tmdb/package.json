@@ -22,7 +22,7 @@
       "name": "searchTV",
       "title": "Search TV",
       "subtitle": "Search for a TV show by name",
-      "description": "Search for a TV show by name",
+      "description": "Search for TV shows by name",
       "mode": "view"
     },
     {
