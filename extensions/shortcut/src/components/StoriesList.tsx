@@ -4,7 +4,15 @@ import { useMemo } from "react";
 import { useProjectMap, useWorkflowMap } from "../hooks";
 import StoryListItem from "./StoryListItem";
 
-export default function StoriesList({ stories, isLoading }: { stories: StorySlim[] | undefined; isLoading: boolean }) {
+export default function StoriesList({
+  stories,
+  isLoading,
+  refreshList,
+}: {
+  stories: StorySlim[] | undefined;
+  isLoading: boolean;
+  refreshList?: () => void;
+}) {
   const projectIdMap = useProjectMap();
   const workflowMap = useWorkflowMap();
 
@@ -35,7 +43,14 @@ export default function StoriesList({ stories, isLoading }: { stories: StorySlim
           return (
             <List.Section key={state.id} title={state.name} subtitle={`${stories.length} stories`}>
               {stories?.map((story) => {
-                return <StoryListItem story={story} project={projectIdMap[story.project_id!]} key={story.id} />;
+                return (
+                  <StoryListItem
+                    story={story}
+                    project={projectIdMap[story.project_id!]}
+                    key={story.id}
+                    refreshList={refreshList}
+                  />
+                );
               })}
             </List.Section>
           );

@@ -4,7 +4,13 @@ import StoriesList from "./components/StoriesList";
 
 export default function AssignedStories() {
   const { data: memberInfo } = useMemberInfo();
-  const { data: assignedStories, isValidating } = useAssignedStories(memberInfo?.mention_name);
+  const { data: assignedStories, isValidating, mutate } = useAssignedStories(memberInfo?.mention_name);
 
-  return <StoriesList isLoading={isValidating} stories={assignedStories?.data as unknown as StorySlim[]} />;
+  return (
+    <StoriesList
+      isLoading={isValidating}
+      stories={assignedStories?.data as unknown as StorySlim[]}
+      refreshList={mutate}
+    />
+  );
 }

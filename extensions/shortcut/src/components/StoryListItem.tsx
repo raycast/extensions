@@ -16,7 +16,15 @@ const getStoryColor = (storyType: StorySlim["story_type"]) => {
   }
 };
 
-export default function StoryListItem({ project, story }: { project?: Project; story: StorySlim }) {
+export default function StoryListItem({
+  project,
+  story,
+  refreshList,
+}: {
+  project?: Project;
+  story: StorySlim;
+  refreshList?: () => void;
+}) {
   const memberMap = useMemberMap();
 
   const owners = story.owner_ids.map((ownerId) => memberMap?.[ownerId]);
@@ -62,7 +70,11 @@ export default function StoryListItem({ project, story }: { project?: Project; s
       }
       actions={
         <ActionPanel>
-          <Action.Push icon={Icon.Sidebar} title="View Story" target={<StoryDetail storyId={story.id} />} />
+          <Action.Push
+            icon={Icon.Sidebar}
+            title="View Story"
+            target={<StoryDetail storyId={story.id} refreshList={refreshList} />}
+          />
           <Action.OpenInBrowser url={story.app_url} />
         </ActionPanel>
       }

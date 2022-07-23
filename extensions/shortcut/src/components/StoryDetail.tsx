@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { getMemberAvatar } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
 import {
@@ -32,7 +32,7 @@ ${tasklist}
 `;
 };
 
-export default function StoryDetail({ storyId }: { storyId: number }) {
+export default function StoryDetail({ storyId, refreshList }: { storyId: number; refreshList?: () => void }) {
   const { data: story, isValidating, mutate: mutateStory } = useStory(storyId);
   const workflowMap = useWorkflowMap();
   const storyMarkdown = useStoryMarkdown(story);
@@ -41,6 +41,7 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
   const iterationMap = useIterationMap();
   const memberMap = useMemberMap();
   const { data: memberInfo } = useMemberInfo();
+  const { pop } = useNavigation();
 
   const workflow = useMemo(() => {
     if (!story || !workflowMap) {
@@ -97,14 +98,12 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
       markdown={storyMarkdown}
       actions={
         <ActionPanel title="Story Actions">
-          <ActionPanel.Section>
-            {story && (
-              <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
-            )}
-          </ActionPanel.Section>
-
           {story && (
             <>
+              <ActionPanel.Section>
+                <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
+              </ActionPanel.Section>
+
               <ActionPanel.Submenu
                 title="Set Status..."
                 icon={Icon.Pencil}
@@ -205,6 +204,41 @@ export default function StoryDetail({ storyId }: { storyId: number }) {
                   })}
                 </ActionPanel.Submenu>
               )}
+
+              <ActionPanel.Section>
+                <Action
+                  style={Action.Style.Destructive}
+                  title="Delete Story"
+                  icon={Icon.Trash}
+                  onAction={() => {
+                    confirmAlert({
+                      title: "Delete Story",
+                      message: "Are you sure you want to delete this story?",
+                      primaryAction: {
+                        title: "Delete",
+                        style: Alert.ActionStyle.Destructive,
+                        onAction: async () => {
+                          try {
+                            await shortcut.deleteStory(story.id);
+
+                            if (refreshList) {
+                              refreshList();
+                            }
+
+                            pop();
+                          } catch (error) {
+                            showToast({
+                              style: Toast.Style.Failure,
+                              title: "Failed to delete story",
+                              message: String(error),
+                            });
+                          }
+                        },
+                      },
+                    });
+                  }}
+                />
+              </ActionPanel.Section>
             </>
           )}
         </ActionPanel>
