@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { environment, LaunchType, LocalStorage, open } from "@raycast/api";
+import { environment, LaunchType, open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
 import { getLogin } from "../integration/getLogin";
 import { getIssueComments, getPullComments, pullToCommentsParams } from "../integration/getComments";
 import { pullSearch } from "../integration/pullSearch";
-import { loadPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
-
-const myPullsKey = "myPulls";
-const participatedPullsKey = "participatedPulls";
+import {
+  loadPullsFromLocalStorage,
+  setPullsToLocalStorage,
+  storeMyPulls,
+  storeParticipatedPulls
+} from "../flows/store";
 
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
@@ -76,8 +78,8 @@ export default function usePulls() {
                 setParticipatedPulls(participatedPulls);
 
                 return Promise.all([
-                  LocalStorage.setItem(myPullsKey, JSON.stringify(myPulls)),
-                  LocalStorage.setItem(participatedPullsKey, JSON.stringify(participatedPulls))
+                  storeMyPulls(myPulls),
+                  storeParticipatedPulls(participatedPulls),
                 ])
                   .then(() => console.debug("stored my pulls and participated pulls"))
               }));

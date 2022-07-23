@@ -42,3 +42,8 @@ export const setPullsToLocalStorage = (
     LocalStorage.setItem(pullVisitsKey, JSON.stringify(pullVisits))
   ]);
 
+export const storeMyPulls = (myPulls: PullSearchResultShort[]) =>
+  LocalStorage.setItem(myPullsKey, JSON.stringify(myPulls));
+
+export const storeParticipatedPulls = (participatedPulls: PullSearchResultShort[]) =>
+  LocalStorage.setItem(participatedPullsKey, JSON.stringify(participatedPulls));
