@@ -7,7 +7,7 @@ const pullVisitsKey = "pullVisits";
 
 type UndefinedString = string | undefined
 
-export const loadPullsFromLocalStorage = () =>
+export const loadAllPullsFromLocalStorage = () =>
   Promise.all([
     LocalStorage.getItem(myPullsKey).then(data => data as UndefinedString),
     LocalStorage.getItem(participatedPullsKey).then(data => data as UndefinedString),

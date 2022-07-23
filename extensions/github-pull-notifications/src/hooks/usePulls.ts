@@ -4,7 +4,7 @@ import { PullRequestLastVisit, PullSearchResultShort } from "../integration/type
 import { getLogin } from "../integration/getLogin";
 import { pullSearch } from "../integration/pullSearch";
 import {
-  loadPullsFromLocalStorage,
+  loadAllPullsFromLocalStorage,
   setPullsToLocalStorage,
   storeMyPulls,
   storeParticipatedPulls
@@ -86,7 +86,7 @@ export default function usePulls() {
     Promise.resolve()
       // .then(() => LocalStorage.clear())
       .then(() => console.debug("begin initialization flow"))
-      .then(loadPullsFromLocalStorage)
+      .then(loadAllPullsFromLocalStorage)
       .then(setAllPullsToState)
       .then((allPulls) => actionIsUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
       .finally(() => {
