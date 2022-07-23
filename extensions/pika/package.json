@@ -14,15 +14,15 @@
   "commands": [
     {
       "name": "openFromURL",
-      "title": "Open URL in Pika.style",
-      "subtitle": "",
+      "title": "Open URL in Pika",
+      "subtitle": "Pika.style",
       "description": "Open website or Image URL in Pika",
       "mode": "view"
     },
     {
       "name": "openImage",
-      "title": "Open Image in Pika.style",
-      "subtitle": "",
+      "title": "Open Image in Pika",
+      "subtitle": "Pika.style",
       "description": "Open Image in Pika",
       "mode": "view"
     }
