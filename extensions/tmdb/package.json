@@ -20,7 +20,7 @@
     },
     {
       "name": "searchTV",
-      "title": "Search TV",
+      "title": "Search TV Shows",
       "subtitle": "The Movie Database",
       "description": "Search for TV shows by name",
       "mode": "view"
