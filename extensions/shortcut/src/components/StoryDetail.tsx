@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { getMemberAvatar } from "../helpers/storyHelpers";
+import { getMemberAvatar, getStoryColor } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
 import {
   useGroupsMap,
   useIterationMap,
+  useIterations,
   useMemberInfo,
   useMemberMap,
   useProject,
@@ -39,6 +40,7 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
   const groupMap = useGroupsMap();
   const { data: project } = useProject(story?.project_id as number);
   const iterationMap = useIterationMap();
+  const { data: iterations } = useIterations();
   const memberMap = useMemberMap();
   const { data: memberInfo } = useMemberInfo();
   const { pop } = useNavigation();
@@ -164,7 +166,10 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                       title={type}
                       onAction={onAction}
                       key={type}
-                      icon={type !== story.story_type ? Icon.Circle : Icon.CircleFilled}
+                      icon={{
+                        source: type !== story.story_type ? Icon.Circle : Icon.CircleFilled,
+                        tintColor: getStoryColor(type),
+                      }}
                     />
                   );
                 })}
@@ -199,6 +204,41 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                         onAction={onAction}
                         key={estimate}
                         icon={estimate !== story.estimate ? Icon.Circle : Icon.CircleFilled}
+                      />
+                    );
+                  })}
+                </ActionPanel.Submenu>
+              )}
+
+              {iterations && (
+                <ActionPanel.Submenu
+                  title="Set Iteration..."
+                  icon={Icon.Repeat}
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: "i",
+                  }}
+                >
+                  {iterations.map((iteration) => {
+                    const onAction = async () => {
+                      try {
+                        await shortcut.updateStory(story.id, { iteration_id: iteration.id });
+                        await mutateStory();
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to update story",
+                          message: String(error),
+                        });
+                      }
+                    };
+
+                    return (
+                      <Action
+                        title={iteration.name}
+                        onAction={onAction}
+                        key={iteration.id}
+                        icon={iteration.id !== story.iteration_id ? Icon.Circle : Icon.CircleFilled}
                       />
                     );
                   })}

@@ -1,6 +1,6 @@
-import { Icon, Image, List } from "@raycast/api";
+import { Color, Icon, Image, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import { Member } from "@useshortcut/client";
+import { Member, StorySlim } from "@useshortcut/client";
 
 export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
   return [
@@ -31,3 +31,15 @@ export function getMemberAvatar(member: Member): Image.ImageLike {
   return getAvatarIcon(member.profile.name || member.profile.mention_name);
   // }
 }
+
+export const getStoryColor = (storyType: StorySlim["story_type"]) => {
+  switch (storyType) {
+    case "feature":
+      return Color.Yellow;
+    case "bug":
+      return Color.Red;
+    case "chore":
+    default:
+      return Color.PrimaryText;
+  }
+};

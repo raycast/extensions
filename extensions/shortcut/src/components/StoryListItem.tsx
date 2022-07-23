@@ -1,20 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Project, StorySlim } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
-import { getOwnersAccessoryItems } from "../helpers/storyHelpers";
+import { getOwnersAccessoryItems, getStoryColor } from "../helpers/storyHelpers";
 import StoryDetail from "./StoryDetail";
-
-const getStoryColor = (storyType: StorySlim["story_type"]) => {
-  switch (storyType) {
-    case "feature":
-      return Color.Yellow;
-    case "bug":
-      return Color.Red;
-    case "chore":
-    default:
-      return Color.PrimaryText;
-  }
-};
 
 export default function StoryListItem({
   project,
