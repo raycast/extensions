@@ -33,8 +33,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
-    "axios": "^0.26.1",
-    "js-base64": "^3.7.2"
+    "axios": "^0.26.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",

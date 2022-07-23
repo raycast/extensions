@@ -1,5 +1,4 @@
 import { Script } from "../type";
-import { encode, decode } from "js-base64";
 
 export const base64Encode: Script = {
   info: {
@@ -9,7 +8,7 @@ export const base64Encode: Script = {
     example: "https://www.raycast.com",
   },
   run(input) {
-    return encode(input);
+    return Buffer.from(input, "utf8").toString("base64");
   },
 };
 
@@ -21,6 +20,6 @@ export const base64Decode: Script = {
     example: "aHR0cHM6Ly93d3cucmF5Y2FzdC5jb20=",
   },
   run(input) {
-    return decode(input);
+    return Buffer.from(input, "base64").toString("utf8");
   },
 };

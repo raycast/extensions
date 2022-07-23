@@ -1,5 +1,4 @@
 import { Script } from "../type";
-import { decode } from "js-base64";
 
 export const jwt: Script = {
   info: {
@@ -16,8 +15,8 @@ export const jwt: Script = {
       throw Error("Invalid Token");
     }
 
-    const header = decode(jwtParts[0]);
-    const payload = decode(jwtParts[1]);
+    const header = Buffer.from(jwtParts[0], "base64").toString("utf8");
+    const payload = Buffer.from(jwtParts[1], "base64").toString("utf8");
     const signature = jwtParts[2];
 
     try {
