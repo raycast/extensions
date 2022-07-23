@@ -1,6 +1,12 @@
-import { CommentShort, PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
+import {
+  CommentShort,
+  PullRequestLastVisit,
+  PullRequestReviewShort,
+  PullSearchResultShort
+} from "../integration/types";
 import { getIssueComments, getPullComments } from "../integration/getComments";
 import { mapPullSearchResultToPRID } from "../tools/mapPullSearchResultToPRID";
+import getReviews from "../integration/getReviews";
 
 export const filterPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
   Promise.resolve()
@@ -13,16 +19,19 @@ const testPulls = (login: string, recentVisits: PullRequestLastVisit[], pulls: P
   Promise.all(pulls.map(pull => testPull(login, recentVisits, pull)));
 
 const testPull = (login: string, recentVisits: PullRequestLastVisit[], pull: PullSearchResultShort) =>
-  fetchAllComments(pull).then(comment => keepApplicablePull(pull, login, recentVisits, comment));
+  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull(pull, login, recentVisits, comment));
 
-const fetchAllComments = (pull: PullSearchResultShort) =>
+const fetchAllItems = (pull: PullSearchResultShort) =>
   Promise.all([
     getPullComments(mapPullSearchResultToPRID(pull)),
-    getIssueComments(mapPullSearchResultToPRID(pull))
+    getIssueComments(mapPullSearchResultToPRID(pull)),
+    getReviews(mapPullSearchResultToPRID(pull))
   ])
-    .then(([pullComments, issueComments]) => pullComments.concat(issueComments))
-    .then(comments => comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1))
-    .then(comments => comments.pop());
+    .then(([pullComments, issueComments, reviews]) => [pullComments.concat(issueComments), reviews] as [CommentShort[], PullRequestReviewShort[]])
+    .then(([comments, reviews]) => [
+      comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop(),
+      reviews.sort(compareShortReviews).pop()
+    ] as [CommentShort | undefined, PullRequestReviewShort | undefined]);
 
 const keepApplicablePull = (pull: PullSearchResultShort, login: string, recentVisits: PullRequestLastVisit[], comment: CommentShort | undefined) => {
   const {owner, repo, pull_number} = mapPullSearchResultToPRID(pull);
@@ -56,3 +65,15 @@ const keepApplicablePull = (pull: PullSearchResultShort, login: string, recentVi
 
 const weedOutNonPulls = (pulls: (PullSearchResultShort | false)[]) =>
   (pulls.filter(pull => pull) || []) as PullSearchResultShort[];
+
+const compareShortReviews = (a: PullRequestReviewShort, b: PullRequestReviewShort) => {
+  if (!a.submitted_at && !b.submitted_at) {
+    return 0;
+  } else if (!a.submitted_at && b.submitted_at) {
+    return 1;
+  } else if (a.submitted_at && !b.submitted_at) {
+    return -1;
+  } else {
+    return (a.submitted_at as string) < (b.submitted_at as string) ? -1 : 1;
+  }
+}
