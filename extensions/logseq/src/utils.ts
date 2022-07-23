@@ -108,11 +108,11 @@ export const formatFilePath = (pageName: string) => {
 
 const getCurrentTime = () => {
   return dayjs().format("HH:mm");
-}
+};
 
 export const addLeadingTimeToContentIfNecessary = (content: string) => {
   if (getPreferenceValues().insertTime) {
     return `**${getCurrentTime()}** ${content}`;
   }
   return content;
-}
+};
