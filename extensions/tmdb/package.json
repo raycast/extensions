@@ -15,7 +15,7 @@
       "name": "searchMovie",
       "title": "Search Movie",
       "subtitle": "The Movie Database",
-      "description": "Search for a movie by name",
+      "description": "Search for movies by name",
       "mode": "view"
     },
     {
