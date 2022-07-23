@@ -36,7 +36,7 @@ export type PullRequestLastVisit = {
   last_visit: string;
 }
 
-export type GetCommentsParams = {
+export type PullRequestID = {
   owner: string;
   repo: string;
   pull_number: number;
