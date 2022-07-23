@@ -86,7 +86,7 @@ export default function SearchIcons() {
                 />
                 <Action.OpenInBrowser
                   url={icon.link}
-                  icon={{ source: "../assets/Icons8-Small.png", tintColor: Color.PrimaryText }}
+                  icon={{ source: "../assets/Icons8-Open.png", tintColor: Color.PrimaryText }}
                 />
                 <Action.CopyToClipboard content={icon.name} />
               </ActionPanel>
