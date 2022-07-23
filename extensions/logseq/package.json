@@ -17,6 +17,15 @@
       "description": "Specify the path to your notes graph location"
     },
     {
+      "name": "insertTime",
+      "label": "Add current time as the leading text",
+      "type": "checkbox",
+      "default": false,
+      "title": "Leading Time",
+      "description": "Add current time as the leading text",
+      "required": false
+    },
+    {
       "name": "smartSearch",
       "type": "checkbox",
       "default": true,
