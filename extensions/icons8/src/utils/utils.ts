@@ -5,18 +5,12 @@ import en from "javascript-time-ago/locale/en.json";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-const colors : Color[] = [
-  Color.Yellow, 
-  Color.Blue,
-  Color.Purple, 
-  Color.Green,
-  Color.Red,
-]
+const colors: Color[] = [Color.Yellow, Color.Blue, Color.Purple, Color.Green, Color.Red];
 
 export const getRandomColor = (): Color => {
   const index = Math.floor(Math.random() * colors.length);
   return colors[index];
-}
+};
 
 export const formatDate = (input: Date | string): string => {
   const date = typeof input === "string" ? new Date(input) : input;
@@ -29,17 +23,17 @@ export const svgToImage = async (svg: string, color?: string): Promise<Buffer> =
     svg = `${svg.substring(0, index)} fill="${color}" ${svg.substring(index)}`;
   }
   return Buffer.from(svg, "utf-8");
-}
+};
 
 export const svgToMdImage = (image: Buffer, height: number, width?: number): string => {
   if (!width) width = height;
-  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${width}" height="${height}" />`; 
-  return md;  
+  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${width}" height="${height}" />`;
+  return md;
 };
 
 // boolean represents whether the preview image for the style requires color tint
 export const defaultStyles: any = {
-  "iOS": true,
+  iOS: true,
   "iOS Filled": true,
   "iOS Glyph": true,
   "Material Filled": true,
@@ -58,32 +52,32 @@ export const defaultStyles: any = {
   "SF Ultralight": true,
   "SF Ultralight Filled": true,
   "3D Fluency": false,
-  "Color": false,
+  Color: false,
   "Simple Small": true,
   "Glyph Neue": true,
   "Color Glass": false,
-  "Stickers": false,
+  Stickers: false,
   "Office XS": false,
   "Office S": false,
-  "Office": false,
+  Office: false,
   "Office L": false,
   "Cute Outline": true,
   "Cute Color": false,
   "Cute Clipart": false,
   "Blue UI": false,
-  "Dotted": true,
-  "Gradient": false,
-  "Pastel": true,
+  Dotted: true,
+  Gradient: false,
+  Pastel: true,
   "Pastel Glyph": true,
   "Ice Cream": true,
-  "Emoji": false,
-  "Plumpy": true,
-  "Doodle": false,
-  "Infographic": false,
+  Emoji: false,
+  Plumpy: true,
+  Doodle: false,
+  Infographic: false,
   "Windows Metro": true,
   "Windows 10": true,
-  "Cloud": false,
-  "Bubbles": false,
+  Cloud: false,
+  Bubbles: false,
   "Hand Drawn": true,
   "Color Hand Drawn": false,
 };

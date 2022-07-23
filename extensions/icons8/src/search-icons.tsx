@@ -67,11 +67,7 @@ export default function SearchIcons() {
         </Grid.Dropdown>
       }
     >
-      {!isLoading &&
-        icons &&
-        icons.map((icon: Icon8, index: number) => (
-          <Icon8Item key={index} { ...icon } />
-        ))}
+      {!isLoading && icons && icons.map((icon: Icon8, index: number) => <Icon8Item key={index} {...icon} />)}
     </Grid>
   );
 }
