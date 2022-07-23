@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { environment, LaunchType, open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
-import {
-  loadAllPullsFromLocalStorage,
-  setPullsToLocalStorage,
-  storeMyPulls,
-  storeParticipatedPulls
-} from "../flows/store";
+import { loadAllPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
-import { checkPullsForUpdates } from "../flows/checkPullsForUpdates";
+import useAllPulls from "./useAllPulls";
 
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
@@ -18,9 +13,7 @@ export type AllPulls = {
 
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
-  const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
-  const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
-  const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
+  const { myPulls, participatedPulls, pullVisits, setAllPullsToState, checkForUpdates } = useAllPulls();
 
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
@@ -32,9 +25,7 @@ export default function usePulls() {
           participatedPull => participatedPull.number !== pull.number
         );
 
-        setPullVisits(pullVisits);
-        setMyPulls(myPullsFiltered);
-        setParticipatedPulls(participatedPullsFiltered);
+        setAllPullsToState({ myPulls: myPullsFiltered, participatedPulls: participatedPullsFiltered, pullVisits });
 
         return setPullsToLocalStorage(myPullsFiltered, participatedPullsFiltered, pullVisits);
       })
@@ -44,36 +35,8 @@ export default function usePulls() {
     open(pull.html_url)
       .then(() => addRecentPull(pull));
 
-  const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits }: AllPulls) => {
-    console.debug(`setAllPullsToState`);
-
-    setMyPulls(myPulls);
-    setParticipatedPulls(participatedPulls);
-    setPullVisits(pullVisits);
-
-    console.debug(`setAllPullsToState done`);
-
-    return { myPulls, participatedPulls, pullVisits };
-  };
-
   const notifyShortcutExit = () => Promise.resolve()
     .then(() => console.debug(`shortcut exit`));
-
-  const checkForUpdates = (allPulls: AllPulls) =>
-    checkPullsForUpdates(allPulls)
-      .then(([myPulls, participatedPulls]) => {
-        console.log("got my pulls", myPulls.length);
-        console.log("got participated pulls", participatedPulls.length);
-
-        setMyPulls(myPulls);
-        setParticipatedPulls(participatedPulls);
-
-        return Promise.all([
-          storeMyPulls(myPulls),
-          storeParticipatedPulls(participatedPulls)
-        ])
-          .then(() => console.debug("stored my pulls and participated pulls"));
-      });
 
   useEffect(() => {
     Promise.resolve()
@@ -98,3 +61,4 @@ const actionIsUserInitiated = () => {
 
   return userInitiated;
 };
+
