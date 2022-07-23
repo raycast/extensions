@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
-import { loadAllPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
-import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 import usePullsState from "./usePullsState";
 import { isActionUserInitiated } from "../tools/isActionUserInitiated";
 
@@ -13,45 +11,37 @@ export type AllPulls = {
 }
 
 export default function usePulls() {
-  const [isLoading, setIsLoading] = useState(true);
-  const { myPulls, participatedPulls, pullVisits, setAllPullsToState, checkForUpdates } = usePullsState();
-
-  const addRecentPull = (pull: PullSearchResultShort) =>
-    Promise.resolve()
-      .then(() => pullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
-      .then(filtered => [{ pull, last_visit: getTimestampISOInSeconds() }, ...filtered])
-      .then(pullVisits => {
-        const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
-        const participatedPullsFiltered = participatedPulls.filter(
-          participatedPull => participatedPull.number !== pull.number
-        );
-
-        setAllPullsToState({ myPulls: myPullsFiltered, participatedPulls: participatedPullsFiltered, pullVisits });
-
-        return setPullsToLocalStorage(myPullsFiltered, participatedPullsFiltered, pullVisits);
-      })
-      .then(() => console.debug(`addRecentPull completed`));
+  const [pullsAreLoading, setPullsAreLoading] = useState(true);
+  const {
+    isLoading,
+    myPulls,
+    participatedPulls,
+    pullVisits,
+    checkForUpdates,
+    arrangeRecentPull
+  } = usePullsState();
 
   const visitPull = (pull: PullSearchResultShort) =>
     open(pull.html_url)
-      .then(() => addRecentPull(pull));
+      .then(() => arrangeRecentPull(pull));
 
   const notifyShortcutExit = () => Promise.resolve()
     .then(() => console.debug(`shortcut exit`));
 
   useEffect(() => {
+    if (isLoading) return;
+
     Promise.resolve()
-      // .then(() => LocalStorage.clear())
-      .then(() => console.debug("usePulls hook"))
-      .then(loadAllPullsFromLocalStorage)
-      .then(setAllPullsToState)
-      .then((allPulls) => isActionUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
+      .then(() =>
+        isActionUserInitiated()
+          ? notifyShortcutExit()
+          : checkForUpdates({ myPulls, participatedPulls, pullVisits }))
       .finally(() => {
-        setIsLoading(false);
+        setPullsAreLoading(false);
         console.debug("done");
       });
-  }, []);
+  }, [isLoading]);
 
-  return { isLoading, myPulls, participatedPulls, pullVisits, visitPull };
+  return { isLoading: pullsAreLoading, myPulls, participatedPulls, pullVisits, visitPull };
 }
 
