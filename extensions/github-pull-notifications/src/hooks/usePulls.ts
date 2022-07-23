@@ -7,6 +7,7 @@ import { isActionUserInitiated } from "../tools/isActionUserInitiated";
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
   participatedPulls: PullSearchResultShort[];
+  hiddenPulls: PullRequestLastVisit[];
   pullVisits: PullRequestLastVisit[];
 }
 
@@ -17,6 +18,7 @@ export default function usePulls() {
     myPulls,
     participatedPulls,
     pullVisits,
+    hiddenPulls,
     checkForUpdates,
     arrangeRecentPull
   } = usePullsState();
@@ -35,7 +37,7 @@ export default function usePulls() {
       .then(() =>
         isActionUserInitiated()
           ? notifyShortcutExit()
-          : checkForUpdates({ myPulls, participatedPulls, pullVisits }))
+          : checkForUpdates({ myPulls, participatedPulls, pullVisits, hiddenPulls }))
       .finally(() => {
         setPullsAreLoading(false);
         console.debug("done");

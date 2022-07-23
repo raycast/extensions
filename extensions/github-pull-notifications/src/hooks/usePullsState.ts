@@ -15,6 +15,7 @@ const usePullsState = () => {
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
   const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
+  const [hiddenPulls, setHiddenPulls] = useState<PullRequestLastVisit[]>([]);
 
   const storeUpdates = ([myPulls, participatedPulls]: [PullSearchResultShort[], PullSearchResultShort[]]) => {
     console.debug(`storeUpdates: myPulls=${myPulls.length} participatedPulls=${participatedPulls.length}`);
@@ -29,12 +30,13 @@ const usePullsState = () => {
       .then(() => console.debug("storeUpdates: done"));
   };
 
-  const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits }: AllPulls) => {
+  const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits, hiddenPulls }: AllPulls) => {
     console.debug(`setAllPullsToState`);
 
     setMyPulls(myPulls);
     setParticipatedPulls(participatedPulls);
     setPullVisits(pullVisits);
+    setHiddenPulls(hiddenPulls);
 
     console.debug(`setAllPullsToState done`);
 
@@ -56,6 +58,7 @@ const usePullsState = () => {
     myPulls,
     participatedPulls,
     pullVisits,
+    hiddenPulls,
 
     setAllPullsToState,
 
@@ -65,15 +68,15 @@ const usePullsState = () => {
 
     arrangeRecentPull: (pull: PullSearchResultShort) =>
       Promise.resolve()
-        .then(() => pullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
+        .then(() => hiddenPulls.filter(recentVisit => recentVisit.pull.number !== pull.number))
         .then(filtered => [{ pull, last_visit: getTimestampISOInSeconds() }, ...filtered])
-        .then(pullVisits => {
+        .then(hiddenPulls => {
           const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
           const participatedPullsFiltered = participatedPulls.filter(
             participatedPull => participatedPull.number !== pull.number
           );
 
-          setAllPullsToState({ myPulls: myPullsFiltered, participatedPulls: participatedPullsFiltered, pullVisits });
+          setAllPullsToState({ myPulls: myPullsFiltered, participatedPulls: participatedPullsFiltered, hiddenPulls, pullVisits });
 
           return setPullsToLocalStorage(myPullsFiltered, participatedPullsFiltered, pullVisits);
         })
