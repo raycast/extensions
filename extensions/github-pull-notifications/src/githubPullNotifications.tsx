@@ -11,7 +11,7 @@ export default function githubPullNotifications() {
       isLoading={isLoading}
       icon={{ source: "https://github.githubassets.com/favicons/favicon.png", tintColor: Color.Purple }}
       tooltip="Your Pull Requests"
-      title={prCount > 0 ? `${myPulls.length + participatedPulls.length} PRs to check`: undefined}
+      title={prCount > 0 ? `${myPulls.length + participatedPulls.length} PRs to check`: "All good"}
     >
       {myPulls.length > 0 && <MenuBarExtra.Item title="My Pulls" />}
       {myPulls.map(pull => <MenuBarExtra.Item
