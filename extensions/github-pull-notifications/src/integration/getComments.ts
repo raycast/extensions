@@ -33,11 +33,11 @@ const listLatestIssueComments = ({ owner, pull_number, repo }: GetCommentsParams
   () => octokit.rest.issues.listComments({ owner, repo, issue_number: pull_number, sort: "created", direction: "desc" })
     .then(res => res.data);
 
+const logParams = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
+  () => console.debug(`${prefix}: ${owner}/${repo}#${pull_number}`);
+
 const teeShortComments = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
   (comments: CommentShort[]) => Promise
     .resolve()
-    .then(() => console.debug(`${prefix} ${owner}/${repo}#${pull_number}: ${comments.length} comments`))
+    .then(() => console.debug(`${prefix}: ${owner}/${repo}#${pull_number}, comments=${comments.length}`))
     .then(() => comments);
-
-const logParams = (prefix: string, { owner, pull_number, repo }: GetCommentsParams) =>
-  () => console.debug(`${prefix} for ${owner}/${repo}#${pull_number}`);
