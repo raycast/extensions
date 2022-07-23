@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { environment, LaunchType, open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
-import { getLogin } from "../integration/getLogin";
-import { pullSearch } from "../integration/pullSearch";
 import {
   loadAllPullsFromLocalStorage,
   setPullsToLocalStorage,
   storeMyPulls,
   storeParticipatedPulls
 } from "../flows/store";
-import { filterPulls } from "../flows/filterPulls";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
+import { checkPullsForUpdates } from "../flows/checkPullsForUpdates";
 
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
@@ -27,7 +25,7 @@ export default function usePulls() {
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
       .then(() => pullVisits.filter(recentVisit => recentVisit.pull.number !== pull.number))
-      .then(filtered => [{pull, last_visit: getTimestampISOInSeconds()}, ...filtered])
+      .then(filtered => [{ pull, last_visit: getTimestampISOInSeconds() }, ...filtered])
       .then(pullVisits => {
         const myPullsFiltered = myPulls.filter(myPull => myPull.number !== pull.number);
         const participatedPullsFiltered = participatedPulls.filter(
@@ -46,7 +44,7 @@ export default function usePulls() {
     open(pull.html_url)
       .then(() => addRecentPull(pull));
 
-  const setAllPullsToState = ({myPulls, participatedPulls, pullVisits}: AllPulls) => {
+  const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits }: AllPulls) => {
     console.debug(`setAllPullsToState`);
 
     setMyPulls(myPulls);
@@ -55,37 +53,27 @@ export default function usePulls() {
 
     console.debug(`setAllPullsToState done`);
 
-    return {myPulls, participatedPulls, pullVisits};
+    return { myPulls, participatedPulls, pullVisits };
   };
 
   const notifyShortcutExit = () => Promise.resolve()
     .then(() => console.debug(`shortcut exit`));
 
-  const checkForUpdates = ({pullVisits}: AllPulls) =>
-    getLogin()
-      .then(login =>
-        Promise.all([
-          fetchMyPulls(),
-          fetchParticipatedPulls()
+  const checkForUpdates = (allPulls: AllPulls) =>
+    checkPullsForUpdates(allPulls)
+      .then(([myPulls, participatedPulls]) => {
+        console.log("got my pulls", myPulls.length);
+        console.log("got participated pulls", participatedPulls.length);
+
+        setMyPulls(myPulls);
+        setParticipatedPulls(participatedPulls);
+
+        return Promise.all([
+          storeMyPulls(myPulls),
+          storeParticipatedPulls(participatedPulls)
         ])
-          .then(([myPulls, participatedPulls]) =>
-            Promise.all([
-              filterPulls(login, pullVisits, myPulls),
-              filterPulls(login, pullVisits, participatedPulls)
-            ]))
-          .then(([myPulls, participatedPulls]) => {
-            console.log("got my pulls", myPulls.length);
-            console.log("got participated pulls", participatedPulls.length);
-
-            setMyPulls(myPulls);
-            setParticipatedPulls(participatedPulls);
-
-            return Promise.all([
-              storeMyPulls(myPulls),
-              storeParticipatedPulls(participatedPulls),
-            ])
-              .then(() => console.debug("stored my pulls and participated pulls"))
-          }));
+          .then(() => console.debug("stored my pulls and participated pulls"));
+      });
 
   useEffect(() => {
     Promise.resolve()
@@ -100,7 +88,7 @@ export default function usePulls() {
       });
   }, []);
 
-  return {isLoading, myPulls, participatedPulls, pullVisits, visitPull};
+  return { isLoading, myPulls, participatedPulls, pullVisits, visitPull };
 }
 
 const actionIsUserInitiated = () => {
@@ -109,7 +97,4 @@ const actionIsUserInitiated = () => {
   console.debug(`actionIsUserInitiated: ${userInitiated}`);
 
   return userInitiated;
-}
-
-const fetchMyPulls = () => pullSearch("is:open archived:false author:@me");
-const fetchParticipatedPulls = () => pullSearch("is:open archived:false commenter:@me");
+};
