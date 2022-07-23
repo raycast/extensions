@@ -29,7 +29,7 @@
       "name": "nowPlayingMovies",
       "title": "Now Playing Movies",
       "subtitle": "The Movie Database",
-      "description": "View details, ratings.. for movies that are playing on the theaters!",
+      "description": "View details, ratings, etc. for movies that are playing on the theaters!",
       "mode": "view"
     },
     {
