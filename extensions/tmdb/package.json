@@ -34,7 +34,7 @@
     },
     {
       "name": "nowPlayingTv",
-      "title": "Now Playing TV",
+      "title": "Now Playing TV Shows",
       "subtitle": "The Movie Database",
       "description": "View details, ratings.. for tv shows that are on Air!",
       "mode": "view"
