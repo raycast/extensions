@@ -5,6 +5,9 @@
   "description": "Can I Use provides up-to-date browser support for front-end web technologies on desktop and mobile web browsers.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "kidonng"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
