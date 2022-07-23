@@ -15,11 +15,19 @@
       "title": "Find in Dash",
       "subtitle": "Dash",
       "description": "Filter a Dash docset and search for the provided string in it.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchstring",
+          "placeholder": "Searchstring",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.38.0",
     "execa": "6.1.0",
     "fast-xml-parser": "3.20.3",
     "html-entities": "2.3.2",

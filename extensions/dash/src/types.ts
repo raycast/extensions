@@ -16,3 +16,8 @@ export interface Docset {
   suggestedKeyword: string;
   iconPath?: string;
 }
+
+export interface DashArgumentes {
+  searchstring: string;
+  docset: string;
+}
