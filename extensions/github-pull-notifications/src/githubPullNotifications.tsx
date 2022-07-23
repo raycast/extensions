@@ -10,7 +10,7 @@ export default function githubPullNotifications() {
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: "https://github.githubassets.com/favicons/favicon.png", tintColor: Color.Purple }}
-      tooltip="Your Pull Requests"
+      tooltip="Pull Requests that require attention"
       title={prCount > 0 ? `${myPulls.length + participatedPulls.length} PRs to check`: "All good"}
     >
       {myPulls.length > 0 && <MenuBarExtra.Item title="My Pulls" />}
