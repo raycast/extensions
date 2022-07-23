@@ -46,9 +46,13 @@ export default function usePulls() {
       .then(() => addRecentPull(pull));
 
   const setAllPullsToState = ({myPulls, participatedPulls, pullVisits}: AllPulls) => {
+    console.debug(`setAllPullsToState`);
+
     setMyPulls(myPulls);
     setParticipatedPulls(participatedPulls);
     setPullVisits(pullVisits);
+
+    console.debug(`setAllPullsToState done`);
 
     return {myPulls, participatedPulls, pullVisits};
   };
@@ -85,7 +89,7 @@ export default function usePulls() {
   useEffect(() => {
     Promise.resolve()
       // .then(() => LocalStorage.clear())
-      .then(() => console.debug("begin initialization flow"))
+      .then(() => console.debug("usePulls hook"))
       .then(loadAllPullsFromLocalStorage)
       .then(setAllPullsToState)
       .then((allPulls) => actionIsUserInitiated() ? notifyShortcutExit() : checkForUpdates(allPulls))
