@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tmdb",
   "title": "The Movie Database",
-  "description": "Browse through hundreds of thousands of movies and tv shows, see new releases, parental guide and much more",
+  "description": "Browse through hundreds of thousands of movies and tv shows, see new releases, parental guide and much more.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [
