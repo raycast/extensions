@@ -28,7 +28,7 @@
     {
       "name": "nowPlayingMovies",
       "title": "Now Playing Movies",
-      "subtitle": "Details For Newly Released Movies",
+      "subtitle": "The Movie Database",
       "description": "View details, ratings.. for movies that are playing on the theaters!",
       "mode": "view"
     },
