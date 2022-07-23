@@ -35,3 +35,9 @@ export type PullRequestLastVisit = {
   pull: PullSearchResultShort;
   last_visit: string;
 }
+
+export type GetCommentsParams = {
+  owner: string;
+  repo: string;
+  pull_number: number;
+};

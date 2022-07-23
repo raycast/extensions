@@ -1,12 +1,6 @@
-import { CommentShort, PullSearchResultShort } from "./types";
+import { CommentShort, GetCommentsParams, PullSearchResultShort } from "./types";
 import octokit from "./octokit";
 import { mapIssueCommentToShort, mapPullCommentToShort } from "./mappers";
-
-export type GetCommentsParams = {
-  owner: string;
-  repo: string;
-  pull_number: number;
-};
 
 export const pullToCommentsParams = (pull: PullSearchResultShort): GetCommentsParams => ({
   owner: pull.repository_url.split("/")[4],
