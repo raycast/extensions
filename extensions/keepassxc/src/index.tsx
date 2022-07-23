@@ -1,10 +1,9 @@
-import { ActionPanel, closeMainWindow, Icon, List, showToast, ToastStyle } from "@raycast/api";
-import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast } from "@raycast/api";
+import { loadEntries, pastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
-  console.log(e.message);
-  console.log(e);
+  console.error(e);
   let invalidPreference = "";
   if (e.message.includes("Invalid credentials were provided")) {
     invalidPreference = "Password";
@@ -22,7 +21,7 @@ const errorHandler = (e: { message: string }) => {
     toastTitle = `Invalid Preference: ${invalidPreference}`;
     toastMessage = "Please Check Extension Preference.";
   }
-  showToast(ToastStyle.Failure, toastTitle, toastMessage);
+  showToast(Toast.Style.Failure, toastTitle, toastMessage);
 };
 
 export default function Command() {
@@ -37,7 +36,7 @@ export default function Command() {
       });
   }, []);
   useEffect(() => {
-    console.log(entries);
+    console.debug(entries);
   }, [entries]);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Type to Search in KeepassXC" throttle={true}>
@@ -56,14 +55,14 @@ export default function Command() {
           keywords={entry.split("/").slice(1)}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
+              <Action
                 title="Paste"
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 onAction={() => {
-                  copyAndPastePassword(entry).then(() => closeMainWindow());
+                  pastePassword(entry).then(() => closeMainWindow());
                 }}
               />
-              <ActionPanel.Item
+              <Action
                 title="Copy Password"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
@@ -71,7 +70,7 @@ export default function Command() {
                   copyPassword(entry).then(() => closeMainWindow());
                 }}
               />
-              <ActionPanel.Item
+              <Action
                 title="Copy Username"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "b" }}
