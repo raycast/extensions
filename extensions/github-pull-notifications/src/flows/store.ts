@@ -7,31 +7,34 @@ const pullVisitsKey = "pullVisits";
 
 type UndefinedString = string | undefined
 
-export const loadAllPullsFromLocalStorage = () =>
-  Promise.all([
-    LocalStorage.getItem(myPullsKey).then(data => data as UndefinedString),
-    LocalStorage.getItem(participatedPullsKey).then(data => data as UndefinedString),
-    LocalStorage.getItem(pullVisitsKey).then(data => data as UndefinedString)
-  ])
-    .then(([myPullsSerialized, participatedPullsSerialized, pullVisitsSerialized]) => {
-      let myPulls: PullSearchResultShort[] = [];
-      let participatedPulls: PullSearchResultShort[] = [];
-      let pullVisits: PullRequestLastVisit[] = [];
+export const loadAllPullsFromLocalStorage = () => Promise.resolve()
+  .then(() => console.debug("loadAllPullsFromLocalStorage"))
+  .then(() => Promise.all([
+    LocalStorage.getItem(myPullsKey).then(serialized => serialized as UndefinedString),
+    LocalStorage.getItem(participatedPullsKey).then(serialized => serialized as UndefinedString),
+    LocalStorage.getItem(pullVisitsKey).then(serialized => serialized as UndefinedString)
+  ]))
+  .then(([myPullsSerialized, participatedPullsSerialized, pullVisitsSerialized]) => {
+    let myPulls: PullSearchResultShort[] = [];
+    let participatedPulls: PullSearchResultShort[] = [];
+    let pullVisits: PullRequestLastVisit[] = [];
 
-      if (myPullsSerialized) {
-        myPulls = (JSON.parse(myPullsSerialized) || []) as PullSearchResultShort[];
-      }
+    if (myPullsSerialized) {
+      myPulls = (JSON.parse(myPullsSerialized) || []) as PullSearchResultShort[];
+    }
 
-      if (participatedPullsSerialized) {
-        participatedPulls = (JSON.parse(participatedPullsSerialized) || []) as PullSearchResultShort[];
-      }
+    if (participatedPullsSerialized) {
+      participatedPulls = (JSON.parse(participatedPullsSerialized) || []) as PullSearchResultShort[];
+    }
 
-      if (pullVisitsSerialized) {
-        pullVisits = (JSON.parse(pullVisitsSerialized) || []) as PullRequestLastVisit[];
-      }
+    if (pullVisitsSerialized) {
+      pullVisits = (JSON.parse(pullVisitsSerialized) || []) as PullRequestLastVisit[];
+    }
 
-      return { myPulls, participatedPulls, pullVisits };
-    });
+    console.debug(`loadAllPullsFromLocalStorage: myPulls=${myPulls.length}, participatedPulls=${participatedPulls.length}, pullVisits=${pullVisits.length}`);
+
+    return { myPulls, participatedPulls, pullVisits };
+  });
 
 export const setPullsToLocalStorage = (
   myPulls: PullSearchResultShort[],
@@ -41,7 +44,7 @@ export const setPullsToLocalStorage = (
   Promise.all([
     storeMyPulls(myPulls),
     storeParticipatedPulls(participatedPulls),
-    storePullVisits(pullVisits),
+    storePullVisits(pullVisits)
   ]);
 
 export const storeMyPulls = (myPulls: PullSearchResultShort[]) =>
