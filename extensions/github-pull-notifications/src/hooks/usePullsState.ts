@@ -4,7 +4,7 @@ import { checkPullsForUpdates } from "../flows/checkPullsForUpdates";
 import { storeMyPulls, storeParticipatedPulls } from "../flows/store";
 import { AllPulls } from "./usePulls";
 
-const useAllPulls = () => {
+const usePullsState = () => {
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
   const [participatedPulls, setParticipatedPulls] = useState<PullSearchResultShort[]>([]);
   const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
@@ -47,4 +47,4 @@ const useAllPulls = () => {
   };
 };
 
-export default useAllPulls;
+export default usePullsState;

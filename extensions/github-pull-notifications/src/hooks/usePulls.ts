@@ -3,7 +3,7 @@ import { environment, LaunchType, open } from "@raycast/api";
 import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
 import { loadAllPullsFromLocalStorage, setPullsToLocalStorage } from "../flows/store";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
-import useAllPulls from "./useAllPulls";
+import usePullsState from "./usePullsState";
 
 export type AllPulls = {
   myPulls: PullSearchResultShort[];
@@ -13,7 +13,7 @@ export type AllPulls = {
 
 export default function usePulls() {
   const [isLoading, setIsLoading] = useState(true);
-  const { myPulls, participatedPulls, pullVisits, setAllPullsToState, checkForUpdates } = useAllPulls();
+  const { myPulls, participatedPulls, pullVisits, setAllPullsToState, checkForUpdates } = usePullsState();
 
   const addRecentPull = (pull: PullSearchResultShort) =>
     Promise.resolve()
