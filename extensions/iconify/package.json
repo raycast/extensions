@@ -5,6 +5,9 @@
   "description": "Search icons via Iconify",
   "icon": "icon.png",
   "author": "destiner",
+  "contributors": [
+    "kidonng"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -18,14 +21,14 @@
   "commands": [
     {
       "name": "view-icons",
-      "title": "View Icons",
+      "title": "Icon Sets",
       "subtitle": "Iconify",
-      "description": "View available icons",
+      "description": "View icon by sets",
       "mode": "view"
     },
     {
       "name": "search-icons",
-      "title": "Search All Icons",
+      "title": "Search Icons",
       "subtitle": "Iconify",
       "description": "Search through all available icons",
       "mode": "view"
@@ -33,8 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.1",
-    "axios": "^0.26.1",
-    "js-base64": "^3.7.2"
+    "axios": "^0.26.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.15.0",

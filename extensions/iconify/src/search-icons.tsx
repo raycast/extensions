@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, List } from '@raycast/api';
 import { useState } from 'react';
 
 import Service, { Icon } from './service';
-import { toBase64, toSvg } from './utils';
+import { toDataURI, toSvg, toURL } from './utils';
 
 const service = new Service();
 
@@ -36,10 +36,15 @@ function Command() {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
         const svgIcon = toSvg(body, width, height);
-        const base64Icon = toBase64(svgIcon);
+        const dataURIIcon = toDataURI(svgIcon);
         return (
           <List.Item
-            icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
+            icon={{
+              source: dataURIIcon,
+              tintColor: body.includes('currentColor')
+                ? Color.PrimaryText // Monochrome icon
+                : null,
+            }}
             key={`${setId}:${id}`}
             title={id}
             accessories={[
@@ -50,6 +55,10 @@ function Command() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={svgIcon} />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={toURL(setId, id)}
+                />
               </ActionPanel>
             }
           />

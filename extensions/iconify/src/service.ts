@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const githubClient = axios.create({
-  baseURL: 'https://raw.githubusercontent.com/iconify/icon-sets/master',
+const unpkgClient = axios.create({
+  baseURL: 'https://unpkg.com/@iconify/json',
 });
 
 const iconifyClient = axios.create({
@@ -71,7 +71,7 @@ interface QueryResponse {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await githubClient.get<Record<string, SetResponse>>(
+    const response = await unpkgClient.get<Record<string, SetResponse>>(
       '/collections.json',
     );
     const ids = Object.keys(response.data);
@@ -86,26 +86,12 @@ class Service {
       })
       .filter((icon) => {
         const { hidden } = response.data[icon.id];
-        // Temporarily removing some sets to prevent "Out of Memory" error
-        // when displaying a list with a large number of items
-        const largeSets = [
-          'ic',
-          'fluent',
-          'openmoji',
-          'twemoji',
-          'noto',
-          'noto-v1',
-          'emojione-v1',
-        ];
-        const large = largeSets.includes(icon.id);
-        return !hidden && !large;
+        return !hidden;
       });
   }
 
   async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await githubClient.get<IconResponse>(
-      `/json/${setId}.json`,
-    );
+    const response = await unpkgClient.get<IconResponse>(`/json/${setId}.json`);
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
