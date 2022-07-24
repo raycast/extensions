@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { Fragment, useState } from "react";
+import { Action, Color, Icon, List } from "@raycast/api";
 
 import { useLeaderBoard } from "./hooks";
 import { LeaderBoardItem } from "./components";
@@ -33,7 +33,29 @@ export default function Command({ id }: { id?: string }) {
         <List.EmptyView title="Failed to Fetch Data" icon={{ source: Icon.Important, tintColor: Color.Red }} />
       )}
       {data?.data.map((item, idx) => (
-        <LeaderBoardItem key={idx} {...item} {...{ showDetail, setShowDetail }} />
+        <LeaderBoardItem
+          key={idx}
+          {...item}
+          {...{ showDetail, setShowDetail }}
+          PageActions={
+            <Fragment>
+              {data.page > 1 && (
+                <Action
+                  title="Previous Page"
+                  onAction={() => setPage(String(data.page - 1))}
+                  shortcut={{ key: "arrowLeft", modifiers: ["shift"] }}
+                />
+              )}
+              {data.page < data.total_pages && (
+                <Action
+                  title="Next Page"
+                  onAction={() => setPage(String(data.page + 1))}
+                  shortcut={{ key: "arrowRight", modifiers: ["shift"] }}
+                />
+              )}
+            </Fragment>
+          }
+        />
       ))}
     </List>
   );
