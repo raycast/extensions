@@ -16,7 +16,16 @@
       "subtitle": "WakaTime",
       "title": "Show Summary",
       "description": "Show your WakaTime Summary",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "description": "Use your WakaTime API keey to use your account",
+          "type": "password",
+          "required": true,
+          "title": "WakaTime API Key"
+        }
+      ]
     },
     {
       "name": "leaderboard",
@@ -30,7 +39,16 @@
       "subtitle": "WakaTime",
       "title": "Show Private Leaderboards",
       "description": "Show your private leaderboards",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "description": "Use your WakaTime API keey to use your account",
+          "type": "password",
+          "required": true,
+          "title": "WakaTime API Key"
+        }
+      ]
     }
   ],
   "preferences": [
