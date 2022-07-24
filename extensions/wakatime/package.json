@@ -20,7 +20,7 @@
       "preferences": [
         {
           "name": "apiKey",
-          "description": "Use your WakaTime API keey to use your account",
+          "description": "Use your WakaTime API key to use your account",
           "type": "password",
           "required": true,
           "title": "WakaTime API Key"
@@ -43,7 +43,7 @@
       "preferences": [
         {
           "name": "apiKey",
-          "description": "Use your WakaTime API keey to use your account",
+          "description": "Use your WakaTime API key to use your account",
           "type": "password",
           "required": true,
           "title": "WakaTime API Key"
