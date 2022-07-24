@@ -54,10 +54,15 @@ function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={svgIcon} />
+                <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
                 <Action.CopyToClipboard
                   title="Copy URL"
                   content={toURL(setId, id)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={`${setId}:${id}`}
+                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
                 />
               </ActionPanel>
             }
