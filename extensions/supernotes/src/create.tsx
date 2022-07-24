@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, showHUD } from "@raycast/api";
 
 import useCreate, { SimpleCardData } from "hooks/useCreate";
 import { ICard } from "utils/types";
@@ -17,7 +17,7 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
     }
   };
 
-  const { create, loading } = useCreate(setCreatedCard);
+  const { create, loading } = useCreate();
 
   return createdCard ? (
     <CardDetail card={createdCard} />
@@ -27,7 +27,23 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={create} />
+          <Action.SubmitForm
+            title="Create Card"
+            onSubmit={(data) =>
+              create(data as SimpleCardData, async (card) => {
+                await showHUD("Created Card");
+                await popToRoot();
+              })
+            }
+          />
+          <Action.SubmitForm
+            title="Create and View Card"
+            onSubmit={(data) =>
+              create(data as SimpleCardData, (card) => {
+                setCreatedCard(card);
+              })
+            }
+          />
         </ActionPanel>
       }
     >
