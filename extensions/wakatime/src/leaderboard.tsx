@@ -1,14 +1,14 @@
-import { List } from "@raycast/api";
+import { useState } from "react";
+import { Color, Icon, List } from "@raycast/api";
 
 import { useLeaderBoard } from "./hooks";
 import { LeaderBoardItem } from "./components";
-import { useState } from "react";
 
 export default function Command({ id }: { id?: string }) {
   const [page, setPage] = useState<string>();
   const [showDetail, setShowDetail] = useState(false);
 
-  const { data, isLoading } = useLeaderBoard({ id, page: page == undefined ? undefined : +page });
+  const { data, error, isLoading } = useLeaderBoard({ id, page: page == undefined ? undefined : +page });
 
   return (
     <List
@@ -29,6 +29,9 @@ export default function Command({ id }: { id?: string }) {
         )
       }
     >
+      {error != undefined && (
+        <List.EmptyView title="Failed to Fetch Data" icon={{ source: Icon.Important, tintColor: Color.Red }} />
+      )}
       {data?.data.map((item, idx) => (
         <LeaderBoardItem key={idx} {...item} {...{ showDetail, setShowDetail }} />
       ))}
