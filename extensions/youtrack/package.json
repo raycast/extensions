@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtrack",
   "title": "YouTrack",
-  "description": "YouTrack 🔄 RayCast",
+  "description": "YouTrack 🔄 Raycast",
   "icon": "command-icon.png",
   "author": "tiulpin",
   "categories": [
@@ -52,10 +52,22 @@
       "required": false,
       "default": "50",
       "data": [
-        {"title": "50", "value":  "50"},
-        {"title": "100", "value":  "100"},
-        {"title": "500", "value":  "500"},
-        {"title": "1000", "value":  "1000"}
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "500",
+          "value": "500"
+        },
+        {
+          "title": "1000",
+          "value": "1000"
+        }
       ],
       "type": "dropdown"
     }
@@ -73,7 +85,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "2.7.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
