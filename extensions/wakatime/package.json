@@ -36,7 +36,7 @@
   "preferences": [
     {
       "name": "apiKey",
-      "required": true,
+      "required": false,
       "title": "WakaTime API Key",
       "type": "password",
       "description": "Use your WakaTime API key to use your account",
