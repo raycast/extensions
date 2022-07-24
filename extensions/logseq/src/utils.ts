@@ -111,8 +111,15 @@ const getCurrentTime = () => {
 };
 
 export const addLeadingTimeToContentIfNecessary = (content: string) => {
-  if (getPreferenceValues().insertTime) {
-    return `**${getCurrentTime()}** ${content}`;
+  let result = content;
+
+  if (getPreferenceValues().addQuickCaptureTag) {
+    result = `[[quick capture]]: ` + result;
   }
-  return content;
+
+  if (getPreferenceValues().insertTime) {
+    result = `**${getCurrentTime()}** ` + result;
+  }
+
+  return result;
 };
