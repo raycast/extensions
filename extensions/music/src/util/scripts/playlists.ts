@@ -2,6 +2,12 @@ import * as TE from "fp-ts/TaskEither";
 import { tell, runScript, createQueryString } from "../apple-script";
 import { pipe } from "fp-ts/lib/function";
 import { general } from ".";
+import { runAppleScript } from "run-applescript";
+import { getViewLayout, getImageSize } from "../listorgrid";
+import { parseImageStream } from "../artwork";
+
+const layout = getViewLayout();
+const imageSize = getImageSize();
 
 const outputQuery = createQueryString({
   id: "pId",
@@ -32,6 +38,58 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
     end repeat
 `;
 
+export const tracks = (id: string) => {
+  const outputQuery = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "artistName",
+    album: "albumName",
+    duration: "trackDuration",
+  });
+
+  return runScript(`
+		set output to ""
+			tell application "Music"
+				set results to tracks of first playlist of (every playlist whose id is ${id})
+				repeat with selectedTrack in results
+					set trackId to the database ID of selectedTrack
+					set trackName to the name of selectedTrack
+					set albumName to the album of selectedTrack
+					set artistName to the artist of selectedTrack
+					set trackDuration to the duration of selectedTrack
+					set output to output & ${outputQuery} & "\n"
+				end repeat
+			end tell
+		return output
+	`);
+};
+
+export const search_tracks = (id: string, search: string) => {
+  const outputQuery = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "artistName",
+    album: "albumName",
+    duration: "trackDuration",
+  });
+
+  return runScript(`
+    set output to ""
+      tell application "Music"
+        set results to (every track whose name contains "${search}" or artist contains "${search}")
+        repeat with selectedTrack in results
+          set trackId to the database ID of selectedTrack
+          set trackName to the name of selectedTrack
+          set albumName to the album of selectedTrack
+          set artistName to the artist of selectedTrack
+          set trackDuration to the duration of selectedTrack
+          set output to output & ${outputQuery} & "\n"
+        end repeat
+      end tell
+    return output
+  `);
+};
+
 export const play =
   (shuffle = false) =>
   (name: string): TE.TaskEither<Error, string> =>
@@ -56,3 +114,24 @@ export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =
         end tell
 	return output
 `);
+
+export const getArtworkByIds = async (ids: string[]) => {
+  const result: any = {};
+  const size = layout === "list" || ids.length > 10 ? imageSize : undefined;
+  const promises = ids.map(async (id) => {
+    try {
+      const data = await runAppleScript(`
+        tell application "Music"
+          set playlistArtwork to first artwork of first playlist of (every playlist whose id is ${id})
+          set playlistImage to data of playlistArtwork
+        end tell
+        return playlistImage
+      `);
+      result[id] = await parseImageStream(data, size);
+    } catch {
+      result[id] = "../assets/no-playlist.png";
+    }
+  });
+  await Promise.all(promises);
+  return result;
+};

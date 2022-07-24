@@ -1,31 +1,29 @@
 import { showToast, Toast } from "@raycast/api";
-import { useCallback, useState } from "react";
-import { getMaxNumberOfResults } from "./util/listorgrid";
-import { Tracks } from "./tracks";
+import { useEffect, useState } from "react";
+import { getPlaylistTracksLayout, getMaxNumberOfResults } from "./util/listorgrid";
 import { Track } from "./util/models";
-import { fromEmptyOrNullable } from "./util/option";
-import { parseResult } from "./util/parser";
-import * as music from "./util/scripts";
+import { Tracks } from "./tracks";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
+import { fromEmptyOrNullable } from "./util/option";
+import { parseResult } from "./util/parser";
+import * as music from "./util/scripts";
 
-export default function PlayLibraryTrack() {
-  const [tracks, setTracks] = useState<readonly Track[] | null>([]);
-  const numResults = getMaxNumberOfResults();
+export const PlaylistTracks = (props: { id: string }) => {
+  const [tracks, setTracks] = useState<readonly Track[] | null>(null);
 
-  const onSearch = useCallback(
-    async (next: string) => {
-      if (!next) return;
-      // start loading
-      setTracks(null);
+  const layout = getPlaylistTracksLayout();
+  const numResults = getMaxNumberOfResults(layout);
 
+  useEffect(() => {
+    const getTracks = async () => {
       await pipe(
-        next,
+        props.id,
         S.trim,
-        music.track.search,
+        music.playlists.tracks,
         TE.matchW(
           () => {
             showToast(Toast.Style.Failure, "Could not get tracks");
@@ -43,9 +41,9 @@ export default function PlayLibraryTrack() {
         ),
         T.map(setTracks)
       )();
-    },
-    [setTracks]
-  );
+    };
+    getTracks();
+  }, []);
 
-  return <Tracks tracks={tracks} onSearch={onSearch} throttle={true} />;
-}
+  return <Tracks tracks={tracks} throttle={false} overrideLayout={layout} />;
+};
