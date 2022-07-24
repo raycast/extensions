@@ -12,7 +12,7 @@ async function routeHandler<T>(endpoint: string): Promise<Types.RouteResponse<T>
   const baseURL = "https://wakatime.com/api/v1";
 
   try {
-    const res = await fetch(`${baseURL}${endpoint}`, { headers: { Authorization: getAuthToken() } });
+    const res = await fetch(`${baseURL}${endpoint}`, { headers: getAuthToken() });
     const data = (await res.json()) as T;
 
     return { ok: true, ...data };
@@ -31,10 +31,12 @@ async function routeHandler<T>(endpoint: string): Promise<Types.RouteResponse<T>
  */
 function getAuthToken() {
   const API_KEY_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
 
+  if (!apiKey) return;
   if (!API_KEY_REGEX.test(apiKey)) throw new Error("Invalid API Key");
-  return `Basic ${Buffer.from(apiKey).toString("base64")}`;
+
+  return { Authorization: `Basic ${Buffer.from(apiKey).toString("base64")}` };
 }
 
 /**
