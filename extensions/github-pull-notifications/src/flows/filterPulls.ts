@@ -2,7 +2,7 @@ import {
   CommentShort,
   PullRequestLastVisit,
   PullRequestReviewShort,
-  PullSearchResultShort
+  PullSearchResultShort, UndefinedString
 } from "../integration/types";
 import { getIssueComments, getPullComments } from "../integration/getComments";
 import { mapPullSearchResultToPRID } from "../tools/mapPullSearchResultToPRID";
@@ -62,6 +62,7 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
 
   const commentTimestamp = getCommentTimestamp({ comment, login, hiddenPulls, logPrefix, pull });
   const reviewTimestamp = getReviewTimestamp({ review, login, hiddenPulls, logPrefix, pull });
+  const hideTimestamp = hiddenPulls.find(hidden => hidden.pull.id === pull.id)?.last_visit;
 
   if (!commentTimestamp && !reviewTimestamp) {
     console.debug(`${logPrefix} action=drop`);
@@ -69,19 +70,18 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
     return false;
   }
 
+  shouldAppendReviewIcon(hideTimestamp, reviewTimestamp) && (pull.myIcon += reviewStatusEmoji(review?.state || ""));
+  shouldAppendCommentIcon(hideTimestamp, commentTimestamp) && (pull.myIcon += "💬");
+
   if (commentTimestamp && !reviewTimestamp) {
     pull.html_url = comment?.html_url || "";
-    pull.myIcon = "💬";
   } else if (!commentTimestamp && reviewTimestamp) {
     pull.html_url = review?.html_url || "";
-    pull.myIcon = reviewStatusEmoji(review?.state || "unknown");
   } else {
     if (commentTimestamp > reviewTimestamp) {
       pull.html_url = comment?.html_url || "";
-      pull.myIcon = "💬";
     } else {
       pull.html_url = review?.html_url || "";
-      pull.myIcon = reviewStatusEmoji(review?.state || "unknown");
     }
   }
 
@@ -89,6 +89,30 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
 
   return pull;
 };
+
+const shouldAppendReviewIcon = (hideTimestamp: UndefinedString, reviewTimestamp: string | false) => {
+  if (!reviewTimestamp) {
+    return false;
+  }
+
+  if (!hideTimestamp) {
+    return true;
+  }
+
+  return hideTimestamp < reviewTimestamp;
+}
+
+const shouldAppendCommentIcon = (hideTimestamp: UndefinedString, commentTimestamp: string | false) => {
+  if (!commentTimestamp) {
+    return false;
+  }
+
+  if (!hideTimestamp) {
+    return true;
+  }
+
+  return hideTimestamp < commentTimestamp;
+}
 
 type GetCommentTimestampParams = { comment: CommentShort | undefined; } & FilterParams;
 type GetReviewTimestampParams = { review: PullRequestReviewShort | undefined; } & FilterParams;

@@ -1,13 +1,11 @@
 import { LocalStorage } from "@raycast/api";
-import { PullRequestLastVisit, PullSearchResultShort } from "../integration/types";
+import { PullRequestLastVisit, PullSearchResultShort, UndefinedString } from "../integration/types";
 import { AllPulls } from "../hooks/usePulls";
 
 const myPullsKey = "myPulls";
 const participatedPullsKey = "participatedPulls";
 const pullVisitsKey = "pullVisits";
 const hiddenPullsKey = "hiddenPulls";
-
-type UndefinedString = string | undefined
 
 export const loadAllPullsFromLocalStorage = (): Promise<AllPulls> => Promise.resolve()
   .then(() => console.debug("loadAllPullsFromLocalStorage"))

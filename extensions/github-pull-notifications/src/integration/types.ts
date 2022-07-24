@@ -19,7 +19,7 @@ export type PullSearchResultShort = {
   closed_at: string | null;
   user: UserShort | null;
 
-  myIcon?: string;
+  myIcon: string;
 }
 
 export type PullRequestReviewShort = {
@@ -52,3 +52,5 @@ export type PullRequestID = {
   repo: string;
   pull_number: number;
 };
+
+export type UndefinedString = string | undefined;

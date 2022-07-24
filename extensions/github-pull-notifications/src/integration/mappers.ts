@@ -13,6 +13,7 @@ export const mapPullSearchResultToShort =
      id, url, repository_url, html_url, number, title, state, created_at, updated_at, closed_at, user
    }: PullSearchResult): PullSearchResultShort => ({
     id, url, repository_url, html_url, number, title, state, created_at, updated_at, closed_at,
+    myIcon: "",
     user: mapUserShort(user)
   });
 
