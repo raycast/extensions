@@ -294,6 +294,8 @@ declare global {
       is_email_public: boolean;
       /** whether this user's photo should be shown publicly on leader boards */
       photo_public: boolean;
+      /** user's public photo */
+      photo: string;
     }
   }
 
