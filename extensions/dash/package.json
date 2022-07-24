@@ -19,7 +19,7 @@
       "arguments": [
         {
           "name": "searchstring",
-          "placeholder": "Searchstring",
+          "placeholder": "Query",
           "type": "text",
           "required": false
         }
