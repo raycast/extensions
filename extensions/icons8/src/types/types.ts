@@ -11,14 +11,18 @@ export interface Icon8 {
   name: string;
   url: string;
   link: string;
-  platform: string; 
-  color: boolean;
-  svg: string;
-  png?: Buffer;
-  mdImage?: string;
-  description?: string;
+
+  platform: string;
   style?: string;
   category?: string;
+
+  isColor: boolean;
+
+  svg: string;
+  image?: Buffer;
+  mdImage?: string;
+
+  description?: string;
   tags?: string[];
   isFree?: boolean;
   isAnimated?: boolean;

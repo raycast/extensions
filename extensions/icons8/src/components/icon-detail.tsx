@@ -1,16 +1,18 @@
 import { Detail, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon8 } from "../types/types";
 import { getIconDetail } from "../hooks/api";
 import { getRandomColor, formatDate } from "../utils/utils";
+import { IconActionPanel } from "./actions";
+import { IconProps } from "./icon";
 
-export const IconDetail = (props: { icon: Icon8 }): JSX.Element => {
+export const IconDetail = (props: IconProps): JSX.Element => {
   const [icon, setIcon] = useState<Icon8>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchIcon = async () => {
-      setIcon(await getIconDetail(props.icon));
+      setIcon(await getIconDetail(props.icon, props.options.color));
       setIsLoading(false);
     };
     fetchIcon();
@@ -19,6 +21,7 @@ export const IconDetail = (props: { icon: Icon8 }): JSX.Element => {
   return (
     <Detail
       isLoading={isLoading}
+      actions={<IconActionPanel props={props} item={false} />}
       markdown={icon && `# ${icon.name}\n\n${icon.mdImage}`}
       metadata={
         icon && (

@@ -1,14 +1,15 @@
 import { Icon, Grid, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
-import { getGridItemSize } from "./utils/grid";
+import { getGridSize } from "./utils/grid";
 import { getIcons, getStyles, numRecent } from "./hooks/api";
 import { Icon8, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 import { Icon8Item } from "./components/icon";
+import { getStoredOptions, setStoredOptions } from "./utils/options";
 
 export default function SearchIcons() {
-  const gridSize: Grid.ItemSize = getGridItemSize();
+  const gridSize: Grid.ItemSize = getGridSize();
 
   const [searchText, setSearchText] = useState("");
   const [icons, setIcons] = useState<Icon8[] | null>([]);
@@ -60,9 +61,27 @@ export default function SearchIcons() {
     fetchIcons();
   }, [searchText, style]);
 
+  const [imageOptions, setImageOptions] = useState(null);
+
+  const getImageOptions = async () => {
+    setImageOptions(await getStoredOptions());
+  };
+
+  const storeImageOptions = async () => {
+    await setStoredOptions(imageOptions);
+  };
+
+  useEffect(() => {
+    getImageOptions();
+  }, []);
+
+  useEffect(() => {
+    storeImageOptions();
+  }, [imageOptions]);
+
   return (
     <Grid
-      isLoading={icons === null}
+      isLoading={icons === null || imageOptions === null}
       itemSize={gridSize}
       inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
@@ -92,7 +111,7 @@ export default function SearchIcons() {
                   value={style.code}
                   icon={{
                     source: style.url ? style.url : Icon.Warning,
-                    tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
+                    tintColor: style.url ? (defaultStyles[style.title] ? Color.PrimaryText : null) : Color.Red,
                   }}
                 />
               ))}
@@ -104,25 +123,43 @@ export default function SearchIcons() {
         {searchText === "" &&
           pinnedIcons?.map((icon: Icon8, index: number) => {
             const movement = getPinnedMovement(pinnedIcons, icon.id);
-            return (<Icon8Item
-              key={index}
-              icon={icon}
-              platform={style}
-              refresh={refreshIcons}
-              pinned={true}
-              movement={movement}
-            />)
-          }
-          )}
+            return (
+              <Icon8Item
+                key={index}
+                icon={icon}
+                platform={style}
+                refresh={refreshIcons}
+                pinned={true}
+                movement={movement}
+                options={imageOptions}
+                setOptions={setImageOptions}
+              />
+            );
+          })}
       </Grid.Section>
       <Grid.Section title="Recent Icons">
         {searchText === "" &&
           recentIcons?.map((icon: Icon8, index: number) => (
-            <Icon8Item key={index} icon={icon} platform={style} refresh={refreshIcons} recent={true} />
+            <Icon8Item
+              key={index}
+              icon={icon}
+              platform={style}
+              refresh={refreshIcons}
+              recent={true}
+              options={imageOptions}
+              setOptions={setImageOptions}
+            />
           ))}
       </Grid.Section>
       {icons?.map((icon: Icon8, index: number) => (
-        <Icon8Item key={index} icon={icon} platform={style} refresh={refreshIcons} />
+        <Icon8Item
+          key={index}
+          icon={icon}
+          platform={style}
+          refresh={refreshIcons}
+          options={imageOptions}
+          setOptions={setImageOptions}
+        />
       ))}
     </Grid>
   );

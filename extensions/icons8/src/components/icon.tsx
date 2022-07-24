@@ -6,11 +6,13 @@ import { PinnedMovement } from "../utils/storage";
 export interface IconProps {
   icon: Icon8;
   refresh: () => void;
-  platform?: string; 
+  platform?: string;
   pinned?: boolean;
   recent?: boolean;
-  movement?: PinnedMovement; 
-};
+  movement?: PinnedMovement;
+  options: any;
+  setOptions: (options: any) => void;
+}
 
 export const Icon8Item = (props: IconProps): JSX.Element => {
   const icon = props.icon;
@@ -19,11 +21,11 @@ export const Icon8Item = (props: IconProps): JSX.Element => {
     <Grid.Item
       key={icon.id}
       content={{
-        value: { source: icon.url, tintColor: icon.color ? null : Color.PrimaryText },
+        value: { source: icon.url, tintColor: icon.isColor ? null : props.options.color },
         tooltip: icon.name,
       }}
       subtitle={icon.name}
-      actions={<IconActionPanel {...props}/>}
+      actions={<IconActionPanel props={props} item={true} />}
     />
   );
 };

@@ -10,6 +10,7 @@ import {
   showInFinder,
 } from "@raycast/api";
 import { IconStorageActions, appendRecentIcon } from "../utils/storage";
+import { ConfigureAction } from "./configure-icon";
 import { IconDetail } from "./icon-detail";
 import { getIconDetail } from "../hooks/api";
 import { IconProps } from "./icon";
@@ -19,52 +20,55 @@ import fs from "fs";
 
 const preferences: Preferences = getPreferenceValues();
 const path: string = preferences.downloadPath;
-const downloadPath = path.includes(homedir()) ? path : `${homedir()}/${path.replace("~/", "")}`;
+export const downloadPath = path.includes(homedir()) ? path : `${homedir()}/${path.replace("~/", "")}`;
 
-export const IconActionPanel = (props: IconProps): JSX.Element => {
-  const icon = props.icon; 
+const addRecentIcon = async (icon: Icon8, refresh: () => void) => {
+  await appendRecentIcon(icon);
+  refresh();
+};
+
+export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX.Element => {
+  const props = args.props;
+  const icon = props.icon;
 
   return (
     <ActionPanel>
-      <OpenInBrowser icon={icon} />
-      <ViewIcon icon={icon} />
+      <OpenInBrowser icon={icon} refresh={props.refresh} />
+      {args.item && <ViewIcon {...props} />}
+      <ConfigureAction icon={icon} options={props.options} setOptions={props.setOptions} />
       <ActionPanel.Section>
-        <DownloadSVGIcon icon={icon} />
-        <DownloadPNGIcon icon={icon} />
-        <CopySVGCode icon={icon} />
-        <CopyImageURL icon={icon} />
+        <DownloadSVGIcon icon={icon} color={props.options.color} refresh={props.refresh} />
+        <DownloadIconImage icon={icon} {...props.options} />
+        <CopySVGCode icon={icon} refresh={props.refresh} />
+        <CopyImageURL icon={icon} refresh={props.refresh} />
       </ActionPanel.Section>
-      <IconStorageActions {...props} />
+      <IconStorageActions props={props} showMovement={args.item} />
     </ActionPanel>
   );
 };
 
-const ViewIcon = (props: { icon: Icon8 }): JSX.Element => {
+const ViewIcon = (props: IconProps): JSX.Element => {
   return (
     <Action.Push
       title="View Icon"
       target={<IconDetail {...props} />}
-      icon={{ source: props.icon.url, tintColor: props.icon.color ? null : Color.PrimaryText }}
-      onPush={async () => {
-        await appendRecentIcon(props.icon);
-      }}
+      icon={Icon.Layers}
+      onPush={async () => await addRecentIcon(props.icon, props.refresh)}
     />
   );
 };
 
-const OpenInBrowser = (props: { icon: Icon8 }): JSX.Element => {
+const OpenInBrowser = (props: { icon: Icon8; refresh: () => void }): JSX.Element => {
   return (
     <Action.OpenInBrowser
       url={props.icon.link}
       icon={{ source: "../assets/Icons8-Open.png", tintColor: Color.PrimaryText }}
-      onOpen={async () => {
-        await appendRecentIcon(props.icon);
-      }}
+      onOpen={async () => await addRecentIcon(props.icon, props.refresh)}
     />
   );
 };
 
-const CopySVGCode = (props: { icon: Icon8 }): JSX.Element => {
+const CopySVGCode = (props: { icon: Icon8; refresh: () => void }): JSX.Element => {
   return (
     <Action.CopyToClipboard
       title="Copy SVG Code"
@@ -73,13 +77,13 @@ const CopySVGCode = (props: { icon: Icon8 }): JSX.Element => {
       shortcut={{ modifiers: ["cmd"], key: "c" }}
       onCopy={async () => {
         showToast(Toast.Style.Success, "Copied SVG Code");
-        await appendRecentIcon(props.icon);
+        await addRecentIcon(props.icon, props.refresh);
       }}
     />
   );
 };
 
-const CopyImageURL = (props: { icon: Icon8 }): JSX.Element => {
+const CopyImageURL = (props: { icon: Icon8; refresh: () => void }): JSX.Element => {
   return (
     <Action.CopyToClipboard
       title="Copy Image URL"
@@ -88,13 +92,13 @@ const CopyImageURL = (props: { icon: Icon8 }): JSX.Element => {
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       onCopy={async () => {
         showToast(Toast.Style.Success, "Copied Image URL");
-        await appendRecentIcon(props.icon);
+        await addRecentIcon(props.icon, props.refresh);
       }}
     />
   );
 };
 
-const DownloadSVGIcon = (props: { icon: Icon8 }): JSX.Element => {
+const DownloadSVGIcon = (props: { icon: Icon8; color: string; refresh: () => void }): JSX.Element => {
   return (
     <Action
       title="Download SVG Icon"
@@ -102,7 +106,7 @@ const DownloadSVGIcon = (props: { icon: Icon8 }): JSX.Element => {
       shortcut={{ modifiers: ["cmd"], key: "s" }}
       onAction={async () => {
         showToast(Toast.Style.Animated, "Downloading SVG Icon ...");
-        const icon: Icon8 | undefined = await getIconDetail(props.icon);
+        const icon: Icon8 | undefined = await getIconDetail(props.icon, props.color);
         if (icon) {
           const filePath = `${downloadPath}/${icon.name}.svg`;
           fs.writeFileSync(filePath, icon.svg);
@@ -125,7 +129,7 @@ const DownloadSVGIcon = (props: { icon: Icon8 }): JSX.Element => {
             },
           };
           showToast(options);
-          await appendRecentIcon(props.icon);
+          await addRecentIcon(props.icon, props.refresh);
         } else {
           showToast(Toast.Style.Failure, "SVG Icon Download Failed");
         }
@@ -134,22 +138,33 @@ const DownloadSVGIcon = (props: { icon: Icon8 }): JSX.Element => {
   );
 };
 
-const DownloadPNGIcon = (props: { icon: Icon8 }): JSX.Element => {
+interface DownloadImageProps {
+  icon: Icon8;
+  color: string;
+  size: number;
+  format: string;
+  refresh: () => void;
+}
+
+const DownloadIconImage = (props: DownloadImageProps): JSX.Element => {
+  const format = props.format;
+  const formatName = format.toUpperCase();
+
   return (
     <Action
-      title="Download PNG Icon"
+      title={`Download ${formatName} Icon`}
       icon={Icon.Download}
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       onAction={async () => {
-        showToast(Toast.Style.Animated, "Downloading PNG Icon ...");
-        const icon: Icon8 | undefined = await getIconDetail(props.icon);
-        if (icon && icon.png) {
-          const filePath = `${downloadPath}/${icon.name}.png`;
-          console.log(icon.png);
-          fs.writeFileSync(filePath, icon.png);
+        showToast(Toast.Style.Animated, `Downloading ${formatName} Icon ...`);
+        const icon: Icon8 | undefined = await getIconDetail(props.icon, props.color);
+        if (icon && icon.image) {
+          const filePath = `${downloadPath}/${icon.name}.${format}`;
+          console.log(icon.image);
+          fs.writeFileSync(filePath, icon.image);
           const options: Toast.Options = {
             style: Toast.Style.Success,
-            title: "PNG Icon Downloaded",
+            title: `${formatName} Icon Downloaded`,
             primaryAction: {
               title: "Open Icon",
               onAction: (toast) => {
@@ -166,9 +181,9 @@ const DownloadPNGIcon = (props: { icon: Icon8 }): JSX.Element => {
             },
           };
           showToast(options);
-          await appendRecentIcon(props.icon);
+          await addRecentIcon(props.icon, props.refresh);
         } else {
-          showToast(Toast.Style.Failure, "PNG Icon Download Failed");
+          showToast(Toast.Style.Failure, `${formatName} Icon Download Failed`);
         }
       }}
     />

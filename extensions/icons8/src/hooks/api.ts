@@ -19,7 +19,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
     if (response.status !== 200) {
       showToast(Toast.Style.Failure, `Error Fetching Icons. Reponse Status : ${response.status}`);
       console.log(response);
-      return []; 
+      return [];
     }
     const data: any = await response.json();
     const icons = data.icons;
@@ -29,7 +29,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
       url: `https://img.icons8.com/${icon.platform}/2x/${icon.commonName}.png`,
       link: `https://icons8.com/icon/${icon.id}/${icon.name}`,
       platform: icon.platform,
-      color: icon.isColor,
+      isColor: icon.isColor,
     }));
     return icons8;
   } catch (e: any) {
@@ -45,8 +45,8 @@ export const getStyles = async (): Promise<Style[]> => {
     const data: any = await response.json();
     if (response.status !== 200) {
       showToast(Toast.Style.Failure, `Error Fetching Styles. Reponse Status : ${response.status}`);
-      console.log(data)
-      return []; 
+      console.log(data);
+      return [];
     }
     const platforms = data.docs
       .filter((platform: any) => platform.title in defaultStyles)
@@ -65,7 +65,7 @@ export const getStyles = async (): Promise<Style[]> => {
   }
 };
 
-export const getIconDetail = async (icon8: Icon8): Promise<Icon8 | undefined> => {
+export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8 | undefined> => {
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
   const data: any = await response.json();
@@ -77,7 +77,7 @@ export const getIconDetail = async (icon8: Icon8): Promise<Icon8 | undefined> =>
       url: `https://img.icons8.com/${icon.platform}/2x/${icon.commonName}.png`,
       link: `https://icons8.com/icon/${icon.id}/${icon.name}`,
       platform: icon.platform,
-      color: icon8.color,
+      isColor: icon8.isColor,
       svg: icon.svg,
       description: icon.description,
       style: icon.platformName,
@@ -87,8 +87,8 @@ export const getIconDetail = async (icon8: Icon8): Promise<Icon8 | undefined> =>
       isAnimated: icon.isAnimated,
       published: new Date(icon.publishedAt),
     };
-    icon8.png = await svgToImage(icon8.svg, icon8.color ? undefined : "#ffffff");
-    icon8.mdImage = svgToMdImage(icon8.png, 256, 256);
+    icon8.image = await svgToImage(icon8.svg, icon8.isColor ? undefined : color);
+    icon8.mdImage = svgToMdImage(icon8.image, 256, 256);
     return icon8;
   } catch (e: any) {
     console.error(e);

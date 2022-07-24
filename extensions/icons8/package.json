@@ -104,10 +104,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "d3-color": "^3.1.0",
     "javascript-time-ago": "^2.5.6",
     "node-fetch": "^3.2.9"
   },
   "devDependencies": {
+    "@types/d3-color": "^3.1.0",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/svg-parser": "^2.0.3",

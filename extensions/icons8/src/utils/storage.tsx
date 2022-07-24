@@ -2,12 +2,14 @@ import { Action, ActionPanel, Toast, showToast, Icon, Color, LocalStorage } from
 import React from "react";
 import { Icon8 } from "../types/types";
 import { IconProps } from "../components/icon";
-import { getGridItemSize } from "./grid";
+import { getGridSize } from "./grid";
 
-export const IconStorageActions = (props: IconProps) => {
+export const IconStorageActions = (args: { props: IconProps; showMovement?: boolean }) => {
+  const props = args.props;
+
   return (
     <ActionPanel.Section>
-      {props.pinned && props.movement ? (
+      {props.pinned && props.movement && args.showMovement && (
         <React.Fragment>
           {(props.movement.left || props.movement.up) && (
             <Action
@@ -31,6 +33,10 @@ export const IconStorageActions = (props: IconProps) => {
               }}
             />
           )}
+        </React.Fragment>
+      )}
+      {props.pinned ? (
+        <React.Fragment>
           <Action
             title="Remove Pinned Icon"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -113,7 +119,7 @@ const remove = (icons: Icon8[], id: string | undefined): Icon8[] => {
 const appendStoredIcons = async (key: string, icon: Icon8) => {
   let icons = await getStoredIcons(key);
   icons = remove(icons, icon.id);
-  icons.unshift(icon); 
+  icons.unshift(icon);
   if (icons.length > 1000) icons.pop();
   await LocalStorage.setItem(key, JSON.stringify(icons));
 };
@@ -165,18 +171,18 @@ const clearPinnedIcons = async (platform?: string) => {
 
 export interface PinnedMovement {
   up: boolean;
-  right: boolean; 
+  right: boolean;
   down: boolean;
-  left: boolean; 
+  left: boolean;
 }
 
 export const getPinnedMovement = (icons: Icon8[], id: string): PinnedMovement => {
   const index = icons.findIndex((icon: Icon8) => icon.id === id);
-  const itemsPerRow = getGridItemSize() === "small" ? 8 : 5;
+  const itemsPerRow = getGridSize() === "small" ? 8 : 5;
   const up = index >= itemsPerRow && index % itemsPerRow === 0;
   const down = index < Math.floor(icons.length / itemsPerRow) * itemsPerRow && (index + 1) % itemsPerRow === 0;
   const right = !down && index !== icons.length - 1;
-  const left = !up && index !== 0; 
+  const left = !up && index !== 0;
   return {
     up,
     right,
