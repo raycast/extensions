@@ -125,4 +125,12 @@ declare global {
     type StatProperty = Record<"digital" | "name" | "text", string> &
       Record<"hours" | "minutes" | "percent" | "seconds" | "total_seconds", number>;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Types {
+    type RouteData<T> = T & { ok: true };
+    type RouteError = { error: string; ok: false };
+
+    type RouteResponse<T> = RouteData<T> | RouteError;
+  }
 }
