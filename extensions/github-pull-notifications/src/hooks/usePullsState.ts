@@ -9,7 +9,6 @@ import {
 } from "../flows/store";
 import { AllPulls } from "./usePulls";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
-import { LocalStorage } from "@raycast/api";
 
 const usePullsState = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -60,8 +59,6 @@ const usePullsState = () => {
     participatedPulls,
     pullVisits,
     hiddenPulls,
-
-    setAllPullsToState,
 
     checkForUpdates: (allPulls: AllPulls) =>
       checkPullsForUpdates(allPulls)
