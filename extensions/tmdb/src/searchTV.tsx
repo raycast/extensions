@@ -20,7 +20,6 @@ export default function Command() {
         setIsLoading(false);
       })
       .catch((err: any) => {
-        // console.log(err);
         setIsLoading(false);
       });
   };
