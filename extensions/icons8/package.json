@@ -23,7 +23,7 @@
       "name": "apiKey",
       "title": "API Key",
       "description": "API Key for Icons8.",
-      "type": "textfield",
+      "type": "password",
       "default": "",
       "required": true
     },
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "name": "downloadPath", 
+      "name": "downloadPath",
       "title": "Download Directory",
       "description": "Directory to download SVG and PNG icons.",
       "type": "textfield",
@@ -80,8 +80,8 @@
       "required": false
     },
     {
-      "name": "numRecent", 
-      "title": "Number of Recent Icons", 
+      "name": "numRecent",
+      "title": "Number of Recent Icons",
       "description": "Number of recent icons to show.",
       "type": "dropdown",
       "default": "16",

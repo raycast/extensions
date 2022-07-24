@@ -1,7 +1,8 @@
+import { Icon, Grid, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, Grid, Color } from "@raycast/api";
+import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { getGridItemSize } from "./utils/grid";
-import { getIcons, getStyles } from "./hooks/api";
+import { getIcons, getStyles, numRecent } from "./hooks/api";
 import { Icon8, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 import { Icon8Item } from "./components/icon";
@@ -10,11 +11,10 @@ export default function SearchIcons() {
   const gridSize: Grid.ItemSize = getGridItemSize();
 
   const [searchText, setSearchText] = useState("");
-  const [icons, setIcons] = useState<Icon8[] | null>();
+  const [icons, setIcons] = useState<Icon8[] | null>([]);
 
   const [style, setStyle] = useState<string>();
   const [styles, setStyles] = useState<Style[] | null>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchStyles = async () => {
@@ -23,12 +23,38 @@ export default function SearchIcons() {
     fetchStyles();
   }, []);
 
+  const [pinnedIcons, setPinnedIcons] = useState<Icon8[] | null>(null);
+  const [recentIcons, setRecentIcons] = useState<Icon8[] | null>(null);
+
+  const getStoredIcons = async () => {
+    let pinned = await getPinnedIcons();
+    if (style) {
+      pinned = pinned.filter((icon) => icon.platform === style);
+    }
+    setPinnedIcons(pinned);
+    let recent = await getRecentIcons();
+    if (style) {
+      recent = recent.filter((icon) => icon.platform === style);
+    }
+    recent = recent.slice(0, numRecent);
+    setRecentIcons(recent);
+  };
+
+  const [refresh, setRefresh] = useState(false);
+  const refreshIcons = () => setRefresh(!refresh);
+
+  useEffect(() => {
+    getStoredIcons();
+  }, [refresh, style]);
+
   useEffect(() => {
     const fetchIcons = async () => {
       if (searchText) {
-        setIsLoading(true);
-        setIcons(await getIcons(searchText, style === "" ? undefined : style));
-        setIsLoading(false);
+        setIcons(null);
+        const icons = await getIcons(searchText, style);
+        setIcons(icons);
+      } else {
+        setIcons([]);
       }
     };
     fetchIcons();
@@ -36,13 +62,20 @@ export default function SearchIcons() {
 
   return (
     <Grid
-      isLoading={isLoading}
+      isLoading={icons === null}
       itemSize={gridSize}
-      inset={Grid.Inset.Large}
+      inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
       throttle={true}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Styles" storeValue onChange={(value: string) => setStyle(value)}>
+        <Grid.Dropdown
+          tooltip="Styles"
+          storeValue
+          onChange={(value: string) => {
+            if (value) setStyle(value);
+            else setStyle(undefined);
+          }}
+        >
           <Grid.Dropdown.Section>
             <Grid.Dropdown.Item
               title="All Styles"
@@ -67,7 +100,30 @@ export default function SearchIcons() {
         </Grid.Dropdown>
       }
     >
-      {!isLoading && icons && icons.map((icon: Icon8, index: number) => <Icon8Item key={index} {...icon} />)}
+      <Grid.Section title="Pinned Icons">
+        {searchText === "" &&
+          pinnedIcons?.map((icon: Icon8, index: number) => {
+            const movement = getPinnedMovement(pinnedIcons, icon.id);
+            return (<Icon8Item
+              key={index}
+              icon={icon}
+              platform={style}
+              refresh={refreshIcons}
+              pinned={true}
+              movement={movement}
+            />)
+          }
+          )}
+      </Grid.Section>
+      <Grid.Section title="Recent Icons">
+        {searchText === "" &&
+          recentIcons?.map((icon: Icon8, index: number) => (
+            <Icon8Item key={index} icon={icon} platform={style} refresh={refreshIcons} recent={true} />
+          ))}
+      </Grid.Section>
+      {icons?.map((icon: Icon8, index: number) => (
+        <Icon8Item key={index} icon={icon} platform={style} refresh={refreshIcons} />
+      ))}
     </Grid>
   );
 }

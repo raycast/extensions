@@ -11,6 +11,7 @@ export interface Icon8 {
   name: string;
   url: string;
   link: string;
+  platform: string; 
   color: boolean;
   svg: string;
   png?: Buffer;
