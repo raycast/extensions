@@ -31,7 +31,7 @@
       "name": "leaderboard",
       "subtitle": "WakaTime",
       "title": "Show Public Leaderboard",
-      "description": "Show your rank in the public global leaderboard",
+      "description": "An overview of the public leaderboard. Check your rank against others all around the world.",
       "mode": "view"
     },
     {
