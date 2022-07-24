@@ -34,7 +34,7 @@ export function useBase<D>({ handler, toasts }: Props<D>) {
     }
 
     void run();
-  }, []);
+  }, [handler]);
 
   return { data, error, isLoading };
 }
