@@ -21,7 +21,7 @@ export default function Command() {
   }, []);
   const results = useMemo(() => {
     const { results } = state.payload;
-    switch (typeFilter) {
+    switch (typeFilter.toLowerCase()) {
       case "general":
       case "documentation":
       case "sample_code":

@@ -1,5 +1,5 @@
 type AllResultType = "all";
-type ResultType = "general" | "documentation" | "video" | "sample_code" | string;
+type ResultType = "General" | "documentation" | "video" | "sample_code" | string;
 
 type SearchResult = {
   title: string;

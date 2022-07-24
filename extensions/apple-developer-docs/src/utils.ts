@@ -24,7 +24,7 @@ export const makeUrl = (uri: string) => {
 export const makeUrlMarkdown = (url: string, title?: string) => `[${title ?? url}](${url})`;
 
 export const getIcon = (type: string): ImageLike => {
-  switch (type) {
+  switch (type.toLowerCase()) {
     case "general":
       return Icon.Megaphone;
     case "sample_code":
