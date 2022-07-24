@@ -10,6 +10,12 @@ import {
 import { AllPulls } from "./usePulls";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 
+type StoreUpdatesParams = {
+  allPulls: PullSearchResultShort[],
+  myPulls: PullSearchResultShort[],
+  participatedPulls: PullSearchResultShort[]
+};
+
 const usePullsState = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [myPulls, setMyPulls] = useState<PullSearchResultShort[]>([]);
@@ -17,17 +23,20 @@ const usePullsState = () => {
   const [pullVisits, setPullVisits] = useState<PullRequestLastVisit[]>([]);
   const [hiddenPulls, setHiddenPulls] = useState<PullRequestLastVisit[]>([]);
 
-  const storeUpdates = ([myPulls, participatedPulls]: [PullSearchResultShort[], PullSearchResultShort[]]) => {
-    console.debug(`storeUpdates: myPulls=${myPulls.length} participatedPulls=${participatedPulls.length}`);
+  const storeUpdates = ({allPulls, myPulls, participatedPulls}: StoreUpdatesParams) => {
+    console.debug("storeUpdates");
+
+    const filteredHiddenPulls = hiddenPulls.filter(visit => !allPulls.includes(visit.pull));
 
     setMyPulls(myPulls);
     setParticipatedPulls(participatedPulls);
+    setHiddenPulls(filteredHiddenPulls);
 
     return Promise.all([
       storeMyPulls(myPulls),
       storeParticipatedPulls(participatedPulls)
     ])
-      .then(() => console.debug("storeUpdates: done"));
+      .then(() => console.debug(`storeUpdates: allPulls=${allPulls.length} hiddenPulls=${hiddenPulls.length} myPulls=${myPulls.length} participatedPulls=${participatedPulls.length} done`));
   };
 
   const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits, hiddenPulls }: AllPulls) => {
