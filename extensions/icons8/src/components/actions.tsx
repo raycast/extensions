@@ -16,7 +16,6 @@ import { IconDetail } from "./icon-detail";
 import { getIconDetail } from "../hooks/api";
 import { IconProps } from "./icon";
 import { Icon8, Preferences } from "../types/types";
-import svgToImg from "svg-to-img";
 import { homedir } from "os";
 import fs from "fs";
 
@@ -98,12 +97,12 @@ const CopySVGCode = (props: IconActionProps): JSX.Element => {
 
 const CopyImageURL = (props: { icon: Icon8; refresh: () => void }): JSX.Element => {
   return (
-    <Action.CopyToClipboard
+    <Action
       title="Copy Image URL"
-      content={props.icon.url}
       icon={Icon.Link}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      onCopy={async () => {
+      onAction={async () => {
+        Clipboard.copy(props.icon.url); 
         showToast(Toast.Style.Success, "Copied Image URL");
         await addRecentIcon(props.icon, props.refresh);
       }}
@@ -171,10 +170,6 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
         }
         if (icon.image) {
           const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.${format}`;
-          const image = await svgToImg.from(icon.image).toPng({ 
-            width: props.options.size 
-          });
-          console.log(image); 
           const options: Toast.Options = {
             style: Toast.Style.Success,
             title: `${formatName} Icon Downloaded`,
