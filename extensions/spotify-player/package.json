@@ -45,10 +45,10 @@
       "preferences": [
         {
           "name": "maxtitlelength",
-          "description": "Max Menubar title length",
+          "description": "Max Menubar title length. Leave empty for no limitation.",
           "type": "textfield",
           "required": false,
-          "title": "Max. Menubar Title length. Leave empty for now limitation."
+          "title": "Max. Menubar Title length"
         }
       ]
     },
