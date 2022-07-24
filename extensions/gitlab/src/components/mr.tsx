@@ -20,6 +20,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 import { userIcon } from "./users";
+import { useCachedState } from "@raycast/utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -148,7 +149,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   );
 }
 
-export function MRListDetail(props: { mr: MergeRequest; subtitle: string }): JSX.Element {
+export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expandDetails: boolean }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
@@ -166,28 +167,33 @@ export function MRListDetail(props: { mr: MergeRequest; subtitle: string }): JSX
       markdown={lines.join("\n")}
       isLoading={isLoading}
       metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title={`${mr.source_branch} ➜ ${mr.target_branch}`} text={props.subtitle} />
-          <List.Item.Detail.Metadata.Separator />
-          {mr.author && (
-            <List.Item.Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />
-          )}
-          <UserMetadataLabel users={mr.assignees} singular="Assignee" plural="Assignees" />
-          <UserMetadataLabel users={mr.reviewers} singular="Reviewer" plural="Reviewers" />
-          {mr.milestone && <List.Item.Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
-          {mr.labels.length > 0 && (
-            <>
-              <List.Item.Detail.Metadata.Separator />
-              {mr.labels.map((m) => (
-                <List.Item.Detail.Metadata.Label
-                  key={m.id}
-                  title={m.name}
-                  icon={{ source: Icon.CircleFilled, tintColor: m.color }}
-                />
-              ))}
-            </>
-          )}
-        </List.Item.Detail.Metadata>
+        props.expandDetails ? (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label
+              title={`${mr.source_branch} ➜ ${mr.target_branch}`}
+              text={props.subtitle}
+            />
+            <List.Item.Detail.Metadata.Separator />
+            {mr.author && (
+              <List.Item.Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />
+            )}
+            <UserMetadataLabel users={mr.assignees} singular="Assignee" plural="Assignees" />
+            <UserMetadataLabel users={mr.reviewers} singular="Reviewer" plural="Reviewers" />
+            {mr.milestone && <List.Item.Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+            {mr.labels.length > 0 && (
+              <>
+                <List.Item.Detail.Metadata.Separator />
+                {mr.labels.map((m) => (
+                  <List.Item.Detail.Metadata.Label
+                    key={m.id}
+                    title={m.name}
+                    icon={{ source: Icon.CircleFilled, tintColor: m.color }}
+                  />
+                ))}
+              </>
+            )}
+          </List.Item.Detail.Metadata>
+        ) : undefined
       }
     />
   );
@@ -300,6 +306,7 @@ export function MRList({
   }
 
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
 
   return (
     <List
@@ -313,7 +320,13 @@ export function MRList({
     >
       <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
         {mrs.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
+          <MRListItem
+            key={mr.id}
+            mr={mr}
+            refreshData={refresh}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
     </List>
@@ -325,6 +338,8 @@ export function MRListItem(props: {
   refreshData: () => void;
   action?: JSX.Element;
   showCIStatus?: boolean;
+  expandDetails: boolean;
+  onToggleDetails: () => void;
 }): JSX.Element {
   const mr = props.mr;
 
@@ -361,6 +376,8 @@ export function MRListItem(props: {
   }
   accessories.push({ icon: accessoryIcon });
 
+  const detailsIcon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
+
   return (
     <List.Item
       id={mr.id.toString()}
@@ -368,15 +385,19 @@ export function MRListItem(props: {
       subtitle={!getListDetailsPreference() ? subtitle : undefined}
       icon={icon}
       accessories={accessories}
-      detail={getListDetailsPreference() && <MRListDetail mr={mr} subtitle={subtitle} />}
+      detail={
+        getListDetailsPreference() && <MRListDetail mr={mr} subtitle={subtitle} expandDetails={props.expandDetails} />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {!getListDetailsPreference() && (
-              <Action.Push
-                title="Show Details"
-                target={<MRDetail mr={mr} />}
-                icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+            {!getListDetailsPreference() ? (
+              <Action.Push icon={detailsIcon} title="Show Details" target={<MRDetail mr={mr} />} />
+            ) : (
+              <Action
+                icon={detailsIcon}
+                title={`${props.expandDetails ? "Collapse" : "Expand"} Details`}
+                onAction={props.onToggleDetails}
               />
             )}
             <GitLabOpenInBrowserAction url={mr.web_url} />

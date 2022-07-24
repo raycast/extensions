@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
@@ -34,7 +35,10 @@ export function SearchMyMergeRequests(): JSX.Element {
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
+
   const title = search ? "Search Results" : "Created Recently";
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
     <List
       isLoading={isLoading}
@@ -45,7 +49,14 @@ export function SearchMyMergeRequests(): JSX.Element {
     >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
-          <MRListItem key={m.id} mr={m} refreshData={performRefetch} showCIStatus={true} />
+          <MRListItem
+            key={m.id}
+            mr={m}
+            refreshData={performRefetch}
+            showCIStatus={true}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
     </List>

@@ -6,6 +6,7 @@ import { useCache } from "../cache";
 import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
 import { MRListItem } from "./mr";
+import { useCachedState } from "@raycast/utils";
 
 export function ReviewList(): JSX.Element {
   const [project, setProject] = useState<Project>();
@@ -19,6 +20,8 @@ export function ReviewList(): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
     <List
       searchBarPlaceholder="Filter Reviews by name..."
@@ -27,7 +30,13 @@ export function ReviewList(): JSX.Element {
       isShowingDetail={getListDetailsPreference()}
     >
       {mrs?.map((mr) => (
-        <MRListItem key={mr.id} mr={mr} refreshData={performRefetch} />
+        <MRListItem
+          key={mr.id}
+          mr={mr}
+          refreshData={performRefetch}
+          expandDetails={expandDetails}
+          onToggleDetails={() => setExpandDetails(!expandDetails)}
+        />
       ))}
     </List>
   );

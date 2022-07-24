@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
@@ -27,6 +28,8 @@ function MyMRList(props: {
     props.performRefetch();
   };
 
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
     <List
       searchBarPlaceholder="Filter Merge Requests by name..."
@@ -38,7 +41,14 @@ function MyMRList(props: {
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} showCIStatus={true} />
+          <MRListItem
+            key={mr.id}
+            mr={mr}
+            refreshData={refresh}
+            showCIStatus={true}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
     </List>
