@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Grid, Icon, Image, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { isSpotifyInstalled } from "./client/utils";
 import { play, playShuffled, useAlbumSearch } from "./client/client";
+import { isSpotifyInstalled } from "./utils";
 
-export default function SpotifyList() {
+export default function SearchAlbums() {
   const [searchText, setSearchText] = useState<string>();
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
   const response = useAlbumSearch(searchText);

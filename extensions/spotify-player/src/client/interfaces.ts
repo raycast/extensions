@@ -10,9 +10,3 @@ export interface AuthResponseCredentials {
   expires_in: number;
   scope: string;
 }
-
-export type CurrentlyPlayingTrack = {
-  id: string;
-  artist: string;
-  name: string;
-};

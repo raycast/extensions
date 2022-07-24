@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { play, startPlaySimilar, useTrackSearch } from "./client/client";
 import { showToast, List, ActionPanel, Action, Toast, Image, Color, Icon } from "@raycast/api";
 import _ from "lodash";
-import { isSpotifyInstalled, trackTitle } from "./client/utils";
+import { isSpotifyInstalled, msToHMS, trackTitle } from "./utils";
 
-export default function SpotifyList() {
+export default function SearchTracks() {
   const [searchText, setSearchText] = useState<string>();
   const response = useTrackSearch(searchText);
 
@@ -89,10 +89,10 @@ function TrackListItem(props: {
           />
           {spotifyInstalled && track.id && (
             <Action
-              title="Play Similar"
+              title="Play Radio"
               icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
               onAction={() => {
-                startPlaySimilar(track.id);
+                startPlaySimilar({ seed_tracks: track.id });
               }}
             />
           )}
@@ -140,31 +140,3 @@ const getTrackDetailMarkdownContent = (
   }
   return `${content}`;
 };
-
-function msToHMS(milliseconds: number): string {
-  const totalSeconds = parseInt(Math.floor(milliseconds / 1000).toString());
-  const totalMinutes = parseInt(Math.floor(totalSeconds / 60).toString());
-  const totalHours = parseInt(Math.floor(totalMinutes / 60).toString());
-  const days = parseInt(Math.floor(totalHours / 24).toString());
-
-  const seconds = parseInt((totalSeconds % 60).toString());
-  const minutes = parseInt((totalMinutes % 60).toString());
-  const hours = parseInt((totalHours % 24).toString());
-
-  const humanized = [pad(hours), pad(minutes), pad(seconds)];
-
-  let time = "";
-  if (days > 0) {
-    time = `${days}:${humanized[0]}:${humanized[1]}:${humanized[2]}`;
-  } else if (hours > 0) {
-    time = `${hours}:${humanized[1]}:${humanized[2]}`;
-  } else if (minutes > 0) {
-    time = `${minutes}:${humanized[2]}`;
-  } else if (seconds > 0) {
-    time = `${humanized[2]}`;
-  }
-  return time;
-}
-function pad(value: number): string {
-  return value < 10 ? "0" + value : String(value);
-}

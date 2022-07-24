@@ -1,7 +1,7 @@
-import { getAlbumTracks, getArtistAlbums, spotifyApi } from "./client/client";
+import { getAlbumTracks, getArtistAlbums, spotifyApi } from "../client/client";
 import { List, ActionPanel, Action, Image, Icon, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
-import { TracksList } from "./searchTracks";
+import { TracksList } from "../searchTracks";
 
 export function AlbumsList(props: { albums: SpotifyApi.AlbumObjectSimplified[] }) {
   const albums = props.albums;
@@ -30,7 +30,7 @@ export function AlbumsListByArtist(props: { artistId: string }) {
   );
 }
 
-function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified }) {
+export function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified }) {
   const album = props.album;
   const icon: Image.ImageLike = {
     source: album.images[album.images.length - 1]?.url,

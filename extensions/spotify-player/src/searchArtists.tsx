@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { getArtistAlbums, useArtistsSearch } from "./client/client";
-import { showToast, List, ActionPanel, Action, Toast, Image, Icon } from "@raycast/api";
+import { getArtistAlbums, startPlaySimilar, useArtistsSearch } from "./client/client";
+import { showToast, List, ActionPanel, Action, Toast, Image, Icon, Color, showHUD } from "@raycast/api";
 import _ from "lodash";
-import { AlbumsList } from "./artistAlbums";
+import { AlbumsList } from "./components/artistAlbums";
 
-export default function ArtistsList() {
+export default function SearchArtists() {
   const [searchText, setSearchText] = useState<string>();
   const response = useArtistsSearch(searchText);
 
@@ -45,22 +45,32 @@ function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectFull }) {
   );
 }
 
-function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObjectFull }) {
-  const response = getArtistAlbums(props.artist.id);
+function ArtistsActionPanel({ title, artist }: { title: string; artist: SpotifyApi.ArtistObjectFull }) {
+  const response = getArtistAlbums(artist.id);
   const albums = response.result?.items;
 
-  const artistImage = _(props.artist.images).last()?.url;
+  const artistImage = _(artist.images).last()?.url;
   return (
-    <ActionPanel title={props.title}>
+    <ActionPanel title={title}>
       {albums && <Action.Push title="Open Albums" icon={Icon.ArrowRight} target={<AlbumsList albums={albums} />} />}
+      <Action
+        title="Start Radio"
+        icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
+        onAction={async () => {
+          const artistId = artist.id.replace("spotify:artist:", "");
+          await startPlaySimilar({ seed_artists: artistId });
+          showHUD(`♫ Playing Similar – ♫ ${artist.name}`);
+        }}
+      />
       <Action.OpenInBrowser
         title="Open Artist in Browser"
         icon={artistImage && { source: artistImage, mask: Image.Mask.Circle }}
-        url={props.artist.external_urls.spotify}
+        url={artist.external_urls.spotify}
       />
+
       <Action.CopyToClipboard
         title="Copy Artist URL"
-        content={props.artist.external_urls.spotify}
+        content={artist.external_urls.spotify}
         shortcut={{ modifiers: ["cmd"], key: "." }}
       />
     </ActionPanel>

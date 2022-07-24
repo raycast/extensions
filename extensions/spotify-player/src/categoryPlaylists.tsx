@@ -1,13 +1,12 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { play, playShuffled, usePlaylistSearch } from "./client/client";
+import { useGetCategoryPlaylists } from "./client/client";
 import { isSpotifyInstalled } from "./utils";
 import PlaylistItem from "./components/PlaylistItem";
 
-export default function SearchPlaylists() {
-  const [searchText, setSearchText] = useState<string>();
+export default function CategoryPlaylist({ category }: { category: SpotifyApi.CategoryObject }) {
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
-  const response = usePlaylistSearch(searchText);
+  const response = useGetCategoryPlaylists(category.id);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
@@ -26,9 +25,10 @@ export default function SearchPlaylists() {
   return (
     <List
       searchBarPlaceholder="Search playlists..."
-      onSearchTextChange={setSearchText}
+      navigationTitle={category.name}
       isLoading={response.isLoading}
       throttle
+      enableFiltering
     >
       {response.result?.playlists.items.map((p) => (
         <PlaylistItem key={p.id} playlist={p} spotifyInstalled={spotifyInstalled} />
