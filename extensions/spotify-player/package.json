@@ -88,6 +88,27 @@
       "mode": "view"
     },
     {
+      "name": "featuredPlaylists",
+      "title": "Featured Playlists",
+      "subtitle": "Spotify",
+      "description": "View featured playlists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "browseAll",
+      "title": "Browse All",
+      "subtitle": "Spotify",
+      "description": "Browse genres in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "searchPlaylists",
+      "title": "Search Playlists",
+      "subtitle": "Spotify",
+      "description": "Search & Play playlists in Spotify",
+      "mode": "view"
+    },
+    {
       "name": "likeCurrentSong",
       "subtitle": "Spotify",
       "title": "Like Current Song",

@@ -65,9 +65,9 @@ export function getArtistAlbums(artistId: string | undefined): Response<SpotifyA
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -163,9 +163,9 @@ export function useArtistsSearch(query: string | undefined): Response<SpotifyApi
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -214,9 +214,9 @@ export function getAlbumTracks(albumId: string | undefined): Response<SpotifyApi
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -265,9 +265,9 @@ export function useAlbumSearch(query: string | undefined): Response<SpotifyApi.A
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -316,9 +316,9 @@ export function useTrackSearch(query: string | undefined): Response<SpotifyApi.T
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -381,9 +381,9 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -432,9 +432,9 @@ export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPla
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -479,9 +479,9 @@ export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesRespon
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
