@@ -153,7 +153,7 @@ declare global {
         /** page containing the currently authorized user, or null if the current user is not on this leader board */
         page: number;
         user: LeaderBoardUser;
-      };
+      } | null;
       range: {
         /** start of this range as ISO 8601 UTC datetime */
         start_date: string;
