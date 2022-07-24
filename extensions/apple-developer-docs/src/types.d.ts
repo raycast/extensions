@@ -1,3 +1,4 @@
+type AllResultType = "all";
 type ResultType = "general" | "documentation" | "video" | "sample_code" | string;
 
 type SearchResult = {

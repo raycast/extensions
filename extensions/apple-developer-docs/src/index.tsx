@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { config } from "./config";
-import { makeUrl, makeUrlMarkdown } from "./utils";
+import { capitalizeRecursively, getIcon, makeUrl, makeUrlMarkdown } from "./utils";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -15,11 +15,31 @@ export default function Command() {
     return `Results for "${suggested_query.query}"`;
   }, [state.payload.suggested_query]);
 
+  const [typeFilter, setTypeFilter] = useState<AllResultType | ResultType>("all");
+  const onTypeChange = useCallback((type: string) => {
+    setTypeFilter(type);
+  }, []);
+  const results = useMemo(() => {
+    const { results } = state.payload;
+    switch (typeFilter) {
+      case "general":
+      case "documentation":
+      case "sample_code":
+      case "video":
+        return results.filter((result) => result.type === typeFilter);
+      default:
+        return results;
+    }
+  }, [state.payload.results, typeFilter]);
+
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
       searchBarPlaceholder="Search Apple Developer documentation..."
+      searchBarAccessory={
+        <TypeDropdown types={["all", "general", "documentation", "sample_code", "video"]} onTypeChange={onTypeChange} />
+      }
       throttle
     >
       {typeof state.payload.featuredResult !== "string" && (
@@ -27,8 +47,8 @@ export default function Command() {
           <SearchFeaturedItem featured={state.payload.featuredResult} />
         </List.Section>
       )}
-      <List.Section title={resultsTitle} subtitle={state.payload.results.length + ""}>
-        {state.payload.results.map((result) => (
+      <List.Section title={resultsTitle} subtitle={results.length + ""}>
+        {results.map((result) => (
           <SearchListItem key={`${result.order}_${result.url}`} result={result} />
         ))}
       </List.Section>
@@ -68,18 +88,7 @@ function SearchFeaturedItem({ featured }: { featured: FeaturedResult }) {
 }
 
 function SearchListItem({ result }: { result: SearchResult }) {
-  const icon = useMemo(() => {
-    switch (result.type) {
-      case "general":
-        return Icon.Megaphone;
-      case "sample_code":
-        return Icon.CodeBlock;
-      case "video":
-        return Icon.PlayFilled;
-      default:
-        return Icon.Book;
-    }
-  }, [result.type]);
+  const icon = useMemo(() => getIcon(result.type), [result.type]);
   const url = useMemo(() => makeUrl(result.url), [result.url]);
 
   return (
@@ -90,6 +99,27 @@ function SearchListItem({ result }: { result: SearchResult }) {
       accessories={[{ text: result.platform.join(", "), icon: result.tile_image }]}
       actions={<ItemActionPanel url={url} title={result.title} />}
     />
+  );
+}
+
+type TypeDropdownProps = {
+  types: (AllResultType | ResultType)[];
+  onTypeChange: (type: AllResultType | ResultType) => void;
+};
+function TypeDropdown({ types, onTypeChange }: TypeDropdownProps) {
+  return (
+    <List.Dropdown tooltip="Select result type" storeValue={true} onChange={onTypeChange}>
+      <List.Dropdown.Section title="Result Types">
+        {types.map((resultType) => (
+          <List.Dropdown.Item
+            icon={getIcon(resultType)}
+            key={resultType}
+            title={capitalizeRecursively(resultType.replace("_", " ").toLowerCase())}
+            value={resultType}
+          />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
   );
 }
 
