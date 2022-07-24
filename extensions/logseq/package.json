@@ -5,7 +5,9 @@
   "description": "Add notes quickly in Logseq",
   "icon": "command-icon.png",
   "author": "futantan",
-  "contributors": ["sawhney17"],
+  "contributors": [
+    "sawhney17"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -15,6 +17,24 @@
       "title": "Path to Graph",
       "required": true,
       "description": "Specify the path to your notes graph location"
+    },
+    {
+      "name": "insertTime",
+      "label": "Add current time as the leading text",
+      "type": "checkbox",
+      "default": false,
+      "title": "Leading Time",
+      "description": "Add current time as the leading text",
+      "required": false
+    },
+    {
+      "name": "addQuickCaptureTag",
+      "label": "Add quick capture tag [[quick capture]]",
+      "type": "checkbox",
+      "default": false,
+      "title": "Quick Capture",
+      "description": "Add quick capture tag like logseq mobile",
+      "required": false
     },
     {
       "name": "smartSearch",
