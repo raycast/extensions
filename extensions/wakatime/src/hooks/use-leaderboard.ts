@@ -9,6 +9,7 @@ export function useLeaderBoard({ id, page }: { id?: string; page?: number } = {}
 
   useEffect(() => {
     async function getData() {
+      setData(undefined);
       setIsLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Loading Leaderboard");
 
