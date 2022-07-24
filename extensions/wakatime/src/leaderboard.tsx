@@ -14,10 +14,10 @@ export default function Command({ id }: { id?: string }) {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail}
-      selectedItemId={data?.current_user.user.id}
+      selectedItemId={data?.current_user?.user.id}
       searchBarAccessory={
         data && (
-          <List.Dropdown tooltip="Page" value={page ?? String(data.current_user.page)} onChange={setPage}>
+          <List.Dropdown tooltip="Page" onChange={setPage} value={page ?? String(data ? data.page : 1)}>
             {Array.from({ length: data.total_pages }).map((_, idx) => (
               <List.Dropdown.Item key={idx} title={`Page ${idx + 1}`} value={String(idx + 1)} />
             ))}
