@@ -132,7 +132,6 @@
     "@raycast/api": "1.38.1",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.3",
-    "node-notifier": "^10.0.1",
     "run-applescript": "^6.0.0",
     "spotify-web-api-node": "^5.0.2"
   },
@@ -145,8 +144,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "js-base64": "^3.6.1",
-    "open": "^8.2.1",
     "prettier": "^2.6.2",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
