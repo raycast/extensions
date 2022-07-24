@@ -31,6 +31,7 @@ export default function CanIUse() {
     <List searchBarPlaceholder="Search technologies...">
       {Object.entries(features).map(([featureName, packedFeature]) => {
         const feat = feature(packedFeature);
+        const link = getCanIUseLink(featureName);
 
         const accessories: List.Item.Accessory[] = [
           { text: briefMode ? feat.status.toUpperCase() : statusToName[feat.status] },
@@ -63,7 +64,12 @@ export default function CanIUse() {
                     />
                   }
                 />
-                <Action.OpenInBrowser url={getCanIUseLink(featureName)} />
+                <Action.OpenInBrowser url={link} />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={link}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
               </ActionPanel>
             }
             accessories={accessories}
