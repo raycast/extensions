@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-07-24
+
+- Add max. length preference for menubar item
+
 ## [Feature] - 2022-07-21
 
 - Introduce new command "Just Play"

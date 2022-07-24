@@ -9,7 +9,8 @@
   "contributors": [
     "dillionverma",
     "andreaselia",
-    "stuart"
+    "stuart",
+    "tonka3000"
   ],
   "commands": [
     {
@@ -40,7 +41,16 @@
       "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
       "subtitle": "Spotify",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "maxtitlelength",
+          "description": "Max Menubar title length. Leave empty for no limitation.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Menubar Title length"
+        }
+      ]
     },
     {
       "name": "playSimilar",
