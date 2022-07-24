@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-18 00:37
+ * @lastEditTime: 2022-07-22 23:57
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -121,7 +121,6 @@ export const languageItemList: LanguageItem[] = [
     eudicWebLanguageId: "en",
     baiduLanguageId: "en",
     caiyunLanguageId: "en",
-    googleLanguageId: "en",
     languageTitle: "English",
     voiceList: ["Alex", "Samantha"],
   },

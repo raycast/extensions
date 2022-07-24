@@ -4,7 +4,7 @@ import { deepLAuthKey } from "./crypto";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 15:42
+ * @lastEditTime: 2022-07-23 21:25
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -389,7 +389,7 @@ export async function requestDeepLTextTranslate(
       code: error.response.status.toString(),
       message: error.response.statusText,
     };
-    console.warn("deepL error info: ", errorInfo);
+    console.error("deepL error info: ", errorInfo);
     return Promise.reject(errorInfo);
   }
 }
