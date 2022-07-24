@@ -13,7 +13,7 @@ export function IssueListItem(props: { item: Issue; index: number; instance: str
     const icon = getIcon(props.index + 1);
     const accessories = [{ text: props.item.id }];
     setState({ icon, accessories });
-  }, [props.item, props.index]);
+  }, [props.item.id, props.index]);
 
   return (
     <List.Item

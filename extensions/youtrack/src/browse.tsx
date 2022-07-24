@@ -1,22 +1,23 @@
 // noinspection JSIgnoredPromiseFromCall
 
-import { useEffect, useState } from "react";
-import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { Youtrack } from "youtrack-rest-client";
-import { IssueListItem } from "./components";
-import { fetchIssues, getEmptyIssue, loadCache, saveCache } from "./utils";
-import { Preferences, State } from "./interfaces";
+import {useEffect, useState} from "react";
+import {getPreferenceValues, List, showToast, Toast} from "@raycast/api";
+import {Youtrack} from "youtrack-rest-client";
+import {IssueListItem} from "./components";
+import {fetchIssues, getEmptyIssue, loadCache, saveCache} from "./utils";
+import {Preferences, State} from "./interfaces";
+import _ from "lodash";
 
 // noinspection JSUnusedGlobalSymbols
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
 
-  const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
+  const [state, setState] = useState<State>({isLoading: true, items: [], project: null, yt: null});
 
   useEffect(() => {
     try {
-      const yt = new Youtrack({ baseUrl: prefs.instance, token: prefs.token });
-      setState({ isLoading: false, items: [], project: null, yt });
+      const yt = new Youtrack({baseUrl: prefs.instance, token: prefs.token});
+      setState({isLoading: false, items: [], project: null, yt});
     } catch (error) {
       setState((previous) => ({
         ...previous,
@@ -32,14 +33,16 @@ export default function Command() {
       if (state.yt === null) {
         return;
       }
-      setState((previous) => ({ ...previous, isLoading: true }));
-      const cache = await loadCache();
-      if (cache) {
-        setState((previous) => ({ ...previous, items: cache, isLoading: true }));
-      }
+      setState((previous) => ({...previous, isLoading: true}));
       try {
+        const cache = await loadCache();
         const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
-        setState((previous) => ({ ...previous, items: feed, isLoading: false }));
+        if (cache.length) {
+          if (_.isEqual(cache, feed)) {
+            setState((previous) => ({...previous, items: cache, isLoading: false}));
+          }
+        }
+        setState((previous) => ({...previous, items: feed, isLoading: false}));
         await saveCache(feed);
       } catch (error) {
         setState((previous) => ({
@@ -50,6 +53,7 @@ export default function Command() {
         }));
       }
     }
+
     fetchItems();
   }, [state.yt]);
 
@@ -66,7 +70,7 @@ export default function Command() {
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
       {state.items?.map((item, index) => (
-        <IssueListItem key={item.id} item={item} index={index} instance={prefs.instance} />
+        <IssueListItem key={item.id} item={item} index={index} instance={prefs.instance}/>
       ))}
     </List>
   );
