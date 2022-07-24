@@ -1,6 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { Preferences, Icon8, Style } from "../types/types";
-import { svgToImage, svgToMdImage, defaultStyles } from "../utils/utils";
+import { svgToMdImage, defaultStyles, recolorSVG } from "../utils/utils";
 import fetch from "node-fetch";
 
 const preferences: Preferences = getPreferenceValues();
@@ -65,19 +65,14 @@ export const getStyles = async (): Promise<Style[]> => {
   }
 };
 
-export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8 | undefined> => {
+export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8> => {
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
   const data: any = await response.json();
   const icon = data.icon;
   try {
     icon8 = {
-      id: icon.id,
-      name: icon.name,
-      url: `https://img.icons8.com/${icon.platform}/2x/${icon.commonName}.png`,
-      link: `https://icons8.com/icon/${icon.id}/${icon.name}`,
-      platform: icon.platform,
-      isColor: icon8.isColor,
+      ...icon8,
       svg: icon.svg,
       description: icon.description,
       style: icon.platformName,
@@ -87,11 +82,12 @@ export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8 
       isAnimated: icon.isAnimated,
       published: new Date(icon.publishedAt),
     };
-    icon8.image = await svgToImage(icon8.svg, icon8.isColor ? undefined : color);
-    icon8.mdImage = svgToMdImage(icon8.image, 256, 256);
+    icon8.svg = recolorSVG(icon8.svg, color); 
+    icon8.image = Buffer.from(icon8.svg, "utf-8");
+    icon8.mdImage = svgToMdImage(icon8.image, 256);
     return icon8;
   } catch (e: any) {
     console.error(e);
-    return undefined;
+    return icon8;
   }
 };

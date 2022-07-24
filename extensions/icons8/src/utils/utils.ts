@@ -17,17 +17,16 @@ export const formatDate = (input: Date | string): string => {
   return timeAgo.format(date) as string;
 };
 
-export const svgToImage = async (svg: string, color?: string): Promise<Buffer> => {
+export const recolorSVG = (svg: string, color?: string): string => {
   if (color) {
     const index = svg.indexOf("<svg") + 4;
-    svg = `${svg.substring(0, index)} fill="${color}" ${svg.substring(index)}`;
+    svg = `${svg.substring(0, index)} fill="${color}" ${svg.substring(index + 1)}`;
   }
-  return Buffer.from(svg, "utf-8");
+  return svg; 
 };
 
-export const svgToMdImage = (image: Buffer, height: number, width?: number): string => {
-  if (!width) width = height;
-  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${width}" height="${height}" />`;
+export const svgToMdImage = (image: Buffer, size: number): string => {
+  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${size}" height="${size}" />`;
   return md;
 };
 

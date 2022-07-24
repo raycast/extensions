@@ -21,6 +21,7 @@ export interface Icon8 {
   svg: string;
   image?: Buffer;
   mdImage?: string;
+  downloadName?: string; 
 
   description?: string;
   tags?: string[];

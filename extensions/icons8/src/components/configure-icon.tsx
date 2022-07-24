@@ -41,11 +41,14 @@ const ConfigureIcon = (props: ConfigureProps): JSX.Element => {
         path: values.downloadPath,
         color: color.formatHex(),
         format: values.imageFormat,
-        size: values.imageSize,
+        size: parseInt(values.imageSize),
       });
       pop();
     } else {
       showToast(Toast.Style.Failure, "Invalid Color");
+    }
+    if (values.downloadName) {
+      icon.downloadName = values.downloadName;
     }
   };
 
