@@ -3,7 +3,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 
 import LeaderBoard from "./leaderboard";
 
-export default function Command() {
+export default function PrivateLeaderBoardsCommand() {
   const { data, isLoading } = usePrivateLeaderBoards();
 
   return (

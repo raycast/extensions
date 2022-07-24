@@ -4,7 +4,7 @@ import { Action, Color, Icon, List } from "@raycast/api";
 import { useLeaderBoard } from "./hooks";
 import { LeaderBoardItem } from "./components";
 
-export default function Command({ id }: { id?: string }) {
+export default function LeaderBoardCommand({ id }: { id?: string }) {
   const [page, setPage] = useState<string>();
   const [showDetail, setShowDetail] = useState(false);
 

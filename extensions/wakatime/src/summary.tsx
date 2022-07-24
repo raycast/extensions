@@ -4,7 +4,7 @@ import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useActivityChange, useUser } from "./hooks";
 import { ProjectsStatsList, RangeStatsList } from "./components";
 
-export default function Command() {
+export default function SummaryCommand() {
   const change = useActivityChange();
   const { data, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
