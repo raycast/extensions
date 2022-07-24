@@ -4,12 +4,13 @@ import { mapIssueCommentToShort, mapPullCommentToShort } from "./mappers";
 
 export const getPullComments = (params: PullRequestID): Promise<CommentShort[]> => Promise.resolve()
   .then(logParams("getPullComments", params))
-  .then(paginateListReviewComments(params))
+  .then(listLatestReviewComments(params))
   .then(comments => comments.map(mapPullCommentToShort))
   .then(teeShortComments("getPullComments", params))
 
-const paginateListReviewComments = (params: PullRequestID) =>
-  () => octokit.paginate(octokit.rest.pulls.listReviewComments, params);
+const listLatestReviewComments = ({ owner, pull_number, repo }: PullRequestID) =>
+  () => octokit.rest.pulls.listReviewComments({ owner, repo, pull_number, sort: "created", direction: "desc" })
+    .then(res => res.data);
 
 export const getIssueComments = (params: PullRequestID): Promise<CommentShort[]> => Promise.resolve()
   .then(logParams("getIssueComments", params))
