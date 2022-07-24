@@ -36,7 +36,13 @@ const usePullsState = () => {
       storeMyPulls(myPulls),
       storeParticipatedPulls(participatedPulls)
     ])
-      .then(() => console.debug(`storeUpdates: allPulls=${allPulls.length} hiddenPulls=${hiddenPulls.length} myPulls=${myPulls.length} participatedPulls=${participatedPulls.length} done`));
+      .then(() => console.debug(
+        `storeUpdates: allPulls=${allPulls.length} `+
+        `hiddenPulls=${filteredHiddenPulls.length} `+
+        `myPulls=${myPulls.length} `+
+        `participatedPulls=${participatedPulls.length} `+
+        `done`
+      ))
   };
 
   const setAllPullsToState = ({ myPulls, participatedPulls, pullVisits, hiddenPulls }: AllPulls) => {
@@ -84,7 +90,10 @@ const usePullsState = () => {
               participatedPull => participatedPull.number !== pull.number
             ),
             hiddenPulls,
-            pullVisits
+            pullVisits: [
+              {pull, last_visit: getTimestampISOInSeconds()},
+              ...pullVisits.filter(pullVisit => pullVisit.pull.number !== pull.number)
+            ].slice(0, 20)
           };
 
           setAllPullsToState(apply);
