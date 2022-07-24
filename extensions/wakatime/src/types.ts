@@ -299,7 +299,7 @@ declare global {
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Types {
-    type RouteData<T> = T & { ok: true };
+    type RouteData<T> = T & { ok: true; error?: never };
     type RouteError = { error: string; ok: false };
 
     type RouteResponse<T> = RouteData<T> | RouteError;
