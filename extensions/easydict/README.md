@@ -165,7 +165,7 @@ By default, the extension will automatically select the preferred languages as t
 
 ### Sort Translation Results Manually
 
-<details> <summary> You can sort the translation results by your preference, default is `DeepL,Google,Apple,Baidu,Tencent,Youdao,Caiyun`. </summary>
+<details> <summary> You can sort the translation results by your preference, default is DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
 
 <p>
 

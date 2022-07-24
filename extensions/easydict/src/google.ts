@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-22 23:27
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 17:26
+ * @lastEditTime: 2022-07-24 16:22
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -30,6 +30,8 @@ export async function requestGoogleTranslate(
 
 /**
  *  Check if ip is in China
+ *
+ *  Todo: should store ip in LocalStorage.
  */
 async function checkIfIpInChina(): Promise<boolean> {
   try {
@@ -70,7 +72,9 @@ async function getCurrentIpInfo() {
 }
 
 /**
- * Use crawler to get Google Translate results
+ * Use crawler to get Google Translate results.
+ *
+ * From https://github.com/roojay520/bobplugin-google-translate/blob/master/src/google-translate-mobile.ts
  */
 async function googleCrawlerTranslate(
   queryText: string,
