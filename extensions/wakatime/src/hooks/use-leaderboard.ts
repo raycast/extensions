@@ -3,7 +3,7 @@ import { showToast, Toast } from "@raycast/api";
 
 import { getLeaderBoard } from "../utils";
 
-export function useLeaderBoard(id?: string) {
+export function useLeaderBoard({ id, page }: { id?: string; page?: number } = {}) {
   const [data, setData] = useState<WakaTime.LeaderBoard>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -13,7 +13,7 @@ export function useLeaderBoard(id?: string) {
       const toast = await showToast(Toast.Style.Animated, "Loading Leaderboard");
 
       try {
-        const data = await getLeaderBoard(id);
+        const data = await getLeaderBoard({ id, page });
 
         if (!data.ok) throw new Error(data.error);
         setData(data);
@@ -30,7 +30,7 @@ export function useLeaderBoard(id?: string) {
     }
 
     getData();
-  }, []);
+  }, [id, page]);
 
   return { data, isLoading };
 }

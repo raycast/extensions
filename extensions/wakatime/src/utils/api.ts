@@ -67,8 +67,10 @@ export const getSummary = (key: string, start: Date) => {
  * @param {string} [id] - The id of the leaderboard you want to get. If you don't pass an id, you'll
  * get the default public leaderboard.
  */
-export const getLeaderBoard = (id?: string) =>
-  routeHandler<WakaTime.LeaderBoard>(id ? `/users/current/leaderboards/${id}` : "/leaders");
+export const getLeaderBoard = ({ id, page }: { id?: string; page?: number } = {}) => {
+  const query = page == undefined ? "" : `?page=${page}`;
+  return routeHandler<WakaTime.LeaderBoard>(id ? `/users/current/leaderboards/${id}${query}` : `/leaders${query}`);
+};
 
 /**
  * It fetches the user's private leaderboards from the WakaTime API and returns it as a `WakaTime.PrivateLeaderBoards` object
