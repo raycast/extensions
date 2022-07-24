@@ -17,7 +17,11 @@ export default function Command({ id }: { id?: string }) {
       selectedItemId={data?.current_user?.user.id}
       searchBarAccessory={
         data && (
-          <List.Dropdown tooltip="Page" onChange={setPage} value={page ?? String(data ? data.page : 1)}>
+          <List.Dropdown
+            tooltip="Page"
+            value={page ?? String(data ? data.page : 1)}
+            onChange={(page) => !isLoading && setPage(page)}
+          >
             {Array.from({ length: data.total_pages }).map((_, idx) => (
               <List.Dropdown.Item key={idx} title={`Page ${idx + 1}`} value={String(idx + 1)} />
             ))}
