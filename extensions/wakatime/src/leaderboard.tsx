@@ -14,7 +14,7 @@ export default function Command({ id }: { id?: string }) {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail}
-      selectedItemId={data?.current_user?.page == page ? data?.current_user?.user.id : undefined}
+      selectedItemId={data?.current_user?.page === data?.page ? data?.current_user?.user.id : undefined}
       searchBarAccessory={
         data && (
           <List.Dropdown
