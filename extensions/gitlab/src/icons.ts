@@ -24,7 +24,7 @@ export enum GitLabIcons {
   epic = "epic.png",
   comment = "book.png",
   wiki = "list.png",
-  show_details = "sidebar-right-16",
+  show_details = "app-window-sidebar-right-16",
   tag = "tag.png",
   commit = "commit.png",
   status_success = "status_success.png",

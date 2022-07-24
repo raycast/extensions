@@ -2,7 +2,7 @@ import { ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
+import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -133,7 +133,7 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
       icon={icon}
       title={job.name}
       subtitle={subtitle}
-      accessories={ensureCleanAccessories([{ text: status }])}
+      accessories={[{ text: status }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

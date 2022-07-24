@@ -102,3 +102,12 @@ export function getPreferPopToRootPreference(): boolean {
   }
   return false;
 }
+
+export function getListDetailsPreference(): boolean {
+  const pref = getPreferenceValues();
+  const val = (pref.listdetails as boolean) || false;
+  if (val === true) {
+    return true;
+  }
+  return false;
+}

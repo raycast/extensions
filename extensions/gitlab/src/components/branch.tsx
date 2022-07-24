@@ -7,7 +7,7 @@ import { CreateMRAction, ShowBranchCommitsAction } from "./branch_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusIcon } from "./jobs";
-import { ensureCleanAccessories, showErrorToast } from "../utils";
+import { showErrorToast } from "../utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -39,7 +39,7 @@ export function BranchListItem(props: { branch: any; project: Project }) {
       title={branch.name}
       subtitle={states.join(" ")}
       icon={icon}
-      accessories={ensureCleanAccessories([{ icon: statusIcon }])}
+      accessories={[{ icon: statusIcon }]}
       actions={
         <ActionPanel>
           <ShowBranchCommitsAction projectID={project.id} branch={branch} />

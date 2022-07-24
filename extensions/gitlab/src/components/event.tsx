@@ -4,7 +4,7 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, daysInSeconds, ensureCleanAccessories, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, daysInSeconds, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
@@ -390,7 +390,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     <List.Item
       title={title || ""}
       icon={icon}
-      accessories={ensureCleanAccessories([{ text: accessoryTitle }])}
+      accessories={[{ text: accessoryTitle }]}
       actions={<ActionPanel>{actionElement && actionElement}</ActionPanel>}
     />
   );

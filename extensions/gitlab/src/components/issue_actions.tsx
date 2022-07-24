@@ -22,7 +22,7 @@ export function CloseIssueAction(props: { issue: Issue; finished?: () => void })
   return (
     <ActionPanel.Item
       title="Close Issue"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
       onAction={handleAction}
     />
   );

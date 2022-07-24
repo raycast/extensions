@@ -36,7 +36,7 @@ export function StatusClearCurrentAction(props: {
         showErrorToast(getErrorMessage(error), "Could not clear Status");
       }
     };
-    return <Action title="Clear Status" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
+    return <Action title="Clear Status" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
   }
   return null;
 }
@@ -53,7 +53,7 @@ export function StatusPresetFactoryResetAction(props: {
     }
   };
   return (
-    <Action title="Preset Factory Reset" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />
+    <Action title="Preset Factory Reset" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />
   );
 }
 
