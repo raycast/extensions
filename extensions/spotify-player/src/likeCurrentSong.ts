@@ -1,5 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { likeCurrentlyPlayingTrack } from "./client/client";
+import { likeCurrentlyPlayingTrack } from "./spotify/client";
 
 export default async () => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Liking Song" });

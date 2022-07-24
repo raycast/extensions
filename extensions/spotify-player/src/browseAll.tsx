@@ -1,5 +1,5 @@
 import { List, showToast, Toast } from "@raycast/api";
-import { useGetCategories } from "./client/client";
+import { useGetCategories } from "./spotify/client";
 import Categoryitem from "./components/Categorytem";
 
 export default function BrowseAll() {
@@ -10,7 +10,7 @@ export default function BrowseAll() {
   }
 
   return (
-    <List isLoading={response.isLoading} throttle>
+    <List searchBarPlaceholder="Search Genres..." isLoading={response.isLoading} throttle>
       {response.result?.categories.items.map((c) => (
         <Categoryitem key={c.id} category={c} />
       ))}

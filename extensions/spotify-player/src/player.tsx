@@ -5,6 +5,7 @@ import {
   closeMainWindow,
   Color,
   environment,
+  getPreferenceValues,
   Icon,
   LaunchType,
   List,
@@ -12,30 +13,33 @@ import {
   showHUD,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import BrowseAll from "./browseAll";
-import { getState, getTrack, nextTrack, pause, play, playPause, previousTrack } from "./client/applescript";
-import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
-import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./client/types";
+import { getState, getTrack, nextTrack, pause, play, playPause, previousTrack } from "./spotify/applescript";
+import { likeCurrentlyPlayingTrack, startPlaySimilar, useSearch } from "./spotify/client";
+import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import NotInstalledDetail from "./components/NotInstalledDetail";
 import NowPlayingDetail from "./components/NowPlayingDetail";
 import NowPlayingEmptyDetail from "./components/NowPlayingEmptyDetail";
+import { SearchListItems } from "./components/SearchListItems";
 import FeaturedPlaylists from "./featuredPlaylists";
 import SearchAlbums from "./searchAlbums";
 import SearchArtists from "./searchArtists";
 import SearchPlaylists from "./searchPlaylists";
 import SearchTracks from "./searchTracks";
-import { isSpotifyInstalled, showTrackNotification } from "./utils";
+import { isSpotifyInstalled, Preferences, showTrackNotification } from "./utils";
 
-export default function NowPlaying() {
+export default function Player() {
+  const preferences = getPreferenceValues<Preferences>();
+
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | undefined>();
   const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | undefined>();
   const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState<string>();
 
-  const { push } = useNavigation();
+  const response = useSearch(searchText);
 
   const fetchPlayerAndTrackState = async () => {
     // Check if Spotify is installed (only try this once)
@@ -76,8 +80,17 @@ export default function NowPlaying() {
     };
   }, []);
 
+  const handlePlayPause = async () => {
+    if (preferences.closeWindowOnAction) {
+      await closeMainWindow();
+    }
+    await playPause();
+  };
+
   const handlePlay = async () => {
-    await closeMainWindow();
+    if (preferences.closeWindowOnAction) {
+      await closeMainWindow();
+    }
     await setCurrentSpotifyState((oldState) => {
       if (!oldState) return;
       return {
@@ -90,30 +103,42 @@ export default function NowPlaying() {
   };
 
   const handlePause = async () => {
-    await closeMainWindow();
+    if (preferences.closeWindowOnAction) {
+      await closeMainWindow();
+    }
     await setCurrentSpotifyState((oldState) => {
       if (!oldState) return;
       return {
         ...oldState,
 
-        state: SpotifyPlayingState.Playing,
+        state: SpotifyPlayingState.Paused,
       };
     });
     await pause();
   };
 
   const handleNextTrack = async () => {
-    await closeMainWindow();
+    if (preferences.closeWindowOnAction) {
+      await closeMainWindow();
+    }
     await nextTrack();
-    await showTrackNotification();
-    await fetchPlayerAndTrackState();
+    if (preferences.closeWindowOnAction) {
+      await showTrackNotification();
+    } else {
+      await fetchPlayerAndTrackState();
+    }
   };
 
   const handlePreviousTrack = async () => {
-    await closeMainWindow();
+    if (preferences.closeWindowOnAction) {
+      await closeMainWindow();
+    }
     await previousTrack();
-    await showTrackNotification();
-    await fetchPlayerAndTrackState();
+    if (preferences.closeWindowOnAction) {
+      await showTrackNotification();
+    } else {
+      await fetchPlayerAndTrackState();
+    }
   };
 
   const searchItems = [
@@ -123,7 +148,7 @@ export default function NowPlaying() {
       icon={Icon.Music}
       actions={
         <ActionPanel>
-          <Action title="Search Playlists" onAction={() => push(<SearchPlaylists />)} />
+          <Action.Push title="Search Playlists" target={<SearchPlaylists />} />
         </ActionPanel>
       }
     />,
@@ -133,7 +158,7 @@ export default function NowPlaying() {
       icon={Icon.MagnifyingGlass}
       actions={
         <ActionPanel>
-          <Action title="Search Tracks" onAction={() => push(<SearchTracks />)} />
+          <Action.Push title="Search Tracks" target={<SearchTracks />} />
         </ActionPanel>
       }
     />,
@@ -143,7 +168,7 @@ export default function NowPlaying() {
       icon={Icon.Person}
       actions={
         <ActionPanel>
-          <Action title="Search Artists" onAction={() => push(<SearchArtists />)} />
+          <Action.Push title="Search Artists" target={<SearchArtists />} />
         </ActionPanel>
       }
     />,
@@ -153,7 +178,7 @@ export default function NowPlaying() {
       icon={Icon.List}
       actions={
         <ActionPanel>
-          <Action title="Search Albums" onAction={() => push(<SearchAlbums />)} />
+          <Action.Push title="Search Albums" target={<SearchAlbums />} />
         </ActionPanel>
       }
     />,
@@ -163,7 +188,7 @@ export default function NowPlaying() {
       icon={Icon.Stars}
       actions={
         <ActionPanel>
-          <Action title="Featured Playlists" onAction={() => push(<FeaturedPlaylists />)} />
+          <Action.Push title="Featured Playlists" target={<FeaturedPlaylists />} />
         </ActionPanel>
       }
     />,
@@ -173,7 +198,7 @@ export default function NowPlaying() {
       icon={Icon.Hashtag}
       actions={
         <ActionPanel>
-          <Action title="Browse All" onAction={() => push(<BrowseAll />)} />
+          <Action.Push title="Browse All" target={<BrowseAll />} />
         </ActionPanel>
       }
     />,
@@ -205,7 +230,7 @@ export default function NowPlaying() {
                 ? playerState.state === SpotifyPlayingState.Playing
                   ? handlePause()
                   : handlePlay()
-                : playPause()
+                : handlePlayPause()
             }
           />
           <Action
@@ -324,15 +349,22 @@ export default function NowPlaying() {
     }
   };
 
-  if (!isSpotifyInstalled) {
+  if (spotifyInstalled === false) {
     return <NotInstalledDetail />;
   }
 
-  const listItems = getListItems();
+  const listItems = getListItems() ?? [];
 
   return (
-    <List searchBarPlaceholder="Now Playing..." isShowingDetail={true} enableFiltering isLoading={false}>
-      {listItems}
+    <List
+      searchBarPlaceholder="Now Playing..."
+      isShowingDetail={true}
+      isLoading={response.isLoading}
+      onSearchTextChange={setSearchText}
+    >
+      {searchText
+        ? response.result && <SearchListItems results={response.result} spotifyInstalled={spotifyInstalled ?? false} />
+        : listItems}
     </List>
   );
 }

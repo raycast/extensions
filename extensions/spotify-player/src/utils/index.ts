@@ -1,6 +1,10 @@
 import { getApplications, showHUD } from "@raycast/api";
-import { getState, getTrack } from "../client/applescript";
-import { SpotifyPlayingState } from "../client/types";
+import { getState, getTrack } from "../spotify/applescript";
+import { SpotifyPlayingState } from "../spotify/types";
+
+export interface Preferences {
+  closeWindowOnAction: boolean;
+}
 
 export async function isSpotifyInstalled() {
   const applications = await getApplications();

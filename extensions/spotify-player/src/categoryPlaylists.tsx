@@ -1,8 +1,8 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useGetCategoryPlaylists } from "./client/client";
+import { useGetCategoryPlaylists } from "./spotify/client";
 import { isSpotifyInstalled } from "./utils";
-import PlaylistItem from "./components/PlaylistItem";
+import PlaylistItem from "./components/PlaylistListItem";
 
 export default function CategoryPlaylist({ category }: { category: SpotifyApi.CategoryObject }) {
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);

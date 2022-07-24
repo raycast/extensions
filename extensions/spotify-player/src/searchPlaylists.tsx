@@ -1,8 +1,8 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { play, playShuffled, usePlaylistSearch } from "./client/client";
+import { usePlaylistSearch } from "./spotify/client";
 import { isSpotifyInstalled } from "./utils";
-import PlaylistItem from "./components/PlaylistItem";
+import PlaylistItem from "./components/PlaylistListItem";
 
 export default function SearchPlaylists() {
   const [searchText, setSearchText] = useState<string>();

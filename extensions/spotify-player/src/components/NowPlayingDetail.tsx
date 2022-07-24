@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../client/types";
+import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 import { msToHMS } from "../utils";
 
 export default function NowPlayingDetail({
@@ -19,7 +19,7 @@ export default function NowPlayingDetail({
 
   useEffect(() => {
     const id = setTimeout(() => {
-      if (position < trackDuration) {
+      if (playerState.state === SpotifyPlayingState.Playing && position < trackDuration) {
         setPosition(position + 1000);
       }
     }, 1000);

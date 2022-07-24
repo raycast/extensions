@@ -1,9 +1,9 @@
 // This whole file is unused
 
 import { List, ActionPanel, Action, Image, Icon } from "@raycast/api";
-import { play, playShuffled } from "../client/client";
+import { play, playShuffled } from "../spotify/client";
 
-export default function PlaylistItem(props: {
+export default function PlaylistListItem(props: {
   playlist: SpotifyApi.PlaylistObjectSimplified;
   spotifyInstalled: boolean;
 }) {

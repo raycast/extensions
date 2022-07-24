@@ -1,4 +1,4 @@
-import { getAlbumTracks, getArtistAlbums, spotifyApi } from "../client/client";
+import { getAlbumTracks, getArtistAlbums, spotifyApi } from "../spotify/client";
 import { List, ActionPanel, Action, Image, Icon, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
 import { TracksList } from "../searchTracks";

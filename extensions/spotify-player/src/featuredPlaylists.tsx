@@ -1,8 +1,8 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useGetFeaturedPlaylists } from "./client/client";
+import { useGetFeaturedPlaylists } from "./spotify/client";
 import { isSpotifyInstalled } from "./utils";
-import PlaylistItem from "./components/PlaylistItem";
+import PlaylistItem from "./components/PlaylistListItem";
 
 export default function FeaturedPlaylists() {
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);

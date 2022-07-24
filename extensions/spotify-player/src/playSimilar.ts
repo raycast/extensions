@@ -1,6 +1,6 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { getTrack } from "./client/applescript";
-import { startPlaySimilar } from "./client/client";
+import { getTrack } from "./spotify/applescript";
+import { startPlaySimilar } from "./spotify/client";
 
 export default async function main() {
   try {

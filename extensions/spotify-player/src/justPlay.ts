@@ -1,6 +1,6 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
-import { searchTracks, play } from "./client/client";
+import { searchTracks, play } from "./spotify/client";
 import { trackTitle } from "./utils";
 
 export default async function Main(props: { arguments: { query: string } }) {

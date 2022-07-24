@@ -13,11 +13,10 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
-
-import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./client/types";
+import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
+import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import { isSpotifyInstalled } from "./utils";
-import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./client/applescript";
+import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
 
 export default function NowPlayingMenuBar() {
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | undefined>();

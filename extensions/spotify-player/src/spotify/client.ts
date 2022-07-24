@@ -158,6 +158,56 @@ export async function playShuffled(uri: string): Promise<void> {
   }
 }
 
+export function useSearch(query: string | undefined): Response<SpotifyApi.SearchResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.SearchResponse>>({ isLoading: false });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      if (!query) {
+        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+      try {
+        const response =
+          (await spotifyApi
+            .search(query, ["track", "artist", "album", "playlist"], { limit: 10 })
+            .then((response: { body: any }) => response.body as SpotifyApi.SearchResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, [query]);
+
+  return response;
+}
+
 export function useArtistsSearch(query: string | undefined): Response<SpotifyApi.ArtistSearchResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistSearchResponse>>({ isLoading: false });
   let cancel = false;
@@ -490,7 +540,7 @@ export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesRespon
       try {
         const response =
           (await spotifyApi
-            .getCategories({ limit: 50 })
+            .getCategories()
             .then((response: { body: any }) => response.body as SpotifyApi.MultipleCategoriesResponse)
             .catch((error) => {
               setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
