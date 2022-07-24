@@ -18,6 +18,8 @@ export type PullSearchResultShort = {
   updated_at: string;
   closed_at: string | null;
   user: UserShort | null;
+
+  myIcon?: string;
 }
 
 export type PullRequestReviewShort = {

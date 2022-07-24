@@ -55,6 +55,8 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
   if (!comment && !review && !iAmAuthor) {
     console.debug(`${logPrefix} action=keep`);
 
+    pull.myIcon = "🙏";
+
     return pull;
   }
 
@@ -69,13 +71,17 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
 
   if (commentTimestamp && !reviewTimestamp) {
     pull.html_url = comment?.html_url || "";
+    pull.myIcon = "💬";
   } else if (!commentTimestamp && reviewTimestamp) {
     pull.html_url = review?.html_url || "";
+    pull.myIcon = reviewStatusEmoji(review?.state || "unknown");
   } else {
     if (commentTimestamp > reviewTimestamp) {
       pull.html_url = comment?.html_url || "";
+      pull.myIcon = "💬";
     } else {
       pull.html_url = review?.html_url || "";
+      pull.myIcon = reviewStatusEmoji(review?.state || "unknown");
     }
   }
 
@@ -168,3 +174,20 @@ const compareShortReviews = (a: PullRequestReviewShort, b: PullRequestReviewShor
     return (a.submitted_at as string) < (b.submitted_at as string) ? -1 : 1;
   }
 };
+
+const reviewStatusEmoji = (status: string) => {
+  switch (status) {
+    case "APPROVED":
+      return "✅";
+    case "CHANGES_REQUESTED":
+      return "📝";
+    case "COMMENTED":
+      return "💬";
+    case "DISMISSED":
+      return "🚫";
+    case "PENDING":
+      return "⏳";
+    default:
+      return "🔍";
+  }
+}

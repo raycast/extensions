@@ -1,9 +1,15 @@
 import { MenuBarExtra } from "@raycast/api";
 import { PullSearchResultShort } from "../integration/types";
 
-const PullRequestItem = ({pull, onAction}: {pull: PullSearchResultShort, onAction: () => void}) => (
+type PullRequestItemParams = {
+  pull: PullSearchResultShort;
+  showMyIcon?: boolean;
+  onAction: () => void;
+};
+
+const PullRequestItem = ({pull, onAction, showMyIcon=false}: PullRequestItemParams) => (
   <MenuBarExtra.Item
-    title={pull.title}
+    title={(showMyIcon ? pull.myIcon + " " || "" : "") + pull.title}
     icon={pull.user?.avatar_url}
     onAction={onAction}
   />
