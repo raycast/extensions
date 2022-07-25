@@ -6,12 +6,13 @@ import { IssueResult } from "../api/getIssues";
 
 import { getUserIcon } from "../helpers/users";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
+import { getLinearClient } from "../helpers/withLinearClient";
+import { getErrorMessage } from "../helpers/errors";
 
 import useIssueComments from "../hooks/useIssueComments";
 import useMe from "../hooks/useMe";
 
-import { getLinearClient } from "../helpers/withLinearClient";
-import { getErrorMessage } from "../helpers/errors";
+import IssueCommentForm from "./IssueCommentForm";
 
 type IssueCommentsProps = {
   issue: IssueResult;
@@ -49,11 +50,23 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
   return (
     <List
       isLoading={isLoadingComments || isLoadingMe}
-      navigationTitle={`${issue.title} • Comments`}
+      navigationTitle={`${issue.identifier} • Comments`}
       searchBarPlaceholder="Filter by user or comment content"
       isShowingDetail
     >
-      <List.EmptyView title="No comments" description="This issue doesn't have any comments." />
+      <List.EmptyView
+        title="No comments"
+        description="This issue doesn't have any comments."
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Add Comment"
+              icon={Icon.Plus}
+              target={<IssueCommentForm issue={issue} mutateComments={mutateComments} />}
+            />
+          </ActionPanel>
+        }
+      />
 
       {comments?.map((comment) => {
         const createdAt = new Date(comment.createdAt);
@@ -87,6 +100,13 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
 
                 {me?.id === comment.user.id ? (
                   <ActionPanel.Section>
+                    <Action.Push
+                      title="Edit Comment"
+                      icon={Icon.Pencil}
+                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      target={<IssueCommentForm issue={issue} comment={comment} mutateComments={mutateComments} />}
+                    />
+
                     <Action
                       title="Delete Comment"
                       icon={Icon.Trash}
@@ -96,6 +116,15 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                     />
                   </ActionPanel.Section>
                 ) : null}
+
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Add Comment"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    target={<IssueCommentForm issue={issue} mutateComments={mutateComments} />}
+                  />
+                </ActionPanel.Section>
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
