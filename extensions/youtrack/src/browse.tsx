@@ -39,7 +39,8 @@ export default function Command() {
         const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
         if (cache.length) {
           if (_.isEqual(cache, feed)) {
-            setState((previous) => ({ ...previous, items: cache, isLoading: false }));
+            setState((previous) => ({ ...previous, isLoading: false }));
+            return;
           }
         }
         setState((previous) => ({ ...previous, items: feed, isLoading: false }));
