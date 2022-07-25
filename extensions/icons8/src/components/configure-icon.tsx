@@ -1,4 +1,4 @@
-import { Form, Action, ActionPanel, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, Action, Icon } from "@raycast/api";
 import { useState } from "react";
 import { downloadPath as defaultDownloadPath } from "./actions";
 import { Icon8 } from "../types/types";
@@ -22,59 +22,32 @@ export const ConfigureAction = (props: ConfigureProps): JSX.Element => {
   );
 };
 
-interface Values {
-  downloadName: string;
-  downloadPath: string;
-  iconColor: string;
-  imageSize: string;
-  imageFormat: string;
-}
-
 const ConfigureIcon = (props: ConfigureProps): JSX.Element => {
-  const icon = props.icon;
-  const { pop } = useNavigation();
-
-  const handleSubmit = (values: Values) => {
-    const color = d3.color(values.iconColor);
-    if (color) {
-      props.setOptions({
-        path: values.downloadPath,
-        color: color.formatHex(),
-        format: values.imageFormat,
-        size: parseInt(values.imageSize),
-      });
-      pop();
-    } else {
-      showToast(Toast.Style.Failure, "Invalid Color");
-    }
-    if (values.downloadName) {
-      icon.downloadName = values.downloadName;
-    }
-  };
-
   return (
-    <Form
-      navigationTitle="Configure Icon"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save Configuration" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <DownloadName icon={icon} />
-      <DownloadPath />
-      {!icon.isColor && <IconColor {...props} />}
+    <Form navigationTitle="Configure Icon">
+      <DownloadName {...props} />
+      <DownloadPath {...props} />
+      {!props.icon.isColor && <IconColor {...props} />}
       <ImageSize {...props} />
       <ImageFormat {...props} />
     </Form>
   );
 };
 
-const DownloadName = (props: { icon: Icon8 }): JSX.Element => {
-  return <Form.TextField id="downloadName" title="Download Name" placeholder={props.icon.name} />;
+const DownloadName = (props: ConfigureProps): JSX.Element => {
+  return (
+    <Form.TextField
+      id="downloadName"
+      title="Download Name"
+      placeholder={props.icon.name}
+      onChange={(value: string) => {
+        props.icon.downloadName = value;
+      }}
+    />
+  );
 };
 
-const DownloadPath = (): JSX.Element => {
+const DownloadPath = (props: ConfigureProps): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
 
   return (
@@ -83,10 +56,11 @@ const DownloadPath = (): JSX.Element => {
       title="Download Path"
       defaultValue={defaultDownloadPath}
       error={error}
-      onBlur={(e) => {
-        if (e.target.value) {
-          if (fs.existsSync(e.target.value)) {
+      onChange={(value: string) => {
+        if (value) {
+          if (fs.existsSync(value)) {
             setError(undefined);
+            props.setOptions({ ...props.options, path: value });
           } else {
             setError("Path Does Not Exist");
           }
@@ -117,13 +91,19 @@ const ImageFormat = (props: ConfigureProps): JSX.Element => {
 };
 
 const ImageSize = (props: ConfigureProps): JSX.Element => {
+  const sizes = ["32", "64", "128", "256", "512"];
   return (
-    <Form.Dropdown id="imageSize" title="Image Size" defaultValue={props.options.size.toString()}>
-      <Form.Dropdown.Item value="64" title="64" />
-      <Form.Dropdown.Item value="128" title="128" />
-      <Form.Dropdown.Item value="256" title="256" />
-      <Form.Dropdown.Item value="512" title="512" />
-      <Form.Dropdown.Item value="1024" title="1024" />
+    <Form.Dropdown
+      id="imageSize"
+      title="Image Size"
+      defaultValue={props.options.size.toString()}
+      onChange={(value: string) => {
+        props.setOptions({ ...props.options, size: parseInt(value) });
+      }}
+    >
+      {sizes.map((size: string, index: number) => (
+        <Form.Dropdown.Item key={index} value={size} title={size} />
+      ))}
     </Form.Dropdown>
   );
 };
@@ -141,6 +121,7 @@ const IconColor = (props: ConfigureProps): JSX.Element => {
         const color = d3.color(value.trim());
         if (color !== null) {
           setError(undefined);
+          props.setOptions({ ...props.options, color: color.formatHex() });
         } else {
           setError("Invalid Color");
         }

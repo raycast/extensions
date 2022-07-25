@@ -9,19 +9,18 @@ export interface Preferences {
 export interface Icon8 {
   id: string;
   name: string;
+  commonName: string;
   url: string;
   link: string;
+  isColor: boolean;
 
   platform: string;
   style?: string;
   category?: string;
 
-  isColor: boolean;
-
   svg: string;
-  image?: Buffer;
   mdImage?: string;
-  downloadName?: string; 
+  downloadName?: string;
 
   description?: string;
   tags?: string[];

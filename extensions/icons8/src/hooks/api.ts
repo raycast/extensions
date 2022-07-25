@@ -1,6 +1,7 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { Preferences, Icon8, Style } from "../types/types";
-import { svgToMdImage, defaultStyles, recolorSVG } from "../utils/utils";
+import { defaultStyles, getPreviewLink, recolorSVG } from "../utils/utils";
+import { getGridSize } from "../utils/grid";
 import fetch from "node-fetch";
 
 const preferences: Preferences = getPreferenceValues();
@@ -8,6 +9,7 @@ const preferences: Preferences = getPreferenceValues();
 const api: string = preferences.apiKey;
 const numResults: number = preferences.numResults;
 export const numRecent: number = preferences.numRecent;
+const previewSize = getGridSize() === "small" ? 128 : 256;
 
 export const getIcons = async (search: string, style?: string): Promise<Icon8[]> => {
   let query = `https://search.icons8.com/api/iconsets/v5/search?term=${search}&token=${api}&amount=${numResults}`;
@@ -26,7 +28,8 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
     const icons8: Icon8[] = icons.map((icon: any) => ({
       id: icon.id,
       name: icon.name,
-      url: `https://img.icons8.com/${icon.platform}/2x/${icon.commonName}.png`,
+      commonName: icon.commonName,
+      url: `https://img.icons8.com/${icon.platform}/${previewSize}/${icon.commonName}.png`,
       link: `https://icons8.com/icon/${icon.id}/${icon.name}`,
       platform: icon.platform,
       isColor: icon.isColor,
@@ -83,8 +86,7 @@ export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8>
       published: new Date(icon.publishedAt),
     };
     icon8.svg = recolorSVG(icon8.svg, color);
-    icon8.image = Buffer.from(icon8.svg, "utf-8");
-    icon8.mdImage = svgToMdImage(icon8.image, 256);
+    icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`
     return icon8;
   } catch (e: any) {
     console.error(e);

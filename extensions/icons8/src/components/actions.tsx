@@ -16,6 +16,8 @@ import { IconDetail } from "./icon-detail";
 import { getIconDetail } from "../hooks/api";
 import { IconProps } from "./icon";
 import { Icon8, Preferences } from "../types/types";
+import { getDownloadLink } from "../utils/utils";
+import fetch from "node-fetch";
 import { homedir } from "os";
 import fs from "fs";
 
@@ -39,7 +41,7 @@ export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX
       <ConfigureAction icon={icon} options={props.options} setOptions={props.setOptions} />
       <ActionPanel.Section>
         <DownloadSVGIcon {...props} />
-        {/* <DownloadIconImage {...props} /> */}
+        <DownloadIconImage {...props} />
         <CopySVGCode {...props} />
         <CopyImageURL icon={icon} refresh={props.refresh} />
       </ActionPanel.Section>
@@ -165,11 +167,12 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
       onAction={async () => {
         showToast(Toast.Style.Animated, `Downloading ${formatName} Icon ...`);
         let icon = props.icon;
-        if (!icon.image) {
-          icon = await getIconDetail(props.icon, props.options.color);
-        }
-        if (icon.image) {
-          const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.${format}`;
+        const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.${format}`;
+        const downloadLink = getDownloadLink(icon, props.options);
+        try {
+          const response = await fetch(downloadLink);
+          const buffer = Buffer.from(await response.arrayBuffer());
+          fs.writeFileSync(filePath, buffer);
           const options: Toast.Options = {
             style: Toast.Style.Success,
             title: `${formatName} Icon Downloaded`,
@@ -190,8 +193,9 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
           };
           showToast(options);
           await addRecentIcon(props.icon, props.refresh);
-        } else {
+        } catch (error) {
           showToast(Toast.Style.Failure, `${formatName} Icon Download Failed`);
+          console.error(error);
         }
       }}
     />

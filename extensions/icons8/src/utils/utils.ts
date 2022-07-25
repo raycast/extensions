@@ -1,6 +1,7 @@
 import { Color } from "@raycast/api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import { Icon8 } from "../types/types";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -25,9 +26,14 @@ export const recolorSVG = (svg: string, color?: string): string => {
   return svg;
 };
 
-export const svgToMdImage = (image: Buffer, size: number): string => {
-  const md = `<img src="data:image/svg+xml;base64,${image.toString("base64")}" width="${size}" height="${size}" />`;
-  return md;
+export const getPreviewLink = (icon: Icon8, color: string) => {
+  const recolor = icon.isColor ? "" : "/" + color.slice(1);
+  return `https://img.icons8.com/${icon.platform}/256${recolor}/${icon.commonName}.png`;
+};
+
+export const getDownloadLink = (icon: Icon8, options: any) => {
+  const color = icon.isColor ? "" : "/" + options.color.slice(1);
+  return `https://img.icons8.com/${icon.platform}/${options.size}${color}/${icon.commonName}.png`;
 };
 
 // boolean represents whether the preview image for the style requires color tint
