@@ -18,12 +18,9 @@ const env = environment || "production";
 
 let browsers: string[] = [];
 try {
-  browsers = browserslist(defaultQuery);
+  browsers = path ? browserslist(null, { path: resolvePath(path), env }) : browserslist(defaultQuery);
 } catch (e) {
   console.error("Failed to query Browserslist:", e);
-}
-if (path) {
-  browsers = browserslist(null, { path: resolvePath(path), env });
 }
 
 export default function CanIUse() {
