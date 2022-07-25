@@ -49,9 +49,9 @@ export const getStyles = async (): Promise<Style[] | null> => {
     }
     const data: any = await response.json();
     const platforms = data.docs
-      .filter((platform: any) => platform.title in defaultStyles)
-      .filter((platform: any) => platform.iconsCount > 0)
+      .filter((platform: any) => platform.title in defaultStyles && platform.iconsCount > 0 && platform.preview)
       .sort((a: any, b: any) => a.title.localeCompare(b.title));
+    // for (const platform of platforms) console.log(platform);
     const styles: Style[] = platforms.map((platform: any) => ({
       code: platform.apiCode,
       title: platform.title,

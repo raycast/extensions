@@ -15,7 +15,7 @@ export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
   const [icons, setIcons] = useState<Icon8[] | null>([]);
 
-  const [style, setStyle] = useState<string>();
+  const [style, setStyle] = useState<string | undefined>(undefined);
   const [styles, setStyles] = useState<Style[] | null>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -97,7 +97,7 @@ export default function SearchIcons() {
         styles?.length > 0 ? (
           <Grid.Dropdown
             tooltip="Styles"
-            storeValue={true}
+            defaultValue={style}
             onChange={(value: string) => {
               if (value) setStyle(value);
               else setStyle(undefined);
@@ -118,8 +118,8 @@ export default function SearchIcons() {
                     title={style.title}
                     value={style.code}
                     icon={{
-                      source: style.url ? style.url : Icon.Warning,
-                      tintColor: style.url ? (defaultStyles[style.title] ? Color.PrimaryText : null) : Color.Red,
+                      source: style.url,
+                      tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
                     }}
                   />
                 ))}
