@@ -1,3 +1,28 @@
-# Icons8
+<div style="display: flex; justify-content: space-around;">
+  <img src="./media/Icons8-Art.svg" style="width: 96px; border-radius: 32px;"/>
+</div>
 
-Search and download icons using Icons8 large library.
+<h1 style="display: flex; justify-content: space-around;">Icons8</h1>
+
+<p style="display: flex; justify-content: space-around;">
+Search and preview icons from Icons8 large library. Configure and recolor icons. 
+</p>
+<p style="display: flex; justify-content: space-around; line-height: 0.5;">
+Download SVG icons or export image in PNG, JPG, or WEBP format.
+</p>
+
+## Icons8 API Key
+
+Get the API key [here](https://developers.icons8.com).
+
+* Sign up with your email address. 
+* Answer the quick survey. 
+
+## Features 
+
+* Search for icons by name. 
+* Filter the icons by the common styles. 
+* Recolor the colorable icons. 
+* View details about the icon such as style, category, and tags.
+* Configure the download settings such as file name, format, and size. 
+* Pin the icons and view recent icons. 
