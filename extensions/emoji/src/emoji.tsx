@@ -1,4 +1,4 @@
-import { ActionPanel, List, closeMainWindow, getPreferenceValues, Action } from "@raycast/api";
+import { ActionPanel, List, getPreferenceValues, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { createEmojiList } from "generate-emoji-list";
@@ -120,14 +120,12 @@ export default function Main(): ReactElement {
                         <Action.Paste
                           content={emoji.emoji}
                           onPaste={() => {
-                            closeMainWindow();
                             addToRecentlyUsed(emoji);
                           }}
                         />
                         <Action.CopyToClipboard
                           content={emoji.emoji}
                           onCopy={() => {
-                            closeMainWindow();
                             addToRecentlyUsed(emoji);
                           }}
                         />
