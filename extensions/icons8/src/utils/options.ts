@@ -3,7 +3,7 @@ import { homedir } from "os";
 
 export const getStoredOptions = async () => {
   const options: string | undefined = await LocalStorage.getItem("options");
-  if (options) {
+  if (options && options !== "null") {
     return JSON.parse(options);
   } else {
     const color = environment.theme === "light" ? "#000000" : "#ffffff";
