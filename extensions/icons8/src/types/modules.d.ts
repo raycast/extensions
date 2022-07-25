@@ -1,0 +1,1 @@
+declare module '@ycm.jason/svg-to-img'

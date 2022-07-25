@@ -39,7 +39,7 @@ export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX
       <ConfigureAction icon={icon} options={props.options} setOptions={props.setOptions} />
       <ActionPanel.Section>
         <DownloadSVGIcon {...props} />
-        <DownloadIconImage {...props} />
+        {/* <DownloadIconImage {...props} /> */}
         <CopySVGCode {...props} />
         <CopyImageURL icon={icon} refresh={props.refresh} />
       </ActionPanel.Section>

@@ -89,7 +89,7 @@ export default function SearchIcons() {
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Styles"
-          storeValue
+          storeValue={true}
           onChange={(value: string) => {
             if (value) setStyle(value);
             else setStyle(undefined);

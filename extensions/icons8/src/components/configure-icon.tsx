@@ -99,6 +99,7 @@ const DownloadPath = (): JSX.Element => {
 };
 
 const ImageFormat = (props: ConfigureProps): JSX.Element => {
+  const formats = ["png", "jpg", "webp"];
   return (
     <Form.Dropdown
       id="imageFormat"
@@ -108,9 +109,9 @@ const ImageFormat = (props: ConfigureProps): JSX.Element => {
         props.setOptions({ ...props.options, format: value });
       }}
     >
-      <Form.Dropdown.Item value="png" title="PNG" />
-      <Form.Dropdown.Item value="jpg" title="JPG" />
-      <Form.Dropdown.Item value="tiff" title="TIFF" />
+      {formats.map((format: string, index: number) => (
+        <Form.Dropdown.Item key={index} value={format} title={format.toUpperCase()} />
+      ))}
     </Form.Dropdown>
   );
 };
