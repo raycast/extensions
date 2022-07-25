@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
@@ -25,25 +25,33 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
   const { comments, isLoadingComments, mutateComments } = useIssueComments(issue.id);
 
   async function deleteComment(commentId: string) {
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Deleting comment" });
+    if (
+      await confirmAlert({
+        title: "Delete Comment",
+        message: "Are you sure you want to delete this comment?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
+      try {
+        await showToast({ style: Toast.Style.Animated, title: "Deleting comment" });
 
-      await mutateComments(linearClient.commentDelete(commentId), {
-        optimisticUpdate(data) {
-          if (!data) {
-            return data;
-          }
-          return data?.filter((x) => x.id !== commentId);
-        },
-      });
+        await mutateComments(linearClient.commentDelete(commentId), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return data;
+            }
+            return data?.filter((x) => x.id !== commentId);
+          },
+        });
 
-      await showToast({ style: Toast.Style.Success, title: "Deleted comment" });
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete comment",
-        message: getErrorMessage(error),
-      });
+        await showToast({ style: Toast.Style.Success, title: "Deleted comment" });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete comment",
+          message: getErrorMessage(error),
+        });
+      }
     }
   }
 
