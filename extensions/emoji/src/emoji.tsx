@@ -12,6 +12,7 @@ const { unicodeVersion, shortCodes } = getPreferenceValues<{
   unicodeVersion: UnicodeVersion;
   shortCodes: boolean;
 }>();
+const allEmojis = "All Emojis";
 
 type Category = { category: string; emojis: Emoji[] };
 type Emoji = {
@@ -81,7 +82,7 @@ export default function Main(): ReactElement {
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown tooltip="Select Category" onChange={setCategory}>
-          <List.Dropdown.Item key={category} title="All Emojis" value="" icon="🥳" />
+          <List.Dropdown.Item key={category} title={allEmojis} value="" icon="🥳" />
           {categories.map((category) => (
             <List.Dropdown.Item
               key={category}
@@ -97,7 +98,7 @@ export default function Main(): ReactElement {
         ? filterList(
             [
               !searchText && { category: "Recently Used", emojis: recentlyUsed },
-              { category: category || "Emojis", emojis: list },
+              { category: category || allEmojis, emojis: list },
             ].filter(Boolean) as Category[],
             searchText,
             category
