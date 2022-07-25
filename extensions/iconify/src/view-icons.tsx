@@ -4,7 +4,9 @@ import Service, { Icon, Set } from './service';
 import { toDataURI, toSvg, toURL } from './utils';
 
 const service = new Service();
-const cache = new Cache();
+const cache = new Cache({
+  capacity: 50 * 1e6,
+});
 
 const day = 24 * 60 * 60 * 1e3;
 const isExpired = (time: number) => Date.now() - time > day;

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const unpkgClient = axios.create({
-  baseURL: 'https://unpkg.com/@iconify/json',
+const jsdelivrClient = axios.create({
+  baseURL: 'https://cdn.jsdelivr.net/gh/iconify/icon-sets',
 });
 
 const iconifyClient = axios.create({
@@ -71,7 +71,7 @@ interface QueryResponse {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await unpkgClient.get<Record<string, SetResponse>>(
+    const response = await jsdelivrClient.get<Record<string, SetResponse>>(
       '/collections.json',
     );
     const ids = Object.keys(response.data);
@@ -91,7 +91,9 @@ class Service {
   }
 
   async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await unpkgClient.get<IconResponse>(`/json/${setId}.json`);
+    const response = await jsdelivrClient.get<IconResponse>(
+      `/json/${setId}.json`,
+    );
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
