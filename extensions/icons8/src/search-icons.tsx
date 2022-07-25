@@ -17,17 +17,18 @@ export default function SearchIcons() {
 
   const [style, setStyle] = useState<string>();
   const [styles, setStyles] = useState<Style[] | null>([]);
-  const [valid, setValid] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchStyles = async () => {
       setStyles(await getStyles());
+      setIsLoading(false);
     };
     fetchStyles();
   }, []);
 
-  const [pinnedIcons, setPinnedIcons] = useState<Icon8[] | null>(null);
-  const [recentIcons, setRecentIcons] = useState<Icon8[] | null>(null);
+  const [pinnedIcons, setPinnedIcons] = useState<Icon8[]>();
+  const [recentIcons, setRecentIcons] = useState<Icon8[]>();
 
   const getStoredIcons = async () => {
     let pinned = await getPinnedIcons();
@@ -47,8 +48,10 @@ export default function SearchIcons() {
   const refreshIcons = () => setRefresh(!refresh);
 
   useEffect(() => {
-    getStoredIcons();
-  }, [refresh, style]);
+    if (styles && styles.length > 0) {
+      getStoredIcons();
+    }
+  }, [refresh, style, styles]);
 
   useEffect(() => {
     const fetchIcons = async () => {
@@ -85,42 +88,44 @@ export default function SearchIcons() {
 
   return styles ? (
     <Grid
-      isLoading={icons === null}
+      isLoading={isLoading || icons === null}
       itemSize={gridSize}
       inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
       throttle={true}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Styles"
-          storeValue={true}
-          onChange={(value: string) => {
-            if (value) setStyle(value);
-            else setStyle(undefined);
-          }}
-        >
-          <Grid.Dropdown.Section>
-            <Grid.Dropdown.Item
-              title="All Styles"
-              value={""}
-              icon={{ source: "https://maxst.icons8.com/vue-static/icon/all-styles.png" }}
-            />
-          </Grid.Dropdown.Section>
-          <Grid.Dropdown.Section>
-            {styles &&
-              styles.map((style) => (
-                <Grid.Dropdown.Item
-                  key={style.code}
-                  title={style.title}
-                  value={style.code}
-                  icon={{
-                    source: style.url ? style.url : Icon.Warning,
-                    tintColor: style.url ? (defaultStyles[style.title] ? Color.PrimaryText : null) : Color.Red,
-                  }}
-                />
-              ))}
-          </Grid.Dropdown.Section>
-        </Grid.Dropdown>
+        styles?.length > 0 ? (
+          <Grid.Dropdown
+            tooltip="Styles"
+            storeValue={true}
+            onChange={(value: string) => {
+              if (value) setStyle(value);
+              else setStyle(undefined);
+            }}
+          >
+            <Grid.Dropdown.Section>
+              <Grid.Dropdown.Item
+                title="All Styles"
+                value={""}
+                icon={{ source: "https://maxst.icons8.com/vue-static/icon/all-styles.png" }}
+              />
+            </Grid.Dropdown.Section>
+            <Grid.Dropdown.Section>
+              {styles &&
+                styles.map((style) => (
+                  <Grid.Dropdown.Item
+                    key={style.code}
+                    title={style.title}
+                    value={style.code}
+                    icon={{
+                      source: style.url ? style.url : Icon.Warning,
+                      tintColor: style.url ? (defaultStyles[style.title] ? Color.PrimaryText : null) : Color.Red,
+                    }}
+                  />
+                ))}
+            </Grid.Dropdown.Section>
+          </Grid.Dropdown>
+        ) : null
       }
     >
       {(icons === null || icons.length === 0) &&

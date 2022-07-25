@@ -19,8 +19,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
   try {
     const response = await fetch(query);
     if (response.status !== 200) {
-      showToast(Toast.Style.Failure, `Error Fetching Icons. Reponse Status : ${response.status}`);
-      console.log(response);
+      showToast(Toast.Style.Failure, `Error Fetching Icons.`);
       return [];
     }
     const data: any = await response.json();
@@ -45,11 +44,10 @@ export const getStyles = async (): Promise<Style[] | null> => {
   const query = `https://api-icons.icons8.com/publicApi/platforms?token=${api}&limit=588`;
   try {
     const response = await fetch(query);
-    const data: any = await response.json();
     if (response.status !== 200) {
-      // showToast(Toast.Style.Failure, `Error Fetching Styles. Reponse Status : ${response.status}`);
       return null;
     }
+    const data: any = await response.json();
     const platforms = data.docs
       .filter((platform: any) => platform.title in defaultStyles)
       .filter((platform: any) => platform.iconsCount > 0)
@@ -70,25 +68,24 @@ export const getStyles = async (): Promise<Style[] | null> => {
 export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8> => {
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
-  const data: any = await response.json();
-  const icon = data.icon;
-  try {
-    icon8 = {
-      ...icon8,
-      svg: icon.svg,
-      description: icon.description,
-      style: icon.platformName,
-      category: icon.categoryName,
-      tags: icon.tags,
-      isFree: icon.isFree,
-      isAnimated: icon.isAnimated,
-      published: new Date(icon.publishedAt),
-    };
-    icon8.svg = recolorSVG(icon8.svg, color);
-    icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`;
-    return icon8;
-  } catch (e: any) {
-    console.error(e);
+  if (response.status !== 200) {
+    showToast(Toast.Style.Failure, `Error Fetching Icon.`);
     return icon8;
   }
+  const data: any = await response.json();
+  const icon = data.icon;
+  icon8 = {
+    ...icon8,
+    svg: icon.svg,
+    description: icon.description,
+    style: icon.platformName,
+    category: icon.categoryName,
+    tags: icon.tags,
+    isFree: icon.isFree,
+    isAnimated: icon.isAnimated,
+    published: new Date(icon.publishedAt),
+  };
+  icon8.svg = recolorSVG(icon8.svg, color);
+  icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`;
+  return icon8;
 };
