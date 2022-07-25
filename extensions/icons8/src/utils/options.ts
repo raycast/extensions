@@ -1,5 +1,5 @@
 import { environment, LocalStorage } from "@raycast/api";
-import { downloadPath } from "../components/actions";
+import { homedir } from "os";
 
 export const getStoredOptions = async () => {
   const options: string | undefined = await LocalStorage.getItem("options");
@@ -8,7 +8,7 @@ export const getStoredOptions = async () => {
   } else {
     const color = environment.theme === "light" ? "#000000" : "#ffffff";
     return {
-      path: downloadPath,
+      path: `${homedir()}/Downloads`,
       color: color,
       size: 256,
       format: "png",

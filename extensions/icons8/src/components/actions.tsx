@@ -18,12 +18,7 @@ import { IconProps } from "./icon";
 import { Icon8, Preferences } from "../types/types";
 import { getDownloadLink } from "../utils/utils";
 import fetch from "node-fetch";
-import { homedir } from "os";
 import fs from "fs";
-
-const preferences: Preferences = getPreferenceValues();
-const path: string = preferences.downloadPath;
-export const downloadPath = path.includes(homedir()) ? path : `${homedir()}/${path.replace("~/", "")}`;
 
 const addRecentIcon = async (icon: Icon8, refresh: () => void) => {
   await appendRecentIcon(icon);
@@ -166,7 +161,7 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       onAction={async () => {
         showToast(Toast.Style.Animated, `Downloading ${formatName} Icon ...`);
-        let icon = props.icon;
+        const icon = props.icon;
         const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.${format}`;
         const downloadLink = getDownloadLink(icon, props.options);
         try {

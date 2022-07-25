@@ -72,14 +72,6 @@
       ]
     },
     {
-      "name": "downloadPath",
-      "title": "Download Directory",
-      "description": "Directory to download SVG and PNG icons.",
-      "type": "textfield",
-      "default": "~/Downloads",
-      "required": false
-    },
-    {
       "name": "numRecent",
       "title": "Number of Recent Icons",
       "description": "Number of recent icons to show.",
@@ -94,6 +86,10 @@
         {
           "value": "16",
           "title": "16"
+        },
+        {
+          "value": "24",
+          "title": "24"
         },
         {
           "value": "32",

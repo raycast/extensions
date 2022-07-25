@@ -2,7 +2,6 @@ export interface Preferences {
   apiKey: string;
   gridSize: string;
   numResults: number;
-  downloadPath: string;
   numRecent: number;
 }
 

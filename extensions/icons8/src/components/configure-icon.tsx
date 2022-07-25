@@ -1,6 +1,5 @@
 import { Form, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import { downloadPath as defaultDownloadPath } from "./actions";
 import { Icon8 } from "../types/types";
 import * as d3 from "d3-color";
 import fs from "fs";
@@ -49,12 +48,11 @@ const DownloadName = (props: ConfigureProps): JSX.Element => {
 
 const DownloadPath = (props: ConfigureProps): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
-
   return (
     <Form.TextField
       id="downloadPath"
       title="Download Path"
-      defaultValue={defaultDownloadPath}
+      defaultValue={props.options.path}
       error={error}
       onChange={(value: string) => {
         if (value) {
@@ -110,7 +108,6 @@ const ImageSize = (props: ConfigureProps): JSX.Element => {
 
 const IconColor = (props: ConfigureProps): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
-
   return (
     <Form.TextField
       id="iconColor"
