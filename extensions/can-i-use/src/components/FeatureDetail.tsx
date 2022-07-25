@@ -40,7 +40,6 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
         let icon: Image.ImageLike = { source: Icon.XMarkCircle, tintColor: Color.Red };
         let tooltip = Support.Unsupported;
         let version: number | null = null;
-        const link = getCanIUseLink(feature);
 
         if ("u" in agentSupport) {
           text = briefMode ? "" : Support.Unknown;
@@ -79,8 +78,7 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
             title={agentInfos.browser}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={link} />
-                <Action.CopyToClipboard title="Copy URL" content={link} />
+                <Action.OpenInBrowser url={getCanIUseLink(feature)} />
               </ActionPanel>
             }
             accessories={[{ text }, { icon, tooltip }]}
