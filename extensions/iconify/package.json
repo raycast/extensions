@@ -21,9 +21,9 @@
   "commands": [
     {
       "name": "view-icons",
-      "title": "Icon Sets",
+      "title": "Search Icon Sets",
       "subtitle": "Iconify",
-      "description": "View icon by sets",
+      "description": "Search and view icons in a specific icon set",
       "mode": "view"
     },
     {

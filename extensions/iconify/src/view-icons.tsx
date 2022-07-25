@@ -72,7 +72,7 @@ function Command() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Select an icon set"
+          tooltip="Select Icon Set"
           storeValue={true}
           onChange={setActiveSetId}
         >
