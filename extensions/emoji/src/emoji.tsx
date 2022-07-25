@@ -1,4 +1,4 @@
-import { ActionPanel, List, closeMainWindow, popToRoot, getPreferenceValues, Action } from "@raycast/api";
+import { ActionPanel, List, closeMainWindow, getPreferenceValues, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { createEmojiList } from "generate-emoji-list";
@@ -118,7 +118,6 @@ export default function Main(): ReactElement {
                           content={emoji.emoji}
                           onPaste={() => {
                             closeMainWindow();
-                            popToRoot();
                             addToRecentlyUsed(emoji);
                           }}
                         />
@@ -126,7 +125,6 @@ export default function Main(): ReactElement {
                           content={emoji.emoji}
                           onCopy={() => {
                             closeMainWindow();
-                            popToRoot();
                             addToRecentlyUsed(emoji);
                           }}
                         />
