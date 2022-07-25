@@ -114,7 +114,6 @@ export default function Main(): ReactElement {
                     <ActionPanel>
                       <ActionPanel.Section>
                         <Action.Paste
-                          title="Paste Emoji in Active App"
                           content={emoji.emoji}
                           onPaste={() => {
                             closeMainWindow();
@@ -123,7 +122,6 @@ export default function Main(): ReactElement {
                           }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Emoji to Clipboard"
                           content={emoji.emoji}
                           onCopy={() => {
                             closeMainWindow();
