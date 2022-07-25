@@ -1,13 +1,13 @@
-<div style="display: flex; justify-content: space-around;">
+<div align="center">
   <img src="./media/Icons8-Art.svg" style="width: 96px; border-radius: 32px;"/>
 </div>
 
-<h1 style="display: flex; justify-content: space-around;">Icons8</h1>
+<h1 align="center">Icons8</h1>
 
-<p style="display: flex; justify-content: space-around;">
+<p align="center">
 Search and preview icons from Icons8 large library. Configure and recolor icons. 
 </p>
-<p style="display: flex; justify-content: space-around; line-height: 0.5;">
+<p align="center" style="line-height: 0.5;">
 Download SVG icons or export image in PNG, JPG, or WEBP format.
 </p>
 
