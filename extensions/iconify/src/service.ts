@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const githubClient = axios.create({
-  baseURL: 'https://raw.githubusercontent.com/iconify/icon-sets/master',
+const jsdelivrClient = axios.create({
+  baseURL: 'https://cdn.jsdelivr.net/gh/iconify/icon-sets',
 });
 
 const iconifyClient = axios.create({
@@ -71,7 +71,7 @@ interface QueryResponse {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await githubClient.get<Record<string, SetResponse>>(
+    const response = await jsdelivrClient.get<Record<string, SetResponse>>(
       '/collections.json',
     );
     const ids = Object.keys(response.data);
@@ -86,24 +86,12 @@ class Service {
       })
       .filter((icon) => {
         const { hidden } = response.data[icon.id];
-        // Temporarily removing some sets to prevent "Out of Memory" error
-        // when displaying a list with a large number of items
-        const largeSets = [
-          'ic',
-          'fluent',
-          'openmoji',
-          'twemoji',
-          'noto',
-          'noto-v1',
-          'emojione-v1',
-        ];
-        const large = largeSets.includes(icon.id);
-        return !hidden && !large;
+        return !hidden;
       });
   }
 
   async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await githubClient.get<IconResponse>(
+    const response = await jsdelivrClient.get<IconResponse>(
       `/json/${setId}.json`,
     );
     const ids = Object.keys(response.data.icons);
