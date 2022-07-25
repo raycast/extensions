@@ -10,14 +10,13 @@ interface FeatureDetailProps {
   briefMode: boolean;
 }
 
-const formatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-
 export default function FeatureDetail({ feature, showReleaseDate, showPartialSupport, briefMode }: FeatureDetailProps) {
   const supportTable = caniuse.getSupport(feature);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: briefMode ? "short" : "long",
+    day: "numeric",
+  });
   const formatDate = (date: number) => ` (${briefMode ? "" : "Released "}${formatter.format(date * 1e3)})`;
 
   return (
