@@ -1,5 +1,5 @@
 import { Grid, getPreferenceValues } from "@raycast/api";
-import { Preferences, Icon8 } from "../types/types";
+import { Preferences } from "../types/types";
 
 const preferences: Preferences = getPreferenceValues();
 const gridSize: string = preferences.gridSize;

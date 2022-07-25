@@ -22,7 +22,7 @@ export const recolorSVG = (svg: string, color?: string): string => {
     const index = svg.indexOf("<svg") + 4;
     svg = `${svg.substring(0, index)} fill="${color}" ${svg.substring(index + 1)}`;
   }
-  return svg; 
+  return svg;
 };
 
 export const svgToMdImage = (image: Buffer, size: number): string => {

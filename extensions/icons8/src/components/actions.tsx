@@ -8,7 +8,7 @@ import {
   Color,
   open,
   showInFinder,
-  Clipboard
+  Clipboard,
 } from "@raycast/api";
 import { IconStorageActions, appendRecentIcon } from "../utils/storage";
 import { ConfigureAction } from "./configure-icon";
@@ -71,7 +71,7 @@ const OpenInBrowser = (props: { icon: Icon8; refresh: () => void }): JSX.Element
 
 interface IconActionProps {
   icon: Icon8;
-  options: any; 
+  options: any;
   refresh: () => void;
 }
 
@@ -82,12 +82,12 @@ const CopySVGCode = (props: IconActionProps): JSX.Element => {
       icon={Icon.Code}
       shortcut={{ modifiers: ["cmd"], key: "c" }}
       onAction={async () => {
-        let icon = props.icon
+        let icon = props.icon;
         if (!icon.svg) {
           showToast(Toast.Style.Animated, "Getting SVG Code...");
-          icon = await getIconDetail(icon, props.options.color); 
+          icon = await getIconDetail(icon, props.options.color);
         }
-        Clipboard.copy(icon.svg); 
+        Clipboard.copy(icon.svg);
         showToast(Toast.Style.Success, "Copied SVG Code");
         await addRecentIcon(props.icon, props.refresh);
       }}
@@ -102,7 +102,7 @@ const CopyImageURL = (props: { icon: Icon8; refresh: () => void }): JSX.Element 
       icon={Icon.Link}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       onAction={async () => {
-        Clipboard.copy(props.icon.url); 
+        Clipboard.copy(props.icon.url);
         showToast(Toast.Style.Success, "Copied Image URL");
         await addRecentIcon(props.icon, props.refresh);
       }}
@@ -118,7 +118,7 @@ const DownloadSVGIcon = (props: IconActionProps): JSX.Element => {
       shortcut={{ modifiers: ["cmd"], key: "s" }}
       onAction={async () => {
         showToast(Toast.Style.Animated, "Downloading SVG Icon ...");
-        let icon = props.icon; 
+        let icon = props.icon;
         if (!icon.svg) {
           icon = await getIconDetail(props.icon, props.options.color);
         }
@@ -164,7 +164,7 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       onAction={async () => {
         showToast(Toast.Style.Animated, `Downloading ${formatName} Icon ...`);
-        let icon = props.icon; 
+        let icon = props.icon;
         if (!icon.image) {
           icon = await getIconDetail(props.icon, props.options.color);
         }
