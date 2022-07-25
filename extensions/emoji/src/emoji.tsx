@@ -8,6 +8,11 @@ import emojiKeywords from "emojilib";
 import Fuse from "fuse.js";
 import { usePersistentState } from "raycast-toolkit";
 
+const { unicodeVersion, shortCodes } = getPreferenceValues<{
+  unicodeVersion: UnicodeVersion;
+  shortCodes: boolean;
+}>();
+
 type Category = { category: string; emojis: Emoji[] };
 type Emoji = {
   emoji: string;
@@ -35,12 +40,10 @@ export default function Main(): ReactElement {
     // https://github.com/facebook/react/pull/22114
     let didUnmount = false;
 
-    const options = {
-      unicodeVersion: getPreferenceValues().unicodeVersion.value as UnicodeVersion,
-      features: { shortCodes: Boolean(getPreferenceValues().shortCodes.value) },
-    };
-
-    createEmojiList(options).then((list: Category[]) => {
+    createEmojiList({
+      unicodeVersion,
+      features: { shortCodes },
+    }).then((list: Category[]) => {
       if (!didUnmount) {
         setList(
           list.flatMap((category) =>
