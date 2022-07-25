@@ -10,6 +10,13 @@ interface FeatureDetailProps {
   briefMode: boolean;
 }
 
+export enum Support {
+  Unsupported = "Not supported",
+  Unknown = "Support unknown",
+  Partial = "Partial support",
+  Supported = "Supported",
+}
+
 export default function FeatureDetail({ feature, showReleaseDate, showPartialSupport, briefMode }: FeatureDetailProps) {
   const supportTable = caniuse.getSupport(feature);
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -29,30 +36,34 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
 
         const agentSupport = supportTable[agentName];
 
-        let text = briefMode ? "" : "Not supported";
+        let text = briefMode ? "" : Support.Unsupported;
         let icon: Image.ImageLike = { source: Icon.XMarkCircle, tintColor: Color.Red };
+        let tooltip = Support.Unsupported;
         let version: number | null = null;
         const link = getCanIUseLink(feature);
 
         if ("u" in agentSupport) {
-          text = briefMode ? "" : "Unknown support";
+          text = briefMode ? "" : Support.Unknown;
           icon = Icon.QuestionMark;
+          tooltip = Support.Unknown;
         }
 
         if ("a" in agentSupport || "x" in agentSupport) {
           if (showPartialSupport) {
             version = (agentSupport.a || agentSupport.x)!;
-            text = briefMode ? String(version) : `Partial support in version ${version}`;
+            text = briefMode ? String(version) : `${Support.Partial} in version ${version}`;
           } else {
-            text = briefMode ? "" : "Partial support";
+            text = briefMode ? "" : Support.Partial;
           }
           icon = { source: Icon.Checkmark, tintColor: Color.Orange };
+          tooltip = Support.Partial;
         }
 
         if ("y" in agentSupport) {
           version = agentSupport.y!;
-          text = briefMode ? String(version) : `Support since version ${version}`;
+          text = briefMode ? String(version) : `${Support.Supported} since version ${version}`;
           icon = { source: Icon.Checkmark, tintColor: Color.Green };
+          tooltip = Support.Supported;
         }
 
         if (showReleaseDate && version) {
@@ -72,7 +83,7 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
                 <Action.CopyToClipboard title="Copy URL" content={link} />
               </ActionPanel>
             }
-            accessories={[{ text }, { icon }]}
+            accessories={[{ text }, { icon, tooltip }]}
           />
         );
       })}

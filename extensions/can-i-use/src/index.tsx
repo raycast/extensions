@@ -3,7 +3,7 @@ import { features, feature } from "caniuse-lite";
 import * as caniuse from "caniuse-api";
 import browserslist from "browserslist";
 import { statusToName, resolvePath, getCanIUseLink } from "./utils";
-import FeatureDetail from "./components/FeatureDetail";
+import FeatureDetail, { Support } from "./components/FeatureDetail";
 
 const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } = getPreferenceValues<{
   showReleaseDate: boolean;
@@ -38,11 +38,11 @@ export default function CanIUse() {
         ];
 
         if (browsers.length > 0) {
-          const icon = caniuse.isSupported(featureName, browsers)
-            ? { source: Icon.Checkmark, tintColor: Color.Green }
-            : { source: Icon.XMarkCircle, tintColor: Color.Red };
+          const icon: List.Item.Accessory = caniuse.isSupported(featureName, browsers)
+            ? { icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: Support.Supported }
+            : { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: Support.Unsupported };
 
-          accessories.push({ icon });
+          accessories.push(icon);
         }
 
         return (
