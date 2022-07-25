@@ -18,7 +18,10 @@ const env = environment || "production";
 
 let browsers: string[] = [];
 try {
-  browsers = path ? browserslist(null, { path: resolvePath(path), env }) : browserslist(defaultQuery);
+  // No data is available for op_mini (Opera Mini)
+  browsers = (path ? browserslist(null, { path: resolvePath(path), env }) : browserslist(defaultQuery)).filter(
+    (browser) => browser !== "op_mini all"
+  );
 } catch (e) {
   console.error("Failed to query Browserslist:", e);
 }

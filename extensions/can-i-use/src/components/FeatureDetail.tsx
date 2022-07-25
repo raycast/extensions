@@ -22,7 +22,8 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
   return (
     <List searchBarPlaceholder="Search browsers...">
       {Object.entries(agents).map(([agentName, agentInfos]) => {
-        if (!agentInfos || !supportTable[agentName]) {
+        // No data is available for op_mini (Opera Mini)
+        if (!agentInfos || !supportTable[agentName] || agentName === "op_mini") {
           return null;
         }
 
