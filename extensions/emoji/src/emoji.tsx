@@ -33,6 +33,9 @@ const filterList = (list: Category[], searchText: string, category: string): Cat
   });
 };
 
+const getEmojipediaLink = (description: string) =>
+  `https://emojipedia.org/${description.toLowerCase().replace(/:? /g, "-")}/`;
+
 export default function Main(): ReactElement {
   const [list, setList] = usePersistentState<Emoji[]>("emoji-list-v2", []);
   const [categories, setCategories] = usePersistentState<string[]>("emoji-categories", []);
@@ -128,6 +131,7 @@ export default function Main(): ReactElement {
                             addToRecentlyUsed(emoji);
                           }}
                         />
+                        <Action.OpenInBrowser title="View on Emojipedia" url={getEmojipediaLink(emoji.description)} />
                       </ActionPanel.Section>
                     </ActionPanel>
                   }
