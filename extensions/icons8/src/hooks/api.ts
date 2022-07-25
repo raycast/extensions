@@ -86,7 +86,7 @@ export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8>
       published: new Date(icon.publishedAt),
     };
     icon8.svg = recolorSVG(icon8.svg, color);
-    icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`
+    icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`;
     return icon8;
   } catch (e: any) {
     console.error(e);
