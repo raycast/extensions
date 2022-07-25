@@ -5,6 +5,9 @@
   "description": "Finds emojis and inserts or copies them.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
+  "contributors": [
+    "kidonng"
+  ],
   "license": "MIT",
   "categories": [
     "System",
