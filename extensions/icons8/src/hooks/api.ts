@@ -41,15 +41,14 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
   }
 };
 
-export const getStyles = async (): Promise<Style[]> => {
+export const getStyles = async (): Promise<Style[] | null> => {
   const query = `https://api-icons.icons8.com/publicApi/platforms?token=${api}&limit=588`;
   try {
     const response = await fetch(query);
     const data: any = await response.json();
     if (response.status !== 200) {
-      showToast(Toast.Style.Failure, `Error Fetching Styles. Reponse Status : ${response.status}`);
-      console.log(data);
-      return [];
+      // showToast(Toast.Style.Failure, `Error Fetching Styles. Reponse Status : ${response.status}`);
+      return null;
     }
     const platforms = data.docs
       .filter((platform: any) => platform.title in defaultStyles)

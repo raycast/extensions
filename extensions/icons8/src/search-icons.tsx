@@ -1,5 +1,5 @@
 import { Icon, Grid, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { getGridSize } from "./utils/grid";
 import { getIcons, getStyles, numRecent } from "./hooks/api";
@@ -7,6 +7,7 @@ import { Icon8, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 import { Icon8Item } from "./components/icon";
 import { getStoredOptions, setStoredOptions } from "./utils/options";
+import { EmptyView, InvalidAPIKey } from "./components/empty-view";
 
 export default function SearchIcons() {
   const gridSize: Grid.ItemSize = getGridSize();
@@ -15,7 +16,8 @@ export default function SearchIcons() {
   const [icons, setIcons] = useState<Icon8[] | null>([]);
 
   const [style, setStyle] = useState<string>();
-  const [styles, setStyles] = useState<Style[] | null>();
+  const [styles, setStyles] = useState<Style[] | null>([]);
+  const [valid, setValid] = useState(true);
 
   useEffect(() => {
     const fetchStyles = async () => {
@@ -61,14 +63,16 @@ export default function SearchIcons() {
     fetchIcons();
   }, [searchText, style]);
 
-  const [imageOptions, setImageOptions] = useState(null);
+  const [imageOptions, setImageOptions] = useState(undefined);
 
   const getImageOptions = async () => {
     setImageOptions(await getStoredOptions());
   };
 
   const storeImageOptions = async () => {
-    await setStoredOptions(imageOptions);
+    if (imageOptions) {
+      await setStoredOptions(imageOptions);
+    }
   };
 
   useEffect(() => {
@@ -79,9 +83,9 @@ export default function SearchIcons() {
     storeImageOptions();
   }, [imageOptions]);
 
-  return (
+  return styles ? (
     <Grid
-      isLoading={icons === null || imageOptions === null}
+      isLoading={icons === null}
       itemSize={gridSize}
       inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
@@ -119,38 +123,43 @@ export default function SearchIcons() {
         </Grid.Dropdown>
       }
     >
-      <Grid.Section title="Pinned Icons">
-        {searchText === "" &&
-          pinnedIcons?.map((icon: Icon8, index: number) => {
-            const movement = getPinnedMovement(pinnedIcons, icon.id);
-            return (
-              <Icon8Item
-                key={index}
-                icon={icon}
-                platform={style}
-                refresh={refreshIcons}
-                pinned={true}
-                movement={movement}
-                options={imageOptions}
-                setOptions={setImageOptions}
-              />
-            );
-          })}
-      </Grid.Section>
-      <Grid.Section title="Recent Icons">
-        {searchText === "" &&
-          recentIcons?.map((icon: Icon8, index: number) => (
-            <Icon8Item
-              key={index}
-              icon={icon}
-              platform={style}
-              refresh={refreshIcons}
-              recent={true}
-              options={imageOptions}
-              setOptions={setImageOptions}
-            />
-          ))}
-      </Grid.Section>
+      {(icons === null || icons.length === 0) &&
+        (pinnedIcons?.length === 0 && recentIcons?.length === 0 ? (
+          <EmptyView />
+        ) : (
+          <React.Fragment>
+            <Grid.Section title="Pinned Icons">
+              {pinnedIcons?.map((icon: Icon8, index: number) => {
+                const movement = getPinnedMovement(pinnedIcons, icon.id);
+                return (
+                  <Icon8Item
+                    key={index}
+                    icon={icon}
+                    platform={style}
+                    refresh={refreshIcons}
+                    pinned={true}
+                    movement={movement}
+                    options={imageOptions}
+                    setOptions={setImageOptions}
+                  />
+                );
+              })}
+            </Grid.Section>
+            <Grid.Section title="Recent Icons">
+              {recentIcons?.map((icon: Icon8, index: number) => (
+                <Icon8Item
+                  key={index}
+                  icon={icon}
+                  platform={style}
+                  refresh={refreshIcons}
+                  recent={true}
+                  options={imageOptions}
+                  setOptions={setImageOptions}
+                />
+              ))}
+            </Grid.Section>
+          </React.Fragment>
+        ))}
       {icons?.map((icon: Icon8, index: number) => (
         <Icon8Item
           key={index}
@@ -162,5 +171,7 @@ export default function SearchIcons() {
         />
       ))}
     </Grid>
+  ) : (
+    <InvalidAPIKey />
   );
 }
