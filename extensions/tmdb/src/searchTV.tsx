@@ -26,7 +26,7 @@ export default function Command() {
 
   return (
     <List
-      isShowingDetail
+      isShowingDetail={!isLoading && tvs.length !== 0}
       isLoading={isLoading}
       throttle
       onSearchTextChange={(query: string) => {
