@@ -129,6 +129,15 @@ export default function Main(): ReactElement {
                             addToRecentlyUsed(emoji);
                           }}
                         />
+                        {shortCodes && emoji.shortCode && (
+                          <Action.CopyToClipboard
+                            title="Copy Shortcode"
+                            content={emoji.shortCode[0]}
+                            onCopy={() => {
+                              addToRecentlyUsed(emoji);
+                            }}
+                          />
+                        )}
                         <Action.OpenInBrowser title="View on Emojipedia" url={getEmojipediaLink(emoji.description)} />
                       </ActionPanel.Section>
                     </ActionPanel>
