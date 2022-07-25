@@ -106,7 +106,6 @@ export default function Main(): ReactElement {
                   id={`${category.category}${emoji.description}`}
                   icon={emoji.emoji}
                   title={emoji.description.replace(/\b(\w)/g, (s) => s.toUpperCase())}
-                  accessoryTitle={emoji?.shortCode?.join(" / ")}
                   keywords={emoji.shortCode}
                   actions={
                     <ActionPanel>
@@ -132,6 +131,11 @@ export default function Main(): ReactElement {
                       </ActionPanel.Section>
                     </ActionPanel>
                   }
+                  accessories={[
+                    {
+                      text: emoji?.shortCode?.join(" / "),
+                    },
+                  ]}
                 />
               ))}
             </List.Section>

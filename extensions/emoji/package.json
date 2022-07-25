@@ -68,16 +68,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
+    "@raycast/api": "^1.38.1",
     "emojilib": "^3.0.6",
     "fuse.js": "^6.5.3",
     "generate-emoji-list": "^1.0.1",
-    "raycast-toolkit": "^1.0.3",
-    "react": "^17.0.2"
+    "raycast-toolkit": "^1.0.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.29",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
