@@ -5,6 +5,9 @@
   "description": "YouTrack 🔄 Raycast",
   "icon": "command-icon.png",
   "author": "tiulpin",
+  "contributors": [
+    "skoch13"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
