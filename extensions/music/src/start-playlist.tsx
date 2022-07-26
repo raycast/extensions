@@ -1,11 +1,11 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
-import * as A from "fp-ts/ReadonlyNonEmptyArray";
 
 enum PlaylistKind {
   ALL = "all",

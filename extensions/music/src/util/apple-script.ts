@@ -4,8 +4,13 @@ import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
 import { logScript } from "./logger";
 import { URLSearchParams } from "url";
+import { ScriptError } from './models';
 
-export const runScript = (command: string) => TE.tryCatch(() => pipe(command, logScript, runAppleScript), E.toError);
+function toScriptError(e: unknown): ScriptError {
+  return e as ScriptError
+}
+
+export const runScript = (command: string) => TE.tryCatch(() => pipe(command, logScript, runAppleScript), toScriptError);
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
 
