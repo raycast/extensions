@@ -1,5 +1,11 @@
 # Emoji Changelog
 
+## [Improvements] - 2022-07-26
+
+- Upgrade default Unicode version to 14.0;
+- Add Copy Shortcode action;
+- Add View on Emojipedia Action;
+
 ## [Fix] - 2022-04-26
 
 - Disables recently used emojis while searching
