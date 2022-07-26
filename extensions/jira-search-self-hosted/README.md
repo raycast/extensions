@@ -11,6 +11,7 @@ search extension built by sven to work with JIRA server instances.
   - Filter issues by project using `@project` syntax.
   - Filter issue by type using `#issueType` syntax.
   - Filter issue by status using `!status` or `!"my fancy status"` (use double quotes if status contains spaces) syntax.
+  - Filter issue by assignee using `%email` or `%"full name"` (use double quotes if assignee contains spaces) syntax.
   - For example enter `pdf export @dev @it #bug #story` to find all issues which contain words starting with "pdf" and "export" and which are in the "DEV" or "IT" project and which are of type "Bug" or "Story."
   - Find issue directly by issue key (for example `DEV-1234`).
 - Find projects by title.
