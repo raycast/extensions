@@ -14,7 +14,8 @@
   "commands": [
     {
       "name": "dicom",
-      "title": "DICOM Tags Search",
+      "title": "Search Tags",
+      "subtitle": "DICOM",
       "description": "Search and get DICOM tags",
       "mode": "view"
     }
