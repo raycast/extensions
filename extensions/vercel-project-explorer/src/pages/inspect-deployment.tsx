@@ -62,10 +62,11 @@ const InspectDeployment = ({ deployment }: Props) => {
           <Detail.Metadata.Link title={"Site URL"} text={deployment.url} target={`https://${deployment.url}`} />
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
           {/* @ts-ignore */}
-          {deployment.inspectorURL &&
+          {deployment.inspectorURL && (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            (<Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />)}
+            <Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />
+          )}
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
