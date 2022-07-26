@@ -2,8 +2,7 @@ import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 const Caffeinate = async (args?: string) => {
-
-  const validStringCaffeinateArgs = typeof args === 'string';
+  const validStringCaffeinateArgs = typeof args === "string";
 
   try {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
