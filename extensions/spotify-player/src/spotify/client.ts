@@ -540,7 +540,7 @@ export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesRespon
       try {
         const response =
           (await spotifyApi
-            .getCategories()
+            .getCategories({ limit: 50 })
             .then((response: { body: any }) => response.body as SpotifyApi.MultipleCategoriesResponse)
             .catch((error) => {
               setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
