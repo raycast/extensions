@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "DICOM",
+  "name": "dicom",
   "title": "DICOM",
   "description": "DICOM tag lookup",
   "icon": "dicom.png",
