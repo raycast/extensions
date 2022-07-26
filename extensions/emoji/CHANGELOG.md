@@ -5,6 +5,7 @@
 - Upgrade default Unicode version to 14.0;
 - Add Copy Shortcode action;
 - Add View on Emojipedia Action;
+- Add preference for Primary action
 
 ## [Fix] - 2022-04-26
 
