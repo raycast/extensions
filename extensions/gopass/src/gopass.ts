@@ -1,5 +1,6 @@
 import { homedir } from "os";
 import { spawn } from "child_process";
+import { sortDirectoriesFirst } from "./utils";
 
 function gopass(args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -27,9 +28,13 @@ function gopass(args: string[]): Promise<string> {
   });
 }
 
-async function list(): Promise<string[]> {
-  const entries = await gopass(["list", "--flat"]);
-  return entries.split(`\n`);
+async function list({ limit = -1, prefix = "", directoriesFirst = false, stripPrefix = false } = {}): Promise<
+  string[]
+> {
+  return await gopass(["list", `--limit=${limit}`, "--flat", `--strip-prefix=${stripPrefix}`, prefix])
+    .then((data) => data.split(`\n`))
+    .then((data) => data.filter((item) => item.length))
+    .then((data) => (directoriesFirst ? sortDirectoriesFirst(data) : data));
 }
 
 async function password(entry: string): Promise<string> {
