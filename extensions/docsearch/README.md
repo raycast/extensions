@@ -6,7 +6,7 @@ Link **all DocSearch** into Raycast.
 
 ### Add Other Documentation
 
-1. The documentation web is supported by [DocSearch](https://docsearch.camunda.com/).
+1. The documentation web is supported [DocSearch](https://docsearch.camunda.com/).
 2. Open developer tools and input something in the search bar.
 ![developer_tools](./assets/developer_tools.jpg)
 3. Input DocSearch data into [APIData.ts](/src/algolia/APIData.ts), like below.
@@ -20,4 +20,4 @@ Link **all DocSearch** into Raycast.
         indexName: 'vuepress',
    }
    ```
-4. Enjoy! Welcome contribute.
+4. Enjoy! Welcome to contribute.
