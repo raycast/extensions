@@ -30,6 +30,13 @@
       "subtitle": "Shortcut",
       "description": "Show Epics in current workspace",
       "mode": "view"
+    },
+    {
+      "name": "create-story",
+      "title": "Create Story",
+      "subtitle": "Shortcut",
+      "description": "Create story",
+      "mode": "view"
     }
   ],
   "preferences": [

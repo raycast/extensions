@@ -14,7 +14,6 @@ export default function StoryListItem({
   refreshList?: () => void;
 }) {
   const memberMap = useMemberMap();
-
   const owners = story.owner_ids.map((ownerId) => memberMap?.[ownerId]);
 
   return (
