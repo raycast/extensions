@@ -2,9 +2,9 @@ import { ActionPanel, Image, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useCallback, useState } from "react";
 import { Actions } from "./components/Actions";
-import { DetailView } from "./components/Details";
+import { VideoDetail } from "./components/Details";
 import { apiRequest, useQuery } from "./lib/api";
-import { Archive, Video } from "./lib/interfaces";
+import { HArchive, Video } from "./lib/interfaces";
 import { getPreferences, OrgDropdown } from "./lib/preferences";
 
 export default function Command() {
@@ -47,10 +47,10 @@ function Item({ video }: { video: Video }) {
       title={video.channelName}
       accessoryTitle={video.topic?.split("_").join(" ") ?? ""}
       icon={{ source: video.avatarUrl, mask: Image.Mask.Circle }}
-      detail={<DetailView {...video} />}
+      detail={<VideoDetail {...video} />}
       actions={
         <ActionPanel title={`${video.title}`}>
-          <Actions video={video} isInDetail={true} />
+          <Actions video={video} />
         </ActionPanel>
       }
     />
@@ -105,7 +105,7 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
           },
           signal,
         })
-  ) as Archive[];
+  ) as HArchive[];
 
   return response
     .filter((video) => !["missing", "live"].includes(video.status))
@@ -123,21 +123,25 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
         channelName,
         avatarUrl: video.channel.photo,
         liveViewers: 0,
-        clips: video.clips?.map((clip) => {
-          const channelName = (preferEnglishName && clip.channel.english_name) || clip.channel.name;
+        clips:
+          video.clips?.map((clip) => {
+            const channelName = (preferEnglishName && clip.channel.english_name) || clip.channel.name;
 
-          return {
-            videoId: clip.id,
-            title: clip.title,
-            startAt: parseISO(clip.available_at ?? clip.published_at),
-            description: clip.description,
-            status: clip.status,
-            channelId: clip.channel.id,
-            channelName,
-            avatarUrl: clip.channel.photo,
-            liveViewers: 0,
-          };
-        }),
+            return {
+              videoId: clip.id,
+              title: clip.title,
+              startAt: parseISO(clip.available_at ?? clip.published_at),
+              description: clip.description,
+              status: clip.status,
+              channelId: clip.channel.id,
+              channelName,
+              avatarUrl: clip.channel.photo,
+              liveViewers: 0,
+              mentions: clip.mentions ?? [],
+              clips: [],
+            };
+          }) ?? [],
+        mentions: [],
       };
     });
 }

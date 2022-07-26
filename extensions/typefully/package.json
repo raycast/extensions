@@ -3,7 +3,7 @@
   "name": "typefully",
   "title": "Typefully",
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "danielferguson",
   "categories": [
     "Productivity",
@@ -12,14 +12,13 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "create-draft",
       "title": "Create Draft Tweet",
       "subtitle": "Typefully",
-      "icon": "command-icon.png",
+      "icon": "icon.png",
       "description": "Draft a tweet with the Typefully platform, optionally schedule it for the next available slot.",
       "mode": "view",
       "keywords": [
-        "typefully",
         "draft",
         "schedule",
         "twitter",
@@ -27,14 +26,43 @@
       ]
     },
     {
-      "name": "open-dashboard",
-      "title": "Open Dashboard",
+      "name": "view-scheduled",
+      "title": "View Scheduled Drafts",
       "subtitle": "Typefully",
-      "icon": "command-icon.png",
+      "icon": "icon.png",
+      "description": "View drafts that have been recently scheduled.",
+      "mode": "view",
+      "keywords": [
+        "draft",
+        "recently",
+        "scheduled",
+        "twitter",
+        "tweet"
+      ]
+    },
+    {
+      "name": "view-posted",
+      "title": "View Recently Posted Drafts",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
+      "description": "View recently posted drafts.",
+      "mode": "view",
+      "keywords": [
+        "view",
+        "recently",
+        "scheduled",
+        "twitter",
+        "tweets"
+      ]
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Typefully",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
       "description": "Open the Typefully website",
       "mode": "no-view",
       "keywords": [
-        "typefully",
         "open",
         "dashboard"
       ]
@@ -57,6 +85,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.36.1",
+    "dayjs": "^1.11.3",
     "got": "^12.1.0"
   },
   "devDependencies": {

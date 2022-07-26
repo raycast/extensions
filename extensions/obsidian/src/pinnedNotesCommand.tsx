@@ -1,10 +1,11 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
 import { NoteListPinned } from "./components/NoteListPinned";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -14,15 +15,13 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListPinned vaultPath={vault.path} />} />;
+    return (
+      <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListPinned vault={vault} showTitle={true} />} />
+    );
   } else if (vaults.length == 1) {
-    return <NoteListPinned vaultPath={vaults[0].path} />;
+    return <NoteListPinned vault={vaults[0]} showTitle={false} />;
   } else {
-    showToast({
-      title: "Path Error",
-      message: "Something went wrong with your vault path. There are no paths to select from.",
-      style: Toast.Style.Failure,
-    });
+    noVaultPathsToast();
     return <List />;
   }
 }

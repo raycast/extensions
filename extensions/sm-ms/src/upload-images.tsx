@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open } from "@raycast/api";
 import React, { useState } from "react";
 import { chooseFile } from "./utils/applescript-utils";
 import { uploadImage } from "./utils/axios-utils";
@@ -7,6 +7,7 @@ import { ActionToSmMs } from "./components/action-to-sm-ms";
 
 export default function UploadImages() {
   const [imagePath, setImagePath] = useState<string>("");
+  const [imagePathError, setImagePathError] = useState<string | undefined>();
   const [uploadedImage, setUploadedImage] = useState<string[]>([]);
 
   return (
@@ -18,15 +19,15 @@ export default function UploadImages() {
             title={"Upload Image"}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
             onAction={() => {
-              uploadImage(imagePath).then((value) => {
+              uploadImage(imagePath, setImagePathError).then((value) => {
                 if (typeof value !== "undefined") {
                   if (value.success) {
                     const _uploadedImage = [...uploadedImage];
                     _uploadedImage.unshift(value.message);
                     setUploadedImage(_uploadedImage);
+                    setImagePath("");
                   }
                 }
-                setImagePath("");
               });
             }}
           />
@@ -55,7 +56,13 @@ export default function UploadImages() {
         id={"Image"}
         title={"Image"}
         value={imagePath}
-        onChange={setImagePath}
+        error={imagePathError}
+        onChange={(newValue) => {
+          setImagePath(newValue);
+          if (newValue.length > 0) {
+            setImagePathError(undefined);
+          }
+        }}
         placeholder={"Path (⌘+⇧+↩) or URL"}
       />
       {uploadedImage.map((value, index, array) => {

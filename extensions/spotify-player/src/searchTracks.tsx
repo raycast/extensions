@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useTrackSearch } from "./client/client";
+import { startPlaySimilar, useTrackSearch } from "./client/client";
 import { PlayAction } from "./actions";
-import { showToast, List, ActionPanel, Action, Toast, Image } from "@raycast/api";
+import { showToast, List, ActionPanel, Action, Toast, Image, Color } from "@raycast/api";
 import _ from "lodash";
-import { isSpotifyInstalled } from "./client/utils";
+import { isSpotifyInstalled, trackTitle } from "./client/utils";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
@@ -72,7 +72,7 @@ function TrackListItem(props: {
       mask: Image.Mask.Circle,
     };
   }
-  const title = `${track.artists[0].name} – ${track.name}`;
+  const title = trackTitle(track);
   return (
     <List.Item
       title={title}
@@ -82,11 +82,20 @@ function TrackListItem(props: {
       actions={
         <ActionPanel title={title}>
           <PlayAction itemURI={track.uri} />
+          {spotifyInstalled && track.id && (
+            <Action
+              title="Play Similar"
+              icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
+              onAction={() => {
+                startPlaySimilar(track.id);
+              }}
+            />
+          )}
           <Action.OpenInBrowser
             title={`Show Track (${track.name.trim()})`}
             url={spotifyInstalled ? `spotify:track:${track.id}` : track.external_urls.spotify}
             icon={icon}
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
           {album && (
             <Action.OpenInBrowser

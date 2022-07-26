@@ -1,4 +1,4 @@
-import { getApplications, showToast, Toast, open, showHUD } from "@raycast/api";
+import { getApplications } from "@raycast/api";
 
 export async function isSpacesInstalled() {
   const applications = await getApplications();

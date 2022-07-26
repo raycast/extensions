@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
 import { parse } from "path";
@@ -13,6 +13,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
       : props.setRefresh;
   const [path, setPath] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [pathError, setPathError] = useState<string | undefined>();
 
   useEffect(() => {
     async function _fetchFilePath() {
@@ -33,7 +34,11 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
             title={"Add File Template"}
             icon={Icon.TextDocument}
             onAction={async () => {
-              await addFileTemplate(name, path);
+              if (path.length === 0) {
+                setPathError("The field should't be empty!");
+                return;
+              }
+              await addFileTemplate(name, path, setPathError);
               setRefresh(Date.now());
             }}
           />
@@ -74,7 +79,20 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         title={"Path"}
         placeholder={"/xxx/xxx"}
         value={path}
-        onChange={setPath}
+        error={pathError}
+        onChange={(newValue) => {
+          setPath(newValue);
+          if (newValue.length > 0) {
+            setPathError(undefined);
+          }
+        }}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setPathError("The field should't be empty!");
+          } else {
+            setPathError(undefined);
+          }
+        }}
         info={
           "Insert the full path of the file used for the template. If you select a file before opening this command, its path is automatically added."
         }
@@ -83,7 +101,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         id={"name"}
         title={"Name"}
         placeholder={"File name without extension(Optional)"}
-        value={parse(path).name}
+        value={name}
         onChange={setName}
       />
       <Form.Description title={"Extension"} text={parse(path).name} />
@@ -107,13 +125,17 @@ const fetchFilePath = async (enterCommand = false) => {
   }
 };
 
-const addFileTemplate = async (name: string, path: string) => {
+const addFileTemplate = async (
+  name: string,
+  path: string,
+  setPathError: Dispatch<SetStateAction<string | undefined>>
+) => {
   if (fse.existsSync(path)) {
     if (checkIsFile(path)) {
       const templateFolderPath = environment.supportPath + "/templates";
       const desPath = templateFolderPath + "/" + name + parse(path).ext;
       if (fse.existsSync(desPath)) {
-        await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
+        setPathError("File already exists! Please rename!");
         return;
       }
 
@@ -123,9 +145,9 @@ const addFileTemplate = async (name: string, path: string) => {
       await showHUD("Template added");
       await popToRoot({ clearSearchBar: false });
     } else {
-      await showToast(Toast.Style.Failure, "Folder path not supported.");
+      setPathError("Folder path is not supported!");
     }
   } else {
-    await showToast(Toast.Style.Failure, "Path is invalid.");
+    setPathError("Path is invalid!");
   }
 };

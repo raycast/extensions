@@ -1,7 +1,7 @@
 {
   "name": "@raycast/migration",
-  "version": "1.36.0",
-  "description": "",
+  "version": "1.38.2",
+  "description": "Tool to automate the migration to a newer version of the @raycast/api",
   "main": "index.js",
   "bin": "./bin/migrate.js",
   "scripts": {

@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import BookmarkItem from "./components/BookmarkItem";
 import { useBookmarksSearch } from "./utils";
@@ -9,7 +9,7 @@ export default function Main(): ReactElement {
   const { response, error, isLoading } = useBookmarksSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search bookmark", error);
+    showToast(Toast.Style.Failure, "Cannot search bookmark", error);
   }
 
   // operators help: https://help.raindrop.io/using-search#operators

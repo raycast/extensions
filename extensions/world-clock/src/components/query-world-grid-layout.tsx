@@ -1,5 +1,5 @@
 import { getPreferenceValues, Grid } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 import { TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";

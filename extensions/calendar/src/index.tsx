@@ -1,7 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Calendar } from "calendar";
-import { weekNumber } from "weeknumber";
+import { weekNumber, weekNumberSun } from "weeknumber";
 
 const days = ["` SUN` ` MON` ` TUE` ` WED` ` THU` ` FRI` ` SAT`", "` MON` ` TUE` ` WED` ` THU` ` FRI` ` SAT` ` SUN`"];
 
@@ -22,7 +22,12 @@ export default function main() {
       let table = "";
       m.forEach((week) => {
         if (showWeeks) {
-          const wn = weekNumber(week[0]).toString();
+          let wn = "";
+          if (weekStart == 0) {
+            wn = weekNumberSun(week[0]).toString();
+          } else {
+            wn = weekNumber(week[0]).toString();
+          }
           table += "`" + wn + " ".repeat(2 - wn.length) + "`    ";
         }
 

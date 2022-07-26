@@ -17,6 +17,7 @@ import {
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -33,7 +34,7 @@ export enum IssueState {
 }
 
 const GET_ISSUE_DETAIL = gql`
-  query GetIssueDetail($id: ID!) {
+  query GetIssueDetail($id: IssueID!) {
     issue(id: $id) {
       description
       webUrl
@@ -81,7 +82,6 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
     lines.push(optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
   }
   const md = lines.join("  \n");
-  const author = issue.author ? `${issue.author.name}` : "<no author>";
 
   return (
     <Detail
@@ -98,19 +98,28 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(issue.state)}
-              color={stateColor(issue.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.Label title="Milestone" text={issue.milestone?.title || "<no milestone>"} />
-          <Detail.Metadata.TagList title="Labels">
-            {issue.labels.map((i) => (
-              <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {issue.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={issue.author.name} icon={userIcon(issue.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {issue.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {issue.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
+          {issue.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {issue.labels.map((i) => (
+                <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />

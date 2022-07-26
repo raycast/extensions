@@ -1,5 +1,4 @@
 import { ActionPanel, Icon, Action } from "@raycast/api";
-import { title } from "process";
 import { IProcessInfo } from "../models/interfaces";
 
 export function CopyCommandsActionsMenu(props: { process: IProcessInfo }) {

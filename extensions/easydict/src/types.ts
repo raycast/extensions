@@ -1,18 +1,64 @@
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-04 21:58
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2022-07-21 15:29
+ * @fileName: types.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { DicionaryType, SectionType, TranslateType } from "./consts";
+import { LanguageDetectType } from "./detectLanguage";
 import { IcibaDictionaryResult } from "./dict/iciba/interface";
 
-export interface TranslateTypeResult {
-  type: TranslateType | DicionaryType;
-  result:
-    | YoudaoTranslateResult
-    | BaiduTranslateResult
-    | TencentTranslateResult
-    | CaiyunTranslateResult
-    | IcibaDictionaryResult
-    | YoudaoDictionaryResult
-    | null;
+export enum SectionType {
+  Translation = "Translate",
+  Explanations = "Explanation",
+  Forms = "Forms and Tenses",
+  WebTranslation = "Web Translation",
+  WebPhrase = "Web Phrase",
+}
+
+export enum TranslationType {
+  Youdao = "Youdao",
+  Baidu = "Baidu",
+  Tencent = "Tencent",
+  Caiyun = "Caiyun",
+  Apple = "Apple",
+  DeepL = "DeepL",
+  Google = "Google",
+}
+
+export enum DicionaryType {
+  Youdao = "Youdao",
+  Iciba = "Iciba",
+  Eudic = "Eudic",
+}
+
+export type QueryType = TranslationType | DicionaryType;
+export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
+
+export interface RequestTypeResult {
+  type: RequestType;
+  result: RequestResult | null;
   errorInfo?: RequestErrorInfo;
+}
+
+type RequestResult =
+  | YoudaoTranslateResult
+  | BaiduTranslateResult
+  | TencentTranslateResult
+  | CaiyunTranslateResult
+  | AppleTranslateResult
+  | DeepLTranslateResult
+  | IcibaDictionaryResult
+  | YoudaoDictionaryResult;
+
+export interface RequestErrorInfo {
+  message: string;
+  code?: string;
+  type?: RequestType;
 }
 
 export interface YoudaoTranslateResult {
@@ -31,14 +77,14 @@ export type YoudaoDictionaryResult = YoudaoTranslateResult;
 
 export interface QueryWordInfo {
   word: string;
-  phonetic?: string;
-  speech?: string;
   fromLanguage: string;
   toLanguage: string;
-  isWord: boolean;
+  isWord?: boolean; // * NOTE: youdao reqeust must have the return value.
+  phonetic?: string;
+  speech?: string;
   examTypes?: string[];
   audioPath?: string;
-  speechUrl: string; // youdao tts url
+  speechUrl?: string; // youdao tts url, some language not have tts url, such as "ຂາດ"
 }
 
 export interface YoudaoTranslateResultBasicItem {
@@ -74,50 +120,52 @@ export interface YoudaoTranslateReformatResultItem {
 export interface MyPreferences {
   language1: string;
   language2: string;
-  youdaoAppId: string;
-  youdaoAppSecret: string;
-  baiduAppId: string;
-  baiduAppSecret: string;
-  caiyunToken: string;
-  tencentSecretId: string;
-  tencentSecretKey: string;
-  tencentProjectId: string;
   isAutomaticQuerySelectedText: boolean;
   isAutomaticPlayWordAudio: boolean;
   isDisplayTargetTranslationLanguage: boolean;
+  translationDisplayOrder: string;
+
+  youdaoAppId: string;
+  youdaoAppSecret: string;
+
   enableBaiduTranslate: boolean;
+  baiduAppId: string;
+  baiduAppSecret: string;
+
   enableTencentTranslate: boolean;
+  tencentSecretId: string;
+  tencentSecretKey: string;
+
+  enableAppleLanguageDetect: boolean;
+  enableAppleTranslate: boolean;
+
+  enableDeepLTranslate: boolean;
+  deepLAuthKey: string;
+
   enableCaiyunTranslate: boolean;
+  caiyunToken: string;
 }
 
-export interface ListItemActionPanelItem {
+export interface ActionListPanelProps {
+  displayItem: TranslateDisplayItem;
   isInstalledEudic: boolean;
-  isShowOpenInEudicWeb: boolean;
-  eudicWebUrl: string;
-  isShowOpenInYoudaoWeb: boolean;
-  youdaoWebUrl: string;
-  copyText: string;
-  queryText: string;
-  queryWordInfo: QueryWordInfo;
-  currentFromLanguage: LanguageItem;
-  currentTargetLanguage: LanguageItem;
   onLanguageUpdate: (language: LanguageItem) => void;
-}
-
-export interface RequestErrorInfo {
-  errorCode: string;
-  errorMessage: string;
 }
 
 export interface LanguageItem {
   youdaoLanguageId: string;
+  appleDetectChineseLanguageTitle?: string; // such as 中文，英语. ⚠️: Apple detect more languages than apple translate.
+  appleLanguageId?: string; // used to translate, Apple translate support 12 languages?
+  deepLSourceLanguageId?: string; // deepL source language id
+  deepLTargetLanguageId?: string; // most are same as source language, some are different, such as "EN-GB" "EN-US" and so on.
+  francLanguageId: string; // the languages represented by ISO 639-3
   aliyunLanguageId: string;
   tencentDetectLanguageId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
   tencentLanguageId?: string;
   baiduLanguageId?: string;
   caiyunLanguageId?: string;
   languageTitle: string;
-  languageVoice: string[];
+  voiceList?: string[];
   googleLanguageId?: string;
   youdaoWebLanguageId?: string;
   eudicWebLanguageId?: string;
@@ -137,17 +185,25 @@ export interface BaiduTranslateItem {
 
 export type TencentTranslateResult = TextTranslateResponse;
 
-// export interface TencentTranslateResult {
-//   TargetText: string;
-//   Source: string;
-//   Target: string;
-//   RequestId: string;
-// }
-
 export interface CaiyunTranslateResult {
   rc: string;
   target: string[];
   confidence: number;
+}
+
+export interface AppleTranslateResult {
+  translatedText: string;
+}
+
+/**
+ * DeepL translate result
+ */
+export interface DeepLTranslateResult {
+  translations: DeepLTranslationItem[];
+}
+export interface DeepLTranslationItem {
+  detected_source_language: string;
+  text: string;
 }
 
 export interface TranslateSourceResult {
@@ -160,7 +216,7 @@ export interface TranslateSourceResult {
 
 export interface TranslateFormatResult {
   queryWordInfo: QueryWordInfo;
-  translations: TranslateItem[];
+  translationItems: TranslateItem[];
   explanations?: string[];
   forms?: YoudaoTranslateResultBasicFormsItem[];
   webTranslation?: TranslateResultKeyValueItem;
@@ -168,7 +224,7 @@ export interface TranslateFormatResult {
 }
 
 export interface TranslateItem {
-  type: TranslateType;
+  type: TranslationType;
   text: string;
 }
 export interface TranslateResultKeyValueItem {
@@ -177,8 +233,8 @@ export interface TranslateResultKeyValueItem {
 }
 
 export interface TranslateDisplayResult {
-  type: SectionType | TranslateType;
-  sectionTitle?: SectionType | TranslateType | string;
+  type: SectionType | TranslationType;
+  sectionTitle?: SectionType | TranslationType | string;
   items?: TranslateDisplayItem[];
 }
 export interface TranslateDisplayItem {
