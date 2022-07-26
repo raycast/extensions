@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Color, List, Cache } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Color,
+  List,
+  Cache,
+  getPreferenceValues,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Service, { Icon, Set } from './service';
 import { toDataURI, toSvg, toURL } from './utils';
+
+const { primaryAction } =
+  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
 
 const service = new Service();
 const cache = new Cache({
@@ -86,6 +96,11 @@ function Command() {
         const { id, body, width, height } = icon;
         const svgIcon = toSvg(body, width, height);
         const dataURIIcon = toDataURI(svgIcon);
+
+        const paste = <Action.Paste title="Paste SVG" content={svgIcon} />;
+        const copy = (
+          <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
+        );
         return (
           <List.Item
             icon={{
@@ -98,8 +113,17 @@ function Command() {
             title={id}
             actions={
               <ActionPanel>
-                <Action.Paste content={svgIcon} />
-                <Action.CopyToClipboard content={svgIcon} />
+                {primaryAction === 'paste' ? (
+                  <>
+                    {paste}
+                    {copy}
+                  </>
+                ) : (
+                  <>
+                    {copy}
+                    {paste}
+                  </>
+                )}
                 <Action.CopyToClipboard
                   title="Copy Name"
                   content={`${activeSetId}:${id}`}

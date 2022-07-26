@@ -21,17 +21,37 @@
   "commands": [
     {
       "name": "view-icons",
-      "title": "Search Icon Sets",
+      "title": "View Icons",
       "subtitle": "Iconify",
-      "description": "Search and view icons in a specific icon set",
+      "description": "View available icons",
       "mode": "view"
     },
     {
       "name": "search-icons",
-      "title": "Search Icons",
+      "title": "Search All Icons",
       "subtitle": "Iconify",
       "description": "Search through all available icons",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
     }
   ],
   "dependencies": {
