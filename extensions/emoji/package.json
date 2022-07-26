@@ -87,9 +87,9 @@
       "type": "checkbox",
       "required": false,
       "title": "Shortcodes",
-      "label": "Show Shortcodes",
+      "label": "Add Shortcodes",
       "default": false,
-      "description": "Show short codes for emojis (e.g. zap for ⚡️) which can be used in platforms like GitHub and Slack."
+      "description": "Add short codes to the emojis (e.g. zap for ⚡️) which can be used in platforms like GitHub and Slack."
     }
   ],
   "dependencies": {
