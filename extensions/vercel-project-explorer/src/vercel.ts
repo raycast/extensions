@@ -17,6 +17,9 @@ export const token = getPreferenceValues().accessToken;
 const headers = new Headers({
   Authorization: "Bearer " + token,
 });
+
+export const FetchHeaders = headers;
+
 const apiURL = "https://api.vercel.com/";
 
 // Fetch the username that belongs to the token given.
@@ -187,9 +190,20 @@ export async function fetchDeploymentsForProject(project: Project, teamId?: stri
   }
 }
 
+export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100,) {
+  const url = apiURL + `v6/deployments`
+
+  let query = `?limit=${limit}&teamId=${teamId ?? ""}`
+  if (projectId) {
+    query += `&projectId=${projectId}`
+  }
+
+  return url + query
+}
+
 export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300) {
   try {
-    const fetchURL = apiURL + `v6/deployments?teamId=${teamId ?? ""}&limit=${limit}`;
+    const fetchURL = getFetchDeploymentsURL(teamId, limit);
     const response = await fetch(fetchURL, {
       method: "get",
       headers: headers,
@@ -199,7 +213,7 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
     // eslint-disable-next-line prefer-const
     let { deployments, pagination } = json;
 
-    while (pagination.next && deployments.length < maxToFetch) {
+    while (pagination?.next && deployments.length < maxToFetch) {
       const next = await fetch(fetchURL + "&until=" + pagination.next, {
         method: "get",
         headers: headers,
@@ -244,6 +258,10 @@ export async function fetchEnvironmentVariables(projectId: string, teamId?: stri
   return environmentVariables.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
+export function getFetchProjectsURL(teamId?: string) {
+  return apiURL + `v8/projects?teamId=${teamId ?? ""}`;
+}
+
 // Raw function for fetching project environment variable
 async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: string): Promise<Environment[]> {
   try {
@@ -275,7 +293,7 @@ export async function updateEnvironmentVariable(
 }
 
 export async function updateProject(projectId: string, project: Partial<Project>, teamId?: string): Promise<Project> {
-  const response = await fetch(apiURL + `v8/projects/${projectId}?teamId=${teamId ? teamId : ""}`, {
+  const response = await fetch(getFetchProjectsURL(projectId, teamId), {
     method: "patch",
     headers: headers,
     body: JSON.stringify(project),
@@ -333,15 +351,16 @@ async function _rawUpdateProjectEnvironmentVariable(
   }
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = "";
+  const bytes = [].slice.call(new Uint8Array(buffer));
+
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+
+  return btoa(binary);
+}
+
 export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
-  function arrayBufferToBase64(buffer: ArrayBuffer) {
-    let binary = "";
-    const bytes = [].slice.call(new Uint8Array(buffer));
-
-    bytes.forEach((b) => (binary += String.fromCharCode(b)));
-
-    return btoa(binary);
-  }
 
   const theme = environment.theme === "light" ? "0" : "1";
   const image = await fetch(
@@ -354,6 +373,18 @@ export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
 
   const arrayBuffer = await image.arrayBuffer();
   const base64Flag = "data:image/png;base64,";
+  const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
+
+  return imageStr;
+}
+
+export async function getAvatarImageURL(userOrTeamId: string, isTeam = false) {
+  const image = await fetch(`https://vercel.com/api/www/avatar/${isTeam ? `?teamId=${userOrTeamId}` : userOrTeamId}`, {
+    method: "get",
+    headers: headers,
+  });
+
+  const arrayBuffer = await image.arrayBuffer();
   const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
 
   return imageStr;

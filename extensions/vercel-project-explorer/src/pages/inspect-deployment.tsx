@@ -21,7 +21,8 @@ const InspectDeployment = ({ deployment }: Props) => {
 
   useEffect(() => {
     async function fetchBuilds() {
-      const fetchedBuilds = await fetchDeploymentBuildsByDeploymentId(deployment.uid);
+      // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
+      const fetchedBuilds = await fetchDeploymentBuildsByDeploymentId(deployment.uid || deployment.id);
       setMostRecentBuild(fetchedBuilds ? fetchedBuilds[0] : undefined);
     }
     fetchBuilds();
@@ -38,7 +39,7 @@ const InspectDeployment = ({ deployment }: Props) => {
   const getStateText = () => {
     return build?.readyState
       ? build.readyState.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
-      : "";
+      : "Error";
   };
 
   return (
@@ -61,7 +62,7 @@ const InspectDeployment = ({ deployment }: Props) => {
           <Detail.Metadata.Link title={"Site URL"} text={deployment.url} target={`https://${deployment.url}`} />
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
           {/* @ts-ignore */}
-          <Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />
+          {deployment.inspectorURL && <Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />}
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label

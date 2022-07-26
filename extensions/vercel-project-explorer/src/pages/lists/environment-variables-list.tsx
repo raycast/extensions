@@ -159,13 +159,13 @@ const EnvironmentVariableItem = ({
       case "system":
         return Icon.Desktop;
       case "secret":
-        return Icon.EyeSlash;
+        return Icon.EyeDisabled;
       case "encrypted":
-        return Icon.TextDocument;
+        return Icon.BlankDocument;
       case "plain":
-        return Icon.TextDocument;
+        return Icon.BlankDocument;
       default:
-        return Icon.TextDocument;
+        return Icon.BlankDocument;
     }
   };
 

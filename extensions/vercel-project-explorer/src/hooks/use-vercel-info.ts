@@ -1,9 +1,7 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useEffect } from "react";
-import { Project, Team, User } from "../types";
-import useInterval from "../utils/use-interval";
-import { fetchUser, fetchTeams, fetchProjects, updateProject, getChecksForDeployment } from "../vercel";
-import useSharedState from "./use-shared-state";
+import { useEffect, useState, } from "react";
+import { LocalStorage } from "@raycast/api";
+import { Team, User } from "../types";
+import { fetchUser, fetchTeams, getAvatarImageURL } from "../vercel";
 
 const useVercel = () => {
   /* Establishing state:
@@ -12,63 +10,9 @@ const useVercel = () => {
    * teams -- used for filtering projects
    * projects -- used for listing projects. The projects are filtered by the user and selectedTeam
    */
-  const [user, setUser] = useSharedState<User>("user");
-  const [teams, setTeams] = useSharedState<Team[]>("teams");
-  const [selectedTeam, setSelectedTeam] = useSharedState<Team>("selectedTeam");
-  const [projects, setProjects] = useSharedState<Project[]>("projects");
-
-  const fetchAndUpdateProjects = async (user: User, selectedTeam?: Team) => {
-    setProjects(await fetchProjects(user.username, selectedTeam ? [selectedTeam] : undefined));
-  };
-
-  const onTeamChange = (teamIdOrUsername: string) => {
-    const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
-    if (teamIfExists) {
-      setSelectedTeam(teamIfExists);
-    } else {
-      setSelectedTeam(undefined);
-    }
-  };
-
-  /*
-   * Update the projects when a project is updated. Can be made more efficient.
-   */
-  const updateLocalProject = async (projectId: string, project: Partial<Project>, teamId?: string) => {
-    const updated = await updateProject(projectId, project, teamId);
-
-    if (updated && projects?.length) {
-      setProjects((projects) => {
-        const updatedProjects = projects?.map((project) => {
-          if (project.id === updated.id) {
-            return updated;
-          }
-          return project;
-        });
-        return updatedProjects;
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update project",
-      });
-    }
-  };
-
-  /*
-   * We refresh the projects every minute
-   */
-  useInterval(async () => {
-    if (user) {
-      fetchAndUpdateProjects(user, selectedTeam);
-    }
-  }, 1000 * 60);
-
-  // Update projects on team change
-  useEffect(() => {
-    if (user) {
-      fetchAndUpdateProjects(user, selectedTeam);
-    }
-  }, [selectedTeam]);
+  const [user, setUser] = useState<User>();
+  const [teams, setTeams] = useState<Team[]>();
+  const [selectedTeam, setSelectedTeam] = useState<Team>();
 
   /*
    * Populate user, projects, and teams
@@ -77,43 +21,68 @@ const useVercel = () => {
     const fetchData = async () => {
       if (!user || !teams) {
         const [fetchedUser, fetchedTeams] = await Promise.all([fetchUser(), fetchTeams()]);
-        const fetchedProjects = await fetchProjects(fetchedUser.username, selectedTeam ? [selectedTeam] : undefined);
+
+        // // add avatar to fetched teams
+        // const fetchedTeamsWithAvatar = await Promise.all(fetchedTeams.map(async (team) => {
+        //   const id = team.id;
+        //   let avatarURL
+        //   if (id) {
+        //     // avatarURL = await getAvatarImageURL(id, true);
+        //   } else {
+        //   }
+
+        //   return { ...team, avatar: avatarURL || "" };
+        // }));
+
         setUser(fetchedUser);
-        setProjects(fetchedProjects);
         setTeams(fetchedTeams);
+
+        const selectedTeamId = await LocalStorage.getItem("selectedTeam");
+        if (selectedTeamId) {
+          const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
+          if (selectedTeam) {
+            setSelectedTeam(selectedTeam);
+          }
+        }
       }
     };
     fetchData();
   }, []);
 
-  /*
-   * We store the selectedTeam ID in localStorage for persistence
-   */
+  // update selectedTeam on load
   useEffect(() => {
-    async function getStoredId() {
-      const storedTeamId = await LocalStorage.getItem("team");
-      if (storedTeamId) {
-        const team = teams?.find((team) => team.id === storedTeamId);
-        if (team) {
-          setSelectedTeam(team);
-        } else {
-          // If the stored team is no longer found, clear the localStorage
-          await LocalStorage.setItem("team", "");
+    async function updateSelectedTeam() {
+      if (user && teams) {
+        const selectedTeamId = await LocalStorage.getItem("selectedTeam");
+        if (selectedTeamId) {
+          const selectedTeam = teams.find((team) => team.id === selectedTeamId);
+          if (selectedTeam) {
+            setSelectedTeam(selectedTeam);
+          }
         }
       }
     }
 
-    getStoredId();
-  }, [teams, selectedTeam]);
+    updateSelectedTeam();
+  }, []);
+
+  const updateSelectedTeam =
+    async (teamIdOrUsername: string) => {
+      const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
+      if (teamIfExists) {
+        setSelectedTeam(teamIfExists);
+        await LocalStorage.setItem("selectedTeam", teamIfExists.id);
+      } else {
+        setSelectedTeam(undefined);
+        await LocalStorage.removeItem("selectedTeam");
+      }
+    }
 
   return {
     user,
     selectedTeam,
     teams,
-    projects,
-    setSelectedTeam,
-    onTeamChange,
-    updateProject: updateLocalProject,
+    updateSelectedTeam,
   };
 };
 

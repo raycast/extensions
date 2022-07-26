@@ -4,9 +4,9 @@ import fromNow from "../utils/time";
 import { Deployment, Project as ProjectType, Team } from "../types";
 import { fetchDeploymentsForProject } from "../vercel";
 import CopyToClipboardActionPanel from "./action-panels/copy-to-clipboard";
-import DeploymentList from "./lists/deployments-list";
 import EnvironmentVariables from "./lists/environment-variables-list";
 import EditPreferences from "./forms/edit-preferences";
+import DeploymentsList from "./lists/deployments-list";
 
 type Props = {
   project: ProjectType;
@@ -14,21 +14,20 @@ type Props = {
   team?: Team;
   updateProject: (projectId: string, project: Partial<ProjectType>, teamId?: string) => Promise<void>;
 };
+
 const Project = ({ project, team, updateProject }: Props) => {
   const { push } = useNavigation();
-  const [deployments, setDeployments] = useState<Deployment[]>();
-  const [latestDeployment, setLatestDeployment] = useState<Deployment>();
+  const [latestDeployment, setLatestDeployment] = useState<Deployment | undefined | null>();
 
   useEffect(() => {
-    fetchDeploymentsForProject(project, team?.id).then((deployments) => {
-      setDeployments(deployments);
-
+    fetchDeploymentsForProject(project, team?.id, 1).then((deployments) => {
       if (deployments.length) setLatestDeployment(deployments[0]);
+      else setLatestDeployment(null);
     });
   }, []);
 
   return (
-    <List navigationTitle={project.name} isLoading={!deployments}>
+    <List navigationTitle={project.name} isLoading={latestDeployment === undefined}>
       <List.Section title={`Deployments`}>
         <List.Item
           title={`Visit Most Recent Deployment`}
@@ -49,14 +48,13 @@ const Project = ({ project, team, updateProject }: Props) => {
         <List.Item
           title="Search Deployments..."
           icon={Icon.MagnifyingGlass}
-          subtitle={`${deployments?.length} deployments loaded`}
           actions={
             <ActionPanel>
               <Action
                 title="Search Deployments..."
                 icon={{ source: Icon.MagnifyingGlass }}
                 onAction={() => {
-                  push(<DeploymentList deployments={deployments || []} />);
+                  push(<DeploymentsList projectId={project.id} />);
                 }}
               />
             </ActionPanel>

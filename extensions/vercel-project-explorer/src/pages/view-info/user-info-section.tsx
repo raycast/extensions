@@ -8,7 +8,7 @@ type Props = {
 
 const UserListSection = ({ user }: Props) => {
   return user ? (
-    <List.Section title={`Account information`}>
+    <List.Section>
       <List.Item
         title={`Username`}
         subtitle={user.username || undefined}
