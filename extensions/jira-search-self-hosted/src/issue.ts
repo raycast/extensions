@@ -63,7 +63,7 @@ function buildJql(query: string): string {
   console.log("Status: ", statuus);
   query = query.replace(statusRegex, "");
 
-  const assigneeRegex = /%([\.@a-z0-9_-]+|"[\.@a-z0-9_ -]+")/gi;
+  const assigneeRegex = /%([.@a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
   const assigneeMatchingGroup = Array.from(query.matchAll(assigneeRegex));
   const assignee = assigneeMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
   query = query.replace(assigneeRegex, "");
