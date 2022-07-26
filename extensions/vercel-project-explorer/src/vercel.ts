@@ -234,9 +234,13 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
   }
 }
 
+export function getFetchDeploymentBuildsURL(deploymentId: Deployment["uid"] | string) {
+  return apiURL + `v11/deployments/${deploymentId}/builds`;
+}
+
 export async function fetchDeploymentBuildsByDeploymentId(deploymentId: string) {
   try {
-    const response = await fetch(apiURL + `v11/deployments/${deploymentId}/builds`, {
+    const response = await fetch(getFetchDeploymentBuildsURL(deploymentId), {
       method: "get",
       headers: headers,
     });
