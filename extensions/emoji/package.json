@@ -23,6 +23,24 @@
   ],
   "preferences": [
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
       "name": "unicodeVersion",
       "type": "dropdown",
       "required": false,

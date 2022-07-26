@@ -8,7 +8,8 @@ import emojiKeywords from "emojilib";
 import Fuse from "fuse.js";
 import { usePersistentState } from "raycast-toolkit";
 
-const { unicodeVersion, shortCodes } = getPreferenceValues<{
+const { primaryAction, unicodeVersion, shortCodes } = getPreferenceValues<{
+  primaryAction: "paste" | "copy";
   unicodeVersion: UnicodeVersion;
   shortCodes: boolean;
 }>();
@@ -107,48 +108,55 @@ export default function Main(): ReactElement {
             category
           ).map((category: Category) => (
             <List.Section title={category.category} key={category.category}>
-              {category.emojis.map((emoji) => (
-                <List.Item
-                  key={emoji.description}
-                  id={`${category.category}${emoji.description}`}
-                  icon={emoji.emoji}
-                  title={emoji.description.replace(/\b(\w)/g, (s) => s.toUpperCase())}
-                  keywords={emoji.shortCode}
-                  actions={
-                    <ActionPanel>
-                      <ActionPanel.Section>
-                        <Action.Paste
-                          content={emoji.emoji}
-                          onPaste={() => {
-                            addToRecentlyUsed(emoji);
-                          }}
-                        />
-                        <Action.CopyToClipboard
-                          content={emoji.emoji}
-                          onCopy={() => {
-                            addToRecentlyUsed(emoji);
-                          }}
-                        />
-                        {shortCodes && emoji.shortCode && (
-                          <Action.CopyToClipboard
-                            title="Copy Shortcode"
-                            content={emoji.shortCode[0]}
-                            onCopy={() => {
-                              addToRecentlyUsed(emoji);
-                            }}
-                          />
-                        )}
-                        <Action.OpenInBrowser title="View on Emojipedia" url={getEmojipediaLink(emoji.description)} />
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  }
-                  accessories={[
-                    {
-                      text: emoji?.shortCode?.join(" / "),
-                    },
-                  ]}
-                />
-              ))}
+              {category.emojis.map((emoji) => {
+                const paste = (
+                  <Action.Paste
+                    content={emoji.emoji}
+                    onPaste={() => {
+                      addToRecentlyUsed(emoji);
+                    }}
+                  />
+                );
+                const copy = (
+                  <Action.CopyToClipboard
+                    content={emoji.emoji}
+                    onCopy={() => {
+                      addToRecentlyUsed(emoji);
+                    }}
+                  />
+                );
+                return (
+                  <List.Item
+                    key={emoji.description}
+                    id={`${category.category}${emoji.description}`}
+                    icon={emoji.emoji}
+                    title={emoji.description.replace(/\b(\w)/g, (s) => s.toUpperCase())}
+                    keywords={emoji.shortCode}
+                    actions={
+                      <ActionPanel>
+                        <ActionPanel.Section>
+                          {primaryAction === "paste" ? [paste, copy] : [copy, paste]}
+                          {shortCodes && emoji.shortCode && (
+                            <Action.CopyToClipboard
+                              title="Copy Shortcode"
+                              content={emoji.shortCode[0]}
+                              onCopy={() => {
+                                addToRecentlyUsed(emoji);
+                              }}
+                            />
+                          )}
+                          <Action.OpenInBrowser title="View on Emojipedia" url={getEmojipediaLink(emoji.description)} />
+                        </ActionPanel.Section>
+                      </ActionPanel>
+                    }
+                    accessories={[
+                      {
+                        text: emoji?.shortCode?.join(" / "),
+                      },
+                    ]}
+                  />
+                );
+              })}
             </List.Section>
           ))
         : []}
