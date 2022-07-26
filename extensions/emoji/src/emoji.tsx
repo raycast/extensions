@@ -135,7 +135,17 @@ export default function Main(): ReactElement {
                     actions={
                       <ActionPanel>
                         <ActionPanel.Section>
-                          {primaryAction === "paste" ? [paste, copy] : [copy, paste]}
+                          {primaryAction === "paste" ? (
+                            <>
+                              {paste}
+                              {copy}
+                            </>
+                          ) : (
+                            <>
+                              {copy}
+                              {paste}
+                            </>
+                          )}
                           {shortCodes && emoji.shortCode && (
                             <Action.CopyToClipboard
                               title="Copy Shortcode"
