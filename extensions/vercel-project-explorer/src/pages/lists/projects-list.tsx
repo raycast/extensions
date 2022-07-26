@@ -1,10 +1,9 @@
 import { ActionPanel, open, Icon, List, useNavigation, Action, showToast, Toast } from "@raycast/api";
-import ProjectComponent from "../project";
 import { Project } from "../../types";
 import fromNow from "../../utils/time";
 import SearchBarAccessory from "../search-projects/search-bar-accessory";
 import useVercel from "../../hooks/use-vercel-info";
-import { getFetchProjectsURL, updateProject } from "../../vercel";
+import { getFetchProjectsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
 import { FetchHeaders } from "../../vercel";
 import InspectDeployment from "../inspect-deployment";
@@ -31,41 +30,6 @@ const ProjectListSection = () => {
 
   const projects = data?.projects;
 
-  /*
-   * Update the projects when a project is updated. Can be made more efficient.
-   */
-  const updateLocalProject = async (projectId: string, project: Partial<Project>, teamId?: string) => {
-    if (!projects) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "No projects found",
-        message: "Please refresh the view",
-      });
-      return;
-    }
-
-    // TODO: use mutate()
-    const updated = await updateProject(projectId, project, teamId);
-
-    if (!updated) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update project",
-      });
-      return;
-    }
-
-    if (updated && projects.length) {
-      revalidate();
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update project",
-        message: "Please refresh the view",
-      });
-    }
-  };
-
   const { push } = useNavigation();
 
   return <List
@@ -90,13 +54,6 @@ const ProjectListSection = () => {
           keywords={[project.framework || ""]}
           actions={
             <ActionPanel>
-              {/* <Action
-                title="Show Details"
-                icon={Icon.ArrowRight}
-                onAction={async () => {
-                  push(<ProjectComponent team={selectedTeam} project={project} updateProject={updateLocalProject} />);
-                }}
-              /> */}
               <Action
                 title="Inspect Most Recent Deployment"
                 icon={Icon.ArrowRight}

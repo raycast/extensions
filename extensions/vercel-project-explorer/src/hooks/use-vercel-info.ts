@@ -1,7 +1,7 @@
 import { useEffect, useState, } from "react";
 import { LocalStorage } from "@raycast/api";
 import { Team, User } from "../types";
-import { fetchUser, fetchTeams, getAvatarImageURL } from "../vercel";
+import { fetchUser, fetchTeams, } from "../vercel";
 
 const useVercel = () => {
   /* Establishing state:

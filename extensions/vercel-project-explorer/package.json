@@ -19,12 +19,6 @@
       "title": "Search Deployments",
       "description": "Explore your Vercel deployments",
       "mode": "view"
-    },
-    {
-      "name": "view-info",
-      "title": "View User Information",
-      "description": "View your user information",
-      "mode": "view"
     }
   ],
   "preferences": [

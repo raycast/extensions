@@ -146,7 +146,7 @@ export async function deleteEnvironmentVariableById(
   }
 }
 
-export async function fetchProjectById(projectId: Project["id"], teamId?: string) {
+export async function fetchProjectById(projectId: Project["id"],) {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}`, {
       method: "get",
@@ -203,7 +203,7 @@ export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limi
 
 export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300) {
   try {
-    const fetchURL = getFetchDeploymentsURL(teamId, limit);
+    const fetchURL = getFetchDeploymentsURL(teamId, undefined, limit);
     const response = await fetch(fetchURL, {
       method: "get",
       headers: headers,
@@ -293,7 +293,7 @@ export async function updateEnvironmentVariable(
 }
 
 export async function updateProject(projectId: string, project: Partial<Project>, teamId?: string): Promise<Project> {
-  const response = await fetch(getFetchProjectsURL(projectId, teamId), {
+  const response = await fetch(getFetchProjectsURL(teamId), {
     method: "patch",
     headers: headers,
     body: JSON.stringify(project),
@@ -385,6 +385,7 @@ export async function getAvatarImageURL(userOrTeamId: string, isTeam = false) {
   });
 
   const arrayBuffer = await image.arrayBuffer();
+  const base64Flag = "data:image/png;base64,";
   const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
 
   return imageStr;
