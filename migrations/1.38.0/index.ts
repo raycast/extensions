@@ -7,6 +7,7 @@ const map = {
   SpeakerArrowUp: "SpeakerUp",
   SpeakerSlash: "SpeakerOff",
   TextDocument: "BlankDocument",
+  XmarkCircle: "XMarkCircle",
 };
 
 const transform: Transform = (file: FileInfo, api: API) => {
