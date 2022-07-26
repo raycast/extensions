@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import useSWR from "swr";
 import fetch from "node-fetch";
 import * as asciichart from "asciichart";
-import { getCurrency } from "./preference";
+import { getCurrency, getPreferenceValues } from "./preference";
 
 // ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
 const tfOptions = [
@@ -60,8 +60,10 @@ function LendingRatesSubMenu(props: LendingRatesDropdownProps) {
   );
 }
 
+const defaultRateView = getPreferenceValues().default_rate_view;
+
 const useToggleChartView = () => {
-  const [isChartView, setIsChartView] = useState(false);
+  const [isChartView, setIsChartView] = useState(defaultRateView === "chart");
   const onToggleChartView = useCallback(() => setIsChartView(!isChartView), [isChartView]);
 
   const action = (
