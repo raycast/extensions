@@ -1,3 +1,3 @@
-# dicom
+# DICOM
 
 dicom tag lookup
