@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 
 import { getSubIssues, IssueResult } from "../api/getIssues";
 
@@ -7,7 +8,6 @@ import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
 import useUsers from "../hooks/useUsers";
 import CreateIssueForm from "./CreateIssueForm";
-import { MutatePromise } from "@raycast/utils";
 import IssueListItem from "./IssueListItem";
 
 type SubIssuesProps = {
@@ -29,7 +29,7 @@ export default function SubIssues({ issue, mutateList }: SubIssuesProps) {
   return (
     <List
       isLoading={isLoadingIssues || isLoadingMe || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      navigationTitle={`${issue.title} • ${issue.identifier}`}
+      navigationTitle={`${issue.identifier} • Sub-issues`}
     >
       <List.EmptyView
         title="No issues"

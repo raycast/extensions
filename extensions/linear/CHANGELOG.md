@@ -1,5 +1,11 @@
 # Linear Changelog
 
+## [Comment improvements] - 2022-07-26
+
+- Add the ability to add/edit a comment
+- Add an empty screen if there are no comments for a given issue
+- Add a warning before deleting a comment
+
 ## [New commands and open sourced] - 2022-07-21
 
 Introduce "Notifications" and "Create Project" commands to the Linear extension.
