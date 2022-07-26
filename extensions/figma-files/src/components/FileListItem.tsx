@@ -1,4 +1,4 @@
-import { ActionPanel, List, CopyToClipboardAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
@@ -25,7 +25,7 @@ export default function FileListItem(props: { file: File; extraKey?: string; onV
         <ActionPanel>
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} onVisit={onVisit} />
-            <CopyToClipboardAction content={`https://figma.com/file/${file.key}`} />
+            <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenPageSubmenuAction file={props.file} onVisit={onVisit} />

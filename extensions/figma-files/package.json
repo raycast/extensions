@@ -5,7 +5,7 @@
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "commands": [
     {
@@ -33,7 +33,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.38.2",
     "javascript-time-ago": "^2.3.9",
     "node-fetch": "^3.0.0"
   },

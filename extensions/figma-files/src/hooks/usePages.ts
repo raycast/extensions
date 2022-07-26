@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 
@@ -59,7 +59,7 @@ async function fetchPages(file: File, signal: AbortSignal): Promise<Node[]> {
     }
 
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load pages");
+    showToast(Toast.Style.Failure, "Could not load pages");
     return Promise.resolve([]);
   }
 }
