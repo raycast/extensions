@@ -1,9 +1,10 @@
 # Bitfinex Changelog
 
-## [New Iconography] - 2022-07-20
+## [New Iconography and improvements] - 2022-07-26
 
 - Adjust the height of lending chart
 - Adopt the new iconography from Raycast 1.38.0
+- Add lending rates view preference for list or chart
 
 ## [New Charts View for Lending Rates] - 2022-07-19
 
