@@ -2,6 +2,7 @@ import { pipe } from "fp-ts/function";
 import * as R from "fp-ts/Reader";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
+
 import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";

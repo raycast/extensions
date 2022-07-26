@@ -1,7 +1,18 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Icon,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
+
 import { Track } from "./util/models";
 import * as music from "./util/scripts";
 import { handleError } from "./util/utils";
@@ -35,8 +46,8 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not rate this track");
       }),
       TE.map(() => {
-        showHUD('⭐'.repeat(value));
-        closeMainWindow()
+        showHUD("⭐".repeat(value));
+        closeMainWindow();
       })
     )();
 

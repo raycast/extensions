@@ -38,6 +38,5 @@ export interface ScriptError extends Error {
 }
 
 export const ScriptError = {
-  is: (error: Error): error is ScriptError =>
-  'shortMessaage' in error
-}
+  is: (error: Error): error is ScriptError => "shortMessaage" in error,
+};

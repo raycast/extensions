@@ -5,11 +5,12 @@ import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
+
 import { Album } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
-import { handleTaskEitherError } from './util/utils';
+import { handleTaskEitherError } from "./util/utils";
 
 export default function PlayLibraryAlbum() {
   const [albums, setAlbums] = useState<readonly Album[] | null>(null);
@@ -88,7 +89,6 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
   const title = `Start Album "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
-
     await pipe(
       name,
       music.albums.play(shuffle),

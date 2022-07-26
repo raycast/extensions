@@ -1,7 +1,9 @@
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { general } from ".";
+
 import { createQueryString, runScript } from "../apple-script";
+
+import { general } from ".";
 
 export const getAll = runScript(`
 	set output to ""

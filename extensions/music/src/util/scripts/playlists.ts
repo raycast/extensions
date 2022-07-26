@@ -1,8 +1,10 @@
-import * as TE from "fp-ts/TaskEither";
-import { tell, runScript, createQueryString } from "../apple-script";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+
+import { tell, runScript, createQueryString } from "../apple-script";
+import { ScriptError } from "../models";
+
 import { general } from ".";
-import { ScriptError } from '../models';
 
 const outputQuery = createQueryString({
   id: "pId",
