@@ -30,7 +30,7 @@ const InspectDeployment = ({ deployment }: Props) => {
   // }, [deployment]);
 
   // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
-  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id);
+  const url = getFetchDeploymentBuildsURL(deployment.uid || deployment.id, 1);
 
   const { isLoading, data } = useFetch<{
     builds: Build[];
