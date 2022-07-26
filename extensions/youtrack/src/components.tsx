@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List } from "@raycast/api";
-import { getIcon } from "./utils";
+import { Action, ActionPanel, List, Icon, Color, Image } from "@raycast/api";
 import { Issue } from "./interfaces";
 
+const tintedResolvedIcon = { source: Icon.Check, tintColor: Color.Green };
+const openIcon = { source: Icon.Dot };
+
 export function IssueListItem(props: { item: Issue; index: number; instance: string; resolved: boolean }) {
-  const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
-    icon: getIcon(100),
+  const [state, setState] = useState<{ icon: Image; accessories: List.Item.Accessory[] }>({
+    icon: { source: "" },
     accessories: [],
   });
 
   useEffect(() => {
-    const icon = getIcon(props.index + 1);
-    const accessories = [{ text: props.item.id }];
+    const icon = props.resolved ? tintedResolvedIcon : openIcon;
+    const tooltip = props.resolved ? "Resolved" : "Open";
+    const accessories = [{ text: props.item.id, tooltip }];
     setState({ icon, accessories });
-  }, [props.item.id, props.index]);
+  }, [props.item.id, props.resolved]);
 
   return (
     <List.Item
