@@ -10,20 +10,27 @@ import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-export default function FileListItem(props: { file: File; extraKey?: string; onVisit: (file: File) => void }) {
-  const { file, extraKey, onVisit } = props;
+export default function FileListItem(props: {
+  file: File;
+  extraKey?: string;
+  onVisit: (file: File) => void;
+  showingDetail: boolean;
+  setShowingDetail: (showingDetail: boolean) => void;
+}) {
+  const { file, extraKey, onVisit, showingDetail, setShowingDetail } = props;
 
-  const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)));
+  const dateUpdated = String(timeAgo.format(new Date(file.last_modified)));
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   return (
     <List.Item
       id={fileIdentifier}
       title={file.name}
       icon={file.thumbnail_url}
-      accessoryTitle={accessoryTitle}
+      accessories={[{ text: showingDetail ? "" : dateUpdated }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
             <OpenProjectFileAction file={props.file} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
@@ -33,6 +40,7 @@ export default function FileListItem(props: { file: File; extraKey?: string; onV
           <DevelopmentActionSection />
         </ActionPanel>
       }
+      detail={<List.Item.Detail markdown={`![Thumbnail](${file.thumbnail_url}) \n Last updated: ${dateUpdated}`} />}
     />
   );
 }

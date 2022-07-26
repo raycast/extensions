@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { List } from "@raycast/api";
 
 import FileListItem from "./components/FileListItem";
@@ -16,8 +17,10 @@ export default function Command() {
     return <ErrorView />;
   }
 
+  const [showingDetail, setShowingDetail] = useState(true);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter files by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter files by name..." isShowingDetail={showingDetail}>
       <List.Section key="recent-files" title="Recent Files">
         {visitedFiles?.map((file) => (
           <FileListItem
@@ -25,6 +28,8 @@ export default function Command() {
             file={file}
             extraKey={file.key + "-recent-file-item"}
             onVisit={visitFile}
+            showingDetail={showingDetail}
+            setShowingDetail={setShowingDetail}
           />
         ))}
       </List.Section>
@@ -36,7 +41,13 @@ export default function Command() {
             {project.files
               .filter((file) => visitedFiles?.find((visitedFile) => file.key === visitedFile.key) === undefined)
               .map((file) => (
-                <FileListItem key={file.key + "-file"} file={file} onVisit={visitFile} />
+                <FileListItem
+                  key={file.key + "-file"}
+                  file={file}
+                  onVisit={visitFile}
+                  showingDetail={showingDetail}
+                  setShowingDetail={setShowingDetail}
+                />
               ))}
           </List.Section>
         ))}
