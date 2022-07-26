@@ -1,7 +1,7 @@
-import { useEffect, useState, } from "react";
+import { useEffect, useState } from "react";
 import { LocalStorage } from "@raycast/api";
 import { Team, User } from "../types";
-import { fetchUser, fetchTeams, } from "../vercel";
+import { fetchUser, fetchTeams } from "../vercel";
 
 const useVercel = () => {
   /* Establishing state:
@@ -66,17 +66,16 @@ const useVercel = () => {
     updateSelectedTeam();
   }, []);
 
-  const updateSelectedTeam =
-    async (teamIdOrUsername: string) => {
-      const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
-      if (teamIfExists) {
-        setSelectedTeam(teamIfExists);
-        await LocalStorage.setItem("selectedTeam", teamIfExists.id);
-      } else {
-        setSelectedTeam(undefined);
-        await LocalStorage.removeItem("selectedTeam");
-      }
+  const updateSelectedTeam = async (teamIdOrUsername: string) => {
+    const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
+    if (teamIfExists) {
+      setSelectedTeam(teamIfExists);
+      await LocalStorage.setItem("selectedTeam", teamIfExists.id);
+    } else {
+      setSelectedTeam(undefined);
+      await LocalStorage.removeItem("selectedTeam");
     }
+  };
 
   return {
     user,

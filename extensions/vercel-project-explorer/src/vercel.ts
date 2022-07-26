@@ -146,7 +146,7 @@ export async function deleteEnvironmentVariableById(
   }
 }
 
-export async function fetchProjectById(projectId: Project["id"],) {
+export async function fetchProjectById(projectId: Project["id"]) {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}`, {
       method: "get",
@@ -190,15 +190,15 @@ export async function fetchDeploymentsForProject(project: Project, teamId?: stri
   }
 }
 
-export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100,) {
-  const url = apiURL + `v6/deployments`
+export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100) {
+  const url = apiURL + `v6/deployments`;
 
-  let query = `?limit=${limit}&teamId=${teamId ?? ""}`
+  let query = `?limit=${limit}&teamId=${teamId ?? ""}`;
   if (projectId) {
-    query += `&projectId=${projectId}`
+    query += `&projectId=${projectId}`;
   }
 
-  return url + query
+  return url + query;
 }
 
 export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300) {
@@ -361,7 +361,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 }
 
 export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
-
   const theme = environment.theme === "light" ? "0" : "1";
   const image = await fetch(
     `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false`,

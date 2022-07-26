@@ -7,9 +7,7 @@ import SearchBarAccessory from "../search-projects/search-bar-accessory";
 import { FetchHeaders, getFetchDeploymentsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
 
-const DeploymentsList = ({ projectId }: {
-  projectId?: string;
-}) => {
+const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   const { user, selectedTeam, teams, updateSelectedTeam } = useVercel();
 
   const url = getFetchDeploymentsURL(selectedTeam?.id, projectId);
@@ -22,12 +20,12 @@ const DeploymentsList = ({ projectId }: {
     headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
   });
 
-  const deployments = data?.deployments
+  const deployments = data?.deployments;
 
   const onTeamChange = async (teamIdOrUsername: string) => {
     await updateSelectedTeam(teamIdOrUsername);
     revalidate();
-  }
+  };
 
   const { push } = useNavigation();
 
@@ -71,7 +69,7 @@ const DeploymentsList = ({ projectId }: {
             {
               text: deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : "",
               tooltip: deployment.createdAt ? new Date(deployment.createdAt).toLocaleString() : "",
-            }
+            },
           ]}
         />
       ))}
@@ -80,7 +78,6 @@ const DeploymentsList = ({ projectId }: {
 };
 
 export default DeploymentsList;
-
 
 const getCommitMessage = (deployment: Deployment) => {
   // TODO: determine others
