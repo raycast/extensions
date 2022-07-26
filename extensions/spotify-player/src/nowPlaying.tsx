@@ -10,6 +10,7 @@ import {
   Clipboard,
   Icon,
   Color,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { currentPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
@@ -54,10 +55,26 @@ export default function Main() {
       ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`
       : undefined;
 
+  const optimizeTitle = (title: string | undefined) => {
+    if (title === undefined) {
+      return title;
+    }
+    const prefs = getPreferenceValues();
+    const max = Number(prefs.maxtitlelength);
+    if (Number.isNaN(max)) {
+      return title;
+    }
+    if (max <= 0) {
+      return title;
+    }
+    return title.slice(0, max);
+  };
+
   return (
     <MenuBarExtra
       icon={spotifyInstalled && currentlyPlayingTrack ? "icon.png" : undefined}
-      title={trackTitle}
+      title={optimizeTitle(trackTitle)}
+      tooltip={trackTitle}
       isLoading={isLoading}
     >
       {currentlyPlayingTrack && currentlyPlayingTrack.id && (
