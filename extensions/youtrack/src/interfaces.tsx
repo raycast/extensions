@@ -4,6 +4,7 @@ export interface Issue {
   id: string;
   summary: string;
   date: string;
+  resolved: boolean;
 }
 
 export interface Preferences {

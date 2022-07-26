@@ -3,7 +3,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { getIcon } from "./utils";
 import { Issue } from "./interfaces";
 
-export function IssueListItem(props: { item: Issue; index: number; instance: string }) {
+export function IssueListItem(props: { item: Issue; index: number; instance: string; resolved: boolean }) {
   const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
     icon: getIcon(100),
     accessories: [],

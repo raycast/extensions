@@ -9,6 +9,7 @@ export function getEmptyIssue(): Issue {
     id: "",
     summary: "Connecting to YouTrack...",
     date: "",
+    resolved: false,
   };
 }
 
@@ -17,6 +18,7 @@ function issueToItem(issue: ReducedIssue): Issue {
     id: `${issue.project?.shortName}-${issue.numberInProject}`,
     summary: issue.summary ?? "Unable to load issue summary",
     date: new Date(issue.updated ?? 0).toDateString(),
+    resolved: !!issue.resolved,
   };
 }
 

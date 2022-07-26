@@ -71,7 +71,7 @@ export default function Command() {
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
       {state.items?.map((item, index) => (
-        <IssueListItem key={item.id} item={item} index={index} instance={prefs.instance} />
+        <IssueListItem key={item.id} item={item} index={index} instance={prefs.instance} resolved={item.resolved} />
       ))}
     </List>
   );
