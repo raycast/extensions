@@ -2,67 +2,50 @@ import {
   CommentShort,
   PullRequestLastVisit,
   PullRequestReviewShort,
-  PullSearchResultShort, UndefinedString
+  PullSearchResultShort, PullWithDependencies, UndefinedString
 } from "../integration/types";
-import { getIssueComments, getPullComments } from "../integration/getComments";
 import { mapPullSearchResultToPRID } from "../tools/mapPullSearchResultToPRID";
-import getReviews from "../integration/getReviews";
 import { getTimestampISOInSeconds } from "../tools/getTimestampISOInSeconds";
 
-export const filterPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
+export const filterPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullWithDependencies[]) =>
   Promise.resolve()
     .then(() => console.debug(`filterPulls: login=${login}, hiddenPulls=${hiddenPulls.length}, pulls=${pulls.length}`))
     .then(() => testPulls(login, hiddenPulls, pulls))
     .then(weedOutNonPulls)
     .finally(() => console.debug(`filterPulls: done`));
 
-const testPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullSearchResultShort[]) =>
+const testPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullWithDependencies[]) =>
   Promise.all(pulls.map(pull => testPull(login, hiddenPulls, pull)));
 
-const testPull = (login: string, hiddenPulls: PullRequestLastVisit[], pull: PullSearchResultShort) =>
-  fetchAllItems(pull).then(([comment, review]) => keepApplicablePull({ pull, login, hiddenPulls, comment, review }));
-
-const fetchAllItems = (pull: PullSearchResultShort) => Promise.resolve()
-  .then(() => mapPullSearchResultToPRID(pull))
-  .then(pullID => Promise.all([
-    getPullComments(pullID),
-    getIssueComments(pullID),
-    getReviews(pullID)
-  ]))
-  .then(([pullComments, issueComments, reviews]) => [
-    pullComments.concat(issueComments),
-    reviews
-  ] as [CommentShort[], PullRequestReviewShort[]])
-  .then(([comments, reviews]) => [
-    comments.sort((a, b) => a.created_at < b.created_at ? -1 : 1).pop(),
-    reviews.sort(compareShortReviews).pop()
-  ] as [CommentShort | undefined, PullRequestReviewShort | undefined]);
+const testPull = (login: string, hiddenPulls: PullRequestLastVisit[], pull: PullWithDependencies) =>
+  keepApplicablePull({ pull, login, hiddenPulls });
 
 type KeepApplicablePullParams = {
-  pull: PullSearchResultShort;
+  pull: PullWithDependencies;
   login: string;
   hiddenPulls: PullRequestLastVisit[];
-  comment: CommentShort | undefined;
-  review: PullRequestReviewShort | undefined;
 }
 
-const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepApplicablePullParams) => {
-  const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull);
+const keepApplicablePull = ({ pull, login, hiddenPulls }: KeepApplicablePullParams) => {
+  const { owner, repo, pull_number } = mapPullSearchResultToPRID(pull.pull);
   const logPrefix = `keepApplicablePull: pull=${owner}/${repo}#${pull_number}`;
 
-  const iAmAuthor = pull.user?.login === login;
+  const iAmAuthor = pull.pull.user?.login === login;
 
-  if (!comment && !review && !iAmAuthor) {
+  if (pull.comments.length === 0 && pull.reviews.length === 0 && !iAmAuthor) {
     console.debug(`${logPrefix} action=keep`);
 
-    pull.myIcon = "🙏";
+    pull.pull.myIcon = "🙏";
 
-    return pull;
+    return pull.pull;
   }
 
-  const commentTimestamp = getCommentTimestamp({ comment, login, hiddenPulls, logPrefix, pull });
-  const reviewTimestamp = getReviewTimestamp({ review, login, hiddenPulls, logPrefix, pull });
-  const hideTimestamp = hiddenPulls.find(hidden => hidden.pull.id === pull.id)?.last_visit;
+  const review = pull.reviews.pop();
+  const comment = pull.comments.pop();
+
+  const commentTimestamp = getCommentTimestamp({ comment: comment, login, hiddenPulls, logPrefix, pull: pull.pull });
+  const reviewTimestamp = getReviewTimestamp({ review: review, login, hiddenPulls, logPrefix, pull: pull.pull });
+  const hideTimestamp = hiddenPulls.find(hidden => hidden.pull.id === pull.pull.id)?.last_visit;
 
   if (!commentTimestamp && !reviewTimestamp) {
     console.debug(`${logPrefix} action=drop`);
@@ -70,24 +53,24 @@ const keepApplicablePull = ({ pull, login, hiddenPulls, comment, review }: KeepA
     return false;
   }
 
-  shouldAppendReviewIcon(hideTimestamp, reviewTimestamp) && (pull.myIcon += reviewStatusEmoji(review?.state || ""));
-  shouldAppendCommentIcon(hideTimestamp, commentTimestamp) && (pull.myIcon += "💬");
+  shouldAppendReviewIcon(hideTimestamp, reviewTimestamp) && (pull.pull.myIcon += reviewStatusEmoji(review?.state || ""));
+  shouldAppendCommentIcon(hideTimestamp, commentTimestamp) && (pull.pull.myIcon += "💬");
 
   if (commentTimestamp && !reviewTimestamp) {
-    pull.html_url = comment?.html_url || "";
+    pull.pull.html_url = comment?.html_url || "";
   } else if (!commentTimestamp && reviewTimestamp) {
-    pull.html_url = review?.html_url || "";
+    pull.pull.html_url = review?.html_url || "";
   } else {
     if (commentTimestamp > reviewTimestamp) {
-      pull.html_url = comment?.html_url || "";
+      pull.pull.html_url = comment?.html_url || "";
     } else {
-      pull.html_url = review?.html_url || "";
+      pull.pull.html_url = review?.html_url || "";
     }
   }
 
   console.debug(`${logPrefix} action=keep`);
 
-  return pull;
+  return pull.pull;
 };
 
 const shouldAppendReviewIcon = (hideTimestamp: UndefinedString, reviewTimestamp: string | false) => {
@@ -186,18 +169,6 @@ function getReviewTimestamp({ pull, review, login, hiddenPulls, logPrefix }: Get
 
 const weedOutNonPulls = (pulls: (PullSearchResultShort | false)[]) =>
   (pulls.filter(pull => pull) || []) as PullSearchResultShort[];
-
-const compareShortReviews = (a: PullRequestReviewShort, b: PullRequestReviewShort) => {
-  if (!a.submitted_at && !b.submitted_at) {
-    return 0;
-  } else if (!a.submitted_at && b.submitted_at) {
-    return 1;
-  } else if (a.submitted_at && !b.submitted_at) {
-    return -1;
-  } else {
-    return (a.submitted_at as string) < (b.submitted_at as string) ? -1 : 1;
-  }
-};
 
 const reviewStatusEmoji = (status: string) => {
   switch (status) {

@@ -36,6 +36,12 @@ export type UserShort = {
   url: string;
 };
 
+export type TeamShort = {
+  id: number;
+  name: string;
+  html_url: string;
+};
+
 export type CommentShort = {
   created_at: string;
   html_url: string;
@@ -54,3 +60,14 @@ export type PullRequestID = {
 };
 
 export type UndefinedString = string | undefined;
+
+export type PullWithDependencies = {
+  pull: PullSearchResultShort;
+
+  comments: CommentShort[];
+  reviews: PullRequestReviewShort[];
+  requestedReviewers: {
+    users?: UserShort[];
+    teams?: TeamShort[];
+  }
+};
