@@ -17,7 +17,7 @@ export default function Soundpick() {
   const [isLoading, setIsLoading] = useState(true);
   const [listOfDevices, setListOfDevices] = useState(Array<SoundOutputDevice>);
 
-  function showDeviceListView(): JSX.Element[] {
+  function showDeviceListView(): Array<JSX.Element> {
     return listOfDevices.map((device) => (
       <List.Item
         key={device.name}
