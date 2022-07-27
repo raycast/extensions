@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -81,6 +81,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { issues } = useIssues(getLastCreatedIssues);
   const { projects } = useProjects(teamId);
 
+  useEffect(() => {
+    if (teams?.length === 1) {
+      setTeamId(teams[0].id);
+    }
+  }, [teams]);
   const team = teams?.find((team) => team.id === teamId);
 
   const scale = team
