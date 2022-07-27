@@ -9,6 +9,8 @@ import path = require("path");
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
+  bibtex_path?: string;
+  csl_style?: string;
 }
 
 export interface RefData {
@@ -108,9 +110,23 @@ WHERE itemAttachments.parentItemID = :id
 AND itemAttachments.contentType = 'application/pdf'
 `;
 
+const CREATORS_SQL = `
+SELECT  creators.firstName AS given,
+        creators.lastName AS family,
+        itemCreators.orderIndex AS "index",
+        creatorTypes.creatorType AS "type"
+    FROM creators
+    LEFT JOIN itemCreators
+        ON creators.creatorID = itemCreators.creatorID
+    LEFT JOIN creatorTypes
+        ON itemCreators.creatorTypeID = creatorTypes.creatorTypeID
+WHERE itemCreators.itemID = :id
+ORDER BY "index" ASC
+`;
+
 const cachePath = utils.cachePath("zotero.json");
 
-function resolveHome(filepath: string): string {
+export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
     return path.join(process.env.HOME, filepath.slice(1));
   }
@@ -215,7 +231,9 @@ async function getData(): Promise<RefData[]> {
       v.push(st2.getAsObject().name);
     }
     st2.free();
-    row.tags = v;
+    if (v.length > 0) {
+      row.tags = v;
+    }
 
     const st3 = db.prepare(METADATA_SQL);
     st3.bind({ ":id": row.id });
@@ -242,6 +260,21 @@ async function getData(): Promise<RefData[]> {
     if (at) {
       row.attachment = at;
     }
+
+    const st5 = db.prepare(CREATORS_SQL);
+    st5.bind({ ":id": row.id });
+
+    const cts = [];
+    while (st5.step()) {
+      const temp_data = st5.getAsObject();
+      cts.push(`${temp_data.given} ${temp_data.family}`);
+    }
+    st5.free();
+
+    if (cts.length > 0) {
+      row.creators = cts;
+    }
+
     if (preferences.use_bibtex) {
       row.citekey = await getBibtexKey(row.key, row.library);
     }
@@ -261,12 +294,12 @@ const parseQuery = (q: string) => {
   const ts = queryItems.filter((c) => c.startsWith("."));
 
   let qss = "";
-  if (qs.length) {
+  if (qs.length > 0) {
     qss = qs.join(" ");
   }
 
   let tss = [];
-  if (ts.length) {
+  if (ts.length > 0) {
     tss = ts.map((x) => x.substring(1));
   }
 
@@ -281,8 +314,13 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
+    const fData = {
+      zotero_path: preferences.zotero_path,
+      use_bibtex: preferences.use_bibtex,
+      data: data,
+    };
     try {
-      await writeFile(cachePath, JSON.stringify(data));
+      await writeFile(cachePath, JSON.stringify(fData));
     } catch (err) {
       console.error("Failed to write installed cache:", err);
     }
@@ -300,14 +338,18 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
     if (diffTime < 3600000) {
       const cacheBuffer = await readFile(cachePath);
-      const data = JSON.parse(cacheBuffer.toString());
-      return data;
+      const fData = JSON.parse(cacheBuffer.toString());
+      return fData.data;
     } else {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
-        const data = JSON.parse(cacheBuffer.toString());
-        return data;
+        const fData = JSON.parse(cacheBuffer.toString());
+        if (fData.zotero_path === preferences.zotero_path && fData.use_bibtex === preferences.use_bibtex) {
+          return fData.data;
+        } else {
+          throw "Invalid cache";
+        }
       } else {
         throw "Invalid cache";
       }
@@ -344,21 +386,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
 
   const { qss, tss } = parseQuery(q);
 
-  const query: Fuse.Expression = {
-    $or: [{ title: qss }, { abstractNote: qss }],
-  };
-  // filter for ALL tags, ignoring case
-  if (tss.length > 0) {
-    for (const c of tss) {
-      ret = ret.filter((r) => {
-        return r.tags?.some((e) => {
-          return e.toLowerCase() === c.toLowerCase();
-        });
-      });
-    }
-  }
-
-  if (!qss.trim()) {
+  if (!qss.trim() && tss.length < 1) {
     return ret;
   }
 
@@ -369,26 +397,45 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     includeMatches: false,
     findAllMatches: true,
     minMatchCharLength: 3,
-    threshold: 0.9,
+    threshold: 0.1,
     ignoreLocation: true,
     keys: [
       {
         name: "title",
-        weight: 6,
+        weight: 2,
       },
       {
         name: "abstractNote",
+        weight: 1,
+      },
+      {
+        name: "tags",
+        weight: 5,
+      },
+      {
+        name: "date",
+        weight: 3,
+      },
+      {
+        name: "creators",
         weight: 4,
       },
     ],
   };
 
-  // Create the Fuse index
-  const myIndex = Fuse.createIndex(options.keys, ret);
-  // initialize Fuse with the index
-  const fuse = new Fuse(ret, options, myIndex);
+  const query: Fuse.Expression = {
+    $and: qss
+      .split(" ")
+      .map((k) => k.trim())
+      .filter(Boolean)
+      .map((z) => ({
+        $or: options.keys.map((x) => Object.fromEntries(new Map([[x.name, z.replace(/\+/gi, " ")]]))),
+      })),
+  };
 
-  const re = fuse.search(query);
+  if (tss.length > 0) {
+    query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });
+  }
 
-  return re.map((x) => x.item);
+  return new Fuse(ret, options).search(query).map((x) => x.item);
 };

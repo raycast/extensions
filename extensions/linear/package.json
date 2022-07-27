@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linear",
+  "title": "Linear",
+  "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
+  "icon": "linear.png",
+  "owner": "raycast",
+  "access": "public",
+  "author": "thomaslombart",
+  "contributors": [
+    "mathieudutour",
+    "thomas"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Create and assign new issues.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "signature",
+          "type": "checkbox",
+          "title": "Signature",
+          "label": "Add Raycast signature to new issues",
+          "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search issues globally in all projects.",
+      "mode": "view"
+    },
+    {
+      "name": "assigned-issues",
+      "title": "Assigned Issues",
+      "description": "View and modify issues that are assigned to you.",
+      "mode": "view"
+    },
+    {
+      "name": "created-issues",
+      "title": "Created Issues",
+      "description": "View and modify issues that you have created.",
+      "mode": "view"
+    },
+    {
+      "name": "active-cycle",
+      "title": "Active Cycle",
+      "description": "View and modify issues that are in the active cycle.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Explore projects for your Linear team.",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create projects for your Linear team.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Read your latest Linear notifications.",
+      "mode": "view"
+    },
+    {
+      "name": "unread-notifications",
+      "title": "Unread Notifications",
+      "description": "Show unread notifications in the Menu Bar.",
+      "mode": "menu-bar",
+      "subtitle": "Linear",
+      "icon": "linear.png",
+      "interval": "15m"
+    },
+    {
+      "name": "create-issue-for-myself",
+      "title": "Create Issue for Myself",
+      "description": "Create and assign a new issue to yourself.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "preferredTeamKey",
+          "type": "textfield",
+          "title": "Preferred Team",
+          "placeholder": "RAY",
+          "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@linear/sdk": "^1.22.0",
+    "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.0.4",
+    "date-fns": "^2.28.0",
+    "lodash": "^4.17.21",
+    "node-emoji": "^1.11.0",
+    "remove-markdown": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "@types/node-emoji": "^1.8.1",
+    "@types/object-hash": "^2.2.1",
+    "@types/remove-markdown": "^0.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

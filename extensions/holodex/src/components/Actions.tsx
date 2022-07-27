@@ -1,13 +1,29 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useMemo } from "react";
+import { ClipItem } from "../clips";
 import { Video } from "../lib/interfaces";
-import { Details } from "./Details";
+import { getPreferences } from "../lib/preferences";
 
-export function Actions({ video, isInDetail = false }: { video: Video; isInDetail?: boolean }) {
-  const { videoId, channelId, channelName } = video;
+function RelatedClips({ title, clips }: { title: string; clips: Video[] }) {
+  return (
+    <List isShowingDetail navigationTitle={title}>
+      <List.Section title="Clips" subtitle={clips.length + ""}>
+        {clips.map((video) => (
+          <ClipItem key={video.videoId} video={video} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
 
-  const prefs = getPreferenceValues();
-  const preferYouTube = prefs["prefer-youtube"];
+export function Actions({ video }: { video: Video }) {
+  const { videoId, channelId, channelName, title, clips } = video;
+
+  const prefs = getPreferences();
+  const preferYouTube = prefs["preferYouTube"];
+  const externalVideoPlayer = prefs["externalVideoPlayer"];
+
+  const externalVideoPlayerActionEnabled = externalVideoPlayer !== "";
 
   const primaryShortcut = useMemo<Keyboard.Shortcut>(() => ({ modifiers: ["cmd"], key: "enter" }), []);
   const secondaryShortcut = useMemo<Keyboard.Shortcut>(() => ({ modifiers: ["cmd"], key: "." }), []);
@@ -41,7 +57,6 @@ export function Actions({ video, isInDetail = false }: { video: Video; isInDetai
   return (
     <>
       <ActionPanel.Section>
-        {!isInDetail && <Action.Push title="Show Details" icon={Icon.TextDocument} target={<Details {...video} />} />}
         {preferYouTube ? (
           <>
             <YouTube shortcut={primaryShortcut} />
@@ -53,6 +68,29 @@ export function Actions({ video, isInDetail = false }: { video: Video; isInDetai
             <YouTube shortcut={secondaryShortcut} />
           </>
         )}
+        {externalVideoPlayerActionEnabled && (
+          <Action.Open
+            title={`Open in ${externalVideoPlayer}`}
+            target={youtubeUrl}
+            application={externalVideoPlayer}
+            icon={{ fileIcon: `/Applications/${externalVideoPlayer}.app` }}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
+        )}
+        {clips.length > 0 && (
+          <Action.Push
+            title="Related Clips"
+            target={<RelatedClips title={`Clips for ${title}`} clips={clips} />}
+            icon={Icon.MagnifyingGlass}
+            shortcut={{ key: ".", modifiers: ["cmd", "shift"] }}
+          />
+        )}
+        <Action.CopyToClipboard
+          content={preferYouTube ? youtubeUrl : holodexUrl}
+          title="Copy Video URL"
+          shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
+        />
+        <Action.CopyToClipboard content={videoId} title="Copy Video ID" />
       </ActionPanel.Section>
       <ActionPanel.Section title={`Channel: ${channelName}`}>
         {preferYouTube ? (
@@ -66,18 +104,12 @@ export function Actions({ video, isInDetail = false }: { video: Video; isInDetai
             <YouTubeChannel />
           </>
         )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          content={preferYouTube ? youtubeUrl : holodexUrl}
-          title="Copy Video URL"
-          shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
-        />
         <Action.CopyToClipboard
           content={preferYouTube ? youtubeChannelUrl : holodexChannelUrl}
           title="Copy Channel URL"
           shortcut={{ key: "c", modifiers: ["cmd", "ctrl"] }}
         />
+        <Action.CopyToClipboard content={channelId} title="Copy Channel ID" />
       </ActionPanel.Section>
     </>
   );

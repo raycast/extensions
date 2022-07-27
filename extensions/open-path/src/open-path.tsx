@@ -7,7 +7,7 @@ import { URL } from "url";
 import { isIPv4 } from "net";
 
 export default async () => {
-  const { trimText, isShowHud, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
+  const { trimText, isShowHud, fileOperation, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
 
   const _getText = await getPath(priorityDetection);
   const path = trimText ? _getText.trim() : _getText;
@@ -17,9 +17,7 @@ export default async () => {
     return "";
   }
   if (fse.pathExistsSync(path)) {
-    await open(path);
-    console.info("open: directory path");
-    await showHud(isShowHud, "Open Path: " + path);
+    await filePathOperation(path, fileOperation, isShowHud);
     return;
   }
 
@@ -46,7 +44,7 @@ export default async () => {
     console.info("open: URL");
     await showHud(isShowHud, "Open URL: " + path);
   } catch (e) {
-    await reOpenURL(isShowHud, path, searchEngine);
+    await reOpenURL(fileOperation, isShowHud, path, searchEngine);
     console.error(String(e));
   }
 };
@@ -65,7 +63,19 @@ const getPath = async (priorityDetection: string) => {
   }
 };
 
-const reOpenURL = async (isShowHud: boolean, rawPath: string, searchEngine: string) => {
+export const filePathOperation = async (path: string, fileOperation: string, isShowHud: boolean) => {
+  if (fileOperation === "showInFinder" && checkIsFile(path)) {
+    await showInFinder(path);
+    console.info("showInFinder(finalPath)");
+    await showHud(isShowHud, "Show in Finder: " + path);
+  } else {
+    await open(path);
+    console.info("open(finalPath)");
+    await showHud(isShowHud, "Open Path: " + path);
+  }
+};
+
+const reOpenURL = async (fileOperation: string, isShowHud: boolean, rawPath: string, searchEngine: string) => {
   let finalPath = rawPath;
   if (rawPath.startsWith("~/")) {
     finalPath = rawPath.replace("~", homedir());
@@ -81,14 +91,6 @@ const reOpenURL = async (isShowHud: boolean, rawPath: string, searchEngine: stri
       await showHud(isShowHud, "Search: " + rawPath);
     }
   } else {
-    if (checkIsFile(finalPath)) {
-      await showInFinder(finalPath);
-      console.info("showInFinder(finalPath)");
-      await showHud(isShowHud, "Show in Finder: " + finalPath);
-    } else {
-      await open(finalPath);
-      console.info("open(finalPath)");
-      await showHud(isShowHud, "Open Path: " + finalPath);
-    }
+    await filePathOperation(finalPath, fileOperation, isShowHud);
   }
 };

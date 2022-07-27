@@ -1,6 +1,20 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Fix] - 2022-05-23
+## [Fixes] - 2022-07-03
+
+- Fixed an issue where some characters will display as percentage encoded format.
+
+## [Fixes] - 2022-05-25
+
+- Reverted back to using the VS Code SQLite DB to load recent projects.
+- Fixed an issue where only 10 recent projects would load.
+
+## [Updates] - 2022-05-25
+
+- Fixed a bug where it was unable to open project that has space in path
+- Fixed so deleted paths are not visible in the list
+
+## [Updates] - 2022-05-23
 
 Adds back the support for remote workspaces that got broken in an earlier fix
 

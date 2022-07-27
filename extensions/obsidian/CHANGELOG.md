@@ -1,6 +1,41 @@
 # Obsidian Changelog
 
-## [New command, Detail View & More | Version 1.5.0] - 2022-05-04
+## [Tag Filter, Markdown Controls for Edit Note, Templates for Append Action & More | Version 1.7.0] - 2022-07-11
+
+- Add tag filter to filter results in `Search Note` and `Pinned Notes` command by tags (YAML frontmatter and inline)
+- Add `Random Note` command which opens a random note in Quick Look (all actions available)
+- `Edit Note` action now supports markdown controls (e.g. `cmd + b` for bold and `cmd + i` for italic)
+- `Append to Note` and `Append Selected Text to Note` actions now support all templates
+- Add template preference for both `Append to Note` and `Append Selected Text to Note` actions
+- Use `{content}` for `Append Selected Text to Note` action
+- Add templates `{\n}`, `{newline}`, `{nl}` for new line
+- Add shorter template `{clip}` for clipboard
+- Add `Default Content` and `Fill Form with Default Values` settings for `Create Note` command
+- Add `Show in Finder` action for all vault selection lists
+- Minor fixes
+
+## [Edit Note Action, Clipboard Template | Version 1.6.1] - 2022-07-01
+
+- Add `Edit Note` action to `Search Note` and `Pinned Notes` command which lets you edit a note
+- `Edit Note` action supports templates
+- Add `Reset Pinned Notes` action for `Pinned Notes` command
+- Add `Delete Note` action to `Search Note` and `Pinned Notes` command which lets you delete a note
+- Add `{clipboard}` to available templates
+- Update store images
+- Migrate to Raycast API v1.37.0
+- Minor fixes
+
+## [Full Content Search, Metadata View, Templates & More| Version 1.6.0] - 2022-06-20
+
+- Add full content search to `Search Note` and `Pinned Notes` command
+- Add metadata view for notes in `Search Note` and `Pinned Notes` command
+- Add templates for `Create Note` command that can be used in the notes name and content
+- Add `Show in Finder` action to `Search Note`, `Pinned Notes` and `Open Vault` commands
+- Vaults will now be found automatically
+- Fix performance issues
+- Migrate to Raycast API v1.36.0
+
+## [New command, Detail View & More | Version 1.5.0] - 2022-05-02
 
 - Add `Pinned Notes` command which lists all pinned notes of a vault
 - Add `Pin Note` action to `Search Note` command which pins a note

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
 import { GaxiosResponse } from "googleapis-common";
+import { convertYouTubeDuration } from "duration-iso-8601";
 
 function createClient(): youtube_v3.Youtube {
   const pref = getPreferenceValues();
@@ -146,6 +147,7 @@ export interface Video {
   id: string;
   title: string;
   description?: string;
+  duration?: string | undefined;
   publishedAt: string;
   thumbnails: Thumbnails;
   statistics?: VideoStatistics;
@@ -173,7 +175,7 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
   if (videoIds) {
     const statsData = await youtubeClient.videos.list({
       id: videoIds,
-      part: ["statistics"],
+      part: ["statistics", "contentDetails"],
       maxResults: videoIds.length,
     });
     const statsItems = statsData.data.items;
@@ -186,6 +188,7 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
             const el = videos.find((x) => x.id === s.id);
             if (el) {
               el.statistics = stats;
+              el.duration = convertYouTubeDuration(s.contentDetails?.duration);
             }
           }
         }
@@ -417,6 +420,7 @@ export async function getPopularVideos(): Promise<Video[] | undefined> {
           id: item.id || "",
           title: sn.title || "?",
           description: sn.description || undefined,
+          duration: convertYouTubeDuration(item.contentDetails?.duration),
           publishedAt: sn.publishedAt || "?",
           thumbnails: {
             default: {

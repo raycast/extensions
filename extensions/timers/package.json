@@ -86,6 +86,18 @@
         {"title": "Terminator", "value": "terminator.wav"},
         {"title": "Speak Timer Name", "value": "speak_timer_name"}
       ]
+    },
+    {
+        "name": "newTimerInputOrder",
+        "type": "dropdown",
+        "required": true,
+        "title": "New Timer Input Order",
+        "description": "Order for input fields in new timer form.",
+        "default": "Hours , Minutes, Seconds",
+        "data": [
+            {"title": "Hours, Minutes, Seconds", "value": "hhmmss"},
+            {"title": "Seconds, Minutes, Hours", "value": "ssmmhh"}
+        ]
     }
   ],
   "dependencies": {

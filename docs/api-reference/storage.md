@@ -35,9 +35,7 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                | Required | Description                                |
-| :--- | :------------------ | :------- | :----------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to retrieve the value of. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.getItem" />
 
 #### Return
 
@@ -65,10 +63,7 @@ export default async () => {
 
 #### Parameters
 
-| Name  | Type                                      | Required | Description                                               |
-| :---- | :---------------------------------------- | :------- | :-------------------------------------------------------- |
-| key   | <code>string</code>                       | Yes      | The key you want to create or update the value of.        |
-| value | <code>[Value](#localstorage.value)</code> | Yes      | The value you want to create or update for the given key. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.setItem" />
 
 #### Return
 
@@ -96,9 +91,7 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type                | Required | Description                              |
-| :--- | :------------------ | :------- | :--------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to remove the value of. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.removeItem" />
 
 #### Return
 

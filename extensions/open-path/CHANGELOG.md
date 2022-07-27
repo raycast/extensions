@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Add File Operation preference] - 2022-05-25
+
+- Add File Operation preference
+
 ## [Update extension icons] - 2022-05-23
 
 - Update extension icons.

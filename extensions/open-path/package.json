@@ -38,6 +38,24 @@
       "label": "Show HUD"
     },
     {
+      "name": "fileOperation",
+      "type": "dropdown",
+      "required": false,
+      "title": "File Operation",
+      "description": "When the path is a file, should the file be opened or shown in Finder.",
+      "default": "showInFinder",
+      "data": [
+        {
+          "title": "Show in Finder",
+          "value": "showInFinder"
+        },
+        {
+          "title": "Open File",
+          "value": "openFile"
+        }
+      ]
+    },
+    {
       "name": "priorityDetection",
       "type": "dropdown",
       "required": false,

@@ -1,7 +1,7 @@
-import { ActionPanel, List, showToast, Color, Detail, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, Color, Detail, Action, Image } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
@@ -11,6 +11,7 @@ import {
   now,
   optimizeMarkdownText,
   Query,
+  showErrorToast,
   toDateString,
   tokenizeQueryText,
 } from "../utils";
@@ -19,6 +20,7 @@ import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
+import { userIcon } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -37,7 +39,7 @@ export enum MRState {
 }
 
 const GET_MR_DETAIL = gql`
-  query GetMRDetail($id: ID!) {
+  query GetMRDetail($id: MergeRequestID!) {
     mergeRequest(id: $id) {
       description
       project {
@@ -50,7 +52,7 @@ const GET_MR_DETAIL = gql`
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Merge Request Details", error);
+    showErrorToast(error, "Could not fetch Merge Request Details");
   }
   if (isLoading || !mr) {
     return <Detail isLoading={isLoading} />;
@@ -82,7 +84,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not get merge request details", error);
+    showErrorToast(error, "Could not get Merge Request Details");
   }
 
   const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
@@ -94,8 +96,6 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   }
 
   const md = lines.join("  \n");
-  const author = mr.author ? `${mr.author.name}` : "<no author>";
-  const milestone = mr.milestone ? mr.milestone.title : "<no milestone>";
 
   return (
     <Detail
@@ -112,21 +112,37 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={capitalizeFirstLetter(mr.state)}
-              color={stateColor(mr.state)}
-              //icon={stateIcon(issue.state)}
-            />
+            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(mr.state)} color={stateColor(mr.state)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
-          <Detail.Metadata.Label title="Author" text={author} />
-          <Detail.Metadata.Label title="Milestone" text={milestone} />
-          <Detail.Metadata.TagList title="Labels">
-            {mr.labels.map((m) => (
-              <Detail.Metadata.TagList.Item text={m.name} color={m.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          {mr.author && (
+            <Detail.Metadata.TagList title="Author">
+              <Detail.Metadata.TagList.Item text={mr.author.name} icon={userIcon(mr.author)} />
+            </Detail.Metadata.TagList>
+          )}
+          {mr.assignees.length > 0 && (
+            <Detail.Metadata.TagList title="Assignee">
+              {mr.assignees.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.reviewers.length > 0 && (
+            <Detail.Metadata.TagList title="Reviewer">
+              {mr.reviewers.map((a) => (
+                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {mr.milestone && <Detail.Metadata.Label title="Milestone" text={mr.milestone.title} />}
+          {mr.labels.length > 0 && (
+            <Detail.Metadata.TagList title="Labels">
+              {mr.labels.map((m) => (
+                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />
@@ -140,7 +156,7 @@ function useDetail(issueID: number): {
 } {
   const [mrdetail, setMRDetail] = useState<MRDetailData>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -156,7 +172,7 @@ function useDetail(issueID: number): {
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_MR_DETAIL,
           variables: { id: `gid://gitlab/MergeRequest/${issueID}` },
         });
@@ -221,11 +237,7 @@ export function MRList({
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
-  }
-
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
@@ -239,8 +251,8 @@ export function MRList({
       searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
-      <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
-        {mrs?.map((mr) => (
+      <List.Section title={title} subtitle={mrs.length.toString() || "0"}>
+        {mrs.map((mr) => (
           <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
@@ -378,14 +390,14 @@ export function useSearch(
   project?: Project,
   group?: Group
 ): {
-  mrs?: MergeRequest[];
+  mrs: MergeRequest[];
   error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
+  const [mrs, setMRs] = useState<MergeRequest[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -458,7 +470,7 @@ export function useMR(
 } {
   const [mr, setMR] = useState<MergeRequest>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

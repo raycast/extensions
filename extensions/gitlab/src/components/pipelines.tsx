@@ -1,8 +1,8 @@
-import { Action, ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -102,7 +102,7 @@ export function PipelineList(props: { projectFullPath: string }): JSX.Element {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   return (
     <List isLoading={isLoading} navigationTitle="Pipelines">
@@ -129,7 +129,7 @@ export function useSearch(
 } {
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -150,7 +150,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_PIPELINES,
           variables: { fullPath: projectFullPath },
           fetchPolicy: "network-only",
@@ -160,7 +160,7 @@ export function useSearch(
           iid: `${p.iid}`,
           status: p.status,
           active: p.active,
-          webUrl: `${gitlabgql.url}${p.path}`,
+          webUrl: `${getGitLabGQL().url}${p.path}`,
           ref: p.ref,
         }));
         if (!didUnmount) {

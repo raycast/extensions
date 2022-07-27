@@ -17,12 +17,13 @@ import type { Preferences } from "../rsync-commands"
 
 type UseEntriesOutput = {
   entries: Entry[]
-  entryRunning: boolean
   addEntry: (entry: Entry) => Promise<boolean>
   updateEntry: (entry: Entry, resetConfirmed?: boolean, skipValidation?: boolean) => Promise<boolean>
   deleteEntry: (entry: Entry) => void
   runEntry: (entry: Entry) => Promise<boolean>
   copyEntryCommand: (entry: Entry) => void
+  formatErrorsAsList: (errors: string[], forMarkdown?: boolean) => string
+  entryRunning: boolean
 }
 
 const useEntries = (): UseEntriesOutput => {
@@ -37,7 +38,7 @@ const useEntries = (): UseEntriesOutput => {
     LocalStorage.setItem("entries", JSON.stringify(entries.map(e => e.toRawData())))
   }
 
-  const updateEntries = useCallback(
+  const entriesChanged = useCallback(
     (entries: Entry[]) => {
       setEntries(entries)
       storeEntries(entries)
@@ -45,17 +46,16 @@ const useEntries = (): UseEntriesOutput => {
     [setEntries]
   )
 
-  const validateEntry = async (entry: Entry) => {
-    try {
-      entry.validate()
-    } catch (err: any) {
+  const validateEntry = async (entry: Entry, skipName = false) => {
+    const errors = entry.getErrors(skipName)
+    if (errors.length) {
       await showToast({
         style: Toast.Style.Failure,
-        title: err,
+        title: "Entry is not valid",
+        message: formatErrorsAsList(errors),
       })
       return false
     }
-
     return true
   }
 
@@ -63,7 +63,7 @@ const useEntries = (): UseEntriesOutput => {
     if (await validateEntry(entry)) {
       entry.id = uuidv4()
       const newEntries: Entry[] = [...entries, entry]
-      updateEntries(newEntries)
+      entriesChanged(newEntries)
       setCreatedEntry(entry.id)
       await showToast({
         style: Toast.Style.Success,
@@ -78,12 +78,18 @@ const useEntries = (): UseEntriesOutput => {
     if (skipValidation || (await validateEntry(entry))) {
       if (resetConfirmed) entry.confirmed = false
       const prevEntryIndex = entries.findIndex(e => e.id === entry.id)
-      if (prevEntryIndex === -1) throw "Could not find entry to update"
+      if (prevEntryIndex === -1) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not find entry to update",
+        })
+        return false
+      }
       const oldEntry = entries[prevEntryIndex]
       if (!oldEntry.equals(entry)) {
         const newEntries = [...entries]
         newEntries.splice(prevEntryIndex, 1, entry)
-        updateEntries(newEntries)
+        entriesChanged(newEntries)
         await showToast({
           style: Toast.Style.Success,
           title: "Entry updated",
@@ -99,22 +105,15 @@ const useEntries = (): UseEntriesOutput => {
     if (prevEntryIndex === -1) throw "Could not find entry to update"
     const newEntries = [...entries]
     newEntries.splice(prevEntryIndex, 1)
-    updateEntries(newEntries)
+    entriesChanged(newEntries)
     await showToast({
       style: Toast.Style.Success,
       title: "Entry deleted",
     })
   }
 
-  const getEntryCommand = async (entry: Entry) => {
-    await validateEntry(entry)
-    return entry.getCommand()
-  }
-
   const runEntry = async (entry: Entry, pushResultView = true) => {
     if (await validateEntry(entry)) {
-      const command = await getEntryCommand(entry)
-
       if (!preferences.noVerifyCommands && !entry.confirmed) {
         const confirmResponse = await confirmAlert({
           title: "Are you sure about this?",
@@ -134,6 +133,7 @@ const useEntries = (): UseEntriesOutput => {
       await updateEntry(clone, false)
 
       setEntryRunning(true)
+      const command = entry.getCommand()
       if (command && pushResultView) {
         push(<CommandRunner command={command} />)
       }
@@ -144,17 +144,39 @@ const useEntries = (): UseEntriesOutput => {
   }
 
   const copyEntryCommand = async (entry: Entry) => {
-    const command = await getEntryCommand(entry)
-    if (command) {
-      await Clipboard.copy(command)
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Copied Command to Clipboard",
-      })
+    if (await validateEntry(entry, true)) {
+      const command = entry.getCommand()
+
+      if (command) {
+        await Clipboard.copy(command)
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Copied Command to Clipboard",
+        })
+      }
     }
   }
 
-  return { entries, addEntry, updateEntry, deleteEntry, runEntry, copyEntryCommand, entryRunning }
+  const formatErrorsAsList = (errors: string[], forMarkdown = false) =>
+    errors
+      .map(err => `• ${err}`)
+      .join(
+        forMarkdown
+          ? `
+    `
+          : "\n"
+      )
+
+  return {
+    entries,
+    addEntry,
+    updateEntry,
+    deleteEntry,
+    runEntry,
+    copyEntryCommand,
+    formatErrorsAsList,
+    entryRunning,
+  }
 }
 
 export default useEntries

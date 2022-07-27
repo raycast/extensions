@@ -5,7 +5,8 @@
   "version": "1.2.4",
   "author": "tonka3000",
   "contributors": [
-    "altrdev"
+    "altrdev",
+    "rspeicher"
   ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -23,6 +24,13 @@
       "title": "Covers",
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant covers",
+      "mode": "view"
+    },
+    {
+      "name": "fans",
+      "title": "Fans",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant fans",
       "mode": "view"
     },
     {
@@ -247,6 +255,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }
 }

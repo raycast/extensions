@@ -37,7 +37,7 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
       <List.Section title="Workspaces">
         {entries.filter(isWorkspaceEntry).map((entry) => (
-          <LocalListItem key={entry.fileUri} uri={entry.fileUri} />
+          <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
         ))}
       </List.Section>
 
@@ -83,7 +83,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
 }
 
 function LocalListItem(props: { uri: string }) {
-  const name = decodeURI(basename(props.uri));
+  const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);

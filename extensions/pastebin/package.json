@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pastebin",
+  "title": "Pastebin",
+  "description": "Create and manage Pastebin pastes",
+  "icon": "pastebin.png",
+  "author": "vimtor",
+  "categories": [
+    "Web",
+    "Communication",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-paste",
+      "title": "Create Paste",
+      "subtitle": "Pastebin",
+      "description": "Create paste in Pastebin",
+      "mode": "view"
+    },
+    {
+      "name": "list-pastes",
+      "title": "Search Pastes",
+      "subtitle": "Pastebin",
+      "description": "Search pastes in Pastebin",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Get it on https://pastebin.com/doc_api after signing up",
+      "required": true,
+      "type": "password",
+      "placeholder": "pxijXlZt-WictechMbx_2Hib8-uReMmL"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Pastebin username",
+      "required": true,
+      "type": "textfield",
+      "placeholder": "raycaster"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Pastebin password",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "pastebin-api": "^5.1.0",
+    "swr": "^1.3.0",
+    "dateformat": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/dateformat": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

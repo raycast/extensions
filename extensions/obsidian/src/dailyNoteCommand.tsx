@@ -1,14 +1,17 @@
-import { List, ActionPanel, Action, Detail, showToast, Toast, closeMainWindow, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Detail, List, open, popToRoot, showToast, Toast } from "@raycast/api";
 
 import { Vault } from "./utils/interfaces";
-import { vaultPluginCheck, parseVaults } from "./utils/utils";
-
-const getTarget = (vaultName: string) => {
-  return "obsidian://advanced-uri?vault=" + encodeURIComponent(vaultName) + "&daily=true";
-};
+import { getDailyNoteTarget, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
 
 export default function Command() {
-  const vaults = parseVaults();
+  const { vaults, ready } = useObsidianVaults();
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  }
 
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
 
@@ -28,7 +31,7 @@ export default function Command() {
   }
 
   if (vaultsWithPlugin.length == 1) {
-    open(getTarget(vaultsWithPlugin[0].name));
+    open(getDailyNoteTarget(vaultsWithPlugin[0]));
     popToRoot();
     closeMainWindow();
   }
@@ -41,7 +44,7 @@ export default function Command() {
           key={vault.key}
           actions={
             <ActionPanel>
-              <Action.Open title="Daily Note" target={getTarget(vault.name)} />
+              <Action.Open title="Daily Note" target={getDailyNoteTarget(vault)} />
             </ActionPanel>
           }
         />
