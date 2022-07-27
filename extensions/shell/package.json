@@ -12,7 +12,15 @@
       "name": "index",
       "title": "Execute Shell Command",
       "description": "Execute shell command and display output",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

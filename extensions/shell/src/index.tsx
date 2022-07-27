@@ -6,11 +6,17 @@ import { exec, ChildProcess } from "child_process";
 import { runAppleScript } from "run-applescript";
 import { usePersistentState } from "raycast-toolkit";
 import fs from "fs";
+
 interface EnvType {
   env: Record<string, string>;
   cwd: string;
   shell: string;
 }
+
+interface ShellArguments {
+  command: string;
+}
+
 let cachedEnv: null | EnvType = null;
 
 const getCachedEnv = async () => {
@@ -159,7 +165,7 @@ const runInTerminal = (command: string) => {
   runAppleScript(script);
 };
 
-export default function Command() {
+export default function Command(props: { arguments: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
@@ -172,6 +178,10 @@ export default function Command() {
   useEffect(() => {
     setHistory([...new Set(shellHistory().reverse())] as string[]);
   }, [setHistory]);
+
+  if (props.arguments.command.length > 0) {
+    return <Result cmd={props.arguments.command} />;
+  }
 
   const categories = [];
 
