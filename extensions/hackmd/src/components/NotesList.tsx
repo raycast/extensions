@@ -1,6 +1,6 @@
 import { Note } from "@hackmd/api/dist/type";
 import { ReactElement } from "react";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import NoteDetail from "./NoteDetail";
 
 export default function NotesList({
@@ -22,6 +22,7 @@ export default function NotesList({
               key={note.id}
               title={note.title}
               subtitle={note.tags?.join(", ")}
+              icon={Icon.Document}
               accessories={[
                 {
                   date: new Date(note.createdAt),
