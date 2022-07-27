@@ -1,6 +1,6 @@
 # Emoji Changelog
 
-## [Improvements] - 2022-07-26
+## [Improvements] - 2022-07-27
 
 - Upgrade default Unicode version to 14.0;
 - Add Copy Shortcode action;
