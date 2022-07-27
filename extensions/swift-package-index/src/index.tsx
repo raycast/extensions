@@ -62,7 +62,7 @@ function PackageListItem({ manifest }: { manifest: PackageInfo }) {
               url={manifest.githubURL}
             />
             <Action.OpenInBrowser
-              title="Open Author Github"
+              title="Open Author Github Page"
               shortcut={{ modifiers: ["opt", "cmd"], key: "enter" }}
               url={manifest.authorGithubURL}
             />
