@@ -1,17 +1,7 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { URL } from "node:url";
 import millify from "millify";
 
 import useBandwith from "./hooks/useBandwith";
-
-export function faviconUrl(size: number, url: string): string {
-  try {
-    const domain = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-  } catch (err) {
-    return Icon.Globe;
-  }
-}
 
 export default function Command() {
   const { bandwith, todaysBandwith } = useBandwith();
