@@ -25,6 +25,7 @@ export default function Command() {
       errors.forEach(({ key, value }) => {
         setErrorByKey(key, value);
       });
+      return;
     }
 
     const clamp = calculateClamp(values, "rem");
