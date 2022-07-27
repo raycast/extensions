@@ -15,7 +15,7 @@ export default function Command() {
         setText(clipboard.trim());
         showToast({
           style: Toast.Style.Success,
-          title: `Loaded text from clipboard`,
+          title: `Text loaded from clipboard`,
           message: `[⌘ + E] to reset`,
         });
       }
