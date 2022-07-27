@@ -42,12 +42,11 @@ export default function () {
 
         // String Filter
         const queryGlobal: string = inputState
-        const queryText: string = queryGlobal.replace(/陈炤伶|伶仔|伶伶/g, "公主").replace(/邓港大/g, "猪")
-        const queryEmoji: string = queryGlobal.replace(/陈炤伶|伶仔|伶伶/g, "🐰").replace(/邓港大/g, "🦊")
+        const queryText: string = queryGlobal //.replace(/陈炤伶|伶仔|伶伶/g, "公主").replace(/邓港大/g, "猪")
+        const queryEmoji: string = queryGlobal //.replace(/陈炤伶|伶仔|伶伶/g, "🐰").replace(/邓港大/g, "🦊")
 
         const hasChinese = /[\u4E00-\u9FA5]+/g.test(queryText)
         const lang = hasChinese ? "zh" : "en"
-
         const dataList: ITranslateReformatResult[] = []
 
         // 接口速度较慢
@@ -90,7 +89,7 @@ export default function () {
             const res = await fetchEmojiAll(queryText, lang)
             if (!res?.data) return
             console.log("EmojiAll Data Received")
-            return formatEmojiAll(res.data)
+            return formatEmojiAll(res.data, lang)
         }
 
         getEmojiTrans().then((emojiTrans) => {
@@ -135,16 +134,6 @@ export default function () {
                 updateTranslateResultState(dataList)
             })
         )
-
-        // fetchEmojiAll(queryText, lang).then(res => {
-        //     const results: ITranslateReformatResult[] = formatEmojiAll(res.data)
-        //     if (results.length == 0) return
-
-        //     dataList.push(...results)
-
-        //     cancelLoadingState()
-        //     updateTranslateResultState(dataList)
-        // })
     }
 
     useEffect(() => {

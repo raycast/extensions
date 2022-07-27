@@ -77,9 +77,14 @@ export async function fetchDeepl(queryText: string): Promise<any> {
 
 export async function fetchDeepmoji(queryText: string): Promise<any> {
     if (!deepmojiURL) return
-    return axios.post(deepmojiURL, {
-        sentences: [queryText],
-    })
+    return axios
+        .post(deepmojiURL, {
+            sentences: [queryText],
+        })
+        .catch((err) => {
+            showErrorToast("Deepmoji Emotion Analysis", err.message)
+            return
+        })
 }
 
 export async function fetchEmojiTransHtml(): Promise<any> {

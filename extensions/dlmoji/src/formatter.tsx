@@ -1,6 +1,7 @@
 import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
 import { load } from "cheerio"
 import { truncate } from "./utils"
+import { decode } from "html-entities"
 
 const MAX_LENGTH = 5
 
@@ -35,18 +36,20 @@ export function formatDeepmoji(preds: EmojiScore[]): ITranslateReformatResultIte
     }
 }
 
-export function formatEmojiAll(data: EmojiDataItem[]): ITranslateReformatResult[] | undefined {
+export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateReformatResult[] | undefined {
     if (!data) return
 
-    function extract(item: EmojiDataItem) {
+    function extract(item: EmojiDataItem, url: string) {
+        const title = decode(item.value)
+        const description = decode(item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "")) // 去掉换行,空格,html标签
         const emoji = item.emoji_symbol
-        const description = item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "") // 去掉换行,空格,html标签
         const copyText = description ? emoji + COPY_SEPARATOR + description : emoji
         return {
-            title: truncate(item.value, 26) + "  " + item.emoji_symbol,
+            title: truncate(title, 26) + "  " + item.emoji_symbol,
             subtitle: description,
             key: emoji,
             copyText: copyText,
+            url: url,
         }
     }
 
@@ -54,9 +57,11 @@ export function formatEmojiAll(data: EmojiDataItem[]): ITranslateReformatResult[
     const combineList: ITranslateReformatResultItem[] = []
     data.forEach((item) => {
         if (item.type === "emoji") {
-            emojiList.push(extract(item))
+            lang = lang === "zh" ? "zh-hans" : lang
+            const url = "https://www.emojiall.com/" + lang + "/code/" + item.emoji_symbol.codePointAt(0)?.toString(16)
+            emojiList.push(extract(item, url))
         } else if (item.type === "combine") {
-            combineList.push(extract(item))
+            combineList.push(extract(item, ""))
         }
     })
     emojiList.splice(MAX_LENGTH)

@@ -1,16 +1,6 @@
 import { Component, Fragment } from "react"
 import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
-import {
-    Action,
-    ActionPanel,
-    Clipboard,
-    Color,
-    Icon,
-    List,
-    getPreferenceValues,
-    KeyEquivalent,
-    Keyboard,
-} from "@raycast/api"
+import { Action, ActionPanel, Clipboard, Color, Icon, List, getPreferenceValues, Keyboard } from "@raycast/api"
 import { clamp, truncate } from "./utils"
 
 interface ITranslateResult {
@@ -47,31 +37,6 @@ function ActionCopyListSection(props: IActionCopyListSection) {
     copyTextArray.length > 1 && copyTextArray.push(newCopyText)
     const finalTextArray = reformatCopyTextArray(copyTextArray, 6)
 
-    // const shortcutKeyEquivalent: Keyboard.KeyEquivalent[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-
-    // function changeTextCopyStyle(text: string): string {
-    //     const textArray: string[] = text.split(" ")
-    //     if (props.copyMode === COPY_TYPE.Uppercase) {
-    //         const SEPARATOR = "_"
-    //         return textArray
-    //             .map((text) => {
-    //                 return text.toUpperCase()
-    //             })
-    //             .join(SEPARATOR)
-    //     } else if (props.copyMode === COPY_TYPE.LowercaseCamelCase && textArray.length > 1) {
-    //         return textArray
-    //             .map((text, idx) => {
-    //                 if (idx === 0) return text.toLowerCase()
-
-    //                 const firstLetter = text.slice(0, 1).toUpperCase()
-    //                 return firstLetter + text.slice(1, text.length)
-    //             })
-    //             .join("")
-    //     }
-
-    //     return text
-    // }
-
     return (
         <ActionPanel.Section>
             {finalTextArray.map((textItem, key) => {
@@ -95,8 +60,13 @@ function ActionCopyListSection(props: IActionCopyListSection) {
 class ListActionPanel extends Component<IListItemActionPanelItem> {
     render() {
         return (
-            <ActionPanel>
+            <ActionPanel title={this.props.title}>
                 <ActionCopyListSection copyText={this.props.copyText} />
+                {this.props.url && (
+                    <ActionPanel.Section>
+                        <Action.OpenInBrowser url={this.props.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+                    </ActionPanel.Section>
+                )}
                 <ActionPanel.Section title="Others">
                     <Action.OpenInBrowser
                         icon={Icon.QuestionMark}
@@ -139,8 +109,9 @@ export default function TranslateResult(props: ITranslateResult) {
                                     detail={<List.Item.Detail markdown={item.title} />}
                                     actions={
                                         <ListActionPanel
-                                            queryText={props.inputState}
+                                            title={item.subtitle || item.title}
                                             copyText={item?.copyText || item.key || item.subtitle}
+                                            url={item.url}
                                         />
                                     }
                                 />

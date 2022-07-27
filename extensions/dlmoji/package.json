@@ -86,6 +86,7 @@
         "cheerio": "^1.0.0-rc.12",
         "crypto-js": "^4.1.1",
         "form-data": "^4.0.0",
+        "html-entities": "^2.3.3",
         "lodash": "^4.17.21",
         "prettier": "^2.7.1"
     },

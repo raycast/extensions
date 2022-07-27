@@ -21,6 +21,7 @@ interface ITranslateReformatResultItem {
     title: string
     subtitle?: string
     copyText: string
+    url?: string
 }
 
 interface ITranslateResultWebItem {
@@ -47,7 +48,8 @@ interface IPreferences {
 
 interface IListItemActionPanelItem {
     copyText?: string
-    queryText?: string
+    title?: string
+    url?: string
 }
 
 interface IReformatTranslateResult {
