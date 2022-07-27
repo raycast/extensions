@@ -1,5 +1,18 @@
 # `Easydict` Changelog
 
+## [v1.4.0] - 2022-07-27
+
+### ✨ New
+
+- Added support for Google translation.
+
+![Google](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1658584161.png)
+
+### 🐞 Fixes
+
+- Fixed a bug where web translation could cause a crash.
+
+
 ## [v1.3.1] - 2022-07-21
 
 ### 🐞 Fixes
@@ -7,13 +20,6 @@
 - Fixed new release prompt being shown multiple times.
 - Handled the exceptional error of request to Youdao translation.
 
-### ✅ Recent Updates
-
-- Added support for DeepL translation.
-- Supported to sort translation results manually.
-- Added support for Apple 🍎 system translation.
-- Fixed deleting input box text will cause repeated query selected text problem.
-- Fixed the bug of "✨ New Version Released" flashing when rendering action button.
 
 ## [v1.3.0] - 2022-07-20
 

@@ -2,8 +2,8 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 15:05
- * @fileName: releaseDetail.tsx
+ * @lastEditTime: 2022-07-24 00:46
+ * @fileName: releaseLog.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
@@ -18,7 +18,7 @@ import { Easydict } from "./versionInfo";
  *
  * @fallbackMarkdown The placeholder markdown content before fetching from GitHub.
  */
-export function ReleaseDetail(props: { fallbackMarkdown?: string }) {
+export default function ReleaseLogDetail(props: { fallbackMarkdown?: string }) {
   const [releaseMarkdown, setReleaseMarkdown] = useState<string>(changelog);
 
   console.log(`call ReleaseDetail function`);
