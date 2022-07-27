@@ -54,9 +54,9 @@
     },
     {
       "name": "playSimilar",
-      "title": "Play Similar",
+      "title": "Start Radio",
       "subtitle": "Spotify",
-      "description": "Starts playing similar tracks to the currently playing. The command initiate kind a Song's Radio",
+      "description": "Starts playing similar tracks to the currently playing. The command initiate the Song's Radio",
       "mode": "no-view"
     },
     {
