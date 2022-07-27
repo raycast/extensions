@@ -13,6 +13,13 @@
       "subtitle": "GitHub",
       "description": "Search review requests on GitHub and listing them.",
       "mode": "view"
+    },
+    {
+      "name": "githubPullNotifications",
+      "title": "Github Pull Notifications",
+      "description": "",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -25,10 +32,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.38.1",
     "graphql-request": "^4.0.0",
     "graphql-tag": "^2.12.6",
-    "javascript-time-ago": "^2.3.9"
+    "javascript-time-ago": "^2.3.9",
+    "octokit": "^2.0.4"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.5.0",
