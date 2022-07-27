@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Toast,
-  showToast,
-  getPreferenceValues,
-  Icon,
-  Color,
-  open,
-  showInFinder,
-  Clipboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Toast, showToast, Icon, Color, open, showInFinder, Clipboard } from "@raycast/api";
 import { IconStorageActions, appendRecentIcon } from "../utils/storage";
 import { ConfigureAction } from "./configure-icon";
 import { IconDetail } from "./icon-detail";
 import { getIconDetail } from "../hooks/api";
 import { IconProps } from "./icon";
-import { Icon8, Preferences } from "../types/types";
+import { Icon8 } from "../types/types";
 import { getDownloadLink } from "../utils/utils";
 import fetch from "node-fetch";
 import fs from "fs";
@@ -27,18 +16,17 @@ const addRecentIcon = async (icon: Icon8, refresh: () => void) => {
 
 export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX.Element => {
   const props = args.props;
-  const icon = props.icon;
 
   return (
     <ActionPanel>
-      <OpenInBrowser icon={icon} refresh={props.refresh} />
       {args.item && <ViewIcon {...props} />}
-      <ConfigureAction icon={icon} options={props.options} setOptions={props.setOptions} />
+      <OpenInBrowser {...props} />
+      <ConfigureAction {...props} />
       <ActionPanel.Section>
         <DownloadSVGIcon {...props} />
         <DownloadIconImage {...props} />
         <CopySVGCode {...props} />
-        <CopyImageURL icon={icon} refresh={props.refresh} />
+        <CopyImageURL {...props} />
       </ActionPanel.Section>
       <IconStorageActions props={props} showMovement={args.item} />
     </ActionPanel>

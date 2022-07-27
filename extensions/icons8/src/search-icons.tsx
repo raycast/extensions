@@ -1,13 +1,13 @@
-import { Icon, Grid, Color } from "@raycast/api";
+import { Grid, Color } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
-import { getGridSize } from "./utils/grid";
-import { getIcons, getStyles, numRecent } from "./hooks/api";
-import { Icon8, Style } from "./types/types";
-import { defaultStyles } from "./utils/utils";
-import { Icon8Item } from "./components/icon";
 import { getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
+import { getGridSize, numRecent } from "./utils/grid";
+import { getIcons, getStyles } from "./hooks/api";
+import { Icon8Item } from "./components/icon";
+import { Icon8, Style } from "./types/types";
+import { defaultStyles } from "./utils/utils";
 
 export default function SearchIcons() {
   const gridSize: Grid.ItemSize = getGridSize();
@@ -90,7 +90,7 @@ export default function SearchIcons() {
     <Grid
       isLoading={isLoading || icons === null}
       itemSize={gridSize}
-      inset={Grid.Inset.Medium}
+      inset={Grid.Inset.Small}
       onSearchTextChange={setSearchText}
       throttle={true}
       searchBarAccessory={

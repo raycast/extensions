@@ -1,7 +1,8 @@
-import { Grid, Color } from "@raycast/api";
+import { Grid } from "@raycast/api";
 import { IconActionPanel } from "./actions";
 import { Icon8 } from "../types/types";
 import { PinnedMovement } from "../utils/storage";
+import { previewSize } from "../utils/grid";
 
 export interface IconProps {
   icon: Icon8;
@@ -21,7 +22,10 @@ export const Icon8Item = (props: IconProps): JSX.Element => {
     <Grid.Item
       key={icon.id}
       content={{
-        value: { source: icon.url, tintColor: icon.isColor ? null : props.options.color },
+        value: {
+          source: icon.url.replace("$preview-size", previewSize),
+          tintColor: icon.isColor ? null : props.options.color,
+        },
         tooltip: icon.name,
       }}
       subtitle={icon.name}

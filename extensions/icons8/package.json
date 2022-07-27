@@ -54,20 +54,20 @@
       "required": false,
       "data": [
         {
-          "value": "32",
-          "title": "32"
+          "value": "80",
+          "title": "80"
         },
         {
-          "value": "64",
-          "title": "64"
+          "value": "160",
+          "title": "160"
         },
         {
-          "value": "128",
-          "title": "128"
+          "value": "240",
+          "title": "240"
         },
         {
-          "value": "256",
-          "title": "256"
+          "value": "320",
+          "title": "320"
         }
       ]
     },
@@ -76,7 +76,7 @@
       "title": "Number of Recent Icons",
       "description": "Number of recent icons to show.",
       "type": "dropdown",
-      "default": "16",
+      "default": "32",
       "required": false,
       "data": [
         {
@@ -94,6 +94,10 @@
         {
           "value": "32",
           "title": "32"
+        },
+        {
+          "value": "40",
+          "title": "40"
         }
       ]
     }

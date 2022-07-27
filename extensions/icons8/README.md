@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./media/Icons8-Art.svg" style="width: 96px; border-radius: 32px;"/>
+  <img src="extensions/icons8/assets/Icons8-Art.svg" style="width: 96px;"/>
 </div>
 
 <h1 align="center">Icons8</h1>
