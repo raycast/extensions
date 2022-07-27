@@ -58,13 +58,13 @@ export default class SoundOutputService implements SoundOutputService {
 
       return response;
     } catch (error) {
-      console.log(`[ERROR]: Could not fetch sound output devices from runAppleScript: ${error}`);
+      console.log(`[ERROR]: Could not fetch available sound output devices`);
       return Array<SoundOutputDevice>();
     }
   }
 
   async connectToDevice(name: string): Promise<boolean> {
-    console.log(`[INFO]: Attempting to connect to ${name}`);
+    console.log(`[INFO]: Attempting too connect to ${name}`);
     const strippedName = name.trim();
 
     try {
@@ -112,7 +112,7 @@ export default class SoundOutputService implements SoundOutputService {
       console.log(`[INFO]: Got response from runAppleScript: ${response}`);
       return stringToBool(response);
     } catch (error) {
-      console.log(`[ERROR]: Could not set selected ${strippedName} to true from runAppleScript: ${error}`);
+      console.log(`[ERROR]: Could not set selected state for '${strippedName}' to true`);
       return false;
     }
   }
