@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { getApplications, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 import { CurrentlyPlayingTrack, Response } from "./interfaces";
@@ -56,17 +56,23 @@ return playerState`;
     const result = response as SpotifyPlayingState;
     return result;
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed getting playback",
-    });
     return SpotifyPlayingState.Stopped;
   }
 }
 
 export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
+  const installedApplications = await getApplications();
+  const spotifyApplication = installedApplications.find((a) => a.bundleId?.includes("spotify"));
+
+  if (!spotifyApplication) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Check if you have Spotify app installed on your Mac",
+    });
+  }
+
   const script = `
-  if application "Spotify" is not running then
+  if application "${spotifyApplication?.name}" is not running then
 	return "${notPlayingErrorMessage}"
 end if
 
@@ -98,7 +104,6 @@ end if`;
     if (error == notPlayingErrorMessage) {
       return { error };
     }
-
     const track = JSON.parse(response as string) as CurrentlyPlayingTrack;
     return { result: track };
   } catch (err) {

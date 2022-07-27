@@ -27,7 +27,7 @@ export function BuildListItem({ build }: BuildListItemProps) {
       subtitle={build.pipeline?.name ?? `#${build.number}`}
       icon={getStateIcon(build.state)}
       keywords={[build.pipeline?.name || "", build.number.toString()]}
-      accessoryTitle={timeAgo(build.createdAt)}
+      accessories={[{ text: timeAgo(build.createdAt) }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={build.url} />
