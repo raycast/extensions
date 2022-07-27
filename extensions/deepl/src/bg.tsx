@@ -1,3 +1,3 @@
-import command from "./command";
+import Command from "./Command";
 
-export default command({ name: "Bulgarian", code: "bg" });
+export default Command({ name: "Bulgarian", code: "bg" });

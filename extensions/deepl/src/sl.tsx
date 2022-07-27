@@ -1,3 +1,3 @@
-import command from "./command";
+import Command from "./Command";
 
-export default command({ name: "Slovenian", code: "sl" });
+export default Command({ name: "Slovenian", code: "sl" });
