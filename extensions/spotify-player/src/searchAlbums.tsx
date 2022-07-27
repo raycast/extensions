@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Image, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isSpotifyInstalled } from "./client/utils";
 import { PlayAction } from "./actions";
