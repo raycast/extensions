@@ -15,3 +15,9 @@
 - Added modules page
 - Better error handling
 - Added icons
+
+## [Update] - 2022-07-27
+
+- Added pinned module items
+- Added ability to remove recent items
+- Updated icons
