@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Detail, List, Action, Icon, closeMainWindow, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 import { shellHistory } from "shell-history";
 import { shellEnv } from "shell-env";
-import { exec, ChildProcess } from "child_process";
+import { ChildProcess, exec } from "child_process";
 import { runAppleScript } from "run-applescript";
 import { usePersistentState } from "raycast-toolkit";
 import fs from "fs";
@@ -15,6 +25,9 @@ interface EnvType {
 
 interface ShellArguments {
   command: string;
+}
+interface Preferences {
+  arguments_terminal: boolean;
 }
 
 let cachedEnv: null | EnvType = null;
@@ -179,8 +192,21 @@ export default function Command(props: { arguments: ShellArguments }) {
     setHistory([...new Set(shellHistory().reverse())] as string[]);
   }, [setHistory]);
 
+  const preferences = getPreferenceValues<Preferences>();
   if (props.arguments.command.length > 0) {
-    return <Result cmd={props.arguments.command} />;
+    if (preferences.arguments_terminal) {
+      addToRecentlyUsed(props.arguments.command);
+      showHUD("Ran command in iTerm/Terminal");
+      popToRoot();
+      closeMainWindow();
+      if (iTermInstalled) {
+        return runInIterm(props.arguments.command);
+      } else {
+        return runInTerminal(props.arguments.command);
+      }
+    } else {
+      return <Result cmd={props.arguments.command} />;
+    }
   }
 
   const categories = [];

@@ -23,6 +23,17 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "arguments_terminal",
+      "type": "checkbox",
+      "required": false,
+      "title": "For use with arguments:",
+      "description": "Decide if you want to run commands inside raycast or inside a terminal application",
+      "default": false,
+      "label": "Use Terminal/iTerm"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "raycast-toolkit": "^1.0.4",
