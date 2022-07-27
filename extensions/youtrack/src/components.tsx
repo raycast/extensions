@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Icon, Color, Image } from "@raycast/api";
 import { Issue } from "./interfaces";
+import { issueStates } from "./utils";
 
-const tintedResolvedIcon = { source: Icon.Check, tintColor: Color.Green };
+const resolvedIcon = { source: Icon.Check, tintColor: Color.Green };
 const openIcon = { source: Icon.Dot };
 
 export function IssueListItem(props: { item: Issue; index: number; instance: string; resolved: boolean }) {
@@ -12,8 +13,8 @@ export function IssueListItem(props: { item: Issue; index: number; instance: str
   });
 
   useEffect(() => {
-    const icon = props.resolved ? tintedResolvedIcon : openIcon;
-    const tooltip = props.resolved ? "Resolved" : "Open";
+    const icon = props.resolved ? resolvedIcon : openIcon;
+    const tooltip = props.resolved ? issueStates.ISSUE_RESOLVED : issueStates.ISSUE_OPEN;
     const accessories = [{ text: props.item.id, tooltip }];
     setState({ icon, accessories });
   }, [props.item.id, props.resolved]);

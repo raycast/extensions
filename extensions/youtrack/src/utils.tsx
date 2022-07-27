@@ -35,3 +35,8 @@ export async function loadCache(): Promise<Issue[]> {
   const data = (await LocalStorage.getItem(YT_CACHE_KEY)) as string;
   return JSON.parse(data ?? "[]") as Issue[];
 }
+
+export const issueStates = {
+  ISSUE_RESOLVED: "Resolved",
+  ISSUE_OPEN: "Open",
+};
