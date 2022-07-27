@@ -45,6 +45,24 @@
       "description": "Bitfinex API Secret"
     },
     {
+      "title": "Default Rate View",
+      "name": "default_rate_view",
+      "type": "dropdown",
+      "description": "Default Rate View",
+      "required": true,
+      "default": "list",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "chart",
+          "title": "Chart"
+        }
+      ]
+    },
+    {
       "title": "Funding Currency",
       "description": "Currency To Use for Bitfinex Funding API",
       "name": "f_currency",
@@ -1308,7 +1326,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.38.0",
     "asciichart": "^1.5.25",
     "bfx-api-node-models": "^1.6.3",
     "bitfinex-api-node": "^5.0.4",

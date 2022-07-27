@@ -36,6 +36,7 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
   return (
     <List.Item
       title={`${symbol} ${amount}`}
+      icon={Icon.Coins}
       subtitle={daysLeftText}
       accessories={[
         {
@@ -45,16 +46,15 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
         {
           icon: Icon.Calendar,
           date: new Date(offer.mtsCreate),
+          tooltip: "Created at",
         },
       ]}
       actions={
         <ActionPanel>
-          {canUpdate && (
-            <Action.Push title="Update Offer" target={<EditOfferForm offer={offer} />} icon={Icon.Pencil} />
-          )}
+          {canUpdate && <Action.Push title="Edit Offer" target={<EditOfferForm offer={offer} />} icon={Icon.Pencil} />}
           {canCancel && (
             <Action
-              icon={Icon.XmarkCircle}
+              icon={Icon.XMarkCircle}
               title="Cancel Offer"
               onAction={async () => {
                 await rest.cancelFundingOffer(offer.id);
@@ -63,7 +63,7 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
               }}
             />
           )}
-          <Action.Push icon={Icon.Plus} title="Create Offer" target={<CreateOfferForm />} />
+          <Action.Push icon={Icon.PlusCircle} title="Create Offer" target={<CreateOfferForm />} />
         </ActionPanel>
       }
     />
@@ -104,7 +104,7 @@ function EditOfferForm(props: { offer: any }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update Offer" onSubmit={onSubmit} icon={Icon.Pencil} />
+          <Action.SubmitForm title="Update Offer" onSubmit={onSubmit} icon={Icon.Upload} />
         </ActionPanel>
       }
     >
@@ -146,8 +146,8 @@ function CreateOfferForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} icon={Icon.Plus} />
-          <Action.Push title="Show Lending Rates" target={<LendingRates />} icon={Icon.LevelMeter} />
+          <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} icon={Icon.PlusCircle} />
+          <Action.Push title="Show Lending Rates" target={<LendingRates />} icon={Icon.LineChart} />
         </ActionPanel>
       }
     >
@@ -190,9 +190,10 @@ export default function FundingOffers() {
         <List.Section title="Available Funding">
           <List.Item
             title={`${Math.abs(balanceInfo[0])} ${f_currency}`}
+            icon={Icon.Coin}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Plus} title="Create Offer" target={<CreateOfferForm />} />
+                <Action.Push icon={Icon.PlusCircle} title="Create Offer" target={<CreateOfferForm />} />
               </ActionPanel>
             }
           />
