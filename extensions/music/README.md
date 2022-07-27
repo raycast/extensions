@@ -1,7 +1,8 @@
-<p align="center">
-	<img src="./assets/icon.png">
-	<h1>Music</h1>
+<p align="center" style="display:flex">
+	<img width="50" src="./assets/icon.png">
 </p>
+
+# Music
 > Apple music extension
 
 ![sc1](./metadata/screenshot-1.png)
