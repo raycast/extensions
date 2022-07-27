@@ -1,9 +1,18 @@
 import { Note } from "@hackmd/api/dist/type";
+import { ReactElement } from "react";
 import { List } from "@raycast/api";
 
-export default function NotesList({ notes, isLoading }: { notes?: Note[]; isLoading: boolean }) {
+export default function NotesList({
+  notes,
+  isLoading,
+  searchBarAccessory,
+}: {
+  notes?: Note[];
+  isLoading: boolean;
+  searchBarAccessory?: ReactElement<List.Dropdown.Props>;
+}) {
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarAccessory={searchBarAccessory}>
       {notes &&
         notes
           .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())

@@ -19,6 +19,13 @@
       "subtitle": "HackMD",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "list-team-notes",
+      "title": "List Team Notes",
+      "subtitle": "HackMD",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
