@@ -26,7 +26,7 @@
     {
       "title": "YouTrack instance",
       "name": "instance",
-      "description": "Your YT instance address",
+      "description": "Your YouTrack instance address",
       "required": true,
       "type": "textfield",
       "placeholder": "https://example.youtrack.cloud"
