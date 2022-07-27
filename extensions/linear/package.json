@@ -126,7 +126,7 @@
   "dependencies": {
     "@linear/sdk": "^1.22.0",
     "@raycast/api": "^1.38.1",
-    "@raycast/utils": "^1.0.4",
+    "@raycast/utils": "^1.0.7",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",
