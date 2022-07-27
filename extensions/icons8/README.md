@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="extensions/icons8/assets/Icons8-Art.svg" style="width: 96px;"/>
+  <img src="https://user-images.githubusercontent.com/12091319/181265326-22b0ab88-2aa5-44ab-8b43-2ae334430068.svg" style="width: 96px;"/>
 </div>
 
 <h1 align="center">Icons8</h1>
