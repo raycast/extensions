@@ -1,6 +1,7 @@
 import { Note } from "@hackmd/api/dist/type";
 import { ReactElement } from "react";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import NoteDetail from "./NoteDetail";
 
 export default function NotesList({
   notes,
@@ -26,6 +27,11 @@ export default function NotesList({
                   date: new Date(note.createdAt),
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push target={<NoteDetail noteId={note.id} />} title="View Detail" />
+                </ActionPanel>
+              }
             />
           ))}
     </List>
