@@ -47,9 +47,10 @@ export default function Soundpick() {
     if (newDeviceIsTheConnectedDevice) {
       await showToast({
         style: Toast.Style.Success,
-        title: `Playing on ${newDevice.name}`
-      })
-      return
+        title: `Playing on ${newDevice.name}`,
+      });
+      await soundOutputService.closeSystemPreferences();
+      return;
     }
 
     const toast = await showToast({
