@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swift-package-index",
-  "title": "Swift Package Index Search",
+  "title": "Swift Package Index",
   "description": "Search for Swift Packages via https://swiftpackageindex.com",
   "icon": "command-icon.png",
   "author": "maximkrouk",
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Swift Packages",
-      "subtitle": "SPI",
+      "title": "Search Packages",
+      "subtitle": "Swift Package Index",
       "description": "Search for Swift Packages via https://swiftpackageindex.com",
       "mode": "view"
     }
