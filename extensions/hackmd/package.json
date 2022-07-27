@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hackmd",
+  "title": "HackMD",
+  "description": "HackMD Raycast extension",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-my-notes",
+      "title": "List My Notes",
+      "subtitle": "HackMD",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "title": "HackMD API Token",
+      "description": "The API token you created on HackMD",
+      "name": "api_token",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@hackmd/api": "^2.0.0",
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.7"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
