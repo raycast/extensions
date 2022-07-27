@@ -3,19 +3,19 @@ import { Icon, Color } from "@raycast/api";
 export const Colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue, Color.Purple];
 
 export const Icons = {
-  Announcement: "../assets/announcement.png",
+  Announcement: Icon.Megaphone,
   Assignment: "../assets/assignment.png",
-  Code: "../assets/code.png",
-  Course: "../assets/course.png",
+  Code: Icon.Code,
+  Course: "../assets/books-stack.png",
   ExternalUrl: Icon.Link,
-  File: Icon.TextDocument,
-  Home: "../assets/home.png",
+  File: Icon.Document,
+  Home: Icon.House,
   HomePage: "../assets/home-page.png",
   InvalidAPIKey: "../assets/invalid-api-key.png",
   InvalidDomain: "../assets/invalid-domain.png",
-  Modules: "../assets/see-modules.png",
+  Modules: Icon.BulletPoints,
   Page: "../assets/page.png",
-  Passcode: "../assets/check-lock.png",
+  Passcode: Icon.LockUnlocked,
   Quiz: "../assets/quiz.png",
 };
 
