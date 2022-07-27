@@ -1,11 +1,18 @@
-import * as E from "fp-ts/Either";
+import { URLSearchParams } from "url";
+
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
-import { logScript } from "./logger";
-import { URLSearchParams } from "url";
 
-export const runScript = (command: string) => TE.tryCatch(() => pipe(command, logScript, runAppleScript), E.toError);
+import { logScript } from "./logger";
+import { ScriptError } from "./models";
+
+function toScriptError(e: unknown): ScriptError {
+  return e as ScriptError;
+}
+
+export const runScript = (command: string) =>
+  TE.tryCatch(() => pipe(command, logScript, runAppleScript), toScriptError);
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
 
