@@ -5,5 +5,5 @@
 # Music
 > Apple music extension
 
-![sc1](./metadata/screenshot-1.png)
-![sc2](./metadata/screenshot-2.png)
+![sc1](./metadata/screnshot-1.png)
+![sc2](./metadata/screnshot-2.png)
