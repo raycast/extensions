@@ -12,6 +12,11 @@ export default function Command() {
   const moviedb = new MovieDb(prefrences.apiKey);
 
   const searchTV = async (query: string) => {
+    if (query === "") {
+      setTVs([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setTVs([]);
     moviedb
