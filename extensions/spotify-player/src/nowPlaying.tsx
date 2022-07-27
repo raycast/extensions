@@ -46,8 +46,12 @@ export default function Main() {
     updatePlayingTrack();
   }, []);
 
-  if (currentSpotifyPlayingState == SpotifyPlayingState.Stopped) {
+  if (isLoading) {
     return <MenuBarExtra isLoading={isLoading}></MenuBarExtra>;
+  }
+
+  if (currentSpotifyPlayingState == SpotifyPlayingState.Stopped) {
+    return null;
   }
 
   const trackTitle =
