@@ -5,6 +5,7 @@
   "description": "Fastest Notion to-do app ever",
   "icon": "icon.png",
   "author": "reboot.studio",
+  "version": "0.0.2",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -16,7 +17,7 @@
       "name": "index",
       "title": "My Todos",
       "subtitle": "Hypersonic",
-      "description": "The fastest Notion to-do app for Raycast",
+      "description": "The fastest Notion to-do app for Raycast.",
       "mode": "view"
     }
   ],
@@ -24,11 +25,51 @@
     {
       "name": "database_name",
       "type": "textfield",
-      "title": "Notion Page Name",
-      "label": "Notion Page Name",
-      "description": "Create, filter and complete all your to-do's",
+      "title": "Notion Database Name",
+      "label": "Notion Database Name",
+      "description": "Are you using your own Database? Add the names for the following properties.",
       "placeholder": "Hypersonic",
       "default": "Hypersonic",
+      "required": false
+    },
+    {
+      "name": "property_title",
+      "type": "textfield",
+      "title": "Title Property Name",
+      "label": "Title Property Name",
+      "description": "The database name of the Title Property",
+      "placeholder": "Title",
+      "default": "Title",
+      "required": false
+    },
+    {
+      "name": "property_date",
+      "type": "textfield",
+      "title": "Date Property Name",
+      "label": "Date Property Name",
+      "description": "The database name of the Date Property",
+      "placeholder": "Date",
+      "default": "Date",
+      "required": false
+    },
+    {
+      "name": "property_done",
+      "type": "textfield",
+      "title": "Checkbox Property Name",
+      "label": "Checkbox Property Name",
+      "description": "The database name of the Checkbox Property",
+      "placeholder": "Done",
+      "default": "Done",
+      "required": false
+    },
+    {
+      "name": "property_label",
+      "type": "textfield",
+      "title": "Select Property Name",
+      "label": "Select Property Name",
+      "description": "The database name of the Select Property",
+      "placeholder": "Label",
+      "default": "Label",
       "required": false
     },
     {

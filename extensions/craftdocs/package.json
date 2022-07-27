@@ -30,10 +30,18 @@
           "description": "Changes the view of the search to show info about documents. It is messy!"
         }
       ]
+    },
+    {
+      "name": "dailyNotes",
+      "title": "Daily Notes",
+      "subtitle": "Craft",
+      "description": "Navigate to your daily notes",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1"
+    "@raycast/api": "^1.33.1",
+    "chrono-node": "^2.3.9"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

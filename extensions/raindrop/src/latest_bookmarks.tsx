@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import BookmarkItem from "./components/BookmarkItem";
 import { useLatestBookmarks } from "./utils";
 import { Bookmark } from "./types";
@@ -7,7 +7,7 @@ export default function LatestBookmarks() {
   const { response, error, isLoading } = useLatestBookmarks();
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search bookmark", error);
+    showToast(Toast.Style.Failure, "Cannot search bookmark", error);
   }
 
   return (

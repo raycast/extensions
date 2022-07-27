@@ -91,7 +91,7 @@ export const useOnboarding = () => {
   )
 
   const handleSetDate = useCallback(
-    async (todo: Todo, dateValue: Date | null, name: string) => {
+    async (todo: Todo, dateValue: string | null, name: string) => {
       const optimisticData = data.filter((t) => t.id !== todo.id)
       setData(optimisticData)
     },

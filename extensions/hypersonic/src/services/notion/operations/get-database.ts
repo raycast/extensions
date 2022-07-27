@@ -13,8 +13,9 @@ export async function getDatabase(): Promise<{
   try {
     const notionClient = await notion()
 
+    const preferences = getPreferenceValues()
     const databases = await notionClient.search({
-      query: getPreferenceValues().database_name,
+      query: preferences.database_name,
       filter: { property: 'object', value: 'database' },
     })
 
@@ -22,7 +23,7 @@ export async function getDatabase(): Promise<{
     const databaseId = database.id
     const databaseUrl = database.url
     const availableTags: any[] =
-      database?.properties['Label']?.select?.options ?? []
+      database?.properties[preferences.property_label]?.select?.options ?? []
 
     const tags = availableTags.map(mapPageTag)
     await storeDatabase({ databaseId, databaseUrl })

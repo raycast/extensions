@@ -1,5 +1,13 @@
 # Google Translate Changelog
 
+## [Add action to open in browser] - 2022-07-15
+
+Add a quick action to open the translation in Google Translate
+
+## [Add details view] - 2022-07-07
+
+Add details view so the full text of translations can be previewed
+
 ## [Fix] - 2022-06-15
 
 Fix character encoding in `TextArea` on translate form

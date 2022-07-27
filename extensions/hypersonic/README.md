@@ -29,9 +29,10 @@ All done! You can now start creating to-do's.
   - Press `↵` to complete a to-do or create a new one.
   - Press `⌘ + ↵` to set a reminder for a to-do.
   - Press `⌘ + L` to add a label. You will need to create the labels first on Notion.
-  - Press `⌘ + U` to open a external link.
-  - Press `⌘ + P` to copy a to-do to the clipboard.
+  - Press `⌘ + E` to open a external link.
+  - Press `⌘ + B` to copy a to-do to the clipboard.
   - Press `⌘ + O` to open the to-do in Notion.
+  - Press `⌘ + U` to undo the to-do mark action.
   - Press `⌘ + ⌫` to delete a to-do.
   - Press `⌘ + ↑` to move up a to-do.
   - Press `⌘ + ↓` to move up a to-do.

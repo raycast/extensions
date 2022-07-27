@@ -83,7 +83,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
 }
 
 function LocalListItem(props: { uri: string }) {
-  const name = decodeURI(basename(props.uri));
+  const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
