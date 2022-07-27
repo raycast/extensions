@@ -49,7 +49,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 
 - `data`, `error`, `isLoading` - see [AsyncState](#asyncstate).
 - `revalidate` is a method to manually call the function with the same arguments again.
-- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useCachedPromise`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See [Mutation and Optimistic Updates](#mutation-and-optimistic-updates) for more information.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useFetch`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See [Mutation and Optimistic Updates](#mutation-and-optimistic-updates) for more information.
 
 ## Example
 
@@ -82,11 +82,11 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 ```tsx
 import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 const Demo = () => {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, mutate } = usefetch(`https://api.example?q=${searchText}`, {
+  const { isLoading, data, mutate } = useFetch(`https://api.example?q=${searchText}`, {
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,
   });
@@ -111,7 +111,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 
 ```tsx
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 const Demo = () => {
   const { isLoading, data, mutate } = useFetch("https://api.example");
