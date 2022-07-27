@@ -10,7 +10,7 @@
 Raycast extension to browse YouTrack issues.
 
   <p>
-    <a href="https://www.raycast.com/tonka3000/gitlab">
+    <a href="https://www.raycast.com/tiulpin/youtrack">
       <img src="https://img.shields.io/badge/Raycast-store-red.svg"
         alt="Find this extension on the Raycast store"
       />
