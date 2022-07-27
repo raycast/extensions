@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { MovieDb } from "moviedb-promise";
 import { MovieResponse } from "moviedb-promise/dist/./request-types";
 
@@ -13,6 +13,7 @@ export default function Command() {
 
   const searchMovie = async (query: string) => {
     setIsLoading(true);
+    setMovies([]);
     moviedb
       .searchMovie({ query: query })
       .then((res: any) => {
@@ -21,6 +22,7 @@ export default function Command() {
       })
       .catch((err: any) => {
         setIsLoading(false);
+        showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: `${err}` });
       });
   };
 

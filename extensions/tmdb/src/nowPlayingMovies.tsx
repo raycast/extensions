@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { MovieDb } from "moviedb-promise";
 import { MovieResult } from "moviedb-promise/dist/./request-types";
 
@@ -21,6 +21,7 @@ export default function Command() {
       })
       .catch((err: any) => {
         setIsLoading(false);
+        showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: `${err}` });
       });
   };
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function Command() {
             setPage(newValue);
             fetchMovie(newValue);
           }}
+          storeValue
         >
           <Grid.Dropdown.Section title="Pages">
             {Array.from(Array(10).keys()).map((i) => (
