@@ -51,7 +51,7 @@
     {
       "title": "Issues limit",
       "name": "maxIssues",
-      "description": "Limit the number of loaded issues by a query",
+      "description": "Limit the number of returned issues by a query",
       "required": false,
       "default": "50",
       "data": [
