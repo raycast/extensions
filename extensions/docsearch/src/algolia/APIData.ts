@@ -10,11 +10,12 @@ export default [
     },
   },
   {
-    name: "Echarts_zh-hans",
+    name: "Echarts",
     icon: "https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/zh/images/favicon.png",
     APIKey: "6ade5f1ff34e94690f9ea38cddcc2f55",
     APPID: "BH4D9OD16A",
     indexName: "apache_echarts",
+    subtitle: "zh-Hans",
     searchParameters: {
       facetFilters: ["lang:zh"],
     },
@@ -41,11 +42,12 @@ export default [
     indexName: "react",
   },
   {
-    name: "React_zh-hans",
+    name: "React",
     icon: "https://zh-hans.reactjs.org/favicon.ico",
     APIKey: "72499aaa151dba0828babe727c7b86ee",
     APPID: "BH4D9OD16A",
     indexName: "reactjs_zh-hans",
+    subtitle: "zh-Hans",
   },
   {
     name: "RSSHub",
@@ -69,11 +71,12 @@ export default [
     indexName: "vitejs",
   },
   {
-    name: "Vite_zh-hans",
+    name: "Vite",
     icon: "https://vitejs.dev/logo.svg",
     APIKey: "b573aa848fd57fb47d693b531297403c",
     APPID: "BH4D9OD16A",
     indexName: "vitejs",
+    subtitle: "zh-Hans",
     searchParameters: {
       facetFilters: ["tags:cn"],
     },

@@ -101,6 +101,7 @@ export default function ChooseSearchDocumentation() {
           icon={API.icon}
           key={API.APIKey}
           title={API.name}
+          subtitle={API.subtitle}
           actions={
             <ActionPanel>
               <Action

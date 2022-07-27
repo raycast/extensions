@@ -4,5 +4,6 @@ export interface IAPIData {
   APIKey: string;
   APPID: string;
   indexName: string;
+  subtitle?: string;
   searchParameters?: object;
 }
