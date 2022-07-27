@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 18:29
+ * @lastEditTime: 2022-07-23 13:00
  * @fileName: detectLanguage.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -426,9 +426,9 @@ export function simpleDetectTextLanguage(text: string): LanguageDetectTypeResult
   let fromYoudaoLanguageId = "auto";
   const englishLanguageId = "en";
   const chineseLanguageId = "zh-CHS";
-  if (isEnglishOrNumber(text) && isPreferredLanguagesContainedEnglish()) {
+  if (isEnglishOrNumber(text) && checkIfPreferredLanguagesContainedEnglish()) {
     fromYoudaoLanguageId = englishLanguageId;
-  } else if (isChinese(text) && isPreferredLanguagesContainedChinese()) {
+  } else if (isChinese(text) && checkIfPreferredLanguagesContainedChinese()) {
     fromYoudaoLanguageId = chineseLanguageId;
   }
   console.log("simple detect language -->:", fromYoudaoLanguageId);
@@ -450,14 +450,14 @@ export function isPreferredLanguage(languageId: string): boolean {
 /**
  * check if preferred languages contains English language
  */
-export function isPreferredLanguagesContainedEnglish(): boolean {
+export function checkIfPreferredLanguagesContainedEnglish(): boolean {
   return defaultLanguage1.youdaoLanguageId === "en" || defaultLanguage2.youdaoLanguageId === "en";
 }
 
 /**
  * check if preferred languages contains Chinese language
  */
-export function isPreferredLanguagesContainedChinese(): boolean {
+export function checkIfPreferredLanguagesContainedChinese(): boolean {
   const lanuguageIdPrefix = "zh";
   const preferences: MyPreferences = getPreferenceValues();
   if (preferences.language1.startsWith(lanuguageIdPrefix) || preferences.language2.startsWith(lanuguageIdPrefix)) {
