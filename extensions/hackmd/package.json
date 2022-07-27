@@ -26,6 +26,13 @@
       "subtitle": "HackMD",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "view-release-notes",
+      "title": "View Release notes",
+      "subtitle": "HackMD",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -40,7 +47,10 @@
   "dependencies": {
     "@hackmd/api": "^2.0.0",
     "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7"
+    "@raycast/utils": "^1.0.7",
+    "mdast-util-to-markdown": "^1.3.0",
+    "minisearch": "^5.0.0",
+    "remark": "^14.0.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
