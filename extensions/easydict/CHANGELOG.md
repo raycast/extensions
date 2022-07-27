@@ -12,12 +12,6 @@
 
 - Fixed a bug where web translation could cause a crash.
 
-### ✅ Recent Updates
-
-- Added support for DeepL translation.
-- Supported to sort translation results manually.
-- Added support for Apple 🍎 system translation.
-- Fixed deleting input box text will cause repeated query selected text problem.
 
 ## [v1.3.1] - 2022-07-21
 
@@ -26,13 +20,6 @@
 - Fixed new release prompt being shown multiple times.
 - Handled the exceptional error of request to Youdao translation.
 
-### ✅ Recent Updates
-
-- Added support for DeepL translation.
-- Supported to sort translation results manually.
-- Added support for Apple 🍎 system translation.
-- Fixed deleting input box text will cause repeated query selected text problem.
-- Fixed the bug of "✨ New Version Released" flashing when rendering action button.
 
 ## [v1.3.0] - 2022-07-20
 
