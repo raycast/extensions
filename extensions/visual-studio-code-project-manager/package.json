@@ -5,6 +5,9 @@
   "description": "Search and open projects from Visual Studio Code Project Manager",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek"
+  ],
   "license": "MIT",
   "commands": [
     {
