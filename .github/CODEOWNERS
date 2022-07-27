@@ -75,7 +75,7 @@
 /extensions/cloudflare                               @Destiner @niklaswa
 /extensions/coda-bookmarks-search                    @allienx
 /extensions/code-stash                               @ben-greenwood
-/extensions/coffee                                   @mooxl @bibixx
+/extensions/coffee                                   @mooxl @bibixx @GastroGeek
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner @mike182uk
 /extensions/coinmarketcap-crypto-crawler             @moojing
@@ -114,6 +114,7 @@
 /extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
 /extensions/dex-screener                             @wp-lai
+/extensions/dicom                                    @sedghi
 /extensions/dict-cc                                  @natterstefan
 /extensions/diff-checker                             @Destiner
 /extensions/dig                                      @danielbahl @pernielsentikaer
@@ -410,7 +411,7 @@
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7
-/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @mattisssa
+/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
 /extensions/steam                                    @KevinBatdorf
@@ -489,8 +490,10 @@
 /extensions/xcode                                    @SvenTiigi @qeude
 /extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
+/extensions/xqc                                      @Aayush9029
 /extensions/yandex-music                             @AlexStrNik
 /extensions/youdao-translate                         @tiancheng92
+/extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
 /extensions/youtube-companion                        @sasivarnan
 /extensions/zen-mode                                 @pradeepb28
