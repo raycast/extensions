@@ -3,7 +3,7 @@
   "name": "network-usage",
   "title": "Network Usage",
   "description": "Display network bandwith from Raycast",
-  "icon": "📈",
+  "icon": "icon.png",
   "author": "oktay",
   "categories": [
     "Security",
