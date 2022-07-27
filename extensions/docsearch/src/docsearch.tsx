@@ -62,8 +62,14 @@ function SearchDocumentation(props: { API: IAPIData }) {
           )}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={result.url} title="Open in Browser" />
-              <Action.CopyToClipboard title="Copy URL" content={result.url} />
+              <Action.OpenInBrowser
+                url={result.url.indexOf("%") !== -1 ? result.url : encodeURI(result.url)}
+                title="Open in Browser"
+              />
+              <Action.CopyToClipboard
+                title="Copy URL"
+                content={result.url.indexOf("%") !== -1 ? decodeURI(result.url) : result.url}
+              />
             </ActionPanel>
           }
         />
