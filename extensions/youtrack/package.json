@@ -34,7 +34,7 @@
     {
       "title": "Token",
       "name": "token",
-      "description": "We are going to use this to authorize in your YT instance by your account",
+      "description": "We are going to use this to authorize your YouTrack instance on your account",
       "required": true,
       "placeholder": "perm:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
       "type": "password"
