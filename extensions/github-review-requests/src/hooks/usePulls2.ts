@@ -1,6 +1,6 @@
 import usePullStore2 from "./usePullStore2";
 import {useEffect, useState} from "react";
-import searchPullRequestsWithDependencies from "../integration2/searchPullRequestsWithDependencies";
+import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
 import {saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";

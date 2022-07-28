@@ -1,6 +1,6 @@
 import {getSdk} from "./SearchPullRequestsWithDependencies.generated";
 import graphQLClient from "../integration/graphQLClient";
-import {PullRequestShort} from "./types";
+import {PullRequestShort} from "../integration2/types";
 
 const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestShort[]> => Promise.resolve()
   .then(() => console.debug("searchPullRequestsWithDependencies", query))
