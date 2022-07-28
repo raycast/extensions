@@ -62,12 +62,13 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 }}
               />
               <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
-              {/* @ts-expect-error Property id does not exist on type Deployment */}
               <Action.OpenInBrowser
                 title={`Visit on Vercel`}
                 url={getDeploymentURL(
-                  selectedTeam ? selectedTeam.name : user?.username,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  selectedTeam ? selectedTeam.name : user!.username,
                   deployment.name,
+                  /* @ts-expect-error Property id does not exist on type Deployment */
                   deployment.id || deployment.uid
                 )}
                 icon={Icon.Link}

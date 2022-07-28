@@ -1,4 +1,3 @@
-import { Icon } from "@raycast/api";
 import { Deployment } from "../types";
 import { getScreenshotImageURL } from "../vercel";
 
