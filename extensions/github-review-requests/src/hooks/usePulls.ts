@@ -4,7 +4,7 @@ import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWit
 import {getLogin} from "../integration/getLogin";
 import {saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../types";
-import {isActionUserInitiated} from "../tools/isActionUserInitiated";
+import {isActionUserInitiated} from "../util";
 
 const usePulls = () => {
   const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull} = usePullStore();

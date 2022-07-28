@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {PullRequestLastVisit, PullRequestShort} from "../types";
 import {loadAllPullsFromStore, PullStore, saveAllPullsToStore} from "../store/pulls";
-import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
+import {getTimestampISOInSeconds} from "../util";
 
 const usePullStore = () => {
   const [isPullStoreLoading, setIsPullStoreLoading] = useState(true);
