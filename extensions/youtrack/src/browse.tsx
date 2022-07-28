@@ -36,13 +36,17 @@ export default function Command() {
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
         const cache = await loadCache();
-        const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
+
         if (cache.length) {
-          if (_.isEqual(cache, feed)) {
-            setState((previous) => ({ ...previous, items: cache, isLoading: false }));
-            return;
-          }
+          setState((previous) => ({ ...previous, items: cache, isLoading: true }));
         }
+
+        const feed = await fetchIssues(prefs.query, Number(prefs.maxIssues), state.yt);
+        if (cache.length && _.isEqual(cache, feed)) {
+          setState((previous) => ({ ...previous, isLoading: false }));
+          return;
+        }
+
         setState((previous) => ({ ...previous, items: feed, isLoading: false }));
         await saveCache(feed);
       } catch (error) {
