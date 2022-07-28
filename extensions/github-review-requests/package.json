@@ -15,9 +15,9 @@
       "mode": "view"
     },
     {
-      "name": "revisedPullNotifications",
-      "title": "Revised Pull Notifications",
-      "description": "",
+      "name": "actionablePullRequests",
+      "title": "Notify About Pending Pull Requests",
+      "description": "List actionable pull requests",
       "mode": "menu-bar",
       "interval": "3m"
     }

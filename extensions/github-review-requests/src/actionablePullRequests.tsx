@@ -1,7 +1,7 @@
 import {Color, MenuBarExtra, open} from "@raycast/api";
 import usePulls2 from "./hooks/usePulls2";
 
-const revisedPullNotifications = () => {
+const actionablePullRequests = () => {
   const {
     isLoading,
 
@@ -39,4 +39,4 @@ const revisedPullNotifications = () => {
 }
 
 // noinspection JSUnusedGlobalSymbols
-export default revisedPullNotifications;
+export default actionablePullRequests;
