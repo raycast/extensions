@@ -271,27 +271,6 @@ export function daysInSeconds(days: number): number {
   return days * 24 * 60 * 60;
 }
 
-export function ensureCleanAccessories(
-  accessories: List.Item.Accessory[] | undefined
-): List.Item.Accessory[] | undefined {
-  if (accessories) {
-    if (accessories.length <= 0) {
-      return undefined;
-    }
-    const result: List.Item.Accessory[] = [];
-    for (const a of accessories) {
-      if (a.icon || a.text) {
-        result.push(a);
-      }
-    }
-    if (result.length <= 0) {
-      return undefined;
-    }
-    return result;
-  }
-  return undefined;
-}
-
 export function showErrorToast(message: string, title?: string): Promise<Toast> {
   const t = title || "Something went wrong";
   return showToast({

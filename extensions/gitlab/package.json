@@ -190,6 +190,14 @@
       "description": "Pop to root after e.g. open the browser"
     },
     {
+      "name": "listdetails",
+      "type": "checkbox",
+      "label": "Show details in merge request list",
+      "required": false,
+      "default": false,
+      "description": "Show details in merge request lists via a metadata view"
+    },
+    {
       "name": "ignorecerts",
       "type": "checkbox",
       "label": "Ignore Certificate Errors (not recommended)",
@@ -199,18 +207,18 @@
       "description": "Ignore SSL Errors"
     },
     {
-      "name" : "customcacert",
-      "type" : "textfield",
+      "name": "customcacert",
+      "type": "textfield",
       "title": "Custom CA Certificate",
-      "placeholder" : "/my/ca.pem",
+      "placeholder": "/my/ca.pem",
       "required": false,
       "description": "Optionally override the trusted CA certificates"
     },
     {
-      "name" : "customcert",
-      "type" : "textfield",
+      "name": "customcert",
+      "type": "textfield",
       "title": "Custom Certificate",
-      "placeholder" : "/my/cert.pem",
+      "placeholder": "/my/cert.pem",
       "required": false,
       "description": "Set Custom Certificate"
     }
@@ -226,7 +234,8 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.35.0",
+    "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
@@ -237,11 +246,9 @@
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
-    "@types/react": "^17.0.20",
     "@types/url-join": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
