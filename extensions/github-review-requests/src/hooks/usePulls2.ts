@@ -3,8 +3,9 @@ import {useEffect, useState} from "react";
 import {environment, LaunchType} from "@raycast/api";
 import searchPullRequestsWithDependencies from "../integration2/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
-import {saveUpdatedPullsToStore} from "../store/pulls";
+import {saveAllPullsToStore, saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
+import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
 
 const usePulls2 = () => {
   const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls} = usePullStore2();
@@ -12,8 +13,18 @@ const usePulls2 = () => {
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
 
   useEffect(() => {
+    // Run effect only after we load from store.
+    // We're most interested in the hiddenPulls
+    // to correctly filter out fresh PRs.
+    if (isPullStoreLoading) {
+      return;
+    }
+
+    console.debug("use pulls hook started");
+
     if (environment.launchType !== LaunchType.Background) {
       setIsRemotePullsLoading(false);
+      console.debug("use pulls hook finished");
 
       return;
     }
@@ -41,14 +52,37 @@ const usePulls2 = () => {
       )
       .then(({login, pulls}) => filterPulls(login, hiddenPulls)(pulls))
       .then(saveUpdatedPullsToStore)
-      .finally(() => setIsRemotePullsLoading(false));
-  }, []);
+      .finally(() => {
+        setIsRemotePullsLoading(false);
+        console.debug("use pulls hook finished");
+      });
+  }, [isPullStoreLoading]);
 
   return {
     isLoading: isPullStoreLoading || isRemotePullsLoading,
 
     updatedPulls,
-    recentlyVisitedPulls
+    recentlyVisitedPulls,
+
+    visitPull: (pull: PullRequestShort) =>
+      Promise.resolve(getTimestampISOInSeconds())
+        .then(lastVisitedAt => {
+          console.debug(lastVisitedAt);
+
+          return saveAllPullsToStore({
+            updatedPulls: updatedPulls.filter(pr => pr.id !== pull.id),
+
+            recentlyVisitedPulls: [
+              pull,
+              ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
+            ] as PullRequestShort[],
+
+            hiddenPulls: [
+              {id: pull.id, lastVisitedAt},
+              ...hiddenPulls.filter(pr => pr.id !== pull.id)
+            ] as PullRequestLastVisit[]
+          });
+        })
   };
 }
 
@@ -67,37 +101,34 @@ const filterPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
     console.debug(`${logPrefix} url=${pull.url}`);
 
     if (isMyFreshPR(logPrefix, login, pull)) {
-      console.debug(`${logPrefix} action:drop`)
+      console.debug(`${logPrefix} action=drop`)
 
       return null;
     }
 
     if (isSomeonesFreshPR(logPrefix, login, pull)) {
-      console.debug(`${logPrefix} action:keep`)
+      console.debug(`${logPrefix} action=keep`)
 
       return pull;
     }
 
     if (pull.requestedReviewers.length > 0) {
-      console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length} action:keep`)
+      console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length} action=keep`)
 
       return pull;
     }
 
     const lastVisitedAt = hiddenPulls.find(pr => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
+    console.debug(`${logPrefix} last-visited-at=${lastVisitedAt}`);
+    console.debug("hidden", JSON.stringify(hiddenPulls))
+
     const comment = eligibleComment(login, lastVisitedAt, pull);
     const review = eligibleReview(login, lastVisitedAt, pull);
 
     if (!comment && !review) {
-      console.debug(`${logPrefix} comment=none review=none action:drop`)
+      console.debug(`${logPrefix} comment=none review=none action=drop`)
 
       return null;
-    }
-
-    if (!lastVisitedAt) {
-      console.debug(`${logPrefix} lastVisit=none action:keep`)
-
-      return pull;
     }
 
     return pull;
@@ -131,7 +162,7 @@ const isReviewed = (pull: PullRequestShort) => pull.reviews.length > 0;
 const eligibleComment = (login: string, lastVisit: string, pull: PullRequestShort) => {
   const comment = pull.comments[pull.comments.length - 1];
 
-  return pull.comments.length > 0 && comment.user.login !== login && comment.createdAt > lastVisit
+  return comment && comment.user.login !== login && comment.createdAt > lastVisit
     ? comment
     : null;
 };
@@ -139,7 +170,7 @@ const eligibleComment = (login: string, lastVisit: string, pull: PullRequestShor
 const eligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
   const review = pull.reviews[pull.reviews.length - 1];
 
-  return pull.reviews.length > 0 && review.user.login !== login && review.submittedAt > lastVisit
+  return review && review.user.login !== login && review.submittedAt > lastVisit
     ? review
     : null;
 };

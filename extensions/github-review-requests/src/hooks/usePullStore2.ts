@@ -14,9 +14,8 @@ const usePullStore2 = () => {
         setUpdatedPulls(updatedPulls);
         setRecentlyVisitedPulls(recentlyVisitedPulls);
         setHiddenPulls(hiddenPulls);
-      });
-
-    setIsPullStoreLoading(false);
+      })
+      .finally(() => setIsPullStoreLoading(false));
   }, []);
 
   return {
