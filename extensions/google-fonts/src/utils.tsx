@@ -54,7 +54,8 @@ const cleanFontVariants = (variants: string[]) => {
     .reduce((pvs: number[], variant: number) => {
       if (!pvs.includes(variant)) pvs.push(variant);
       return pvs;
-    }, []);
+    }, [])
+    .sort((a, b) => a - b);
 };
 
 const filterFontMatchFamily = (haystack: Font, needle: string) => {
