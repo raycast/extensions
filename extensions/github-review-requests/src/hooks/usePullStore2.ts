@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
-import {loadAllPullsFromStore} from "../store/pulls";
+import {loadAllPullsFromStore, PullStore, saveAllPullsToStore} from "../store/pulls";
+import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
 
 const usePullStore2 = () => {
   const [isPullStoreLoading, setIsPullStoreLoading] = useState(true);
@@ -23,7 +24,30 @@ const usePullStore2 = () => {
 
     updatedPulls,
     recentlyVisitedPulls,
-    hiddenPulls
+    hiddenPulls,
+
+    visitPull: (pull: PullRequestShort) =>
+      Promise.resolve(getTimestampISOInSeconds())
+        .then(lastVisitedAt => ({
+          updatedPulls: updatedPulls.filter(pr => pr.id !== pull.id),
+
+          recentlyVisitedPulls: [
+            pull,
+            ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
+          ] as PullRequestShort[],
+
+          hiddenPulls: [
+            {id: pull.id, lastVisitedAt},
+            ...hiddenPulls.filter(pr => pr.id !== pull.id)
+          ] as PullRequestLastVisit[]
+        } as PullStore))
+        .then(({updatedPulls, recentlyVisitedPulls, hiddenPulls}: PullStore) => {
+          setUpdatedPulls(updatedPulls);
+          setRecentlyVisitedPulls(recentlyVisitedPulls);
+          setHiddenPulls(hiddenPulls);
+
+          return saveAllPullsToStore({updatedPulls, recentlyVisitedPulls, hiddenPulls});
+        })
   }
 }
 

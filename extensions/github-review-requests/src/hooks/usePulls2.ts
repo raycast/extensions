@@ -2,13 +2,12 @@ import usePullStore2 from "./usePullStore2";
 import {useEffect, useState} from "react";
 import searchPullRequestsWithDependencies from "../integration2/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
-import {saveAllPullsToStore, saveUpdatedPullsToStore} from "../store/pulls";
+import {saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
-import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
 import {isActionUserInitiated} from "../tools/isActionUserInitiated";
 
 const usePulls2 = () => {
-  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls} = usePullStore2();
+  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull} = usePullStore2();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
 
@@ -61,25 +60,7 @@ const usePulls2 = () => {
     updatedPulls,
     recentlyVisitedPulls,
 
-    visitPull: (pull: PullRequestShort) =>
-      Promise.resolve(getTimestampISOInSeconds())
-        .then(lastVisitedAt => {
-          console.debug(lastVisitedAt);
-
-          return saveAllPullsToStore({
-            updatedPulls: updatedPulls.filter(pr => pr.id !== pull.id),
-
-            recentlyVisitedPulls: [
-              pull,
-              ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
-            ] as PullRequestShort[],
-
-            hiddenPulls: [
-              {id: pull.id, lastVisitedAt},
-              ...hiddenPulls.filter(pr => pr.id !== pull.id)
-            ] as PullRequestLastVisit[]
-          });
-        })
+    visitPull
   };
 }
 
