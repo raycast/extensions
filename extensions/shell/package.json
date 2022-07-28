@@ -28,7 +28,7 @@
       "name": "arguments_terminal",
       "type": "checkbox",
       "required": false,
-      "title": "For use with arguments:",
+      "title": "Arguments Settings:",
       "description": "Decide if you want to run commands inside raycast or inside a terminal application",
       "default": false,
       "label": "Use Terminal/iTerm"
