@@ -1,6 +1,6 @@
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import {environment, LaunchType} from "@raycast/api";
+import { environment, LaunchType } from "@raycast/api";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");

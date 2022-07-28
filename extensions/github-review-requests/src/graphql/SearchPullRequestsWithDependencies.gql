@@ -1,5 +1,5 @@
 query SearchPullRequestsWithDependencies($query: String!) {
-  search (type: ISSUE, first: 50, query: $query) {
+  search(type: ISSUE, first: 50, query: $query) {
     nodes {
       __typename
       ... on PullRequest {
