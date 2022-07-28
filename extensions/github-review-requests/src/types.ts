@@ -4,6 +4,7 @@ export type PullRequestShort = {
   user: UserShort;
   title: string;
   url: string;
+  createdAt: string;
 
   reviews: ReviewShort[];
   comments: CommentShort[];

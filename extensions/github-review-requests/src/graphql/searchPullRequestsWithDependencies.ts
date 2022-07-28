@@ -13,7 +13,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
           return null;
         }
 
-        const {id, url, author, reviewRequests, reviews, number, title, comments} = node;
+        const {id, url, author, reviewRequests, reviews, number, title, comments, createdAt} = node;
 
         return {
           id,
@@ -21,6 +21,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
           user: {login: author?.login, avatarUrl: author?.avatarUrl},
           title,
           url,
+          createdAt,
 
           reviews: (reviews?.nodes || []).map(node => !node ? null : ({
             id: node.id,

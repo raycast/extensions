@@ -27,16 +27,20 @@ const usePullStore = () => {
     hiddenPulls,
 
     visitPull: (pull: PullRequestShort) =>
-      Promise.resolve(getTimestampISOInSeconds())
+      Promise.resolve()
+        .then(() => console.debug(JSON.stringify(pull)))
+        .then(() => getTimestampISOInSeconds())
         .then(lastVisitedAt => ({
-          updatedPulls: updatedPulls.filter(pr => pr.id !== pull.id),
+          updatedPulls: pull.requestedReviewers.length > 0
+            ? updatedPulls
+            : updatedPulls.filter(pr => pr.id !== pull.id),
 
           recentlyVisitedPulls: [
             pull,
             ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
           ] as PullRequestShort[],
 
-          hiddenPulls: [
+          hiddenPulls: pull.requestedReviewers.length > 0 ? hiddenPulls : [
             {id: pull.id, lastVisitedAt},
             ...hiddenPulls.filter(pr => pr.id !== pull.id)
           ] as PullRequestLastVisit[]

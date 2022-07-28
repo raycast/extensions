@@ -8,7 +8,7 @@ export type SearchPullRequestsWithDependenciesQueryVariables = Types.Exact<{
 }>;
 
 
-export type SearchPullRequestsWithDependenciesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultItemConnection', nodes?: Array<{ __typename: 'App' } | { __typename: 'Discussion' } | { __typename: 'Issue' } | { __typename: 'MarketplaceListing' } | { __typename: 'Organization' } | { __typename: 'PullRequest', id: string, number: number, title: string, url: string, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null, reviews?: { __typename?: 'PullRequestReviewConnection', nodes?: Array<{ __typename?: 'PullRequestReview', id: string, createdAt: string, state: Types.PullRequestReviewState, url: string, submittedAt?: string | null, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null } | null> | null } | null, comments: { __typename?: 'IssueCommentConnection', nodes?: Array<{ __typename?: 'IssueComment', id: string, createdAt: string, bodyText: string, url: string, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null } | null> | null }, reviewRequests?: { __typename?: 'ReviewRequestConnection', nodes?: Array<{ __typename: 'ReviewRequest', requestedReviewer?: { __typename?: 'Mannequin' } | { __typename?: 'Team', id: string, name: string } | { __typename?: 'User', id: string, login: string, avatarUrl: string } | null } | null> | null } | null } | { __typename: 'Repository' } | { __typename: 'User' } | null> | null } };
+export type SearchPullRequestsWithDependenciesQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultItemConnection', nodes?: Array<{ __typename: 'App' } | { __typename: 'Discussion' } | { __typename: 'Issue' } | { __typename: 'MarketplaceListing' } | { __typename: 'Organization' } | { __typename: 'PullRequest', id: string, number: number, title: string, url: string, createdAt: string, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null, reviews?: { __typename?: 'PullRequestReviewConnection', nodes?: Array<{ __typename?: 'PullRequestReview', id: string, createdAt: string, state: Types.PullRequestReviewState, url: string, submittedAt?: string | null, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null } | null> | null } | null, comments: { __typename?: 'IssueCommentConnection', nodes?: Array<{ __typename?: 'IssueComment', id: string, createdAt: string, bodyText: string, url: string, author?: { __typename?: 'Bot', login: string, avatarUrl: string } | { __typename?: 'EnterpriseUserAccount', login: string, avatarUrl: string } | { __typename?: 'Mannequin', login: string, avatarUrl: string } | { __typename?: 'Organization', login: string, avatarUrl: string } | { __typename?: 'User', login: string, avatarUrl: string } | null } | null> | null }, reviewRequests?: { __typename?: 'ReviewRequestConnection', nodes?: Array<{ __typename?: 'ReviewRequest', requestedReviewer?: { __typename: 'Mannequin' } | { __typename: 'Team', id: string, name: string } | { __typename: 'User', id: string, login: string, avatarUrl: string } | null } | null> | null } | null } | { __typename: 'Repository' } | { __typename: 'User' } | null> | null } };
 
 
 export const SearchPullRequestsWithDependenciesDocument = gql`
@@ -21,6 +21,7 @@ export const SearchPullRequestsWithDependenciesDocument = gql`
         number
         title
         url
+        createdAt
         author {
           login
           avatarUrl
@@ -52,8 +53,8 @@ export const SearchPullRequestsWithDependenciesDocument = gql`
         }
         reviewRequests(last: 1) {
           nodes {
-            __typename
             requestedReviewer {
+              __typename
               ... on User {
                 id
                 login

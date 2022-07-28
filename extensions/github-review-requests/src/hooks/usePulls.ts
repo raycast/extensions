@@ -21,7 +21,7 @@ const usePulls = () => {
     .then(
       ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]) => {
         const pulls = authoredPulls.concat(commentedOnPulls, reviewRequestedPulls)
-          .filter((pull, index, self) => self.findIndex(p => p.number === pull.number) === index);
+          .filter((pull, index, self) => self.findIndex(p => p.id === pull.id) === index);
 
         console.debug(`pull iteration: pulled-prs=${pulls.length}`);
 
@@ -77,7 +77,15 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
       return null;
     }
 
+    const lastVisitedAt = hiddenPulls.find(pr => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
+
     if (isSomeonesPRNew(logPrefix, login, pull)) {
+      if (pull.createdAt < lastVisitedAt) {
+        console.debug(`${logPrefix} lastVisitedAt=${lastVisitedAt} action=drop`)
+
+        return null;
+      }
+
       console.debug(`${logPrefix} action=keep`)
 
       return pull;
@@ -90,7 +98,6 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
       return pull;
     }
 
-    const lastVisitedAt = hiddenPulls.find(pr => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
     const comment = getEligibleComment(logPrefix, login, lastVisitedAt, pull);
     const review = getEligibleReview(login, lastVisitedAt, pull);
 

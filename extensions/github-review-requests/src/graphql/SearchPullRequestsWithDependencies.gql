@@ -7,6 +7,7 @@ query SearchPullRequestsWithDependencies($query: String!) {
         number
         title
         url
+        createdAt
 
         author {
           login
@@ -42,8 +43,8 @@ query SearchPullRequestsWithDependencies($query: String!) {
 
         reviewRequests(last: 1) {
           nodes {
-            __typename
             requestedReviewer {
+              __typename
               ... on User {
                 id
                 login
