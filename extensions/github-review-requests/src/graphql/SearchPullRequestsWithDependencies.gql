@@ -42,6 +42,7 @@ query SearchPullRequestsWithDependencies($query: String!) {
 
         reviewRequests(last: 1) {
           nodes {
+            __typename
             requestedReviewer {
               ... on User {
                 id

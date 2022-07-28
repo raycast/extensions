@@ -2,12 +2,11 @@ import usePullStore from "./usePullStore";
 import {useEffect, useState} from "react";
 import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
-import {saveUpdatedPullsToStore} from "../store/pulls";
-import {PullRequestLastVisit, PullRequestShort} from "../types";
+import {CommentShort, PullRequestLastVisit, PullRequestShort, ReviewShort} from "../types";
 import {isActionUserInitiated} from "../util";
 
 const usePulls = () => {
-  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull} = usePullStore();
+  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls} = usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
 
@@ -30,7 +29,7 @@ const usePulls = () => {
       }
     )
     .then(({login, pulls}) => processPulls(login, hiddenPulls, pulls))
-    .then(saveUpdatedPullsToStore);
+    .then(updatePulls);
 
   useEffect(() => {
     // Run effect only after we load from store.
@@ -72,18 +71,19 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
 
     console.debug(`${logPrefix} url=${pull.url}`);
 
-    if (isMyFreshPR(logPrefix, login, pull)) {
+    if (isMyPRNew(logPrefix, login, pull)) {
       console.debug(`${logPrefix} action=drop`)
 
       return null;
     }
 
-    if (isSomeonesFreshPR(logPrefix, login, pull)) {
+    if (isSomeonesPRNew(logPrefix, login, pull)) {
       console.debug(`${logPrefix} action=keep`)
 
       return pull;
     }
 
+    console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length}`)
     if (pull.requestedReviewers.length > 0) {
       console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length} action=keep`)
 
@@ -91,7 +91,7 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
     }
 
     const lastVisitedAt = hiddenPulls.find(pr => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
-    const comment = getEligibleComment(login, lastVisitedAt, pull);
+    const comment = getEligibleComment(logPrefix, login, lastVisitedAt, pull);
     const review = getEligibleReview(login, lastVisitedAt, pull);
 
     if (!comment && !review) {
@@ -100,13 +100,16 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
       return null;
     }
 
+    pull.url = selectLatestURLFrom(comment, review) || pull.url;
+    console.debug(`${logPrefix} comment.createdAt=${comment?.createdAt} review.submittedAt=${review?.submittedAt} action=keep`)
+
     return pull;
   };
 
 const createLogPrefix = (pull: PullRequestShort) =>
   `processPull: prid=${prid(pull)}`;
 
-const isMyFreshPR = (logPrefix: string, login: string, pull: PullRequestShort) => {
+const isMyPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
   const authored = isAuthor(login, pull);
   const noComments = !isCommented(pull);
   const noReviews = !isReviewed(pull);
@@ -120,7 +123,7 @@ const isMyFreshPR = (logPrefix: string, login: string, pull: PullRequestShort) =
   return prIsFresh;
 }
 
-const isSomeonesFreshPR = (logPrefix: string, login: string, pull: PullRequestShort) => {
+const isSomeonesPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
   const authored = isAuthor(login, pull);
   const commented = isCommented(pull);
   const reviewed = isReviewed(pull);
@@ -134,17 +137,36 @@ const isSomeonesFreshPR = (logPrefix: string, login: string, pull: PullRequestSh
   return prIsFresh;
 }
 
-
 const isAuthor = (login: string, pull: PullRequestShort) => pull.user.login === login;
 const isCommented = (pull: PullRequestShort) => pull.comments.length > 0;
 const isReviewed = (pull: PullRequestShort) => pull.reviews.length > 0;
 
-const getEligibleComment = (login: string, lastVisit: string, pull: PullRequestShort) => {
+const getEligibleComment = (logPrefix: string, login: string, lastVisit: string, pull: PullRequestShort) => {
   const comment = pull.comments[pull.comments.length - 1];
 
-  return comment && comment.user.login !== login && comment.createdAt > lastVisit
-    ? comment
-    : null;
+  if (!comment) {
+    console.debug(`${logPrefix} comment=none`)
+
+    return null;
+  }
+
+  if (comment.user.login === login) {
+    console.debug(`${logPrefix} comment.user=@me`)
+
+    return null;
+  }
+
+  if (comment.createdAt < lastVisit) {
+    console.debug(`${logPrefix} comment.createdAt=${comment.createdAt} lastVisit=${lastVisit}`)
+
+    return null;
+  }
+
+  console.debug(
+    `${logPrefix} comment.user=${comment.user.login} comment.createdAt=${comment.createdAt} lastVisit=${lastVisit}`
+  );
+
+  return comment;
 };
 
 const getEligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
@@ -153,6 +175,22 @@ const getEligibleReview = (login: string, lastVisit: string, pull: PullRequestSh
   return review && review.user.login !== login && review.submittedAt > lastVisit
     ? review
     : null;
+};
+
+const selectLatestURLFrom = (comment: CommentShort | null, review: ReviewShort | null) => {
+  if (!comment && !review) {
+    return null;
+  }
+
+  if (!comment) {
+    return review?.url;
+  }
+
+  if (!review) {
+    return comment?.url;
+  }
+
+  return comment.createdAt > review.submittedAt ? comment.url : review.url;
 };
 
 const prid = ({url, number}: PullRequestShort) =>

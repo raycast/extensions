@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {PullRequestLastVisit, PullRequestShort} from "../types";
-import {loadAllPullsFromStore, PullStore, saveAllPullsToStore} from "../store/pulls";
+import {loadAllPullsFromStore, PullStore, saveAllPullsToStore, saveUpdatedPullsToStore} from "../store/pulls";
 import {getTimestampISOInSeconds} from "../util";
 
 const usePullStore = () => {
@@ -47,7 +47,13 @@ const usePullStore = () => {
           setHiddenPulls(hiddenPulls);
 
           return saveAllPullsToStore({updatedPulls, recentlyVisitedPulls, hiddenPulls});
-        })
+        }),
+
+    updatePulls: (pulls: PullRequestShort[]) => {
+      setUpdatedPulls(pulls);
+
+      return saveUpdatedPullsToStore(pulls);
+    }
   }
 }
 
