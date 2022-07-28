@@ -12,7 +12,7 @@
 
 ## [Add support for Git cached projects] - 2021-11-15
 
-## [Fixes] -  2021-11-04
+## [Fixes] - 2021-11-04
 
 - Fixes `undefined` property access when checking project tags
 
