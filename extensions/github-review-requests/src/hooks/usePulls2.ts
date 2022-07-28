@@ -21,21 +21,16 @@ const usePulls2 = () => {
   ])
     .then(
       ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]) => {
-        console.debug(
-          `pulled pulls: authoredPulls=${authoredPulls.length} ` +
-          `commentedOnPulls=${commentedOnPulls.length} ` +
-          `reviewRequestedPulls=${reviewRequestedPulls.length}`
-        );
+        const pulls = authoredPulls.concat(commentedOnPulls, reviewRequestedPulls)
+          .filter((pull, index, self) => self.findIndex(p => p.number === pull.number) === index);
 
-        return ({
-          login,
-          pulls: authoredPulls.concat(commentedOnPulls, reviewRequestedPulls)
-            .filter((pull, index, self) => self.findIndex(p => p.number === pull.number) === index)
-        });
+        console.debug(`pull iteration: pulled-prs=${pulls.length}`);
+
+        return ({login, pulls});
       }
     )
     .then(({login, pulls}) => filterPulls(login, hiddenPulls)(pulls))
-    .then(saveUpdatedPullsToStore)
+    .then(saveUpdatedPullsToStore);
 
   useEffect(() => {
     // Run effect only after we load from store.
