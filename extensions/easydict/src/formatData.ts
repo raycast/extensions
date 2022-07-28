@@ -3,14 +3,13 @@ import { DeepLTranslateResult } from "./types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-19 21:11
+ * @lastEditTime: 2022-07-23 00:38
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import {
-  AppleTranslateResult,
   BaiduTranslateResult,
   CaiyunTranslateResult,
   QueryWordInfo,
@@ -87,6 +86,21 @@ export function updateFormatTranslateResultWithDeepLResult(
   return formatResult;
 }
 
+export function updateFormatTranslateResultWithGoogleResult(
+  formatResult: TranslateFormatResult,
+  googleResult: RequestTypeResult
+): TranslateFormatResult {
+  const googleTranslatedText = googleResult.result as string;
+  if (googleTranslatedText) {
+    formatResult.translationItems.push({
+      type: TranslationType.Google,
+      text: googleTranslatedText,
+    });
+    return sortTranslationItems(formatResult, sortedOrder);
+  }
+  return formatResult;
+}
+
 /**
  * update format result with apple translate result
  */
@@ -94,11 +108,11 @@ export function updateFormatResultWithAppleTranslateResult(
   formatResult: TranslateFormatResult,
   appleTranslateResult: RequestTypeResult
 ): TranslateFormatResult {
-  const appleTranslate = appleTranslateResult.result as AppleTranslateResult;
-  if (appleTranslate.translatedText) {
+  const appleTranslatedText = appleTranslateResult.result as string;
+  if (appleTranslatedText) {
     formatResult.translationItems.push({
       type: TranslationType.Apple,
-      text: appleTranslate.translatedText,
+      text: appleTranslatedText,
     });
     return sortTranslationItems(formatResult, sortedOrder);
   }
@@ -193,6 +207,7 @@ export function sortTranslationItems(
 export function getTranslationResultOrder(): string[] {
   const defaultTypeOrder = [
     TranslationType.DeepL,
+    TranslationType.Google,
     TranslationType.Apple,
     TranslationType.Baidu,
     TranslationType.Tencent,

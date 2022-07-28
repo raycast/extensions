@@ -1,5 +1,6 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { currentPlayingTrack, startPlaySimilar } from "./client/client";
+import { startPlaySimilar } from "./client/client";
+import { currentPlayingTrack } from "./controls/spotify-applescript";
 
 export default async function main() {
   const response = await currentPlayingTrack();

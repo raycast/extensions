@@ -114,6 +114,7 @@
 /extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
 /extensions/dex-screener                             @wp-lai
+/extensions/dicom                                    @sedghi
 /extensions/dict-cc                                  @natterstefan
 /extensions/diff-checker                             @Destiner
 /extensions/dig                                      @danielbahl @pernielsentikaer
@@ -137,7 +138,7 @@
 /extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
-/extensions/emoji                                    @FezVrasta
+/extensions/emoji                                    @FezVrasta @kidonng
 /extensions/encoding-tools                           @eth-p
 /extensions/ens-name-lookup                          @Yukaii
 /extensions/ensk-is                                  @jokull
@@ -215,6 +216,7 @@
 /extensions/iata-code-decoder                        @timrogers
 /extensions/iconify                                  @Destiner
 /extensions/iconpark                                 @koinzhang
+/extensions/icons8                                   @yug2005
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/inkdrop                                  @yaeda
@@ -286,7 +288,7 @@
 /extensions/nature-remo                              @uetchy
 /extensions/nba-game-viewer                          @AbhinavPalacharla
 /extensions/netease-music                            @chyroc
-/extensions/netlify                                  @Destiner
+/extensions/netlify                                  @Destiner @jonohewitt
 /extensions/nextcloud                                @uetchy
 /extensions/nextjs-docs                              @PrasadChinwal
 /extensions/night-light                              @devmoath
@@ -421,6 +423,7 @@
 /extensions/surge                                    @ysj151215
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
+/extensions/swift-package-index                      @maximkrouk
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-monitor                           @hossammourad @Crayon144 @pernielsentikaer
 /extensions/tableplus                                @pernielsentikaer
@@ -438,6 +441,7 @@
 /extensions/timers                                   @ThatNerdSquared
 /extensions/timeular                                 @kudrykv
 /extensions/tldr                                     @pomdtr
+/extensions/tmdb                                     @Aayush9029
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart
 /extensions/toggl-track                              @franzwilhelm
@@ -472,7 +476,7 @@
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @gleich
 /extensions/vim-bro                                  @ajaypremshankar
-/extensions/visual-studio-code-project-manager       @MarkusLanger
+/extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @macbookandrew @immint023 @pernielsentikaer
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
@@ -483,14 +487,17 @@
 /extensions/wikipedia                                @vimtor
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
+/extensions/word-count                               @itsmingjie
 /extensions/word-search                              @RishabSwift @thomaspaulmann
 /extensions/world-clock                              @koinzhang
 /extensions/wrike                                    @suarez-agu
 /extensions/xcode                                    @SvenTiigi @qeude
 /extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
+/extensions/xqc                                      @Aayush9029
 /extensions/yandex-music                             @AlexStrNik
 /extensions/youdao-translate                         @tiancheng92
+/extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
 /extensions/youtube-companion                        @sasivarnan
 /extensions/zen-mode                                 @pradeepb28

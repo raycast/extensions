@@ -111,7 +111,7 @@ jobs:
             rsync -arv "$file" "$file" || true
           done
 
-          cd raycast-macos
+          cd raycast-utils
 
           if [[ $(git diff --stat) != '' ]]; then
             git checkout -b docs-sync-${{ github.sha }}

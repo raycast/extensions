@@ -13,10 +13,10 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { currentPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
+import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
 import { CurrentlyPlayingTrack } from "./client/interfaces";
 import { isSpotifyInstalled, spotifyPlayingState, SpotifyPlayingState } from "./client/utils";
-import { nextTrack, pause, play, previousTrack } from "./controls/spotify-applescript";
+import { currentPlayingTrack, nextTrack, pause, play, previousTrack } from "./controls/spotify-applescript";
 
 export default function Main() {
   const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<CurrentlyPlayingTrack | undefined>();
@@ -31,23 +31,29 @@ export default function Main() {
       setSpotifyInstalled(await isSpotifyInstalled());
       setCurrentSpotifyPlayingState(await spotifyPlayingState());
       const response = await currentPlayingTrack();
+      let newSubtitle: string | undefined;
       if (response?.result) {
         setCurrentlyPlayingTrack(response?.result);
-        const title = `${response?.result.artist} – ${response?.result.name}`;
-        await updateCommandMetadata({ subtitle: `${title}` });
+        newSubtitle = `${response?.result.artist} – ${response?.result.name}`;
       } else if (response?.error) {
         await updateCommandMetadata({ subtitle: undefined });
         if (environment.launchType != LaunchType.Background) {
           showToast(Toast.Style.Failure, response.error);
         }
       }
+
+      await updateCommandMetadata({ subtitle: newSubtitle });
       setIsLoading(false);
     }
     updatePlayingTrack();
   }, []);
 
-  if (currentSpotifyPlayingState == SpotifyPlayingState.Stopped) {
+  if (isLoading) {
     return <MenuBarExtra isLoading={isLoading}></MenuBarExtra>;
+  }
+
+  if (currentSpotifyPlayingState == SpotifyPlayingState.Stopped) {
+    return null;
   }
 
   const trackTitle =

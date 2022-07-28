@@ -10,7 +10,9 @@ function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
   async function openNotification(notification: NotificationResult) {
-    await open(notification.issue.url);
+    const applications = await getApplications();
+    const linearApp = applications.find((app) => app.bundleId === "com.linear");
+    await open(notification.issue.url, linearApp);
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
