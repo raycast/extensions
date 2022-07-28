@@ -1,4 +1,4 @@
-import usePullStore2 from "./usePullStore2";
+import usePullStore from "./usePullStore";
 import {useEffect, useState} from "react";
 import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
@@ -6,12 +6,12 @@ import {saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../types";
 import {isActionUserInitiated} from "../tools/isActionUserInitiated";
 
-const usePulls2 = () => {
-  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull} = usePullStore2();
+const usePulls = () => {
+  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull} = usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
 
-  const exitShortcut = () => console.debug("usePulls2: exitShortcut");
+  const exitShortcut = () => console.debug("usePulls: exitShortcut");
 
   const runPullIteration = () => Promise.all([
     getLogin(),
@@ -41,11 +41,11 @@ const usePulls2 = () => {
     }
 
     Promise.resolve()
-      .then(() => console.debug("usePulls2: start"))
+      .then(() => console.debug("usePulls: start"))
       .then(() => isActionUserInitiated() ? exitShortcut() : runPullIteration())
       .finally(() => {
         setIsRemotePullsLoading(false);
-        console.debug("usePulls2: end");
+        console.debug("usePulls: end");
       })
   }, [isPullStoreLoading]);
 
@@ -59,7 +59,7 @@ const usePulls2 = () => {
   };
 }
 
-export default usePulls2;
+export default usePulls;
 
 const filterPulls = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
   (pulls: PullRequestShort[]) =>

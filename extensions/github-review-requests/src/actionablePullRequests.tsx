@@ -1,5 +1,5 @@
 import {Color, MenuBarExtra, open} from "@raycast/api";
-import usePulls2 from "./hooks/usePulls2";
+import usePulls from "./hooks/usePulls";
 
 const actionablePullRequests = () => {
   const {
@@ -9,7 +9,7 @@ const actionablePullRequests = () => {
     recentlyVisitedPulls,
 
     visitPull,
-  } = usePulls2();
+  } = usePulls();
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={{source: "icon.png", tintColor: Color.Blue}}>

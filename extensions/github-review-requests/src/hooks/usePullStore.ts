@@ -3,7 +3,7 @@ import {PullRequestLastVisit, PullRequestShort} from "../types";
 import {loadAllPullsFromStore, PullStore, saveAllPullsToStore} from "../store/pulls";
 import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
 
-const usePullStore2 = () => {
+const usePullStore = () => {
   const [isPullStoreLoading, setIsPullStoreLoading] = useState(true);
   const [updatedPulls, setUpdatedPulls] = useState<PullRequestShort[]>([]);
   const [recentlyVisitedPulls, setRecentlyVisitedPulls] = useState<PullRequestShort[]>([]);
@@ -51,4 +51,4 @@ const usePullStore2 = () => {
   }
 }
 
-export default usePullStore2;
+export default usePullStore;
