@@ -22,10 +22,12 @@ const sortCategoryByLastChanged = (a: [string, Note[]], b: [string, Note[]]) => 
 export default function NotesList({
   notes,
   isLoading,
+  mutate,
   searchBarAccessory,
   sortByCategory,
 }: {
   notes?: Note[];
+  mutate?: () => void;
   isLoading: boolean;
   searchBarAccessory?: ReactElement<List.Dropdown.Props>;
   sortByCategory?: boolean;
@@ -36,7 +38,7 @@ export default function NotesList({
     }
 
     const groupedNotes = notes.sort(sortByLastChanged).reduce((acc, note) => {
-      const category = (note.tags?.length > 0 && note.tags[0]) || "No Category";
+      const category = (note.tags?.length > 0 && Array.isArray(note.tags) && note.tags[0]) || "No Category";
 
       if (!acc[category]) {
         acc[category] = [note];
@@ -52,13 +54,14 @@ export default function NotesList({
 
   return (
     <List isLoading={isLoading} searchBarAccessory={searchBarAccessory}>
-      {!sortByCategory && notes?.sort(sortByLastChanged).map((note) => <NoteListItem note={note} key={note.id} />)}
+      {!sortByCategory &&
+        notes?.sort(sortByLastChanged).map((note) => <NoteListItem note={note} key={note.id} mutate={mutate} />)}
 
       {sortByCategory &&
         groupedNotesByCategory.map(([category, notes]) => (
           <List.Section key={category} title={category}>
             {notes.map((note) => (
-              <NoteListItem note={note} key={note.id} />
+              <NoteListItem note={note} key={note.id} mutate={mutate} />
             ))}
           </List.Section>
         ))}

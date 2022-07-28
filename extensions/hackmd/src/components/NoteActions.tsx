@@ -1,6 +1,6 @@
 import url from "url";
 import { Note } from "@hackmd/api/dist/type";
-import { Action, ActionPanel, Icon, confirmAlert, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 
 import api from "../lib/api";
 import { getPreferences } from "../lib/preference";
@@ -39,18 +39,26 @@ export default function NoteActions({
                 title: "Delete",
                 style: Alert.ActionStyle.Destructive,
                 onAction: async () => {
-                  if (note.teamPath) {
-                    await api.deleteTeamNote(note.teamPath, note.id);
-                  } else {
-                    await api.deleteNote(note.id);
-                  }
+                  try {
+                    if (note.teamPath) {
+                      await api.deleteTeamNote(note.teamPath, note.id);
+                    } else {
+                      await api.deleteNote(note.id);
+                    }
 
-                  if (mutate) {
-                    mutate();
-                  }
+                    if (mutate) {
+                      mutate();
+                    }
 
-                  if (onDeleteCallback) {
-                    onDeleteCallback();
+                    if (onDeleteCallback) {
+                      onDeleteCallback();
+                    }
+                  } catch (error) {
+                    showToast({
+                      title: "Error",
+                      message: String(error),
+                      style: Toast.Style.Failure,
+                    });
                   }
                 },
               },

@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import api from "../lib/api";
 import NoteActions from "./NoteActions";
 
-export default function NoteDetail({ noteId }: { noteId: string }) {
+export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?: () => void }) {
   const { data, isLoading } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
   const { pop } = useNavigation();
 
@@ -13,18 +13,18 @@ export default function NoteDetail({ noteId }: { noteId: string }) {
       markdown={data?.content}
       actions={
         <ActionPanel>
-          <NoteActions note={data} onDeleteCallback={() => pop()} />
+          <NoteActions note={data} onDeleteCallback={() => pop()} mutate={mutate} />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
-          {data?.tags?.length && data?.tags?.length > 0 && (
+          {data?.tags?.length && data?.tags?.length > 0 ? (
             <Detail.Metadata.TagList title="Tags">
               {data?.tags.map((tag) => (
                 <Detail.Metadata.TagList.Item text={tag} key={tag} />
               ))}
             </Detail.Metadata.TagList>
-          )}
+          ) : null}
 
           {data && (
             <>

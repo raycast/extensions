@@ -16,13 +16,14 @@ export default function ListMyNotes() {
     }
   }, [teamPath, teams]);
 
-  const { isLoading, data } = useCachedPromise((path: string) => api.getTeamNotes(path), [teamPath], {
+  const { isLoading, data, mutate } = useCachedPromise((path: string) => api.getTeamNotes(path), [teamPath], {
     execute: !!teamPath,
   });
 
   return (
     <NotesList
       notes={data}
+      mutate={mutate}
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Select a Team" onChange={(path) => setTeamPath(path)} storeValue>

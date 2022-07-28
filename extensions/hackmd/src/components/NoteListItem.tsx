@@ -17,7 +17,11 @@ export default function NoteListItem({ note, mutate }: { note: Note; mutate?: ()
       ]}
       actions={
         <ActionPanel>
-          <Action.Push icon={Icon.Sidebar} target={<NoteDetail noteId={note.id} />} title="View Detail" />
+          <Action.Push
+            icon={Icon.Sidebar}
+            target={<NoteDetail noteId={note.id} mutate={mutate} />}
+            title="View Detail"
+          />
 
           <NoteActions note={note} mutate={mutate} />
         </ActionPanel>
