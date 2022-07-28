@@ -1,5 +1,5 @@
 import {LocalStorage} from "@raycast/api";
-import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
+import {PullRequestLastVisit, PullRequestShort} from "../types";
 
 const updatedPullsKey = "updatedPulls";
 const recentlyVisitedPullsKey = "recentlyVisitedPulls";

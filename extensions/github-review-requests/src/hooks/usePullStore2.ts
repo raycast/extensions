@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
+import {PullRequestLastVisit, PullRequestShort} from "../types";
 import {loadAllPullsFromStore, PullStore, saveAllPullsToStore} from "../store/pulls";
 import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
 

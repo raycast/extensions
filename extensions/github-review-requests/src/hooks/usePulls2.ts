@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
 import {saveUpdatedPullsToStore} from "../store/pulls";
-import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
+import {PullRequestLastVisit, PullRequestShort} from "../types";
 import {isActionUserInitiated} from "../tools/isActionUserInitiated";
 
 const usePulls2 = () => {
