@@ -1,40 +1,67 @@
 import { Note } from "@hackmd/api/dist/type";
-import { ReactElement } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import NoteDetail from "./NoteDetail";
+import { ReactElement, useMemo } from "react";
+import { List } from "@raycast/api";
+import NoteListItem from "./NoteListItem";
+
+const sortByLastChanged = (a: Note, b: Note) =>
+  new Date(b.lastChangedAt).valueOf() - new Date(a.lastChangedAt).valueOf();
+
+const sortCategoryByLastChanged = (a: [string, Note[]], b: [string, Note[]]) => {
+  const [aCategory, aNotes] = a;
+  const [bCategory, bNotes] = b;
+
+  if (aCategory === "No Category") {
+    return -1;
+  } else if (bCategory === "No Category") {
+    return 1;
+  }
+
+  return sortByLastChanged(aNotes[0], bNotes[0]);
+};
 
 export default function NotesList({
   notes,
   isLoading,
   searchBarAccessory,
+  sortByCategory,
 }: {
   notes?: Note[];
   isLoading: boolean;
   searchBarAccessory?: ReactElement<List.Dropdown.Props>;
+  sortByCategory?: boolean;
 }) {
+  const groupedNotesByCategory = useMemo(() => {
+    if (!notes) {
+      return [];
+    }
+
+    const groupedNotes = notes.sort(sortByLastChanged).reduce((acc, note) => {
+      const category = (note.tags?.length > 0 && note.tags[0]) || "No Category";
+
+      if (!acc[category]) {
+        acc[category] = [note];
+      } else {
+        acc[category].push(note);
+      }
+
+      return acc;
+    }, {} as Record<string, Note[]>);
+
+    return Object.entries(groupedNotes).sort(sortCategoryByLastChanged);
+  }, [notes]);
+
   return (
     <List isLoading={isLoading} searchBarAccessory={searchBarAccessory}>
-      {notes &&
-        notes
-          .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
-          .map((note) => (
-            <List.Item
-              key={note.id}
-              title={note.title}
-              subtitle={note.tags?.join(", ")}
-              icon={Icon.Document}
-              accessories={[
-                {
-                  date: new Date(note.createdAt),
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.Push target={<NoteDetail noteId={note.id} />} title="View Detail" />
-                </ActionPanel>
-              }
-            />
-          ))}
+      {!sortByCategory && notes?.sort(sortByLastChanged).map((note) => <NoteListItem note={note} key={note.id} />)}
+
+      {sortByCategory &&
+        groupedNotesByCategory.map(([category, notes]) => (
+          <List.Section key={category} title={category}>
+            {notes.map((note) => (
+              <NoteListItem note={note} key={note.id} />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }
