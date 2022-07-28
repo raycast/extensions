@@ -1,26 +1,37 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
-import { config } from "./config";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
 import { capitalizeRecursively, getIcon, makeUrl, makeUrlMarkdown } from "./utils";
+import { config } from "./config";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+
+  const params = new URLSearchParams();
+  params.append("q", searchText.length === 0 ? "SwiftUI" : searchText);
+  params.append("results", config.maxResults.toString());
+
+  const { data, isLoading } = useFetch(config.apiBaseUrl + "?" + params.toString(), {
+    parseResponse: async (response) => (await response.json()) as PayloadResponse,
+    keepPreviousData: true,
+    initialData: { results: [], featuredResult: "", suggested_query: "", uuid: "" },
+  });
+
   const resultsTitle = useMemo(() => {
-    const { suggested_query } = state.payload;
+    const { suggested_query } = data;
     if (typeof suggested_query === "string") {
       return "Results";
     }
 
     return `Results for "${suggested_query.query}"`;
-  }, [state.payload.suggested_query]);
+  }, [data.suggested_query]);
 
   const [typeFilter, setTypeFilter] = useState<AllResultType | ResultType>("all");
   const onTypeChange = useCallback((type: string) => {
     setTypeFilter(type);
   }, []);
   const results = useMemo(() => {
-    const { results } = state.payload;
+    const { results } = data;
     switch (typeFilter.toLowerCase()) {
       case "general":
       case "documentation":
@@ -30,21 +41,21 @@ export default function Command() {
       default:
         return results;
     }
-  }, [state.payload.results, typeFilter]);
+  }, [data.results, typeFilter]);
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Apple Developer documentation..."
       searchBarAccessory={
         <TypeDropdown types={["all", "general", "documentation", "sample_code", "video"]} onTypeChange={onTypeChange} />
       }
       throttle
     >
-      {typeof state.payload.featuredResult !== "string" && (
+      {typeof data.featuredResult !== "string" && (
         <List.Section title="Featured">
-          <SearchFeaturedItem featured={state.payload.featuredResult} />
+          <SearchFeaturedItem featured={data.featuredResult} />
         </List.Section>
       )}
       <List.Section title={resultsTitle} subtitle={results.length + ""}>
@@ -121,73 +132,4 @@ function TypeDropdown({ types, onTypeChange }: TypeDropdownProps) {
       </List.Dropdown.Section>
     </List.Dropdown>
   );
-}
-
-function useSearch() {
-  const [state, setState] = useState<SearchState>({
-    payload: { results: [], featuredResult: "", suggested_query: "", uuid: "" },
-    isLoading: true,
-  });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({ ...oldState, isLoading: true }));
-      try {
-        const payload = await performSearch(searchText, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          payload,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({ ...oldState, isLoading: false }));
-
-        if (error instanceof AbortError) {
-          return;
-        }
-
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
-      }
-    },
-    [cancelRef, setState]
-  );
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  return {
-    state,
-    search,
-  };
-}
-
-async function performSearch(searchText: string, signal: AbortSignal): Promise<PayloadResponse> {
-  const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "SwiftUI" : searchText);
-  params.append("results", config.maxResults.toString());
-
-  const response = await fetch(config.apiBaseUrl + "?" + params.toString(), {
-    method: "get",
-    signal: signal,
-  });
-
-  const json = (await response.json()) as PayloadResponse;
-
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-
-  return json;
-}
-
-interface SearchState {
-  payload: PayloadResponse;
-  isLoading: boolean;
 }
