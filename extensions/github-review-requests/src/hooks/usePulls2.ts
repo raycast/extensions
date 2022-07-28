@@ -1,16 +1,42 @@
 import usePullStore2 from "./usePullStore2";
 import {useEffect, useState} from "react";
-import {environment, LaunchType} from "@raycast/api";
 import searchPullRequestsWithDependencies from "../integration2/searchPullRequestsWithDependencies";
 import {getLogin} from "../integration/getLogin";
 import {saveAllPullsToStore, saveUpdatedPullsToStore} from "../store/pulls";
 import {PullRequestLastVisit, PullRequestShort} from "../integration2/types";
 import {getTimestampISOInSeconds} from "../tools/getTimestampISOInSeconds";
+import {isActionUserInitiated} from "../tools/isActionUserInitiated";
 
 const usePulls2 = () => {
   const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls} = usePullStore2();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
+
+  const exitShortcut = () => console.debug("usePulls2: exitShortcut");
+
+  const runPullIteration = () => Promise.all([
+    getLogin(),
+    searchPullRequestsWithDependencies("is:open archived:false author:@me"),
+    searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
+    searchPullRequestsWithDependencies("is:open archived:false review-requested:@me")
+  ])
+    .then(
+      ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]) => {
+        console.debug(
+          `pulled pulls: authoredPulls=${authoredPulls.length} ` +
+          `commentedOnPulls=${commentedOnPulls.length} ` +
+          `reviewRequestedPulls=${reviewRequestedPulls.length}`
+        );
+
+        return ({
+          login,
+          pulls: authoredPulls.concat(commentedOnPulls, reviewRequestedPulls)
+            .filter((pull, index, self) => self.findIndex(p => p.number === pull.number) === index)
+        });
+      }
+    )
+    .then(({login, pulls}) => filterPulls(login, hiddenPulls)(pulls))
+    .then(saveUpdatedPullsToStore)
 
   useEffect(() => {
     // Run effect only after we load from store.
@@ -20,42 +46,13 @@ const usePulls2 = () => {
       return;
     }
 
-    console.debug("use pulls hook started");
-
-    if (environment.launchType !== LaunchType.Background) {
-      setIsRemotePullsLoading(false);
-      console.debug("use pulls hook finished");
-
-      return;
-    }
-
-    Promise.all([
-      getLogin(),
-      searchPullRequestsWithDependencies("is:open archived:false author:@me"),
-      searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
-      searchPullRequestsWithDependencies("is:open archived:false review-requested:@me")
-    ])
-      .then(
-        ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]) => {
-          console.debug(
-            `pulled pulls: authoredPulls=${authoredPulls.length} ` +
-            `commentedOnPulls=${commentedOnPulls.length} ` +
-            `reviewRequestedPulls=${reviewRequestedPulls.length}`
-          );
-
-          return ({
-            login,
-            pulls: authoredPulls.concat(commentedOnPulls, reviewRequestedPulls)
-              .filter((pull, index, self) => self.findIndex(p => p.number === pull.number) === index)
-          });
-        }
-      )
-      .then(({login, pulls}) => filterPulls(login, hiddenPulls)(pulls))
-      .then(saveUpdatedPullsToStore)
+    Promise.resolve()
+      .then(() => console.debug("usePulls2: start"))
+      .then(() => isActionUserInitiated() ? exitShortcut() : runPullIteration())
       .finally(() => {
         setIsRemotePullsLoading(false);
-        console.debug("use pulls hook finished");
-      });
+        console.debug("usePulls2: end");
+      })
   }, [isPullStoreLoading]);
 
   return {
