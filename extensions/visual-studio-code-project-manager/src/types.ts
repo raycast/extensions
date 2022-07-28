@@ -22,5 +22,5 @@ export interface Preferences {
 export enum VSCodeBuild {
   Code = "Code",
   Insiders = "Code - Insiders",
-  Codium = "VSCodium"
+  VSCodium = "VSCodium"
 }

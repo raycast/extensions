@@ -76,6 +76,10 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     }
