@@ -36,14 +36,12 @@ function Actions(props: { item: Issue; instance: string }) {
     <ActionPanel title={props.item.summary}>
       <ActionPanel.Section>
         {link && <Action.OpenInBrowser url={link} />}
-        {link && (
-          <Action.CopyToClipboard content={props.item.id} title="Copy ID" shortcut={{ modifiers: ["cmd"], key: "." }} />
-        )}
+        {link && <Action.CopyToClipboard content={props.item.id} title="Copy ID" />}
         {link && (
           <Action.CopyToClipboard
             content={link}
             title="Copy Link"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
         )}
       </ActionPanel.Section>
