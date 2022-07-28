@@ -1,8 +1,9 @@
 import { Note } from "@hackmd/api/dist/type";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import NoteDetail from "./NoteDetail";
+import NoteActions from "./NoteActions";
 
-export default function NoteListItem({ note }: { note: Note }) {
+export default function NoteListItem({ note, mutate }: { note: Note; mutate?: () => void }) {
   return (
     <List.Item
       key={note.id}
@@ -16,7 +17,9 @@ export default function NoteListItem({ note }: { note: Note }) {
       ]}
       actions={
         <ActionPanel>
-          <Action.Push target={<NoteDetail noteId={note.id} />} title="View Detail" />
+          <Action.Push icon={Icon.Sidebar} target={<NoteDetail noteId={note.id} />} title="View Detail" />
+
+          <NoteActions note={note} mutate={mutate} />
         </ActionPanel>
       }
     />

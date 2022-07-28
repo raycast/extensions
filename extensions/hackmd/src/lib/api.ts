@@ -1,5 +1,7 @@
 import API from "@hackmd/api";
-import { getAPIToken } from "./preference";
+import { getPreferences } from "./preference";
 
-export const api = new API(getAPIToken());
+const { api_base_url, api_token } = getPreferences();
+
+export const api = new API(api_token, api_base_url);
 export default api;

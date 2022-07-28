@@ -42,6 +42,22 @@
       "description": "The API token you created on HackMD",
       "name": "api_token",
       "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "HackMD API Base URL",
+      "description": "The base URL of HackMD API",
+      "name": "api_base_url",
+      "default": "https://api.hackmd.io/v1",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "HackMD Instance URL",
+      "description": "The base URL of HackMD instance",
+      "name": "instance_url",
+      "default": "https://hackmd.io",
+      "required": false
     }
   ],
   "dependencies": {

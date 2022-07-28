@@ -1,14 +1,21 @@
-import { Detail } from "@raycast/api";
+import { ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import api from "../lib/api";
+import NoteActions from "./NoteActions";
 
 export default function NoteDetail({ noteId }: { noteId: string }) {
   const { data, isLoading } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
+  const { pop } = useNavigation();
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={data?.content}
+      actions={
+        <ActionPanel>
+          <NoteActions note={data} onDeleteCallback={() => pop()} />
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
           {data?.tags?.length && data?.tags?.length > 0 && (
