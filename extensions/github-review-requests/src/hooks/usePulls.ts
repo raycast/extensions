@@ -29,7 +29,7 @@ const usePulls = () => {
         return ({login, pulls});
       }
     )
-    .then(({login, pulls}) => filterPulls(login, hiddenPulls)(pulls))
+    .then(({login, pulls}) => processPulls(login, hiddenPulls, pulls))
     .then(saveUpdatedPullsToStore);
 
   useEffect(() => {
@@ -61,15 +61,14 @@ const usePulls = () => {
 
 export default usePulls;
 
-const filterPulls = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
-  (pulls: PullRequestShort[]) =>
-    pulls.map(filterPull(login, hiddenPulls))
-      .filter(pull => pull !== null) as PullRequestShort[];
+const processPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullRequestShort[]) =>
+  pulls
+    .map(processPull(login, hiddenPulls))
+    .filter(pull => pull !== null) as PullRequestShort[];
 
-const filterPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
+const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
   (pull: PullRequestShort) => {
-    const pullId = prid(pull);
-    const logPrefix = `filterPull: prid=${pullId}`;
+    const logPrefix = createLogPrefix(pull);
 
     console.debug(`${logPrefix} url=${pull.url}`);
 
@@ -92,11 +91,8 @@ const filterPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
     }
 
     const lastVisitedAt = hiddenPulls.find(pr => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
-    console.debug(`${logPrefix} last-visited-at=${lastVisitedAt}`);
-    console.debug("hidden", JSON.stringify(hiddenPulls))
-
-    const comment = eligibleComment(login, lastVisitedAt, pull);
-    const review = eligibleReview(login, lastVisitedAt, pull);
+    const comment = getEligibleComment(login, lastVisitedAt, pull);
+    const review = getEligibleReview(login, lastVisitedAt, pull);
 
     if (!comment && !review) {
       console.debug(`${logPrefix} comment=none review=none action=drop`)
@@ -107,14 +103,21 @@ const filterPull = (login: string, hiddenPulls: PullRequestLastVisit[]) =>
     return pull;
   };
 
+const createLogPrefix = (pull: PullRequestShort) =>
+  `processPull: prid=${prid(pull)}`;
+
 const isMyFreshPR = (logPrefix: string, login: string, pull: PullRequestShort) => {
   const authored = isAuthor(login, pull);
   const noComments = !isCommented(pull);
   const noReviews = !isReviewed(pull);
 
-  console.debug(`${logPrefix} authored=${authored} no-comments=${noComments} no-reviews=${noReviews}`);
+  const prIsFresh = authored && noComments && noReviews;
 
-  return authored && noComments && noReviews;
+  if (prIsFresh) {
+    console.debug(`${logPrefix} author=@me comments=none reviews=none`)
+  }
+
+  return prIsFresh;
 }
 
 const isSomeonesFreshPR = (logPrefix: string, login: string, pull: PullRequestShort) => {
@@ -122,9 +125,13 @@ const isSomeonesFreshPR = (logPrefix: string, login: string, pull: PullRequestSh
   const commented = isCommented(pull);
   const reviewed = isReviewed(pull);
 
-  console.debug(`${logPrefix} authored=${authored} commented=${commented} reviewed=${reviewed}`);
+  const prIsFresh = !authored && !commented && !reviewed
 
-  return !authored && !commented && !reviewed;
+  if (prIsFresh) {
+    console.debug(`${logPrefix} author=${pull.user.login} comments=none reviews=none`)
+  }
+
+  return prIsFresh;
 }
 
 
@@ -132,7 +139,7 @@ const isAuthor = (login: string, pull: PullRequestShort) => pull.user.login === 
 const isCommented = (pull: PullRequestShort) => pull.comments.length > 0;
 const isReviewed = (pull: PullRequestShort) => pull.reviews.length > 0;
 
-const eligibleComment = (login: string, lastVisit: string, pull: PullRequestShort) => {
+const getEligibleComment = (login: string, lastVisit: string, pull: PullRequestShort) => {
   const comment = pull.comments[pull.comments.length - 1];
 
   return comment && comment.user.login !== login && comment.createdAt > lastVisit
@@ -140,7 +147,7 @@ const eligibleComment = (login: string, lastVisit: string, pull: PullRequestShor
     : null;
 };
 
-const eligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
+const getEligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
   const review = pull.reviews[pull.reviews.length - 1];
 
   return review && review.user.login !== login && review.submittedAt > lastVisit

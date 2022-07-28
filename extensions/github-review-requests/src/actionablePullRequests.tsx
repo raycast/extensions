@@ -12,7 +12,11 @@ const actionablePullRequests = () => {
   } = usePulls();
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={{source: "icon.png", tintColor: Color.Blue}}>
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon={{source: "icon.png", tintColor: updatedPulls.length === 0 ? Color.Green : Color.Yellow}}
+      title={updatedPulls.length > 0 ? `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s": ""} to check` : "All good"}
+    >
       {updatedPulls.map(pull =>
         <MenuBarExtra.Item
           icon={pull.user.avatarUrl}
