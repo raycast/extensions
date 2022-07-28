@@ -28,7 +28,6 @@ const usePullStore = () => {
 
     visitPull: (pull: PullRequestShort) =>
       Promise.resolve()
-        .then(() => console.debug(JSON.stringify(pull)))
         .then(() => getTimestampISOInSeconds())
         .then(lastVisitedAt => ({
           updatedPulls: pull.requestedReviewers.length > 0
