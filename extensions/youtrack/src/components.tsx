@@ -40,7 +40,11 @@ function Actions(props: { item: Issue; instance: string }) {
           <Action.CopyToClipboard content={props.item.id} title="Copy ID" shortcut={{ modifiers: ["cmd"], key: "." }} />
         )}
         {link && (
-          <Action.CopyToClipboard content={link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "," }} />
+          <Action.CopyToClipboard
+            content={link}
+            title="Copy Link"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          />
         )}
       </ActionPanel.Section>
     </ActionPanel>
