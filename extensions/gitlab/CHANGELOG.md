@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [MR Details] - 2022-07-27
+## [MR Details] - 2022-07-28
 
 - Add a new setting to show details in merge request list via a metadata view.
 - Switch `My Reviews` to use `MRListItem` to display merge requests.
