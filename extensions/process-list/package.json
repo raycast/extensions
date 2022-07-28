@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "process-list",
+  "title": "Process List",
+  "description": "A Raycast extension for listing and interacting with processes running on your machine",
+  "icon": "command-icon.png",
+  "author": "samtgarson",
+  "categories": [
+    "Productivity",
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-processes",
+      "title": "List Processes",
+      "description": "A glanceable list of processes running on your machine, with the ability to kill them",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "live-refresh",
+      "description": "Automatically refresh the process list on a 5 second interval",
+      "type": "checkbox",
+      "default": true,
+      "label": "Live refresh",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.7",
+    "fkill": "^8.0.1",
+    "react": "^18.2.0",
+    "systeminformation": "^5.12.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
