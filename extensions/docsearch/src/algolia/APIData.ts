@@ -57,11 +57,32 @@ export default [
     indexName: "rsshub",
   },
   {
+    name: "Slidev",
+    icon: "https://cn.sli.dev/favicon.png",
+    APIKey: "1a5c5a504139c58f428974c78c55291d",
+    APPID: "BH4D9OD16A",
+    indexName: "slidev",
+    subtitle: "zh-Hans",
+    searchParameters: {
+      facetFilters: ["language:cn"],
+    },
+  },
+  {
     name: "TailWindCSS v3",
     icon: "https://tailwindcss.com/favicons/favicon-16x16.png?v=3",
     APIKey: "5fc87cef58bb80203d2207578309fab6",
     APPID: "KNPXZI5B0M",
     indexName: "tailwindcss",
+  },
+  {
+    name: "Unidata",
+    icon: "https://unidata.app/images/logo.png",
+    APIKey: "3f968df846740a9e2b38e89d8e6ce9fa",
+    APPID: "LNA1UZCPZB",
+    indexName: "unidata",
+    searchParameters: {
+      facetFilters: ["lang:en-US"],
+    },
   },
   {
     name: "Vite",
@@ -82,11 +103,25 @@ export default [
     },
   },
   {
+    name: "Vitest",
+    icon: "https://vitest.dev/logo.svg",
+    APIKey: "9c3ced6fed60d2670bb36ab7e8bed8bc",
+    APPID: "ZTF29HGJ69",
+    indexName: "vitest",
+  },
+  {
     name: "Vue3",
     icon: "https://vuejs.org/logo.svg",
     APIKey: "f49cbd92a74532cc55cfbffa5e5a7d01",
     APPID: "ML0LEBN7FQ",
     indexName: "vuejs",
+  },
+  {
+    name: "VueUse",
+    icon: "https://vueuse.org/favicon.svg",
+    APIKey: "a99ef8de1b2b27949975ce96642149c6",
+    APPID: "BH4D9OD16A",
+    indexName: "vueuse",
   },
   {
     name: "Vuepress v1",
