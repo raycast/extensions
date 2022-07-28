@@ -19,7 +19,7 @@
       "title": "Notify About Pending Pull Requests",
       "description": "List actionable pull requests",
       "mode": "menu-bar",
-      "interval": "3m"
+      "interval": "1m"
     }
   ],
   "preferences": [
