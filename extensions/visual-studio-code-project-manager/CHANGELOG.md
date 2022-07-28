@@ -1,5 +1,7 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Add VSCodium option] - 2022-07-28
+
 ## [Add filtering by tag functionality] - 2022-07-27
 
 ## [Add preference to hide projects without tag] - 2022-05-01
