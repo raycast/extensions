@@ -105,7 +105,7 @@ export default function Command() {
       searchBarPlaceholder="Search family..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Category Filter" onChange={handleChangeCategory}>
+        <Grid.Dropdown tooltip="Category Filter" onChange={handleChangeCategory} defaultValue={selectedCategory}>
           <Grid.Dropdown.Section>
             <Grid.Dropdown.Item title={`All Categories (${fonts.length})`} value="" />
           </Grid.Dropdown.Section>
