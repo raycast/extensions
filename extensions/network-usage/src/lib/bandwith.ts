@@ -1,6 +1,8 @@
 import { environment, LaunchType } from "@raycast/api";
 import { spawn } from "child_process";
 import moment from "moment";
+import cron from "node-schedule";
+
 import { DEFAULT_PATH, runCommand } from "./cli";
 
 export interface RealtimeBandwithData {
@@ -36,7 +38,7 @@ export const getActiveInterface = () => {
   return networkInterface;
 };
 
-export const watchBandwidth = ({
+export const watchRealtimeBandwidth = ({
   networkInterface,
   onData,
   onError,
@@ -128,4 +130,27 @@ export const getBandwidthOfToday = (networkInterface: string) => {
     rx,
     lastUpdate,
   };
+};
+
+const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const watchBandwidthOfToday = ({
+  networkInterface,
+  onData,
+}: {
+  networkInterface: string;
+  onData: (data: { tx: number; rx: number; lastUpdate: string }) => void;
+}) => {
+  const data = getBandwidthOfToday(networkInterface);
+  onData(data);
+
+  cron.scheduleJob("*/5 * * * *", async () => {
+    await sleep(1000 * 3);
+
+    const data = getBandwidthOfToday(networkInterface);
+
+    onData(data);
+  });
 };

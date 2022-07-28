@@ -22,10 +22,12 @@
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "millify": "^5.0.0",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "node-schedule": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
+    "@types/node-schedule": "^2.1.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

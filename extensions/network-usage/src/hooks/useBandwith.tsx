@@ -1,7 +1,12 @@
 import { environment, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { RealtimeBandwithData, getActiveInterface, getBandwidthOfToday, watchBandwidth } from "../lib/bandwith";
+import {
+  RealtimeBandwithData,
+  getActiveInterface,
+  watchRealtimeBandwidth,
+  watchBandwidthOfToday,
+} from "../lib/bandwith";
 import { checkVNStatInstalled, checkVNStatServiceStarted, installVNStat, startVNStatService } from "../lib/cli";
 
 const useBandwith = () => {
@@ -39,7 +44,7 @@ const useBandwith = () => {
 
       const activeInterface = getActiveInterface();
 
-      watchBandwidth({
+      watchRealtimeBandwidth({
         networkInterface: activeInterface,
         onData: (data) => {
           if (environment.launchType === LaunchType.UserInitiated) {
@@ -51,9 +56,12 @@ const useBandwith = () => {
         },
       });
 
-      const bandwithOfToday = getBandwidthOfToday(activeInterface);
-
-      setTodaysBandwith(bandwithOfToday);
+      watchBandwidthOfToday({
+        networkInterface: activeInterface,
+        onData: (data) => {
+          setTodaysBandwith(data);
+        },
+      });
     };
 
     get();
