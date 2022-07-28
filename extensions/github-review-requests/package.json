@@ -20,6 +20,13 @@
       "description": "",
       "mode": "menu-bar",
       "interval": "1m"
+    },
+    {
+      "name": "revisedPullNotifications",
+      "title": "Revised Pull Notifications",
+      "description": "",
+      "mode": "menu-bar",
+      "interval": "3m"
     }
   ],
   "preferences": [
