@@ -262,8 +262,8 @@ export async function fetchEnvironmentVariables(projectId: string, teamId?: stri
   return environmentVariables.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-export function getFetchProjectsURL(teamId?: string) {
-  return apiURL + `v8/projects?teamId=${teamId ?? ""}`;
+export function getFetchProjectsURL(teamId?: string, limit = 100) {
+  return apiURL + `v8/projects?teamId=${teamId ?? ""}&limit=${limit}`;
 }
 
 // Raw function for fetching project environment variable
@@ -402,4 +402,16 @@ export async function getChecksForDeployment(deploymentId: Deployment["uid"], te
   });
   const json = (await response.json()) as { checks: Check[] };
   return json.checks;
+}
+
+export function getDeploymentURL(userOrTeamName: string, projectName: string, deploymentId: Deployment["uid"]) {
+  if (deploymentId.startsWith("dpl_")) {
+    deploymentId = deploymentId.substring(4);
+  }
+
+  return `https://vercel.com/${userOrTeamName}/${projectName}/${deploymentId}`;
+}
+
+export function getProjectURL(userOrTeamName: string, projectName: string) {
+  return `https://vercel.com/${userOrTeamName}/${projectName}`;
 }

@@ -4,7 +4,7 @@ import fromNow from "../../utils/time";
 import { Deployment, DeploymentState } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/search-bar-accessory";
-import { FetchHeaders, getFetchDeploymentsURL } from "../../vercel";
+import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
@@ -56,10 +56,22 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 title="Show Details"
                 icon={Icon.Binoculars}
                 onAction={() => {
-                  push(<InspectDeployment deployment={deployment} />);
+                  push(
+                    <InspectDeployment username={user?.username} deployment={deployment} selectedTeam={selectedTeam} />
+                  );
                 }}
               />
-              <Action.OpenInBrowser title={`Open on Vercel`} url={`https://${deployment.url}`} icon={Icon.Link} />
+              <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
+              {/* @ts-expect-error Property id does not exist on type Deployment */}
+              <Action.OpenInBrowser
+                title={`Visit on Vercel`}
+                url={getDeploymentURL(
+                  selectedTeam ? selectedTeam.name : user?.username,
+                  deployment.name,
+                  deployment.id || deployment.uid
+                )}
+                icon={Icon.Link}
+              />
             </ActionPanel>
           }
           accessories={[

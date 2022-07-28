@@ -1,16 +1,18 @@
-import { Icon, Detail, ActionPanel, Action } from "@raycast/api";
+import { Icon, Detail, ActionPanel, Action, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import getProjectMarkdown from "../markdown/get-deployment-markdown";
 import fromNow from "../utils/time";
-import { Build, Deployment } from "../types";
+import { Build, Deployment, Team, User } from "../types";
 import { useFetch } from "@raycast/utils";
-import { FetchHeaders, getFetchDeploymentBuildsURL } from "../vercel";
+import { FetchHeaders, getDeploymentURL, getFetchDeploymentBuildsURL } from "../vercel";
 
 type Props = {
   deployment: Deployment;
+  selectedTeam?: Team;
+  username?: User["username"];
 };
 
-const InspectDeployment = ({ deployment }: Props) => {
+const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   // const [build, setMostRecentBuild] = useState<Build>();
   const [markdown, setMarkdown] = useState<string>();
 
@@ -18,7 +20,7 @@ const InspectDeployment = ({ deployment }: Props) => {
     if (!markdown) {
       getProjectMarkdown(deployment).then(setMarkdown);
     }
-  });
+  }, [markdown, deployment]);
 
   // useEffect(() => {
   //   async function fetchBuilds() {
@@ -56,6 +58,25 @@ const InspectDeployment = ({ deployment }: Props) => {
       : "";
   };
 
+  // latestDeployment Deployments do not have an inspectorURL
+  const deploymentURL = () => {
+    // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
+    if (deployment.inspectorURL) return deployment.inspectorURL;
+
+    const name = selectedTeam ? selectedTeam.name : username;
+
+    if (!name) {
+      showToast({
+        title: "Error",
+        message: "Could not determine team or user name",
+      });
+      return "";
+    }
+
+    // @ts-expect-error Property 'id' does not exist on type 'Deployment'.
+    return getDeploymentURL(name, deployment.name, deployment.uid || deployment.id);
+  };
+
   return (
     <Detail
       navigationTitle={getCommitMessage(deployment)}
@@ -63,9 +84,7 @@ const InspectDeployment = ({ deployment }: Props) => {
       markdown={markdown}
       actions={
         <ActionPanel>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
-          <Action.OpenInBrowser title={`Open on Vercel`} url={`https://${deployment.inspectorUrl}`} icon={Icon.Link} />
+          <Action.OpenInBrowser title={`Visit on Vercel`} url={deploymentURL()} icon={Icon.Link} />
           <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
         </ActionPanel>
       }
@@ -73,13 +92,13 @@ const InspectDeployment = ({ deployment }: Props) => {
         <Detail.Metadata>
           <Detail.Metadata.Label title={"State"} text={getStateText()} />
           <Detail.Metadata.Label title="Name" text={deployment.name} />
-          <Detail.Metadata.Link title={"Site URL"} text={deployment.url} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Link title={"Preview URL"} text={deployment.url} target={`https://${deployment.url}`} />
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
           {/* @ts-ignore */}
           {deployment.inspectorURL && (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            <Detail.Metadata.Link title={"Inspect on Vercel"} text={deployment.url} target={deployment.inspectorURL} />
+            <Detail.Metadata.Link title={"Visit on Vercel"} text={deployment.url} target={deploymentURL()} />
           )}
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Separator />
@@ -89,7 +108,7 @@ const InspectDeployment = ({ deployment }: Props) => {
           />
           <Detail.Metadata.Label title={"Creator"} text={deployment.creator?.username || "Unknown"} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title={""} text={"Open on Vercel"} target={`https://${deployment.url}`} />
+          <Detail.Metadata.Link title={""} text={"Inspect on Vercel"} target={deploymentURL()} />
         </Detail.Metadata>
       }
     />

@@ -56,25 +56,31 @@ const ProjectListSection = () => {
             actions={
               <ActionPanel>
                 <Action
+                  title="Search Deployments"
+                  icon={Icon.MagnifyingGlass}
+                  onAction={async () => {
+                    push(<DeploymentsList projectId={project.id} />);
+                  }}
+                />
+                <Action
                   title="Inspect Most Recent Deployment"
                   icon={Icon.ArrowRight}
                   onAction={async () => {
                     if (project.latestDeployments?.length) {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      push(<InspectDeployment deployment={project.latestDeployments[0] as any} />);
+                      push(
+                        <InspectDeployment
+                          username={user?.username}
+                          deployment={project.latestDeployments[0] as any}
+                          selectedTeam={selectedTeam}
+                        />
+                      );
                     } else {
                       showToast({
                         style: Toast.Style.Failure,
                         title: "No deployments found",
                       });
                     }
-                  }}
-                />
-                <Action
-                  title="Search Deployments"
-                  icon={Icon.MagnifyingGlass}
-                  onAction={async () => {
-                    push(<DeploymentsList projectId={project.id} />);
                   }}
                 />
                 {!!project.latestDeployments?.length && (
