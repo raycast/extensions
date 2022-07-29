@@ -14,31 +14,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list-my-notes",
-      "title": "List My Notes",
+      "name": "browse-notes",
+      "title": "Browse Notes",
       "subtitle": "HackMD",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "list-team-notes",
-      "title": "List Team Notes",
-      "subtitle": "HackMD",
-      "description": "",
+      "description": "Browser HackMD Notes",
       "mode": "view"
     },
     {
       "name": "view-release-notes",
-      "title": "View Release notes",
+      "title": "View Release Notes",
       "subtitle": "HackMD",
-      "description": "",
+      "description": "View HackMD Release Notes",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
       "subtitle": "HackMD",
-      "description": "",
+      "description": "Create a HackMD Note",
       "mode": "view"
     }
   ],
