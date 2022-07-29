@@ -7,23 +7,25 @@ import {processPulls} from "../flows/processPulls";
 import {PullRequestShort} from "../types";
 
 const usePulls = () => {
-  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls } =
+  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls} =
     usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
 
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
 
-  const runPullIteration = () =>
-    Promise.all([
+  const runPullIteration = () => Promise.resolve()
+    .then(() => console.debug("runPullIteration"))
+    .then(() => Promise.all([
       getLogin(),
       searchPullRequestsWithDependencies("is:open archived:false author:@me"),
       searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
       searchPullRequestsWithDependencies("is:open archived:false review-requested:@me"),
-    ])
-      .then(mergePulls)
-      .then(({ login, pulls }) => processPulls(login, hiddenPulls, pulls))
-      .then(updatePulls);
+    ]))
+    .then(mergePulls)
+    .then(({login, pulls}) => processPulls(login, hiddenPulls, pulls))
+    .then(updatePulls)
+    .finally(() => console.debug("runPullIteration: done"));
 
   useEffect(() => {
     // Run effect only after we load from store.
@@ -35,11 +37,9 @@ const usePulls = () => {
 
     Promise.resolve()
       .then(() => console.debug("usePulls: start"))
-      .then(() => (isActionUserInitiated() ? exitShortcut() : runPullIteration()))
-      .finally(() => {
-        setIsRemotePullsLoading(false);
-        console.debug("usePulls: end");
-      });
+      .then(() => isActionUserInitiated() ? exitShortcut() : runPullIteration())
+      .finally(() => setIsRemotePullsLoading(false))
+      .finally(() => console.debug("usePulls: end"));
   }, [isPullStoreLoading]);
 
   return {
@@ -54,15 +54,18 @@ const usePulls = () => {
 
 export default usePulls;
 
-
-const mergePulls = ([
-  login, authoredPulls, commentedOnPulls, reviewRequestedPulls
-]: [string, PullRequestShort[], PullRequestShort[], PullRequestShort[]]) => {
+type MergePullParams = [string, PullRequestShort[], PullRequestShort[], PullRequestShort[]];
+const mergePulls = ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]: MergePullParams) => {
   const pulls = authoredPulls
     .concat(commentedOnPulls, reviewRequestedPulls)
     .filter(uniquePullRequests);
 
-  console.debug(`pull iteration: pulled-prs=${pulls.length}`);
+  console.debug(
+    `mergePulls: merged=${pulls.length} `+
+    `authored=${authoredPulls.length} `+
+    `commented=${commentedOnPulls.length} `+
+    `review-requested=${reviewRequestedPulls.length}`
+  );
 
   return {login, pulls};
 };

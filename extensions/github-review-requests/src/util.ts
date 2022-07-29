@@ -15,7 +15,7 @@ export const getTimestampISOInSeconds = () => new Date().toISOString().substring
 export const isActionUserInitiated = () => {
   const userInitiated = environment.launchType === LaunchType.UserInitiated;
 
-  console.debug(`actionIsUserInitiated: ${userInitiated}`);
+  console.debug(`isActionUserInitiated: ${userInitiated}`);
 
   return userInitiated;
 };

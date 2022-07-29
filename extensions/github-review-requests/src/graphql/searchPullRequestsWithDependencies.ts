@@ -4,7 +4,7 @@ import { PullRequestShort } from "../types";
 
 const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestShort[]> =>
   Promise.resolve()
-    .then(() => console.debug("searchPullRequestsWithDependencies", query))
+    .then(() => console.debug(`searchPullRequestsWithDependencies: query=${query}`))
     .then(() => getSdk(graphQLClient).SearchPullRequestsWithDependencies({ query: `is:pr ${query}` }))
     .then(({ search: { nodes } }) => nodes)
     .then(
@@ -77,6 +77,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
             };
           })
           .filter((pull) => pull !== null) as PullRequestShort[]
-    );
+    )
+    .finally(() => console.debug(`searchPullRequestsWithDependencies done query=${query}`));
 
 export default searchPullRequestsWithDependencies;
