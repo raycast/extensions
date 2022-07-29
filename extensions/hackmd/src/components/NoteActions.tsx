@@ -1,13 +1,10 @@
-import url from "url";
 import { Note } from "@hackmd/api/dist/type";
 import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast, useNavigation } from "@raycast/api";
 
 import api from "../lib/api";
-import { getPreferences } from "../lib/preference";
 import NoteForm from "./NoteForm";
 import { useCachedPromise } from "@raycast/utils";
-
-const { instance_url } = getPreferences();
+import { getNoteUrl } from "../helpers/noteHelper";
 
 export default function NoteActions({
   note,
@@ -20,8 +17,7 @@ export default function NoteActions({
 }) {
   if (!note) return null;
 
-  const namePath = note.userPath || note.teamPath;
-  const noteUrl = new url.URL(`@${namePath}/${note.permalink || note.id}`, instance_url).toString();
+  const noteUrl = getNoteUrl(note);
 
   const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
   const { pop } = useNavigation();

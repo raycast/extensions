@@ -1,12 +1,16 @@
 import { ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import api from "../lib/api";
 import NoteActions from "./NoteActions";
 import { PermissionTitleMap } from "../lib/constants";
+import { getNoteUrl } from "../helpers/noteHelper";
 
 export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?: () => void }) {
   const { data, isLoading, mutate: mutateSingle } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
   const { pop } = useNavigation();
+
+  const noteUrl = useMemo(() => (data && getNoteUrl(data)) || "", [data]);
 
   return (
     <Detail
@@ -38,16 +42,21 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
             <>
               <Detail.Metadata.Label title="ID" text={data.id} />
 
-              {/* TODO: URL */}
+              <Detail.Metadata.Link title="Note URL" target={noteUrl} text="Click to Open" />
 
               <Detail.Metadata.Label title="Title" text={data.title} />
 
               <Detail.Metadata.Separator />
 
-              {/* TODO: display permission in TagList */}
-              <Detail.Metadata.Label title="Read Permission" text={PermissionTitleMap[data.readPermission]} />
-              <Detail.Metadata.Label title="Write Permission" text={PermissionTitleMap[data.writePermission]} />
+              <Detail.Metadata.TagList title="Read Permission">
+                <Detail.Metadata.TagList.Item text={PermissionTitleMap[data.readPermission]} />
+              </Detail.Metadata.TagList>
 
+              <Detail.Metadata.TagList title="Write Permission">
+                <Detail.Metadata.TagList.Item text={PermissionTitleMap[data.writePermission]} />
+              </Detail.Metadata.TagList>
+
+              <Detail.Metadata.Label title="Last Changed At" text={new Date(data?.lastChangedAt).toLocaleString()} />
               <Detail.Metadata.Label title="Created" text={new Date(data?.createdAt).toLocaleString()} />
             </>
           )}
