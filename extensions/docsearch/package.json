@@ -13,6 +13,7 @@
     {
       "name": "docsearch",
       "title": "Search Documentation",
+      "subtitle": "DocSearch",
       "description": "Search documentation",
       "mode": "view"
     }
