@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search",
+      "title": "Search Documentation",
+      "subtitle": "Apple Developer",
       "description": "Search from Apple Developer documentation results.",
       "mode": "view"
     }
