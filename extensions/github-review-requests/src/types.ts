@@ -5,6 +5,7 @@ export type PullRequestShort = {
   title: string;
   url: string;
   createdAt: string;
+  updatedAt: string;
 
   reviews: ReviewShort[];
   comments: CommentShort[];

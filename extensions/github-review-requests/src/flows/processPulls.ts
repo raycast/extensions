@@ -1,23 +1,24 @@
 import {CommentShort, PullRequestLastVisit, PullRequestShort, ReviewShort} from "../types";
 
 export const processPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullRequestShort[]) =>
-  pulls.map(processPull(login, hiddenPulls)).filter((pull) => pull !== null) as PullRequestShort[];
+  pulls
+    .map(processPull(login, hiddenPulls))
+    .filter((pull) => pull !== null) as PullRequestShort[];
+
 const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) => (pull: PullRequestShort) => {
   const logPrefix = createLogPrefix(pull);
 
   console.debug(`${logPrefix} url=${pull.url}`);
 
   if (isMyPRNew(logPrefix, login, pull)) {
-    console.debug(`${logPrefix} action=drop`);
-
     return null;
   }
 
-  const lastVisitedAt = hiddenPulls.find((pr) => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";
+  const lastVisitedAt = getLastVisitedAt(hiddenPulls, pull);
 
   if (isSomeonesPRNew(logPrefix, login, pull)) {
     if (pull.createdAt < lastVisitedAt) {
-      console.debug(`${logPrefix} lastVisitedAt=${lastVisitedAt} action=drop`);
+      console.debug(`${logPrefix} pull.createdAt=${pull.createdAt} lastVisitedAt=${lastVisitedAt} action=drop`);
 
       return null;
     }
@@ -27,10 +28,13 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) => (pul
     return pull;
   }
 
-  console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length}`);
-  if (pull.requestedReviewers.length > 0) {
-    console.debug(`${logPrefix} requested-reviewers=${pull.requestedReviewers.length} action=keep`);
+  if (pull.updatedAt < lastVisitedAt) {
+    console.debug(`${logPrefix} pull.updatedAt=${pull.updatedAt} lastVisitedAt=${lastVisitedAt} action=drop`);
 
+    return null;
+  }
+
+  if (pull.requestedReviewers.length > 0) {
     return pull;
   }
 
@@ -50,24 +54,27 @@ const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) => (pul
 
   return pull;
 };
+
 const createLogPrefix = (pull: PullRequestShort) => `processPull: prid=${prid(pull)}`;
+
 const isMyPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
-  const authored = isAuthor(login, pull);
-  const noComments = !isCommented(pull);
-  const noReviews = !isReviewed(pull);
+  const authored = pull.user.login === login;
+  const noComments = pull.comments.length === 0;
+  const noReviews = pull.reviews.length === 0;
 
   const prIsFresh = authored && noComments && noReviews;
 
   if (prIsFresh) {
-    console.debug(`${logPrefix} author=@me comments=none reviews=none`);
+    console.debug(`${logPrefix} author=@me comments=none reviews=none intention=drop`);
   }
 
   return prIsFresh;
 };
+
 const isSomeonesPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
-  const authored = isAuthor(login, pull);
-  const commented = isCommented(pull);
-  const reviewed = isReviewed(pull);
+  const authored = pull.user.login === login;
+  const commented = pull.comments.length > 0;
+  const reviewed = pull.reviews.length > 0;
 
   const prIsFresh = !authored && !commented && !reviewed;
 
@@ -77,9 +84,7 @@ const isSomeonesPRNew = (logPrefix: string, login: string, pull: PullRequestShor
 
   return prIsFresh;
 };
-const isAuthor = (login: string, pull: PullRequestShort) => pull.user.login === login;
-const isCommented = (pull: PullRequestShort) => pull.comments.length > 0;
-const isReviewed = (pull: PullRequestShort) => pull.reviews.length > 0;
+
 const getEligibleComment = (logPrefix: string, login: string, lastVisit: string, pull: PullRequestShort) => {
   const comment = pull.comments[pull.comments.length - 1];
 
@@ -107,11 +112,13 @@ const getEligibleComment = (logPrefix: string, login: string, lastVisit: string,
 
   return comment;
 };
+
 const getEligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
   const review = pull.reviews[pull.reviews.length - 1];
 
   return review && review.user.login !== login && review.submittedAt > lastVisit ? review : null;
 };
+
 const selectLatestURLFrom = (comment: CommentShort | null, review: ReviewShort | null) => {
   if (!comment && !review) {
     return null;
@@ -127,4 +134,8 @@ const selectLatestURLFrom = (comment: CommentShort | null, review: ReviewShort |
 
   return comment.createdAt > review.submittedAt ? comment.url : review.url;
 };
+
 const prid = ({url, number}: PullRequestShort) => `${url.split("/")[3]}/${url.split("/")[4]}#${number}`;
+
+const getLastVisitedAt = (hiddenPulls: PullRequestLastVisit[], pull: PullRequestShort) =>
+  hiddenPulls.find((pr) => pr.id === pull.id)?.lastVisitedAt || "0000-00-00T00:00:00Z";

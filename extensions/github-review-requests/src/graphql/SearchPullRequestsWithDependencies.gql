@@ -8,6 +8,7 @@ query SearchPullRequestsWithDependencies($query: String!) {
         title
         url
         createdAt
+        updatedAt
 
         author {
           login
