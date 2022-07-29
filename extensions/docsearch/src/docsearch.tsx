@@ -1,8 +1,9 @@
+import APIData from "./algolia/apiData";
+import type { IAPIData } from "./algolia/types";
+
 import { ActionPanel, List, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
-import APIData from "./algolia/APIData";
-import type { IAPIData } from "./algolia/types";
 
 function escape2Html(str: string) {
   return str
