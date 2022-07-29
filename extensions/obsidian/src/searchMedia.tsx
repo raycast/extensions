@@ -2,12 +2,12 @@ import { List } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
-import { SearchArguments, Vault } from "./utils/interfaces";
-import { NoteListPinned } from "./components/NoteListPinned";
+import { MediaSearchArguments, Vault } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
+import { MediaGrid } from "./components/MediaGrid";
 
-export default function Command(props: { arguments: SearchArguments }) {
+export default function Command(props: { arguments: MediaSearchArguments }) {
   const { vaults, ready } = useObsidianVaults();
 
   if (!ready) {
@@ -15,14 +15,9 @@ export default function Command(props: { arguments: SearchArguments }) {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return (
-      <VaultSelection
-        vaults={vaults}
-        target={(vault: Vault) => <NoteListPinned vault={vault} showTitle={true} searchArguments={props.arguments} />}
-      />
-    );
+    return <VaultSelection vaults={vaults} target={(vault: Vault) => <MediaGrid vault={vault} searchArguments={props.arguments}/>} />;
   } else if (vaults.length == 1) {
-    return <NoteListPinned vault={vaults[0]} showTitle={false} searchArguments={props.arguments} />;
+    return <MediaGrid vault={vaults[0]} searchArguments={props.arguments}/>;
   } else {
     noVaultPathsToast();
     return <List />;

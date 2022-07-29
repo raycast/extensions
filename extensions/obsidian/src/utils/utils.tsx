@@ -11,6 +11,7 @@ import {
 
 import fs from "fs";
 import fsPath from "path";
+import path from "path";
 import YAML from "yaml";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
@@ -24,6 +25,8 @@ import {
   SearchNotePreferences,
   Vault,
   QuickLookPreferences,
+  MediaState,
+  Media,
 } from "../utils/interfaces";
 
 import {
@@ -36,7 +39,7 @@ import {
   YAML_FRONTMATTER_REGEX,
 } from "./constants";
 import { isNotePinned, unpinNote } from "./pinNoteUtils";
-import NoteLoader from "./NoteLoader";
+import { MediaLoader, useNotes } from "./NoteLoader";
 
 export function filterContent(content: string) {
   const pref: QuickLookPreferences = getPreferenceValues();
@@ -191,24 +194,6 @@ export function sortNoteByAlphabet(a: Note, b: Note) {
   return sortByAlphabet(a.title, b.title);
 }
 
-export function filterNotes(notes: Note[], input: string, byContent: boolean) {
-  if (input.length === 0) {
-    return notes;
-  }
-  return notes
-    .filter((note) => {
-      if (byContent) {
-        return (
-          note.title.toLowerCase().includes(input.toLowerCase()) ||
-          note.content.toLowerCase().includes(input.toLowerCase())
-        );
-      } else {
-        return note.title.toLowerCase().includes(input.toLowerCase());
-      }
-    })
-    .sort(sortNoteByAlphabet);
-}
-
 export function wordCount(str: string) {
   return str.split(" ").length;
 }
@@ -303,6 +288,10 @@ export const getOpenVaultTarget = (vault: Vault) => {
   return "obsidian://open?vault=" + encodeURIComponent(vault.name);
 };
 
+export const getOpenPathInObsidianTarget = (path: string) => {
+  return "obsidian://open?path=" + encodeURIComponent(path);
+};
+
 export const getDailyNoteTarget = (vault: Vault) => {
   return "obsidian://advanced-uri?vault=" + encodeURIComponent(vault.name) + "&daily=true";
 };
@@ -336,7 +325,7 @@ export function YAMLTagsFor(content: string) {
   const frontmatter = content.match(YAML_FRONTMATTER_REGEX);
   if (frontmatter) {
     try {
-      const parsedYAML = YAML.parse(frontmatter[0].replaceAll("---", ""));
+      const parsedYAML = YAML.parse(frontmatter[0].replaceAll("---", ""), { logLevel: "error" });
 
       if (Object.prototype.hasOwnProperty.call(parsedYAML, "tag")) {
         foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
@@ -388,6 +377,17 @@ export function getListOfTags(notes: Note[]) {
   return foundTags.sort(sortByAlphabet);
 }
 
+export function getListOfExtensions(media: Media[]) {
+  const foundExtensions: string[] = [];
+  for (const mediaItem of media) {
+    const extension = path.extname(mediaItem.path);
+    if (!foundExtensions.includes(extension) && extension != "") {
+      foundExtensions.push(extension);
+    }
+  }
+  return foundExtensions;
+}
+
 function setExtensionVersion(version: string) {
   fs.writeFileSync(environment.supportPath + "/version.txt", version);
 }
@@ -410,14 +410,100 @@ export function getRandomNote(vault: Vault | Vault[]) {
   let notes: Note[] = [];
   if (Array.isArray(vault)) {
     for (const v of vault) {
-      const nl = new NoteLoader(v);
-      notes = [...notes, ...nl.loadNotes()];
+      notes = [...notes, ...useNotes(v)];
     }
   } else {
-    const nl = new NoteLoader(vault);
-    notes = nl.loadNotes();
+    notes = useNotes(vault);
   }
 
   const randomNote = notes[Math.floor(Math.random() * notes.length)];
   return randomNote;
+}
+
+export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
+  const files = fs.readdirSync(dirPath);
+
+  arrayOfFiles = arrayOfFiles || [];
+
+  for (const file of files) {
+    const next = fs.statSync(dirPath + "/" + file);
+    if (next.isDirectory() && !file.includes(".obsidian")) {
+      arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
+    } else {
+      if (
+        validFileEnding(file, fileEndings) &&
+        file !== ".md" &&
+        !file.includes(".excalidraw") &&
+        !dirPath.includes(".obsidian") &&
+        validFolder(dirPath, exFolders)
+      ) {
+        arrayOfFiles.push(path.join(dirPath, "/", file));
+      }
+    }
+  }
+
+  return arrayOfFiles;
+}
+
+export function validFolder(folder: string, exFolders: string[]) {
+  for (const f of exFolders) {
+    if (folder.includes(f)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function validFileEnding(file: string, fileEndings: string[]) {
+  for (const ending of fileEndings) {
+    if (file.endsWith(ending)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function prefExcludedFolders() {
+  const pref: SearchNotePreferences = getPreferenceValues();
+  const foldersString = pref.excludedFolders;
+  if (foldersString) {
+    const folders = foldersString.split(",");
+    for (let i = 0; i < folders.length; i++) {
+      folders[i] = folders[i].trim();
+    }
+    return folders;
+  } else {
+    return [];
+  }
+}
+
+export function useMedia(vault: Vault) {
+  const [media, setMedia] = useState<MediaState>({
+    ready: false,
+    media: [],
+  });
+
+  useEffect(() => {
+    async function fetch() {
+      if (!media.ready) {
+        try {
+          await fs.promises.access(vault.path + "/.");
+
+          const ml = new MediaLoader(vault);
+          const media = ml.loadMedia().sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
+
+          setMedia({ ready: true, media });
+        } catch (error) {
+          showToast({
+            title: "The path set in preferences doesn't exist",
+            message: "Please set a valid path in preferences",
+            style: Toast.Style.Failure,
+          });
+        }
+      }
+    }
+    fetch();
+  }, []);
+
+  return media;
 }

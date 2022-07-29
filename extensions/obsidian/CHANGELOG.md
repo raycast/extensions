@@ -1,5 +1,18 @@
 # Obsidian Changelog
 
+## [Search Media Command, Menu Bar Item, Command Arguments, Custom Icons & More | Version 1.8.0] - 2022-08-05
+
+- Add `Search Media` command which lets you search for media like images, video, audio or pdfs in your vault
+- Add `Image Size` preference for `Search Media` command
+- Add file type filter (`cmd + p`) for `Search Media` command
+- Add `Quick Look` and `Open in Obsidian` actions for `Search Media` command
+- Add Menu Bar Item that lets you interact with your pinned notes or open a daily note
+- Add Command Arguments for `Search Note`, `Search Media` and `Pinned Notes` command for quicker searches
+- Add a custom Obsidian icon for `Open in Obsidian` actions and the new Menu Bar Item
+- Improve overall performance by caching the vaults content
+- If full content search is activated in preferences you can search for paths
+- Minor fixes
+
 ## [Tag Filter, Markdown Controls for Edit Note, Templates for Append Action & More | Version 1.7.0] - 2022-07-11
 
 - Add tag filter to filter results in `Search Note` and `Pinned Notes` command by tags (YAML frontmatter and inline)

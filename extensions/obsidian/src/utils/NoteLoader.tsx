@@ -1,11 +1,30 @@
-import { getPreferenceValues } from "@raycast/api";
-import fs from "fs";
+import { Cache, Icon } from "@raycast/api";
+import { AUDIO_FILE_EXTENSIONS, BYTES_PER_MEGABYTE, VIDEO_FILE_EXTENSIONS } from "./constants";
+import { Note, Vault, Media } from "./interfaces";
+import { getNoteFileContent, prefExcludedFolders, tagsFor, walkFilesHelper } from "./utils";
 import path from "path";
 
-import { SearchNotePreferences, Note, Vault } from "./interfaces";
-import { getNoteFileContent, tagsFor } from "./utils";
+const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
 
-class NoteLoader {
+export function useNotes(vault: Vault) {
+  console.log(vault.name);
+  if (cache.has(vault.name)) {
+    const data = JSON.parse(cache.get(vault.name) ?? "");
+    if (data.lastCached > Date.now() - 1000 * 60 * 60 * 24) {
+      console.log("Cache still valid");
+      return data.notes;
+    }
+  } else {
+    console.log("Cache not found");
+  }
+  const nl = new NoteLoader(vault);
+  const notes = nl.loadNotes();
+  cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
+
+  return notes;
+}
+
+export class NoteLoader {
   vaultPath: string;
 
   constructor(vault: Vault) {
@@ -13,8 +32,9 @@ class NoteLoader {
   }
 
   loadNotes() {
+    console.log("Loading Notes for vault: " + this.vaultPath);
     const notes: Note[] = [];
-    const files = this.getFiles();
+    const files = this._getFiles();
 
     for (const f of files) {
       const comp = f.split("/");
@@ -34,61 +54,61 @@ class NoteLoader {
       };
       notes.push(note);
     }
+    console.log("Finished loading " + notes.length + " notes");
+
     return notes;
   }
 
-  getFiles() {
-    const exFolders = this.prefExcludedFolders();
-    const files = this.getFilesHelp(this.vaultPath, exFolders, []);
+  _getFiles() {
+    const exFolders = prefExcludedFolders();
+    const files = walkFilesHelper(this.vaultPath, exFolders, [".md"], []);
     return files;
-  }
-
-  getFilesHelp(dirPath: string, exFolders: string[], arrayOfFiles: string[]) {
-    const files = fs.readdirSync(dirPath);
-    arrayOfFiles = arrayOfFiles || [];
-
-    for (const file of files) {
-      const next = fs.statSync(dirPath + "/" + file);
-      if (next.isDirectory() && !file.includes(".obsidian")) {
-        arrayOfFiles = this.getFilesHelp(dirPath + "/" + file, exFolders, arrayOfFiles);
-      } else {
-        if (
-          file.endsWith(".md") &&
-          file !== ".md" &&
-          !file.includes(".excalidraw") &&
-          !dirPath.includes(".obsidian") &&
-          this.isValidFile(dirPath, exFolders)
-        ) {
-          arrayOfFiles.push(path.join(dirPath, "/", file));
-        }
-      }
-    }
-
-    return arrayOfFiles;
-  }
-
-  isValidFile(file: string, exFolders: string[]) {
-    for (const folder of exFolders) {
-      if (file.includes(folder)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  prefExcludedFolders() {
-    const pref: SearchNotePreferences = getPreferenceValues();
-    const foldersString = pref.excludedFolders;
-    if (foldersString) {
-      const folders = foldersString.split(",");
-      for (let i = 0; i < folders.length; i++) {
-        folders[i] = folders[i].trim();
-      }
-      return folders;
-    } else {
-      return [];
-    }
   }
 }
 
-export default NoteLoader;
+export class MediaLoader {
+  vaultPath: string;
+
+  constructor(vault: Vault) {
+    this.vaultPath = vault.path;
+  }
+
+  _getFiles() {
+    const exFolders = prefExcludedFolders();
+    const files = walkFilesHelper(
+      this.vaultPath,
+      exFolders,
+      [...AUDIO_FILE_EXTENSIONS, ...VIDEO_FILE_EXTENSIONS, ".jpg", ".png", ".gif", ".mp4", ".pdf"],
+      []
+    );
+    return files;
+  }
+
+  loadMedia() {
+    const medias: Media[] = [];
+    const files = this._getFiles();
+
+    for (const f of files) {
+      const icon = this.getIconFor(f);
+
+      const media: Media = {
+        title: path.basename(f),
+        path: f,
+        icon: icon,
+      };
+      medias.push(media);
+    }
+    return medias;
+  }
+
+  getIconFor(pathStr: string) {
+    const ext = path.extname(pathStr);
+    if (VIDEO_FILE_EXTENSIONS.includes(ext)) {
+      return { source: Icon.Video };
+    } else if (AUDIO_FILE_EXTENSIONS.includes(ext)) {
+      return { source: Icon.Microphone };
+    }
+
+    return { source: pathStr };
+  }
+}

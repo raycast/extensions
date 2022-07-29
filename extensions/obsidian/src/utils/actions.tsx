@@ -4,19 +4,19 @@ import React, { useState } from "react";
 
 import { AppendNoteForm } from "../components/AppendNoteForm";
 import { EditNote } from "../components/EditNote";
-import { SearchNotePreferences, Note, Vault } from "./interfaces";
+import { SearchNotePreferences, Note, Vault, Media } from "./interfaces";
 import { isNotePinned, pinNote, unpinNote } from "./pinNoteUtils";
 import { NoteQuickLook } from "../components/NoteQuickLook";
-import { deleteNote, appendSelectedTextTo } from "./utils";
-import { NoteAction, PrimaryAction } from "./constants";
+import { deleteNote, appendSelectedTextTo, getOpenPathInObsidianTarget } from "./utils";
+import { NoteAction, ObsidianIconDynamicBold, PrimaryAction } from "./constants";
 
-export function ShowNoteInFinderAction(props: { note: Note }) {
-  const { note } = props;
+export function ShowPathInFinderAction(props: { path: string }) {
+  const { path } = props;
   return (
     <Action.ShowInFinder
       title="Show in Finder"
       icon={Icon.Finder}
-      path={note.path}
+      path={path}
       shortcut={{ modifiers: ["opt"], key: "enter" }}
     />
   );
@@ -81,12 +81,12 @@ export function PasteNoteAction(props: { note: Note }) {
 
 export function CopyMarkdownLinkAction(props: { note: Note }) {
   const { note } = props;
-  const URIEncodedPath = encodeURIComponent(note.path);
+
   return (
     <Action.CopyToClipboard
       title="Copy Markdown Link"
       icon={Icon.Link}
-      content={`[${note.title}](obsidian://open?path=${URIEncodedPath})`}
+      content={`[${note.title}](${getOpenPathInObsidianTarget(note.path)})`}
       shortcut={{ modifiers: ["opt"], key: "l" }}
     />
   );
@@ -94,12 +94,12 @@ export function CopyMarkdownLinkAction(props: { note: Note }) {
 
 export function CopyObsidianURIAction(props: { note: Note }) {
   const { note } = props;
-  const URIEncodedPath = encodeURIComponent(note.path);
+
   return (
     <Action.CopyToClipboard
       title="Copy Obsidian URI"
       icon={Icon.Link}
-      content={`obsidian://open?path=${URIEncodedPath}`}
+      content={getOpenPathInObsidianTarget(note.path)}
       shortcut={{ modifiers: ["opt"], key: "u" }}
     />
   );
@@ -123,7 +123,7 @@ export function PinNoteAction(props: { note: Note; vault: Vault; actionCallback:
           actionCallback(NoteAction.Pin);
         }
       }}
-      icon={pinned ? Icon.XmarkCircle : Icon.Pin}
+      icon={pinned ? Icon.XMarkCircle : Icon.Pin}
     />
   );
 }
@@ -156,14 +156,10 @@ export function QuickLookAction(props: { note: Note; vault: Vault; actionCallbac
   );
 }
 
-export function OpenInObsidianAction(props: { note: Note }) {
-  const { note } = props;
+export function OpenPathInObsidianAction(props: { path: string }) {
+  const { path } = props;
   return (
-    <Action.Open
-      title="Open in Obsidian"
-      target={"obsidian://open?path=" + encodeURIComponent(note.path)}
-      icon={Icon.TextDocument}
-    />
+    <Action.Open title="Open in Obsidian" target={getOpenPathInObsidianTarget(path)} icon={ObsidianIconDynamicBold} />
   );
 }
 
@@ -177,7 +173,7 @@ export function NoteActions(props: { note: Note; vault: Vault; actionCallback: (
 
   return (
     <React.Fragment>
-      <ShowNoteInFinderAction note={note} />
+      <ShowPathInFinderAction path={note.path} />
       <EditNoteAction note={note} vault={vault} actionCallback={actionCallback} />
       <AppendToNoteAction note={note} actionCallback={actionCallback} />
       <AppendSelectedTextToNoteAction note={note} actionCallback={actionCallback} />
@@ -196,7 +192,7 @@ export function OpenNoteActions(props: { note: Note; vault: Vault; actionCallbac
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
   const quicklook = <QuickLookAction note={note} vault={vault} actionCallback={actionCallback} />;
-  const obsidian = <OpenInObsidianAction note={note} />;
+  const obsidian = <OpenPathInObsidianAction path={note.path} />;
 
   if (primaryAction == PrimaryAction.QuickLook) {
     return (

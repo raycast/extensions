@@ -1,7 +1,7 @@
 import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
 
-import { Note, Vault, SearchNotePreferences } from "../utils/interfaces";
+import { Note, Vault, SearchNotePreferences, SearchArguments } from "../utils/interfaces";
 import {
   readingTime,
   wordCount,
@@ -98,11 +98,12 @@ export function NoteList(props: {
   isLoading?: boolean;
   title?: string;
   vault: Vault;
+  searchArguments: SearchArguments;
   action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
   onSearchChange: (search: string) => void;
   onDelete: (note: Note) => void;
 }) {
-  const { notes, allNotes, vault, isLoading, title, tags, action, onSearchChange, onDelete } = props;
+  const { notes, allNotes, vault, isLoading, title, tags, searchArguments, action, onSearchChange, onDelete } = props;
   const pref = getPreferenceValues<SearchNotePreferences>();
   const { showDetail } = pref;
 
@@ -121,6 +122,11 @@ export function NoteList(props: {
       return (
         <List.Dropdown
           tooltip="Search For"
+          defaultValue={
+            searchArguments.tagArgument.startsWith("#")
+              ? searchArguments.tagArgument
+              : "#" + searchArguments.tagArgument
+          }
           onChange={(value) => {
             if (value != "all") {
               if (props.setNotes) {
@@ -151,6 +157,7 @@ export function NoteList(props: {
       isShowingDetail={showDetail}
       onSearchTextChange={onSearchChange}
       navigationTitle={title}
+      searchText={searchArguments.searchArgument}
       searchBarAccessory={<DropDownList />}
     >
       {notes?.map((note) => (

@@ -25,6 +25,20 @@
       "subtitle": "Obsidian",
       "description": "Search, open, view, copy, paste and edit any note in Obsidian.",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tagArgument",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "excludedFolders",
@@ -211,6 +225,20 @@
       "subtitle": "Obsidian",
       "description": "Search, open, view, copy, paste and edit pinned notes.",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tagArgument",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "removeYAML",
@@ -365,17 +393,77 @@
           ]
         }
       ]
+    },
+    {
+      "name": "searchMedia",
+      "title": "Search Media",
+      "subtitle": "Obsidian",
+      "description": "Search for media in your vault",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "typeArgument",
+          "placeholder": "Type",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "excludedFolders",
+          "type": "textfield",
+          "placeholder": "folder1, folder2, ...",
+          "title": "Exclude following folders",
+          "required": false,
+          "description": "Specify which folders to exclude (comma separated)"
+        },
+        {
+          "name": "imageSize",
+          "type": "dropdown",
+          "title": "Image Size",
+          "required": false,
+          "description": "Select the image size to display",
+          "defaultValue": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "obsidianMenuBar",
+      "title": "Obsidian Menu Bar",
+      "subtitle": "Obsidian",
+      "description": "See your pinned notes at a glance and control actions from the menu bar.",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.38.1",
     "@types/uuid": "^8.3.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.43",
+    "@types/react": "^17.0.47",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

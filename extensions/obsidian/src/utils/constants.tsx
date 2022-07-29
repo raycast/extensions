@@ -1,3 +1,5 @@
+import { Grid } from "@raycast/api";
+
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
 export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
@@ -46,4 +48,82 @@ export const MONTH_NUMBER_TO_STRING: Record<number, string> = {
   9: "Oct",
   10: "Nov",
   11: "Dec",
+};
+
+export const VIDEO_FILE_EXTENSIONS = [
+  ".webm",
+  ".mkv",
+  ".flv",
+  ".vob",
+  ".ogv",
+  ".ogg",
+  ".rrc",
+  ".gifv",
+  ".mng",
+  ".mov",
+  ".avi",
+  ".qt",
+  ".wmv",
+  ".yuv",
+  ".rm",
+  ".asf",
+  ".amv",
+  ".mp4",
+  ".m4p",
+  ".m4v",
+  ".mpg",
+  ".mp2",
+  ".mpeg",
+  ".mpe",
+  ".mpv",
+  ".m4v",
+  ".svi",
+  ".3gp",
+  ".3g2",
+  ".mxf",
+  ".roq",
+  ".nsv",
+  ".flv",
+  ".f4v",
+  ".f4p",
+  ".f4a",
+  ".f4b",
+  ".mod",
+];
+
+export const AUDIO_FILE_EXTENSIONS = [
+  "aac",
+  "aiff",
+  "ape",
+  "au",
+  "flac",
+  "gsm",
+  "it",
+  "m3u",
+  "m4a",
+  "mid",
+  "mod",
+  "mp3",
+  "mpa",
+  "pls",
+  "ra",
+  "s3m",
+  "sid",
+  "wav",
+  "wma",
+  "xm",
+];
+
+export const IMAGE_SIZE_MAPPING: Map<string, Grid.ItemSize> = new Map([
+  ["small", Grid.ItemSize.Small],
+  ["large", Grid.ItemSize.Large],
+  ["medium", Grid.ItemSize.Medium],
+]);
+
+export const ObsidianIconWhiteBold = { source: "obsidian-icon-white-bold.svg" };
+export const ObsidianIconBlackBold = { source: "obsidian-icon-black-bold.svg" };
+export const ObsidianIconBlackBolder = { source: "obsidian-icon-black-bolder.svg" };
+export const ObsidianIconWhiteBolder = { source: "obsidian-icon-white-bolder.svg" };
+export const ObsidianIconDynamicBold = {
+  source: { light: "obsidian-icon-black-bolder.svg", dark: "obsidian-icon-white-bolder.svg" },
 };
