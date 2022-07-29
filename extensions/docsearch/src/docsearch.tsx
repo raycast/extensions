@@ -90,6 +90,7 @@ export default function ChooseSearchDocumentation() {
     <List
       throttle={true}
       navigationTitle="Documentations"
+      searchBarPlaceholder="Choose a documentation"
       onSearchTextChange={(query) =>
         query
           ? setCurrentAPIData(APIData.filter((api) => api.name.toLowerCase().includes(query.toLowerCase())))
@@ -110,6 +111,7 @@ export default function ChooseSearchDocumentation() {
                   push(<SearchDocumentation API={API} />);
                 }}
               />
+              <Action.OpenInBrowser url={API.homepage} title="Open in Browser" />
             </ActionPanel>
           }
         />

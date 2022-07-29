@@ -1,7 +1,8 @@
 # DocSearch Changelog
 
-## [Support for the new documentation] - 2022-07-29
+## [New feature and support for the new documentation] - 2022-07-29
 
+- 🌟 Add open documentation homepage button
 - 📄 Support [Arthas](https://arthas.aliyun.com/)
 - 📄 Support [Bootstrap](https://getbootstrap.com/)
 

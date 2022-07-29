@@ -7,6 +7,7 @@ export default <IAPIData[]>[
     apiKey: "03fb4b6577b57b5dafc792d9ddf66508",
     appId: "UX8WBNVHHR",
     indexName: "arthas",
+    homepage: "https://arthas.aliyun.com/",
   },
   {
     name: "Bootstrap",
@@ -14,6 +15,7 @@ export default <IAPIData[]>[
     apiKey: "5990ad008512000bba2cf951ccf0332f",
     appId: "BH4D9OD16A",
     indexName: "bootstrap",
+    homepage: "https://getbootstrap.com/",
     searchParameters: {
       facetFilters: ["version:5.1"],
     },
@@ -24,6 +26,7 @@ export default <IAPIData[]>[
     apiKey: "6ade5f1ff34e94690f9ea38cddcc2f55",
     appId: "BH4D9OD16A",
     indexName: "apache_echarts",
+    homepage: "https://echarts.apache.org/en/index.html",
     searchParameters: {
       facetFilters: ["lang:en"],
     },
@@ -34,6 +37,7 @@ export default <IAPIData[]>[
     apiKey: "6ade5f1ff34e94690f9ea38cddcc2f55",
     appId: "BH4D9OD16A",
     indexName: "apache_echarts",
+    homepage: "https://echarts.apache.org/zh/index.html",
     subtitle: "zh-Hans",
     searchParameters: {
       facetFilters: ["lang:zh"],
@@ -45,6 +49,7 @@ export default <IAPIData[]>[
     apiKey: "a57ef92bf2adfae863a201ee43d6b5a1",
     appId: "BH4D9OD16A",
     indexName: "brew_all",
+    homepage: "https://brew.sh/",
   },
   {
     name: "Prettier",
@@ -52,6 +57,7 @@ export default <IAPIData[]>[
     apiKey: "9fcdb2a62af4c47cc5eecf3d5a747818",
     appId: "BH4D9OD16A",
     indexName: "prettier",
+    homepage: "https://prettier.io/",
   },
   {
     name: "React",
@@ -59,6 +65,7 @@ export default <IAPIData[]>[
     apiKey: "36221914cce388c46d0420343e0bb32e",
     appId: "BH4D9OD16A",
     indexName: "react",
+    homepage: "https://reactjs.org/",
   },
   {
     name: "React",
@@ -66,6 +73,7 @@ export default <IAPIData[]>[
     apiKey: "72499aaa151dba0828babe727c7b86ee",
     appId: "BH4D9OD16A",
     indexName: "reactjs_zh-hans",
+    homepage: "https://zh-hans.reactjs.org/",
     subtitle: "zh-Hans",
   },
   {
@@ -74,6 +82,7 @@ export default <IAPIData[]>[
     apiKey: "6247bc0db93150fd9e531b93a3fa4046",
     appId: "BH4D9OD16A",
     indexName: "rsshub",
+    homepage: "https://docs.rsshub.app/",
   },
   {
     name: "Slidev",
@@ -81,6 +90,7 @@ export default <IAPIData[]>[
     apiKey: "1a5c5a504139c58f428974c78c55291d",
     appId: "BH4D9OD16A",
     indexName: "slidev",
+    homepage: "https://cn.sli.dev/",
     subtitle: "zh-Hans",
     searchParameters: {
       facetFilters: ["language:cn"],
@@ -92,6 +102,7 @@ export default <IAPIData[]>[
     apiKey: "5fc87cef58bb80203d2207578309fab6",
     appId: "KNPXZI5B0M",
     indexName: "tailwindcss",
+    homepage: "https://tailwindcss.com/",
   },
   {
     name: "Unidata",
@@ -99,6 +110,7 @@ export default <IAPIData[]>[
     apiKey: "3f968df846740a9e2b38e89d8e6ce9fa",
     appId: "LNA1UZCPZB",
     indexName: "unidata",
+    homepage: "https://unidata.app/",
     searchParameters: {
       facetFilters: ["lang:en-US"],
     },
@@ -109,6 +121,7 @@ export default <IAPIData[]>[
     apiKey: "b573aa848fd57fb47d693b531297403c",
     appId: "BH4D9OD16A",
     indexName: "vitejs",
+    homepage: "https://vitejs.dev/",
   },
   {
     name: "Vite",
@@ -116,6 +129,7 @@ export default <IAPIData[]>[
     apiKey: "b573aa848fd57fb47d693b531297403c",
     appId: "BH4D9OD16A",
     indexName: "vitejs",
+    homepage: "https://cn.vitejs.dev/",
     subtitle: "zh-Hans",
     searchParameters: {
       facetFilters: ["tags:cn"],
@@ -127,6 +141,7 @@ export default <IAPIData[]>[
     apiKey: "9c3ced6fed60d2670bb36ab7e8bed8bc",
     appId: "ZTF29HGJ69",
     indexName: "vitest",
+    homepage: "https://vitest.dev/",
   },
   {
     name: "Vue3",
@@ -134,6 +149,7 @@ export default <IAPIData[]>[
     apiKey: "f49cbd92a74532cc55cfbffa5e5a7d01",
     appId: "ML0LEBN7FQ",
     indexName: "vuejs",
+    homepage: "https://vuejs.org/",
   },
   {
     name: "VueUse",
@@ -141,6 +157,7 @@ export default <IAPIData[]>[
     apiKey: "a99ef8de1b2b27949975ce96642149c6",
     appId: "BH4D9OD16A",
     indexName: "vueuse",
+    homepage: "https://vueuse.org/",
   },
   {
     name: "Vuepress v1",
@@ -148,6 +165,7 @@ export default <IAPIData[]>[
     apiKey: "3a539aab83105f01761a137c61004d85",
     appId: "BH4D9OD16A",
     indexName: "vuepress",
+    homepage: "https://vuepress.vuejs.org/",
   },
   {
     name: "Vuepress v2",
@@ -155,5 +173,6 @@ export default <IAPIData[]>[
     apiKey: "9a9058b8655746634e01071411c366b8",
     appId: "34YFD9IUQ2",
     indexName: "vuepress",
+    homepage: "https://v2.vuepress.vuejs.org/",
   },
 ];
