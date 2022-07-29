@@ -76,7 +76,7 @@ const keepPRWithFeedback = (login: string, lastVisitedAt: string) => (pull: Pull
   }
 
   if (hasRecentComment(login, pull, lastVisitedAt) && pull.myIcon !== "💬") {
-    pull.myIcon = "💬";
+    pull.myIcon += "💬";
   }
 
   return pull;
