@@ -5,6 +5,7 @@ import api from "../lib/api";
 import NoteForm from "./NoteForm";
 import { useCachedPromise } from "@raycast/utils";
 import { getNoteUrl } from "../helpers/noteHelper";
+import CreateNote from "../create-note";
 
 export default function NoteActions({
   note,
@@ -73,6 +74,10 @@ export default function NoteActions({
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           title="Delete Note"
+          shortcut={{
+            key: "d",
+            modifiers: ["cmd", "shift"],
+          }}
           onAction={async () => {
             confirmAlert({
               title: "Delete Note",
@@ -108,6 +113,16 @@ export default function NoteActions({
           }}
         />
       </ActionPanel.Section>
+
+      <Action.Push
+        title="Create Note"
+        icon={Icon.Plus}
+        target={<CreateNote />}
+        shortcut={{
+          key: "c",
+          modifiers: ["cmd", "shift"],
+        }}
+      />
     </>
   );
 }
