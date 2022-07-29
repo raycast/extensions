@@ -9,7 +9,7 @@ import {
   getSelectedText,
   Icon,
   List,
-  useNavigation
+  useNavigation,
 } from "@raycast/api";
 import fetch from "node-fetch";
 import crypto from "crypto";
@@ -83,7 +83,7 @@ function translateAPI(content: string, from_language: string, to_language: strin
   url.search = params.toString();
   return fetch(url.toString(), {
     method: "GET",
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 }
 
@@ -247,7 +247,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
     translation: undefined,
     web: undefined,
     webdict: { url: "" },
-    errorCode: ""
+    errorCode: "",
   });
 
   const { content, from_language, to_language } = props;
@@ -260,7 +260,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
   useEffect(() => {
     (async () => {
       const response = await translateAPI(content, from_language, to_language);
-      set_translate_result(await response.json() as translateResult);
+      set_translate_result((await response.json()) as translateResult);
     })();
   }, []);
 
@@ -380,8 +380,11 @@ export default function Main() {
             title="Translate"
             onSubmit={(input: translateRequest) => {
               push(
-                <Translate content={input.content || select} to_language={input.to_language}
-                           from_language={input.from_language} />
+                <Translate
+                  content={input.content || select}
+                  to_language={input.to_language}
+                  from_language={input.from_language}
+                />
               );
             }}
           />
