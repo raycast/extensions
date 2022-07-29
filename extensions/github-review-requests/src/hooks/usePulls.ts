@@ -43,6 +43,7 @@ const usePulls = () => {
       .then(() => console.debug("usePulls: start"))
       .then(() => getLogin().then(setLogin))
       .then(() => (isActionUserInitiated() ? exitShortcut() : runPullIteration()))
+      .catch(console.error)
       .finally(() => setIsRemotePullsLoading(false))
       .finally(() => console.debug("usePulls: end"));
   }, [isPullStoreLoading]);
