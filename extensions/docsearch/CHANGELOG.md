@@ -1,6 +1,11 @@
 # DocSearch Changelog
 
-## [Support some documentation] - 2022-07-28
+## [Support for the new documentation] - 2022-07-29
+
+- 📄 Support [Arthas](https://arthas.aliyun.com/)
+- 📄 Support [Bootstrap](https://getbootstrap.com/)
+
+## [Support for the new documentation] - 2022-07-28
 
 - 📄 Support [Slidev_zh-Hans](https://cn.sli.dev/)
 - 📄 Support [Unidata](https://unidata.app/)

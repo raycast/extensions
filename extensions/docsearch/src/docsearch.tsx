@@ -15,7 +15,7 @@ function escape2Html(str: string) {
 
 function SearchDocumentation(props: { API: IAPIData }) {
   const currentAPI = props.API;
-  const searchClient = algoliasearch(currentAPI.APPID, currentAPI.APIKey);
+  const searchClient = algoliasearch(currentAPI.appId, currentAPI.apiKey);
   const searchIndex = searchClient.initIndex(currentAPI.indexName);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +99,7 @@ export default function ChooseSearchDocumentation() {
       {currentAPIData?.map((API: IAPIData) => (
         <List.Item
           icon={API.icon}
-          key={API.APIKey}
+          key={API.apiKey}
           title={API.name}
           subtitle={API.subtitle}
           actions={
