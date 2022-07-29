@@ -15,9 +15,14 @@ export default function Command(props: { arguments: MediaSearchArguments }) {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <MediaGrid vault={vault} searchArguments={props.arguments}/>} />;
+    return (
+      <VaultSelection
+        vaults={vaults}
+        target={(vault: Vault) => <MediaGrid vault={vault} searchArguments={props.arguments} />}
+      />
+    );
   } else if (vaults.length == 1) {
-    return <MediaGrid vault={vaults[0]} searchArguments={props.arguments}/>;
+    return <MediaGrid vault={vaults[0]} searchArguments={props.arguments} />;
   } else {
     noVaultPathsToast();
     return <List />;
