@@ -10,6 +10,8 @@ export type PullRequestShort = {
   reviews: ReviewShort[];
   comments: CommentShort[];
   requestedReviewers: ReviewerShort[];
+
+  myIcon: string;
 };
 
 export type PullRequestLastVisit = {

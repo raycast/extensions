@@ -11,6 +11,7 @@ const usePulls = () => {
     usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
+  const [login, setLogin] = useState("");
 
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
 
@@ -37,6 +38,7 @@ const usePulls = () => {
 
     Promise.resolve()
       .then(() => console.debug("usePulls: start"))
+      .then(() => getLogin().then(setLogin))
       .then(() => isActionUserInitiated() ? exitShortcut() : runPullIteration())
       .finally(() => setIsRemotePullsLoading(false))
       .finally(() => console.debug("usePulls: end"));
@@ -44,6 +46,8 @@ const usePulls = () => {
 
   return {
     isLoading: isPullStoreLoading || isRemotePullsLoading,
+
+    login,
 
     updatedPulls,
     recentlyVisitedPulls,

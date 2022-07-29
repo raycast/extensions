@@ -4,7 +4,7 @@ import PullRequestItem from "./components/PullRequestItem";
 import {PullRequestShort} from "./types";
 
 const actionablePullRequests = () => {
-  const {isLoading, updatedPulls, recentlyVisitedPulls, visitPull} = usePulls();
+  const {isLoading, login, updatedPulls, recentlyVisitedPulls, visitPull} = usePulls();
 
   const title = getTitle(updatedPulls);
   const icon = getIcon(updatedPulls);
@@ -17,7 +17,8 @@ const actionablePullRequests = () => {
         <PullRequestItem
           key={pull.id}
           pull={pull}
-          onAction={() => open(pull.url).then(() => visitPull(pull))}
+          showMyIcon
+          onAction={() => open(pull.url).then(() => visitPull(login, pull))}
         />
       ))}
 

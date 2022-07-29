@@ -26,6 +26,8 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               createdAt,
               updatedAt,
 
+              myIcon: "",
+
               reviews: (reviews?.nodes || [])
                 .map((node) =>
                   !node

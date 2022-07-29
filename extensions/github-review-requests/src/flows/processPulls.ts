@@ -1,4 +1,4 @@
-import {PullRequestLastVisit, PullRequestShort} from "../types";
+import {PullRequestLastVisit, PullRequestShort, ReviewShort} from "../types";
 
 export const processPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullRequestShort[]) =>
   pulls
@@ -6,25 +6,23 @@ export const processPulls = (login: string, hiddenPulls: PullRequestLastVisit[],
     .filter((pull) => pull !== null) as PullRequestShort[];
 
 const pickAction = (login: string, lastVisits: PullRequestLastVisit[], pull: PullRequestShort): (pull: PullRequestShort) => PullRequestShort | null => {
-  console.debug(createLogPrefix(pull));
-
   const lastVisitedAt = getLastVisitedAt(lastVisits, pull);
 
   switch (true) {
     case isAlreadyVisited(pull, lastVisitedAt):
       return dropAlreadyVisitedPR;
 
-    case isMyPRNew2(login, pull):
+    case isMyPRNew(login, pull):
       return dropMyPR;
 
     case isSomeoneElsePRNNew(login, pull):
       return keepSomeoneElsePR;
 
-    case isReviewerRequested(pull):
+    case isReviewerRequested(login, pull):
       return keepPRWithRequestedReviewers;
 
     case hasRecentComment(login, pull, lastVisitedAt) || hasRecentReview(login, pull, lastVisitedAt):
-      return keepPRWithFeedback;
+      return keepPRWithFeedback(login, lastVisitedAt);
 
     default:
       return dropPRInUnknownState;
@@ -34,7 +32,7 @@ const pickAction = (login: string, lastVisits: PullRequestLastVisit[], pull: Pul
 const isAlreadyVisited = (pull: PullRequestShort, lastVisitedAt: string) =>
   pull.updatedAt < lastVisitedAt;
 
-const isMyPRNew2 = (login: string, pull: PullRequestShort) =>
+const isMyPRNew = (login: string, pull: PullRequestShort) =>
   pull.user.login === login &&
   pull.comments.length === 0 &&
   pull.reviews.length === 0;
@@ -42,8 +40,8 @@ const isMyPRNew2 = (login: string, pull: PullRequestShort) =>
 const isSomeoneElsePRNNew = (login: string, pull: PullRequestShort) =>
   pull.user.login !== login && pull.comments.length === 0 && pull.reviews.length === 0;
 
-const isReviewerRequested = (pull: PullRequestShort) =>
-  pull.requestedReviewers.length > 0;
+const isReviewerRequested = (login: string, pull: PullRequestShort) =>
+  pull.user.login !== login && pull.requestedReviewers.length > 0;
 
 const hasRecentComment = (login: string, pull: PullRequestShort, lastVisitedAt: string) =>
   pull.comments.some((comment) => comment.user.login !== login && comment.createdAt > lastVisitedAt);
@@ -66,17 +64,46 @@ const dropMyPR = (pull: PullRequestShort) => {
 const keepSomeoneElsePR = (pull: PullRequestShort) => {
   console.debug(`${createLogPrefix(pull)} action=keep reason=someone-else-pr-is-new`);
 
+  pull.myIcon = "👥";
+
   return pull;
 }
 
-const keepPRWithFeedback = (pull: PullRequestShort) => {
+const keepPRWithFeedback = (login: string, lastVisitedAt: string) => (pull: PullRequestShort) => {
   console.debug(`${createLogPrefix(pull)} action=keep reason=has-feedback`);
 
+  if (hasRecentReview(login, pull, lastVisitedAt)) {
+    pull.myIcon = selectIconForState(pull.reviews);
+  }
+
+  if (hasRecentComment(login, pull, lastVisitedAt) && pull.myIcon !== "💬") {
+    pull.myIcon = "💬";
+  }
+
   return pull;
 }
+
+const selectIconForState = (reviews: ReviewShort[]) => {
+  switch (reviews[0]?.state) {
+    case "APPROVED":
+      return "👍";
+    case "CHANGES_REQUESTED":
+      return "🔄";
+    case "COMMENTED":
+      return "💬";
+    case "DISMISSED":
+      return "☁️";
+    case "PENDING":
+      return "🕑";
+    default:
+      return "💬";
+  }
+};
 
 const keepPRWithRequestedReviewers = (pull: PullRequestShort) => {
   console.debug(`${createLogPrefix(pull)} action=keep reason=has-requested-reviewers`);
+
+  pull.myIcon = "👥";
 
   return pull;
 }
