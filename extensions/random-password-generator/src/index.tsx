@@ -1,10 +1,16 @@
 import { List } from "@raycast/api";
+import { ZxcvbnResult } from "@zxcvbn-ts/core";
 import { useEffect, useState } from "react";
 import { PasswordItem } from "./interface";
 import { StoryListItem } from "./StoryListItem";
 import { generatePasswords } from "./util";
 
 const passwordLengths = [128, 64, 32, 24, 20, 16, 12, 8];
+// stores whether password details should be auto calculated for different password length
+const autoCalculatePrefs = passwordLengths.reduce((acc, length) => {
+  acc[length] = length <= 24;
+  return acc;
+}, {} as Record<number, boolean>);
 
 const defaultPasswordLength = 16;
 
@@ -16,6 +22,7 @@ interface PasswordGroup {
 export default function Command() {
   const [loading, setLoading] = useState(true);
   const [passwordLength, setPasswordLength] = useState<number>(defaultPasswordLength);
+  const [focusedPassword, setFocusedPassword] = useState<string>();
   const [showingDetails, setShowingDetails] = useState(false);
   const [passwordGroups, setPasswordGroups] = useState<PasswordGroup[]>();
 
@@ -47,6 +54,7 @@ export default function Command() {
     <List
       isShowingDetail={showingDetails}
       isLoading={loading}
+      onSelectionChange={(id?: string) => setFocusedPassword(id)}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Password Length"
@@ -68,6 +76,8 @@ export default function Command() {
               options={options}
               showingDetails={showingDetails}
               setShowingDetails={() => setShowingDetails(!showingDetails)}
+              autoCalculateDetails={autoCalculatePrefs[passwordLength]}
+              isFocused={!!focusedPassword && focusedPassword === password}
             />
           ))}
         </List.Section>

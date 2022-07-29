@@ -1,5 +1,3 @@
-import { MatchExtended } from "@zxcvbn-ts/core/dist/types";
-
 export interface PasswordOptions {
   name: string;
   isUpperCase: boolean;
@@ -7,13 +5,6 @@ export interface PasswordOptions {
   isSymbol: boolean;
   isNumeric: boolean;
   isSegmented?: boolean;
-}
-export interface PasswordDetails {
-  crackTime: string;
-  score: number;
-  warning: string;
-  suggestions: string[];
-  sequence: MatchExtended[];
 }
 export interface PasswordItem {
   password: string;
@@ -23,4 +14,6 @@ export interface PasswordItem {
 export interface StoryListItemProps extends PasswordItem {
   setShowingDetails: () => void;
   showingDetails: boolean;
+  autoCalculateDetails: boolean;
+  isFocused: boolean;
 }
