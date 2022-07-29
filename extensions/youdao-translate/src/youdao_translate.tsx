@@ -342,7 +342,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
   } else {
     let result = "";
     translate_result.translation?.forEach((value) => {
-      result += `* ${value}`;
+      result += `${value}`;
     });
     return (
       <Detail
