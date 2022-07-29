@@ -20,11 +20,11 @@ const pickAction = (login: string, lastVisits: PullRequestLastVisit[], pull: Pul
     case isSomeoneElsePRNNew(login, pull):
       return keepSomeoneElsePR;
 
-    case hasRecentComment(login, pull, lastVisitedAt) || hasRecentReview(login, pull, lastVisitedAt):
-      return keepPRWithFeedback;
-
     case isReviewerRequested(pull):
       return keepPRWithRequestedReviewers;
+
+    case hasRecentComment(login, pull, lastVisitedAt) || hasRecentReview(login, pull, lastVisitedAt):
+      return keepPRWithFeedback;
 
     default:
       return dropPRInUnknownState;
