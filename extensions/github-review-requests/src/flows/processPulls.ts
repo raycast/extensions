@@ -1,139 +1,93 @@
-import {CommentShort, PullRequestLastVisit, PullRequestShort, ReviewShort} from "../types";
+import {PullRequestLastVisit, PullRequestShort} from "../types";
 
 export const processPulls = (login: string, hiddenPulls: PullRequestLastVisit[], pulls: PullRequestShort[]) =>
   pulls
-    .map(processPull(login, hiddenPulls))
+    .map(pull => pickAction(login, hiddenPulls, pull)(pull))
     .filter((pull) => pull !== null) as PullRequestShort[];
 
-const processPull = (login: string, hiddenPulls: PullRequestLastVisit[]) => (pull: PullRequestShort) => {
-  const logPrefix = createLogPrefix(pull);
+const pickAction = (login: string, lastVisits: PullRequestLastVisit[], pull: PullRequestShort): (pull: PullRequestShort) => PullRequestShort | null => {
+  console.debug(createLogPrefix(pull));
 
-  console.debug(`${logPrefix} url=${pull.url}`);
+  const lastVisitedAt = getLastVisitedAt(lastVisits, pull);
 
-  if (isMyPRNew(logPrefix, login, pull)) {
-    return null;
+  switch (true) {
+    case isAlreadyVisited(pull, lastVisitedAt):
+      return dropAlreadyVisitedPR;
+
+    case isMyPRNew2(login, pull):
+      return dropMyPR;
+
+    case isSomeoneElsePRNNew(login, pull):
+      return keepSomeoneElsePR;
+
+    case hasRecentComment(login, pull, lastVisitedAt) || hasRecentReview(login, pull, lastVisitedAt):
+      return keepPRWithFeedback;
+
+    case isReviewerRequested(pull):
+      return keepPRWithRequestedReviewers;
+
+    default:
+      return dropPRInUnknownState;
   }
+}
 
-  const lastVisitedAt = getLastVisitedAt(hiddenPulls, pull);
+const isAlreadyVisited = (pull: PullRequestShort, lastVisitedAt: string) =>
+  pull.updatedAt < lastVisitedAt;
 
-  if (isSomeonesPRNew(logPrefix, login, pull)) {
-    if (pull.createdAt < lastVisitedAt) {
-      console.debug(`${logPrefix} pull.createdAt=${pull.createdAt} lastVisitedAt=${lastVisitedAt} action=drop`);
+const isMyPRNew2 = (login: string, pull: PullRequestShort) =>
+  pull.user.login === login &&
+  pull.comments.length === 0 &&
+  pull.reviews.length === 0;
 
-      return null;
-    }
+const isSomeoneElsePRNNew = (login: string, pull: PullRequestShort) =>
+  pull.user.login !== login && pull.comments.length === 0 && pull.reviews.length === 0;
 
-    console.debug(`${logPrefix} action=keep`);
+const isReviewerRequested = (pull: PullRequestShort) =>
+  pull.requestedReviewers.length > 0;
 
-    return pull;
-  }
+const hasRecentComment = (login: string, pull: PullRequestShort, lastVisitedAt: string) =>
+  pull.comments.some((comment) => comment.user.login !== login && comment.createdAt > lastVisitedAt);
 
-  if (pull.updatedAt < lastVisitedAt) {
-    console.debug(`${logPrefix} pull.updatedAt=${pull.updatedAt} lastVisitedAt=${lastVisitedAt} action=drop`);
+const hasRecentReview = (login: string, pull: PullRequestShort, lastVisit: string) =>
+  pull.reviews.some((review) => review.user.login !== login && review.submittedAt > lastVisit);
 
-    return null;
-  }
+const dropAlreadyVisitedPR = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=drop reason=visited`);
 
-  if (pull.requestedReviewers.length > 0) {
-    return pull;
-  }
+  return null;
+}
 
-  const comment = getEligibleComment(logPrefix, login, lastVisitedAt, pull);
-  const review = getEligibleReview(login, lastVisitedAt, pull);
+const dropMyPR = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=drop reason=my-pr-is-new`);
 
-  if (!comment && !review) {
-    console.debug(`${logPrefix} comment=none review=none action=drop`);
+  return null;
+}
 
-    return null;
-  }
-
-  pull.url = selectLatestURLFrom(comment, review) || pull.url;
-  console.debug(
-    `${logPrefix} comment.createdAt=${comment?.createdAt} review.submittedAt=${review?.submittedAt} action=keep`
-  );
+const keepSomeoneElsePR = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=keep reason=someone-else-pr-is-new`);
 
   return pull;
-};
+}
+
+const keepPRWithFeedback = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=keep reason=has-feedback`);
+
+  return pull;
+}
+
+const keepPRWithRequestedReviewers = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=keep reason=has-requested-reviewers`);
+
+  return pull;
+}
+
+const dropPRInUnknownState = (pull: PullRequestShort) => {
+  console.debug(`${createLogPrefix(pull)} action=drop reason=unknown-state`);
+
+  return null;
+}
 
 const createLogPrefix = (pull: PullRequestShort) => `processPull: prid=${prid(pull)}`;
-
-const isMyPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
-  const authored = pull.user.login === login;
-  const noComments = pull.comments.length === 0;
-  const noReviews = pull.reviews.length === 0;
-
-  const prIsFresh = authored && noComments && noReviews;
-
-  if (prIsFresh) {
-    console.debug(`${logPrefix} author=@me comments=none reviews=none intention=drop`);
-  }
-
-  return prIsFresh;
-};
-
-const isSomeonesPRNew = (logPrefix: string, login: string, pull: PullRequestShort) => {
-  const authored = pull.user.login === login;
-  const commented = pull.comments.length > 0;
-  const reviewed = pull.reviews.length > 0;
-
-  const prIsFresh = !authored && !commented && !reviewed;
-
-  if (prIsFresh) {
-    console.debug(`${logPrefix} author=${pull.user.login} comments=none reviews=none`);
-  }
-
-  return prIsFresh;
-};
-
-const getEligibleComment = (logPrefix: string, login: string, lastVisit: string, pull: PullRequestShort) => {
-  const comment = pull.comments[pull.comments.length - 1];
-
-  if (!comment) {
-    console.debug(`${logPrefix} comment=none`);
-
-    return null;
-  }
-
-  if (comment.user.login === login) {
-    console.debug(`${logPrefix} comment.user=@me`);
-
-    return null;
-  }
-
-  if (comment.createdAt < lastVisit) {
-    console.debug(`${logPrefix} comment.createdAt=${comment.createdAt} lastVisit=${lastVisit}`);
-
-    return null;
-  }
-
-  console.debug(
-    `${logPrefix} comment.user=${comment.user.login} comment.createdAt=${comment.createdAt} lastVisit=${lastVisit}`
-  );
-
-  return comment;
-};
-
-const getEligibleReview = (login: string, lastVisit: string, pull: PullRequestShort) => {
-  const review = pull.reviews[pull.reviews.length - 1];
-
-  return review && review.user.login !== login && review.submittedAt > lastVisit ? review : null;
-};
-
-const selectLatestURLFrom = (comment: CommentShort | null, review: ReviewShort | null) => {
-  if (!comment && !review) {
-    return null;
-  }
-
-  if (!comment) {
-    return review?.url;
-  }
-
-  if (!review) {
-    return comment?.url;
-  }
-
-  return comment.createdAt > review.submittedAt ? comment.url : review.url;
-};
 
 const prid = ({url, number}: PullRequestShort) => `${url.split("/")[3]}/${url.split("/")[4]}#${number}`;
 
