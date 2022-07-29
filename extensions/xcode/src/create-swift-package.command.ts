@@ -11,8 +11,5 @@ export default () => {
   // Use Navigation
   const navigation = useNavigation();
   // Xcode create Swift Package Form
-  return xcodeCreateSwiftPackageForm(
-    xcodeSwiftPackageService,
-    navigation
-  );
+  return xcodeCreateSwiftPackageForm(xcodeSwiftPackageService, navigation);
 };

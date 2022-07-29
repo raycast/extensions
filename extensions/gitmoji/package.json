@@ -9,14 +9,34 @@
   "commands": [
     {
       "name": "gitmoji",
-      "title": "gitmoji",
-      "description": "Search your gitmoji",
+      "title": "Gitmoji",
+      "description": "Search your Gitmoji",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy",
+      "data": [
+        {
+          "title": "Emoji ✨",
+          "value": "emoji"
+        },
+        {
+          "title": "Code :sparkles:",
+          "value": "code"
+        }
+      ],
+      "description": "Copy the emoji or copy the code",
+      "default": "emoji"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "gitmojis": "^3.5.0"
+    "gitmojis": "^3.9.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

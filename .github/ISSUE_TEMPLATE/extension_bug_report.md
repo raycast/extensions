@@ -1,17 +1,29 @@
 ---
 name: "🧩 🐞 Extension Bug Report"
 about: Report a reproducible bug or regression related to extension(s) published in the Store
-title: '[Extension Bug] '
-labels: 'extension, bug'
-
+title: ""
+labels: "extension, bug"
 ---
 
 <!--
-  Please provide a clear and concise description of what the bug is. Include
-  screenshots if needed. Please test using the latest version of the extension, Raycast and API.
+  Please provide a proper link to the extension.
+  Example: `# Extension – [API Icon List](https://github.com/raycast/extensions/tree/main/extensions/api-icon-list)`.
 -->
 
-Raycast version:
+# Extension – [Title](https://github.com/raycast/extensions/tree/main/extensions/*)
+
+<!--
+  Please mention the extension's author here.
+  You can check an author's handle by looking at the very first commit with the extension.
+  Example: `Author: @mattisssa`.
+-->
+
+Author:
+
+<!--
+  Please provide a clear and concise description of what the bug is. Include
+  screenshots if needed. Please make sure you are using the latest version of the extension and Raycast.
+-->
 
 ## Description
 
@@ -26,5 +38,8 @@ Raycast version:
 
 ## The current behavior
 
-
 ## The expected behavior
+
+### Raycast version
+
+Version:

@@ -1,0 +1,46 @@
+{
+  "name": "code-stash",
+  "title": "Code Stash",
+  "description": "Searching git.. now you have two problems. Store chunks of code and retrieve them later",
+  "icon": "icon.png",
+  "author": "ben-greenwood",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Code Stash",
+      "description": "Save and restore code snippets",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "code",
+    "stash",
+    "git"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "archiver": "^5.3.1",
+    "lang-detector": "^1.0.6",
+    "nanoid": "^3.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

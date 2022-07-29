@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wolfram-alpha",
+  "title": "Wolfram Alpha",
+  "description": "Query Wolfram Alpha right from Raycast",
+  "icon": "command-icon.png",
+  "author": "mathieudutour",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Query Wolfram Alpha",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appId",
+      "type": "password",
+      "required": true,
+      "title": "Wolfram Alpha App ID",
+      "description": "See the extension's README for instructions about how to create an App ID",
+      "link": "https://developer.wolframalpha.com/portal/myapps/"
+    },
+    {
+      "name": "units",
+      "type": "dropdown",
+      "required": false,
+      "title": "Units",
+      "data": [
+        {
+          "title": "Metric",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial",
+          "value": "imperial"
+        }
+      ],
+      "description": "The system of units to use for measurements and quantities"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.0",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

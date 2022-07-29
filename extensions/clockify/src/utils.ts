@@ -1,4 +1,4 @@
-import { clearLocalStorage, getPreferenceValues, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { clearLocalStorage, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
 import { FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry } from "./types";
 

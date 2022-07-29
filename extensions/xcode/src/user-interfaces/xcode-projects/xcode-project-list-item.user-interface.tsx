@@ -1,29 +1,29 @@
 import { XcodeProject } from "../../models/project/xcode-project.model";
-import { ActionPanel, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { XcodeProjectType } from "../../models/project/xcode-project-type.model";
 import tildify from "tildify";
+import { ReactNode } from "react";
 
 /**
  * Xcode Project List Item
  * @param xcodeProject The XcodeProject
+ * @param customActionsProvider TThe optional custom XcodeProject actions provider. Default value `null`
  */
 export function xcodeProjectListItem(
-  xcodeProject: XcodeProject
+  xcodeProject: XcodeProject,
+  customActionsProvider: ((xcodeProject: XcodeProject) => ReactNode) | null = null
 ): JSX.Element {
   return (
     <List.Item
       key={xcodeProject.filePath}
       title={xcodeProject.name}
       subtitle={tildify(xcodeProject.filePath)}
-      accessoryTitle={accessoryTitle(xcodeProject.type)}
+      accessories={[{ text: accessoryTitle(xcodeProject.type) }]}
       keywords={xcodeProject.keywords}
       icon={{ source: imageAssetSource(xcodeProject.type) }}
       actions={
         <ActionPanel>
-          <OpenAction
-            title="Open with Xcode"
-            target={xcodeProject.filePath} />
-          <ShowInFinderAction path={xcodeProject.filePath} />
+          {customActionsProvider ? customActionsProvider(xcodeProject) : defaultActions(xcodeProject)}
         </ActionPanel>
       }
     />
@@ -31,12 +31,27 @@ export function xcodeProjectListItem(
 }
 
 /**
+ * Default Actions for a given XcodeProject
+ * @param xcodeProject The XcodeProject
+ */
+function defaultActions(xcodeProject: XcodeProject): ReactNode {
+  return [
+    <Action.Open
+      application="com.apple.dt.Xcode"
+      key="open-with-xcode"
+      title="Open with Xcode"
+      target={xcodeProject.filePath}
+      icon={Icon.Hammer}
+    />,
+    <Action.ShowInFinder key="show-in-finder" path={xcodeProject.filePath} />,
+  ];
+}
+
+/**
  * Retrieve image asset source from XcodeProjectType
  * @param xcodeProjectType The XcodeProjectType
  */
-function imageAssetSource(
-  xcodeProjectType: XcodeProjectType
-): string {
+function imageAssetSource(xcodeProjectType: XcodeProjectType): string {
   switch (xcodeProjectType) {
     case XcodeProjectType.project:
       return "xcode-project.png";
@@ -53,9 +68,7 @@ function imageAssetSource(
  * Retrieve accessory title from XcodeProjectType
  * @param xcodeProjectType The XcodeProjectType
  */
-function accessoryTitle(
-  xcodeProjectType: XcodeProjectType
-): string {
+function accessoryTitle(xcodeProjectType: XcodeProjectType): string {
   switch (xcodeProjectType) {
     case XcodeProjectType.project:
       return "Project";

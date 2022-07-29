@@ -1,5 +1,6 @@
-import { ActionPanel, CopyToClipboardAction, List } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { State } from "../haapi";
+import { ensureCleanAccessories } from "../utils";
 
 export function EntityAttributesList(props: { state: State }): JSX.Element {
   const state = props.state;
@@ -13,12 +14,16 @@ export function EntityAttributesList(props: { state: State }): JSX.Element {
           <List.Item
             key={state.entity_id + k}
             title={k}
-            accessoryTitle={`${v}`}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={`${v}`} />
+                <Action.CopyToClipboard content={`${v}`} />
               </ActionPanel>
             }
+            accessories={ensureCleanAccessories([
+              {
+                text: `${v}`,
+              },
+            ])}
           />
         ))}
       </List.Section>

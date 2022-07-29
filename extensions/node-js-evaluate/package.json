@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "node-js-evaluate",
+  "title": "Node.js Evaluate",
+  "description": "Evaluate Javascript (Node.js) code on-the-fly",
+  "icon": "command-icon.png",
+  "author": "Selfish",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Evaluate Code",
+      "subtitle": "Evaluate Javascript (Node.js) code",
+      "description": "Type in any Javascript valid code, to see what it evaluates to",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fastEvaluation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Evaluation Mode",
+      "label": "Use Fast Evaluation (⚠️)",
+      "default": false,
+      "description": "Evaluates code while typing. Do not use that if you do not understand the risk!"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.29.1",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.21",
+    "@types/react": "^17.0.39",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.23.0",
+    "typescript": "^4.5.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

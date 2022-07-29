@@ -35,6 +35,7 @@
   "preferences": [
     {
       "name": "useOriginalFavicon",
+      "title": "Search Open Tabs",
       "title": "Fav icon",
       "label": "Extract the favicon from every open tab",
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Google Chrome profile.",

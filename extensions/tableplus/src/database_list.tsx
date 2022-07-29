@@ -1,64 +1,134 @@
-import {ActionPanel, List, OpenInBrowserAction} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import plist from "plist";
 import fs from "fs";
-import os from "os";
-import {useEffect, useState} from "react";
+import { homedir } from "os";
+import expandTidle from "expand-tilde";
+import { useEffect, useState } from "react";
+import { Connection, Group, tintColors, Preferences } from "./interfaces";
+
+const EmptyGroupID = "__EMPTY__";
+const preferences: Preferences = getPreferenceValues();
+const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
+  ? "-setapp"
+  : "";
+const directoryPath = preferences.path
+  ? expandTidle(preferences.path)
+  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus${appendPath}/Data/`;
 
 export default function DatabaseList() {
-	const [state, setState] = useState<Item[]>([]);
-	const [query, setQuery] = useState<string | undefined>(undefined);
-	const [loading, setLoading] = useState(false)
-	const tablePlusLocation = `${os.homedir()}/Library/Application Support/com.tinyapp.TablePlus/Data/Connections.plist`;
+  const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
 
-	useEffect(() => {
-		try {
-			setLoading(true)
-			const connections = plist.parse(fs.readFileSync(tablePlusLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
+  useEffect(() => {
+    async function fetch() {
+      const tablePlusLocation = `${directoryPath}/Connections.plist`;
+      const groupLocations = `${directoryPath}/ConnectionGroups.plist`;
 
-			const obj = connections.map((connection) => {
-				return {id: connection.ID, groupName: connection.GroupID, name: connection.ConnectionName} as Item;
-			})
-			setLoading(false)
+      if (!fs.existsSync(tablePlusLocation)) {
+        showToast(
+          Toast.Style.Failure,
+          "Error loading connections",
+          "TablePlus data directory not found, add directory path in preferences"
+        );
+        setState({ isLoading: false });
+      } else {
+        const connectionsList = plist.parse(
+          fs.readFileSync(tablePlusLocation, "utf8")
+        ) as ReadonlyArray<plist.PlistObject>;
+        const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
 
-			setState(obj);
-		} catch (error) {
-			console.log(error)
-		}
-	}, []);
+        const groups = new Map<string, Group>(
+          groupList.map((group) => [
+            group.ID.toString(),
+            { id: group.ID.toString(), name: group.Name.toString(), connections: [] },
+          ])
+        );
 
-	return (
-		<List
-			isLoading={loading}
-			searchBarPlaceholder="Filter by name..."
-			onSearchTextChange={(query) => setQuery(query)}
-		>
-			{state
-				.filter(
-					(process) =>
-						(query == null || process.name.toLowerCase().includes(query.toLowerCase()))
-				)
-				.map((process, index) => {
-					return (
-						<List.Item
-							key={index}
-							title={process.name}
-							subtitle={process.groupName}
-							icon='/Applications/TablePlus.app/Contents/Resources/AppIcon.icns'
-							actions={
-								<ActionPanel>
-									<OpenInBrowserAction title="Open Database" url={`tableplus://?id=${process.id}`}/>
-								</ActionPanel>
+        groups.set(EmptyGroupID, {
+          id: EmptyGroupID,
+          name: "Ungrouped",
+          connections: [],
+        });
 
-							}
-						/>
-					);
-				})}
-		</List>
-	);
+        connectionsList.forEach((connection) => {
+          const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID;
+
+          const conn: Connection = {
+            id: connection.ID.toString(),
+            groupId,
+            name: connection.ConnectionName.toString() ?? "",
+            driver: connection.Driver.toString(),
+            isSocket: connection.isUseSocket === 1,
+            isOverSSH: connection.isOverSSH === 1,
+            database: connection.DatabaseName.toString(),
+            ServerAddress: connection.ServerAddress.toString(),
+            DatabaseHost: connection.DatabaseHost.toString(),
+            Driver: connection.Driver.toString(),
+            Environment: connection.Enviroment.toString(),
+          };
+
+          groups.get(groupId)?.connections.push(conn);
+        });
+
+        setState({ isLoading: false, connections: Array.from(groups.values()) });
+      }
+    }
+
+    fetch();
+  }, []);
+
+  return (
+    <List isLoading={state.isLoading} searchBarPlaceholder="Filter connections...">
+      <List.EmptyView icon={{ source: "no-view.png" }} title="No databases found in TablePlus, go add one!" />
+      {state &&
+        state.connections?.map((item) => {
+          const subtitle = `${item.connections.length} ${renderPluralIfNeeded(item.connections.length)}`;
+
+          return (
+            <List.Section key={item.id} title={item.name} subtitle={subtitle}>
+              {item.connections.map((connection) => (
+                <ConnectionListItem key={connection.id} connection={connection} />
+              ))}
+            </List.Section>
+          );
+        })}
+    </List>
+  );
+
+  function renderPluralIfNeeded(itemsLength: number) {
+    return `item${itemsLength > 1 ? "s" : ""}`;
+  }
+
+  function ConnectionListItem(props: { connection: Connection }) {
+    const connection = props.connection;
+
+    let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost;
+    if (connection.database && connection.Driver !== "SQLite") {
+      subtitle += ` : ${connection.database}`;
+    } else if (connection.Driver === "SQLite" && connection.isOverSSH) {
+      subtitle += ` : ${connection.DatabaseHost}`;
+    }
+
+    let groupIcon = "icon.png";
+    if (connection.groupId) {
+      if (fs.existsSync(`${directoryPath}/${connection.groupId}`)) {
+        groupIcon = `${directoryPath}/${connection.groupId}`;
+      }
+    }
+
+    return (
+      <List.Item
+        id={connection.id}
+        key={connection.id}
+        title={connection.name}
+        subtitle={subtitle}
+        accessories={[{ text: connection.Driver }, { icon: groupIcon }]}
+        icon={{ source: Icon.Dot, tintColor: tintColors[connection.Environment] }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Database" url={`tableplus://?id=${connection.id}`} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }
-
-type Item = {
-	id: string;
-	groupName: string;
-	name: string;
-};

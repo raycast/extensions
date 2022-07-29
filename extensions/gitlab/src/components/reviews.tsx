@@ -1,101 +1,75 @@
-import { ActionPanel, List, OpenInBrowserAction, render, showToast, ToastStyle, Color } from "@raycast/api";
-import { MergeRequest } from "../gitlabapi";
-import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { useState, useEffect } from "react";
+import { List } from "@raycast/api";
+import { MergeRequest, Project } from "../gitlabapi";
+import { getListDetailsPreference, gitlab } from "../common";
+import { daysInSeconds, showErrorToast } from "../utils";
+import { useCache } from "../cache";
+import { useEffect, useState } from "react";
+import { MyProjectsDropdown } from "./project";
+import { MRListItem } from "./mr";
+import { useCachedState } from "@raycast/utils";
 
-export function ReviewList() {
-  const [searchText, setSearchText] = useState<string>();
-  const { mrs, error, isLoading } = useSearch(searchText);
+export function ReviewList(): JSX.Element {
+  const [project, setProject] = useState<Project>();
+  const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Reviews", error);
+    showErrorToast(error, "Cannot search Reviews");
   }
 
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
   }
+
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
 
   return (
     <List
       searchBarPlaceholder="Filter Reviews by name..."
-      onSearchTextChange={setSearchText}
       isLoading={isLoading}
-      throttle={true}
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+      isShowingDetail={getListDetailsPreference()}
     >
       {mrs?.map((mr) => (
-        <ReviewListItem key={mr.id} mr={mr} />
+        <MRListItem
+          key={mr.id}
+          mr={mr}
+          refreshData={performRefetch}
+          expandDetails={expandDetails}
+          onToggleDetails={() => setExpandDetails(!expandDetails)}
+        />
       ))}
     </List>
   );
 }
 
-function ReviewListItem(props: { mr: MergeRequest }) {
-  const mr = props.mr;
-  return (
-    <List.Item
-      id={mr.id.toString()}
-      title={mr.title}
-      subtitle={"#" + mr.iid}
-      icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
-      actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={mr.web_url} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-export function useSearch(query: string | undefined): {
-  mrs?: MergeRequest[];
-  error?: string;
-  isLoading: boolean;
+function useMyReviews(project?: Project | undefined): {
+  mrs: MergeRequest[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      if (query === null || cancel) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const user = await gitlab.getMyself();
-        const glMRs = await gitlab.getMergeRequests({
-          state: "opened",
-          reviewer_id: user.id,
-          search: query || "",
-          in: "title",
-        });
-
-        if (!cancel) {
-          setMRs(glMRs);
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(e.message);
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
+  const [mrs, setMrs] = useState<MergeRequest[]>();
+  const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
+    `myreviews`,
+    async (): Promise<MergeRequest[] | undefined> => {
+      const user = await gitlab.getMyself();
+      const glMRs = await gitlab.getMergeRequests({
+        state: "opened",
+        reviewer_id: user.id,
+        in: "title",
+        scope: "all",
+      });
+      return glMRs;
+    },
+    {
+      deps: [],
+      secondsToRefetch: 1,
+      secondsToInvalid: daysInSeconds(7),
     }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { mrs, error, isLoading };
+  );
+  useEffect(() => {
+    const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;
+    setMrs(filtered || []);
+  }, [data, project]);
+  return { mrs, isLoading, error, performRefetch };
 }

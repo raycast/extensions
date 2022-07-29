@@ -1,6 +1,5 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { accessSync, constants } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
 import { cpus } from "os";
@@ -8,20 +7,30 @@ import * as utils from "./utils";
 
 const execp = promisify(exec);
 
+export interface ExecError extends Error {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
+export interface ExecResult {
+  stdout: string;
+  stderr: string;
+}
+
 /// Types
 
-interface Nameable {
+export interface Nameable {
   name: string;
 }
 
 interface Installable {
   tap: string;
-  desc: string;
+  desc?: string;
   homepage: string;
   versions: Versions;
   outdated: boolean;
   caveats?: string;
-  conflicts_with?: string[];
 }
 
 export interface Cask extends Installable {
@@ -31,10 +40,11 @@ export interface Cask extends Installable {
   installed?: string; // version
   auto_updates: boolean;
   depends_on: CaskDependency;
+  conflicts_with?: { cask: string[] };
 }
 
 export interface CaskDependency {
-  macos?: {[key: string]: string[]};
+  macos?: { [key: string]: string[] };
 }
 
 export interface Formula extends Installable, Nameable {
@@ -43,9 +53,10 @@ export interface Formula extends Installable, Nameable {
   dependencies: string[];
   build_dependencies: string[];
   installed: InstalledVersion[];
-  keg_only: boolean,
+  keg_only: boolean;
   linked_key: string;
   pinned: boolean;
+  conflicts_with?: string[];
 }
 
 interface Outdated extends Nameable {
@@ -86,31 +97,58 @@ export interface OutdatedResults {
 
 /// Paths
 
-export const brewPrefix: string = cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+export const brewPrefix: string = (() => {
+  try {
+    return execSync("brew --prefix", { encoding: "utf8" }).trim();
+  } catch {
+    return cpus()[0].model.includes("Apple") ? "/opt/homebrew" : "/usr/local";
+  }
+})();
 
 export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-const brewExecutable = (() => {
-  const path = path_join(brewPrefix, 'bin/brew');
+const brewExecutable: string = path_join(brewPrefix, "bin/brew");
+
+/// Commands
+
+export async function brewDoctorCommand(): Promise<string> {
   try {
-    accessSync(path, constants.X_OK);
-    return path;
-  } catch {
-    return 'brew'; // assume brew is in PATH
+    const output = await execp(`${brewExecutable} doctor`);
+    return output.stdout;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1) {
+      return execErr.stderr;
+    } else {
+      return `${err}`;
+    }
   }
-})();
+}
+
+export async function brewUpgradeCommand(greedy: boolean, cancel?: AbortController): Promise<string> {
+  let cmd = `${brewExecutable} upgrade`;
+  if (greedy) {
+    cmd += " --greedy";
+  }
+  const output = await execSignal(cmd, cancel);
+  return output.stdout;
+}
+
+export async function brewUpdateCommand(cancel?: AbortController): Promise<void> {
+  await execSignal(`${brewExecutable} update`, cancel);
+}
 
 /// Fetching
 
-const installedCachePath = utils.cachePath('installedv2.json');
-const formulaCachePath = utils.cachePath('formula.json');
-const caskCachePath = utils.cachePath('cask.json');
+const installedCachePath = utils.cachePath("installedv2.json");
+const formulaCachePath = utils.cachePath("formula.json");
+const caskCachePath = utils.cachePath("cask.json");
 
-export async function brewFetchInstalled(useCache: boolean): Promise<InstallableResults> {
+export async function brewFetchInstalled(useCache: boolean, cancel?: AbortController): Promise<InstallableResults> {
   async function installed(): Promise<string> {
-    return (await execp(`${brewExecutable} info --json=v2 --installed`)).stdout;
+    return (await execSignal(`${brewExecutable} info --json=v2 --installed`, cancel)).stdout;
   }
 
   if (!useCache) {
@@ -122,7 +160,7 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     try {
       await writeFile(installedCachePath, info);
     } catch (err) {
-      console.error("Failed to write installed cache:", err)
+      console.error("Failed to write installed cache:", err);
     }
     return JSON.parse(info);
   }
@@ -134,22 +172,25 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
   async function readCache(): Promise<InstallableResults> {
     const cacheTime = await mtimeMs(installedCachePath);
     // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
-    const locksTime = await mtimeMs(brewPath('var/homebrew/locks'));
-    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
-    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
+    const locksTime = await mtimeMs(brewPath("var/homebrew/locks"));
+    // Casks
+    const caskroomTime = await mtimeMs(brewPath("Caskroom"));
+
     // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
     let pinnedTime;
     try {
-      pinnedTime = await mtimeMs(brewPath('var/homebrew/pinned'));
+      pinnedTime = await mtimeMs(brewPath("var/homebrew/pinned"));
     } catch {
       pinnedTime = 0;
     }
+    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
+    const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
-    if (homebrewTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
+    if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       const cacheBuffer = await readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
-      throw 'Invalid cache';
+      throw "Invalid cache";
     }
   }
 
@@ -160,19 +201,24 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
   }
 }
 
-export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResults> {
+export async function brewFetchOutdated(greedy: boolean, cancel?: AbortController): Promise<OutdatedResults> {
   let cmd = `${brewExecutable} outdated --json=v2`;
   if (greedy) {
-    cmd += ' --greedy'; // include auto_update casks
+    cmd += " --greedy"; // include auto_update casks
   }
-  return JSON.parse((await execp(cmd)).stdout);
+  // 'outdated' is only reliable after performing a 'brew update'
+  await brewUpdateCommand(cancel);
+  const output = await execSignal(cmd, cancel);
+  return JSON.parse(output.stdout);
 }
 
-const formulaURL = "https://formulae.brew.sh/api/formula.json";
-const caskURL = "https://formulae.brew.sh/api/cask.json"
+/// Search
 
-const formulaRemote: utils.Remote<Formula> = {url: formulaURL, cachePath: formulaCachePath};
-const caskRemote: utils.Remote<Cask> = {url: caskURL, cachePath: caskCachePath};
+const formulaURL = "https://formulae.brew.sh/api/formula.json";
+const caskURL = "https://formulae.brew.sh/api/cask.json";
+
+const formulaRemote: utils.Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
+const caskRemote: utils.Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
 export async function brewFetchFormulae(): Promise<Formula[]> {
   return await utils.fetchRemote(formulaRemote);
@@ -188,12 +234,21 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
   if (searchText.length > 0) {
     const target = searchText.toLowerCase();
-    formulae = formulae?.filter(formula => {
-      return formula.name.toLowerCase().includes(target);
-    });
-    casks = casks?.filter(cask => {
-      return cask.token.toLowerCase().includes(target);
-    });
+    formulae = formulae
+      ?.filter((formula) => {
+        return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return brewCompare(lhs.name, rhs.name, target);
+      });
+
+    casks = casks
+      ?.filter((cask) => {
+        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return brewCompare(lhs.token, rhs.token, target);
+      });
   }
 
   const formulaeLen = formulae.length;
@@ -207,28 +262,35 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
   formulae.totalLength = formulaeLen;
   casks.totalLength = casksLen;
 
-  return {formulae: formulae, casks: casks};
+  return { formulae: formulae, casks: casks };
 }
 
 /// Actions
 
-export async function brewInstall(installable: Cask | Formula): Promise<void> {
+export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execp(`${brewExecutable} install ${identifier}`);
+  await execSignal(`${brewExecutable} install ${identifier}`, cancel);
+  if (isCask(installable)) {
+    installable.installed = installable.version;
+  } else {
+    installable.installed = [
+      { version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true },
+    ];
+  }
 }
 
-export async function brewUninstall(installable: Cask | Formula): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execp(`${brewExecutable} rm ${identifier}`);
+  await execSignal(`${brewExecutable} rm ${identifier}`, cancel);
 }
 
-export async function brewUpgrade(upgradable: Cask | Formula | Outdated): Promise<void> {
+export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(upgradable);
-  await execp(`${brewExecutable} upgrade ${identifier}`);
+  await execSignal(`${brewExecutable} upgrade ${identifier}`, cancel);
 }
 
-export async function brewUpgradeAll(): Promise<void> {
-  await execp(`${brewExecutable} upgrade`);
+export async function brewUpgradeAll(cancel?: AbortController): Promise<void> {
+  await execSignal(`${brewExecutable} upgrade`, cancel);
 }
 
 export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
@@ -253,7 +315,7 @@ export function brewName(item: Cask | Nameable): string {
 
 export function brewIsInstalled(installable: Cask | Formula): boolean {
   if (isCask(installable)) {
-    return caskIsInstalled(installable)
+    return caskIsInstalled(installable);
   } else {
     return formulaIsInstalled(installable);
   }
@@ -261,7 +323,7 @@ export function brewIsInstalled(installable: Cask | Formula): boolean {
 
 export function brewInstallPath(installable: Cask | Formula): string {
   if (isCask(installable)) {
-    return caskInstallPath(installable)
+    return caskInstallPath(installable);
   } else {
     return formulaInstallPath(installable);
   }
@@ -269,7 +331,7 @@ export function brewInstallPath(installable: Cask | Formula): string {
 
 export function brewFormatVersion(installable: Cask | Formula): string {
   if (isCask(installable)) {
-    return caskFormatVersion(installable)
+    return caskFormatVersion(installable);
   } else {
     return formulaFormatVersion(installable);
   }
@@ -278,11 +340,13 @@ export function brewFormatVersion(installable: Cask | Formula): string {
 /// Private
 
 function caskFormatVersion(cask: Cask): string {
-  if (!cask.installed) { return ""; }
+  if (!cask.installed) {
+    return "";
+  }
 
   let version = cask.installed;
   if (cask.outdated) {
-    version += ' (O)';
+    version += " (O)";
   }
   return version;
 }
@@ -296,7 +360,7 @@ function caskIsInstalled(cask: Cask): boolean {
 
 function caskInstallPath(cask: Cask): string {
   // Casks are not updated as reliably, so we don't include the cask installed version here.
-  const basePath = brewPath(path_join('Caskroom', cask.token));
+  const basePath = brewPath(path_join("Caskroom", cask.token));
   if (cask.installed) {
     return path_join(basePath, cask.installed);
   } else {
@@ -305,7 +369,7 @@ function caskInstallPath(cask: Cask): string {
 }
 
 function formulaInstallPath(formula: Formula): string {
-  const basePath = brewPath(path_join('Cellar', formula.name));
+  const basePath = brewPath(path_join("Cellar", formula.name));
   if (formula.installed.length) {
     return path_join(basePath, formula.installed[0].version);
   } else {
@@ -314,20 +378,21 @@ function formulaInstallPath(formula: Formula): string {
 }
 
 function formulaFormatVersion(formula: Formula): string {
-  if (!formula.installed.length) { return ""; }
+  if (!formula.installed.length) {
+    return "";
+  }
 
-  let version = "";
   const installed_version = formula.installed[0];
-  version = installed_version.version;
+  let version = installed_version.version;
   let status = "";
   if (installed_version.installed_as_dependency) {
-    status += 'D';
+    status += "D";
   }
   if (formula.pinned) {
-    status += 'P';
+    status += "P";
   }
   if (formula.outdated) {
-    status += 'O';
+    status += "O";
   }
   if (status) {
     version += ` (${status})`;
@@ -345,4 +410,20 @@ function brewIdentifier(item: Cask | Nameable): string {
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
+}
+
+function brewCompare(lhs: string, rhs: string, target: string): number {
+  const lhs_matches = lhs.toLowerCase().includes(target);
+  const rhs_matches = rhs.toLowerCase().includes(target);
+  if (lhs_matches && !rhs_matches) {
+    return -1;
+  } else if (rhs_matches && !lhs_matches) {
+    return 1;
+  } else {
+    return lhs.localeCompare(rhs);
+  }
+}
+
+async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
+  return await execp(cmd, { signal: cancel?.signal, maxBuffer: 10 * 1024 * 1024 });
 }

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uuid-generator",
+  "title": "UUID Generator",
+  "description": "A quick way to generate UUIDs without opening the browser",
+  "icon": "command-icon.png",
+  "author": "jmaeso",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Generate UUID",
+      "description": "Copy a generated UUID to the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

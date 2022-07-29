@@ -3,52 +3,78 @@
   "name": "things",
   "title": "Things",
   "version": "1.0.0",
-  "description": "Search and access your Things To-Dos from Raycast",
+  "description": "Search and manage your Things To-Dos from Raycast",
   "icon": "things-icon.png",
   "author": "loris",
   "license": "MIT",
   "commands": [
     {
       "name": "show-today-list",
-      "title": "Today",
+      "title": "Show Today List",
       "subtitle": "Things",
-      "description": "List your Today To-Dos",
+      "description": "Search and manage your Today To-Dos",
       "mode": "view"
     },
     {
       "name": "show-inbox-list",
-      "title": "Inbox",
+      "title": "Show Inbox List",
       "subtitle": "Things",
-      "description": "List your Inbox To-Dos",
+      "description": "Search and manage your Inbox To-Dos",
       "mode": "view"
     },
     {
       "name": "show-anytime-list",
-      "title": "Anytime",
+      "title": "Show Anytime List",
       "subtitle": "Things",
-      "description": "List your Anytime To-Dos",
+      "description": "Search and manage your Anytime To-Dos",
       "mode": "view"
     },
     {
       "name": "show-upcoming-list",
-      "title": "Upcoming",
+      "title": "Show Upcoming List",
       "subtitle": "Things",
-      "description": "List your Upcoming To-Dos",
+      "description": "Search and manage your Upcoming To-Dos",
       "mode": "view"
     },
     {
       "name": "show-someday-list",
-      "title": "Someday",
+      "title": "Show Someday List",
       "subtitle": "Things",
-      "description": "List your Someday To-Dos",
+      "description": "Search and manage your Someday To-Dos",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-todo",
+      "title": "Add New To-Do",
+      "subtitle": "Things",
+      "description": "Create To-Dos in any list",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "thingsAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Things version switcher",
+      "description": "Switch between Things or Things Beta",
+      "default": "com.culturedcode.ThingsMac",
+      "data": [
+        {
+          "value": "com.culturedcode.ThingsMac",
+          "title": "Things"
+        },
+        {
+          "value": "com.culturedcode.ThingsMac.beta",
+          "title": "Things Beta"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "dayjs": "^1.10.7",
-    "lodash.groupby": "^4.6.0",
-    "lodash.map": "^4.6.0",
+    "lodash": "^4.17.21",
     "osascript-tag": "^0.1.2"
   },
   "devDependencies": {

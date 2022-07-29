@@ -1,31 +1,83 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safari",
-  "title": "Safari Bookmarks",
-  "description": "List your Safari Cloud Tabs and Reading List Bookmarks",
+  "title": "Safari",
+  "description": "Manage your Safari Tabs, History and Reading List",
+  "categories": [
+    "Applications",
+    "Web"
+  ],
   "icon": "safari-icon.png",
   "author": "loris",
+  "contributors": [
+    "thomas"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Search Cloud Tabs",
+      "title": "Search Tabs",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Cloud Tabs",
-      "mode": "view"
+      "description": "Browse your open tabs (Local and iCloud)",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "safariAppIdentifier",
+          "type": "dropdown",
+          "required": false,
+          "title": "Local Safari Browser",
+          "description": "Switch between Safari or Safari Technology Preview",
+          "default": "Safari",
+          "data": [
+            {
+              "value": "Safari",
+              "title": "Safari"
+            },
+            {
+              "value": "Safari Technology Preview",
+              "title": "Safari Technology Preview"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "reading-list",
       "title": "Search Reading List",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Reading List Bookmarks",
+      "description": "Browse your reading list",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupByStatus",
+          "type": "checkbox",
+          "required": false,
+          "label": "Group by status",
+          "default": true,
+          "description": "Group items by Read/Unread status"
+        }
+      ]
+    },
+    {
+      "name": "add-to-reading-list",
+      "title": "Add to Reading List",
+      "subtitle": "Safari",
+      "description": "Add an item to your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Safari",
+      "description": "Browse your history",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.32.0",
     "execa": "^5.1.1",
     "lodash": "^4.17.21",
+    "osascript-tag": "^0.1.2",
     "simple-plist": "^1.1.1",
     "sql.js": "^1.6.2"
   },
@@ -43,6 +95,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

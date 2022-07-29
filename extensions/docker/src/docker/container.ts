@@ -3,22 +3,19 @@ import * as markdown from '../utils/markdown';
 
 export const isContainerRunning = (containerInfo: ContainerInfo) => containerInfo.State === 'running';
 
-export const containerName = (container: ContainerInfo) =>
-  container.Names.map((name) => name.replace(/^\//, '')).join(', ');
-
-export const containerInspectName = (container: ContainerInspectInfo) => container.Name.replace(/^\//, '');
+export const containerName = ({ Names, Name }: { Names?: string[]; Name?: string }) => {
+  if (Names !== undefined) {
+    return Names.map((name) => name.replace(/^\//, '')).join(', ');
+  }
+  if (Name !== undefined) {
+    return Name.replace(/^\//, '');
+  }
+  return '-';
+};
 
 export const formatContainerDetailMarkdown = (container: ContainerInspectInfo | undefined) =>
   container !== undefined
-    ? `## ${containerInspectName(container)}` +
-      '\n\n' +
-      markdown.attributes([
-        ['Image', container.Config.Image],
-        ['Status', container.State.Status],
-        ['Command', '`' + container.Config.Cmd?.join(' ') + '`'],
-      ]) +
-      renderEnvSection(container.Config.Env) +
-      `\n`
+    ? `# ${containerName(container)}` + '\n\n' + renderEnvSection(container.Config.Env) + `\n`
     : '';
 
 const renderEnvSection = (env: string[]) => {

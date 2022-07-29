@@ -5,7 +5,7 @@
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
@@ -27,7 +27,7 @@
           "type": "password",
           "required": true,
           "title": "Team ID",
-          "description": "Find this in the url after navigating to your team page."
+          "description": "Find this in the url after navigating to your team page"
         }
       ]
     }

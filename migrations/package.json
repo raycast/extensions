@@ -1,0 +1,23 @@
+{
+  "name": "@raycast/migration",
+  "version": "1.38.2",
+  "description": "Tool to automate the migration to a newer version of the @raycast/api",
+  "main": "index.js",
+  "bin": "./bin/migrate.js",
+  "scripts": {
+    "migrate": "./bin/migrate.js"
+  },
+  "author": "mathieudutour",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/raycast/extensions",
+    "directory": "migrations"
+  },
+  "dependencies": {
+    "jscodeshift": "^0.13.1",
+    "semver": "^7.3.5"
+  },
+  "devDependencies": {
+    "@types/jscodeshift": "^0.11.3"
+  }
+}

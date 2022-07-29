@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { timeAgo } from "../utils/format";
 import { getStateIcon, State } from "../utils/states";
 
@@ -26,11 +26,12 @@ export function BuildListItem({ build }: BuildListItemProps) {
       title={build.message}
       subtitle={build.pipeline?.name ?? `#${build.number}`}
       icon={getStateIcon(build.state)}
-      accessoryTitle={timeAgo(build.createdAt)}
+      keywords={[build.pipeline?.name || "", build.number.toString()]}
+      accessories={[{ text: timeAgo(build.createdAt) }]}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={build.url} />
-          <CopyToClipboardAction content={build.url} title="Copy URL" />
+          <Action.OpenInBrowser url={build.url} />
+          <Action.CopyToClipboard content={build.url} title="Copy URL" />
         </ActionPanel>
       }
     />

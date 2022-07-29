@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "can-i-use",
+  "title": "Can I Use",
+  "description": "Can I Use provides up-to-date browser support for front-end web technologies on desktop and mobile web browsers.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Can I Use",
+      "description": "Get browser support for front-end web technologies on desktop and mobile",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path",
+      "description": "Path to project configured with Browserlist",
+      "title": "Project path",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "~/my-project"
+    },
+    {
+      "name": "environment",
+      "description": "Environment to use in the Browserlist configuration (e.g production, modern, etc.)",
+      "title": "Environment",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "production"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.0",
+    "browserslist": "^4.20.2",
+    "caniuse-api": "^3.0.0",
+    "caniuse-lite": "^1.0.30001325"
+  },
+  "devDependencies": {
+    "@types/browserslist": "^4.15.0",
+    "@types/caniuse-api": "^3.0.2",
+    "@types/caniuse-lite": "^1.0.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -1,11 +1,22 @@
-import { ActionPanel, popToRoot, closeMainWindow, CopyToClipboardAction, getPreferenceValues, Icon, List, OpenInBrowserAction, showToast, ToastStyle} from "@raycast/api";
+import {
+  ActionPanel,
+  popToRoot,
+  closeMainWindow,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { HistoryEntry, useChromeHistorySearch } from "./browserHistory"
-import { useEffect, useState, ReactElement} from "react";
-import { faviconUrl } from "./utils"
+import { HistoryEntry, useChromeHistorySearch } from "./browserHistory";
+import { useEffect, useState, ReactElement } from "react";
+import { faviconUrl } from "./utils";
 
 class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = '~~~';
+  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
 
   constructor(
     public readonly title: string,
@@ -13,7 +24,7 @@ class Tab {
     public readonly favicon: string,
     public readonly windowsIndex: number,
     public readonly tabIndex: number
-  ) { }
+  ) {}
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
@@ -26,12 +37,11 @@ class Tab {
   }
 
   urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
+    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
   }
 
-
   googleFavicon(): string {
-    return faviconUrl(64, this.url)
+    return faviconUrl(64, this.url);
   }
 }
 
@@ -39,7 +49,7 @@ async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
-    : '""'
+    : '""';
 
   const openTabs = await runAppleScript(`
       set _output to ""
@@ -61,27 +71,30 @@ async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       return _output
   `);
 
-  return openTabs.split("\n").filter(line => line.length !== 0).map(line => Tab.parse(line));
+  return openTabs
+    .split("\n")
+    .filter((line) => line.length !== 0)
+    .map((line) => Tab.parse(line));
 }
 
 async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
-  
-  const script = `
+
+  const script =
+    `
     tell application "Google Chrome"
       activate
       tell window 1
-          set newTab to make new tab ` + (queryText ? 'with properties {URL:"https://www.google.com/search?q='+queryText+'"}' : '') + ` 
+          set newTab to make new tab ` +
+    (queryText ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}' : "") +
+    ` 
       end tell
     end tell
-  `
+  `;
 
   return await runAppleScript(script);
 }
-
-
-
 
 async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
@@ -97,106 +110,108 @@ interface State {
   tabs?: Tab[];
 }
 
-
 export default function Command(): ReactElement {
-    const [searchText, setSearchText] = useState<string>()
-    const { isLoading, error, entries } = useChromeHistorySearch(searchText)
+  const [searchText, setSearchText] = useState<string>();
+  const { isLoading, error, entries } = useChromeHistorySearch(searchText);
 
+  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
+  const [state, setState] = useState<State>({});
 
-    const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
-    const [state, setState] = useState<State>({});
+  async function getTabs(query: string | null) {
+    let tabs = await getOpenTabs(useOriginalFavicon);
 
-    async function getTabs(query: string | null) {
-      let tabs = await getOpenTabs(useOriginalFavicon);
-
-      if(query){
-        tabs = tabs.filter(function (tab) {
-          return (tab.title.toLowerCase().includes(query.toLowerCase()) || tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase()))
-        })
-      }
-      setState({ tabs: tabs });
+    if (query) {
+      tabs = tabs.filter(function (tab) {
+        return (
+          tab.title.toLowerCase().includes(query.toLowerCase()) ||
+          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+        );
+      });
     }
+    setState({ tabs: tabs });
+  }
 
-    useEffect(() => { 
-      getTabs(null);
-    }, []);
+  useEffect(() => {
+    getTabs(null);
+  }, []);
 
-    if (error) {
-        showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
-    }
+  if (error) {
+    showToast(ToastStyle.Failure, "An Error Occurred", error.toString());
+  }
 
-    return (
-        <List onSearchTextChange={function (query) { setSearchText(query); getTabs(query);}} isLoading={isLoading} throttle={false}>
-            <List.Section title="New Tab" key="new-tab">
-              <List.Item
-                title={(!searchText ? "Open Empty Tab" : `Search "${searchText}"`)}
-                icon={{ source: (!searchText ? Icon.Plus : Icon.MagnifyingGlass)}}
-                actions={<NewTabActions query={searchText} />} 
-              />
-            </List.Section>
-            <List.Section title="Open Tabs" key="open-tabs">
-              {state.tabs?.map((tab) => (
-                <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
-              ))}
-            </List.Section>
-            <List.Section title="Recently Closed" key="recently-closed">
-                {entries?.map((e) => (
-                    <HistoryItem entry={e} key={e.id} />
-                ))}
-            </List.Section>
-        </List>
-    )
+  return (
+    <List
+      onSearchTextChange={function (query) {
+        setSearchText(query);
+        getTabs(query);
+      }}
+      isLoading={isLoading}
+      throttle={false}
+    >
+      <List.Section title="New Tab" key="new-tab">
+        <List.Item
+          title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
+          icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
+          actions={<NewTabActions query={searchText} />}
+        />
+      </List.Section>
+      <List.Section title="Open Tabs" key="open-tabs">
+        {state.tabs?.map((tab) => (
+          <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+        ))}
+      </List.Section>
+      <List.Section title="Recently Closed" key="recently-closed">
+        {entries?.map((e) => (
+          <HistoryItem entry={e} key={e.id} />
+        ))}
+      </List.Section>
+    </List>
+  );
 }
-
-
 
 const NewTabActions = (props: { query: string | undefined }): ReactElement => {
-    const query = props.query
+  const query = props.query;
 
-    return (
-        <ActionPanel title="New Tab">
-          <ActionPanel.Item
-            onAction={function () { openNewTab(query)}}
-            title={(query ? `Search "${query}"` : "Open Empty Tab")} />
-        </ActionPanel>
-    )
-}
+  return (
+    <ActionPanel title="New Tab">
+      <ActionPanel.Item
+        onAction={function () {
+          openNewTab(query);
+        }}
+        title={query ? `Search "${query}"` : "Open Empty Tab"}
+      />
+    </ActionPanel>
+  );
+};
 
 const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
-    const { url, title } = props.entry
-    const id = props.entry.id.toString()
-    const favicon = faviconUrl(64, url)
+  const { url, title } = props.entry;
+  const id = props.entry.id.toString();
+  const favicon = faviconUrl(64, url);
 
-    return (
-        <List.Item
-            id={id}
-            title={title}
-            subtitle={url}
-            icon={favicon}
-            actions={<HistoryItemActions entry={props.entry} />} />)
-}
-
+  return (
+    <List.Item
+      id={id}
+      title={title}
+      subtitle={url}
+      icon={favicon}
+      actions={<HistoryItemActions entry={props.entry} />}
+    />
+  );
+};
 
 const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
-    const { title, url } = props.entry
+  const { title, url } = props.entry;
 
-    return (
-        <ActionPanel title={title}>
-          <OpenInBrowserAction
-              title="Open in Tab"
-              url={url} />
-          <CopyToClipboardAction
-              title="Copy URL"
-              content={url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-        </ActionPanel>
-    )
-}
+  return (
+    <ActionPanel title={title}>
+      <OpenInBrowserAction title="Open in Tab" url={url} />
+      <CopyToClipboardAction title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+    </ActionPanel>
+  );
+};
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
-
-  
-
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
   return (
     <List.Item
       title={props.tab.title}
@@ -225,5 +240,3 @@ function GoogleChromeGoToTab(props: { tab: Tab }) {
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
-
-

@@ -1,0 +1,100 @@
+{
+  "name": "canvascast",
+  "title": "CanvasCast",
+  "description": "Access the Canvas LMS from Raycast",
+  "icon": "canvas.png",
+  "author": "Yoda",
+  "license": "MIT",
+  "contributors": [
+    "yug2005"
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "textfield",
+      "required": true,
+      "title": "Token",
+      "placeholder": "6115~Vfxthpk4Bui862dmW28SmgR2ynvXBR3hYE6X3TjiLdnWo4gCRuFkMndwHi71B1G6",
+      "description": "Access token from Canvas Settings"
+    },
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Domain",
+      "placeholder": "canvas.instructure.com",
+      "description": "Just the domain for your canvas LMS (Do not include the URL)"
+    },
+    {
+      "title": "Recent Module Items",
+      "name": "showRecent",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Recent Items",
+      "default": true,
+      "description": "Show the recently used module items"
+    },
+    {
+      "name": "numRecent",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number of Recent Items",
+      "default": "3",
+      "description": "Number of recently used module items shown",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "My Courses",
+      "subtitle": "Canvas",
+      "description": "See the modules, assignments, and announcements for your courses.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@api-blueprints/pathmaker": "^1.0.0",
+    "@raycast/api": "^1.38.1",
+    "node-fetch": "^3.2.6",
+    "open": "^8.4.0",
+    "turndown-rn": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

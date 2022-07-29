@@ -26,7 +26,7 @@ export type ProposalUISectionItem = {
   title: string;
   // swift version if implemented, schedule period if in review (Not yet implemented)
   subtitle: string | undefined;
-  icon: {source: Icon, tintColor: Color} | string;
+  icon: { source: Icon; tintColor: Color } | string;
   // Repo
   accessoryTitle: string | undefined;
   // repo icon
@@ -38,7 +38,7 @@ export type ProposalUISectionItem = {
 };
 
 export default function ArticleList() {
-  const [state, setState] = useState<{ proposals: ProposalUI }>({ proposals: { sections: []} });
+  const [state, setState] = useState<{ proposals: ProposalUI }>({ proposals: { sections: [] } });
 
   useEffect(() => {
     async function fetch() {
@@ -118,6 +118,6 @@ async function getProposals(): Promise<ProposalUI> {
     return await fetchProposals();
   } catch (error) {
     showToast(ToastStyle.Failure, "Failed", (error as Error).message);
-    return Promise.resolve({ sections: []});
+    return Promise.resolve({ sections: [] });
   }
 }

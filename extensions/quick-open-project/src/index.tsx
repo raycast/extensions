@@ -1,41 +1,42 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Icon,
   Image,
-  KeyboardShortcut,
   List,
-  OpenInBrowserAction,
-  OpenWithAction,
-  ShowInFinderAction,
   closeMainWindow,
   environment,
-  preferences,
-  render,
+  Application,
+  Action,
+  Keyboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import Frecency from "frecency";
 import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import open = require("open");
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
 import gh = require("parse-github-url");
 
+interface Preferences {
+  paths: string;
+  editorApp: Application;
+  terminalApp: Application;
+}
+
 interface Remote {
   url: string;
 }
+
 type Repo = {
   name: string;
   host: string;
   url: string;
 };
-type ProjectList = Project[] | undefined;
-type ProjectState = {
-  projectList: ProjectList | undefined;
-  isLoading: boolean;
-};
+
+type ProjectList = Project[];
 
 class Project {
   name: string;
@@ -94,13 +95,11 @@ const projectFrecency = new Frecency({
 
 function searchProjects(query?: string): {
   projects: ProjectList;
-  isLoading: boolean;
 } {
-  const [{ projectList, isLoading }, setProjectList] = useState<ProjectState>({ projectList: [], isLoading: true });
-  const [projects, setProjects] = useState<ProjectList>();
-
-  useEffect(() => {
-    const projectPaths = (preferences.paths.value as string).split(",").map((s) => s.trim());
+  const projectList = useMemo(() => {
+    const projectPaths = getPreferenceValues<Preferences>()
+      .paths.split(",")
+      .map((s) => s.trim());
     const projects = projectPaths
       .flatMap((base) => {
         if (base.startsWith("~")) {
@@ -111,13 +110,10 @@ function searchProjects(query?: string): {
       .filter((path) => statSync(path)?.isDirectory())
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
-    setProjectList({ projectList: projects, isLoading: false });
+    return projects;
   }, []);
 
-  useEffect(() => {
-    if (projectList == undefined) {
-      return;
-    }
+  const projects = useMemo(() => {
     let filtered = projectList;
     if (filtered.length > 0 && query && query.length > 0) {
       filtered = fuzzysort
@@ -127,23 +123,23 @@ function searchProjects(query?: string): {
           threshold: -1000000, // pick a pretty big negative number
           scoreFn: (a) => {
             let scores = [-1000001] as number[]; // less than the threshold by default
-            if(a[0]) {
-              scores = scores.concat(a[0].score)
+            if (a[0]) {
+              scores = scores.concat(a[0].score);
             }
-            if(a[1]) {
+            if (a[1]) {
               // scores are negative, so make displayPath matches worse than direct name matches
-              scores = scores.concat(a[1].score * 10)
+              scores = scores.concat(a[1].score * 10);
             }
-            return Math.max(...scores)
+            return Math.max(...scores);
           },
         })
         .map((result) => result.obj);
     }
     // but: frecency matches will take precedence if parts of the path are included.
     filtered = projectFrecency.sort({ searchQuery: query || "", results: filtered });
-    setProjects(filtered);
+    return filtered;
   }, [query, projectList]);
-  return { projects, isLoading };
+  return { projects };
 }
 
 function updateFrecency(searchQuery: string | undefined, project: Project) {
@@ -151,13 +147,15 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
   projectFrecency.save({ searchQuery: searchQuery || "", selectedId: project.fullPath });
 }
 
-function Command() {
+export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
-  const { projects, isLoading } = searchProjects(searchQuery);
+  const { projects } = searchProjects(searchQuery);
+  const editorApp = getPreferenceValues<Preferences>().editorApp;
+  const terminalApp = getPreferenceValues<Preferences>().terminalApp;
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} selectedItemId={(projects && projects[0]) ? projects[0].fullPath : ""}>
-      {projects?.map((project) => (
+    <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
+      {projects.map((project) => (
         <List.Item
           id={project.fullPath}
           key={project.fullPath}
@@ -166,42 +164,44 @@ function Command() {
           icon={Icon.TextDocument}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Open in VSCode"
+              <Action
+                title={"Open in " + editorApp.name}
                 key="editor"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/Visual Studio Code.app" }}
+                icon={{ fileIcon: editorApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
-              <ActionPanel.Item
-                title="Open in Terminal"
+              <Action
+                title={"Open in " + terminalApp.name}
                 key="terminal"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
+                  open(project.fullPath, {
+                    app: { name: terminalApp.path, arguments: [project.fullPath] },
+                  });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/iTerm.app" }}
+                icon={{ fileIcon: terminalApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
               />
-              <ActionPanel.Item
-                title="Open in VSCode and Terminal"
+              <Action
+                title={"Open in both " + editorApp.name + " and " + terminalApp.name}
                 key="both"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: terminalApp.path, arguments: [project.fullPath] } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
               />
               {project.gitRemotes().map((remote, i) => {
-                const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as KeyboardShortcut) : undefined;
+                const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as Keyboard.Shortcut) : undefined;
                 let icon = undefined as Image | undefined;
                 if (remote.host == "github.com") {
                   icon = { source: { dark: "github-brands-dark.png", light: "github-brands-light.png" } };
@@ -209,7 +209,7 @@ function Command() {
                   icon = { source: { dark: "gitlab-brands-dark.png", light: "gitlab-brands-light.png" } };
                 }
                 return (
-                  <OpenInBrowserAction
+                  <Action.OpenInBrowser
                     title={`Open on ${remote.host} (${remote.name})`}
                     key={`open remote ${remote.name}`}
                     url={remote.url}
@@ -219,20 +219,20 @@ function Command() {
                   />
                 );
               })}
-              <OpenWithAction
+              <Action.OpenWith
                 key="openwith"
                 path={project.fullPath}
                 onOpen={() => updateFrecency(searchQuery, project)}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
-              <ShowInFinderAction
+              <Action.ShowInFinder
                 title={"Open in Finder"}
                 key="finder"
                 onShow={() => updateFrecency(searchQuery, project)}
                 path={project.fullPath}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
               />
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title={"Copy Path to Clipboard"}
                 key="clipboard"
                 onCopy={() => updateFrecency(searchQuery, project)}
@@ -248,4 +248,3 @@ function Command() {
 }
 
 mkdirSync(environment.supportPath, { recursive: true });
-render(<Command />);

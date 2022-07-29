@@ -1,13 +1,14 @@
 import {
   ActionPanel,
   Color,
-  CopyToClipboardAction,
+  Detail,
   environment,
   Icon,
   List,
-  OpenInBrowserAction,
   showToast,
-  ToastStyle,
+  useNavigation,
+  Action,
+  Toast,
 } from "@raycast/api";
 import { useState } from "react";
 import { Repository } from "./types";
@@ -15,6 +16,8 @@ import { useDebounce } from "use-debounce";
 import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
+import { useRepositoryReleases } from "./useRepositoryReleases";
+import { OpenInWebIDEAction } from "./website";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -27,11 +30,11 @@ export default function Command() {
   } = useVisitedRepositories();
 
   if (error) {
-    showToast(
-      ToastStyle.Failure,
-      "Failed searching repositories",
-      error instanceof Error ? error.message : String(error)
-    );
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed searching repositories",
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
@@ -63,26 +66,32 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
       icon={getIcon(props.repository)}
       title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
-      accessoryTitle={getAccessoryTitle(props.repository)}
       actions={<Actions repository={props.repository} onVisit={props.onVisit} />}
+      accessories={[
+        {
+          text: getAccessoryTitle(props.repository),
+        },
+      ]}
     />
   );
 }
 
 function Actions(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
+  const { push } = useNavigation();
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
-        <OpenInBrowserAction url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
-        <OpenInBrowserAction
-          icon={{ source: "github-dev.png", tintColor: Color.PrimaryText }}
-          title="Open in Web Editor"
-          url={props.repository.url.replace("https://github.com", "https://github.dev")}
-          onOpen={() => props.onVisit(props.repository)}
+        <Action.OpenInBrowser url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
+        <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
+        <Action.OpenInBrowser
+          icon="vscode-action-icon.png"
+          title="Clone in VSCode"
+          url={`vscode://vscode.git/clone?url=${props.repository.url}`}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <OpenInBrowserAction
+        <Action.OpenInBrowser
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
@@ -90,7 +99,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             icon={{ source: "issue.png", tintColor: Color.PrimaryText }}
             title="Open Issues"
             url={`${props.repository.url}/issues`}
@@ -99,7 +108,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           />
         )}
         {props.repository.hasWikiEnabled && (
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
@@ -108,7 +117,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           />
         )}
         {props.repository.hasProjectsEnabled && (
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
             url={`${props.repository.url}/projects`}
@@ -116,19 +125,27 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
+        {props.repository.releases?.totalCount > 0 && (
+          <Action
+            icon={Icon.List}
+            title="Browse Releases"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => push(<ReleaseView repository={props.repository} />)}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <CopyToClipboardAction
+        <Action.CopyToClipboard
           title="Copy Repository URL"
           content={props.repository.url}
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
-        <CopyToClipboardAction
+        <Action.CopyToClipboard
           title="Copy Name with Owner"
           content={props.repository.nameWithOwner}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
-        <CopyToClipboardAction
+        <Action.CopyToClipboard
           title="Copy Clone Command"
           content={`git clone ${props.repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
@@ -141,14 +158,17 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
 
 function DevelopmentActionSection() {
   async function handleClearVisitedRepositories() {
-    const toast = await showToast(ToastStyle.Animated, "Clearing visted repositories");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Clearing visted repositories",
+    });
 
     try {
       await clearVisitedRepositories();
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Cleared visited repositories";
     } catch (error) {
-      toast.style = ToastStyle.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Failed clearing visited repositories";
       toast.message = error instanceof Error ? error.message : undefined;
       console.error("Failed clearing visited repositories", error);
@@ -157,11 +177,63 @@ function DevelopmentActionSection() {
 
   return environment.isDevelopment ? (
     <ActionPanel.Section title="Development">
-      <ActionPanel.Item
-        icon={Icon.Trash}
-        title="Clear Visited Repositories"
-        onAction={handleClearVisitedRepositories}
-      />
+      <Action icon={Icon.Trash} title="Clear Visited Repositories" onAction={handleClearVisitedRepositories} />
     </ActionPanel.Section>
   ) : null;
+}
+
+function ReleaseView(props: { repository: Repository }) {
+  const { releases, loading, error } = useRepositoryReleases(props.repository);
+
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed fetching repository releases",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  return (
+    <List isLoading={loading}>
+      {releases?.map((release) => {
+        const publishedAt = new Date(release.publishedAt);
+        const publishedAtString = `${publishedAt.toLocaleDateString()} ${publishedAt.toLocaleTimeString()}`;
+
+        return (
+          <List.Item
+            key={release.id}
+            title={release.tagName}
+            subtitle={release.name || ""}
+            actions={
+              <ActionPanel title={`${props.repository.nameWithOwner}`}>
+                {release.description && (
+                  <Action.Push
+                    title="View Release Detail"
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    icon={Icon.Eye}
+                    target={
+                      <Detail
+                        markdown={release.description}
+                        actions={
+                          <ActionPanel title={`${props.repository.nameWithOwner}`}>
+                            <Action.OpenInBrowser url={release.url} />
+                          </ActionPanel>
+                        }
+                      />
+                    }
+                  />
+                )}
+                <Action.OpenInBrowser url={release.url} />
+              </ActionPanel>
+            }
+            accessories={[
+              {
+                text: publishedAtString,
+              },
+            ]}
+          />
+        );
+      })}
+    </List>
+  );
 }

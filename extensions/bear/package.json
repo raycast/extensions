@@ -5,6 +5,9 @@
   "description": "Control Bear with Raycast",
   "icon": "command-icon.png",
   "author": "hmarr",
+  "contributors": [
+    "ron-myers"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -45,11 +48,14 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "prettier": "prettier --write . && prettier --check ."
   }
 }

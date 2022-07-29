@@ -119,6 +119,20 @@
       "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Set Status",
+      "subtitle": "GitLab",
+      "description": "Managed My GitLab Status",
+      "mode": "view"
+    },
+    {
+      "name": "commits_my",
+      "title": "My Recent Commits",
+      "subtitle": "GitLab",
+      "description": "Managed My Recent Commits",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -138,30 +152,116 @@
       "description": "Your GitLab API token. `api` scope for read and write operations, `read_api` when you just want to read only commands.",
       "link": "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
       "placeholder": "Enter your GitLab API token."
+    },
+    {
+      "name": "cirefreshinterval",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "title": "CI Auto Refresh Interval (sec)",
+      "description": "Refresh interval in seconds for CI Pipeline/Job lists. Values between 1-9 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "10"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Preferred Primary Action",
+      "required": true,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Open in Raycast",
+          "value": "detail"
+        }
+      ],
+      "description": "Set the default action for Projects"
+    },
+    {
+      "name": "poptoroot",
+      "type": "checkbox",
+      "label": "Pop to Root after external action",
+      "required": false,
+      "default": false,
+      "title": "Behavior",
+      "description": "Pop to root after e.g. open the browser"
+    },
+    {
+      "name": "listdetails",
+      "type": "checkbox",
+      "label": "Show details in merge request list",
+      "required": false,
+      "default": false,
+      "description": "Show details in merge request lists via a metadata view"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificate Errors (not recommended)",
+      "required": false,
+      "default": false,
+      "title": "Certificate Errors",
+      "description": "Ignore SSL Errors"
+    },
+    {
+      "name": "customcacert",
+      "type": "textfield",
+      "title": "Custom CA Certificate",
+      "placeholder": "/my/ca.pem",
+      "required": false,
+      "description": "Optionally override the trusted CA certificates"
+    },
+    {
+      "name": "customcert",
+      "type": "textfield",
+      "title": "Custom Certificate",
+      "placeholder": "/my/cert.pem",
+      "required": false,
+      "description": "Set Custom Certificate"
     }
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "contributors": [
+    "Loskir",
+    "immint023",
+    "duboiss",
+    "metakirby5"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.24.5",
+    "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
+    "javascript-time-ago": "^2.3.10",
     "node-fetch": "^2.6.1",
-    "open": "^8.2.1"
+    "open": "^8.2.1",
+    "url-join": "^4.0.1",
+    "use-interval": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
+    "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
-    "@types/react": "^17.0.20",
+    "@types/url-join": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
     "typescript": "^4.3.5"
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "fix-prettier": "prettier --write src"
   }
 }

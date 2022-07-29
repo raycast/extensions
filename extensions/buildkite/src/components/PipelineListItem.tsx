@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, Color, getPreferenceValues, Icon, List, Action } from "@raycast/api";
 import { getStateIcon, State } from "../utils/states";
 import { Pager } from "../utils/types";
 import { Builds } from "./Builds";
@@ -36,12 +27,17 @@ export function PipelineListItem({ pipeline }: PipelineListItemProps) {
       title={pipeline.name}
       subtitle={pipeline.description}
       icon={getStateIcon(state)}
-      accessoryIcon={favoriteIcon}
+      accessories={[{ icon: favoriteIcon }]}
       actions={
         <ActionPanel>
-          <PushAction icon={Icon.Eye} target={<Builds pipeline={`${org}/${pipeline.slug}`} />} title="View Builds" />
-          <OpenInBrowserAction url={pipeline.url} />
-          <CopyToClipboardAction content={pipeline.url} title="Copy URL" />
+          <Action.OpenInBrowser url={pipeline.url} />
+          <Action.CopyToClipboard content={pipeline.url} title="Copy URL" />
+          <Action.Push
+            icon={Icon.Eye}
+            target={<Builds pipeline={`${org}/${pipeline.slug}`} />}
+            title="View Builds"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
         </ActionPanel>
       }
     />

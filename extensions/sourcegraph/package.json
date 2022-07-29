@@ -1,0 +1,182 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sourcegraph",
+  "title": "Sourcegraph",
+  "description": "Search your code and 2M+ public repositories on Sourcegraph.",
+  "icon": "command-icon.png",
+  "author": "bobheadxi",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Documentation",
+    "Web"
+  ],
+  "keywords": [
+    "sourcegraph",
+    "search",
+    "code",
+    "codesearch"
+  ],
+  "preferences": [
+    {
+      "name": "cloudToken",
+      "title": "Sourcegraph.com: Access token",
+      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "customInstance",
+      "title": "Sourcegraph Instance: Instance URL",
+      "description": "Required to use use 'Sourcegraph Instance' commands - URL of the Sourcegraph instance you want to connect to",
+      "placeholder": "https://sourcegraph.my-company.com",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "customInstanceToken",
+      "title": "Sourcegraph Instance: Access token",
+      "description": "Required to use 'Sourcegraph Instance' commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "featureSearchPatternDropdown",
+      "title": "Experimental features",
+      "label": "Search pattern dropdown",
+      "description": "Enable the search pattern dropdown in the search command.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "searchDotCom",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph.com",
+      "description": "Search 2M+ public repositories on Sourcegraph.com",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "cloudDefaultContext",
+          "title": "Default search context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchInstance",
+      "icon": "logo-bw.png",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Search code on a Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "customInstanceDefaultContext",
+          "title": "Default context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "findNotebooksDotCom",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse search notebooks on Sourcegraph.com.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb"
+      ],
+      "preferences": []
+    },
+    {
+      "name": "findNotebooksInstance",
+      "icon": "logo-bw.png",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse search notebooks on a Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb"
+      ],
+      "preferences": []
+    },
+    {
+      "name": "manageBatchChangesInstance",
+      "icon": "logo-bw.png",
+      "title": "Manage Batch Changes",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Manage batch changes on a Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "batch",
+        "changes",
+        "bc"
+      ],
+      "preferences": []
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.6.9",
+    "@raycast/api": "^1.37.1",
+    "cross-fetch": "^3.1.5",
+    "eventsource": "^2.0.2",
+    "graphql": "^16.5.0",
+    "luxon": "^2.4.0",
+    "nanoid": "^4.0.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.7.0",
+    "@graphql-codegen/fragment-matcher": "^3.2.1",
+    "@graphql-codegen/introspection": "^2.1.1",
+    "@graphql-codegen/typescript": "^2.6.0",
+    "@graphql-codegen/typescript-operations": "^2.4.3",
+    "@graphql-codegen/typescript-react-apollo": "^3.2.17",
+    "@types/eventsource": "^1.1.9",
+    "@types/luxon": "^2.3.2",
+    "@types/node": "~16.10.0",
+    "@types/react": "^18.0.14",
+    "@typescript-eslint/eslint-plugin": "^5.30.3",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fmt": "ray lint --fix",
+    "raycast-publish": ".scripts/raycast-publish.sh",
+    "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt"
+  }
+}

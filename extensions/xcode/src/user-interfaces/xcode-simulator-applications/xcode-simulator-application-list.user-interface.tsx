@@ -15,12 +15,9 @@ export function xcodeSimulatorApplicationList(
   return (
     <List
       isLoading={xcodeSimulatorApplications ? xcodeSimulatorApplications.isCache : true}
-      searchBarPlaceholder="Search for Apps">
-      {
-        xcodeSimulatorApplications
-          ?.value
-          .map(app => xcodeSimulatorApplicationListItem(app, navigation))
-      }
+      searchBarPlaceholder="Search for Apps"
+    >
+      {xcodeSimulatorApplications?.value.map((app) => xcodeSimulatorApplicationListItem(app, navigation))}
     </List>
   );
 }

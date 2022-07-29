@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sm-ms",
+  "title": "SM.MS",
+  "description": "SM.MS image hosting service to upload and share images.",
+  "icon": "sm-ms.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-images",
+      "title": "Upload Images",
+      "subtitle": "SM.MS",
+      "description": "Upload images to SM.MS and get the link to the image.",
+      "mode": "view"
+    },
+    {
+      "name": "delete-images",
+      "title": "Delete Images",
+      "subtitle": "SM.MS",
+      "description": "Delete images based on image hash.",
+      "mode": "view"
+    },
+    {
+      "name": "search-images",
+      "title": "Search Images",
+      "subtitle": "SM.MS",
+      "description": "Search and manage images uploaded through account.",
+      "mode": "view"
+    },
+    {
+      "name": "get-user-profile",
+      "title": "Get User Profile",
+      "subtitle": "SM.MS",
+      "description": "Get user profile.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "secretToken",
+      "type": "password",
+      "required": true,
+      "title": "API secret token",
+      "description": "SM.MS API secret token.",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "axios": "^0.27.2",
+    "form-data": "^4.0.0",
+    "fs-extra": "^10.1.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

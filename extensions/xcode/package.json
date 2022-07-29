@@ -2,8 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.2.0",
+  "version": "1.4.1",
   "author": "SvenTiigi",
+  "contributors": [
+    "qeude"
+  ],
   "license": "MIT",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
@@ -13,7 +16,17 @@
       "title": "Search Recent Projects",
       "subtitle": "Xcode",
       "description": "Search and open your recent Xcode Projects",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "excludedXcodeProjectPaths",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Xcode Project paths (comma separated)",
+          "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
+          "placeholder": "~/Backup,~/Archive/Xcode"
+        }
+      ]
     },
     {
       "name": "simulator-applications.command",
@@ -44,6 +57,13 @@
       "mode": "view"
     },
     {
+      "name": "add-swift-package.command",
+      "title": "Add Swift Package",
+      "subtitle": "Xcode",
+      "description": "Add a Swift Package from an URL to an opened Xcode project",
+      "mode": "view"
+    },
+    {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
@@ -55,7 +75,18 @@
       "title": "Create Swift Playground",
       "subtitle": "Xcode",
       "description": "Create a new Swift Playground and open it directly in Xcode",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "playgroundDefaultLocation",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "~/Desktop",
+          "default": "~/Desktop",
+          "title": "Default location",
+          "description": "Set the default location in which you want to save your Playgrounds."
+        }
+      ]
     },
     {
       "name": "clear-derived-data.command",
@@ -70,7 +101,18 @@
       "subtitle": "Xcode",
       "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
       "mode": "no-view"
+    },
+    {
+      "name": "delete-unsupported-simulators.command",
+      "title": "Delete Unsupported Simulators",
+      "subtitle": "Xcode",
+      "description": "Deletes devices that are not supported by the current Xcode SDK.",
+      "mode": "no-view"
     }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Applications"
   ],
   "keywords": [
     "Xcode",
@@ -82,11 +124,12 @@
     "Apple Developer"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.33.2",
     "dedent": "^0.7.0",
     "node-fetch": "^3.0.0",
     "rxjs": "^7.4.0",
-    "tildify": "^3.0.0"
+    "tildify": "^3.0.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/dedent": "^0.7.0",
@@ -102,6 +145,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

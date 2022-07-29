@@ -5,6 +5,10 @@
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
+  "contributors": [
+    "adrienbaron",
+    "dima-m711"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,36 +21,60 @@
   ],
   "preferences": [
     {
-      "name": "app",
-      "type": "textfield",
-      "required": false,
-      "title": "Preferred App",
-      "description": "Prefer which JetBrains Application (will be sorted to the top of the list)",
-      "default": "PhpStorm",
-      "placeholder": "PhpStorm"
-    },
-    {
       "name": "bin",
       "type": "textfield",
       "required": false,
-      "title": "tools bin folder",
-      "description": "Where are JetBrains Tools installed (in Toolbox Settings)",
+      "title": "Shell scripts location",
+      "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
       "default": "/usr/local/bin",
       "placeholder": "/usr/local/bin"
+    },
+    {
+      "name": "toolsInstall",
+      "type": "textfield",
+      "required": false,
+      "title": "Tools Install location",
+      "description": "What is the JetBrains Tools install Location? (in Toolbox → Settings → Tools)",
+      "default": "~/Library/Application Support/JetBrains/Toolbox",
+      "placeholder": "~/Library/Application Support/JetBrains/Toolbox"
+    },
+    {
+      "name": "fallback",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use protocol urls if missing shell scripts",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
+      "default": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "historic",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use historic project files",
+      "description": "Add projects from previous app installs",
+      "default": false,
+      "label": "Use all"
     }
   ],
   "keywords": [
-    "JetBrains",
-    "JB",
-    "Launch",
-    "Open",
-    "Projects",
-    "Recent"
+    "IntelliJ IDEA",
+    "PyCharm",
+    "WebStorm",
+    "PhpStorm",
+    "Rider",
+    "CLion",
+    "Datalore",
+    "DataSpell",
+    "DataGrip",
+    "RubyMine",
+    "AppCode",
+    "GoLand"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
-    "fuse.js": "^6.4.6",
+    "raycast-hooks": "^1.0.4",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
   },
@@ -64,6 +92,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

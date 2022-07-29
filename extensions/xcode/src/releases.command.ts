@@ -2,7 +2,7 @@ import { XcodeReleaseService } from "./services/xcode-release.service";
 import { useEffect, useState } from "react";
 import { XcodeRelease } from "./models/release/xcode-release.model";
 import { xcodeReleaseList } from "./user-interfaces/xcode-releases/xcode-release-list.user-interface";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 /**
  * Xcode releases command
@@ -16,7 +16,7 @@ export default () => {
   useEffect(() => {
     xcodeReleaseService
       .cachedXcodeReleases()
-      .then(cachedXcodeReleases => {
+      .then((cachedXcodeReleases) => {
         // Check if no XcodeReleases have been set
         if (!xcodeReleases) {
           // Set cached XcodeReleases
@@ -28,7 +28,7 @@ export default () => {
     xcodeReleaseService
       .xcodeReleases()
       .then(setXcodeReleases)
-      .catch(error => {
+      .catch((error) => {
         // Check if no XcodeReleases have been set
         if (!xcodeReleases) {
           // Set empty XcodeReleases
@@ -37,11 +37,10 @@ export default () => {
         // Log Error
         console.error(error);
         // Show Toast
-        return showToast(
-          ToastStyle.Failure,
-          "An error occurred while fetching Xcode Releases",
-          error
-        );
+        return showToast({
+          style: Toast.Style.Failure,
+          title: "An error occurred while fetching Xcode Releases",
+        });
       });
   }, []);
   // Return XcodeRelease List

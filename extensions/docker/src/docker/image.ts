@@ -1,7 +1,8 @@
 import { ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
 import * as markdown from '../utils/markdown';
 
-export const imageTitle = (image: ImageInfo | ImageInspectInfo) => image.RepoTags.join(' ');
+export const imageTitle = (image: ImageInfo | ImageInspectInfo) =>
+  (image.RepoTags ?? image.RepoDigests ?? image.Id).join(' ');
 
 export const formatImageId = (imageId: string, length?: number) => {
   const result = imageId.replace('sha256:', '');
@@ -19,8 +20,8 @@ export const formatImageDetailMarkdown = (image: ImageInspectInfo | undefined) =
         ['Size', formatBytes(image.Size)],
         ['OS', image.Os],
         ['Architecture', image.Architecture],
-        ['Command', markdown.codeBlock(formatImageCommand(image.Config.Cmd))],
-        ['Entrypoint', markdown.codeBlock(formatEntryPoint(image.Config.Entrypoint))],
+        ['Command', markdown.inlineCode(formatImageCommand(image.Config.Cmd))],
+        ['Entrypoint', markdown.inlineCode(formatEntryPoint(image.Config.Entrypoint))],
       ]) +
       renderEnvSection(image.Config.Env) +
       `\n`

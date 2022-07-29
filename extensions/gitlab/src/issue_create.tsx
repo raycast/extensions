@@ -1,20 +1,8 @@
-import {
-  render,
-  showToast,
-  ToastStyle,
-  Form,
-  Icon,
-  FormTagPicker,
-  FormTagPickerItem,
-  popToRoot,
-  ImageMask,
-  ActionPanel,
-  SubmitFormAction,
-} from "@raycast/api";
+import { Action, showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel } from "@raycast/api";
 import { Project, User, Label, Milestone } from "./gitlabapi";
 import { gitlab } from "./common";
 import { useState, useEffect } from "react";
-import { projectIcon, toFormValues } from "./utils";
+import { getErrorMessage, projectIcon, showErrorToast, toFormValues } from "./utils";
 import { useCache } from "./cache";
 
 interface IssueFormValues {
@@ -26,11 +14,9 @@ interface IssueFormValues {
   milestone_id: number;
 }
 
-async function main() {
-  render(<IssueForm />);
+export default function CreateIssueFormRoot(): JSX.Element {
+  return <IssueForm />;
 }
-
-main();
 
 async function submit(values: IssueFormValues) {
   try {
@@ -40,10 +26,10 @@ async function submit(values: IssueFormValues) {
     const val = toFormValues(values);
     console.log(val);
     await gitlab.createIssue(values.project_id, val);
-    await showToast(ToastStyle.Success, "Issue created", "Issue creation successful");
+    await showToast(Toast.Style.Success, "Issue created", "Issue creation successful");
     popToRoot();
-  } catch (error: any) {
-    await showToast(ToastStyle.Failure, "Error", error.message);
+  } catch (error) {
+    await showErrorToast(getErrorMessage(error));
   }
 }
 
@@ -70,42 +56,41 @@ function IssueForm() {
   const error = errorProjects || errorProjectInfo;
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot create issue", error);
+    showErrorToast(error, "Cannot create Issue");
   }
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Issue" onSubmit={submit} />
+          <Action.SubmitForm title="Create Issue" onSubmit={submit} />
         </ActionPanel>
       }
     >
       <ProjectDropdown projects={projects || []} setSelectedProject={setSelectedProject} value={selectedProject} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
       <Form.TextArea id="description" title="Description" placeholder="Enter description" />
-      <FormTagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
+      <Form.TagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
         {members.map((member) => (
-          <FormTagPickerItem
+          <Form.TagPicker.Item
             key={member.id.toString()}
             value={member.id.toString()}
             title={member.name || member.username}
-            icon={{ source: member.avatar_url, mask: ImageMask.Circle }}
+            icon={{ source: member.avatar_url, mask: Image.Mask.Circle }}
           />
         ))}
-      </FormTagPicker>
-      <FormTagPicker id="labels" title="Labels" placeholder="Type or choose an label">
+      </Form.TagPicker>
+      <Form.TagPicker id="labels" title="Labels" placeholder="Type or choose an label">
         {labels.map((label) => (
-          <FormTagPickerItem
+          <Form.TagPicker.Item
             key={label.name}
             value={label.name}
             title={label.name}
             icon={{ source: Icon.Circle, tintColor: label.color }}
           />
         ))}
-      </FormTagPicker>
+      </Form.TagPicker>
       <Form.Dropdown id="milestone_id" title="Milestone">
         <Form.Dropdown.Item key="_empty" value="" title="-" />
         {projectinfo?.milestones?.map((m) => (
@@ -153,11 +138,13 @@ export function useProject(query?: string): {
   const [errorProjectInfo, setError] = useState<string>();
   const [isLoadingProjectInfo, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (query === null || cancel) {
+      if (query === null || didUnmount) {
         return;
       }
 
@@ -172,18 +159,18 @@ export function useProject(query?: string): {
           const labels = await gitlab.getProjectLabels(proid);
           const milestones = await gitlab.getProjectMilestones(proid);
 
-          if (!cancel) {
+          if (!didUnmount) {
             setProjectInfo({ ...projectinfo, members: members, labels: labels, milestones: milestones });
           }
         } else {
           console.log("no project selected");
         }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(e.toString());
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -192,7 +179,7 @@ export function useProject(query?: string): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [query]);
 

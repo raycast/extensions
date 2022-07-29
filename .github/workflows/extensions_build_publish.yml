@@ -7,9 +7,12 @@ on:
         description: 'Extensions to update (space-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
         required: true
       command:
-        description: 'Ray CLI command to run (build | publish)'
-        default: 'build'
+        description: "Ray CLI command to run (build | publish)"
+        default: "build"
         required: true
+      cli_version:
+        description: 'CLI Version (optional, eg. "1.0.0")'
+        required: false
   pull_request:
     paths:
       - "extensions/**"
@@ -21,20 +24,28 @@ on:
 
 jobs:
   extensions_build_publish:
+    if: github.repository == 'raycast/extensions'
     name: Extensions Build & Publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+        uses: raycast/github-actions/git-checkout@v1.10.0
+      # This makes sure that the problems found while validating the extensions are shown in the PR diff
+      - name: Register Problem Matcher for Ray CLI
+        run: echo "##[add-matcher].github/ray.matcher.json"
       - name: Run Ray CLI
-        uses: raycast/github-actions/ray@v1.1.0
+        id: ray_cli
+        uses: raycast/github-actions/ray@v1.10.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
-          api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
-          command: "${{ inputs.command }}"
-          paths: "${{ inputs.paths }}"
+          command: "${{ github.event.inputs.command }}"
+          paths: "${{ github.event.inputs.paths }}"
+          cli_version: "${{ github.event.inputs.cli_version }}"
+      - name: Post Store URLs
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.10.0
+        with:
+          store_urls: ${{ steps.ray_cli.outputs.store_urls }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: edge/simple-slack-notify@master
@@ -47,4 +58,17 @@ jobs:
               { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
             ]
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+      - name: Notify Success to Slack
+        if: success() && github.event_name == 'workflow_dispatch'
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "good"
+          text: ":white_check_mark: ${env.GITHUB_WORKFLOW} has succeeded"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}

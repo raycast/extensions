@@ -1,7 +1,7 @@
-import { showHUD, copyTextToClipboard } from "@raycast/api";
+import { showHUD, Clipboard } from "@raycast/api";
 
 export default async () => {
   const now = new Date();
-  await copyTextToClipboard(now.toLocaleDateString());
+  await Clipboard.copy(now.toLocaleDateString());
   await showHUD("Copied date to clipboard");
 };

@@ -1,4 +1,15 @@
-import { ActionPanel, Color, CopyToClipboardAction, getPreferenceValues, Icon, List, OpenInBrowserAction, showToast, ToastStyle, ImageLike } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+  ImageLike,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
@@ -44,12 +55,12 @@ function BuildListItem(props: { build: Build }) {
 
 async function fetchBuilds(): Promise<Build[]> {
   try {
-    const apiKey = getPreferenceValues().apiKey
+    const apiKey = getPreferenceValues().apiKey;
     const response = await fetch("https://api.bitrise.io/v0.1/builds", {
-      "method": "GET",
-      "headers": {
-        "Authorization": apiKey
-      }
+      method: "GET",
+      headers: {
+        Authorization: apiKey,
+      },
     });
     const json = await response.json();
     return (json as Record<string, unknown>).data as Build[];
@@ -62,16 +73,16 @@ async function fetchBuilds(): Promise<Build[]> {
 
 function getTitle(build: Build): string {
   if (!build.pull_request_target_branch) {
-    return truncate(build.branch, 40)
+    return truncate(build.branch, 40);
   } else {
     return `${truncate(build.branch, 40)} -> ${truncate(build.pull_request_target_branch, 20)}`;
   }
 }
 
 function getAccessoryTitle(build: Build): string {
-  const triggeredAt = new Date(build.triggered_at).toLocaleString()
-  const startedOnWorkerAt = new Date(build.started_on_worker_at).toLocaleString()
-  const finishedAt = new Date(build.finished_at).toLocaleString()
+  const triggeredAt = new Date(build.triggered_at).toLocaleString();
+  const startedOnWorkerAt = new Date(build.started_on_worker_at).toLocaleString();
+  const finishedAt = new Date(build.finished_at).toLocaleString();
   if (build.is_on_hold) {
     return `triggered at ${triggeredAt}`;
   } else if (build.status === 0) {
@@ -100,15 +111,13 @@ function getAccessoryIcon(build: Build): ImageLike {
     return { source: Icon.ExclamationMark, tintColor: Color.Red };
   } else if (build.status === 3) {
     return { source: Icon.Trash, tintColor: Color.Yellow };
-  } else if (build.status === 3) {
-    return { source: Icon.Trash, tintColor: Color.Yellow };
   } else {
     return { source: Icon.QuestionMark, tintColor: Color.Orange };
   }
 }
 
 function getActions(build: Build) {
-  const buildUrl = `https://app.bitrise.io/build/${build.slug}`
+  const buildUrl = `https://app.bitrise.io/build/${build.slug}`;
 
   if (!build.pull_request_view_url) {
     return (
@@ -116,7 +125,7 @@ function getActions(build: Build) {
         <OpenInBrowserAction title="Open Build" url={buildUrl} />
         <CopyToClipboardAction title="Copy build URL" content={buildUrl} />
       </ActionPanel>
-    )
+    );
   } else {
     return (
       <ActionPanel>
@@ -125,29 +134,29 @@ function getActions(build: Build) {
         <OpenInBrowserAction title="Open PR" url={build.pull_request_view_url} />
         <CopyToClipboardAction title="Copy PR URL" content={build.pull_request_view_url} />
       </ActionPanel>
-    )
+    );
   }
 }
 
-function truncate(str: string, n: number){
-  return (str.length > n) ? str.substr(0, n-1) + '...' : str;
-};
+function truncate(str: string, n: number) {
+  return str.length > n ? str.substr(0, n - 1) + "..." : str;
+}
 
 interface Preferences {
   apiKey: string;
 }
 
 type Build = {
-  triggered_at: string,
-  started_on_worker_at: string,
-  finished_at: string,
-  status: number,
-  abort_reason: string,
-  is_on_hold: boolean,
+  triggered_at: string;
+  started_on_worker_at: string;
+  finished_at: string;
+  status: number;
+  abort_reason: string;
+  is_on_hold: boolean;
   slug: string;
   build_number: number;
   branch: string;
-  triggered_workflow: string,
+  triggered_workflow: string;
   pull_request_id: number;
   pull_request_view_url: string;
   pull_request_target_branch: string;
@@ -158,4 +167,4 @@ type Repository = {
   title: string;
   repo_owner: string;
   avatar_url: string;
-}
+};

@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "world-clock",
+  "title": "World Clock",
+  "description": "Query the current time of a region, ip or domain.",
+  "icon": "world-clock.png",
+  "author": "koinzhang",
+  "categories": [
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-world-time",
+      "title": "Query World Time",
+      "icon": "query-world-time.png",
+      "description": "Query the current time for a timezone with region.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemLayout",
+          "type": "dropdown",
+          "description": "Set the layout of the timezone items.",
+          "required": true,
+          "title": "Timezone Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the timezone items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Timezone Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "showClock",
+          "type": "checkbox",
+          "required": false,
+          "title": "Advanced Preferences",
+          "label": "Show Clock",
+          "description": "Show clock in Detail. (Only works with List layout)",
+          "default": true
+        },
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember timezone filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "query-ip-time",
+      "title": "Query IP Time",
+      "icon": "query-ip-time.png",
+      "description": "Query the current time based on IP or domain.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Advanced Preferences",
+      "name": "hour24",
+      "type": "checkbox",
+      "required": true,
+      "label": "Hour 24",
+      "description": "24 hour clock",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "axios": "^0.27.2",
+    "file-url": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^18.0.14",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
+    "eslint": "^8.18.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

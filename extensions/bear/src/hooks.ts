@@ -9,13 +9,13 @@ export function useBearDb(): [BearDb | undefined, Error | undefined] {
     const connect = async () => {
       try {
         setDb(await loadDatabase());
-      } catch (err: any) {
+      } catch {
         setError(new Error("Couldn't load Bear database. Make sure you have Bear installed."));
       }
     };
     connect();
 
-    return () => db?.close()
+    return () => db?.close();
   }, []);
 
   return [db, error];

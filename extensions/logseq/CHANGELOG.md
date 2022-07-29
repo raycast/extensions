@@ -1,0 +1,18 @@
+# Logseq Changelog
+
+## [Support insert leading time and quick capture tag when using quick note] - 2022-07-27
+- Add support for insert leading time and quick capture tag when using quick note just like logseq on mobile.
+- Disabled by default, enable it in the extension settings.
+
+## [Support org mode & custom journal folder name] - 2022-04-15
+
+- Support org mode!
+- Users can config the custom journal location in logseq using `:journals-directory "your-directory"`, this PR covers this config
+
+## [Support custom journal format] - 2022-04-11
+
+In logseq, users can edit the config.edn file and use :journal/file-name-format "yyyy-MM-dd" to specify the date format of the file, the extension will parse this config from the `config.edn` file.
+
+## [Initial Version] - 2022-04-07
+
+Insert your notes to logseq quickly!

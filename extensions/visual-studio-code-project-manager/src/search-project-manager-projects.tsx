@@ -1,26 +1,12 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  CopyToClipboardAction,
-  Detail,
-  environment,
-  getPreferenceValues,
-  List,
-  OpenAction,
-  OpenWithAction,
-  ShowInFinderAction,
-  TrashAction,
-} from "@raycast/api";
-import { existsSync, readFileSync } from "fs";
+import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import { existsSync, lstatSync, readFileSync } from "fs";
 import open from "open";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { ReactElement } from "react";
+import { useState, ReactElement } from "react";
 import tildify from "tildify";
-import { Preferences, ProjectEntry } from "./types";
-
-const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager/projects.json`;
+import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -30,12 +16,69 @@ const gitClientInstalled = existsSync(gitClientPath);
 const terminalPath = preferences.terminalAppPath || "";
 const terminalInstalled = existsSync(terminalPath);
 
+const build: VSCodeBuild = preferences.build;
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
+
+const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
+
 function getProjectEntries(): ProjectEntry[] {
-  const storageFile = preferences.projectManagerDataPath || STORAGE;
-  if (!existsSync(storageFile)) {
-    return [];
+  const storagePath = getPreferencesPath() || STORAGE;
+  const savedProjectsFile = `${storagePath}/projects.json`;
+  const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
+
+  let projectEntries: ProjectEntry[] = [];
+  if (existsSync(savedProjectsFile)) {
+    const savedProjects: ProjectEntry[] = JSON.parse(readFileSync(savedProjectsFile).toString());
+    projectEntries.push(...savedProjects);
   }
-  return JSON.parse(readFileSync(storageFile).toString());
+
+  cachedProjectsFiles.forEach((cachedFile) => {
+    if (existsSync(cachedFile)) {
+      const cachedEntries: CachedProjectEntry[] = JSON.parse(readFileSync(cachedFile).toString());
+      cachedEntries.forEach(({ name, fullPath }) => {
+        projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+      });
+    }
+  });
+
+  if (preferences.hideProjectsWithoutTag) {
+    projectEntries = projectEntries.filter(({ tags }) => Array.isArray(tags) && tags.length);
+  }
+
+  return projectEntries;
+}
+
+function getProjectTags(projectEntries: ProjectEntry[]): string[] {
+  return projectEntries?.reduce((tags: string[], project: ProjectEntry) => {
+    project.tags?.forEach((tag) => {
+      if (!tags.includes(tag)) {
+        tags.push(tag);
+      }
+    });
+
+    return tags.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  }, []);
+}
+
+const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): ProjectEntry[] => {
+  return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
+};
+
+function getPreferencesPath(): string | undefined {
+  const path = preferences.projectManagerDataPath;
+  if (path && existsSync(path)) {
+    const stat = lstatSync(path);
+    if (stat.isDirectory()) {
+      return path;
+    }
+    if (stat.isFile()) {
+      return dirname(path);
+    }
+  }
 }
 
 function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
@@ -79,6 +122,10 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 export default function Command() {
   const elements: ReactElement[] = [];
   const projectEntries = getProjectEntries();
+  const projectTags = getProjectTags(projectEntries);
+
+  const [selectedTag, setSelectedTag] = useState("");
+
   if (!projectEntries || projectEntries.length === 0) {
     return (
       <Detail
@@ -91,16 +138,41 @@ export default function Command() {
 
   const sortedProjects = getSortedProjects(projectEntries);
 
-  if (preferences.groupProjectsByTag) {
+  if (preferences.groupProjectsByTag && !selectedTag) {
+    // don't group if filtering
     const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
     elements.push(...groupedProjects);
   } else {
-    sortedProjects.forEach((project) => {
-      elements.push(<ProjectListItem key={project.rootPath} {...project} />);
+    filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
+      elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
     });
   }
 
-  return <List searchBarPlaceholder="Search projects ...">{elements}</List>;
+  const handleChangeTag = (tag: string) => {
+    setSelectedTag(tag);
+  };
+
+  return (
+    <List
+      searchBarPlaceholder="Search projects ..."
+      searchBarAccessory={
+        projectTags.length ? (
+          <List.Dropdown tooltip="Tags filter" onChange={handleChangeTag} defaultValue={undefined}>
+            <List.Dropdown.Section>
+              <List.Dropdown.Item key="0" title="All Tags" value={""} />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section title="Tags">
+              {projectTags.map((tag, tagIndex) => (
+                <List.Dropdown.Item key={"tag-" + tagIndex} title={tag} value={tag} />
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        ) : null
+      }
+    >
+      {elements}
+    </List>
+  );
 }
 
 function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
@@ -117,9 +189,9 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="command-icon.png" target={path} application="Visual Studio Code" />
+            <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             {terminalInstalled && (
-              <ActionPanel.Item
+              <Action
                 title="Open in Terminal"
                 key="terminal"
                 onAction={() => {
@@ -131,7 +203,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
               />
             )}
             {gitClientInstalled && isGitRepo(path) && (
-              <ActionPanel.Item
+              <Action
                 title="Open in Git client"
                 key="git-client"
                 onAction={() => {
@@ -142,19 +214,19 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
               />
             )}
-            <ShowInFinderAction path={path} />
-            <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.ShowInFinder path={path} />
+            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard
               title="Copy Path"
               content={prettyPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <TrashAction paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+            <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
@@ -166,14 +238,14 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
 function DevelopmentActionSection() {
   return environment.isDevelopment ? (
     <ActionPanel.Section title="Development">
-      <OpenAction
+      <Action.Open
         title="Open projects.json File in Code"
-        icon="icon.png"
+        icon="command-icon.png"
         target={STORAGE}
         application="Visual Studio Code"
       />
-      <ShowInFinderAction title="Show projects.json File in Finder" path={STORAGE} />
-      <CopyToClipboardAction title="Copy projects.json File Path" content={STORAGE} />
+      <Action.ShowInFinder title="Show projects.json File in Finder" path={STORAGE} />
+      <Action.CopyToClipboard title="Copy projects.json File Path" content={STORAGE} />
     </ActionPanel.Section>
   ) : null;
 }

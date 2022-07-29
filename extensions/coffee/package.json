@@ -5,6 +5,10 @@
   "description": "Prevent the sleep function on your mac",
   "icon": "logo.png",
   "author": "mooxl",
+  "contributors": [
+    "bibixx",
+    "GastroGeek"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -34,6 +38,20 @@
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination",
       "mode": "no-view"
+    },
+    {
+      "name": "toggleCaffeinate",
+      "title": "Toggle Caffeinate",
+      "subtitle": "Coffee",
+      "description": "Toggle caffeination",
+      "mode": "no-view"
+    },
+    {
+      "name": "caffeinateFor",
+      "title": "Caffeinate For",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "view"
     }
   ],
   "dependencies": {

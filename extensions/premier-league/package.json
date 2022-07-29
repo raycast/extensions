@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "premier-league",
+  "title": "Premier League",
+  "description": "View the latest Premier League tables, form guides and season archives in Raycast.",
+  "icon": "icon.png",
+  "author": "anhthang",
+  "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
+  "commands": [
+    {
+      "name": "table",
+      "title": "Standings",
+      "subtitle": "Premier League",
+      "description": "View the latest Premier League tables, form guides and season archives.",
+      "mode": "view"
+    },
+    {
+      "name": "fixture",
+      "title": "Fixtures",
+      "subtitle": "Premier League",
+      "description": "View the 380 Premier League fixtures for the current season.",
+      "mode": "view"
+    },
+    {
+      "name": "result",
+      "title": "Results",
+      "subtitle": "Premier League",
+      "description": "View Premier League scores, results & season archives, along with other competitions involving Premier League clubs.",
+      "mode": "view"
+    },
+    {
+      "name": "player",
+      "title": "Players",
+      "subtitle": "Premier League",
+      "description": "Find profiles and information about current and all-time Premier League players.",
+      "mode": "view"
+    },
+    {
+      "name": "manager",
+      "title": "Managers",
+      "subtitle": "Premier League",
+      "description": "Find profiles and information about current and all-time Premier League managers",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "subtitle": "Premier League",
+      "description": "Find profiles and information about current and all-time Premier League clubs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.26.0",
+    "date-fns": "^2.28.0",
+    "json2md": "^1.12.0",
+    "lodash.groupby": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/json2md": "^1.5.1",
+    "@types/lodash.groupby": "^4.6.6",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aws",
+  "title": "Amazon AWS",
+  "description": "Integrate your AWS account in Raycast",
+  "icon": "command-icon.png",
+  "author": "Falcon",
+  "contributors": [
+    "Hodglim",
+    "JonathanWbn",
+    "gebeto",
+    "mommertf",
+    "duboiss",
+    "lbergantin"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ec2",
+      "title": "EC2 Instances",
+      "subtitle": "Amazon AWS",
+      "description": "List and Filter All your EC2 Instances",
+      "mode": "view"
+    },
+    {
+      "name": "ecs",
+      "title": "ECS Clusters",
+      "subtitle": "Amazon AWS",
+      "description": "List and Filter All your ECS Clusters",
+      "mode": "view"
+    },
+    {
+      "name": "queues",
+      "title": "SQS Queues",
+      "subtitle": "Amazon AWS",
+      "description": "List All your SQS Queues",
+      "mode": "view"
+    },
+    {
+      "name": "codepipelines",
+      "title": "CodePipelines",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CodePipelines",
+      "mode": "view"
+    },
+    {
+      "name": "console",
+      "title": "Console",
+      "subtitle": "Amazon AWS",
+      "description": "Launch AWS console links",
+      "mode": "view"
+    },
+    {
+      "name": "cloudformation",
+      "title": "CloudFormation Stacks",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CloudFormation Stacks",
+      "mode": "view"
+    },
+    {
+      "name": "dynamodb",
+      "title": "DynamoDB Tables",
+      "subtitle": "Amazon AWS",
+      "description": "List All your DynamoDB Tables",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "region",
+      "type": "textfield",
+      "required": true,
+      "title": "AWS Region",
+      "description": "The Region Were You Have All Your Instances",
+      "placeholder": "eu-central-1"
+    },
+    {
+      "name": "aws_profile",
+      "type": "textfield",
+      "required": true,
+      "title": "AWS Profile",
+      "description": "set aws profile name",
+      "placeholder": "default"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "aws-sdk": "^2.1023.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

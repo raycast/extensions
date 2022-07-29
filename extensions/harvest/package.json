@@ -1,0 +1,109 @@
+{
+  "name": "harvest",
+  "title": "Harvest",
+  "description": "Access Harvest Time Entries",
+  "icon": "harvest-logo-icon.png",
+  "author": "eluce2",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new",
+      "icon": "add.png",
+      "title": "New Time Entry",
+      "subtitle": "Harvest",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "listTimeEntries",
+      "icon": "timer.png",
+      "title": "Today's Timesheet",
+      "preferences": [
+        {
+          "name": "sortBy",
+          "title": "Sort By",
+          "description": "How should the time entries in your timesheet be sorted?",
+          "required": false,
+          "default": "updated-desc",
+          "value": "updated-desc",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Updated Time - Newest First",
+              "value": "updated-desc"
+            },
+            {
+              "title": "Updated Time - Oldest First",
+              "value": "updated-asc"
+            },
+            {
+              "title": "Created Time - Newest First",
+              "value": "created-desc"
+            },
+            {
+              "title": "Created Time - Oldest First",
+              "value": "created-asc"
+            },
+            {
+              "title": "No Sorting",
+              "value": "none"
+            }
+          ]
+        }
+      ],
+      "subtitle": "Harvest",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "stopTimer",
+      "icon": "stop.png",
+      "title": "Stop Timer",
+      "subtitle": "Harvest",
+      "description": "Stop your running timer",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Harvest Token",
+      "required": true,
+      "link": "https://id.getharvest.com/developers",
+      "type": "password"
+    },
+    {
+      "name": "accountID",
+      "title": "Harvest Account ID",
+      "required": true,
+      "description": "Harvest Accoutn ID",
+      "link": "https://id.getharvest.com/developers",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "axios": "^0.23.0",
+    "dayjs": "^1.10.7",
+    "lodash": "^4.17.21",
+    "swr": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -1,3 +1,8 @@
+type Highlight = {
+  text: string;
+  note: string;
+};
+
 export type Bookmark = {
   _id: number;
   collection: unknown; // object
@@ -18,8 +23,10 @@ export type Bookmark = {
   file: unknown; // object
   important: boolean;
   html: string;
+  note: string;
+  highlights: Highlight[];
 };
 
 export interface Preferences {
   token: string;
-};
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggl-track",
+  "title": "Toggl Track",
+  "description": "Start and stop time entries with Toggl Track",
+  "icon": "command-icon.png",
+  "author": "franzwilhelm",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Track Time",
+      "subtitle": "Toggl Track",
+      "description": "Start and stop time entries with Toggl Track",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "togglApiToken",
+      "type": "password",
+      "required": true,
+      "title": "Toggl API Token",
+      "placeholder": "Can be found at https://track.toggl.com/profile",
+      "description": "The API token for your Toggl account."
+    }
+  ],
+  "keywords": [
+    "toggl",
+    "track",
+    "time",
+    "entry"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "dayjs": "^1.10.7",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.10",
+    "@types/react": "^17.0.38",
+    "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "@typescript-eslint/parser": "^5.10.0",
+    "eslint": "^8.7.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.22.1",
+    "typescript": "^4.5.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

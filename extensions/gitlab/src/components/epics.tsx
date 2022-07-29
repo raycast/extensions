@@ -1,21 +1,15 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Image,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { showErrorToast } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 import { ClearLocalCacheAction } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 function getIcon(state: string): Image {
   if (state == "opened") {
@@ -32,14 +26,20 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessoryIcon={{ source: epic.author.avatar_url || "", mask: ImageMask.Circle }}
+      accessories={[{ icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle } }]}
       icon={icon}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={epic.web_url} />
-          <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
-          <CopyToClipboardAction title="Copy Epic ID" content={epic.id} />
-          <ClearLocalCacheAction />
+          <ActionPanel.Section>
+            <GitLabOpenInBrowserAction url={epic.web_url} />
+            <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearLocalCacheAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -65,13 +65,13 @@ export function EpicList(props: { group: Group }) {
     {
       deps: [searchText],
       onFilter: async (epics) => {
-        return await searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
+        return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
     }
   );
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search epics", error);
+    showErrorToast(error, "Cannot search Epics");
   }
 
   const navTitle = `Epics ${props.group.full_path}`;

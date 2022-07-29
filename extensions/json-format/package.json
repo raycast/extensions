@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-format",
+  "title": "Format JSON",
+  "description": "Formats a JSON file with a selected indentation.",
+  "icon": "command-icon.png",
+  "author": "destiner",
+  "categories": ["Data", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Format JSON",
+      "description": "Formats a JSON",
+      "mode": "view"
+    }
+  ],
+  "preferences": [{
+    "name": "indent",
+    "title": "Indentation",
+    "description": "Output file indentation",
+    "type": "dropdown",
+    "required": false,
+    "data": [{
+      "title": "Tab",
+      "value": "tab"
+    }, {
+      "title": "Spaces: 2",
+      "value": "2"
+    }, {
+      "title": "Spaces: 4",
+      "value": "4"
+    }, {
+      "title": "Spaces: 8",
+      "value": "8"
+    }]
+  }],
+  "dependencies": {
+    "@raycast/api": "^1.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

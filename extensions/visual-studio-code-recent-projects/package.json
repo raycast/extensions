@@ -5,6 +5,13 @@
   "description": "Search and open recent projects from Visual Studio Code.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "iainsimmons",
+    "macbookandrew",
+    "cy-98",
+    "immint023",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,21 +24,35 @@
   ],
   "preferences": [
     {
-      "name": "codeCliPath",
-      "type": "textfield",
+      "name": "build",
+      "type": "dropdown",
       "required": false,
-      "default": "/usr/local/bin/code",
-      "title": "Path of the Vscode Cli",
-      "description": "Use `Shell Command: Install 'code' command in PATH` from the command palette to install."
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use when searching for recent projects",
+      "data": [
+        {
+          "value": "Code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "Code - Insiders",
+          "title": "Visual Studio Code - Insiders"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.35.0",
+    "lodash.get": "^4.4.2",
+    "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
+    "@types/lodash.get": "^4.4.7",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -41,6 +62,8 @@
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

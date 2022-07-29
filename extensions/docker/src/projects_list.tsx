@@ -1,11 +1,12 @@
 import Dockerode from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useMemo } from 'react';
 import ContainerList from './container_list';
 import { useDocker } from './docker';
 import { ComposeProject } from './docker/compose';
 import { isContainerRunning } from './docker/container';
 import ErrorDetail from './error_detail';
+import { withToast } from './ui/toast';
 
 export default function ProjectsList() {
   const docker = useMemo(() => new Dockerode(), []);
@@ -21,33 +22,35 @@ export default function ProjectsList() {
       {projects?.map((project) => (
         <List.Item
           key={project.name}
-          icon={{ source: Icon.List }}
+          icon={{ source: 'icon-compose.png', tintColor: Color.SecondaryText }}
           title={project.name}
           subtitle={projectSubTitle(project)}
           actions={
             <ActionPanel>
-              <PushAction
+              <Action.Push
                 title="Show Containers"
                 icon={{ source: Icon.Binoculars }}
                 target={<ContainerList projectFilter={project.name} />}
               />
-              <ActionPanel.Item
+              <Action
                 title="Start All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
                 icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
-                onAction={async () => {
-                  await startProject(project);
-                  await showToast(ToastStyle.Success, `Started ${project.name}`);
-                }}
+                onAction={withToast({
+                  action: () => startProject(project),
+                  onSuccess: () => `Started ${project.name}`,
+                  onFailure: ({ message }) => message,
+                })}
               />
-              <ActionPanel.Item
+              <Action
                 title="Stop All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
                 icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}
-                onAction={async () => {
-                  await stopProject(project);
-                  await showToast(ToastStyle.Success, `Stopped ${project.name}`);
-                }}
+                onAction={withToast({
+                  action: () => stopProject(project),
+                  onSuccess: () => `Stopped ${project.name}`,
+                  onFailure: ({ message }) => message,
+                })}
               />
             </ActionPanel>
           }

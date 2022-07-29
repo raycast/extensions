@@ -1,20 +1,21 @@
-import { readFileSync } from 'fs';
-import path from 'path';
-import { homedir } from 'os';
-import { environment } from '@raycast/api';
-import initSqlJs, { Database, ParamsObject } from 'sql.js'
+import { readFileSync } from "fs";
+import path from "path";
+import { homedir } from "os";
+import { environment } from "@raycast/api";
+import initSqlJs, { Database, ParamsObject } from "sql.js";
 
 export interface Note {
-  id: string,
-  title: string,
-  text: string,
-  modifiedAt: Date,
-  tags: string[],
-  encrypted: boolean,
-  formattedTags: string
+  id: string;
+  title: string;
+  text: string;
+  modifiedAt: Date;
+  tags: string[];
+  encrypted: boolean;
+  formattedTags: string;
 }
 
-const BEAR_DB_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite';
+const BEAR_DB_PATH =
+  homedir() + "/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite";
 const BEAR_EPOCH = 978307200; // Start of 2001 as a timestamp
 const SEARCH_NOTES_QUERY = `
 SELECT
@@ -84,7 +85,7 @@ GROUP BY
 ORDER BY
 	note.ZMODIFICATIONDATE DESC
 LIMIT 400
-`
+`;
 
 const SEARCH_NOTE_LINKS = `
 SELECT DISTINCT
@@ -110,7 +111,7 @@ GROUP BY
 ORDER BY
 	note.ZMODIFICATIONDATE DESC
 LIMIT 400
-`
+`;
 
 export async function loadDatabase(): Promise<BearDb> {
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
@@ -151,21 +152,21 @@ export class BearDb {
   }
 
   private toNote(row: ParamsObject): Note {
-    const tags = ((row.tags) as string | undefined)?.split(',') ?? [];
+    const tags = (row.tags as string | undefined)?.split(",") ?? [];
     return {
       id: row.id as string,
       title: row.title as string,
       text: row.text as string,
-      modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
+      modifiedAt: new Date(((row.modified_at as number) + BEAR_EPOCH) * 1000),
       tags: tags,
       formattedTags: formatTags(tags),
       encrypted: row.encrypted === 1,
-    }
+    };
   }
 
   getNotes(searchQuery: string): Note[] {
     const statement = this.database.prepare(SEARCH_NOTES_QUERY);
-    statement.bind({ ':query': searchQuery });
+    statement.bind({ ":query": searchQuery });
 
     const results: Note[] = [];
     while (statement.step()) {
@@ -180,7 +181,7 @@ export class BearDb {
 
   getBacklinks(noteID: string): Note[] {
     const statement = this.database.prepare(SEARCH_BACKLINKS);
-    statement.bind({ ':id': noteID });
+    statement.bind({ ":id": noteID });
 
     const results: Note[] = [];
     while (statement.step()) {
@@ -195,7 +196,7 @@ export class BearDb {
 
   getNoteLinks(noteID: string): Note[] {
     const statement = this.database.prepare(SEARCH_NOTE_LINKS);
-    statement.bind({ ':id': noteID });
+    statement.bind({ ":id": noteID });
 
     const results: Note[] = [];
     while (statement.step()) {

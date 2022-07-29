@@ -17,10 +17,10 @@
     "name": "Chinese Simplified",
     "flag": "🇨🇳"
   },
-  "Chinese Traditional": {
+  "Mandarin": {
     "code": "zh-TW",
-    "name": "Chinese Traditional",
-    "flag": "🇨🇳"
+    "name": "Taiwanese Mandarin",
+    "flag": "🇹🇼"
   },
   "Corsican": { "code": "co", "name": "Corsican" },
   "Croatian": { "code": "hr", "name": "Croatian", "flag": "🇭🇷" },

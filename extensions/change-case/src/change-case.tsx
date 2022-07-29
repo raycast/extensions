@@ -1,65 +1,156 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction } from "@raycast/api";
-import * as changeCase from "change-case";
-import execa from "execa";
+import {
+  ActionPanel,
+  List,
+  getPreferenceValues,
+  getSelectedText,
+  Action,
+  Icon,
+  Clipboard,
+  showHUD,
+  closeMainWindow,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import * as changeCase from "change-case-all";
+import { execa } from "execa";
 import { useEffect, useState } from "react";
 
+type CaseType =
+  | "Camel Case"
+  | "Capital Case"
+  | "Constant Case"
+  | "Dot Case"
+  | "Header Case"
+  | "Kebab Case"
+  | "Lower Case"
+  | "Lower First"
+  | "Macro Case"
+  | "No Case"
+  | "Param Case"
+  | "Pascal Case"
+  | "Path Case"
+  | "Random Case"
+  | "Sentence Case"
+  | "Snake Case"
+  | "Swap Case"
+  | "Title Case"
+  | "Upper Case"
+  | "Upper First";
+
 async function runShellScript(command: string) {
-  const { stdout } = await execa.command(command);
+  const { stdout } = await execa(command, {
+    env: { LC_CTYPE: "UTF-8" },
+  });
   return stdout;
 }
 
-async function readClipboard() {
-  return await runShellScript("pbpaste");
+class NoTextError extends Error {
+  constructor() {
+    super("No text");
+
+    Object.setPrototypeOf(this, NoTextError.prototype);
+  }
+}
+
+async function getSelection() {
+  try {
+    return await getSelectedText();
+  } catch (error) {
+    return "";
+  }
+}
+
+async function readContent(preferredSource: string) {
+  if (preferredSource === "clipboard") {
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    throw new NoTextError();
+  } else {
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    throw new NoTextError();
+  }
 }
 
 export default function changeChase() {
-  const data = [
-    { label: "Camel Case", func: changeCase.camel },
-    { label: "Constant Case", func: changeCase.constant },
-    { label: "Macro Case", func: changeCase.constant },
-    { label: "Dot Case", func: changeCase.dot },
-    { label: "Kebab Case", func: changeCase.param },
-    { label: "Lower Case", func: changeCase.lower },
-    { label: "Lower First", func: changeCase.lcFirst },
-    { label: "No Case", func: changeCase.no },
-    { label: "Param Case", func: changeCase.param },
-    { label: "Pascal Case", func: changeCase.pascal },
-    { label: "Path Case", func: changeCase.path },
-    { label: "Sentence Case", func: changeCase.sentence },
-    { label: "Snake Case", func: changeCase.snake },
-    { label: "Swap Case", func: changeCase.swap },
-    { label: "Title Case", func: changeCase.title },
-    { label: "Upper Case", func: changeCase.upper },
-    { label: "Upper First ", func: changeCase.ucFirst }
+  const data: { type: CaseType; func: (input: string, options?: object) => string }[] = [
+    { type: "Camel Case", func: changeCase.camelCase },
+    { type: "Capital Case", func: changeCase.capitalCase },
+    { type: "Constant Case", func: changeCase.constantCase },
+    { type: "Dot Case", func: changeCase.dotCase },
+    { type: "Header Case", func: changeCase.headerCase },
+    { type: "Kebab Case", func: changeCase.paramCase },
+    { type: "Lower Case", func: changeCase.lowerCase },
+    { type: "Lower First", func: changeCase.lowerCaseFirst },
+    { type: "Macro Case", func: changeCase.constantCase },
+    { type: "No Case", func: changeCase.noCase },
+    { type: "Param Case", func: changeCase.paramCase },
+    { type: "Pascal Case", func: changeCase.pascalCase },
+    { type: "Path Case", func: changeCase.pathCase },
+    { type: "Random Case", func: changeCase.spongeCase },
+    { type: "Sentence Case", func: changeCase.sentenceCase },
+    { type: "Snake Case", func: changeCase.snakeCase },
+    { type: "Swap Case", func: changeCase.swapCase },
+    { type: "Title Case", func: changeCase.titleCase },
+    { type: "Upper Case", func: changeCase.upperCase },
+    { type: "Upper First", func: changeCase.upperCaseFirst },
   ];
 
-  const [clipboard, setClipboard] = useState<string>();
+  const [clipboard, setClipboard] = useState<string>("");
+
+  const preferences = getPreferenceValues();
+  const preferredSource = preferences["source"];
+
   useEffect(() => {
-    readClipboard().then((clipboard) => setClipboard(clipboard));
-  });
+    readContent(preferredSource)
+      .then((c) => setClipboard(c))
+      .catch((error) => {
+        if (error instanceof NoTextError) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Nothing to convert",
+            message: "Please ensure that text is either selected or copied",
+          });
+        }
+      });
+  }, [preferredSource]);
 
   return (
-    <List isLoading={!clipboard}>
-      {
-        data.map((d) => {
-          const modified = d.func(clipboard ?? "");
-          console.log(modified);
-          return (
-            <List.Item
-              key={d.label}
-              id={d.label}
-              title={d.label}
-              subtitle={modified}
-              actions={
-                <ActionPanel>
-                  <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
-                  <PasteAction title="Paste in Frontmost App" content={modified} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
-      }
+    <List>
+      {data.map((d) => {
+        const modified = d.func(clipboard);
+        if (preferences[d.type.replace(/ +/g, "")] !== true) return;
+        return (
+          <List.Item
+            key={d.type}
+            id={d.type}
+            title={d.type}
+            subtitle={modified}
+            actions={
+              <ActionPanel>
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
+                <Action title="Paste in Active App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
+}
+
+export async function copyToClipboard(content: string) {
+  await showHUD("Copied to Clipboard");
+  await Clipboard.copy(content);
+  await closeMainWindow();
+}
+
+export async function paste(content: string) {
+  await showHUD("Pasted in Active App");
+  await Clipboard.paste(content);
+  await closeMainWindow();
 }

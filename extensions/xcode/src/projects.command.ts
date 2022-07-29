@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { XcodeProject } from "./models/project/xcode-project.model";
 import { xcodeProjectList } from "./user-interfaces/xcode-projects/xcode-project-list.user-interface";
@@ -17,7 +17,7 @@ export default () => {
     // Retrieve cached XcodeProjects
     xcodeProjectService
       .cachedXcodeProjects()
-      .then(cachedXcodeProjects => {
+      .then((cachedXcodeProjects) => {
         // Check if no XcodeProjects have been set
         if (!xcodeProjects) {
           // Set cached XcodeProjects
@@ -29,7 +29,7 @@ export default () => {
     xcodeProjectService
       .xcodeProjects()
       .then(setXcodeProjects)
-      .catch(error => {
+      .catch((error) => {
         // Check if no XcodeProjects have been set
         if (!xcodeProjects) {
           // Set empty XcodeProjects
@@ -38,11 +38,10 @@ export default () => {
         // Log Error
         console.error(error);
         // Show Toast
-        return showToast(
-          ToastStyle.Failure,
-          "An error occurred while finding Xcode Projects",
-          error
-        );
+        return showToast({
+          style: Toast.Style.Failure,
+          title: "An error occurred while finding Xcode Projects",
+        });
       });
   }, []);
   // Return XcodeProject List

@@ -1,54 +1,29 @@
 import Dockerode, { ContainerInfo, ContainerInspectInfo, ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ComposeProject, containersToProjects } from './compose';
 import { isContainerRunning } from './container';
 
 export type DockerState = ReturnType<typeof useDocker>;
 
+const FetchInterval = 1000;
+
 export const useDocker = (docker: Dockerode) => {
-  const [containers, setContainers] = useState<ContainerInfo[]>();
-  const [isLoading, setLoading] = useState(false);
+  const stopContainer = ({ Id }: { Id: string }) => docker.getContainer(Id).stop();
 
-  const stopContainer = async (containerInfo: { Id: string }) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).stop();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
+  const startContainer = ({ Id }: { Id: string }) => docker.getContainer(Id).start();
 
-  const startContainer = async (containerInfo: { Id: string }) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).start();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
+  const restartContainer = ({ Id }: { Id: string }) => docker.getContainer(Id).restart();
 
-  const restartContainer = async (containerInfo: { Id: string }) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).restart();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
-
-  const removeContainer = async (containerInfo: { Id: string }) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).remove();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
+  const removeContainer = ({ Id }: { Id: string }) => docker.getContainer(Id).remove();
 
   const useImages = () => {
     const [images, setImages] = useState<ImageInfo[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
       async function fetchImages() {
-        setLoading(true);
         try {
           const images = await docker.listImages();
           setImages(images);
@@ -56,50 +31,51 @@ export const useDocker = (docker: Dockerode) => {
           if (error instanceof Error) {
             setError(error);
           }
-        } finally {
-          setLoading(false);
         }
       }
-      fetchImages();
+
+      withLoading(setLoading, fetchImages)();
+      interval.current = setInterval(fetchImages, FetchInterval);
+
+      return () => interval.current && clearInterval(interval.current);
     }, []);
 
     return {
       images,
       error,
       isLoading,
-      removeImage: async ({ Id }: { Id: string }) => {
-        setLoading(true);
-        await docker.getImage(Id).remove();
-        const images = await docker.listImages();
-        setImages(images);
-        setLoading(false);
-      },
+      removeImage: withLoading(setLoading, ({ Id }: { Id: string }) => docker.getImage(Id).remove()),
     };
   };
 
   const useImageInfo = ({ Id }: { Id: string }) => {
     const [imageInfo, setImageInfo] = useState<ImageInspectInfo>();
     const [isLoading, setLoading] = useState(false);
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
       async function fetchImageInfo() {
-        setLoading(true);
         const imageInfo = await docker.getImage(Id).inspect();
         setImageInfo(imageInfo);
-        setLoading(false);
       }
-      fetchImageInfo();
+
+      withLoading(setLoading, fetchImageInfo)();
+      interval.current = setInterval(fetchImageInfo, FetchInterval);
+
+      return () => interval.current && clearInterval(interval.current);
     }, [Id]);
 
     return { imageInfo, isLoading };
   };
 
   const useContainers = () => {
+    const [containers, setContainers] = useState<ContainerInfo[]>();
+    const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
       async function fetchContainers() {
-        setLoading(true);
         try {
           const containers = await docker.listContainers({ all: true });
           setContainers(containers);
@@ -107,37 +83,50 @@ export const useDocker = (docker: Dockerode) => {
           if (error instanceof Error) {
             setError(error);
           }
-        } finally {
-          setLoading(false);
         }
       }
-      fetchContainers();
+
+      withLoading(setLoading, fetchContainers)();
+      interval.current = setInterval(fetchContainers, FetchInterval);
+
+      return () => interval.current && clearInterval(interval.current);
     }, []);
 
-    return { containers, isLoading, error, stopContainer, startContainer, restartContainer, removeContainer };
+    return {
+      containers,
+      isLoading,
+      error,
+      startContainer: withLoading(setLoading, startContainer),
+      stopContainer: withLoading(setLoading, stopContainer),
+      restartContainer: withLoading(setLoading, restartContainer),
+      removeContainer: withLoading(setLoading, removeContainer),
+    };
   };
 
   const useContainerInfo = (containerId: string) => {
     const [containerInfo, setContainerInfo] = useState<ContainerInspectInfo>();
     const [isLoading, setLoading] = useState(false);
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
       async function fetchContainerInfo() {
-        setLoading(true);
         const response = await docker.getContainer(containerId).inspect();
         setContainerInfo(response);
-        setLoading(false);
       }
-      fetchContainerInfo();
+
+      withLoading(setLoading, fetchContainerInfo)();
+      interval.current = setInterval(fetchContainerInfo, FetchInterval);
+
+      return () => interval.current && clearInterval(interval.current);
     }, [containerId]);
 
     return {
       containerInfo,
       isLoading,
-      startContainer,
-      restartContainer,
-      stopContainer,
-      removeContainer,
+      startContainer: withLoading(setLoading, startContainer),
+      restartContainer: withLoading(setLoading, restartContainer),
+      stopContainer: withLoading(setLoading, stopContainer),
+      removeContainer: withLoading(setLoading, removeContainer),
     };
   };
 
@@ -145,10 +134,10 @@ export const useDocker = (docker: Dockerode) => {
     const [projects, setProjects] = useState<ComposeProject[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
       async function fetchContainers() {
-        setLoading(true);
         try {
           const containers = await docker.listContainers({ all: true });
           setProjects(containersToProjects(containers));
@@ -156,39 +145,37 @@ export const useDocker = (docker: Dockerode) => {
           if (error instanceof Error) {
             setError(error);
           }
-        } finally {
-          setLoading(false);
         }
       }
-      fetchContainers();
+
+      withLoading(setLoading, fetchContainers)();
+      interval.current = setInterval(fetchContainers, FetchInterval);
+
+      return () => interval.current && clearInterval(interval.current);
     }, []);
 
     return {
       projects,
       isLoading,
       error,
-      startProject: async (project: ComposeProject) => {
-        setLoading(true);
+      startProject: withLoading(setLoading, async (project: ComposeProject) => {
         await Promise.all(
           project.containers
             .filter((container) => !isContainerRunning(container))
-            .map((container) => docker.getContainer(container.Id).start())
+            .map((container) => docker.getContainer(container.Id).start()),
         );
         const containers = await docker.listContainers({ all: true });
         setProjects(containersToProjects(containers));
-        setLoading(false);
-      },
-      stopProject: async (project: ComposeProject) => {
-        setLoading(true);
+      }),
+      stopProject: withLoading(setLoading, async (project: ComposeProject) => {
         await Promise.all(
           project.containers
             .filter((container) => isContainerRunning(container))
-            .map((container) => docker.getContainer(container.Id).stop())
+            .map((container) => docker.getContainer(container.Id).stop()),
         );
         const containers = await docker.listContainers({ all: true });
         setProjects(containersToProjects(containers));
-        setLoading(false);
-      },
+      }),
     };
   };
 
@@ -200,3 +187,29 @@ export const useDocker = (docker: Dockerode) => {
     useProjects,
   };
 };
+
+function withLoading<ReturnValue>(
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  callback: () => Promise<ReturnValue>,
+): () => Promise<ReturnValue>;
+
+function withLoading<Arguments, ReturnValue>(
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  callback: (args: Arguments) => Promise<ReturnValue>,
+): (args: Arguments) => Promise<ReturnValue>;
+
+function withLoading<Arguments, ReturnValue>(
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  callback: (args: Arguments) => Promise<ReturnValue>,
+): (args: Arguments) => Promise<ReturnValue> {
+  return async (args: Arguments) => {
+    setLoading(true);
+    try {
+      const returnValue = await callback(args);
+      setLoading(false);
+      return returnValue;
+    } finally {
+      setLoading(false);
+    }
+  };
+}
