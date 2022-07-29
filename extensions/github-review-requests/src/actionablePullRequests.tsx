@@ -37,7 +37,6 @@ const actionablePullRequests = () => {
 };
 
 // noinspection JSUnusedGlobalSymbols
-
 export default actionablePullRequests;
 
 const getTitle = (updatedPulls: PullRequestShort[]) =>

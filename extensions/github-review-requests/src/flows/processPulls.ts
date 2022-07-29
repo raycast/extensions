@@ -79,7 +79,26 @@ const keepPRWithFeedback = (login: string, lastVisitedAt: string) => (pull: Pull
     pull.myIcon += "💬";
   }
 
+  pull.url = selectLatestURL(pull);
+
   return pull;
+};
+
+const selectLatestURL = (pull: PullRequestShort) => {
+  const { url, comments, reviews } = pull;
+  const comment = comments[comments.length - 1];
+  const review = reviews[reviews.length - 1];
+
+  switch (true) {
+    case !!comment && !!review:
+      return comment.createdAt > review.submittedAt ? comment.url : review.url;
+    case !!comment:
+      return comment.url;
+    case !!review:
+      return review.url;
+    default:
+      return url;
+  }
 };
 
 const selectIconForState = (reviews: ReviewShort[]) => {

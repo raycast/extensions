@@ -5,6 +5,9 @@
   "description": "Search review requests on GitHub and listing them.",
   "icon": "icon.png",
   "author": "resessh",
+  "contributors": [
+    "bgnfu7re"
+  ],
   "license": "MIT",
   "commands": [
     {
