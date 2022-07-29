@@ -33,6 +33,13 @@
       "subtitle": "HackMD",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "HackMD",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
