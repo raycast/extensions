@@ -1,25 +1,19 @@
 import {Color, MenuBarExtra, open} from "@raycast/api";
 import usePulls from "./hooks/usePulls";
 import PullRequestItem from "./components/PullRequestItem";
+import {PullRequestShort} from "./types";
 
 const actionablePullRequests = () => {
   const {isLoading, updatedPulls, recentlyVisitedPulls, visitPull} = usePulls();
 
-  const title = updatedPulls.length === 0
-    ? `All good`
-    : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
-
-  const tintColor = updatedPulls.length === 0
-    ? Color.Green
-    : Color.Yellow;
-
-  const icon = {source: "icon.png", tintColor};
+  const title = getTitle(updatedPulls);
+  const icon = getIcon(updatedPulls);
 
   const showSeparator = updatedPulls.length > 0 && recentlyVisitedPulls.length > 0;
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={icon} title={title}>
-      {updatedPulls.map((pull) => (
+      {updatedPulls.length > 0 && updatedPulls.map((pull) => (
         <PullRequestItem
           key={pull.id}
           pull={pull}
@@ -41,4 +35,18 @@ const actionablePullRequests = () => {
 };
 
 // noinspection JSUnusedGlobalSymbols
+
 export default actionablePullRequests;
+
+const getTitle = (updatedPulls: PullRequestShort[]) => updatedPulls.length === 0
+  ? `All good`
+  : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
+
+const getIcon = (updatedPulls: PullRequestShort[]) => ({
+  source: "icon.png",
+  tintColor: getTintColor(updatedPulls),
+})
+
+const getTintColor = (updatedPulls: PullRequestShort[]) => updatedPulls.length === 0
+  ? Color.Green
+  : Color.Yellow;
