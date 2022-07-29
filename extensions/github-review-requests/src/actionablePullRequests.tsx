@@ -1,44 +1,38 @@
-import { Color, MenuBarExtra, open } from "@raycast/api";
+import {Color, MenuBarExtra, open} from "@raycast/api";
 import usePulls from "./hooks/usePulls";
+import PullRequestItem from "./components/PullRequestItem";
 
 const actionablePullRequests = () => {
-  const {
-    isLoading,
+  const {isLoading, updatedPulls, recentlyVisitedPulls, visitPull} = usePulls();
 
-    updatedPulls,
-    recentlyVisitedPulls,
+  const title = updatedPulls.length === 0
+    ? `All good`
+    : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
 
-    visitPull,
-  } = usePulls();
+  const tintColor = updatedPulls.length === 0
+    ? Color.Green
+    : Color.Yellow;
+
+  const icon = {source: "icon.png", tintColor};
+
+  const showSeparator = updatedPulls.length > 0 && recentlyVisitedPulls.length > 0;
 
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      icon={{ source: "icon.png", tintColor: updatedPulls.length === 0 ? Color.Green : Color.Yellow }}
-      title={
-        updatedPulls.length > 0 ? `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check` : "All good"
-      }
-    >
+    <MenuBarExtra isLoading={isLoading} icon={icon} title={title}>
       {updatedPulls.map((pull) => (
-        <MenuBarExtra.Item
-          icon={pull.user.avatarUrl}
+        <PullRequestItem
           key={pull.id}
-          title={pull.title}
+          pull={pull}
           onAction={() => open(pull.url).then(() => visitPull(pull))}
         />
       ))}
 
-      {updatedPulls.length > 0 && recentlyVisitedPulls.length > 0 && <MenuBarExtra.Separator />}
+      {showSeparator && <MenuBarExtra.Separator/>}
 
       {recentlyVisitedPulls.length > 0 && (
         <MenuBarExtra.Submenu title="Recently Visited">
           {recentlyVisitedPulls.map((pull) => (
-            <MenuBarExtra.Item
-              icon={pull.user.avatarUrl}
-              key={pull.id}
-              title={pull.title}
-              onAction={() => open(pull.url)}
-            />
+            <PullRequestItem key={pull.id} pull={pull} onAction={() => open(pull.url)}/>
           ))}
         </MenuBarExtra.Submenu>
       )}
