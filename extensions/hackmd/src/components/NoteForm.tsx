@@ -40,7 +40,16 @@ export default function NoteForm({
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="teamPath" title="Team" onChange={(path) => setTeamPath(path)} value={teamPath}>
+      <Form.Dropdown
+        id="teamPath"
+        title="Team"
+        onChange={(path) => {
+          if (!note) {
+            setTeamPath(path);
+          }
+        }}
+        value={teamPath}
+      >
         <Form.Dropdown.Item value="" title="My Workspace" icon={Icon.PersonCircle} key="my-workspace" />
 
         {teams?.map((team) => (
