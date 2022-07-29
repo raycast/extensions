@@ -2,9 +2,10 @@ import { ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import api from "../lib/api";
 import NoteActions from "./NoteActions";
+import { PermissionTitleMap } from "../lib/constants";
 
 export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?: () => void }) {
-  const { data, isLoading } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
+  const { data, isLoading, mutate: mutateSingle } = useCachedPromise((noteId) => api.getNote(noteId), [noteId]);
   const { pop } = useNavigation();
 
   return (
@@ -13,7 +14,14 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
       markdown={data?.content}
       actions={
         <ActionPanel>
-          <NoteActions note={data} onDeleteCallback={() => pop()} mutate={mutate} />
+          <NoteActions
+            note={data}
+            onDeleteCallback={() => pop()}
+            mutate={() => {
+              if (mutate) mutate();
+              mutateSingle();
+            }}
+          />
         </ActionPanel>
       }
       metadata={
@@ -37,8 +45,8 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
               <Detail.Metadata.Separator />
 
               {/* TODO: display permission in TagList */}
-              <Detail.Metadata.Label title="Read Permission" text={data.readPermission} />
-              <Detail.Metadata.Label title="Write Permission" text={data.writePermission} />
+              <Detail.Metadata.Label title="Read Permission" text={PermissionTitleMap[data.readPermission]} />
+              <Detail.Metadata.Label title="Write Permission" text={PermissionTitleMap[data.writePermission]} />
 
               <Detail.Metadata.Label title="Created" text={new Date(data?.createdAt).toLocaleString()} />
             </>

@@ -1,9 +1,11 @@
 import url from "url";
 import { Note } from "@hackmd/api/dist/type";
-import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast, useNavigation } from "@raycast/api";
 
 import api from "../lib/api";
 import { getPreferences } from "../lib/preference";
+import NoteForm from "./NoteForm";
+import { useCachedPromise } from "@raycast/utils";
 
 const { instance_url } = getPreferences();
 
@@ -21,16 +23,60 @@ export default function NoteActions({
   const namePath = note.userPath || note.teamPath;
   const noteUrl = new url.URL(`@${namePath}/${note.permalink || note.id}`, instance_url).toString();
 
+  const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
+  const { pop } = useNavigation();
+
   return (
     <>
       <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
       <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} />
 
+      {singleNoteData && (
+        <ActionPanel.Section>
+          <Action.Push
+            icon={Icon.Pencil}
+            title="Edit Note"
+            shortcut={{
+              key: "e",
+              modifiers: ["cmd", "shift"],
+            }}
+            target={
+              <NoteForm
+                note={singleNoteData}
+                onSubmit={async (values) => {
+                  const { teamPath, ...rest } = values;
+
+                  try {
+                    if (teamPath) {
+                      await api.updateTeamNote(teamPath, note.id, rest);
+                    } else {
+                      await api.updateNote(note.id, rest);
+                    }
+                  } catch (e) {
+                    showToast({
+                      title: "Update Note Failed",
+                      message: String(e),
+                      style: Toast.Style.Failure,
+                    });
+                  }
+
+                  setTimeout(() => {
+                    if (mutate) mutate();
+                  }, 200);
+
+                  pop();
+                }}
+              />
+            }
+          />
+        </ActionPanel.Section>
+      )}
+
       <ActionPanel.Section>
         <Action
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          title="Delete"
+          title="Delete Note"
           onAction={async () => {
             confirmAlert({
               title: "Delete Note",

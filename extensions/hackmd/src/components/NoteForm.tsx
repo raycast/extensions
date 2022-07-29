@@ -3,19 +3,12 @@ import { Action, ActionPanel, Form, Icon, Image } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import api from "../lib/api";
-
-const permissions = ["owner", "signed_in", "guest"];
-
-const PermissionTitleMap: Record<string, string> = {
-  owner: "Owner",
-  signed_in: "Signed In",
-  guest: "Guest",
-};
+import { Permissions, PermissionTitleMap } from "../lib/constants";
 
 const PermissionItems = () => (
   <>
-    {permissions.map((permission) => (
-      <Form.Dropdown.Item title={PermissionTitleMap[permission]} value={permission} />
+    {Permissions.map((permission) => (
+      <Form.Dropdown.Item title={PermissionTitleMap[permission]} value={permission} key={permission} />
     ))}
   </>
 );
@@ -48,11 +41,11 @@ export default function NoteForm({
       }
     >
       <Form.Dropdown id="teamPath" title="Team" onChange={(path) => setTeamPath(path)} value={teamPath}>
-        <Form.Dropdown.Item value="" title="My Workspace" icon={Icon.PersonCircle} />
+        <Form.Dropdown.Item value="" title="My Workspace" icon={Icon.PersonCircle} key="my-workspace" />
 
         {teams?.map((team) => (
           <Form.Dropdown.Item
-            key={team.path}
+            key={team.id}
             value={team.path}
             title={team.name}
             icon={{

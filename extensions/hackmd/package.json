@@ -68,7 +68,7 @@
     }
   ],
   "dependencies": {
-    "@hackmd/api": "^2.0.0",
+    "@hackmd/api": "2.1.0",
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.0.7",
     "mdast-util-to-markdown": "^1.3.0",
