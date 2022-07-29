@@ -1,13 +1,13 @@
 import usePullStore from "./usePullStore";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
-import {getLogin} from "../integration/getLogin";
-import {isActionUserInitiated} from "../util";
-import {processPulls} from "../flows/processPulls";
-import {PullRequestShort} from "../types";
+import { getLogin } from "../integration/getLogin";
+import { isActionUserInitiated } from "../util";
+import { processPulls } from "../flows/processPulls";
+import { PullRequestShort } from "../types";
 
 const usePulls = () => {
-  const {isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls} =
+  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls } =
     usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
@@ -15,18 +15,21 @@ const usePulls = () => {
 
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
 
-  const runPullIteration = () => Promise.resolve()
-    .then(() => console.debug("runPullIteration"))
-    .then(() => Promise.all([
-      getLogin(),
-      searchPullRequestsWithDependencies("is:open archived:false author:@me"),
-      searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
-      searchPullRequestsWithDependencies("is:open archived:false review-requested:@me"),
-    ]))
-    .then(mergePulls)
-    .then(({login, pulls}) => processPulls(login, hiddenPulls, pulls))
-    .then(updatePulls)
-    .finally(() => console.debug("runPullIteration: done"));
+  const runPullIteration = () =>
+    Promise.resolve()
+      .then(() => console.debug("runPullIteration"))
+      .then(() =>
+        Promise.all([
+          getLogin(),
+          searchPullRequestsWithDependencies("is:open archived:false author:@me"),
+          searchPullRequestsWithDependencies("is:open archived:false commenter:@me"),
+          searchPullRequestsWithDependencies("is:open archived:false review-requested:@me"),
+        ])
+      )
+      .then(mergePulls)
+      .then(({ login, pulls }) => processPulls(login, hiddenPulls, pulls))
+      .then(updatePulls)
+      .finally(() => console.debug("runPullIteration: done"));
 
   useEffect(() => {
     // Run effect only after we load from store.
@@ -39,7 +42,7 @@ const usePulls = () => {
     Promise.resolve()
       .then(() => console.debug("usePulls: start"))
       .then(() => getLogin().then(setLogin))
-      .then(() => isActionUserInitiated() ? exitShortcut() : runPullIteration())
+      .then(() => (isActionUserInitiated() ? exitShortcut() : runPullIteration()))
       .finally(() => setIsRemotePullsLoading(false))
       .finally(() => console.debug("usePulls: end"));
   }, [isPullStoreLoading]);
@@ -60,21 +63,17 @@ export default usePulls;
 
 type MergePullParams = [string, PullRequestShort[], PullRequestShort[], PullRequestShort[]];
 const mergePulls = ([login, authoredPulls, commentedOnPulls, reviewRequestedPulls]: MergePullParams) => {
-  const pulls = authoredPulls
-    .concat(commentedOnPulls, reviewRequestedPulls)
-    .filter(uniquePullRequests);
+  const pulls = authoredPulls.concat(commentedOnPulls, reviewRequestedPulls).filter(uniquePullRequests);
 
   console.debug(
-    `mergePulls: merged=${pulls.length} `+
-    `authored=${authoredPulls.length} `+
-    `commented=${commentedOnPulls.length} `+
-    `review-requested=${reviewRequestedPulls.length}`
+    `mergePulls: merged=${pulls.length} ` +
+      `authored=${authoredPulls.length} ` +
+      `commented=${commentedOnPulls.length} ` +
+      `review-requested=${reviewRequestedPulls.length}`
   );
 
-  return {login, pulls};
+  return { login, pulls };
 };
 
-
 const uniquePullRequests = (pull: PullRequestShort, index: number, self: PullRequestShort[]) =>
-  self.findIndex((p) => p.id === pull.id) === index;
-
+  self.findIndex(p => p.id === pull.id) === index;

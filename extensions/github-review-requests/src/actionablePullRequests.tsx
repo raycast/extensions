@@ -1,10 +1,10 @@
-import {Color, MenuBarExtra, open} from "@raycast/api";
+import { Color, MenuBarExtra, open } from "@raycast/api";
 import usePulls from "./hooks/usePulls";
 import PullRequestItem from "./components/PullRequestItem";
-import {PullRequestShort} from "./types";
+import { PullRequestShort } from "./types";
 
 const actionablePullRequests = () => {
-  const {isLoading, login, updatedPulls, recentlyVisitedPulls, visitPull} = usePulls();
+  const { isLoading, login, updatedPulls, recentlyVisitedPulls, visitPull } = usePulls();
 
   const title = getTitle(updatedPulls);
   const icon = getIcon(updatedPulls);
@@ -13,21 +13,22 @@ const actionablePullRequests = () => {
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={icon} title={title}>
-      {updatedPulls.length > 0 && updatedPulls.map((pull) => (
-        <PullRequestItem
-          key={pull.id}
-          pull={pull}
-          showMyIcon
-          onAction={() => open(pull.url).then(() => visitPull(login, pull))}
-        />
-      ))}
+      {updatedPulls.length > 0 &&
+        updatedPulls.map(pull => (
+          <PullRequestItem
+            key={pull.id}
+            pull={pull}
+            showMyIcon
+            onAction={() => open(pull.url).then(() => visitPull(login, pull))}
+          />
+        ))}
 
-      {showSeparator && <MenuBarExtra.Separator/>}
+      {showSeparator && <MenuBarExtra.Separator />}
 
       {recentlyVisitedPulls.length > 0 && (
         <MenuBarExtra.Submenu title="Recently Visited">
-          {recentlyVisitedPulls.map((pull) => (
-            <PullRequestItem key={pull.id} pull={pull} onAction={() => open(pull.url)}/>
+          {recentlyVisitedPulls.map(pull => (
+            <PullRequestItem key={pull.id} pull={pull} onAction={() => open(pull.url)} />
           ))}
         </MenuBarExtra.Submenu>
       )}
@@ -39,15 +40,12 @@ const actionablePullRequests = () => {
 
 export default actionablePullRequests;
 
-const getTitle = (updatedPulls: PullRequestShort[]) => updatedPulls.length === 0
-  ? `All good`
-  : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
+const getTitle = (updatedPulls: PullRequestShort[]) =>
+  updatedPulls.length === 0 ? `All good` : `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""} to check`;
 
 const getIcon = (updatedPulls: PullRequestShort[]) => ({
   source: "icon.png",
   tintColor: getTintColor(updatedPulls),
-})
+});
 
-const getTintColor = (updatedPulls: PullRequestShort[]) => updatedPulls.length === 0
-  ? Color.Green
-  : Color.Yellow;
+const getTintColor = (updatedPulls: PullRequestShort[]) => (updatedPulls.length === 0 ? Color.Green : Color.Yellow);

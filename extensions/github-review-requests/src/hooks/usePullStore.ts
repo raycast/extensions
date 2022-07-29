@@ -31,15 +31,16 @@ const usePullStore = () => {
         .then(() => console.debug("visitPull ->>", login))
         .then(() => getTimestampISOInSeconds())
         .then(
-          (lastVisitedAt) =>
+          lastVisitedAt =>
             ({
-              updatedPulls: pull.user.login !== login && pull.requestedReviewers.length > 0
-                ? updatedPulls
-                : updatedPulls.filter((pr) => pr.id !== pull.id),
+              updatedPulls:
+                pull.user.login !== login && pull.requestedReviewers.length > 0
+                  ? updatedPulls
+                  : updatedPulls.filter(pr => pr.id !== pull.id),
 
               recentlyVisitedPulls: [
                 pull,
-                ...recentlyVisitedPulls.filter((pr) => pr.id !== pull.id).slice(0, 19),
+                ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
               ] as PullRequestShort[],
 
               hiddenPulls:
@@ -47,7 +48,7 @@ const usePullStore = () => {
                   ? hiddenPulls
                   : ([
                       { id: pull.id, lastVisitedAt },
-                      ...hiddenPulls.filter((pr) => pr.id !== pull.id),
+                      ...hiddenPulls.filter(pr => pr.id !== pull.id),
                     ] as PullRequestLastVisit[]),
             } as PullStore)
         )

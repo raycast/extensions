@@ -8,9 +8,9 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
     .then(() => getSdk(graphQLClient).SearchPullRequestsWithDependencies({ query: `is:pr ${query}` }))
     .then(({ search: { nodes } }) => nodes)
     .then(
-      (nodes) =>
+      nodes =>
         (nodes ?? [])
-          .map((node) => {
+          .map(node => {
             if (node?.__typename !== "PullRequest") {
               return null;
             }
@@ -29,7 +29,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               myIcon: "",
 
               reviews: (reviews?.nodes || [])
-                .map((node) =>
+                .map(node =>
                   !node
                     ? null
                     : {
@@ -40,10 +40,10 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
                         submittedAt: node.submittedAt,
                       }
                 )
-                .filter((review) => review !== null),
+                .filter(review => review !== null),
 
               comments: (comments.nodes || [])
-                .map((node) =>
+                .map(node =>
                   !node
                     ? null
                     : {
@@ -52,10 +52,10 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
                         createdAt: node?.createdAt,
                       }
                 )
-                .filter((comment) => comment !== null),
+                .filter(comment => comment !== null),
 
               requestedReviewers: (reviewRequests?.nodes || [])
-                .map((node) => {
+                .map(node => {
                   if (!node) {
                     return null;
                   }
@@ -76,10 +76,10 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
 
                   return null;
                 })
-                .filter((value) => value !== null),
+                .filter(value => value !== null),
             };
           })
-          .filter((pull) => pull !== null) as PullRequestShort[]
+          .filter(pull => pull !== null) as PullRequestShort[]
     )
     .finally(() => console.debug(`searchPullRequestsWithDependencies done query=${query}`));
 
