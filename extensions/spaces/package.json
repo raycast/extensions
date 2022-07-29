@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spaces",
   "title": "Spaces",
-  "description": "It's time to reclaim your workspace on macOS",
+  "description": "Declutter and organize your workspace in 1-click",
   "icon": "spaces-icon.png",
   "author": "pradeepb28",
   "categories": [
@@ -15,7 +15,7 @@
       "name": "create-space",
       "title": "Create Space",
       "subtitle": "Spaces",
-      "description": "Opens a window to create a new workspace.",
+      "description": "It opens a window to create a new workspace.",
       "mode": "no-view"
     },
     {
