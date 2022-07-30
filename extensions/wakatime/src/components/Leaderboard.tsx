@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { getDuration, getFlagEmoji } from "../utils";
 
