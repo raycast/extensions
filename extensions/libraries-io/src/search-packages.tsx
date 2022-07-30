@@ -62,16 +62,18 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <Action.Push
-              title="Show Versions"
-              icon={Icon.Tag}
-              target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />}
-            />
-            <Action.Push
               title="Show Dependencies"
               icon={Icon.Box}
               target={
                 <PackageDependencies key={searchResult.name + searchResult.platform} searchResult={searchResult} />
               }
+              shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+            />
+            <Action.Push
+              title="Show Versions"
+              icon={Icon.Tag}
+              target={<PackageVersions key={searchResult.name + searchResult.platform} searchResult={searchResult} />}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
