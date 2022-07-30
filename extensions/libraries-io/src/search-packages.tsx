@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { PackageResult } from "./components/PackageResult";
-import type { Package } from "./types";
+import type { Package, PackageSearchArguments } from "./types";
 
 export default function Command(props: { arguments: PackageSearchArguments }) {
   const [searchText, setSearchText] = useState("");

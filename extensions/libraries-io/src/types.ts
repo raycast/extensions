@@ -8,6 +8,10 @@ export interface Package {
   versions: Array<Version>;
 }
 
+export interface PackageSearchArguments {
+  platform?: string;
+}
+
 export interface Version {
   number: string;
   published_at: string;
