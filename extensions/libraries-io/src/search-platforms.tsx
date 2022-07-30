@@ -32,6 +32,7 @@ function SearchListItem({ searchResult }: { searchResult: Platform }) {
               icon={`libraries-io-icon.png`}
             />
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.homepage} />
+            <Action.CopyToClipboard content={searchResult.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Platform Name" />
           </ActionPanel.Section>
         </ActionPanel>
       }
