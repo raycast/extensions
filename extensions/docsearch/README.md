@@ -18,6 +18,7 @@ Link **all DocSearch** into Raycast.
         APIKey: '3a539aab83105f01761a137c61004d85',
         APPID: 'BH4D9OD16A',
         indexName: 'vuepress',
+        homepage: 'https://vuepress.vuejs.org/',
    }
    ```
 4. Enjoy! Welcome to contribute.
