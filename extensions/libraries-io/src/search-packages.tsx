@@ -73,6 +73,9 @@ function SearchListItem({ searchResult }: { searchResult: Package }) {
               }
             />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard content={searchResult.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
