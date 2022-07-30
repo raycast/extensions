@@ -23,7 +23,7 @@ export function usePrivateLeaderBoards() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Error Loading Private Leaderboards";
-        toast.message = (error as Record<string, string>).message;
+        toast.message = (error as Error).message;
       }
 
       setIsLoading(false);

@@ -17,7 +17,7 @@ export function useProjects() {
         if (!data.ok) throw new Error(data.error);
         setData(data);
       } catch (error) {
-        await showToast(Toast.Style.Failure, "Error Loading Projects", (error as Record<string, string>).message);
+        await showToast(Toast.Style.Failure, "Error Loading Projects", (error as Error).message);
       }
 
       setIsLoading(false);

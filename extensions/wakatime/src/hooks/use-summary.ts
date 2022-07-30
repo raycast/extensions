@@ -33,7 +33,7 @@ export function useSummary() {
           })
         );
       } catch (error) {
-        await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Record<string, string>).message);
+        await showToast(Toast.Style.Failure, "Error Loading Summary", (error as Error).message);
       }
 
       setIsLoading(false);

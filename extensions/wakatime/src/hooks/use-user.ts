@@ -23,7 +23,7 @@ export function useUser() {
       } catch (err) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed Loading Summary";
-        toast.message = (err as Record<string, string>).message;
+        toast.message = (err as Error).message;
       }
 
       setIsLoading(false);

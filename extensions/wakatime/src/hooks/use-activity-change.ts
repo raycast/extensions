@@ -29,11 +29,7 @@ export function useActivityChange() {
           duration: `You've spent ${getDuration(timeDiff)} ${quantifier} compared to yesterday`,
         });
       } catch (error) {
-        await showToast(
-          Toast.Style.Failure,
-          "Error Loading Activity Change",
-          (error as Record<string, string>).message
-        );
+        await showToast(Toast.Style.Failure, "Error Loading Activity Change", (error as Error).message);
       }
 
       setIsLoading(false);
