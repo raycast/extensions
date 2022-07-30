@@ -1,8 +1,9 @@
 import { Cache, Icon } from "@raycast/api";
 import { AUDIO_FILE_EXTENSIONS, BYTES_PER_MEGABYTE, VIDEO_FILE_EXTENSIONS } from "./constants";
 import { Note, Vault, Media } from "./interfaces";
-import { getNoteFileContent, prefExcludedFolders, tagsFor, walkFilesHelper } from "./utils";
+import { getNoteFileContent, prefExcludedFolders, walkFilesHelper } from "./utils";
 import path from "path";
+import { tagsForString } from "./yaml";
 
 const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
 
@@ -45,11 +46,10 @@ export class NoteLoader {
       }
 
       const noteContent = getNoteFileContent(f, false);
-
       const note: Note = {
         title: name,
         path: f,
-        tags: tagsFor(noteContent),
+        tags: tagsForString(noteContent),
         content: noteContent,
       };
       notes.push(note);

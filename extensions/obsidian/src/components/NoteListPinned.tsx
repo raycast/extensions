@@ -4,10 +4,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Note, SearchArguments, SearchNotePreferences, Vault } from "../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { getPinnedNotes, migratePinnedNotes, resetPinnedNotes } from "../utils/pinNoteUtils";
-import { getListOfTags } from "../utils/utils";
 import { filterNotes } from "../utils/search";
 import { MAX_RENDERED_NOTES, NoteAction } from "../utils/constants";
 import { NoteActions, OpenNoteActions } from "../utils/actions";
+import { tagsForNotes } from "../utils/yaml";
 
 export function NoteListPinned(props: { vault: Vault; showTitle: boolean; searchArguments: SearchArguments }) {
   const { searchContent } = getPreferenceValues<SearchNotePreferences>();
@@ -50,7 +50,7 @@ export function NoteListPinned(props: { vault: Vault; showTitle: boolean; search
   }
 
   const currentPinnedNotes = getPinnedNotes(vault);
-  const tags = getListOfTags(currentPinnedNotes ?? []);
+  const tags = tagsForNotes(currentPinnedNotes ?? []);
 
   useEffect(() => {
     setPinnedNotes(currentPinnedNotes);
