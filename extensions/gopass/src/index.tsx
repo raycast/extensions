@@ -48,7 +48,7 @@ const getIcon = (entry: string) => (isDirectory(entry) ? Icon.Folder : Icon.Key)
 const getTarget = (entry: string) => (isDirectory(entry) ? <Main prefix={entry} /> : <Details entry={entry} />);
 
 export default function Main({ prefix = "" }): JSX.Element {
-  const [entries, setEntries] = useState<string[]>();
+  const [entries, setEntries] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState("");
 
@@ -66,8 +66,8 @@ export default function Main({ prefix = "" }): JSX.Element {
 
   return (
     <List isLoading={loading} enableFiltering={false} onSearchTextChange={setSearchText}>
-      <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries?.length)}>
-        {entries?.map((entry, i) => (
+      <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries.length)}>
+        {entries.map((entry, i) => (
           <List.Item
             key={i}
             title={entry}
