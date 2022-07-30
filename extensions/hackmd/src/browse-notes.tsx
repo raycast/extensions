@@ -48,7 +48,7 @@ export default function BrowseNotes() {
             value=""
             title="My Workspace"
             icon={
-              user?.photo
+              !user?.photo
                 ? Icon.PersonCircle
                 : {
                     source: user?.photo || "",
