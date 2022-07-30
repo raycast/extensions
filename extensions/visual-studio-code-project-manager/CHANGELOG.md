@@ -1,5 +1,7 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Add VSCodium option] - 2022-07-28
+
 ## [Add filtering by tag functionality] - 2022-07-27
 
 ## [Add preference to hide projects without tag] - 2022-05-01
@@ -10,7 +12,7 @@
 
 ## [Add support for Git cached projects] - 2021-11-15
 
-## [Fixes] -  2021-11-04
+## [Fixes] - 2021-11-04
 
 - Fixes `undefined` property access when checking project tags
 
