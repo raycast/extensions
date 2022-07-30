@@ -15,6 +15,7 @@ export enum NoteAction {
 export enum PrimaryAction {
   QuickLook = "quicklook",
   OpenInObsidian = "obsidian",
+  OpenInObsidianNewPane = "newpane",
 }
 
 export const CURRENT_EXTENSION_VERSION = "1.7.0";

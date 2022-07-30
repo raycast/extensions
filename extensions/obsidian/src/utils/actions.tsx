@@ -7,7 +7,7 @@ import { EditNote } from "../components/EditNote";
 import { SearchNotePreferences, Note, Vault, Media } from "./interfaces";
 import { isNotePinned, pinNote, unpinNote } from "./pinNoteUtils";
 import { NoteQuickLook } from "../components/NoteQuickLook";
-import { deleteNote, appendSelectedTextTo, getOpenPathInObsidianTarget } from "./utils";
+import { deleteNote, appendSelectedTextTo, getOpenPathInObsidianTarget, vaultPluginCheck } from "./utils";
 import { NoteAction, ObsidianIconDynamicBold, PrimaryAction } from "./constants";
 
 export function ShowPathInFinderAction(props: { path: string }) {
@@ -163,6 +163,24 @@ export function OpenPathInObsidianAction(props: { path: string }) {
   );
 }
 
+export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vault }) {
+  const { note, vault } = props;
+
+  return (
+    <Action.Open
+      title="Open in new Pane"
+      target={
+        "obsidian://advanced-uri?vault=" +
+        encodeURIComponent(vault.name) +
+        "&filepath=" +
+        encodeURIComponent(note.path.replace(vault.path, "")) +
+        "&newpane=true"
+      }
+      icon={ObsidianIconDynamicBold}
+    />
+  );
+}
+
 export function ShowVaultInFinderAction(props: { vault: Vault }) {
   const { vault } = props;
   return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
@@ -191,28 +209,36 @@ export function OpenNoteActions(props: { note: Note; vault: Vault; actionCallbac
   const { note, vault, actionCallback } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
+  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck([vault], "obsidian-advanced-uri");
+
   const quicklook = <QuickLookAction note={note} vault={vault} actionCallback={actionCallback} />;
   const obsidian = <OpenPathInObsidianAction path={note.path} />;
+  const obsidianNewPane = vaultsWithPlugin.includes(vault) ? (
+    <OpenNoteInObsidianNewPaneAction note={note} vault={vault} />
+  ) : null;
 
   if (primaryAction == PrimaryAction.QuickLook) {
     return (
       <React.Fragment>
         {quicklook}
         {obsidian}
+        {obsidianNewPane}
       </React.Fragment>
     );
   } else if (primaryAction == PrimaryAction.OpenInObsidian) {
     return (
       <React.Fragment>
         {obsidian}
+        {obsidianNewPane}
         {quicklook}
       </React.Fragment>
     );
-  } else {
+  } else if (primaryAction == PrimaryAction.OpenInObsidianNewPane) {
     return (
       <React.Fragment>
-        {quicklook}
+        {obsidianNewPane}
         {obsidian}
+        {quicklook}
       </React.Fragment>
     );
   }

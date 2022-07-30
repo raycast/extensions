@@ -126,6 +126,10 @@
             {
               "title": "Open in Obsidian",
               "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
             }
           ]
         }
@@ -318,6 +322,10 @@
             {
               "title": "Open in Obsidian",
               "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
             }
           ]
         }
@@ -389,6 +397,10 @@
             {
               "title": "Open in Obsidian",
               "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
             }
           ]
         }
