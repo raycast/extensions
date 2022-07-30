@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Look up words or translate text in an easy way, especially optimized for English and Chinese words.",
-  "icon": "eudic-icon.png",
+  "description": "Easily look up words or translate text. Support 23 languages, especially optimized for English and Chinese words.",
+  "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
   "commands": [
     {
       "name": "easydict",
       "title": "Search Word",
-      "subtitle": "Easy Dictionary",
-      "description": "Easy to look up words or translate text, support MacOS system translate, Youdao, Tencent, Baidu and Caiyun translation API.",
+      "subtitle": "Easydict",
+      "description": "Easily look up words or translate text, support MacOS system translate, DeepL, Google, Baidu, Tencent, Youdao and Caiyun translation API.",
       "mode": "view"
     }
   ],
@@ -24,6 +24,8 @@
   "keywords": [
     "dictionary",
     "translate",
+    "deepl",
+    "google",
     "apple",
     "youdao",
     "baidu",
@@ -33,7 +35,7 @@
     "shortcuts"
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.38.0",
     "axios": "^0.25.0",
     "crypto-js": "^4.1.1",
     "franc": "^6.0.0",
@@ -68,14 +70,16 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": "npm run eslint",
-    "**/*": "prettier --write . --ignore-unknown"
+    "**/*": [
+      "prettier --write . --ignore-unknown"
+    ]
   },
   "preferences": [
     {
       "title": "First Language",
       "name": "language1",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "default": "Chinese-Simplified",
       "description": "Select the first language you want to translate into",
       "data": [
@@ -177,7 +181,7 @@
       "title": "Second Language",
       "name": "language2",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "default": "English",
       "description": "Select the second language you want to translate into",
       "data": [
@@ -319,6 +323,22 @@
     },
     {
       "title": "Translation Services",
+      "type": "checkbox",
+      "name": "enableDeepLTranslate",
+      "label": "DeepL Translate",
+      "required": false,
+      "description": "Turn on/off DeepL Translate",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "name": "enableGoogleTranslate",
+      "label": "Google Translate",
+      "required": false,
+      "description": "Turn on/off Google Translate",
+      "default": true
+    },
+    {
       "name": "enableBaiduTranslate",
       "type": "checkbox",
       "label": "Baidu Translate",
@@ -343,6 +363,15 @@
       "default": true
     },
     {
+      "title": "Translation Display Order",
+      "name": "translationDisplayOrder",
+      "type": "textfield",
+      "required": false,
+      "description": "Separate by comma, default is DeepL,Google,Apple,Baidu,Tencent,Youdao,Caiyun",
+      "default": "deepl,google,apple,baidu,tencent,youdao,caiyun",
+      "placeholder": "deepl,google,apple,baidu,tencent,youdao,caiyun"
+    },
+    {
       "title": "Youdao App ID",
       "name": "youdaoAppId",
       "type": "textfield",
@@ -356,6 +385,14 @@
       "type": "textfield",
       "required": false,
       "description": "Your Youdao App Secret",
+      "default": ""
+    },
+    {
+      "title": "DeepL Auth Key",
+      "name": "deepLAuthKey",
+      "type": "textfield",
+      "required": false,
+      "description": "Your DeepL Auth Key",
       "default": ""
     },
     {

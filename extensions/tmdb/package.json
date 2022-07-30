@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tmdb",
+  "title": "The Movie Database",
+  "description": "Browse through hundreds of thousands of movies and tv shows, see new releases, parental guide and much more.",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchMovie",
+      "title": "Search Movies",
+      "subtitle": "The Movie Database",
+      "description": "Search for movies by name",
+      "mode": "view"
+    },
+    {
+      "name": "searchTV",
+      "title": "Search TV Shows",
+      "subtitle": "The Movie Database",
+      "description": "Search for TV shows by name",
+      "mode": "view"
+    },
+    {
+      "name": "nowPlayingMovies",
+      "title": "Now Playing Movies",
+      "subtitle": "The Movie Database",
+      "description": "View details, ratings, etc. for movies that are playing on the theaters!",
+      "mode": "view"
+    },
+    {
+      "name": "nowPlayingTv",
+      "title": "Now Playing TV Shows",
+      "subtitle": "The Movie Database",
+      "description": "View details, ratings, etc. for TV shows that are on air!",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "TMDB API Key",
+      "description": "Your TMDB API Key",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "moviedb-promise": "^3.1.15"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

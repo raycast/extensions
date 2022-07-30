@@ -5,7 +5,7 @@ import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
-import { ensureCleanAccessories, showErrorToast } from "../../utils";
+import { showErrorToast } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
@@ -63,7 +63,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     <List.Item
       title={title}
       subtitle={ref || commit}
-      accessories={ensureCleanAccessories([{ text: project?.name_with_namespace }])}
+      accessories={[{ text: project?.name_with_namespace }]}
       icon={icon}
       actions={
         <ActionPanel>

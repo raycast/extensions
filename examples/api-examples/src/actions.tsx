@@ -1,5 +1,16 @@
-import { ActionPanel, Detail, Icon, showHUD, showToast, Action, Toast, Alert, confirmAlert, Color } from "@raycast/api";
-import open from "open";
+import {
+  ActionPanel,
+  Detail,
+  Icon,
+  showHUD,
+  showToast,
+  Action,
+  Toast,
+  Alert,
+  confirmAlert,
+  Color,
+  open,
+} from "@raycast/api";
 import { homedir } from "os";
 import { resolve } from "path";
 
@@ -22,7 +33,7 @@ Leverage one of the built-in actions to quickly add functionality to your comman
 
 Use the \`Action\` to extend your commands even further. Specify a title, icon, style and action
 handler. Or wrap it in a separate React component to reuse it.
-Use Action.Style.Destructive 
+Use Action.Style.Destructive
 
 ## Keyboard shortcuts
 
@@ -84,11 +95,8 @@ export default function Command() {
             />
             <ReusableAction title="Hey 👋" />
             <ActionPanel.Submenu title="Open With..." icon={Icon.Globe}>
-              <Action
-                title="Google Chrome"
-                onAction={() => open("https://raycast.com", { app: { name: open.apps.chrome } })}
-              />
-              <Action title="Safari" onAction={() => open("https://raycast.com", { app: { name: "Safari" } })} />
+              <Action title="Google Chrome" onAction={() => open("https://raycast.com", "'google chrome'")} />
+              <Action title="Safari" onAction={() => open("https://raycast.com", "Safari")} />
             </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>

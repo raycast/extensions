@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Image, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isSpotifyInstalled } from "./client/utils";
 import { PlayAction } from "./actions";
@@ -24,16 +24,17 @@ export default function SpotifyList() {
   }, []);
 
   return (
-    <List
+    <Grid
       searchBarPlaceholder="Search albums..."
       onSearchTextChange={setSearchText}
       isLoading={response.isLoading}
       throttle
+      itemSize={Grid.ItemSize.Large}
     >
       {response.result?.albums.items.map((a) => (
         <AlbumItem key={a.id} album={a} spotifyInstalled={spotifyInstalled} />
       ))}
-    </List>
+    </Grid>
   );
 }
 
@@ -41,21 +42,19 @@ function AlbumItem(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInst
   const album = props.album;
   const spotifyInstalled = props.spotifyInstalled;
   const icon: Image.ImageLike = {
-    source: album.images[album.images.length - 1]?.url,
-    mask: Image.Mask.Circle,
+    source: album.images[0]?.url,
   };
 
   const title = album.name;
-  const subtitle = `${album.artists.map((a) => a.name).join(", ")}`;
+  const subtitle = `${album.artists.map((a) => a.name).join(", ")} • ${album.release_date.substring(
+    0,
+    4
+  )} • ${album.total_tracks.toString()} songs`;
   return (
-    <List.Item
+    <Grid.Item
       title={title}
       subtitle={subtitle}
-      accessories={[
-        { text: album.release_date.substring(0, 4), tooltip: "release year" },
-        { text: `${album.total_tracks.toString()} songs`, tooltip: "number of tracks" },
-      ]}
-      icon={icon}
+      content={icon}
       actions={
         <ActionPanel title={title}>
           <PlayAction itemURI={album.uri} />

@@ -2,22 +2,23 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 18:09
+ * @lastEditTime: 2022-07-20 16:01
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { environment } from "@raycast/api";
-import { exec, execFile } from "child_process";
 import axios from "axios";
+import { exec, execFile } from "child_process";
 import fs from "fs";
 import { languageItemList } from "./consts";
-import playerImport = require("play-sound");
 import { trimTextLength } from "./utils";
+import playerImport = require("play-sound");
 const player = playerImport({});
 
 const audioDirPath = `${environment.supportPath}/audio`;
+// console.log(`audio path: ${audioDirPath}`);
 
 /**
   use play-sound to play local audio file, use say command when audio not exist. if error, use say command to play.

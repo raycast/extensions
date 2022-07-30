@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-04 23:29
+ * @lastEditTime: 2022-07-24 01:01
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,24 +10,28 @@
 
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
-import { requestCostTime } from "../request";
 import { changelog } from "./changelog";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
 const githubApiUrl = "https://api.github.com";
 
+/**
+ * Used for new release prompt.
+ *
+ * Todo: need to optimize the structure of this class.
+ */
 export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "1.2.0";
-  buildNumber = 3;
-  versionDate = "2022-07-04";
+  version = "1.4.0";
+  buildNumber = 6;
+  versionDate = "2022-07-24";
   isNeedPrompt = true;
-  hasPrompted = false; // only show once, then will be set to true
+  hasPrompted = false; // always default false, only show once, then should be set to true.
   releaseMarkdown = changelog;
 
   getRepoUrl() {
@@ -72,6 +76,14 @@ export class Easydict {
   }
 
   /**
+   * Manually hide prompt when viewed,, and store hasPrompted.
+   */
+  public hideReleasePrompt() {
+    this.hasPrompted = true;
+    return this.storeCurrentVersionInfo();
+  }
+
+  /**
    * Get version info with version key, return a promise EasydictInfo.
    */
   async getVersionInfo(versionKey: string): Promise<Easydict | undefined> {
@@ -91,6 +103,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -102,10 +115,9 @@ export class Easydict {
   }
 
   /**
-   * Fetch release markdown, return a promise string.
-   * First, fetech markdown from github, if failed, then read from localStorage.
+   * Fetch release markdown, return a promise string. First, fetech markdown from github, if failed, then read from localStorage.
    *
-   * * NOTE: if fetch markdown from github success, then will store `this`(Easydict) to localStorage.
+   * * only show prompt once, whether fetch release markdown from github successful or failed.
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
@@ -116,16 +128,15 @@ export class Easydict {
       if (releaseMarkdown) {
         this.releaseMarkdown = releaseMarkdown;
         this.hasPrompted = true; // need to set hasPrompted to true when user viewed `ReleaseDetail` page.
-        this.storeCurrentVersionInfo(); // store the value to local storage.
         return Promise.resolve(releaseMarkdown);
       } else {
-        console.log("fetch release markdown from github failed");
+        console.error("fetch release markdown from github failed");
         return this.getLocalStoredMarkdown();
       }
     } catch (error) {
-      console.error(`fetch release markdown error: ${error}`);
-      console.log(`use local storaged markdown`);
-      return this.getLocalStoredMarkdown();
+      console.error(`fetch release error: ${error}`);
+      this.hasPrompted = true;
+      return this.getLocalStoredMarkdown(); // getLocalStoredMarkdown() will store this info first.
     }
   }
 
@@ -133,6 +144,7 @@ export class Easydict {
    * Get local stored markdown, return a promise string.
    */
   public async getLocalStoredMarkdown(): Promise<string> {
+    console.log(`get local storaged markdown`);
     const currentVersionInfo = await this.getCurrentVersionInfo();
     return Promise.resolve(currentVersionInfo.releaseMarkdown);
   }
@@ -144,7 +156,7 @@ export class Easydict {
     try {
       // console.log(`fetch release url: ${releaseUrl}`);
       const response = await axios.get(releaseUrl);
-      console.log(`fetch github cost time: ${response.headers[requestCostTime]} ms`);
+      console.log(`fetch github cost time: ${response.headers["x-request-cost"]} ms`);
 
       return Promise.resolve(response.data);
     } catch (error) {

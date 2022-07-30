@@ -24,21 +24,22 @@
       "title": "Domain",
       "placeholder": "canvas.instructure.com",
       "description": "Just the domain for your canvas LMS (Do not include the URL)"
-    }, 
+    },
     {
-      "name": "recent", 
-      "type": "checkbox", 
-      "required": false, 
-      "label": "Show Recent Module Items", 
-      "default": true, 
+      "title": "Recent Module Items",
+      "name": "showRecent",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Recent Items",
+      "default": true,
       "description": "Show the recently used module items"
     },
     {
-      "name": "numRecent", 
-      "type": "dropdown", 
-      "required": false, 
-      "title": "Number of Recent Items", 
-      "default": "4", 
+      "name": "numRecent",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number of Recent Items",
+      "default": "3",
       "description": "Number of recently used module items shown",
       "data": [
         {
@@ -75,7 +76,7 @@
   ],
   "dependencies": {
     "@api-blueprints/pathmaker": "^1.0.0",
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.38.1",
     "node-fetch": "^3.2.6",
     "open": "^8.4.0",
     "turndown-rn": "^6.1.0"

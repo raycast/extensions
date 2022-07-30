@@ -17,15 +17,6 @@
   ],
   "preferences": [
     {
-      "name": "keepassxcRootPath",
-      "type": "textfield",
-      "required": true,
-      "title": "Path of KeepassXC.app",
-      "description": "Path of KeepassXC.app",
-      "placeholder": "Set the Path of KeepassXC.app",
-      "default": "/Applications/KeePassXC.app"
-    },
-    {
       "name": "database",
       "type": "textfield",
       "required": true,
@@ -39,11 +30,28 @@
       "required": true,
       "title": "Password",
       "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
-      "placeholder": "Please input password of Keepass database."
+      "placeholder": "Please input password of Keepass database"
+    },
+    {
+      "name": "keyFile",
+      "type": "textfield",
+      "required": false,
+      "title": "Path of Key File",
+      "description": "Set the Path of Key File",
+      "placeholder": "Set the Path of Key File"
+    },
+    {
+      "name": "keepassxcRootPath",
+      "type": "appPicker",
+      "required": true,
+      "title": "KeepassXC.app",
+      "description": "KeepassXC.app",
+      "placeholder": "Select KeepassXC.app",
+      "default": "/Applications/KeePassXC.app"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
+    "@raycast/api": "^1.38.1",
     "@types/crypto-js": "^4.1.0",
     "crypto-js": "^4.1.1"
   },

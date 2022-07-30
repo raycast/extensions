@@ -4,7 +4,7 @@ import open from "open";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { ReactElement } from "react";
+import { useState, ReactElement } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
@@ -20,6 +20,7 @@ const build: VSCodeBuild = preferences.build;
 const appKeyMapping = {
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
+  VSCodium: "com.visualstudio.code.oss",
 } as const;
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
@@ -51,6 +52,22 @@ function getProjectEntries(): ProjectEntry[] {
 
   return projectEntries;
 }
+
+function getProjectTags(projectEntries: ProjectEntry[]): string[] {
+  return projectEntries?.reduce((tags: string[], project: ProjectEntry) => {
+    project.tags?.forEach((tag) => {
+      if (!tags.includes(tag)) {
+        tags.push(tag);
+      }
+    });
+
+    return tags.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  }, []);
+}
+
+const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): ProjectEntry[] => {
+  return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
+};
 
 function getPreferencesPath(): string | undefined {
   const path = preferences.projectManagerDataPath;
@@ -106,6 +123,10 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 export default function Command() {
   const elements: ReactElement[] = [];
   const projectEntries = getProjectEntries();
+  const projectTags = getProjectTags(projectEntries);
+
+  const [selectedTag, setSelectedTag] = useState("");
+
   if (!projectEntries || projectEntries.length === 0) {
     return (
       <Detail
@@ -118,16 +139,41 @@ export default function Command() {
 
   const sortedProjects = getSortedProjects(projectEntries);
 
-  if (preferences.groupProjectsByTag) {
+  if (preferences.groupProjectsByTag && !selectedTag) {
+    // don't group if filtering
     const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
     elements.push(...groupedProjects);
   } else {
-    sortedProjects.forEach((project, index) => {
+    filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
       elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
     });
   }
 
-  return <List searchBarPlaceholder="Search projects ...">{elements}</List>;
+  const handleChangeTag = (tag: string) => {
+    setSelectedTag(tag);
+  };
+
+  return (
+    <List
+      searchBarPlaceholder="Search projects ..."
+      searchBarAccessory={
+        projectTags.length ? (
+          <List.Dropdown tooltip="Tags filter" onChange={handleChangeTag} defaultValue={undefined}>
+            <List.Dropdown.Section>
+              <List.Dropdown.Item key="0" title="All Tags" value={""} />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section title="Tags">
+              {projectTags.map((tag, tagIndex) => (
+                <List.Dropdown.Item key={"tag-" + tagIndex} title={tag} value={tag} />
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        ) : null
+      }
+    >
+      {elements}
+    </List>
+  );
 }
 
 function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
