@@ -1,12 +1,19 @@
 import { subDays } from "date-fns";
 import { useCallback } from "react";
+import { useCachedState } from "@raycast/utils";
 
 import { useBase } from "./base";
 import { getDuration, getLeaderBoard, getPrivateLeaderBoards, getProjects, getSummary, getUser } from "../utils";
 
 export function useUser() {
+  const [cachedUser, setCachedUser] = useCachedState<WakaTime.User>("user");
+
   const result = useBase({
-    handler: useCallback(getUser, []),
+    handler: useCallback(async () => {
+      const result = await getUser();
+      if (result.ok) setCachedUser({ data: result.data });
+      return result;
+    }, []),
     toasts: {
       loading: { title: "Loading..." },
       success: { title: "Done!!" },
@@ -17,7 +24,7 @@ export function useUser() {
     },
   });
 
-  return result;
+  return { ...result, data: cachedUser };
 }
 
 export function useActivityChange() {
