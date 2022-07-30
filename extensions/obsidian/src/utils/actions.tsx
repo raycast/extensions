@@ -241,5 +241,13 @@ export function OpenNoteActions(props: { note: Note; vault: Vault; actionCallbac
         {quicklook}
       </React.Fragment>
     );
+  } else {
+    return (
+      <React.Fragment>
+        {obsidian}
+        {obsidianNewPane}
+        {quicklook}
+      </React.Fragment>
+    );
   }
 }
