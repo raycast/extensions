@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
-import { humanize } from "./utils";
+import { humanize, isValidUrl } from "./utils";
 import { copyPassword, pastePassword } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
@@ -16,8 +16,9 @@ async function paste(key: string, value: string): Promise<void> {
   await closeMainWindow();
 }
 
-const Actions = ({ copy, paste }: { copy: () => void; paste: () => void }): JSX.Element => (
+const Actions = ({ copy, paste, url }: { copy: () => void; paste: () => void; url?: string }): JSX.Element => (
   <ActionPanel>
+    {url && <Action.OpenInBrowser url={url} />}
     <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copy} />
     <Action title="Paste to Active App" icon={Icon.Document} onAction={paste} />
   </ActionPanel>
@@ -58,7 +59,13 @@ export default function ({ entry }: { entry: string }): JSX.Element {
               key={index}
               title={humanize(key)}
               subtitle={value}
-              actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
+              actions={
+                <Actions
+                  copy={() => copy(key, value)}
+                  paste={() => paste(key, value)}
+                  url={isValidUrl(value) ? value : ""}
+                ></Actions>
+              }
             />
           );
         })}
