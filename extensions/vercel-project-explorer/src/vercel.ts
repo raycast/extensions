@@ -234,13 +234,17 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
   }
 }
 
-export function getFetchDeploymentBuildsURL(deploymentId: Deployment["uid"] | string, limit = 100) {
-  return apiURL + `v11/deployments/${deploymentId}/builds?limit=${limit}`;
+export function getFetchDeploymentBuildsURL(
+  deploymentId: Deployment["uid"] | string,
+  teamId?: Team["id"],
+  limit = 100
+) {
+  return apiURL + `v11/deployments/${deploymentId}/builds?limit=${limit}&teamId=${teamId ?? ""}`;
 }
 
-export async function fetchDeploymentBuildsByDeploymentId(deploymentId: string) {
+export async function fetchDeploymentBuildsByDeploymentId(deploymentId: string, teamId?: string, limit?: number) {
   try {
-    const response = await fetch(getFetchDeploymentBuildsURL(deploymentId), {
+    const response = await fetch(getFetchDeploymentBuildsURL(deploymentId, teamId, limit), {
       method: "get",
       headers: headers,
     });
