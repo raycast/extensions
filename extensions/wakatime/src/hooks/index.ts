@@ -6,7 +6,7 @@ import { getDuration, getLeaderBoard, getPrivateLeaderBoards, getProjects, getSu
 
 export function useUser() {
   const result = useBase({
-    handler: getUser,
+    handler: useCallback(getUser, []),
     toasts: {
       loading: { title: "Loading..." },
       success: { title: "Done!!" },
@@ -22,7 +22,7 @@ export function useUser() {
 
 export function useActivityChange() {
   const result = useBase({
-    async handler() {
+    handler: useCallback(async () => {
       const data = await getSummary("Last 1 Day", subDays(new Date(), 1));
       if (!data.ok) throw new Error(data.error);
       const days = Object.fromEntries(
@@ -38,7 +38,7 @@ export function useActivityChange() {
         percent: Math.floor((timeDiff / days.yesterday) * 1e2),
         duration: `You've spent ${getDuration(timeDiff)} ${quantifier} compared to yesterday`,
       };
-    },
+    }, []),
   });
 
   return result;
@@ -46,7 +46,7 @@ export function useActivityChange() {
 
 export function useProjects() {
   const result = useBase({
-    handler: getProjects,
+    handler: useCallback(getProjects, []),
     toasts: {
       error: (err) => ({
         title: "Failed fetching projects!",
@@ -76,7 +76,7 @@ export function useLeaderBoard({ id, page }: { id?: string; page?: number } = {}
 
 export function usePrivateLeaderBoards() {
   const result = useBase({
-    handler: getPrivateLeaderBoards,
+    handler: useCallback(getPrivateLeaderBoards, []),
     toasts: {
       loading: { title: "Loading Private Leaderboards" },
       success: { title: "Done!!" },
@@ -92,7 +92,7 @@ export function usePrivateLeaderBoards() {
 
 export function useSummary() {
   const result = useBase({
-    async handler() {
+    handler: useCallback(async () => {
       const summaries = [
         ["Today", new Date()],
         ["Yesterday", subDays(new Date(), 1)],
@@ -105,7 +105,7 @@ export function useSummary() {
 
       const data = await Promise.all(summaries);
       return { data: data.filter(Boolean) as NonNullable<typeof data[number]>[], ok: true };
-    },
+    }, []),
     toasts: {
       error: (err) => ({
         title: "Failed fetching summary",
