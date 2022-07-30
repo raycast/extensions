@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "search-packages",
       "title": "Search Packages",
       "subtitle": "Libraries.io",
       "description": "Search packages on Libraries.io",
