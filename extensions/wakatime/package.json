@@ -31,6 +31,14 @@
       "title": "Show Private Leaderboards",
       "description": "Show your private leaderboards",
       "mode": "view"
+    },
+    {
+      "name": "today-summary",
+      "subtitle": "WakaTime",
+      "title": "Show Today Summary",
+      "description": "Show your WakaTime ToDay Summary in Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
