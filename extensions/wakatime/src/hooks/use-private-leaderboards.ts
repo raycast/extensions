@@ -1,36 +1,18 @@
-import { useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
-
+import { useBase } from "./base";
 import { getPrivateLeaderBoards } from "../utils";
 
 export function usePrivateLeaderBoards() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useState<WakaTime.PrivateLeaderBoards>();
+  const result = useBase({
+    handler: getPrivateLeaderBoards,
+    toasts: {
+      loading: { title: "Loading Private Leaderboards" },
+      success: { title: "Done!!" },
+      error: (err) => ({
+        title: "Failed fetching data!",
+        message: err.message,
+      }),
+    },
+  });
 
-  useEffect(() => {
-    async function getData() {
-      setIsLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Loading Private Leaderboards");
-
-      try {
-        const data = await getPrivateLeaderBoards();
-
-        if (!data.ok) throw new Error(data.error);
-        setData(data);
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Finished.";
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error Loading Private Leaderboards";
-        toast.message = (error as Error).message;
-      }
-
-      setIsLoading(false);
-    }
-
-    getData();
-  }, []);
-
-  return { data, isLoading };
+  return result;
 }
