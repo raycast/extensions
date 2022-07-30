@@ -51,7 +51,6 @@ export function AccountListItem({
         icon={{
           source: `https://farisaziz12.github.io/cryptoicon-api/icons/${cryptoCurrency.toLowerCase()}.png`,
           mask: ImageMask.Circle,
-          fallback: "coinbase-logo.png",
         }}
         actions={
           <ActionPanel>
