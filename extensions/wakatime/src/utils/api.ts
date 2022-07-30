@@ -58,7 +58,7 @@ export const getProjects = () => routeHandler<WakaTime.Projects>(`/users/current
  * @returns A promise that resolves to a WakaTime.Summary object.
  */
 export const getSummary = (key: string, start: Date) => {
-  const end = key.includes("last") ? new Date() : start;
+  const end = /^last/i.test(key) ? new Date() : start;
   const query = `?start=${format(start, "yyyy-MM-dd")}&end=${format(end, "yyyy-MM-dd")}`;
 
   return routeHandler<WakaTime.Summary>(`/users/current/summaries${query}`);
