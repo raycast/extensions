@@ -67,20 +67,24 @@ export default function Main({ prefix = "" }): JSX.Element {
   return (
     <List isLoading={loading} enableFiltering={false} onSearchTextChange={setSearchText}>
       <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries.length)}>
-        {entries.map((entry, i) => (
-          <List.Item
-            key={i}
-            title={entry}
-            icon={getIcon(entry)}
-            accessories={[{ icon: Icon.ChevronRight }]}
-            actions={
-              <ActionPanel>
-                <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(prefix + entry)} />
-                {!isDirectory(entry) && passwordActions(entry)}
-              </ActionPanel>
-            }
-          />
-        ))}
+        {entries.map((entry, i) => {
+          const fullPath = prefix + entry;
+
+          return (
+            <List.Item
+              key={i}
+              title={entry}
+              icon={getIcon(entry)}
+              accessories={[{ icon: Icon.ChevronRight }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Show Details" icon={getIcon(entry)} target={getTarget(fullPath)} />
+                  {!isDirectory(entry) && passwordActions(fullPath)}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
