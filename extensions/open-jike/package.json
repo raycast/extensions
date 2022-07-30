@@ -51,10 +51,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
-  "peerDependencies": {
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
-  },
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "execa": "^6.1.0",
@@ -63,14 +59,13 @@
     "undici": "^5.8.0"
   },
   "devDependencies": {
-    "@sxzz/eslint-config-prettier": "^2.3.4",
-    "@sxzz/eslint-config-ts": "^2.3.4",
-    "@types/node": "*",
-    "@types/react": "^17.0.45",
+    "@sxzz/eslint-config-prettier": "^2.3.5",
+    "@sxzz/eslint-config-ts": "^2.3.5",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
     "eslint": "^8.20.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-reconciler": "0.26.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": "^4.7.4"
   }
 }
