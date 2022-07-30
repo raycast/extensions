@@ -1,4 +1,4 @@
-import { Blob } from 'buffer'
+import { Blob } from 'node:buffer'
 import {
   File,
   FormData,
