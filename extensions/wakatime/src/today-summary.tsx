@@ -8,8 +8,12 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon="../assets/icon.png"
-      title={`Today: ${summary.data
-        ?.map(([key, range]) => key === "Today" && range.cummulative_total.text)
+      title={`${summary.data
+        ?.map(
+          ([key, range]) =>
+            key === "Today" &&
+            (range.cummulative_total.seconds === 0 ? "Are we coding today?" : `Today: ${range.cummulative_total.text}`)
+        )
         .filter((item) => item)}`}
       isLoading={summary.isLoading}
     ></MenuBarExtra>
