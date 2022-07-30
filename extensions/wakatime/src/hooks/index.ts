@@ -100,7 +100,7 @@ export function useSummary() {
         ["Last 30 Days", subDays(new Date(), 30)],
       ].map(async ([key, date]) => {
         const summary = await getSummary(key as Range, date as Date);
-        if (summary.ok) return [key, summary] as const;
+        if (summary.ok) return [key as Range, summary] as const;
       });
 
       const data = await Promise.all(summaries);
