@@ -5,8 +5,8 @@ import { useActivityChange, useUser } from "./hooks";
 import { ProjectsStatsList, RangeStatsList } from "./components";
 
 export default function SummaryCommand() {
-  const change = useActivityChange();
-  const { data, isLoading } = useUser();
+  const { data: activityChange } = useActivityChange();
+  const { data: { data } = {}, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
 
   return (
@@ -26,10 +26,10 @@ export default function SummaryCommand() {
           />
         </List.Section>
       )}
-      {!!change.data.duration && (
+      {!!activityChange?.duration && (
         <List.Item
-          title={change.data.duration}
-          accessories={[{ text: `${change.data.percent}%  ${change.data.emoji}` }]}
+          title={activityChange.duration}
+          accessories={[{ text: `${activityChange.percent}%  ${activityChange.emoji}` }]}
         />
       )}
       <RangeStatsList {...{ showDetail, setShowDetail }} />

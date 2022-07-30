@@ -6,11 +6,11 @@ import { useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
 export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
-  const summary = useSummary();
+  const { data: summary } = useSummary();
 
   return (
     <List.Section title="Stats Summary">
-      {summary.data?.map(([key, range]) => (
+      {summary?.data.map(([key, range]) => (
         <RangeStatsItem key={key} title={key} range={range} {...props} />
       ))}
     </List.Section>
