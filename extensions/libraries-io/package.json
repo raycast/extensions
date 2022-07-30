@@ -16,7 +16,14 @@
       "title": "Search Packages",
       "subtitle": "Libraries.io",
       "description": "Search packages on Libraries.io",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "platform",
+          "placeholder": "Platform",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "search-platforms",
