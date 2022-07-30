@@ -10,7 +10,7 @@ export function useNotes(vault: Vault) {
   console.log(vault.name);
   if (cache.has(vault.name)) {
     const data = JSON.parse(cache.get(vault.name) ?? "");
-    if (data.lastCached > Date.now() - 1000 * 60 * 60 * 24) {
+    if (data.lastCached > Date.now() - 1000 * 60 * 5) {
       console.log("Cache still valid");
       return data.notes;
     }
