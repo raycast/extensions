@@ -1,8 +1,7 @@
-import { Action, ActionPanel, Grid, Image, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Image, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isSpotifyInstalled } from "./client/utils";
-import { PlayAction } from "./actions";
-import { useAlbumSearch } from "./client/client";
+import { play, playShuffled, useAlbumSearch } from "./client/client";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
@@ -57,7 +56,20 @@ function AlbumItem(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInst
       content={icon}
       actions={
         <ActionPanel title={title}>
-          <PlayAction itemURI={album.uri} />
+          <Action
+            title="Play"
+            icon={Icon.Play}
+            onAction={() => {
+              play(undefined, album.uri);
+            }}
+          />
+          <Action
+            icon={Icon.Shuffle}
+            title="Play Shuffled"
+            onAction={() => {
+              playShuffled(album.uri);
+            }}
+          />
           <Action.OpenInBrowser
             title={`Show Album (${album.name.trim()})`}
             url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}

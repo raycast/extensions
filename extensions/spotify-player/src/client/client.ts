@@ -228,6 +228,33 @@ export async function startPlaySimilar(trackId: string | undefined): Promise<voi
   }
 }
 
+export async function play(uri?: string, context_uri?: string): Promise<void> {
+  try {
+    await authorizeIfNeeded();
+    await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Start Playing",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
+}
+
+export async function playShuffled(uri: string): Promise<void> {
+  try {
+    await authorizeIfNeeded();
+    await spotifyApi.setShuffle(true);
+    await spotifyApi.play({ context_uri: uri });
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Playing Shuffled Playlist",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
+}
+
 export function useArtistsSearch(query: string | undefined): Response<SpotifyApi.ArtistSearchResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistSearchResponse>>({ isLoading: false });
   let cancel = false;

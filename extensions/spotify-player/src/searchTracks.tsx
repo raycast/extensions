@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { startPlaySimilar, useTrackSearch } from "./client/client";
-import { PlayAction } from "./actions";
-import { showToast, List, ActionPanel, Action, Toast, Image, Color } from "@raycast/api";
+import { play, startPlaySimilar, useTrackSearch } from "./client/client";
+import { showToast, List, ActionPanel, Action, Toast, Image, Color, Icon } from "@raycast/api";
 import _ from "lodash";
 import { isSpotifyInstalled, trackTitle } from "./client/utils";
 
@@ -81,7 +80,13 @@ function TrackListItem(props: {
       detail={<List.Item.Detail markdown={getTrackDetailMarkdownContent(track, album)} />}
       actions={
         <ActionPanel title={title}>
-          <PlayAction itemURI={track.uri} />
+          <Action
+            title="Play"
+            icon={Icon.Play}
+            onAction={() => {
+              play(track.uri);
+            }}
+          />
           {spotifyInstalled && track.id && (
             <Action
               title="Play Similar"
