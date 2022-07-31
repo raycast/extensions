@@ -8,9 +8,10 @@
 - Add `Quick Look` and `Open in Obsidian` actions for `Search Media` command
 - Add Menu Bar Item that lets you interact with your pinned notes or open a daily note
 - Add Command Arguments for `Search Note`, `Search Media` and `Pinned Notes` command for quicker searches
+- Add `Open in new Pane` action if advanced-uri plugin is installed for Obsidian
 - Add a custom Obsidian icon for `Open in Obsidian` actions and the new Menu Bar Item
 - Improve overall performance by caching the vaults content
-- If full content search is activated in preferences you can search for paths
+- If full content search is activated in preferences you can now search for paths
 - Minor fixes
 
 ## [Tag Filter, Markdown Controls for Edit Note, Templates for Append Action & More | Version 1.7.0] - 2022-07-11

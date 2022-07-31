@@ -20,7 +20,6 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Pinned Note](https://github.com/marcjulianschwarz/obsidian-raycast#pinned-notes)
 - [Obsidian Menu Bar Item](https://github.com/marcjulianschwarz/obsidian-raycast#obsidian-menu-bar-item)
 
-
 ## Search Note
 
 This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title.
@@ -39,12 +38,19 @@ Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will s
 <img width="1000" alt="Search Note Command" src="https://user-images.githubusercontent.com/67844154/178247431-2c8be700-7dca-469d-9c99-cd0fde565524.png">
 <img width="1000" alt="Search Note Command Tag Filter" src="https://user-images.githubusercontent.com/67844154/178251441-eeb0c4f9-c848-4899-aa12-62aae9ba3094.png">
 
-
 ### Actions for Search Note command
+
 It features several actions which you can trigger with these keyboard shortcuts (or search for them with `cmd + k`):
+
+**Open Note Actions:**
+Depending on the primary action set in preferences, the keyboard shortcuts can be different.
 
 - `enter` will open the note in "Quick Look"
 - `cmd + enter` will open the note in Obsidian
+- `Open in new Pane` will open the note in a new pane in Obsidian (only for vaults with advanced-uri plugin)
+
+**Other Actions:**
+
 - `opt + enter` will open the notes path in Finder
 - `opt + e` will let you edit the note (supports templates)
 - `opt + d` will let you delete the note
@@ -74,13 +80,13 @@ This command allows for quick access to all of the media (images, video, audio a
 Use the type filter in the top right corner (`cmd + p`) to filter the media by its type / file extension.
 
 ### Actions for Search Media command
+
 It features several actions which you can trigger with these keyboard shortcuts (or search for them with `cmd + k`):
 
 - `enter` will open the file in Apples Preview app
 - `cmd + enter` will open the file in Obsidian
 
 <img width="1000" alt="obsidian-10" src="https://user-images.githubusercontent.com/67844154/180800668-08706bf6-4c17-4aca-b5fa-e4c420d04eb6.png">
-
 
 ## Random Note
 
@@ -114,7 +120,6 @@ Both the note name and note content support these templates:
 
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">
 
-
 ## Daily Note
 
 This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
@@ -130,14 +135,12 @@ Additional actions:
 
 <img width="1000" alt="Pinned Notes Command" src="https://user-images.githubusercontent.com/67844154/178248422-2668fad8-8936-490b-8cf1-1dea0793712a.png">
 
-
 ## Obsidian Menu Bar Item
 
 Use this command to add a menu bar item to the top of the screen (Obsidian icon).
 Clicking it will reveal a list of your vaults. You can view your pinned notes, perform actions on them or open a daily note.
 
 <img width="635" alt="Obsidian Menu Bar Item" src="https://user-images.githubusercontent.com/67844154/180802502-3c6243ae-e3f9-4ddc-95ba-f205dab46721.png">
-
 
 ## Preferences
 
