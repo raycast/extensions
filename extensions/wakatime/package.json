@@ -36,7 +36,7 @@
       "name": "today-summary",
       "subtitle": "WakaTime",
       "title": "Show Today Summary",
-      "description": "Show your WakaTime ToDay Summary in Menu Bar",
+      "description": "Show Today's Summary in the Menu Bar",
       "mode": "menu-bar",
       "interval": "1m"
     }
