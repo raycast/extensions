@@ -3,6 +3,7 @@ export interface Package {
   description?: string;
   platform: string;
   homepage: string;
+  latest_download_url: string;
   repository_url: string;
   package_manager_url: string;
   versions: Array<Version>;

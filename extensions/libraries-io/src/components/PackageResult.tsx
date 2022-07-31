@@ -52,6 +52,12 @@ export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
+            <Action.OpenInBrowser
+              title="Download Latest Release"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
+              url={searchResult.latest_download_url}
+            />
             <Action.CopyToClipboard content={searchResult.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
           </ActionPanel.Section>
         </ActionPanel>
