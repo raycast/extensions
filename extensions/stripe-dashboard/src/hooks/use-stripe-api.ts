@@ -66,10 +66,12 @@ export const useStripeApi = (endpoint: string) => {
     showToast(options);
 
     return () => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Fetch cancelled`,
-      });
+      if (isLoading) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Fetch cancelled`,
+        });
+      }
     };
   }, [isLoading, data, error]);
 
