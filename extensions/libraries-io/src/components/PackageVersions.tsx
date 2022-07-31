@@ -21,7 +21,7 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
                 {
                   icon: Icon.BlankDocument,
                   text: version.spdx_expression,
-                  tooltip: `License: ${version.spdx_expression}`,
+                  tooltip: "License",
                 },
                 {
                   icon: Icon.Calendar,
