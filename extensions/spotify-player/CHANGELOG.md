@@ -2,6 +2,12 @@
 
 ## [Features & Bug Fixes] - 2022-07-27
 
+- Added Play Shuffled actions to `Search Playlist`, `Search Albums` commands
+- Supported start cross-device playing. Means that if you have the music playing not on your machine – the play actions will trigger playing music whenever you have it.
+- Fixed flickering for menu bar items
+
+## [Features & Bug Fixes] - 2022-07-30
+
 - Fixed cases when the Spotify app named not "Spotify" and most of the command didn't work
 - `Search Albums` command now is a Grid
 - Fixed subtitle updates when there is no Spotify playing
