@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { Package, DependenciesResponse } from ".././types";
 
@@ -36,6 +36,11 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
                   tooltip: `Dependency Type: ${dependency.kind}`,
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard content={dependency.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
+                </ActionPanel>
+              }
             />
           ))}
       </List.Section>

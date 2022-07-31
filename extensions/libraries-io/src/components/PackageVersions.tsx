@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { Package } from ".././types";
 import { coerce, compare } from "semver";
 
@@ -29,6 +29,11 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
                   tooltip: `Published: ${new Date(version.published_at).toLocaleDateString()}`,
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard content={version.number} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Version Number" />
+                </ActionPanel>
+              }
             />
           ))
           .reverse()}
