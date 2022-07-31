@@ -2,6 +2,7 @@ import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard
 
 import NoteCreator from "../utils/NoteCreator";
 import { NoteFormPreferences, FormValue, Vault } from "../utils/interfaces";
+import { renewCache } from "../utils/cache";
 
 export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
   const { vault, showTitle } = props;
@@ -46,7 +47,10 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
     }
     const nc = new NoteCreator(noteProps, vault, pref);
     console.log("Creating note... creator");
-    nc.createNote();
+    const saved = nc.createNote();
+    if (await saved) {
+      renewCache(vault);
+    }
     pop();
   }
 

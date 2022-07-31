@@ -36,7 +36,8 @@ import {
   MONTH_NUMBER_TO_STRING,
 } from "./constants";
 import { isNotePinned, unpinNote } from "./pinNoteUtils";
-import { MediaLoader, useNotes } from "./NoteLoader";
+import { useNotes } from "./cache";
+import { MediaLoader } from "./loader";
 
 export function filterContent(content: string) {
   const pref: QuickLookPreferences = getPreferenceValues();

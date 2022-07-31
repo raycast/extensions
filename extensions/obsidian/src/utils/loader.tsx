@@ -1,29 +1,10 @@
-import { Cache, Icon } from "@raycast/api";
-import { AUDIO_FILE_EXTENSIONS, BYTES_PER_MEGABYTE, VIDEO_FILE_EXTENSIONS } from "./constants";
+import { Icon } from "@raycast/api";
+import path from "path";
+
+import { AUDIO_FILE_EXTENSIONS, VIDEO_FILE_EXTENSIONS } from "./constants";
 import { Note, Vault, Media } from "./interfaces";
 import { getNoteFileContent, prefExcludedFolders, walkFilesHelper } from "./utils";
-import path from "path";
 import { tagsForString } from "./yaml";
-
-const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
-
-export function useNotes(vault: Vault) {
-  console.log(vault.name);
-  if (cache.has(vault.name)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "");
-    if (data.lastCached > Date.now() - 1000 * 60 * 5) {
-      console.log("Cache still valid");
-      return data.notes;
-    }
-  } else {
-    console.log("Cache not found");
-  }
-  const nl = new NoteLoader(vault);
-  const notes = nl.loadNotes();
-  cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
-
-  return notes;
-}
 
 export class NoteLoader {
   vaultPath: string;

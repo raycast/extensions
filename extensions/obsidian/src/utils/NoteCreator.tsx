@@ -34,6 +34,7 @@ class NoteCreator {
         open(target);
       }
     }
+    return saved;
   }
 
   addYAMLFrontmatter(content: string) {
