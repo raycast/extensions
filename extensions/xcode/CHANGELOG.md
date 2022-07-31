@@ -1,5 +1,10 @@
 # Xcode Changelog
 
+## [Maintenance Update] - 2022-07-31
+
+- Updated to latest Raycast API
+- Improved components
+
 ## [Open Project Fix] - 2022-04-26
 
 - Always open Xcode Project, Workspace or Swift Package with Xcode

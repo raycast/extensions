@@ -6,8 +6,5 @@
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
-  "rules": {
-    "no-case-declarations": "off"
-  }
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
 }

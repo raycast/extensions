@@ -7,7 +7,7 @@ export class XcodeService {
   /**
    * Retrieve boolean if Xcode is currently running
    */
-  async isXcodeRunning(): Promise<boolean> {
+  static async isXcodeRunning(): Promise<boolean> {
     try {
       // prep Xcode process status
       const output = await execAsync("pgrep Xcode");
@@ -22,7 +22,7 @@ export class XcodeService {
   /**
    * Launch Xcode
    */
-  launchXcode(): Promise<void> {
+  static launchXcode(): Promise<void> {
     return execAsync(
       [
         // Open Xcode in background (-j)
