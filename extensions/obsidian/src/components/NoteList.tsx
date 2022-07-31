@@ -13,7 +13,7 @@ import {
 } from "../utils/utils";
 import { isNotePinned } from "../utils/pinNoteUtils";
 import { NoteAction } from "../utils/constants";
-import { updateNoteInCache } from "../utils/cache";
+import { deleteNoteFromCache, updateNoteInCache } from "../utils/cache";
 
 export function NoteListItem(props: {
   note: Note;
@@ -40,6 +40,7 @@ export function NoteListItem(props: {
         break;
       case NoteAction.Delete:
         onDelete(note);
+        deleteNoteFromCache(vault, note);
         break;
       case NoteAction.Edit:
         reloadContent();
