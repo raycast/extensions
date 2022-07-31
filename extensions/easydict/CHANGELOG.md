@@ -1,5 +1,16 @@
 # `Easydict` Changelog
 
+## [v1.4.1] - 2022-08-01
+
+### 💎 Improvements
+
+- Added show open in eudic preference option, default is true.
+- Improved the handling of DeepL request errors, and added a toast for exceeding the translation quota limit.
+
+### 🐞 Fixes
+
+- Fixed a bug that Eudic downloaded from the web was not recognized correctly.
+
 ## [v1.4.0] - 2022-07-27
 
 ### ✨ New
@@ -12,14 +23,12 @@
 
 - Fixed a bug where web translation could cause a crash.
 
-
 ## [v1.3.1] - 2022-07-21
 
 ### 🐞 Fixes
 
 - Fixed new release prompt being shown multiple times.
 - Handled the exceptional error of request to Youdao translation.
-
 
 ## [v1.3.0] - 2022-07-20
 
