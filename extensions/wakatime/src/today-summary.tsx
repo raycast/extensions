@@ -16,6 +16,6 @@ export default function Command() {
         )
         .filter((item) => item)}`}
       isLoading={summary.isLoading}
-    ></MenuBarExtra>
+    />
   );
 }
