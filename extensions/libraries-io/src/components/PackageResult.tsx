@@ -68,7 +68,7 @@ export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
   );
 };
 
-async function subscribeToPackage(platform:string, name:string): Promise<any> {
+async function subscribeToPackage(platform:string, name:string, ): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
   const response = await fetch(`https://libraries.io/api/subscriptions/${platform}/${name}?api_key=${preferences.token}`, {
     method: "POST",
