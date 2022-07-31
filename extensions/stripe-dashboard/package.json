@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "stripe",
-  "title": "Stripe - Quick Dashboard Access",
+  "name": "stripe-dashboard",
+  "title": "Stripe Dashboard",
   "description": "Quick Stripe Dashboard Access",
   "icon": "stripe.png",
   "author": "farisaziz12",
