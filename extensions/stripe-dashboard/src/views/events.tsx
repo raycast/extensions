@@ -17,7 +17,7 @@ type EventResp = {
       id: string;
       created: number;
       metadata: any;
-    }
+    };
   };
 };
 
@@ -71,10 +71,7 @@ const Events = () => {
         icon={{ source: Icon.Network, tintColor: Color.Orange }}
         actions={
           <ActionPanel title="Actions">
-            <Action.OpenInBrowser
-              title="Open in Stripe Dashboard"
-              url={`${dashboardUrl}/events/${id}`}
-            />
+            <Action.OpenInBrowser title="Open in Stripe Dashboard" url={`${dashboardUrl}/events/${id}`} />
             <Action.CopyToClipboard title="Copy Event ID" content={id} />
             <Action.CopyToClipboard title="Copy Event Type" content={type} />
           </ActionPanel>

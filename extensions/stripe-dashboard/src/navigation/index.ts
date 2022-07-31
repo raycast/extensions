@@ -1,8 +1,7 @@
 import { Icon, Color } from "@raycast/api";
 import { Balance, BalanceTransactions, Charges, PaymentIntents, ConnectedAccounts, Events } from "../views";
-import { PageProps } from './../types';
+import { PageProps } from "./../types";
 import { theme } from "../theme";
-
 
 type NavItem = {
   label: string;

@@ -125,7 +125,9 @@ const Charges = () => {
         icon={{ source: Icon.CreditCard, tintColor: Color.Red }}
         actions={
           <ActionPanel title="Actions">
-            {payment_intent && <Action.OpenInBrowser title="View Payment Intent" url={`${dashboardUrl}/payments/${payment_intent}`} />}
+            {payment_intent && (
+              <Action.OpenInBrowser title="View Payment Intent" url={`${dashboardUrl}/payments/${payment_intent}`} />
+            )}
             {receipt_url && <Action.OpenInBrowser title="View Receipt" url={receipt_url} />}
             <Action.CopyToClipboard title="Copy Charge ID" content={id} />
           </ActionPanel>

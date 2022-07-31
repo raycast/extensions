@@ -1,2 +1,2 @@
 export type Environment = "test" | "live";
-export type PageProps = { environment: Environment }
+export type PageProps = { environment: Environment };
