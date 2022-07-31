@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { PlayAction } from "./actions";
-import { usePlaylistSearch } from "./client/client";
+import { play, playShuffled, usePlaylistSearch } from "./client/client";
 import { isSpotifyInstalled } from "./client/utils";
 
 export default function SpotifyList() {
@@ -57,7 +56,20 @@ function PlaylistItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified; sp
       icon={icon}
       actions={
         <ActionPanel title={title}>
-          <PlayAction itemURI={playlist.uri} />
+          <Action
+            title="Play"
+            icon={Icon.Play}
+            onAction={() => {
+              play(undefined, playlist.uri);
+            }}
+          />
+          <Action
+            icon={Icon.Shuffle}
+            title="Play Shuffled"
+            onAction={() => {
+              playShuffled(playlist.uri);
+            }}
+          />
           <Action.OpenInBrowser
             title={`Show Playlist (${playlist.name.trim()})`}
             url={spotifyInstalled ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
