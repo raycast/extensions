@@ -1,23 +1,25 @@
-import { useSummary } from "./hooks";
+import { useTodaySummary } from "./hooks";
+import { getDuration } from "./utils";
 
 import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
 
 export default function Command() {
-  const summary = useSummary();
+  const todaySummary = useTodaySummary();
   const preference = getPreferenceValues();
-  const asksSentence = preference.showAsksSentence;
+  const showAsksSentence = preference.showAsksSentence;
 
-  function getTitle(): string {
-    return `${summary.data
-      ?.map(
-        ([key, range]) =>
-          key === "Today" &&
-          (range.cummulative_total.seconds === 0 && asksSentence
-            ? asksSentence
-            : `Today: ${range.cummulative_total.text}`)
-      )
-      .filter((item) => item)}`;
+  function getTitle(): string | undefined {
+    const today = todaySummary.data;
+    if (today === undefined) return;
+
+    const cumulative_total = today.cummulative_total;
+    const todayText = getDuration(cumulative_total.seconds);
+    if (cumulative_total.seconds === 0) {
+      return showAsksSentence ? "Are we coding today?" : `Today: ${todayText}`;
+    } else {
+      return todayText;
+    }
   }
 
-  return <MenuBarExtra icon="../assets/icon.png" title={getTitle()} isLoading={summary.isLoading} />;
+  return <MenuBarExtra icon="../assets/icon.png" title={getTitle()} isLoading={todaySummary.isLoading} />;
 }
