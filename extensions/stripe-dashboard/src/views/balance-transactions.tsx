@@ -80,7 +80,7 @@ const BalanceTransactions = () => {
       <List.Item
         key={id}
         title={`${currency} ${amount}`}
-        icon={{ source: Icon.CreditCard, tintColor: theme.colors.stripeBlue }}
+        icon={{ source: Icon.Receipt, tintColor: theme.colors.stripeBlue }}
         actions={
           <ActionPanel title="Copy">
             <Action.CopyToClipboard title="Copy Transaction ID" content={id} />

@@ -31,10 +31,10 @@ type PaymentIntent = {
   metadata: any;
 };
 
-  const resolvedMetadata = (metadata: any) => Object.keys(metadata).reduce((acc, key) => {
-    const value = metadata[key];
-    return { ...acc, [`metadata_${snakeCase(key)}`]: value };
-  }, {});
+const resolvedMetadata = (metadata: any) => Object.keys(metadata).reduce((acc, key) => {
+  const value = metadata[key];
+  return { ...acc, [`metadata_${snakeCase(key)}`]: value };
+}, {});
 
 
 const resolvePaymentIntent = ({

@@ -1,12 +1,11 @@
 import React from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import get from "lodash/get";
 import omit from "lodash/omit";
 import { useStripeApi, useStripeDashboard } from "../hooks";
 import { ENDPOINTS } from "../enums";
 import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "../utils";
 import { withPropsContext } from "../components";
-import { theme } from "../theme";
 
 type ChargeResp = {
   id: string;
@@ -123,7 +122,7 @@ const Charges = () => {
       <List.Item
         key={id}
         title={`${currency} ${amount}`}
-        icon={{ source: Icon.CreditCard, tintColor: theme.colors.stripeBlue }}
+        icon={{ source: Icon.CreditCard, tintColor: Color.Red }}
         actions={
           <ActionPanel title="Actions">
             {payment_intent && <Action.OpenInBrowser title="View Payment Intent" url={`${dashboardUrl}/payments/${payment_intent}`} />}

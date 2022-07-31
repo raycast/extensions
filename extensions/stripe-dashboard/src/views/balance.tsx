@@ -1,12 +1,11 @@
 import React from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import get from "lodash/get";
 import capitalize from "lodash/capitalize";
 import { useStripeApi, useStripeDashboard } from "../hooks";
 import { convertAmount } from "../utils";
 import { ENDPOINTS } from "../enums";
 import { withPropsContext } from "../components";
-import { theme } from "../theme";
 
 type BalanceResp = {
   amount: number;
@@ -49,7 +48,7 @@ const Balance = () => {
       <List.Item
         key={id}
         title={`${currency} ${amount}`}
-        icon={{ source: Icon.BankNote, tintColor: theme.colors.dollarGreen }}
+        icon={{ source: Icon.BankNote, tintColor: Color.Green }}
         actions={
           <ActionPanel title="Actions">
             <Action.OpenInBrowser
