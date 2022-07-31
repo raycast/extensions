@@ -1,7 +1,7 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { PackageResult } from "./components/PackageResult";
-import type { Subscription } from "./types";
+import type { Preferences, Subscription } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -18,8 +18,4 @@ export default function Command() {
       </List.Section>
     </List>
   );
-}
-
-interface Preferences {
-  token: string;
 }

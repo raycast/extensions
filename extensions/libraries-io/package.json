@@ -54,7 +54,7 @@
     "@raycast/api": "^1.38.0",
     "@raycast/utils": "^1.0.6",
     "@types/semver": "^7.3.10",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

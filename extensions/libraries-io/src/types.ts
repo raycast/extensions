@@ -44,3 +44,7 @@ export interface Platform {
 export interface Subscription {
   project: Package;
 }
+
+export interface Preferences {
+  token: string;
+}
