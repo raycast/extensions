@@ -27,6 +27,7 @@ export interface Dependency {
   requirements: string;
   latest: string;
   deprecated: boolean;
+  outdated: boolean;
   kind: string;
 }
 

@@ -24,8 +24,16 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
               icon={Icon.Box}
               accessories={[
                 {
+                  text: dependency.requirements,
+                  tooltip: 'Version Requirement',
+                },
+                {
+                  icon: dependency.deprecated || dependency.outdated ? Icon.Warning : null,
+                  tooltip: dependency.deprecated ? "This package has been marked as deprecated" : dependency.outdated ? 'Out of date version' : null,
+                },
+                {
                   icon: dependency.kind === "runtime" ? Icon.Cog : Icon.Hammer,
-                  tooltip: dependency.kind,
+                  tooltip: `Dependency Type: ${dependency.kind}`,
                 },
               ]}
             />
