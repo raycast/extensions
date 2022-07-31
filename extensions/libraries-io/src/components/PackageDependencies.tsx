@@ -25,11 +25,15 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
               accessories={[
                 {
                   text: dependency.requirements,
-                  tooltip: 'Version Requirement',
+                  tooltip: "Version Requirement",
                 },
                 {
                   icon: dependency.deprecated || dependency.outdated ? Icon.Warning : null,
-                  tooltip: dependency.deprecated ? "This package has been marked as deprecated" : dependency.outdated ? 'Out of date version' : null,
+                  tooltip: dependency.deprecated
+                    ? "This package has been marked as deprecated"
+                    : dependency.outdated
+                    ? "Out of date version"
+                    : null,
                 },
                 {
                   icon: dependency.kind === "runtime" ? Icon.Cog : Icon.Hammer,
@@ -38,7 +42,11 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={dependency.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
+                  <Action.CopyToClipboard
+                    content={dependency.name}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    title="Copy Package Name"
+                  />
                 </ActionPanel>
               }
             />

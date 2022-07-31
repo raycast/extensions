@@ -4,7 +4,6 @@ import { PackageDependencies } from "./PackageDependencies";
 import { PackageVersions } from "./PackageVersions";
 
 export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
-
   return (
     <List.Item
       title={searchResult.name}
@@ -58,7 +57,11 @@ export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
               shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
               url={searchResult.latest_download_url}
             />
-            <Action.CopyToClipboard content={searchResult.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
+            <Action.CopyToClipboard
+              content={searchResult.name}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              title="Copy Package Name"
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

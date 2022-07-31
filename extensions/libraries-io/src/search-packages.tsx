@@ -6,10 +6,13 @@ import type { Package, PackageSearchArguments } from "./types";
 
 export default function Command(props: { arguments: PackageSearchArguments }) {
   const [searchText, setSearchText] = useState("");
-  const { platform } = props.arguments
-  const { data, isLoading } = useFetch<Package[]>(`https://libraries.io/api/search?q=${searchText}&platforms=${platform}`, {
-    execute: searchText !== "",
-  });
+  const { platform } = props.arguments;
+  const { data, isLoading } = useFetch<Package[]>(
+    `https://libraries.io/api/search?q=${searchText}&platforms=${platform}`,
+    {
+      execute: searchText !== "",
+    }
+  );
 
   return (
     <List

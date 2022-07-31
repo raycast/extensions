@@ -11,7 +11,12 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
     <List navigationTitle="Versions">
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
         {searchResult.versions
-          .sort((versionA, versionB) => compare(coerce(versionA.number)?.version || versionA.number, coerce(versionB.number)?.version || versionB.number))
+          .sort((versionA, versionB) =>
+            compare(
+              coerce(versionA.number)?.version || versionA.number,
+              coerce(versionB.number)?.version || versionB.number
+            )
+          )
           .map((version) => (
             <List.Item
               key={version.number}
@@ -31,7 +36,11 @@ export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={version.number} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Version Number" />
+                  <Action.CopyToClipboard
+                    content={version.number}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    title="Copy Version Number"
+                  />
                 </ActionPanel>
               }
             />
