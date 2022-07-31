@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-31 23:57
+ * @lastEditTime: 2022-08-01 01:06
  * @fileName: changelog.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,7 +31,7 @@ export const changelog = `
 
 ### 💎 Improvements
 
-- Added show open in eudic preference option, default is true.
+- Added show open in eudic preference switch option, default is true.
 - Improved the handling of DeepL request errors, and added a toast for exceeding the translation quota limit.
 
 ### 🐞 Fixes

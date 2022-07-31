@@ -4,7 +4,7 @@
 
 ### 💎 Improvements
 
-- Added show open in eudic preference option, default is true.
+- Added show open in eudic preference switch option, default is true.
 - Improved the handling of DeepL request errors, and added a toast for exceeding the translation quota limit.
 
 ### 🐞 Fixes
@@ -64,13 +64,6 @@
 - Improved the response speed of querying selected text.
 - Improved the response speed and accuracy of automatic language detection.
 
-### ✅ Recent Updates
-
-- Added Tencent text translation.
-- Added Tencent language detection.
-- Supported automatically play the voice of word after querying, need to enable in settings.
-- Supported Youdao TTS.
-
 ## [v1.1.0] - 2022-06-20
 
 ### ✨ New
@@ -101,6 +94,6 @@
 - Make full use of the Youdao dictionary API: provided word-rich query information, including basic translation, pronunciation, types of exams that include the word, multiple parts of speech and explanations, forms and tenses, web translations, and web phrases.
 
 - Supported automatic query clipboard text, enabled by default.
-- Supported to open the [Eudic Application](https://www.eudic.net/v4/en/app/eudic) to quickly look up a word, if installed on your Mac.
+- Supported to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 
 ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/AhuT70-1658411805.jpg)
