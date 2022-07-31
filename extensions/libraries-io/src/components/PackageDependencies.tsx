@@ -15,6 +15,7 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
     <List navigationTitle="Dependencies" isLoading={isLoading}>
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
         {data?.dependencies
+          .sort((a, b) => a.name.localeCompare(b.name))
           .sort((a, b) => b.kind.localeCompare(a.kind))
           .map((dependency) => (
             <List.Item

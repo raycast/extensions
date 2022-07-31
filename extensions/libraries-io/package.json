@@ -37,24 +37,23 @@
       "title": "Show Subscriptions",
       "subtitle": "Libraries.io",
       "description": "Show packages you are watching",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "token",
-      "description": "The private token used to access your Libraries.io data",
-      "placeholder": "https://libraries.io/api",
-      "type": "password",
-      "required": false,
-      "title": "Libraries.io API Key"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "token",
+          "description": "The private token used to access your Libraries.io data",
+          "placeholder": "https://libraries.io/api",
+          "type": "password",
+          "required": true,
+          "title": "Libraries.io API Key"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.0",
     "@raycast/utils": "^1.0.6",
-    "@types/semver": "^7.3.10",
-    "node-fetch": "^3.2.10"
+    "@types/semver": "^7.3.10"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

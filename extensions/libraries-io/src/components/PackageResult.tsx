@@ -1,20 +1,7 @@
-import { ActionPanel, Action, environment, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import type { Package, Preferences } from ".././types";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import type { Package } from ".././types";
 import { PackageDependencies } from "./PackageDependencies";
 import { PackageVersions } from "./PackageVersions";
-
-if (environment.commandName === 'show-subscriptions') {
-    var title = "Unsubscribe from Package";
-    var icon = Icon.BellDisabled;
-    var shortcut = "u";
-    var action = unsubscribeFromPackage;
-  } else {
-    var title = "Subscribe to Package";
-    var icon = Icon.Bell;
-    var shortcut = "s'"
-    var action = subscribeToPackage;
-  }
 
 export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
 
@@ -65,14 +52,6 @@ export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
-            <Action
-              title={title}
-              icon={icon}
-              shortcut={{ modifiers: ["cmd", "opt"], key: environment.commandName === 'show-subscriptions' ? 'u' : 's' }}
-              onAction={() => {
-                action(searchResult.platform, searchResult.name);
-              }}
-            />
             <Action.CopyToClipboard content={searchResult.name} shortcut={{ modifiers: ["cmd"], key: "." }} title="Copy Package Name" />
           </ActionPanel.Section>
         </ActionPanel>
@@ -80,39 +59,3 @@ export const PackageResult = ({ searchResult }: { searchResult: Package }) => {
     />
   );
 };
-
-async function subscribeToPackage(platform:string, name:string): Promise<void> {
-  const preferences = getPreferenceValues<Preferences>();
-  const response = await fetch(`https://libraries.io/api/subscriptions/${platform}/${name}?api_key=${preferences.token}`, {
-    method: "POST",
-  });
-
-  const json = (await response.json()) as
-    | { error: string };
-
-  if (response.ok) {
-    await showToast({ title: "Subscribed", message: "Now subscribed to package updates" });
-  } else {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Subscription Failed",
-      message: json.error,
-    });
-  }
-}
-
-async function unsubscribeFromPackage(platform:string, name:string): Promise<void> {
-  const preferences = getPreferenceValues<Preferences>();
-  const response = await fetch(`https://libraries.io/api/subscriptions/${platform}/${name}?api_key=${preferences.token}`, {
-    method: "DELETE",
-  });
-
-  if (response.ok) {
-    await showToast({ title: "Unsubscribed", message: "Now unsubscribed from package updates" });
-  } else {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Unsubscribe Failed",
-    });
-  }
-}
