@@ -65,7 +65,7 @@ export default function Command() {
       throttle
     >
       {filteredSearchedResults && filteredSearchedResults.length > 0 && (
-        <List.Section title="Search History">
+        <List.Section title="Searched">
           {filteredSearchedResults.map((result, i) => (
             <SearchListItem key={i} result={result} onVisit={markAsSearched} />
           ))}
