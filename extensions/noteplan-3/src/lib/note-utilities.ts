@@ -1,3 +1,4 @@
+import { getPreferences } from "./preferences";
 import { parse as parsePath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
@@ -6,17 +7,12 @@ import { sync as find } from "fast-glob";
 import { enGB } from "date-fns/locale";
 import { capitalize } from "lodash";
 import { Icon } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
 
 const NOTE_PLAN_URI = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
 
 export enum NoteType {
   Calendar = "calendar",
   Project = "project",
-}
-
-interface Preferences {
-  extension: string;
 }
 
 export interface NoteEntry {
@@ -30,10 +26,8 @@ export interface Note {
   content: string;
 }
 
-export const preferences = getPreferenceValues<Preferences>();
-
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${preferences.extension}`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${getPreferences.extension}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
