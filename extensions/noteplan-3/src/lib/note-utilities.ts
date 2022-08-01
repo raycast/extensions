@@ -27,7 +27,7 @@ export interface Note {
 }
 
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${getPreferences.extension}`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${getPreferences.fileExtension}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");

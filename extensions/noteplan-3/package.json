@@ -31,12 +31,12 @@
   ],
   "preferences": [
     {
-      "name": "extension",
+      "name": "fileExtension",
       "type": "textfield",
       "required": false,
-      "title": "Note extension",
+      "title": "File Extension",
       "default": "txt",
-      "description": "The extension you use for notes"
+      "description": "The file extension you use for notes"
     }
   ],
   "dependencies": {
