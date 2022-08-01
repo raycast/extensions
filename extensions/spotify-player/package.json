@@ -103,13 +103,6 @@
       "mode": "view"
     },
     {
-      "name": "searchPlaylists",
-      "title": "Search Playlists",
-      "subtitle": "Spotify",
-      "description": "Search & Play playlists in Spotify",
-      "mode": "view"
-    },
-    {
       "name": "likeCurrentSong",
       "subtitle": "Spotify",
       "title": "Like Current Song",
