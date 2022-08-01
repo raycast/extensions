@@ -16,8 +16,14 @@ export default function Command() {
     const cumulative_total = today.cummulative_total;
     const todayText = getDuration(cumulative_total.seconds);
 
-    return cumulative_total.seconds === 0 && showAsksSentence ? "Are we coding today?" : `Today: ${todayText}`;
+    return cumulative_total.seconds === 0 && showAsksSentence ? undefined : `Today: ${todayText}`;
   }
 
-  return <MenuBarExtra icon="../assets/icon.png" title={getTitle()} isLoading={todaySummary.isLoading} />;
+  return (
+    <MenuBarExtra
+      icon="../assets/icon.png"
+      title={getTitle() || "Are we coding today?"}
+      isLoading={todaySummary.isLoading}
+    />
+  );
 }
