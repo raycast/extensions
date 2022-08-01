@@ -20,6 +20,20 @@ export default function Command() {
 }
 ```
 
+It is possible to use locally stored images from e.g. the `assets` directory in markdown.
+
+#### Example
+
+```typescript
+import { Detail } from "@raycast/api";
+
+const image = `file://${join(environment.assetsPath, "image.png")}`;
+
+export default function Command() {
+  return <Detail markdown="![Image Title]({$image})" />;
+}
+```
+
 #### Props
 
 <PropsTableFromJSDoc component="Detail" />
@@ -37,6 +51,7 @@ Use it to display additional structured data about the main content shown in the
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
 const markdown = `
 # Pikachu
 
