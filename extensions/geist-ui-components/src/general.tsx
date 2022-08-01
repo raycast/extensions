@@ -17,7 +17,6 @@ const components = [
     title: "Icons",
     url: "https://geist-ui.dev/en-us/components/icons",
   },
-
 ];
 
 export default function Command() {

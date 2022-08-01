@@ -47,7 +47,7 @@ const components = [
   },
   {
     title: "Tag",
-    url: "https://geist-ui.dev/en-us/components/tag"
+    url: "https://geist-ui.dev/en-us/components/tag",
   },
   {
     title: "Tooltip",

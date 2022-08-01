@@ -15,7 +15,7 @@ const components = [
   },
   {
     title: "Input",
-    url: "https://geist-ui.dev/en-us/components/input"
+    url: "https://geist-ui.dev/en-us/components/input",
   },
   {
     title: "Radio",

@@ -9,7 +9,6 @@ const components = [
     title: "Snippet",
     url: "https://geist-ui.dev/en-us/components/snippet",
   },
-
 ];
 
 export default function Command() {
