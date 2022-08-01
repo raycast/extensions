@@ -131,6 +131,11 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "window") {
+      const source = state.state === "on" ? "cover-open.png" : "cover-close.png"; // window icons are the same as cover icons in HA
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -369,6 +374,15 @@ export function StateListItem(props: { state: State }): JSX.Element {
             }
             case "off": {
               return "Closed";
+            }
+          }
+        } else if (dc === "window") {
+          switch (state.state) {
+            case "on": {
+              return "open";
+            }
+            case "off": {
+              return "closed";
             }
           }
         }

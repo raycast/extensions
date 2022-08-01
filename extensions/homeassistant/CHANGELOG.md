@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Window Support] - 2022-08-01
+- Add icon and state support for window device class
+
 ## [Fan entity support] - 2022-06-18
 - Adds support for Fan entities
 
