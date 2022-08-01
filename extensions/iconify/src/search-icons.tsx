@@ -1,8 +1,17 @@
-import { Action, ActionPanel, Color, List } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Color,
+  List,
+  getPreferenceValues,
+} from '@raycast/api';
 import { useState } from 'react';
 
 import Service, { Icon } from './service';
-import { toBase64, toSvg } from './utils';
+import { toDataURI, toSvg, toURL } from './utils';
+
+const { primaryAction } =
+  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
 
 const service = new Service();
 
@@ -19,8 +28,8 @@ function Command() {
     setLoading(false);
   }
 
-  function getEmptyViewDescription(query: string) {
-    if (query.length === 0) {
+  function getEmptyViewDescription(query: string, isLoading: boolean) {
+    if (query.length === 0 || isLoading) {
       return 'Type something to get started';
     }
     return 'Try another query';
@@ -30,16 +39,26 @@ function Command() {
     <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
       <List.EmptyView
         title="No results"
-        description={getEmptyViewDescription(query)}
+        description={getEmptyViewDescription(query, isLoading)}
       />
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
         const svgIcon = toSvg(body, width, height);
-        const base64Icon = toBase64(svgIcon);
+        const dataURIIcon = toDataURI(svgIcon);
+
+        const paste = <Action.Paste title="Paste SVG" content={svgIcon} />;
+        const copy = (
+          <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
+        );
         return (
           <List.Item
-            icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
+            icon={{
+              source: dataURIIcon,
+              tintColor: body.includes('currentColor')
+                ? Color.PrimaryText // Monochrome icon
+                : null,
+            }}
             key={`${setId}:${id}`}
             title={id}
             accessories={[
@@ -49,7 +68,25 @@ function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={svgIcon} />
+                {primaryAction === 'paste' ? (
+                  <>
+                    {paste}
+                    {copy}
+                  </>
+                ) : (
+                  <>
+                    {copy}
+                    {paste}
+                  </>
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={`${setId}:${id}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={toURL(setId, id)}
+                />
               </ActionPanel>
             }
           />
