@@ -10,15 +10,13 @@ export default function Command() {
 
   function getTitle(): string | undefined {
     const today = todaySummary.data;
+
     if (today === undefined) return;
 
     const cumulative_total = today.cummulative_total;
     const todayText = getDuration(cumulative_total.seconds);
-    if (cumulative_total.seconds === 0) {
-      return showAsksSentence ? "Are we coding today?" : `Today: ${todayText}`;
-    } else {
-      return todayText;
-    }
+
+    return cumulative_total.seconds === 0 && showAsksSentence ? "Are we coding today?" : `Today: ${todayText}`;
   }
 
   return <MenuBarExtra icon="../assets/icon.png" title={getTitle()} isLoading={todaySummary.isLoading} />;
