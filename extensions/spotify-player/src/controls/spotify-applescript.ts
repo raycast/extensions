@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
 import { CurrentlyPlayingTrack, Response } from "../client/interfaces";
+import { spotifyApplicationName } from "../client/utils";
 import { showNextTrackNotification, showPreviousTrackNotification } from "./trackNotification";
 
 const execp = promisify(exec);
@@ -39,19 +40,6 @@ return playerState`;
   } catch (err) {
     return SpotifyPlayingState.Stopped;
   }
-}
-
-async function spotifyApplicationName(): Promise<string | undefined> {
-  const installedApplications = await getApplications();
-  const spotifyApplication = installedApplications.find((a) => a.bundleId?.includes("spotify"));
-
-  if (spotifyApplication) {
-    return spotifyApplication.name;
-  }
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Check if you have Spotify app is installed on your Mac",
-  });
 }
 
 export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {

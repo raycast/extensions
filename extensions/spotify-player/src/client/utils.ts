@@ -10,6 +10,20 @@ export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
   return `${track.artists[0].name} – ${track.name}`;
 }
 
+export async function spotifyApplicationName(): Promise<string> {
+  const installedApplications = await getApplications();
+  const spotifyApplication = installedApplications.find((a) => a.bundleId?.includes("spotify"));
+
+  if (spotifyApplication) {
+    return spotifyApplication.name;
+  }
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Check if you have Spotify app is installed on your Mac",
+  });
+  return "Spotify";
+}
+
 export enum SpotifyPlayingState {
   Playing = "playing",
   Paused = "paused",

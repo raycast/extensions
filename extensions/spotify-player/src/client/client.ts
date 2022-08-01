@@ -4,7 +4,7 @@ import SpotifyWebApi from "spotify-web-api-node";
 import { CurrentlyPlayingTrack, Response } from "./interfaces";
 import { authorize, oauthClient } from "./oauth";
 import { runAppleScript } from "run-applescript";
-import { isSpotifyInstalled } from "./utils";
+import { isSpotifyInstalled, spotifyApplicationName } from "./utils";
 
 const debugMode = false;
 
@@ -29,50 +29,11 @@ async function authorizeIfNeeded(): Promise<void> {
 
 export const notPlayingErrorMessage = "Spotify Is Not Playing";
 
-export enum SpotifyPlayingState {
-  Playing = "playing",
-  Paused = "paused",
-  Stopped = "stopped",
-}
-
-export async function isSpotifyPlaying(): Promise<SpotifyPlayingState> {
-  const script = `
-  if application "Spotify" is not running then
-	return "stopped"
-end if
-
-property playerState : "stopped"
-
-tell application "Spotify"
-	try
-		set playerState to player state as string
-	end try
-end tell
-
-return playerState`;
-
-  try {
-    const response = await runAppleScript(script);
-    const result = response as SpotifyPlayingState;
-    return result;
-  } catch (err) {
-    return SpotifyPlayingState.Stopped;
-  }
-}
-
 export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
-  const installedApplications = await getApplications();
-  const spotifyApplication = installedApplications.find((a) => a.bundleId?.includes("spotify"));
-
-  if (!spotifyApplication) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Check if you have Spotify app installed on your Mac",
-    });
-  }
+  const spotifyName = await spotifyApplicationName();
 
   const script = `
-  if application "${spotifyApplication?.name}" is not running then
+  if application "${spotifyName}" is not running then
 	return "${notPlayingErrorMessage}"
 end if
 
