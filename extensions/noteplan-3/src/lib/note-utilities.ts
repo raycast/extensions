@@ -30,16 +30,10 @@ export interface Note {
   content: string;
 }
 
-const getPreferences = () => {
-  return getPreferenceValues<Preferences>();
-};
-
-export const notesExtension = () => {
-  return getPreferences().extension;
-};
+export const preferences = getPreferenceValues<Preferences>();
 
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${notesExtension()}`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${preferences.extension}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
