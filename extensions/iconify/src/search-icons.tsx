@@ -28,8 +28,8 @@ function Command() {
     setLoading(false);
   }
 
-  function getEmptyViewDescription(query: string) {
-    if (query.length === 0) {
+  function getEmptyViewDescription(query: string, isLoading: boolean) {
+    if (query.length === 0 || isLoading) {
       return 'Type something to get started';
     }
     return 'Try another query';
@@ -39,7 +39,7 @@ function Command() {
     <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
       <List.EmptyView
         title="No results"
-        description={getEmptyViewDescription(query)}
+        description={getEmptyViewDescription(query, isLoading)}
       />
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
