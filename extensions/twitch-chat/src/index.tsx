@@ -1,15 +1,14 @@
-import { Icon, List, getPreferenceValues, ActionPanel } from "@raycast/api";
+import { Icon, List, getPreferenceValues, ActionPanel, open, Action, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import tmi, { ChatUserstate } from "tmi.js";
 
 export default function Command() {
   const [chats, setChats] = useState<SingleChat[]>([]);
+  const client = new tmi.Client({
+    channels: [getPreferenceValues().streamName],
+  });
 
   useEffect((): void => {
-    const client = new tmi.Client({
-      channels: [getPreferenceValues().streamName],
-    });
-
     client.connect();
     client.on("chat", (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
       if (self) {
@@ -26,8 +25,24 @@ export default function Command() {
     });
   }, []);
 
+  const openPopupChat = async () => {
+    popToRoot({ clearSearchBar: true });
+    await open(`https://www.twitch.tv/popout/${getPreferenceValues().streamName}/chat`);
+    client.disconnect();
+  };
+
   return (
     <List navigationTitle={`${getPreferenceValues().streamName}'s Chat`} searchBarPlaceholder="Filter users">
+      <List.Item
+        icon={Icon.Message}
+        title="Open chat in browser"
+        subtitle={`twitch.tv/${getPreferenceValues().streamName}`}
+        actions={
+          <ActionPanel>
+            <Action title="Open chat in browser" onAction={openPopupChat} icon={Icon.Message} />
+          </ActionPanel>
+        }
+      />
       {chats.map((chat: SingleChat) => {
         return (
           <List.Item
