@@ -12,7 +12,7 @@ export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
   );
 
   return (
-    <List navigationTitle="Dependencies" isLoading={isLoading}>
+    <List navigationTitle="Dependencies" isLoading={isLoading} searchBarPlaceholder="Filter dependencies...">
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
         {data?.dependencies
           .sort((a, b) => a.name.localeCompare(b.name))

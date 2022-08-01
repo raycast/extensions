@@ -8,7 +8,7 @@ interface Props {
 
 export const PackageVersions = ({ searchResult }: Props): JSX.Element => {
   return (
-    <List navigationTitle="Versions">
+    <List navigationTitle="Versions" searchBarPlaceholder="Filter versions...">
       <List.Section title={searchResult.name} subtitle={searchResult.platform}>
         {searchResult.versions
           .sort((versionA, versionB) =>
