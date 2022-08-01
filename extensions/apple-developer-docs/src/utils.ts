@@ -40,3 +40,7 @@ export const getIcon = (type: string): ImageLike => {
 
 export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export const capitalizeRecursively = (s: string) => s.split(" ").map(capitalize).join(" ");
+
+export const equals = (a: ResultLike, b: ResultLike) => {
+  return a.title === b.title && a.url === b.url;
+};
