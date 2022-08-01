@@ -1,6 +1,5 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import { State } from "../haapi";
-import { ensureCleanAccessories } from "../utils";
 
 export function EntityAttributesList(props: { state: State }): JSX.Element {
   const state = props.state;
@@ -19,11 +18,11 @@ export function EntityAttributesList(props: { state: State }): JSX.Element {
                 <Action.CopyToClipboard content={`${v}`} />
               </ActionPanel>
             }
-            accessories={ensureCleanAccessories([
+            accessories={[
               {
                 text: `${v}`,
               },
-            ])}
+            ]}
           />
         ))}
       </List.Section>

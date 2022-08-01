@@ -45,7 +45,6 @@ import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./came
 import { ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction } from "./scenes";
-import { ensureCleanAccessories } from "../utils";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
@@ -54,7 +53,7 @@ import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
-import { ShowWeatherAction, weatherConditionToIcon, weatherStatusToIcon } from "./weather";
+import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -445,11 +444,11 @@ export function StateListItem(props: { state: State }): JSX.Element {
       subtitle={subtitle(state)}
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
-      accessories={ensureCleanAccessories([
+      accessories={[
         {
           text: extraTitle(state) + stateValue(state),
         },
-      ])}
+      ]}
     />
   );
 }
