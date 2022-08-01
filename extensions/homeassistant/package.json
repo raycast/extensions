@@ -179,6 +179,13 @@
       "subtitle": "Home Assistant",
       "description": "Get Weather states of Home Assistant Entity Weather",
       "mode": "view"
+    },
+    {
+      "name": "windows",
+      "title": "Windows",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Entity with device class window",
+      "mode": "view"
     }
   ],
   "preferences": [
