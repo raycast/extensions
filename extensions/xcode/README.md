@@ -39,29 +39,3 @@ Inside the `/src` directory you will find the source files for this extension.
 | src/services   | The services providing the core functionality for a component |
 | src/shared     | Shared functions                                              |
 | src/components | The components such as List and List.Items                    |
-
-## Showcases
-
-### Search Recent Projects
-
-![search-recentt-projects](./metadata/xcode-1.png)
-
-### Manage Simulators
-
-![manage-simulators](./metadata/xcode-2.png)
-
-### Create Swift Package
-
-![create-swift-package](./metadata/xcode-3.png)
-
-### Xcode Releases
-
-![xcode-releases](./metadata/xcode-4.png)
-
-### Search Apple Developer Documentation
-
-![search-apple-developer-documentation](./metadata/xcode-5.png)
-
-### Add Swift Package
-
-![add-swift-package](./metadata/xcode-6.png)
