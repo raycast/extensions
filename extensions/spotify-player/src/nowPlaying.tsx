@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
 import { CurrentlyPlayingTrack } from "./client/interfaces";
+import { isAuthorized } from "./client/oauth";
 import { isSpotifyInstalled, spotifyPlayingState, SpotifyPlayingState } from "./client/utils";
 import { currentPlayingTrack, nextTrack, pause, play, previousTrack } from "./controls/spotify-applescript";
 
@@ -23,15 +24,21 @@ interface State {
   currentlyPlayingTrack?: CurrentlyPlayingTrack;
   spotifyInstalled?: boolean;
   playingState: SpotifyPlayingState;
+  isAuthorized: boolean;
 }
 
 export default function Main() {
-  const [state, setState] = useState<State>({ isLoading: true, playingState: SpotifyPlayingState.Stopped });
+  const [state, setState] = useState<State>({
+    isLoading: true,
+    playingState: SpotifyPlayingState.Stopped,
+    isAuthorized: false,
+  });
 
   async function updatePlayingTrack() {
     const spotifyInstalled = await isSpotifyInstalled();
     const playingState = await spotifyPlayingState();
-    setState((prevState) => ({ ...prevState, spotifyInstalled, playingState }));
+    const authorized = await isAuthorized();
+    setState((prevState) => ({ ...prevState, spotifyInstalled, playingState, isAuthorized: authorized }));
     const response = await currentPlayingTrack();
 
     let newSubtitle: string | undefined;
@@ -120,33 +127,42 @@ export default function Main() {
               await updatePlayingTrack();
             }}
           />
-          <MenuBarExtra.Item
-            title="Start Radio"
-            icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
-            onAction={async () => {
-              if (state.currentlyPlayingTrack && state.currentlyPlayingTrack.id) {
-                const trackId = state.currentlyPlayingTrack.id.replace("spotify:track:", "");
-                await startPlaySimilar(trackId);
-                showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
-              }
-            }}
-          />
-          <MenuBarExtra.Separator />
-          <MenuBarExtra.Item
-            icon={Icon.Heart}
-            title="Like"
-            onAction={async () => {
-              try {
-                const response = await likeCurrentlyPlayingTrack();
-                if (response?.result) {
-                  const title = `${response.result.artist} – ${response.result.name}`;
-                  showHUD(`💚 ${title}`);
+          {state.isAuthorized && (
+            <MenuBarExtra.Item
+              title="Start Radio"
+              tooltip="Starts playing Radio for currently playing song"
+              icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
+              onAction={async () => {
+                if (state.currentlyPlayingTrack && state.currentlyPlayingTrack.id) {
+                  const trackId = state.currentlyPlayingTrack.id.replace("spotify:track:", "");
+                  await startPlaySimilar(trackId);
+                  showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
                 }
-              } catch (err) {
-                console.error(err);
-              }
-            }}
-          />
+              }}
+            />
+          )}
+
+          {state.isAuthorized && (
+            <>
+              <MenuBarExtra.Separator />
+              <MenuBarExtra.Item
+                icon={Icon.Heart}
+                title="Like"
+                tooltip="Likes the currently playing song"
+                onAction={async () => {
+                  try {
+                    const response = await likeCurrentlyPlayingTrack();
+                    if (response?.result) {
+                      const title = `${response.result.artist} – ${response.result.name}`;
+                      showHUD(`💚 ${title}`);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+              />
+            </>
+          )}
           <MenuBarExtra.Item
             key={state.currentlyPlayingTrack.id}
             icon={"icon.png"}
@@ -157,12 +173,23 @@ export default function Main() {
           <MenuBarExtra.Item
             title="Copy Song Link"
             icon={Icon.Link}
+            tooltip="Copies the link for currently playing song"
             onAction={async () => {
               const trackId = state.currentlyPlayingTrack?.id.replace("spotify:track:", "");
               Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
               showHUD(`♫ Copied URL – ${trackTitle}`);
             }}
           />
+          {!state.isAuthorized && (
+            <>
+              <MenuBarExtra.Separator />
+              <MenuBarExtra.Item
+                icon={Icon.PersonCircle}
+                title="Signed Out"
+                tooltip="Open any Spotify view command and authorize to get more features here!"
+              />
+            </>
+          )}
         </>
       )}
     </MenuBarExtra>
