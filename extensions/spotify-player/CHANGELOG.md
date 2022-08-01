@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-08-01
+
+- Introduce new command "Spotify Player" with live interface for viewing the current track
+- Introduce new command "Featured Playlists"
+- Introduce new command "Browse All"
+
 ## [Features & Bug Fixes] - 2022-07-27
 
 - Added Play Shuffled actions to `Search Playlist`, `Search Albums` commands
