@@ -485,7 +485,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopCover(props.state.entity_id)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attribtues">
@@ -611,7 +611,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopMedia(entityID)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
             <Action
               title="Next"
@@ -631,20 +631,20 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
               onAction={async () => await ha.volumeUpMedia(entityID)}
-              icon={{ source: Icon.SpeakerArrowUp, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerUp, tintColor: Color.PrimaryText }}
             />
             <Action
               title="Volume Down"
               shortcut={{ modifiers: ["cmd"], key: "-" }}
               onAction={async () => await ha.volumeDownMedia(entityID)}
-              icon={{ source: Icon.SpeakerArrowDown, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerDown, tintColor: Color.PrimaryText }}
             />
             <SelectVolumeAction state={state} />
             <Action
               title="Mute"
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={async () => await ha.muteMedia(entityID)}
-              icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerOff, tintColor: Color.PrimaryText }}
             />
             <SelectSourceAction state={state} />
           </ActionPanel.Section>
