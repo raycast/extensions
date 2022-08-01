@@ -28,26 +28,28 @@ interface State {
 export default function Main() {
   const [state, setState] = useState<State>({ isLoading: true, playingState: SpotifyPlayingState.Stopped });
 
-  useEffect(() => {
-    async function updatePlayingTrack() {
-      const spotifyInstalled = await isSpotifyInstalled();
-      const playingState = await spotifyPlayingState();
-      setState((prevState) => ({ ...prevState, spotifyInstalled, playingState }));
-      const response = await currentPlayingTrack();
-      let newSubtitle: string | undefined;
-      if (response?.result) {
-        setState((prevState) => ({ ...prevState, currentlyPlayingTrack: response?.result }));
-        newSubtitle = `${response?.result.artist} – ${response?.result.name}`;
-      } else if (response?.error) {
-        await updateCommandMetadata({ subtitle: undefined });
-        if (environment.launchType != LaunchType.Background) {
-          showToast(Toast.Style.Failure, response.error);
-        }
-      }
+  async function updatePlayingTrack() {
+    const spotifyInstalled = await isSpotifyInstalled();
+    const playingState = await spotifyPlayingState();
+    setState((prevState) => ({ ...prevState, spotifyInstalled, playingState }));
+    const response = await currentPlayingTrack();
 
-      await updateCommandMetadata({ subtitle: newSubtitle });
-      setState((prevState) => ({ ...prevState, isLoading: false }));
+    let newSubtitle: string | undefined;
+    if (response?.result) {
+      setState((prevState) => ({ ...prevState, currentlyPlayingTrack: response?.result }));
+      newSubtitle = `${response?.result.artist} – ${response?.result.name}`;
+    } else if (response?.error) {
+      await updateCommandMetadata({ subtitle: undefined });
+      if (environment.launchType != LaunchType.Background) {
+        showToast(Toast.Style.Failure, response.error);
+      }
     }
+
+    await updateCommandMetadata({ subtitle: newSubtitle });
+    setState((prevState) => ({ ...prevState, isLoading: false }));
+  }
+
+  useEffect(() => {
     updatePlayingTrack();
   }, []);
 
@@ -102,8 +104,22 @@ export default function Main() {
               await (state.playingState == SpotifyPlayingState.Playing ? pause() : play());
             }}
           />
-          <MenuBarExtra.Item icon={Icon.Forward} title={"Next Track"} onAction={() => nextTrack()} />
-          <MenuBarExtra.Item icon={Icon.Rewind} title={"Previous Track"} onAction={() => previousTrack()} />
+          <MenuBarExtra.Item
+            icon={Icon.Forward}
+            title={"Next Track"}
+            onAction={async () => {
+              await nextTrack();
+              await updatePlayingTrack();
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={Icon.Rewind}
+            title={"Previous Track"}
+            onAction={async () => {
+              await previousTrack();
+              await updatePlayingTrack();
+            }}
+          />
           <MenuBarExtra.Item
             title="Start Radio"
             icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
