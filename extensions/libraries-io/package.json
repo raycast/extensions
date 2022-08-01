@@ -26,10 +26,10 @@
       ]
     },
     {
-      "name": "search-platforms",
-      "title": "Search Platforms",
+      "name": "show-platforms",
+      "title": "Show Platforms",
       "subtitle": "Libraries.io",
-      "description": "Search package managers on Libraries.io",
+      "description": "Show supported package managers on Libraries.io",
       "mode": "view"
     },
     {
