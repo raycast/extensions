@@ -51,6 +51,7 @@ Use it to display additional structured data about the main content shown in the
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
 const markdown = `
 # Pikachu
 
