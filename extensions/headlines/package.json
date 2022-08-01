@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Show Headlines",
-      "subtitle": "See what's happening around you.",
+      "subtitle": "News",
       "description": "Take a glance at the top headlines and entertaintment news.",
       "mode": "view"
     }
