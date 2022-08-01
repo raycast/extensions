@@ -1,8 +1,14 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { getTrack } from "./spotify/applescript";
 import { startPlaySimilar } from "./spotify/client";
+import { isAuthorized } from "./spotify/oauth";
 
 export default async function main() {
+  const authorized = await isAuthorized();
+  if (!authorized) {
+    showHUD("⚠️ Please open any view-based command and authorize to perform the command.");
+    return;
+  }
   try {
     const track = await getTrack();
 

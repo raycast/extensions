@@ -26,6 +26,8 @@ async function authorizeIfNeeded(): Promise<void> {
   }
 }
 
+export const notPlayingErrorMessage = "Spotify Is Not Playing";
+
 export async function likeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> | undefined> {
   const isInstalled = await isSpotifyInstalled();
 

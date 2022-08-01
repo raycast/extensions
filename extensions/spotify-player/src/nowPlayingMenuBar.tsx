@@ -17,11 +17,13 @@ import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import { isSpotifyInstalled } from "./utils";
 import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
+import { isAuthorized } from "./spotify/oauth";
 
 export default function NowPlayingMenuBar() {
   const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | undefined>();
   const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | undefined>();
   const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | undefined>();
+  const [authorized, setAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +34,8 @@ export default function NowPlayingMenuBar() {
         isInstalled = await isSpotifyInstalled();
         setSpotifyInstalled(await isSpotifyInstalled());
       }
+
+      setAuthorized(await isAuthorized());
 
       // If Spotify is installed then fetch the player and track state
       if (isInstalled) {
@@ -126,33 +130,39 @@ export default function NowPlayingMenuBar() {
           />
           <MenuBarExtra.Item icon={Icon.Forward} title={"Next Track"} onAction={() => nextTrack()} />
           <MenuBarExtra.Item icon={Icon.Rewind} title={"Previous Track"} onAction={() => previousTrack()} />
-          <MenuBarExtra.Item
-            title="Start Radio"
-            icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
-            onAction={async () => {
-              if (currentlyPlayingTrack && currentlyPlayingTrack.id) {
-                const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
-                await startPlaySimilar({ seed_tracks: trackId });
-                showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
-              }
-            }}
-          />
-          <MenuBarExtra.Separator />
-          <MenuBarExtra.Item
-            icon={Icon.Heart}
-            title="Like"
-            onAction={async () => {
-              try {
-                const response = await likeCurrentlyPlayingTrack();
-                if (response?.result) {
-                  const title = `${response.result.artist} – ${response.result.name}`;
-                  showHUD(`💚 ${title}`);
+          {authorized && (
+            <MenuBarExtra.Item
+              title="Start Radio"
+              icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
+              onAction={async () => {
+                if (currentlyPlayingTrack && currentlyPlayingTrack.id) {
+                  const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
+                  await startPlaySimilar({ seed_tracks: trackId });
+                  showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
                 }
-              } catch (err) {
-                console.error(err);
-              }
-            }}
-          />
+              }}
+            />
+          )}
+          {authorized && (
+            <>
+              <MenuBarExtra.Separator />
+              <MenuBarExtra.Item
+                icon={Icon.Heart}
+                title="Like"
+                onAction={async () => {
+                  try {
+                    const response = await likeCurrentlyPlayingTrack();
+                    if (response?.result) {
+                      const title = `${response.result.artist} – ${response.result.name}`;
+                      showHUD(`💚 ${title}`);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+              />
+            </>
+          )}
           <MenuBarExtra.Item
             key={currentlyPlayingTrack?.id}
             icon={"icon.png"}
@@ -169,6 +179,16 @@ export default function NowPlayingMenuBar() {
               showHUD(`♫ Copied URL – ${trackTitle}`);
             }}
           />
+          {!authorized && (
+            <>
+              <MenuBarExtra.Separator />
+              <MenuBarExtra.Item
+                icon={Icon.PersonCircle}
+                title="Signed Out"
+                tooltip="Open any Spotify view command and authorize to get more features here!"
+              />
+            </>
+          )}
         </>
       )}
     </MenuBarExtra>

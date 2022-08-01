@@ -1,7 +1,7 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import scripts from "./applescript-scripts";
 import { SpotifyState, TrackInfo } from "./types";
+import { spotifyApplicationName } from "../utils";
 
 export type SpotifyPlayingState = "playing" | "paused" | "stopped";
 
@@ -111,18 +111,4 @@ export async function buildScriptEnsuringSpotifyIsRunning(commandsToRunAfterSpot
       end if
       ${commandsToRunAfterSpotifyIsRunning}
     end tell`;
-}
-
-async function spotifyApplicationName(): Promise<string> {
-  const installedApplications = await getApplications();
-  const spotifyApplication = installedApplications.find((a) => a.bundleId?.includes("spotify"));
-
-  if (spotifyApplication) {
-    return spotifyApplication.name;
-  }
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Check if you have Spotify app is installed on your Mac",
-  });
-  return "Spotify";
 }
