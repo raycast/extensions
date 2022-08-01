@@ -20,7 +20,7 @@ export function ensureCleanAccessories(
     }
     const result: List.Item.Accessory[] = [];
     for (const a of accessories) {
-      if (a.icon || a.text) {
+      if (a.icon) {
         result.push(a);
       }
     }
