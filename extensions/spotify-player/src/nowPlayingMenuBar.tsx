@@ -41,8 +41,11 @@ export default function NowPlayingMenuBar() {
           setCurrentSpotifyState(state);
           setCurrentlyPlayingTrack(track);
 
-          const title = `${track.artist} – ${track.name}`;
-          await updateCommandMetadata({ subtitle: `${title}` });
+          let newSubtitle: string | undefined;
+          if (track.id) {
+            newSubtitle = `${track.artist} – ${track.name}`;
+          }
+          await updateCommandMetadata({ subtitle: newSubtitle });
         } catch (err) {
           await updateCommandMetadata({ subtitle: undefined });
           if (environment.launchType != LaunchType.Background) {

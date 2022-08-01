@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 
 export default {
-  state: `tell application "Spotify"
+  state: (applicationName: string) => `tell application "${applicationName}"
   set cstate to "{"
   set cstate to cstate & "\\"track_id\\": \\"" & current track's id & "\\""
   set cstate to cstate & ",\\"volume\\": " & sound volume
@@ -11,7 +11,7 @@ export default {
 
   return cstate
 end tell`,
-  track: `on escape_quotes(string_to_escape)
+  track: (applicationName: string) => `on escape_quotes(string_to_escape)
   set AppleScript's text item delimiters to the "\\""
   set the item_list to every text item of string_to_escape
   set AppleScript's text item delimiters to the "\\\\\\""
@@ -20,7 +20,7 @@ end tell`,
   return string_to_escape
 end escape_quotes
 
-tell application "Spotify"
+tell application "${applicationName}"
   set ctrack to "{"
   set ctrack to ctrack & "\\"artist\\": \\"" & my escape_quotes(current track's artist) & "\\""
   set ctrack to ctrack & ",\\"album\\": \\"" & my escape_quotes(current track's album) & "\\""
@@ -36,7 +36,7 @@ tell application "Spotify"
   set ctrack to ctrack & ",\\"spotify_url\\": \\"" & current track's spotify url & "\\""
   set ctrack to ctrack & "}"
 end tell`,
-  volumeUp: `on min(x, y)
+  volumeUp: (applicationName: string) => `on min(x, y)
   if x ≤ y then
     return x
   else
@@ -44,8 +44,8 @@ end tell`,
   end if
 end min
 
-tell application "Spotify" to set sound volume to (my min(sound volume + 10, 100))`,
-  volumeDown: `on max(x, y)
+tell application "${applicationName}" to set sound volume to (my min(sound volume + 10, 100))`,
+  volumeDown: (applicationName: string) => `on max(x, y)
   if x ≤ y then
     return y
   else
@@ -53,30 +53,35 @@ tell application "Spotify" to set sound volume to (my min(sound volume + 10, 100
   end if
 end max
 
-tell application "Spotify" to set sound volume to (my max(sound volume - 10, 0))`,
-  setVolume: (volume: number) => `tell application "Spotify" to set sound volume to ${volume}`,
-  play: `tell application "Spotify" to play`,
-  playTrack: (trackId: string) => `tell application "Spotify" to play track "${trackId}"`,
-  playTrackInContext: (trackId: string, context: string) =>
-    `tell application "Spotify" to play track "${trackId}" in context "${context}"`,
-  playPause: `tell application "Spotify" to playpause`,
-  pause: `tell application "Spotify" to pause`,
-  next: `tell application "Spotify" to next track`,
-  previous: `tell application "Spotify" to previous track`,
-  jumpTo: (position: number) => `tell application "Spotify" to set player position to ${position}`,
-  isRunning: `get running of application "Spotify"`,
-  isRepeating: `tell application "Spotify" to return repeating`,
-  isShuffling: `tell application "Spotify" to return shuffling`,
-  setRepeating: (repeating: boolean) => `tell application "Spotify" to set repeating to ${repeating}`,
-  setShuffling: (shuffling: boolean) => `tell application "Spotify" to set shuffling to ${shuffling}`,
-  toggleRepeating: `tell application "Spotify"
+tell application "${applicationName}" to set sound volume to (my max(sound volume - 10, 0))`,
+  setVolume: (applicationName: string, volume: number) =>
+    `tell application "${applicationName}" to set sound volume to ${volume}`,
+  play: `play`,
+  playTrack: (applicationName: string, trackId: string) =>
+    `tell application "${applicationName}" to play track "${trackId}"`,
+  playTrackInContext: (applicationName: string, trackId: string, context: string) =>
+    `tell application "${applicationName}" to play track "${trackId}" in context "${context}"`,
+  playPause: `playpause`,
+  pause: `pause`,
+  next: `next track`,
+  previous: `previous track`,
+  jumpTo: (applicationName: string, position: number) =>
+    `tell application "${applicationName}" to set player position to ${position}`,
+  isRunning: (applicationName: string) => `get running of application "${applicationName}"`,
+  isRepeating: (applicationName: string) => `tell application "${applicationName}" to return repeating`,
+  isShuffling: (applicationName: string) => `tell application "${applicationName}" to return shuffling`,
+  setRepeating: (applicationName: string, repeating: boolean) =>
+    `tell application "${applicationName}" to set repeating to ${repeating}`,
+  setShuffling: (applicationName: string, shuffling: boolean) =>
+    `tell application "${applicationName}" to set shuffling to ${shuffling}`,
+  toggleRepeating: (applicationName: string) => `tell application "${applicationName}"
   if repeating then
     set repeating to false
   else
     set repeating to true
   end if
 end tell`,
-  toggleShuffling: `tell application "Spotify"
+  toggleShuffling: (applicationName: string) => `tell application "${applicationName}"
   if shuffling then
     set shuffling to false
   else

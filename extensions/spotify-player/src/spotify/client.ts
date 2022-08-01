@@ -1,4 +1,4 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
