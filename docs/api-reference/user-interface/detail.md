@@ -20,6 +20,20 @@ export default function Command() {
 }
 ```
 
+It is possible to use locally stored images from e.g. the `assets` directory in markdown.
+
+#### Example
+
+```typescript
+import { Detail } from "@raycast/api";
+
+const image = `file://${join(environment.assetsPath, "image.png")}`;
+
+export default function Command() {
+  return <Detail markdown="![Image Title]({$image})" />;
+}
+```
+
 #### Props
 
 <PropsTableFromJSDoc component="Detail" />
