@@ -5,6 +5,13 @@ import { execAsync } from "../shared/exec-async";
  */
 export class XcodeService {
   /**
+   * Xcode application bundle identifier
+   */
+  static get bundleIdentifier(): string {
+    return "com.apple.dt.Xcode";
+  }
+
+  /**
    * Retrieve boolean if Xcode is currently running
    */
   static async isXcodeRunning(): Promise<boolean> {
@@ -27,7 +34,7 @@ export class XcodeService {
       [
         // Open Xcode in background (-j)
         // via bundle identifier (-b)
-        "open -j -b com.apple.dt.xcode",
+        `open -j -b ${this.bundleIdentifier}`,
         // Sleep for two seconds to ensure
         // the process is truly running
         "sleep 2",

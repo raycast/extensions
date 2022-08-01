@@ -2,6 +2,7 @@ import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
 import tildify from "tildify";
+import { XcodeService } from "../../services/xcode.service";
 
 /**
  * Xcode Project List Item
@@ -20,7 +21,7 @@ export function XcodeProjectListItem(props: { project: XcodeProject; actions?: J
         props.actions ?? (
           <ActionPanel>
             <Action.Open
-              application="com.apple.dt.Xcode"
+              application={XcodeService.bundleIdentifier}
               key="open-with-xcode"
               title="Open with Xcode"
               target={props.project.filePath}
