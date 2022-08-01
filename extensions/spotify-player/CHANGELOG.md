@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Bug Fixes] - 2022-08-01
+
+- Properly handled states for unauthorized state in menu bar and no-view commands
+- Added tooltips for menu bar command actions
+- Menu bar title will now be updated after performing `Next/Previous Track` actions
+
 ## [Features & Bug Fixes] - 2022-07-27
 
 - Added Play Shuffled actions to `Search Playlist`, `Search Albums` commands
