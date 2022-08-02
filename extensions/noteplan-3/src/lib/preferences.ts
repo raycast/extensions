@@ -4,4 +4,6 @@ interface Preferences {
   fileExtension: string;
 }
 
-export const getPreferences = getPreferenceValues<Preferences>();
+export const getPreferences = (): Preferences => {
+  return getPreferenceValues<Preferences>();
+};
