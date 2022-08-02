@@ -16,14 +16,6 @@ async function paste(key: string, value: string): Promise<void> {
   await closeMainWindow();
 }
 
-const Actions = ({ copy, paste, url }: { copy: () => void; paste: () => void; url?: string }): JSX.Element => (
-  <ActionPanel>
-    {url && <Action.OpenInBrowser url={url} />}
-    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copy} />
-    <Action title="Paste to Active App" icon={Icon.Document} onAction={paste} />
-  </ActionPanel>
-);
-
 export default function ({ entry }: { entry: string }): JSX.Element {
   const [details, setDetails] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -46,7 +38,12 @@ export default function ({ entry }: { entry: string }): JSX.Element {
           <List.Item
             title="Password"
             subtitle="*****************"
-            actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
+            actions={
+              <ActionPanel>
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
+                <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
+              </ActionPanel>
+            }
           />
         )}
 
@@ -60,11 +57,11 @@ export default function ({ entry }: { entry: string }): JSX.Element {
               title={humanize(key)}
               subtitle={value}
               actions={
-                <Actions
-                  copy={() => copy(key, value)}
-                  paste={() => paste(key, value)}
-                  url={isValidUrl(value) ? value : ""}
-                ></Actions>
+                <ActionPanel>
+                  {isValidUrl(value) && <Action.OpenInBrowser url={value} />}
+                  <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copy(key, value)} />
+                  <Action title="Paste to Active App" icon={Icon.Document} onAction={() => paste(key, value)} />
+                </ActionPanel>
               }
             />
           );
