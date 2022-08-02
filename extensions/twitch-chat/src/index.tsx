@@ -39,7 +39,7 @@ export default function Command() {
         subtitle={`twitch.tv/${getPreferenceValues().streamName}`}
         actions={
           <ActionPanel>
-            <Action title="Open chat in browser" onAction={openPopupChat} icon={Icon.Message} />
+            <Action title="Open Chat in Browser" onAction={openPopupChat} icon={Icon.Message} />
           </ActionPanel>
         }
       />
