@@ -9,6 +9,7 @@ import {
   useNavigation,
   Action,
   Toast,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState } from "react";
 import { Repository, UserDataResponse } from "./types";
@@ -20,7 +21,12 @@ import { useRepositoryReleases } from "./useRepositoryReleases";
 import { OpenInWebIDEAction } from "./website";
 import { useUserData } from "./useGithubUser";
 
+const preferences: {
+  includeForks: boolean;
+} = getPreferenceValues();
+
 export default function Command() {
+  console.log(preferences);
   const [searchText, setSearchText] = useState<string>();
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [debouncedSearchText] = useDebounce(searchText, 200);
@@ -28,8 +34,8 @@ export default function Command() {
     data: repositories,
     error: searchRepositoriesError,
     isLoading: isLoadingRepositories,
-  } = useRepositories(debouncedSearchText, searchFilter);
-  const { data: userData, error: fetchUserDataError } = useUserData();
+  } = useRepositories(`${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`);
+  const { data: viewer, error: fetchUserDataError } = useUserData();
 
   const {
     repositories: visitedRepositories,
@@ -59,20 +65,20 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={<FilterDropdown userData={userData} onFilterChange={setSearchFilter} />}
+      searchBarAccessory={<FilterDropdown viewer={viewer} onFilterChange={setSearchFilter} />}
     >
       <List.Section
         title="Visited Repositories"
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
       >
         {visitedRepositories
-          ?.filter(
-            (r) =>
-              r.nameWithOwner.includes(searchText ?? "") &&
-              r.nameWithOwner.match(
-                // Converting query filter string to regexp:
-                `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`
-              )
+          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+          .filter((r) =>
+            // Filter on dropdown selection value
+            r.nameWithOwner.match(
+              // Converting query filter string to regexp:
+              `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`
+            )
           )
           .map((repository) => (
             <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
@@ -91,31 +97,31 @@ export default function Command() {
 }
 
 function FilterDropdown({
-  userData,
+  viewer,
   onFilterChange,
 }: {
-  userData: UserDataResponse["viewer"] | undefined;
+  viewer?: UserDataResponse["viewer"];
   onFilterChange: (filter: string) => void;
 }) {
-  return (
+  return viewer ? (
     <List.Dropdown tooltip="Filter Repositories" storeValue={true} onChange={onFilterChange}>
       <List.Dropdown.Item title={"All Repositories"} value={""} />
-      {userData && (
+      {viewer && (
         <List.Dropdown.Item
           title={"My Repositories"}
-          value={`user:${userData.login} ${userData.organizations.nodes.map((org) => `org:${org.login}`).join(" ")}`}
+          value={`user:${viewer.login} ${viewer.organizations.nodes.map((org) => `org:${org.login}`).join(" ")}`}
         />
       )}
-      {userData && (
+      {viewer && (
         <List.Dropdown.Section>
-          <List.Dropdown.Item title={userData.login} value={`user:${userData.login}`} />
-          {userData.organizations.nodes.map((org) => (
+          <List.Dropdown.Item title={viewer.login} value={`user:${viewer.login}`} />
+          {viewer.organizations.nodes.map((org) => (
             <List.Dropdown.Item key={org.login} title={org.login} value={`org:${org.login}`} />
           ))}
         </List.Dropdown.Section>
       )}
     </List.Dropdown>
-  );
+  ) : null;
 }
 
 function RepositoryListItem(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
