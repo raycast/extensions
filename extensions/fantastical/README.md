@@ -63,5 +63,3 @@ If you are unsure on how to add calenders you can read more [here](https://flexi
 If you want to contribute to this extension you can fork the [GitHub repository](https://github.com/devahschaefers/fantastical-raycast) and make a pull request describing your changes.
 
 Also feel free to open an issue if you have any questions or suggestions.
-
-
