@@ -17,11 +17,20 @@
   ],
   "preferences": [
     {
-      "title": "New Tab",
+      "title": "New Tab (blank)",
+      "name": "newBlankTabURL",
+      "default": "about:blank",
+      "required": false,
+      "description": "The URL to launch when opening a profile, or a blank tab.",
+      "type": "textfield",
+      "placeholder": "cannot be empty"
+    },
+    {
+      "title": "New Tab (search)",
       "name": "newTabURL",
       "default": "https://google.com/search?q=%query%",
       "required": false,
-      "description": "The URL to launch when opening a profile. Any %query% will be replaced with the search text.",
+      "description": "The URL to launch when opening a profile with a search. The text \"%query%\" will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
     }

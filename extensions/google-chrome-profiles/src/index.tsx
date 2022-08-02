@@ -162,15 +162,16 @@ function ListBookmarks(props: { profile: Profile }) {
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
-  const newTabURL = newTabUrlWithQuery(searchText);
-
-  const tabsOnTop = [createBookmarkListItem(newTabURL, "New Tab")].concat(
+  const tabsOnTop = [
+    searchText
+      ? createBookmarkListItem(newTabUrlWithQuery(searchText), "Search")
+      : createBookmarkListItem(getPrefs().newBlankTabURL, "Blank"),
+  ].concat(
     clipboard
       ? [
-          createBookmarkListItem(
-            isValidUrl(clipboard) ? clipboard : newTabUrlWithQuery(clipboard),
-            "New Tab from Clipboard"
-          ),
+          isValidUrl(clipboard)
+            ? createBookmarkListItem(clipboard, "Open URL from Clipboard")
+            : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Use text from Clipboard"),
         ]
       : []
   );
