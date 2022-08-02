@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Updated branding & icons] - 2022-08-01
+## [Updated branding & icons] - 2022-08-02
 
 - Updated brading and icons
 - Updated Raycast API
