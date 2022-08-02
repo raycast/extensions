@@ -50,7 +50,7 @@ import {
 import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
-import { SceneActivateAction } from "./scenes";
+import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
@@ -910,6 +910,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <SceneActivateAction state={state} />
+            <SceneEditInBrowserAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
