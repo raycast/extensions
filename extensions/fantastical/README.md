@@ -14,7 +14,7 @@ This will use Fantastical natural language processing to add events. If you are 
 
 Here is an example of adding an event:
 
-<img src="metadata/add-event.png" alt="drawing" width="700"/>
+<img src="assets/add-event.png" alt="drawing" width="700"/>
 
 After adding Fantastical will open with the event in the top right corner as can be seen here:
 
@@ -30,7 +30,7 @@ This will prepend the TODO keyword in front of the text that gets sent to Fantas
 
 Here is an example of adding a reminder:
 
-<img src="metadata/add-reminder.png" alt="drawing" width="700"/>
+<img src="assets/add-reminder.png" alt="drawing" width="700"/>
 
 This too will open Fantastical with the reminder in the top right corner as can be seen here:
 
