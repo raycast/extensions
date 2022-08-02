@@ -15,7 +15,7 @@ export async function authorize() {
 
   if (existingTokens?.accessToken) {
     await oauthClient.setTokens(existingTokens);
-    return;
+    return existingTokens.accessToken;
   }
 
   const authRequest = await oauthClient.authorizationRequest({
