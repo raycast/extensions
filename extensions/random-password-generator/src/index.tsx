@@ -1,19 +1,28 @@
 import { List } from "@raycast/api";
+import { ZxcvbnResult } from "@zxcvbn-ts/core";
 import { useEffect, useState } from "react";
-import { Utils } from "./interface";
+import { PasswordItem } from "./interface";
 import { StoryListItem } from "./StoryListItem";
 import { generatePasswords } from "./util";
 
-const passwordLengths = [24, 20, 16, 12, 8];
+const passwordLengths = [128, 64, 32, 24, 20, 16, 12, 8];
+// stores whether password details should be auto calculated for different password length
+const autoCalculatePrefs = passwordLengths.reduce((acc, length) => {
+  acc[length] = length <= 24;
+  return acc;
+}, {} as Record<number, boolean>);
+
+const defaultPasswordLength = 16;
 
 interface PasswordGroup {
   title: string;
-  passwords: Utils[];
+  passwords: PasswordItem[];
 }
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
-  const [passwordLength, setPasswordLength] = useState<number>(16);
+  const [passwordLength, setPasswordLength] = useState<number>(defaultPasswordLength);
+  const [focusedPassword, setFocusedPassword] = useState<string>();
   const [showingDetails, setShowingDetails] = useState(false);
   const [passwordGroups, setPasswordGroups] = useState<PasswordGroup[]>();
 
@@ -23,12 +32,13 @@ export default function Command() {
     const passwordGroups = new Map<string, PasswordGroup>();
 
     passwords.forEach((password) => {
-      const group = passwordGroups.get(password.sectionTitle);
+      const sectionTitle = password.options.name; //password.sectionTitle
+      const group = passwordGroups.get(sectionTitle);
       if (group) {
         group.passwords.push(password);
       } else {
-        passwordGroups.set(password.sectionTitle, {
-          title: password.sectionTitle,
+        passwordGroups.set(sectionTitle, {
+          title: sectionTitle,
           passwords: [password],
         });
       }
@@ -44,6 +54,7 @@ export default function Command() {
     <List
       isShowingDetail={showingDetails}
       isLoading={loading}
+      onSelectionChange={(id?: string) => setFocusedPassword(id)}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Password Length"
@@ -58,18 +69,15 @@ export default function Command() {
     >
       {passwordGroups?.map((group: PasswordGroup, index: number) => (
         <List.Section title={group.title} key={index}>
-          {group.passwords.map(({ password, subtitle, strength, icon, sequence, accessoryTitle, sectionTitle }) => (
+          {group.passwords.map(({ password, options }) => (
             <StoryListItem
               key={password}
               password={password}
-              subtitle={subtitle}
-              strength={strength}
-              icon={icon}
-              sequence={sequence}
+              options={options}
               showingDetails={showingDetails}
-              sectionTitle={sectionTitle}
               setShowingDetails={() => setShowingDetails(!showingDetails)}
-              accessoryTitle={accessoryTitle}
+              autoCalculateDetails={autoCalculatePrefs[passwordLength]}
+              isFocused={!!focusedPassword && focusedPassword === password}
             />
           ))}
         </List.Section>
