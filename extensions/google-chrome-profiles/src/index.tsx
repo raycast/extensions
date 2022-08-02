@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
@@ -12,7 +12,6 @@ import {
 } from "./util/types";
 import getPrefs from "./util/preferences";
 import { createBookmarkListItem, matchSearchText, isValidUrl } from "./util/util";
-import { getClipboardText } from "./util/clipboard";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -146,12 +145,7 @@ function ListBookmarks(props: { profile: Profile }) {
     }
 
     async function copyFromClipboard() {
-      try {
-        const clipboardText = await getClipboardText();
-        setClipboard(clipboardText);
-      } catch (error) {
-        setClipboard(undefined);
-      }
+      setClipboard(await Clipboard.readText());
     }
 
     listBookmarks();
