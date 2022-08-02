@@ -230,14 +230,14 @@ function newTabUrlWithQuery(searchText: string) {
 function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
   return (
     <ActionPanel>
-      <ActionPanel.Item
+      <Action
         title="Open in Google Chrome"
         icon={Icon.Globe}
         onAction={() => {
           openGoogleChrome(props.profileDirectory, props.url, () => showHUD("Opening bookmark..."));
         }}
       />
-      <ActionPanel.Item
+      <Action
         title="Open in Background"
         icon={Icon.Globe}
         onAction={() => {
