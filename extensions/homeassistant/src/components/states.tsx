@@ -48,7 +48,7 @@ import {
   VacuumTurnOnAction,
 } from "./vacuum";
 import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
-import { ScriptRunAction } from "./scripts";
+import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
@@ -868,6 +868,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <ScriptRunAction state={state} />
+            <ScriptEditInBrowserAction state={state} />
+            <ScriptDebugInBrowserAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
