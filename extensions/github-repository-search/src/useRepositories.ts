@@ -34,7 +34,7 @@ query SearchRepositories($searchQuery: String!) {
   }
 }`;
 
-export function useRepositories(searchText: string | undefined, searchFilter: string | undefined) {
+export function useRepositories(searchQuery: string | undefined) {
   const [state, setState] = useState<{
     data?: SearchRepositoriesResponse["search"];
     error?: Error;
@@ -42,7 +42,7 @@ export function useRepositories(searchText: string | undefined, searchFilter: st
   }>({ isLoading: false });
 
   useEffect(() => {
-    if (!searchText) {
+    if (!searchQuery) {
       setState({ isLoading: false });
       return;
     }
@@ -54,7 +54,7 @@ export function useRepositories(searchText: string | undefined, searchFilter: st
 
       try {
         const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, {
-          searchQuery: `${searchFilter} fork:true ${searchText}`,
+          searchQuery,
         });
 
         if (!isCanceled) {
@@ -79,7 +79,7 @@ export function useRepositories(searchText: string | undefined, searchFilter: st
     return () => {
       isCanceled = true;
     };
-  }, [searchText, searchFilter]);
+  }, [searchQuery]);
 
   return { ...state };
 }

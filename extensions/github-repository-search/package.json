@@ -22,6 +22,15 @@
       "required": true,
       "title": "Personal Access Token",
       "description": "Required scopes: repo, read:org, read:user"
+    },
+    {
+      "name": "includeForks",
+      "type": "checkbox",
+      "required": false,
+      "title": "Options",
+      "default": true,
+      "label": "Include Forks",
+      "description": "Includes forked repositories in search results"
     }
   ],
   "contributors": [
