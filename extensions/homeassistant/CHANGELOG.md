@@ -2,6 +2,8 @@
 
 ## [Window Support] - 2022-08-01
 - Add icon and state support for window device class
+- Add actions to `Edit` or `Debug` scripts or automations in the browser
+- Add action to `Edit` scenes in the browser
 
 ## [Fan entity support] - 2022-06-18
 - Adds support for Fan entities
