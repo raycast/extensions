@@ -14,11 +14,11 @@ This will use Fantastical natural language processing to add events. If you are 
 
 Here is an example of adding an event:
 
-<img src="assets/add-event.png" alt="drawing" width="700"/>
+<img src="readme_assets/add-event.png" alt="drawing" width="700"/>
 
 After adding Fantastical will open with the event in the top right corner as can be seen here:
 
-<img src="assets/fantastical-opened-after-add-event.jpg" alt="after pressing running add event command" width="300">
+<img src="readme_assets/fantastical-opened-after-add-event.jpg" alt="after pressing running add event command" width="300">
 
 Now you can choose to change any details or just add it to your calendar by pressing enter.
 
@@ -30,11 +30,11 @@ This will prepend the TODO keyword in front of the text that gets sent to Fantas
 
 Here is an example of adding a reminder:
 
-<img src="assets/add-reminder.png" alt="drawing" width="700"/>
+<img src="readme_assets/add-reminder.png" alt="drawing" width="700"/>
 
 This too will open Fantastical with the reminder in the top right corner as can be seen here:
 
-<img src="assets/fantastical-opened-after-add-reminder.jpg" alt="after pressing running add reminder command" width="300">
+<img src="readme_assets/fantastical-opened-after-add-reminder.jpg" alt="after pressing running add reminder command" width="300">
 
 Same as before you can now choose to change any details or just add it to your calendar by pressing enter.
 
@@ -45,11 +45,11 @@ You can just type part of the name and Fantastical will find the best match.
 
 An example can be seen here:
 
-<img src="assets/example-of-specifying-calender-raycast.png" alt="how to specify calenders" width="700">
+<img src="readme_assets/example-of-specifying-calender-raycast.png" alt="how to specify calenders" width="700">
 
 Which will result in the following after running the command:
 
-<img src="assets/example-of-specifying-calender-fan.jpg" alt="after running command with specifying calender" width="300">
+<img src="readme_assets/example-of-specifying-calender-fan.jpg" alt="after running command with specifying calender" width="300">
 
 As you can see Fantastical figured out what calender was meant just from the /s and the calender that the event now is added to is the one specified.
 
