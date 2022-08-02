@@ -24,22 +24,22 @@
       "type": "textfield",
       "required": false,
       "title": "Sourcetree command line tools",
-      "description": "Where are the Sourcetree command line tools are installed",
-      "default": "/opt/homebrew/bin/stree",
-      "placeholder": "/opt/homebrew/bin/stree"
+      "description": "The place where the Sourcetree command line tools are installed",
+      "default": "/Applications/SourceTree.app/Contents/Resources/stree",
+      "placeholder": "/Applications/SourceTree.app/Contents/Resources/stree"
     },
     {
       "name": "plist",
       "type": "textfield",
       "required": false,
       "title": "Sourcetree plist file",
-      "description": "Where are the Sourcetree plist are located",
+      "description": "The place where Sourcetree plist is located",
       "default": "~/Library/Application Support/SourceTree/browser.plist",
       "placeholder": "~/Library/Application Support/SourceTree/browser.plist"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.0.6",
     "bplist-parser": "^0.3.2"
   },
