@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Improve icon usage] - 2022-08-01
+
+- Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
+
 ## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-15
 
 - Added ECS Clusters ([#2254](https://github.com/raycast/extensions/pull/2254))
