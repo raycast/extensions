@@ -35,7 +35,7 @@ export default function Command() {
     <List navigationTitle={`${getPreferenceValues().streamName}'s Chat`} searchBarPlaceholder="Filter users">
       <List.Item
         icon={Icon.Message}
-        title="Open chat in browser"
+        title="Open Chat in Browser"
         subtitle={`twitch.tv/${getPreferenceValues().streamName}`}
         actions={
           <ActionPanel>
