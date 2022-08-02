@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, ImageMask, List, PushAction, showHUD, showToast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
@@ -33,7 +33,7 @@ export default function Command() {
   }, []);
 
   if (error) {
-    showToast(ToastStyle.Failure, error.message);
+    showToast(Toast.Style.Failure, error.message);
   }
 
   const infoCache = localState?.profile.info_cache;
@@ -45,19 +45,19 @@ export default function Command() {
         profiles.sort(sortAlphabetically).map((profile, index) => (
           <List.Item
             key={index}
-            icon={profile.ga?.pictureURL ? { source: profile.ga.pictureURL, mask: ImageMask.Circle } : Icon.Person}
+            icon={profile.ga?.pictureURL ? { source: profile.ga.pictureURL, mask: Image.Mask.Circle } : Icon.Person}
             title={profile.name}
             subtitle={profile.ga?.email}
             keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
             actions={
               <ActionPanel>
-                <PushAction
+                <Action.Push
                   title="Show Bookmarks"
                   icon={Icon.Link}
                   target={<ListBookmarks profile={profile} />}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
                 />
-                <ActionPanel.Item
+                <Action
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
                   onAction={async () => {
@@ -119,7 +119,7 @@ const openGoogleChrome = async (profileDirectory: string, link: string, willOpen
     await willOpen();
     await runAppleScript(script);
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Could not found\nGoogle Chrome.app in Applications folder");
+    await showToast(Toast.Style.Failure, "Could not found\nGoogle Chrome.app in Applications folder");
   }
 };
 
@@ -184,7 +184,7 @@ function ListBookmarks(props: { profile: Profile }) {
   );
 
   if (error && (bookmarks?.length ?? 0) == 0) {
-    showToast(ToastStyle.Failure, error.message);
+    showToast(Toast.Style.Failure, error.message);
   }
 
   return (
@@ -242,7 +242,7 @@ function BookmarksActionPanel(props: { profileDirectory: string; url: string }) 
         icon={Icon.Globe}
         onAction={() => {
           openGoogleChrome(props.profileDirectory, props.url, async () => {
-            await showToast(ToastStyle.Success, "Opening bookmark...");
+            await showToast(Toast.Style.Success, "Opening bookmark...");
           });
         }}
       />
