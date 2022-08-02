@@ -74,6 +74,7 @@ function Notifications() {
             ),
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as read" });
@@ -113,6 +114,7 @@ function Notifications() {
             ),
           };
         },
+        shouldRevalidateAfter: true,
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as unread" });

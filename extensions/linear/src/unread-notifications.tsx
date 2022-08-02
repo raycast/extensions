@@ -23,6 +23,7 @@ function UnreadNotifications() {
           notifications: data?.notifications?.map((x) => (x.id === notification.id ? { ...x, readAt: new Date() } : x)),
         };
       },
+      shouldRevalidateAfter: true,
     });
   }
 
