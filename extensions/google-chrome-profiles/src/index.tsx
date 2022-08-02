@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Clipboard, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
+import { readFile } from "fs/promises";
 import { homedir } from "os";
+import { join } from "path";
 import {
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
@@ -20,8 +22,9 @@ export default function Command() {
   useEffect(() => {
     async function listProfiles() {
       try {
-        const script = `read POSIX file "${homedir()}/Library/Application Support/Google/Chrome/Local State" as «class utf8»`;
-        const localStateFileText = await runAppleScript(script);
+        const path = join(homedir(), "Library/Application Support/Google/Chrome/Local State");
+        const localStateFileBuffer = await readFile(path);
+        const localStateFileText = localStateFileBuffer.toString("utf-8");
         setLocalState(JSON.parse(localStateFileText));
       } catch (error) {
         setError(Error("No profile found\nIs Google Chrome installed?"));
@@ -137,8 +140,9 @@ function ListBookmarks(props: { profile: Profile }) {
     async function listBookmarks() {
       try {
         const dir = props.profile.directory;
-        const script = `read POSIX file "${homedir()}/Library/Application Support/Google/Chrome/${dir}/Bookmarks" as «class utf8»`;
-        const bookmarkFileText = await runAppleScript(script);
+        const path = join(homedir(), "Library/Application Support/Google/Chrome", dir, "Bookmarks");
+        const bookmarkFileBuffer = await readFile(path);
+        const bookmarkFileText = bookmarkFileBuffer.toString("utf-8");
         setBookmarkFile(JSON.parse(bookmarkFileText));
       } catch (error) {
         setError(Error("No bookmark found"));
