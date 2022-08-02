@@ -24,14 +24,6 @@
       "description": "The URL to launch when opening a profile. Any %query% will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
-    },
-    {
-      "name": "shouldShowNewTabInBookmarks",
-      "default": true,
-      "required": false,
-      "type": "checkbox",
-      "label": "Show on top of bookmarks",
-      "description": "Indicates if the new tab URL should be displayed on top of the bookmarks"
     }
   ],
   "dependencies": {

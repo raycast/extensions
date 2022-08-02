@@ -164,9 +164,7 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const newTabURL = newTabUrlWithQuery(searchText);
 
-  const tabsOnTop = (
-    getPrefs().shouldShowNewTabInBookmarks ? [createBookmarkListItem(newTabURL, "New Tab")] : []
-  ).concat(
+  const tabsOnTop = [createBookmarkListItem(newTabURL, "New Tab")].concat(
     clipboard
       ? [
           createBookmarkListItem(
