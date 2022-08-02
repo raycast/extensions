@@ -61,7 +61,7 @@ export default function Command() {
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
                   onAction={async () => {
-                    await openGoogleChrome(profile.directory, "new-tab", () => showHUD("Opening profile..."));
+                    await openGoogleChrome(profile.directory, "about:blank", () => showHUD("Opening profile..."));
                   }}
                 />
               </ActionPanel>
