@@ -2,17 +2,17 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 17:08
+ * @lastEditTime: 2022-07-23 23:46
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { Clipboard, environment, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Clipboard, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
+import { Easydict } from "./releaseVersion/versionInfo";
 import { LanguageItem, MyPreferences, QueryRecoredItem, QueryWordInfo, TranslateFormatResult } from "./types";
-import CryptoJS from "crypto-js";
 
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
 export const clipboardQueryInterval = 10 * 60 * 1000;
@@ -24,27 +24,6 @@ export const myPreferences: MyPreferences = getPreferenceValues();
 export const defaultLanguage1 = getLanguageItemFromYoudaoId(myPreferences.language1) as LanguageItem;
 export const defaultLanguage2 = getLanguageItemFromYoudaoId(myPreferences.language2) as LanguageItem;
 export const preferredLanguages = [defaultLanguage1, defaultLanguage2];
-
-const defaultEncrytedYoudaoAppId = "U2FsdGVkX19SpBCGxMeYKP0iS1PWKmvPeqIYNaZjAZC142Y5pLrOskw0gqHGpVS1";
-const defaultEncrytedYoudaoAppKey =
-  "U2FsdGVkX1/JF2ZMngmTw8Vm+P0pHWmHKLQhGpUtYiDc0kLZl6FKw1Vn3hMyl7iL7owwReGJCLsovDxztZKb9g==";
-export const defaultYoudaoAppId = myDecrypt(defaultEncrytedYoudaoAppId);
-export const defaultYoudaoAppSecret = myDecrypt(defaultEncrytedYoudaoAppKey);
-
-const defaultEncryptedBaiduAppId = "U2FsdGVkX1/QHkSw+8qxr99vLkSasBfBRmA6Kb5nMyjP8IJazM9DcOpd3cOY6/il";
-const defaultEncryptedBaiduAppSecret = "U2FsdGVkX1+a2LbZ0+jntJTQjpPKUNWGrlr4NSBOwmlah7iP+w2gefq1UpCan39J";
-export const defaultBaiduAppId = myDecrypt(defaultEncryptedBaiduAppId);
-export const defaultBaiduAppSecret = myDecrypt(defaultEncryptedBaiduAppSecret);
-
-const defaultEncryptedTencentSecretId =
-  "U2FsdGVkX19lHBVXE+CEZI9cENSToLIGzHDsUIE+RyvIC66rgxumDmpYPDY4MdaTSbrq7MIyDvtgXaLvzijYSg==";
-const defaultEncryptedTencentSecretKey =
-  "U2FsdGVkX1+N6wDYXNiUISwKOM97cY03RjXmC+0+iodFo3b4NTNC1J8RR6xqcbdyF7z3Z2yQRMHHxn4m02aUvA==";
-export const defaultTencentSecretId = myDecrypt(defaultEncryptedTencentSecretId);
-export const defaultTencentSecretKey = myDecrypt(defaultEncryptedTencentSecretKey);
-
-const defaultEncryptedCaiyunToken = "U2FsdGVkX1+ihWvHkAfPMrWHju5Kg4EXAm1AVbXazEeHaXE1jdeUzZZrhjdKmS6u";
-export const defaultCaiyunToken = myDecrypt(defaultEncryptedCaiyunToken);
 
 export function getLanguageItemFromYoudaoId(youdaoLanguageId: string): LanguageItem {
   for (const langItem of languageItemList) {
@@ -75,7 +54,19 @@ export function getLanguageItemFromTencentId(tencentLanguageId: string): Languag
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem {
   for (const langItem of languageItemList) {
-    if (langItem.appleChineseLanguageTitle === chineseTitle) {
+    if (langItem.appleDetectChineseLanguageTitle === chineseTitle) {
+      return langItem;
+    }
+  }
+  return languageItemList[0];
+}
+
+/**
+ * Return language item from deepL language id, if not found, return auto language item
+ */
+export function getLanguageItemFromDeepLSourceId(deepLLanguageId: string): LanguageItem {
+  for (const langItem of languageItemList) {
+    if (langItem.deepLSourceLanguageId === deepLLanguageId) {
       return langItem;
     }
   }
@@ -103,18 +94,6 @@ export function isValidLanguageId(languageId: string): boolean {
   }
   return true;
 }
-
-/**
- * get another language item expcept chinese from language item array
- */
-export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
-  if (youdaoLanguageIds[0] === "zh-CHS") {
-    return youdaoLanguageIds[1];
-  } else {
-    return youdaoLanguageIds[0];
-  }
-}
-
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
@@ -126,7 +105,7 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   const isChineseTextResult = formatResult.queryWordInfo.toLanguage === "zh-CHS";
   const isEnglishTextResult = formatResult.queryWordInfo.toLanguage === "en";
 
-  for (const translation of formatResult.translations) {
+  for (const translation of formatResult.translationItems) {
     const textLength = translation.text.length;
     if (isChineseTextResult) {
       if (textLength > maxLineLengthOfChineseTextDisplay) {
@@ -143,31 +122,53 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   return false;
 }
 
-export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
   const eudicWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
-  if (languageId) {
+  if (eudicWebLanguageId) {
     return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
-  const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
+  const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).youdaoWebLanguageId;
   if (youdaoWebLanguageId) {
     return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+/**
+ * Get another language item expcept chinese from language item array
+ */
+export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
+  return youdaoLanguageIds[0] === "zh-CHS" ? youdaoLanguageIds[1] : youdaoLanguageIds[0];
+}
+
+export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
+  const text = encodeURI(queryTextInfo.word);
   const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
   const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
   const fromLanguageId = fromLanguageItem.googleLanguageId || fromLanguageItem.youdaoLanguageId;
   const toLanguageId = toLanguageItem.googleLanguageId || toLanguageItem.youdaoLanguageId;
+  if (fromLanguageId && toLanguageId) {
+    return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  }
+}
+
+/**
+ * Get DeepL web translate url
+ * https://www.deepl.com/translator#en/zh/look
+ */
+export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
+  const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
+  const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
+  const fromLanguageId = fromLanguageItem.deepLSourceLanguageId;
+  const toLanguageId = toLanguageItem.deepLSourceLanguageId;
   const text = encodeURI(queryTextInfo.word);
-  return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  if (fromLanguageId && toLanguageId) {
+    return `https://www.deepl.com/translator#${fromLanguageId}/${toLanguageId}/${text}`;
+  }
 }
 
 /**
@@ -250,10 +251,9 @@ async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInsta
   }
 }
 
-export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean) => void) {
+export function checkIfEudicIsInstalled(setIsInstalledEudic: (isInstalled: boolean) => void) {
   LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    // console.log("is install Eudic: ", isInstalledEudic);
-
+    console.log("is install Eudic: ", isInstalledEudic);
     if (isInstalledEudic == true) {
       setIsInstalledEudic(true);
     } else if (isInstalledEudic == false) {
@@ -264,22 +264,16 @@ export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean
   });
 }
 
-export function myEncrypt(text: string) {
-  // console.warn("encrypt:", text);
-  const ciphertext = CryptoJS.AES.encrypt(text, environment.extensionName).toString();
-  // console.warn("ciphertext: ", ciphertext);
-  return ciphertext;
+export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => void) {
+  const currentEasydict = new Easydict();
+  currentEasydict.getCurrentVersionInfo().then((easydict) => {
+    const isShowingReleasePrompt = easydict.isNeedPrompt && !easydict.hasPrompted;
+    // console.log("isShowingReleasePrompt: ", isShowingReleasePrompt);
+    callback(isShowingReleasePrompt);
+  });
 }
 
-export function myDecrypt(ciphertext: string) {
-  // console.warn("decrypt:", ciphertext);
-  const bytes = CryptoJS.AES.decrypt(ciphertext, environment.extensionName);
-  const originalText = bytes.toString(CryptoJS.enc.Utf8);
-  // console.warn("originalText: ", originalText);
-  return originalText;
-}
-
-export function isShowMultipleTranslations(formatResult: TranslateFormatResult) {
+export function checkIfShowMultipleTranslations(formatResult: TranslateFormatResult) {
   return !formatResult.explanations && !formatResult.forms && !formatResult.webPhrases && !formatResult.webTranslation;
 }
 

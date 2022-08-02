@@ -5,6 +5,7 @@
   "description": "Allows you to see your daily plan, search notes and launch straight into NotePlan.",
   "icon": "command-icon.png",
   "author": "shakedlokits",
+  "contributors": ["lukerandall"],
   "categories": [
     "Productivity",
     "Applications",
@@ -26,6 +27,16 @@
       "keywords": ["today"],
       "subtitle": "NotePlan 3",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fileExtension",
+      "type": "textfield",
+      "required": false,
+      "title": "File Extension",
+      "default": "txt",
+      "description": "The file extension you use for notes"
     }
   ],
   "dependencies": {

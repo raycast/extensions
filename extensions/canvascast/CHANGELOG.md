@@ -1,5 +1,11 @@
 # Canvascast Changelog
 
+## [Update] - 2022-07-27
+
+- Added pinned module items
+- Added ability to remove recent items
+- Updated icons
+
 ## [Update] - 2022-06-21
 
 - Fixed a bug where not all modules was loaded.

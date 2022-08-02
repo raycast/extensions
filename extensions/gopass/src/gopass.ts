@@ -1,5 +1,6 @@
 import { homedir } from "os";
 import { spawn } from "child_process";
+import { sortDirectoriesFirst } from "./utils";
 
 function gopass(args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -10,6 +11,7 @@ function gopass(args: string[]): Promise<string> {
           "/usr/bin", // pbcopy
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
+          "/opt/homebrew/bin", // homebrew on macOS Apple Silicon
         ].join(":"),
       },
     });
@@ -26,9 +28,13 @@ function gopass(args: string[]): Promise<string> {
   });
 }
 
-async function list(): Promise<string[]> {
-  const entries = await gopass(["list", "--flat"]);
-  return entries.split(`\n`);
+async function list({ limit = -1, prefix = "", directoriesFirst = false, stripPrefix = false } = {}): Promise<
+  string[]
+> {
+  return await gopass(["list", `--limit=${limit}`, "--flat", `--strip-prefix=${stripPrefix}`, prefix])
+    .then((data) => data.split(`\n`))
+    .then((data) => data.filter((item) => item.length))
+    .then((data) => (directoriesFirst ? sortDirectoriesFirst(data) : data));
 }
 
 async function password(entry: string): Promise<string> {
@@ -39,4 +45,12 @@ async function clip(entry: string): Promise<void> {
   await gopass(["show", "--clip", entry]);
 }
 
-export default { list, password, clip };
+async function show(entry: string): Promise<string[]> {
+  // gopass has no option to disable printing the password in the first, therefor we use `slice`
+  return await gopass(["show", entry])
+    .then((data) => data.split(`\n`).slice(1))
+    // Filter out details not in YAML colon syntax "key: value", such as GOPASS-SECRET-1.0
+    .then((data) => data.filter((item) => item.includes(":")));
+}
+
+export default { list, password, clip, show };

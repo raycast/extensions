@@ -1,6 +1,6 @@
 import { TodoPage } from '@/types/todo-page'
 import { isNotionClientError } from '@notionhq/client'
-import { showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import { notion } from '../client'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 
@@ -10,10 +10,11 @@ export async function updateTodoTag(
 ): Promise<any> {
   try {
     const notionClient = await notion()
+    const labelProperty = getPreferenceValues().property_label
     const page = await notionClient.pages.update({
       page_id: pageId,
       properties: {
-        Label: {
+        [labelProperty]: {
           select: labelId ? { id: labelId } : null,
         },
       },

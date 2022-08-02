@@ -89,7 +89,7 @@ export function Onboarding() {
                     title="View Link"
                     icon={Icon.Link}
                     url={todo.contentUrl}
-                    shortcut={{ modifiers: ['cmd'], key: 'u' }}
+                    shortcut={{ modifiers: ['cmd'], key: 'e' }}
                   />
                 ) : null}
                 <CopyToDoAction todo={todo} />

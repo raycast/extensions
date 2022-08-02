@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-27 10:26
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-06-27 11:35
+ * @lastEditTime: 2022-07-17 00:20
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,14 +10,13 @@
 
 import axios from "axios";
 import { downloadAudio, getWordAudioPath } from "../../audio";
-import { DicionaryType } from "../../consts";
-import { TranslateTypeResult } from "../../types";
+import { DicionaryType, RequestTypeResult } from "../../types";
 import { IcibaDictionaryResult } from "./interface";
 
 /**
  * request iciba dictionary
  */
-export function icibaDictionary(word: string): Promise<TranslateTypeResult> {
+export function icibaDictionary(word: string): Promise<RequestTypeResult> {
   const url = "http://dict-co.iciba.com/api/dictionary.php";
   const params = {
     key: "0EAE08A016D6688F64AB3EBB2337BFB0",

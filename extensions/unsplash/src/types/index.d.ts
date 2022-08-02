@@ -130,6 +130,7 @@ interface UnsplashPreferences {
   orientation: "all" | "landscape" | "portrait" | "squarish";
   downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
   collections: string;
+  wallpaperPath: string;
   applyTo: "current" | "every";
   includeDefaults: "yes" | "no";
 }

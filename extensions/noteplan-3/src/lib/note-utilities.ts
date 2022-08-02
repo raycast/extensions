@@ -1,3 +1,4 @@
+import { getPreferences } from "./preferences";
 import { parse as parsePath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
@@ -26,7 +27,7 @@ export interface Note {
 }
 
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/**/*.txt`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${getPreferences().fileExtension}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
