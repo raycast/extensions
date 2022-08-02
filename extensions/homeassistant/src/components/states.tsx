@@ -31,7 +31,13 @@ import {
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
-import { AutomationTriggerAction, AutomationTurnOffAction, AutomationTurnOnAction } from "./automation";
+import {
+  AutomationDebugInBrowserAction,
+  AutomationEditInBrowserAction,
+  AutomationTriggerAction,
+  AutomationTurnOffAction,
+  AutomationTurnOnAction,
+} from "./automation";
 import {
   VacuumLocateAction,
   VacuumPauseAction,
@@ -790,6 +796,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <AutomationTurnOnAction state={state} />
             <AutomationTurnOffAction state={state} />
             <AutomationTriggerAction state={state} />
+            <AutomationEditInBrowserAction state={state} />
+            <AutomationDebugInBrowserAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
