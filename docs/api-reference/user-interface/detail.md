@@ -12,6 +12,9 @@ Typically used as a standalone view or when navigating from a [List](list.md).
 
 #### Example
 
+{% tabs %}
+{% tab title="Render a markdown string" %}
+
 ```typescript
 import { Detail } from "@raycast/api";
 
@@ -20,19 +23,24 @@ export default function Command() {
 }
 ```
 
-It is possible to use locally stored images from e.g. the `assets` directory in markdown.
+{% endtab %}
 
-#### Example
+{% tab title="Render an image from the assets directory" %}
 
 ```typescript
 import { Detail } from "@raycast/api";
+import path from "path";
+import { pathToFileURL } from "url";
 
-const image = `file://${join(environment.assetsPath, "image.png")}`;
+const image = pathToFileURL(`${environment.assetsPath}/image.png`).href;
 
 export default function Command() {
   return <Detail markdown="![Image Title]({$image})" />;
 }
 ```
+
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -73,11 +81,7 @@ export default function Main() {
             <Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="Evolution"
-            target="https://www.pokemon.com/us/pokedex/pikachu"
-            text="Raichu"
-          />
+          <Detail.Metadata.Link title="Evolution" target="https://www.pokemon.com/us/pokedex/pikachu" text="Raichu" />
         </Detail.Metadata>
       }
     />
@@ -107,11 +111,7 @@ export default function Main() {
       navigationTitle="Pikachu"
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Height"
-            text={`1' 04"`}
-            icon="weight.svg"
-          />
+          <Detail.Metadata.Label title="Height" text={`1' 04"`} icon="weight.svg" />
         </Detail.Metadata>
       }
     />
@@ -141,11 +141,7 @@ export default function Main() {
       navigationTitle="Pikachu"
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link
-            title="Evolution"
-            target="https://www.pokemon.com/us/pokedex/pikachu"
-            text="Raichu"
-          />
+          <Detail.Metadata.Link title="Evolution" target="https://www.pokemon.com/us/pokedex/pikachu" text="Raichu" />
         </Detail.Metadata>
       }
     />
