@@ -35,7 +35,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
       id={String(bookmark._id)}
       icon={{
         source: faviconUrl(64, bookmark.link),
-        fallback: 'raindrop-icon.png'
+        fallback: "raindrop-icon.png",
       }}
       key={bookmark._id}
       title={bookmark.title}
