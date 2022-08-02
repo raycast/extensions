@@ -111,7 +111,8 @@ const openGoogleChrome = async (profileDirectory: string, link: string, willOpen
   const script = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     set theProfile to quoted form of "${profileDirectory}"
-    do shell script theAppPath & " --profile-directory=" & theProfile & " ${link}"
+    set theLink to quoted form of "${link}"
+    do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
   `;
 
   try {
