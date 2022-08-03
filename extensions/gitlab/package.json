@@ -261,7 +261,7 @@
     "immint023",
     "duboiss",
     "metakirby5",
-    "mentro"
+    "wierdbytes"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
