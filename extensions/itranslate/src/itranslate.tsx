@@ -19,8 +19,11 @@ import {
 import { TranslateError } from "./TranslateError";
 import { TranslateResult } from "./TranslateResult";
 
+<<<<<<< HEAD
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
+=======
+>>>>>>> ec6c15a36eef7f23c36af480407eb8961efd0693
 export default function Command() {
   const preferences: IPreferences = getPreferenceValues<IPreferences>();
   const langSecond: ILangItem = getLang(preferences.langSecond);
@@ -41,11 +44,16 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
     clearTimeout(delayFetchTranslateAPITimer);
     if (inputState.trim().length > 0) {
       delayFetchTranslateAPITimer = setTimeout(() => {
         translate(currentTargetLang);
       }, 900);
+=======
+    if (inputState.trim().length > 0) {
+      translate(currentTargetLang);
+>>>>>>> ec6c15a36eef7f23c36af480407eb8961efd0693
     } else {
       updateTransResultsState([]);
       updateShowDetail(false);
@@ -141,6 +149,10 @@ export default function Command() {
   return (
     <List
       isLoading={isLoadingState}
+<<<<<<< HEAD
+=======
+      throttle={true}
+>>>>>>> ec6c15a36eef7f23c36af480407eb8961efd0693
       isShowingDetail={isShowDetail}
       searchText={inputState}
       searchBarPlaceholder={"Translate text"}
