@@ -20,8 +20,9 @@ export function OpenInSourceTreeApp({ repo }: OpenInSourceTreeAppProps): JSX.Ele
       await popToRoot();
     } catch (error) {
       console.log(error);
+      await showToast(Toast.Style.Failure, `Error opening ${repo.name}`);
     }
   }
 
-  return <ActionPanel.Item title={`Open with SourceTree`} icon="sourcetree_256x256x32.png" onAction={handleAction} />;
+  return <ActionPanel.Item title={`Open with Sourcetree`} icon="sourcetree_256x256x32.png" onAction={handleAction} />;
 }

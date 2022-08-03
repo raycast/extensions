@@ -4,8 +4,10 @@ import { PlistMissingError, Repository, RepositoryList } from "./lib/repository"
 import { Preferences } from "./lib/preferences";
 import { EmptyRepositoryList } from "./EmptyRepositoryList";
 import { SectionedRepositoryList } from "./SectionedRepositoryList";
+import { BinNotAvailable } from "./BinNotAvailable";
 
-const repo = new RepositoryList(Preferences.get().plist);
+const pref = Preferences.get();
+const repo = new RepositoryList(pref.plist);
 
 export default function Command(): JSX.Element {
   const { isLoading, data, error } = useCachedPromise(getRepositoryList, [], {
@@ -15,6 +17,10 @@ export default function Command(): JSX.Element {
 
   if (error instanceof PlistMissingError) {
     return <EmptyRepositoryList />;
+  }
+
+  if (!pref.isBinAvailable()) {
+    return <BinNotAvailable bin={pref.bin} />;
   }
 
   return (
