@@ -1,21 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import EpicStories from "./components/EpicStories";
 import { getOwnersAccessoryItems } from "./helpers/storyHelpers";
 import { useEpics, useMemberMap } from "./hooks";
-
-const getProgressIcon = (progress: number) => {
-  if (progress === 1) {
-    return Icon.CircleProgress100;
-  } else if (progress >= 0.667) {
-    return Icon.CircleProgress75;
-  } else if (progress >= 0.333) {
-    return Icon.CircleProgress50;
-  } else if (progress > 0) {
-    return Icon.CircleProgress25;
-  } else {
-    return Icon.Circle;
-  }
-};
 
 export default function ShowEpics() {
   const { data: epics, isValidating } = useEpics();
@@ -50,14 +37,11 @@ export default function ShowEpics() {
 
                   isNaN(progress)
                     ? {
-                        icon: Icon.Circle,
+                        icon: getProgressIcon(progress, "#58b1e4"),
                         tooltip: "No progress",
                       }
                     : {
-                        icon: {
-                          source: getProgressIcon(progress),
-                          tintColor: progress > 0 ? Color.Green : Color.Yellow,
-                        },
+                        icon: getProgressIcon(progress, "#58b1e4"),
                         tooltip: progress === 0 ? "Not started" : `${Math.round(progress * 100)}%`,
                       },
                 ].filter(Boolean) as List.Item.Accessory[]

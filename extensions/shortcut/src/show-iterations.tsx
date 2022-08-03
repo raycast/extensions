@@ -1,6 +1,8 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { IterationSlim } from "@useshortcut/client";
 import { IterationStories } from "./components/IterationStories";
+import { getIterationProgressColor } from "./helpers/iterationHelper";
 import { useIterations } from "./hooks";
 
 const sortIterationByStartDateDesc = (a: IterationSlim, b: IterationSlim) => {
@@ -13,28 +15,9 @@ export default function ListIterationStories() {
   return (
     <List isLoading={isValidating}>
       {iterations?.sort(sortIterationByStartDateDesc).map((iteration) => {
-        const statusIcon: Image.ImageLike = (function (): Image.ImageLike {
-          switch (iteration.status) {
-            case "unstarted":
-              return {
-                source: Icon.Circle,
-                tintColor: Color.Orange,
-              };
-            case "started":
-              return {
-                source: Icon.Circle,
-                tintColor: Color.Green,
-              };
-            default:
-            case "done":
-              return {
-                source: Icon.CheckCircle,
-              };
-          }
-        })();
-
         const { num_stories_done, num_stories_unstarted, num_stories_started } = iteration.stats;
         const totalStories = num_stories_done + num_stories_unstarted + num_stories_started;
+        const progress = num_stories_done / totalStories;
 
         const iterationDates = `${new Date(iteration.start_date).toLocaleDateString()} - ${new Date(
           iteration.end_date
@@ -52,7 +35,10 @@ export default function ListIterationStories() {
                 tooltip: "Dates",
               },
               {
-                icon: statusIcon,
+                icon: {
+                  source: getProgressIcon(progress, undefined, { backgroundOpacity: 0.5 }),
+                  tintColor: getIterationProgressColor(iteration),
+                },
                 tooltip: iteration.status,
               },
             ]}
