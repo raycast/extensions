@@ -1,3 +1,3 @@
 # HackMD Changelog
 
-## [Initial Version] - 2022-07-29
+## [Initial Version] - 2022-08-04
