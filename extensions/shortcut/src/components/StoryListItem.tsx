@@ -63,7 +63,6 @@ export default function StoryListItem({
             title="View Story"
             target={<StoryDetail storyId={story.id} mutate={mutate} />}
           />
-          <Action.OpenInBrowser url={story.app_url} />
 
           <StoryActions
             mutate={async () => {
