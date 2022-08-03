@@ -20,8 +20,16 @@ export function getOwnersAccessoryItems(owners: (Member | undefined)[]) {
   ].filter(Boolean);
 }
 
+export function getMemberName(member: Member) {
+  return member.profile.name || member.profile.mention_name;
+}
+
 export function getMemberAvatar(member: Member): Image.ImageLike {
-  // !FIXME: the image url is authenticated
+  /**
+   * !FIXME: the image url is authenticated
+   * Even with ?token=xxxx the image is not displayed in Raycast
+   */
+
   // if (member.profile?.display_icon?.url) {
   //   return {
   //     source: member.profile?.display_icon.url,
@@ -43,3 +51,5 @@ export const getStoryColor = (storyType: StorySlim["story_type"]) => {
       return Color.PrimaryText;
   }
 };
+
+export const StoryTypes = ["feature", "bug", "chore"];

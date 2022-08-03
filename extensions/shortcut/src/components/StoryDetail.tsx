@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { getMemberAvatar, getStoryColor } from "../helpers/storyHelpers";
+import { getMemberAvatar, getMemberName, getStoryColor } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
 import {
   useGroupsMap,
@@ -14,6 +14,7 @@ import {
   useWorkflowMap,
 } from "../hooks";
 import shortcut from "../utils/shortcut";
+import { capitalize } from "../utils/string";
 
 const storyTasksMarkdown = (story: Story) => {
   if (story.tasks.length === 0) {
@@ -121,6 +122,9 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
                     try {
                       await shortcut.updateStory(story.id, { workflow_state_id: state.id });
                       await mutateStory();
+                      if (mutate) {
+                        mutate();
+                      }
                     } catch (error) {
                       showToast({
                         style: Toast.Style.Failure,
@@ -154,6 +158,9 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
                     try {
                       await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" });
                       await mutateStory();
+                      if (mutate) {
+                        mutate();
+                      }
                     } catch (error) {
                       showToast({
                         style: Toast.Style.Failure,
@@ -191,6 +198,9 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
                       try {
                         await shortcut.updateStory(story.id, { estimate: estimate });
                         await mutateStory();
+                        if (mutate) {
+                          mutate();
+                        }
                       } catch (error) {
                         showToast({
                           style: Toast.Style.Failure,
@@ -226,6 +236,9 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
                       try {
                         await shortcut.updateStory(story.id, { iteration_id: iteration.id });
                         await mutateStory();
+                        if (mutate) {
+                          mutate();
+                        }
                       } catch (error) {
                         showToast({
                           style: Toast.Style.Failure,
@@ -280,7 +293,7 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
 
                     return (
                       <Action
-                        title={member.profile.name || member.profile.mention_name}
+                        title={getMemberName(member)}
                         onAction={onAction}
                         key={memberId}
                         icon={existingOwnerIds.includes(memberId) ? Icon.CircleFilled : Icon.Circle}
@@ -402,7 +415,14 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
 
             {storyIteration && <Detail.Metadata.Label title="Iteration" text={storyIteration.name} />}
 
-            {story.story_type && <Detail.Metadata.Label title="Type" text={story.story_type} />}
+            {story.story_type && (
+              <Detail.Metadata.TagList title="Type">
+                <Detail.Metadata.TagList.Item
+                  text={capitalize(story.story_type)}
+                  color={getStoryColor(story.story_type)}
+                />
+              </Detail.Metadata.TagList>
+            )}
 
             <Detail.Metadata.Separator />
 
