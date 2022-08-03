@@ -1,7 +1,5 @@
 import { ShortcutClient } from "@useshortcut/client";
-import { getPreferenceValues } from "@raycast/api";
-import { Preference } from "./types";
+import { getPreferenceValues } from "./preference";
 
-const preference = getPreferenceValues<Preference>();
-
+const preference = getPreferenceValues();
 export default new ShortcutClient(preference.apiToken);
