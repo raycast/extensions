@@ -48,7 +48,7 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
       return;
     }
 
-    return groupMap[parseInt(story.group_id, 10)];
+    return groupMap[story.group_id];
   }, [story, groupMap]);
 
   const storyIteration = useMemo(() => {
@@ -98,7 +98,11 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
           <Detail.Metadata>
             <Detail.Metadata.Link target={story.app_url} title="Open Story URL" text="Link" />
 
-            {storyTeam && <Detail.Metadata.Label title="Team" text={storyTeam.name} />}
+            {storyTeam && (
+              <Detail.Metadata.TagList title="Team">
+                <Detail.Metadata.TagList.Item text={storyTeam.name} color={storyTeam.color} />
+              </Detail.Metadata.TagList>
+            )}
 
             {storyState && <Detail.Metadata.Label title="Status" text={storyState.name} />}
 

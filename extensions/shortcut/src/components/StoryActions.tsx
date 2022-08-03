@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { Story, StorySlim } from "@useshortcut/client";
 import { getMemberName, getStoryColor } from "../helpers/storyHelpers";
-import { useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
+import { useGroups, useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
 
 import shortcut from "../utils/shortcut";
 
@@ -12,6 +12,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
   const labelsMap = useLabelsMap();
   const { pop } = useNavigation();
   const workflow = useStoryWorkflow(story);
+  const { data: teams } = useGroups();
 
   const storyUpdateAction = (updater: () => Promise<any>) => async () => {
     try {
@@ -37,6 +38,41 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
           </ActionPanel.Section>
 
           <ActionPanel.Submenu
+            title="Set Team..."
+            icon={Icon.PersonCircle}
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "t",
+            }}
+          >
+            {story.group_id && (
+              <Action
+                title="None"
+                onAction={storyUpdateAction(() => shortcut.updateStory(story.id, { group_id: null }))}
+                icon={Icon.XMarkCircleFilled}
+              />
+            )}
+
+            {teams
+              ?.filter((team) => team.id !== story.group_id)
+              .map((team) => (
+                <Action
+                  key={team.id}
+                  title={team.name}
+                  onAction={storyUpdateAction(() =>
+                    shortcut.updateStory(story.id, {
+                      group_id: team.id,
+                    })
+                  )}
+                  icon={{
+                    source: Icon.TwoPeople,
+                    tintColor: team.color,
+                  }}
+                />
+              ))}
+          </ActionPanel.Submenu>
+
+          <ActionPanel.Submenu
             title="Set Status..."
             icon={Icon.Pencil}
             shortcut={{
@@ -60,7 +96,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
             title="Set Type..."
             icon={Icon.Bookmark}
             shortcut={{
-              modifiers: ["cmd", "shift"],
+              modifiers: ["cmd", "shift", "opt"],
               key: "t",
             }}
           >
