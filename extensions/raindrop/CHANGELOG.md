@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Add fallback icon] - 2022-08-02
+## [Add fallback icon] - 2022-08-03
 
 - Adds Raindrop icon if bookmark has no favicon
 
