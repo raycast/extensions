@@ -14,6 +14,14 @@ export const oauthClient = new OAuth.PKCEClient({
 
 // Authorization
 
+export async function isAuthorized(): Promise<boolean> {
+  const tokenSet = await oauthClient.getTokens();
+  if (tokenSet?.accessToken) {
+    return tokenSet?.accessToken.length > 0;
+  }
+  return false;
+}
+
 export async function authorize(): Promise<void> {
   const tokenSet = await oauthClient.getTokens();
   if (tokenSet?.accessToken) {
