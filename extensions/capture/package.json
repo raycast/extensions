@@ -14,6 +14,25 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "jwt",
+      "type": "password",
+      "required": true,
+      "title": "JWT",
+      "description": "Your Capture JWT",
+      "placeholder": "Enter your Capture JWT"
+    },
+    {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "URL",
+      "description": "Your Capture URL",
+      "placeholder": "Enter your Capture URL",
+      "default": "https://capture-tool-prod.herokuapp.com/rpc/quickCapture"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.38.0",
     "node-fetch": "^3.2.9"

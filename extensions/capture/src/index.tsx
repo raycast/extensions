@@ -1,41 +1,31 @@
-import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 import { useState } from "react";
 
-type Values = {
-  text: string;
-  notes: string;
-  date: Date;
-  collection: string;
+interface Preferences {
   url: string;
   jwt: string;
-};
+}
+
+interface Values {
+  text: string;
+}
 
 const requiredError = "Required";
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+
   const [textError, setTextError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
-  const [jwtError, setJwtError] = useState<string | undefined>();
 
   function hasRequiredError(values: Values) {
     setTextError(!values.text ? requiredError : undefined);
-    setUrlError(!values.url ? requiredError : undefined);
-    setJwtError(!values.jwt ? requiredError : undefined);
 
-    return !values.text || !values.url || !values.jwt;
+    return !values.text;
   }
 
   function clearTextErrorIfNeeded(): any {
     if (textError && textError.length > 0) setTextError(undefined);
-  }
-
-  function clearUrlErrorIfNeeded(): any {
-    if (urlError && urlError.length > 0) setUrlError(undefined);
-  }
-
-  function clearJwtErrorIfNeeded(): any {
-    if (jwtError && jwtError.length > 0) setJwtError(undefined);
   }
 
   function handleSubmit(values: Values) {
@@ -43,7 +33,7 @@ export default function Command() {
 
     showToast({ title: "Sending to Capture...", style: "ANIMATED" as any });
 
-    fetch(values.url, POST({ body: { text: values.text }, token: values.jwt })).then(() => {
+    fetch(preferences.url, POST({ body: { text: values.text }, token: preferences.jwt })).then(() => {
       closeMainWindow();
       popToRoot();
     });
@@ -58,9 +48,6 @@ export default function Command() {
       }
     >
       <Form.TextArea id="text" placeholder="Start typing..." error={textError} onChange={clearTextErrorIfNeeded} />
-      <Form.Separator />
-      <Form.TextField id="url" title="URL" error={urlError} onChange={clearUrlErrorIfNeeded} storeValue />
-      <Form.TextField id="jwt" title="JWT" error={jwtError} onChange={clearJwtErrorIfNeeded} storeValue />
     </Form>
   );
 }

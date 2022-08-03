@@ -1,3 +1,3 @@
 # capture
 
-Quickly capture to your Capture Inbox with Raycast.
+Quickly create records in Capture with Raycast.
