@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-svgo",
+  "title": "SVGO",
+  "description": "Optimize SVG from the clipboard",
+  "icon": "svgo.png",
+  "author": "kaichi",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "optimize",
+      "title": "Optimize",
+      "subtitle": "SVGO",
+      "description": "optimize svg",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.38.2",
+    "is-svg": "4.3.2",
+    "svgo": "2.8.0"
+  },
+  "devDependencies": {
+    "@types/svgo": "2.6.3",
+    "@typescript-eslint/eslint-plugin": "5.32.0",
+    "@typescript-eslint/parser": "5.32.0",
+    "eslint": "8.21.0",
+    "eslint-config-prettier": "8.5.0",
+    "prettier": "2.7.1",
+    "typescript": "4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
