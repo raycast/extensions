@@ -30,7 +30,7 @@ export const useMemberMap = () => {
         ...acc,
         [member.id]: member,
       }),
-      {} as Record<string, Member>
+      {} as Record<Member["id"], Member>
     );
   }, [data]);
 };
@@ -58,11 +58,14 @@ export const useProjectMap = () => {
   const { data: projects } = useProjects();
 
   return useMemo(() => {
-    return projects?.reduce((map, project) => ({ ...map, [project.id]: project }), {} as Record<number, Project>) || {};
+    return (
+      projects?.reduce((map, project) => ({ ...map, [project.id]: project }), {} as Record<Project["id"], Project>) ||
+      {}
+    );
   }, [projects]);
 };
 
-export const useProjectStories = (projectId?: number) => {
+export const useProjectStories = (projectId?: Project["id"]) => {
   return useCachedPromise((projectId) => shortcut.listStories(projectId, {}).then((res) => res.data), [projectId], {
     execute: !!projectId,
   });
@@ -79,13 +82,13 @@ export const useIterationMap = () => {
     return (
       iterations?.reduce(
         (map, iteration) => ({ ...map, [iteration.id]: iteration }),
-        {} as Record<number, IterationSlim>
+        {} as Record<IterationSlim["id"], IterationSlim>
       ) || {}
     );
   }, [iterations]);
 };
 
-export const useIterationStories = (iterationId?: number) => {
+export const useIterationStories = (iterationId?: IterationSlim["id"]) => {
   return useCachedPromise(
     (iterationId) => shortcut.listIterationStories(iterationId, {}).then((res) => res.data),
     [iterationId],
@@ -104,13 +107,16 @@ export const useWorkflowMap = () => {
 
   return useMemo(() => {
     return (
-      workflows?.reduce((map, workflow) => ({ ...map, [workflow.id]: workflow }), {} as Record<number, Workflow>) || {}
+      workflows?.reduce(
+        (map, workflow) => ({ ...map, [workflow.id]: workflow }),
+        {} as Record<Workflow["id"], Workflow>
+      ) || {}
     );
   }, [workflows]);
 };
 
-export const useStory = (storyId?: number) => {
-  return useCachedPromise<(storyId: number) => Promise<Story>>(
+export const useStory = (storyId?: Story["id"]) => {
+  return useCachedPromise<(storyId: Story["id"]) => Promise<Story>>(
     (storyId) => shortcut.getStory(storyId).then((res) => res.data),
     [storyId!],
     {
@@ -140,11 +146,11 @@ export const useGroupsMap = () => {
   const { data } = useGroups();
 
   return useMemo(() => {
-    return data?.reduce((map, group) => ({ ...map, [group.id]: group }), {} as Record<number, Group>) || {};
+    return data?.reduce((map, group) => ({ ...map, [group.id]: group }), {} as Record<Group["id"], Group>) || {};
   }, [data]);
 };
 
-export const useProject = (projectId?: number) => {
+export const useProject = (projectId?: Project["id"]) => {
   return useCachedPromise((projectId) => shortcut.getProject(projectId).then((res) => res.data), [projectId], {
     execute: !!projectId,
   });
@@ -154,7 +160,7 @@ export const useEpics = () => {
   return useCachedPromise<() => Promise<EpicSlim[]>>(() => shortcut.listEpics({}).then((res) => res.data));
 };
 
-export const useEpicStories = (epicId?: number) => {
+export const useEpicStories = (epicId?: EpicSlim["id"]) => {
   return useCachedPromise((epicId) => shortcut.listEpicStories(epicId, {}).then((res) => res.data), [epicId], {
     execute: !!epicId,
   });
@@ -168,6 +174,6 @@ export const useLabelsMap = () => {
   const { data } = useLabels();
 
   return useMemo(() => {
-    return data?.reduce((map, label) => ({ ...map, [label.id]: label }), {} as Record<number, Label>) || {};
+    return data?.reduce((map, label) => ({ ...map, [label.id]: label }), {} as Record<Label["id"], Label>) || {};
   }, [data]);
 };
