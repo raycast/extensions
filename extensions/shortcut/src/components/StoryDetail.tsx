@@ -34,7 +34,7 @@ ${tasklist}
 `;
 };
 
-export default function StoryDetail({ storyId, refreshList }: { storyId: number; refreshList?: () => void }) {
+export default function StoryDetail({ storyId, mutate }: { storyId: number; mutate?: () => void }) {
   const { data: story, isValidating, mutate: mutateStory } = useStory(storyId);
   const workflowMap = useWorkflowMap();
   const storyMarkdown = useStoryMarkdown(story);
@@ -266,8 +266,8 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                       try {
                         await shortcut.updateStory(story.id, { owner_ids: newOwnerIds });
                         await mutateStory();
-                        if (refreshList) {
-                          refreshList();
+                        if (mutate) {
+                          mutate();
                         }
                       } catch (error) {
                         showToast({
@@ -317,8 +317,8 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                           }),
                         });
                         await mutateStory();
-                        if (refreshList) {
-                          refreshList();
+                        if (mutate) {
+                          mutate();
                         }
                       } catch (error) {
                         showToast({
@@ -357,8 +357,8 @@ export default function StoryDetail({ storyId, refreshList }: { storyId: number;
                           try {
                             await shortcut.deleteStory(story.id);
 
-                            if (refreshList) {
-                              refreshList();
+                            if (mutate) {
+                              mutate();
                             }
 
                             pop();

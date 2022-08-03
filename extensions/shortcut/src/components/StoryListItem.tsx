@@ -7,11 +7,11 @@ import StoryDetail from "./StoryDetail";
 export default function StoryListItem({
   project,
   story,
-  refreshList,
+  mutate,
 }: {
   project?: Project;
   story: StorySlim;
-  refreshList?: () => void;
+  mutate?: () => void;
 }) {
   const memberMap = useMemberMap();
   const owners = story.owner_ids.map((ownerId) => memberMap?.[ownerId]);
@@ -60,7 +60,7 @@ export default function StoryListItem({
           <Action.Push
             icon={Icon.Sidebar}
             title="View Story"
-            target={<StoryDetail storyId={story.id} refreshList={refreshList} />}
+            target={<StoryDetail storyId={story.id} mutate={mutate} />}
           />
           <Action.OpenInBrowser url={story.app_url} />
         </ActionPanel>

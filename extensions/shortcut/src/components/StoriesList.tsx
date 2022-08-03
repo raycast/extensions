@@ -7,11 +7,11 @@ import StoryListItem from "./StoryListItem";
 export default function StoriesList({
   stories,
   isLoading,
-  refreshList,
+  mutate,
 }: {
   stories: StorySlim[] | undefined;
   isLoading: boolean;
-  refreshList?: () => void;
+  mutate?: () => void;
 }) {
   const projectIdMap = useProjectMap();
   const workflowMap = useWorkflowMap();
@@ -48,7 +48,7 @@ export default function StoriesList({
                     story={story}
                     project={projectIdMap[story.project_id!]}
                     key={story.id}
-                    refreshList={refreshList}
+                    mutate={mutate}
                   />
                 );
               })}

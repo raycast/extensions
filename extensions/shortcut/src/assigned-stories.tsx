@@ -10,7 +10,7 @@ export default function AssignedStories() {
     <StoriesList
       isLoading={!assignedStories || isValidating}
       stories={assignedStories?.data as unknown as StorySlim[]}
-      refreshList={mutate}
+      mutate={mutate}
     />
   );
 }
