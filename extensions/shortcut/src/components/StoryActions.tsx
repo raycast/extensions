@@ -13,6 +13,21 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
   const { pop } = useNavigation();
   const workflow = useStoryWorkflow(story);
 
+  const storyUpdateAction = (updater: () => Promise<any>) => async () => {
+    try {
+      await updater();
+      if (mutate) {
+        mutate();
+      }
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update story",
+        message: String(error),
+      });
+    }
+  };
+
   return (
     <>
       {story && (
@@ -30,25 +45,12 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
             }}
           >
             {workflow?.states.map((state) => {
-              const onAction = async () => {
-                try {
-                  await shortcut.updateStory(story.id, { workflow_state_id: state.id });
-                  if (mutate) {
-                    mutate();
-                  }
-                } catch (error) {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to update story",
-                    message: String(error),
-                  });
-                }
-              };
-
               return (
                 <Action
                   title={state.name}
-                  onAction={onAction}
+                  onAction={storyUpdateAction(
+                    async () => await shortcut.updateStory(story.id, { workflow_state_id: state.id })
+                  )}
                   key={state.id}
                   icon={state.id !== story.workflow_state_id ? Icon.Circle : Icon.CircleFilled}
                 />
@@ -65,26 +67,13 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
             }}
           >
             {["bug", "chore", "feature"].map((type) => {
-              const onAction = async () => {
-                try {
-                  await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" });
-
-                  if (mutate) {
-                    mutate();
-                  }
-                } catch (error) {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to update story",
-                    message: String(error),
-                  });
-                }
-              };
-
               return (
                 <Action
                   title={type}
-                  onAction={onAction}
+                  onAction={storyUpdateAction(
+                    async () =>
+                      await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" })
+                  )}
                   key={type}
                   icon={{
                     source: type !== story.story_type ? Icon.Circle : Icon.CircleFilled,
@@ -105,25 +94,12 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               }}
             >
               {memberInfo.workspace2.estimate_scale.map((estimate) => {
-                const onAction = async () => {
-                  try {
-                    await shortcut.updateStory(story.id, { estimate: estimate });
-                    if (mutate) {
-                      mutate();
-                    }
-                  } catch (error) {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to update story",
-                      message: String(error),
-                    });
-                  }
-                };
-
                 return (
                   <Action
                     title={`${estimate}`}
-                    onAction={onAction}
+                    onAction={storyUpdateAction(
+                      async () => await shortcut.updateStory(story.id, { estimate: estimate })
+                    )}
                     key={estimate}
                     icon={estimate !== story.estimate ? Icon.Circle : Icon.CircleFilled}
                   />
@@ -142,25 +118,12 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               }}
             >
               {iterations.map((iteration) => {
-                const onAction = async () => {
-                  try {
-                    await shortcut.updateStory(story.id, { iteration_id: iteration.id });
-                    if (mutate) {
-                      mutate();
-                    }
-                  } catch (error) {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to update story",
-                      message: String(error),
-                    });
-                  }
-                };
-
                 return (
                   <Action
                     title={iteration.name}
-                    onAction={onAction}
+                    onAction={storyUpdateAction(
+                      async () => await shortcut.updateStory(story.id, { iteration_id: iteration.id })
+                    )}
                     key={iteration.id}
                     icon={iteration.id !== story.iteration_id ? Icon.Circle : Icon.CircleFilled}
                   />
@@ -184,25 +147,12 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                   ? existingOwnerIds.filter((id) => id !== memberId)
                   : [...existingOwnerIds, memberId];
 
-                const onAction = async () => {
-                  try {
-                    await shortcut.updateStory(story.id, { owner_ids: newOwnerIds });
-                    if (mutate) {
-                      mutate();
-                    }
-                  } catch (error) {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to update story",
-                      message: String(error),
-                    });
-                  }
-                };
-
                 return (
                   <Action
                     title={getMemberName(member)}
-                    onAction={onAction}
+                    onAction={storyUpdateAction(
+                      async () => await shortcut.updateStory(story.id, { owner_ids: newOwnerIds })
+                    )}
                     key={memberId}
                     icon={existingOwnerIds.includes(memberId) ? Icon.CircleFilled : Icon.Circle}
                   />
@@ -226,33 +176,21 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                   ? existingLabelIds.filter((id) => id !== label.id)
                   : [...existingLabelIds, label.id];
 
-                const onAction = async () => {
-                  try {
-                    await shortcut.updateStory(story.id, {
-                      labels: newLabelIds.map((id) => {
-                        const label = labelsMap[id];
-
-                        return {
-                          name: label.name,
-                        };
-                      }),
-                    });
-                    if (mutate) {
-                      mutate();
-                    }
-                  } catch (error) {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to update story",
-                      message: String(error),
-                    });
-                  }
-                };
-
                 return (
                   <Action
                     title={label.name}
-                    onAction={onAction}
+                    onAction={storyUpdateAction(
+                      async () =>
+                        await shortcut.updateStory(story.id, {
+                          labels: newLabelIds.map((id) => {
+                            const label = labelsMap[id];
+
+                            return {
+                              name: label.name,
+                            };
+                          }),
+                        })
+                    )}
                     key={label.id}
                     icon={existingLabelIds.includes(label.id) ? Icon.CircleFilled : Icon.Circle}
                   />
