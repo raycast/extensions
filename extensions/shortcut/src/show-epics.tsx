@@ -5,11 +5,11 @@ import { getOwnersAccessoryItems } from "./helpers/storyHelpers";
 import { useEpics, useMemberMap } from "./hooks";
 
 export default function ShowEpics() {
-  const { data: epics, isValidating } = useEpics();
+  const { data: epics, isLoading } = useEpics();
   const memberMap = useMemberMap();
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isLoading}>
       {epics
         ?.sort((a, b) => a.position - b.position)
         .map((epic) => {

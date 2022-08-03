@@ -2,7 +2,7 @@ import { useIterationStories } from "../hooks";
 import StoriesList from "./StoriesList";
 
 export function IterationStories({ iterationId }: { iterationId: number }) {
-  const { data: stories, isValidating, mutate } = useIterationStories(iterationId);
+  const { data: stories, isLoading, mutate } = useIterationStories(iterationId);
 
-  return <StoriesList stories={stories} isLoading={isValidating} mutate={mutate} />;
+  return <StoriesList stories={stories} isLoading={isLoading} mutate={mutate} />;
 }

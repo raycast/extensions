@@ -1,14 +1,24 @@
 import shortcut from "../utils/shortcut";
 import { useMemo } from "react";
-import useSWR from "swr";
-import { Group, IterationSlim, Label, Member, Project, Workflow } from "@useshortcut/client";
+import { useCachedPromise } from "@raycast/utils";
+import {
+  EpicSlim,
+  Group,
+  IterationSlim,
+  Label,
+  Member,
+  MemberInfo,
+  Project,
+  Story,
+  Workflow,
+} from "@useshortcut/client";
 
 export const useMemberInfo = () => {
-  return useSWR("/member", () => shortcut.getCurrentMemberInfo().then((res) => res.data));
+  return useCachedPromise<() => Promise<MemberInfo>>(() => shortcut.getCurrentMemberInfo().then((res) => res.data));
 };
 
 export const useMembers = () => {
-  return useSWR("/members", () => shortcut.listMembers({}).then((res) => res.data));
+  return useCachedPromise<() => Promise<Member[]>>(() => shortcut.listMembers({}).then((res) => res.data));
 };
 
 export const useMemberMap = () => {
@@ -25,19 +35,22 @@ export const useMemberMap = () => {
 };
 
 export const useAssignedStories = (owner?: string) => {
-  return useSWR(
-    () => owner && `/stories/owner/${owner}`,
-    () =>
+  return useCachedPromise(
+    (owner) =>
       shortcut
         .searchStories({
           query: `owner:${owner}`,
         })
-        .then((res) => res.data)
+        .then((res) => res.data),
+    [owner],
+    {
+      execute: !!owner,
+    }
   );
 };
 
 export const useProjects = () => {
-  return useSWR("/projects", () => shortcut.listProjects().then((res) => res.data));
+  return useCachedPromise<() => Promise<Project[]>>(() => shortcut.listProjects().then((res) => res.data));
 };
 
 export const useProjectMap = () => {
@@ -49,14 +62,13 @@ export const useProjectMap = () => {
 };
 
 export const useProjectStories = (projectId?: number) => {
-  return useSWR(
-    () => projectId && `/stories/project/${projectId}`,
-    () => shortcut.listStories(projectId!, {}).then((res) => res.data)
-  );
+  return useCachedPromise((projectId) => shortcut.listStories(projectId, {}).then((res) => res.data), [projectId], {
+    execute: !!projectId,
+  });
 };
 
 export const useIterations = () => {
-  return useSWR("/iterations", () => shortcut.listIterations().then((res) => res.data));
+  return useCachedPromise<() => Promise<IterationSlim[]>>(() => shortcut.listIterations().then((res) => res.data));
 };
 
 export const useIterationMap = () => {
@@ -73,14 +85,17 @@ export const useIterationMap = () => {
 };
 
 export const useIterationStories = (iterationId?: number) => {
-  return useSWR(
-    () => iterationId && `/stories/iteration/${iterationId}`,
-    () => shortcut.listIterationStories(iterationId!, {}).then((res) => res.data)
+  return useCachedPromise(
+    (iterationId) => shortcut.listIterationStories(iterationId, {}).then((res) => res.data),
+    [iterationId],
+    {
+      execute: !!iterationId,
+    }
   );
 };
 
 export const useWorkflows = () => {
-  return useSWR("/workflows", () => shortcut.listWorkflows().then((res) => res.data));
+  return useCachedPromise<() => Promise<Workflow[]>>(() => shortcut.listWorkflows().then((res) => res.data));
 };
 
 export const useWorkflowMap = () => {
@@ -94,14 +109,17 @@ export const useWorkflowMap = () => {
 };
 
 export const useStory = (storyId?: number) => {
-  return useSWR(
-    () => storyId && `/stories/${storyId}`,
-    () => shortcut.getStory(storyId!).then((res) => res.data)
+  return useCachedPromise<(storyId: number) => Promise<Story>>(
+    (storyId) => shortcut.getStory(storyId).then((res) => res.data),
+    [storyId!],
+    {
+      execute: !!storyId,
+    }
   );
 };
 
 export const useGroups = () => {
-  return useSWR("/groups", () => shortcut.listGroups().then((res) => res.data));
+  return useCachedPromise<() => Promise<Group[]>>(() => shortcut.listGroups().then((res) => res.data));
 };
 
 export const useGroupsMap = () => {
@@ -113,25 +131,23 @@ export const useGroupsMap = () => {
 };
 
 export const useProject = (projectId?: number) => {
-  return useSWR(
-    () => projectId && `/projects/${projectId}`,
-    () => shortcut.getProject(projectId!).then((res) => res.data)
-  );
+  return useCachedPromise((projectId) => shortcut.getProject(projectId).then((res) => res.data), [projectId], {
+    execute: !!projectId,
+  });
 };
 
 export const useEpics = () => {
-  return useSWR("/epics", () => shortcut.listEpics({}).then((res) => res.data));
+  return useCachedPromise<() => Promise<EpicSlim[]>>(() => shortcut.listEpics({}).then((res) => res.data));
 };
 
 export const useEpicStories = (epicId?: number) => {
-  return useSWR(
-    () => epicId && `/stories/epic/${epicId}`,
-    () => shortcut.listEpicStories(epicId!, {}).then((res) => res.data)
-  );
+  return useCachedPromise((epicId) => shortcut.listEpicStories(epicId, {}).then((res) => res.data), [epicId], {
+    execute: !!epicId,
+  });
 };
 
 export const useLabels = () => {
-  return useSWR("/labels", () => shortcut.listLabels({}).then((res) => res.data));
+  return useCachedPromise<() => Promise<Label[]>>(() => shortcut.listLabels({}).then((res) => res.data));
 };
 
 export const useLabelsMap = () => {

@@ -10,10 +10,10 @@ const sortIterationByStartDateDesc = (a: IterationSlim, b: IterationSlim) => {
 };
 
 export default function ListIterationStories() {
-  const { data: iterations, isValidating } = useIterations();
+  const { data: iterations, isLoading } = useIterations();
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isLoading}>
       {iterations?.sort(sortIterationByStartDateDesc).map((iteration) => {
         const { num_stories_done, num_stories_unstarted, num_stories_started } = iteration.stats;
         const totalStories = num_stories_done + num_stories_unstarted + num_stories_started;

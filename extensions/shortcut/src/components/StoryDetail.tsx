@@ -35,7 +35,7 @@ ${tasklist}
 };
 
 export default function StoryDetail({ storyId, mutate }: { storyId: number; mutate?: () => void }) {
-  const { data: story, isValidating, mutate: mutateStory } = useStory(storyId);
+  const { data: story, isLoading, mutate: mutateStory } = useStory(storyId);
   const workflowMap = useWorkflowMap();
   const storyMarkdown = useStoryMarkdown(story);
   const groupMap = useGroupsMap();
@@ -97,7 +97,7 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
 
   return (
     <Detail
-      isLoading={isValidating}
+      isLoading={isLoading}
       navigationTitle={story?.name}
       markdown={storyMarkdown}
       actions={
