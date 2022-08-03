@@ -33,7 +33,10 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
   return (
     <List.Item
       id={String(bookmark._id)}
-      icon={faviconUrl(64, bookmark.link)}
+      icon={{
+        source: faviconUrl(64, bookmark.link),
+        fallback: "raindrop-icon.png",
+      }}
       key={bookmark._id}
       title={bookmark.title}
       subtitle={bookmark.tags.map((tag) => `#${tag}`).join(" ")}
