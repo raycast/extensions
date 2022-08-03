@@ -1,5 +1,11 @@
 # Figma Files Changelog
 
+## [Large thumbnails and menubar app] - 2022-08-03
+
+- Added new detail view to see larger thumbnails.
+- New menubar app to access your files even quicker!
+- removed deprecated Raycast functions and updated dependencies.
+
 ## [Error view] - 2022-02-08
 
 Added a new error view.
