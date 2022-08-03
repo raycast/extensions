@@ -3,6 +3,7 @@ import { Project, StorySlim } from "@useshortcut/client";
 import { useMemberMap } from "../hooks";
 import { getOwnersAccessoryItems, getStoryColor } from "../helpers/storyHelpers";
 import StoryDetail from "./StoryDetail";
+import StoryActions from "./StoryActions";
 
 export default function StoryListItem({
   project,
@@ -63,6 +64,15 @@ export default function StoryListItem({
             target={<StoryDetail storyId={story.id} mutate={mutate} />}
           />
           <Action.OpenInBrowser url={story.app_url} />
+
+          <StoryActions
+            mutate={async () => {
+              if (mutate) {
+                mutate();
+              }
+            }}
+            story={story}
+          />
         </ActionPanel>
       }
     />

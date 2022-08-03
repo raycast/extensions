@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Detail } from "@raycast/api";
+import { ActionPanel, Detail } from "@raycast/api";
 import { getMemberAvatar, getStoryColor } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
 import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useStoryWorkflow } from "../hooks";
@@ -81,15 +81,17 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
       navigationTitle={story?.name}
       markdown={storyMarkdown}
       actions={
-        <StoryActions
-          mutate={async () => {
-            await mutateStory();
-            if (mutate) {
-              mutate();
-            }
-          }}
-          story={story}
-        />
+        <ActionPanel title="Story Actions">
+          <StoryActions
+            mutate={async () => {
+              await mutateStory();
+              if (mutate) {
+                mutate();
+              }
+            }}
+            story={story}
+          />
+        </ActionPanel>
       }
       metadata={
         story && (

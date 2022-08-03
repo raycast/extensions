@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { Story, StorySlim, Workflow } from "@useshortcut/client";
+import { Story, StorySlim } from "@useshortcut/client";
 import { getMemberName, getStoryColor } from "../helpers/storyHelpers";
 import { useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
 
@@ -14,7 +14,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
   const workflow = useStoryWorkflow(story);
 
   return (
-    <ActionPanel title="Story Actions">
+    <>
       {story && (
         <>
           <ActionPanel.Section>
@@ -297,6 +297,6 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
           </ActionPanel.Section>
         </>
       )}
-    </ActionPanel>
+    </>
   );
 }
