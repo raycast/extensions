@@ -2,16 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capture",
   "title": "Capture",
-  "description": "Quickly capture to your Capture Inbox with Raycast.",
+  "description": "Quickly create records in Capture with Raycast.",
   "icon": "command-icon.png",
   "author": "syhchen",
-  "owner": "eleventhlabs",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Capture to Inbox",
-      "description": "Capture a new Record to the Inbox.",
+      "title": "Create New Record",
+      "description": "Creates a new record in your Capture inbox.",
       "mode": "view"
     }
   ],

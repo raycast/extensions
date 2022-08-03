@@ -55,11 +55,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            // shortcut={{ key: "enter", modifiers: ["ctrl"] }}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

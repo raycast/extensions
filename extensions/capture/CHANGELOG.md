@@ -1,3 +1,3 @@
 # Capture Changelog
 
-## [Initial Version] - 2022-07-21
+## [Initial Version] - 2022-08-03
