@@ -27,7 +27,7 @@ export interface Note {
 }
 
 export const listNotes = (): NoteEntry[] => {
-  const paths = find(`${NOTE_PLAN_URI}/Notes/**/*.${getPreferences().fileExtension}`, { absolute: true });
+  const paths = find(`${NOTE_PLAN_URI}/{Calendar,Notes}/**/*.${getPreferences().fileExtension}`, { absolute: true });
 
   return paths.map((path) => {
     const relativePath = path.replace(NOTE_PLAN_URI, "");
@@ -64,6 +64,10 @@ export const getNoteTitle = (note: NoteEntry) => {
   };
 
   if (note.type == NoteType.Calendar) {
+    if (note.fileName.match(/\d{4}-W\d{1,2}/)) {
+      const parts = note.fileName.split("-W");
+      return `Week ${parts[1]}, ${parts[0]}`;
+    }
     const date = parseDate(note.fileName, "yyyyMMdd", new Date());
     return formatRelative(date, new Date(), {
       locale: {
