@@ -15,7 +15,7 @@ export const getNoteUrl = (note: Note): string => {
   const namePath = note.userPath || note.teamPath;
 
   if (namePath) {
-    return new url.URL(`@${namePath}/${note.permalink || note.id}`, instance_url).toString();
+    return new url.URL(`@${namePath}/${note.permalink || note.shortId}`, instance_url).toString();
   } else {
     const mode = modeAlias[note.publishType];
 
