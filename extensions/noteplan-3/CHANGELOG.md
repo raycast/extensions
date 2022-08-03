@@ -1,6 +1,6 @@
 # NotePlan 3 Changelog
 
-## [Fixes] - 2022-08-02
+## [Fixes] - 2022-08-03
 - Fix searching where notes have an alternate extension (often md)
 - Fix crash when there are weekly notes
 
