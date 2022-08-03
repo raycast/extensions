@@ -1,5 +1,5 @@
-import CreateStoryForm from "./components/CreateStoryForm";
+import StoryForm from "./components/StoryForm";
 
 export default function CreateStory() {
-  return <CreateStoryForm />;
+  return <StoryForm />;
 }

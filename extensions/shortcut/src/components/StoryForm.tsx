@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { Form, Icon } from "@raycast/api";
-import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes } from "../helpers/storyHelpers";
-import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
-import { capitalize } from "../utils/string";
+import { Story } from "@useshortcut/client";
 
-export default function CreateStoryForm() {
+import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes } from "../helpers/storyHelpers";
+import { capitalize } from "../utils/string";
+import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
+
+export default function StoryForm({ story }: { story?: Story }) {
   const { data: members, isLoading: isMembersLoading } = useMembers();
   const { data: memberInfo, isLoading: isMemberInfoLoading } = useMemberInfo();
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
