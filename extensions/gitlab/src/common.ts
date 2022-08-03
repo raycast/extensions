@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 
 import { getPreferenceValues } from "@raycast/api";
 import { getHttpAgent, GitLab } from "./gitlabapi";
+import { MRState } from "./components/mr";
 
 export function createGitLabClient(): GitLab {
   const preferences = getPreferenceValues();
@@ -91,6 +92,22 @@ export function getPrimaryActionPreference(): PrimaryAction {
     return PrimaryAction.Browser;
   }
   const result: PrimaryAction = val;
+  return result;
+}
+
+export function getMyMrStatePreference(): MRState {
+  const pref = getPreferenceValues();
+  const val = (pref.mymrstate as string) || undefined;
+  if (
+    val !== MRState.opened &&
+    val !== MRState.closed &&
+    val !== MRState.locked &&
+    val !== MRState.merged &&
+    val !== MRState.all
+  ) {
+    return MRState.all;
+  }
+  const result: MRState = val;
   return result;
 }
 

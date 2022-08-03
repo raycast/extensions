@@ -181,6 +181,36 @@
       "description": "Set the default action for Projects"
     },
     {
+      "name": "mymrstate",
+      "type": "dropdown",
+      "title": "My Merge Requests State",
+      "required": true,
+      "default": "all",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Opened",
+          "value": "opened"
+        },
+        {
+          "title": "Closed",
+          "value": "closed"
+        },
+        {
+          "title": "Locked",
+          "value": "locked"
+        },
+        {
+          "title": "Merged",
+          "value": "merged"
+        }
+      ],
+      "description": "What state of merge requests should be displayed in \"My Merge Requests\" command"
+    },
+    {
       "name": "poptoroot",
       "type": "checkbox",
       "label": "Pop to Root after external action",
@@ -230,7 +260,8 @@
     "Loskir",
     "immint023",
     "duboiss",
-    "metakirby5"
+    "metakirby5",
+    "mentro"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
