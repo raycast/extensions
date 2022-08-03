@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Registered Programs",
+      "title": "Search Registered Programs",
       "subtitle": "Explore Activities",
       "description": "Register for Culture, Library and Recreation programs/activities. Like fitness, swimming, skating, camps, sports etc.",
       "mode": "view"
