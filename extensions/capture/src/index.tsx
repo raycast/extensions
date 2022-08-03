@@ -43,12 +43,10 @@ export default function Command() {
 
     showToast({ title: "Sending to Capture...", style: "ANIMATED" as any });
 
-    fetch(values.url, POST({ body: { text: values.text }, token: values.jwt }))
-      .then(() => {
-        closeMainWindow();
-        popToRoot();
-      })
-      .catch(() => {});
+    fetch(values.url, POST({ body: { text: values.text }, token: values.jwt })).then(() => {
+      closeMainWindow();
+      popToRoot();
+    });
   }
 
   return (
