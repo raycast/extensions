@@ -33,6 +33,13 @@
       "subtitle": "HackMD",
       "description": "Create a HackMD Note",
       "mode": "view"
+    },
+    {
+      "name": "view-history",
+      "title": "View History",
+      "subtitle": "HackMD",
+      "description": "View HackMD History",
+      "mode": "view"
     }
   ],
   "preferences": [
