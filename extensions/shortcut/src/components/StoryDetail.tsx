@@ -1,20 +1,10 @@
 import { useMemo } from "react";
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { getMemberAvatar, getMemberName, getStoryColor } from "../helpers/storyHelpers";
+import { Detail } from "@raycast/api";
+import { getMemberAvatar, getStoryColor } from "../helpers/storyHelpers";
 import { Story } from "@useshortcut/client";
-import {
-  useGroupsMap,
-  useIterationMap,
-  useIterations,
-  useLabelsMap,
-  useMemberInfo,
-  useMemberMap,
-  useProject,
-  useStory,
-  useWorkflowMap,
-} from "../hooks";
-import shortcut from "../utils/shortcut";
+import { useGroupsMap, useIterationMap, useMemberMap, useProject, useStory, useStoryWorkflow } from "../hooks";
 import { capitalize } from "../utils/string";
+import StoryActions from "./StoryActions";
 
 const storyTasksMarkdown = (story: Story) => {
   if (story.tasks.length === 0) {
@@ -37,24 +27,13 @@ ${tasklist}
 
 export default function StoryDetail({ storyId, mutate }: { storyId: number; mutate?: () => void }) {
   const { data: story, isLoading, mutate: mutateStory } = useStory(storyId);
-  const workflowMap = useWorkflowMap();
   const storyMarkdown = useStoryMarkdown(story);
   const groupMap = useGroupsMap();
   const { data: project } = useProject(story?.project_id as number);
   const iterationMap = useIterationMap();
-  const { data: iterations } = useIterations();
   const memberMap = useMemberMap();
-  const { data: memberInfo } = useMemberInfo();
-  const labelsMap = useLabelsMap();
-  const { pop } = useNavigation();
 
-  const workflow = useMemo(() => {
-    if (!story || !workflowMap) {
-      return;
-    }
-
-    return workflowMap[story.workflow_id];
-  }, [story, workflowMap]);
+  const workflow = useStoryWorkflow(story);
 
   const storyState = useMemo(() => {
     if (!workflow || !story) {
@@ -102,295 +81,15 @@ export default function StoryDetail({ storyId, mutate }: { storyId: number; muta
       navigationTitle={story?.name}
       markdown={storyMarkdown}
       actions={
-        <ActionPanel title="Story Actions">
-          {story && (
-            <>
-              <ActionPanel.Section>
-                <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
-              </ActionPanel.Section>
-
-              <ActionPanel.Submenu
-                title="Set Status..."
-                icon={Icon.Pencil}
-                shortcut={{
-                  modifiers: ["cmd", "shift"],
-                  key: "s",
-                }}
-              >
-                {workflow?.states.map((state) => {
-                  const onAction = async () => {
-                    try {
-                      await shortcut.updateStory(story.id, { workflow_state_id: state.id });
-                      await mutateStory();
-                      if (mutate) {
-                        mutate();
-                      }
-                    } catch (error) {
-                      showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to update story",
-                        message: String(error),
-                      });
-                    }
-                  };
-
-                  return (
-                    <Action
-                      title={state.name}
-                      onAction={onAction}
-                      key={state.id}
-                      icon={state.id !== story.workflow_state_id ? Icon.Circle : Icon.CircleFilled}
-                    />
-                  );
-                })}
-              </ActionPanel.Submenu>
-
-              <ActionPanel.Submenu
-                title="Set Type..."
-                icon={Icon.Bookmark}
-                shortcut={{
-                  modifiers: ["cmd", "shift"],
-                  key: "t",
-                }}
-              >
-                {["bug", "chore", "feature"].map((type) => {
-                  const onAction = async () => {
-                    try {
-                      await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" });
-                      await mutateStory();
-                      if (mutate) {
-                        mutate();
-                      }
-                    } catch (error) {
-                      showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to update story",
-                        message: String(error),
-                      });
-                    }
-                  };
-
-                  return (
-                    <Action
-                      title={type}
-                      onAction={onAction}
-                      key={type}
-                      icon={{
-                        source: type !== story.story_type ? Icon.Circle : Icon.CircleFilled,
-                        tintColor: getStoryColor(type),
-                      }}
-                    />
-                  );
-                })}
-              </ActionPanel.Submenu>
-
-              {memberInfo && memberInfo.workspace2.estimate_scale && (
-                <ActionPanel.Submenu
-                  title="Set Estimate..."
-                  icon={Icon.Clock}
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "e",
-                  }}
-                >
-                  {memberInfo.workspace2.estimate_scale.map((estimate) => {
-                    const onAction = async () => {
-                      try {
-                        await shortcut.updateStory(story.id, { estimate: estimate });
-                        await mutateStory();
-                        if (mutate) {
-                          mutate();
-                        }
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to update story",
-                          message: String(error),
-                        });
-                      }
-                    };
-
-                    return (
-                      <Action
-                        title={`${estimate}`}
-                        onAction={onAction}
-                        key={estimate}
-                        icon={estimate !== story.estimate ? Icon.Circle : Icon.CircleFilled}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
-              )}
-
-              {iterations && (
-                <ActionPanel.Submenu
-                  title="Set Iteration..."
-                  icon={Icon.Repeat}
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "i",
-                  }}
-                >
-                  {iterations.map((iteration) => {
-                    const onAction = async () => {
-                      try {
-                        await shortcut.updateStory(story.id, { iteration_id: iteration.id });
-                        await mutateStory();
-                        if (mutate) {
-                          mutate();
-                        }
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to update story",
-                          message: String(error),
-                        });
-                      }
-                    };
-
-                    return (
-                      <Action
-                        title={iteration.name}
-                        onAction={onAction}
-                        key={iteration.id}
-                        icon={iteration.id !== story.iteration_id ? Icon.Circle : Icon.CircleFilled}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
-              )}
-
-              {memberMap && Object.entries(memberMap).length > 0 && (
-                <ActionPanel.Submenu
-                  title="Assign Owner..."
-                  icon={Icon.PersonCircle}
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "o",
-                  }}
-                >
-                  {Object.entries(memberMap).map(([memberId, member]) => {
-                    const existingOwnerIds = story.owner_ids || [];
-                    const newOwnerIds = existingOwnerIds.includes(memberId)
-                      ? existingOwnerIds.filter((id) => id !== memberId)
-                      : [...existingOwnerIds, memberId];
-
-                    const onAction = async () => {
-                      try {
-                        await shortcut.updateStory(story.id, { owner_ids: newOwnerIds });
-                        await mutateStory();
-                        if (mutate) {
-                          mutate();
-                        }
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to update story",
-                          message: String(error),
-                        });
-                      }
-                    };
-
-                    return (
-                      <Action
-                        title={getMemberName(member)}
-                        onAction={onAction}
-                        key={memberId}
-                        icon={existingOwnerIds.includes(memberId) ? Icon.CircleFilled : Icon.Circle}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
-              )}
-
-              {labelsMap && Object.keys(labelsMap).length > 0 && (
-                <ActionPanel.Submenu
-                  title="Assign Label..."
-                  icon={Icon.Tag}
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "l",
-                  }}
-                >
-                  {Object.entries(labelsMap).map(([labelId, label]) => {
-                    const existingLabelIds = story.label_ids || [];
-                    const newLabelIds = existingLabelIds.includes(label.id)
-                      ? existingLabelIds.filter((id) => id !== label.id)
-                      : [...existingLabelIds, label.id];
-
-                    const onAction = async () => {
-                      try {
-                        await shortcut.updateStory(story.id, {
-                          labels: newLabelIds.map((id) => {
-                            const label = labelsMap[id];
-
-                            return {
-                              name: label.name,
-                            };
-                          }),
-                        });
-                        await mutateStory();
-                        if (mutate) {
-                          mutate();
-                        }
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed to update story",
-                          message: String(error),
-                        });
-                      }
-                    };
-
-                    return (
-                      <Action
-                        title={label.name}
-                        onAction={onAction}
-                        key={label.id}
-                        icon={existingLabelIds.includes(label.id) ? Icon.CircleFilled : Icon.Circle}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
-              )}
-
-              <ActionPanel.Section>
-                <Action
-                  style={Action.Style.Destructive}
-                  title="Delete Story"
-                  icon={Icon.Trash}
-                  onAction={() => {
-                    confirmAlert({
-                      title: "Delete Story",
-                      message: "Are you sure you want to delete this story?",
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                        onAction: async () => {
-                          try {
-                            await shortcut.deleteStory(story.id);
-
-                            if (mutate) {
-                              mutate();
-                            }
-
-                            pop();
-                          } catch (error) {
-                            showToast({
-                              style: Toast.Style.Failure,
-                              title: "Failed to delete story",
-                              message: String(error),
-                            });
-                          }
-                        },
-                      },
-                    });
-                  }}
-                />
-              </ActionPanel.Section>
-            </>
-          )}
-        </ActionPanel>
+        <StoryActions
+          mutate={async () => {
+            await mutateStory();
+            if (mutate) {
+              mutate();
+            }
+          }}
+          story={story}
+        />
       }
       metadata={
         story && (

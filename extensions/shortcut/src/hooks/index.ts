@@ -10,6 +10,7 @@ import {
   MemberInfo,
   Project,
   Story,
+  StorySlim,
   Workflow,
 } from "@useshortcut/client";
 
@@ -116,6 +117,19 @@ export const useStory = (storyId?: number) => {
       execute: !!storyId,
     }
   );
+};
+
+export const useStoryWorkflow = (story?: Story | StorySlim) => {
+  const workflowMap = useWorkflowMap();
+  const workflow = useMemo(() => {
+    if (!story || !workflowMap) {
+      return;
+    }
+
+    return workflowMap[story.workflow_id];
+  }, [story, workflowMap]);
+
+  return workflow;
 };
 
 export const useGroups = () => {
