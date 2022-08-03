@@ -48,9 +48,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               return (
                 <Action
                   title={state.name}
-                  onAction={storyUpdateAction(
-                    async () => await shortcut.updateStory(story.id, { workflow_state_id: state.id })
-                  )}
+                  onAction={storyUpdateAction(() => shortcut.updateStory(story.id, { workflow_state_id: state.id }))}
                   key={state.id}
                   icon={state.id !== story.workflow_state_id ? Icon.Circle : Icon.CircleFilled}
                 />
@@ -70,9 +68,8 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               return (
                 <Action
                   title={type}
-                  onAction={storyUpdateAction(
-                    async () =>
-                      await shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" })
+                  onAction={storyUpdateAction(() =>
+                    shortcut.updateStory(story.id, { story_type: type as "bug" | "chore" | "feature" })
                   )}
                   key={type}
                   icon={{
@@ -97,9 +94,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                 return (
                   <Action
                     title={`${estimate}`}
-                    onAction={storyUpdateAction(
-                      async () => await shortcut.updateStory(story.id, { estimate: estimate })
-                    )}
+                    onAction={storyUpdateAction(() => shortcut.updateStory(story.id, { estimate: estimate }))}
                     key={estimate}
                     icon={estimate !== story.estimate ? Icon.Circle : Icon.CircleFilled}
                   />
@@ -121,9 +116,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                 return (
                   <Action
                     title={iteration.name}
-                    onAction={storyUpdateAction(
-                      async () => await shortcut.updateStory(story.id, { iteration_id: iteration.id })
-                    )}
+                    onAction={storyUpdateAction(() => shortcut.updateStory(story.id, { iteration_id: iteration.id }))}
                     key={iteration.id}
                     icon={iteration.id !== story.iteration_id ? Icon.Circle : Icon.CircleFilled}
                   />
@@ -150,9 +143,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                 return (
                   <Action
                     title={getMemberName(member)}
-                    onAction={storyUpdateAction(
-                      async () => await shortcut.updateStory(story.id, { owner_ids: newOwnerIds })
-                    )}
+                    onAction={storyUpdateAction(() => shortcut.updateStory(story.id, { owner_ids: newOwnerIds }))}
                     key={memberId}
                     icon={existingOwnerIds.includes(memberId) ? Icon.CircleFilled : Icon.Circle}
                   />
@@ -179,17 +170,16 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
                 return (
                   <Action
                     title={label.name}
-                    onAction={storyUpdateAction(
-                      async () =>
-                        await shortcut.updateStory(story.id, {
-                          labels: newLabelIds.map((id) => {
-                            const label = labelsMap[id];
+                    onAction={storyUpdateAction(() =>
+                      shortcut.updateStory(story.id, {
+                        labels: newLabelIds.map((id) => {
+                          const label = labelsMap[id];
 
-                            return {
-                              name: label.name,
-                            };
-                          }),
-                        })
+                          return {
+                            name: label.name,
+                          };
+                        }),
+                      })
                     )}
                     key={label.id}
                     icon={existingLabelIds.includes(label.id) ? Icon.CircleFilled : Icon.Circle}
