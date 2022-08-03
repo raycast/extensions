@@ -42,7 +42,7 @@ export function AutomationEditInBrowserAction(props: { state: State }): JSX.Elem
     if (id !== undefined) {
       const url = ha.urlJoin(`config/automation/edit/${id}`);
       return (
-        <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["opt"], key: "e" }} />
+        <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
       );
     }
   }
@@ -56,7 +56,7 @@ export function AutomationDebugInBrowserAction(props: { state: State }): JSX.Ele
     if (id !== undefined) {
       const url = ha.urlJoin(`config/automation/trace/${id}`);
       return (
-        <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["opt"], key: "d" }} />
+        <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />
       );
     }
   }

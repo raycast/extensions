@@ -20,7 +20,7 @@ export function ScriptEditInBrowserAction(props: { state: State }): JSX.Element 
   if (s.entity_id.startsWith("script")) {
     const url = ha.urlJoin(`config/script/edit/${s.entity_id}`);
     return (
-      <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["opt"], key: "e" }} />
+      <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
     );
   }
   return null;
@@ -30,7 +30,7 @@ export function ScriptDebugInBrowserAction(props: { state: State }): JSX.Element
   const s = props.state;
   if (s.entity_id.startsWith("script")) {
     const url = ha.urlJoin(`config/script/trace/${s.entity_id}`);
-    return <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["opt"], key: "d" }} />;
+    return <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />;
   }
   return null;
 }
