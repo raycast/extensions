@@ -17,21 +17,21 @@ import {
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
-import { dirname, resolve } from "path";
+import path from "path";
 import React, { useEffect, useState } from "react";
 import untildify from "untildify";
 import { ScriptCommand } from "./types";
-import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
+import { codeblock, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
 type InputType = "text" | "clipboard";
 
 export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   const { inputFrom } = props;
-  const [commands, setCommands] = useState<ScriptCommand[]>();
+  const [state, setState] = useState<{ commands: ScriptCommand[]; invalid: InvalidCommand[] }>();
 
   const loadCommands = async () => {
-    const { commands } = await parseScriptCommands();
-    setCommands(await sortByAccessTime(commands));
+    const { commands, invalid } = await parseScriptCommands();
+    setState({ commands: await sortByAccessTime(commands), invalid });
   };
 
   useEffect(() => {
@@ -39,10 +39,27 @@ export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
-      {commands?.map((command) => (
-        <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
-      ))}
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
+      <List.Section title="Commands">
+        {state?.commands.map((command) => (
+          <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
+        ))}
+      </List.Section>
+      <List.Section title="Invalid Commands">
+        {state?.invalid.map((command) => (
+          <List.Item
+            key={command.path}
+            title={path.basename(command.path)}
+            subtitle={path.dirname(command.path)}
+            accessories={[{ text: `${command.errors.length} errors`, tooltip: command.errors.join("\n") }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Path" content={command.path} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -52,7 +69,7 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
     if (icon.startsWith("http") || icon.startsWith("https")) {
       return { source: icon };
     }
-    const iconPath = resolve(dirname(script.path), icon);
+    const iconPath = path.resolve(path.dirname(script.path), icon);
     if (existsSync(iconPath)) {
       return { source: iconPath };
     }
@@ -83,24 +100,19 @@ async function getInput(inputType: InputType) {
 
 const { pipePrimaryAction } = getPreferenceValues<{ pipePrimaryAction: "copy" | "paste" }>();
 
-export function PipeCommand(props: {
-  command: ScriptCommand;
-  inputFrom?: InputType;
-  onTrash: () => void;
-  showContent?: boolean;
-}): JSX.Element {
-  const { command, inputFrom, onTrash, showContent } = props;
+function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onTrash: () => void }): JSX.Element {
+  const { command, inputFrom, onTrash } = props;
 
   return (
     <List.Item
       key={command.path}
       icon={getRaycastIcon(command)}
-      accessories={[{ text: command.metadatas.mode, tooltip: "Mode" }]}
+      accessories={[
+        { text: command.metadatas.mode, tooltip: "Mode" },
+        ...(command.user ? [{ icon: Icon.Person }] : []),
+      ]}
       title={command.metadatas.title}
-      subtitle={showContent ? undefined : command.metadatas.packageName}
-      detail={
-        showContent ? <List.Item.Detail markdown={["## Content", codeblock(command.content)].join("\n")} /> : undefined
-      }
+      subtitle={command.metadatas.packageName}
       actions={
         <ActionPanel>
           {typeof inputFrom != "undefined" ? (
@@ -147,7 +159,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
     encoding: "utf-8",
     cwd: command.metadatas.currentDirectoryPath
       ? untildify(command.metadatas.currentDirectoryPath)
-      : dirname(command.path),
+      : path.dirname(command.path),
     input: command.metadatas.mode === "pipe" ? input : undefined,
     env: {
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",

@@ -27,18 +27,11 @@
       "subtitle": "Pipe Commands",
       "description": "Apply a script on your clipboard.",
       "mode": "view"
-    },
-    {
-      "name": "manage-pipe-commands",
-      "title": "Manage Pipe Commands",
-      "subtitle": "Pipe Commands",
-      "description": "Edit your Pipe Commands.",
-      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "pipeCommandsFolder",
+      "name": "commandFolder",
       "title": "Pipe Commands Folder",
       "required": false,
       "type": "textfield",

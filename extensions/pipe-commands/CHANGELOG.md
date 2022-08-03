@@ -18,6 +18,7 @@
 
 - Raycast IconSet values are no longer supported as icons (icons will be blank)
 - deprecate `paste` and `copy` modes in favor of `pipe` mode
+- Remove `Manage Pipe Commands` command
 
 ## [Add `Read the Content` Command] - 2022-04-07
 
