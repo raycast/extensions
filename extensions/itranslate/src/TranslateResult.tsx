@@ -55,8 +55,8 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
 
   function generateSnippetText(): string {
     const icons = ["📕", "📗", "📘", "📙", "📓"];
-    let snippet = `${icons[Math.floor(Math.random() * 5)]} Create Date:\n    ${new Date().toLocaleString()}\n\n`;
-    snippet += `🔍 Translate Result (${props.transRes.from.langTitle} -> ${props.transRes.to.langTitle}):\n    ${props.transRes.res}\n\n`;
+    let snippet = `${icons[Math.floor(Math.random() * 5)]} Create date:\n    ${new Date().toLocaleString()}\n\n`;
+    snippet += `🔍 Translate result (${props.transRes.from.langTitle} -> ${props.transRes.to.langTitle}):\n    ${props.transRes.res}\n\n`;
     if (props.transRes.phonetic) {
       snippet += `🗣️ Phonetic:\n    ${props.transRes.phonetic}\n\n`;
     }
@@ -73,6 +73,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
 
   return (
     <List.Item
+      key={props.transRes.serviceProvider}
       icon={{ source: `${props.transRes.serviceProvider}.png` }}
       title={props.transRes.res}
       detail={<TranslateResultDetail />}
@@ -96,7 +97,11 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
             shortcut={{ modifiers: ["cmd"], key: "p" }}
             onAction={openCommandPreferences}
           />
-          <ActionPanel.Section title="Target Language">
+          <ActionPanel.Submenu
+            title="Select target language"
+            icon={Icon.Repeat}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+          >
             {preferences.quickSwitchLang &&
               LANG_LIST.map((lang) => {
                 return (
@@ -117,7 +122,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
                   />
                 );
               })}
-          </ActionPanel.Section>
+          </ActionPanel.Submenu>
         </ActionPanel>
       }
     />

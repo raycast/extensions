@@ -66,6 +66,7 @@ export default function Command() {
   function parseInputPre(): string {
     return inputState.replace(/([a-z])([A-Z])/g, "$1_$2").replace(/([_])/g, " ");
   }
+
   function translate(targetLang: ILangItem) {
     if (!inputState) return;
     const contentToTrans = parseInputPre();
@@ -121,7 +122,7 @@ export default function Command() {
     if (!preferences.selectedDefault) {
       return (
         <ActionPanel>
-          <Action icon={Icon.Text} title="Translate Selected content" onAction={transSelected} />
+          <Action icon={Icon.Text} title="Translate selected content" onAction={transSelected} />
           <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       );
@@ -150,7 +151,7 @@ export default function Command() {
             if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
               return <TranslateError transRes={transRes} />;
             } else {
-              return <TranslateResult transRes={transRes} onLangUpdate={translate} />;
+              return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
             }
           })}
         </List.Section>

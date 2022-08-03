@@ -288,8 +288,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
-    "axios": "^0.25.0",
-    "@vitalets/google-translate-api": "^8.0.0"
+    "@vitalets/google-translate-api": "^8.0.0",
+    "axios": "^0.25.0"
   },
   "keywords": [
     "itranslate",
