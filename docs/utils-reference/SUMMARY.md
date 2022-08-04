@@ -3,6 +3,7 @@
 - [Getting Started](utils-reference/getting-started.md)
 - [Icons](utils-reference/icons/README.md)
   - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
+  - [getFavicon](utils-reference/icons/getFavicon.md)
   - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
 - [React hooks](utils-reference/react-hooks/README.md)
   - [useCachedState](utils-reference/react-hooks/useCachedState.md)
