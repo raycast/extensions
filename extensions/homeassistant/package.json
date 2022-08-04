@@ -186,6 +186,24 @@
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant Entity with device class window",
       "mode": "view"
+    },
+    {
+      "name": "notificationmenu",
+      "title": "Notifications Menu",
+      "description": "Display Persistent Notifications in the MenuBar",
+      "mode": "menu-bar",
+      "subtitle": "Home Assistant",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showcount",
+          "description": "Show Notification Count in Menu",
+          "type": "checkbox",
+          "label": "Show Notification Count in Menubar",
+          "required": false,
+          "default": false
+        }
+      ]
     }
   ],
   "preferences": [
