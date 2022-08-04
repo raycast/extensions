@@ -3,12 +3,12 @@ import { createInstantMeeting } from "./api/meetings";
 import { authorize } from "./api/oauth";
 
 export default async function Command() {
-  await authorize();
+  const token = await authorize();
 
   try {
     await showToast({ style: Toast.Style.Animated, title: "Creating meeting" });
 
-    const meeting = await createInstantMeeting();
+    const meeting = await createInstantMeeting(token);
 
     await open(meeting.join_url);
 
