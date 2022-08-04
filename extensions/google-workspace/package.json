@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "google-workspace-internal",
+  "name": "google-workspace",
   "title": "Google Workspace",
   "description": "Access Google Drive files.",
   "icon": "google-logo.png",
