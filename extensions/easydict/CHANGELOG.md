@@ -1,6 +1,6 @@
 # `Easydict` Changelog
 
-## [v1.4.1] - 2022-08-01
+## [v1.4.1] - 2022-08-04
 
 ### 💎 Improvements
 
