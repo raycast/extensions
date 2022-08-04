@@ -138,7 +138,8 @@ async function openDb() {
   const f_path = resolveHome(preferences.zotero_path);
   const new_fPath = f_path + ".raycast";
 
-  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(new_fPath);
   return new SQL.Database(db);
 }
@@ -164,7 +165,8 @@ async function openBibtexDb() {
   const f_path = resolveHome(preferences.zotero_path);
   const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
 
-  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(new_fPath);
   return new SQL.Database(db);
 }

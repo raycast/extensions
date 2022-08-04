@@ -12,10 +12,8 @@ const DB_PATH = `${homedir()}/Library/Application Support/${build}/User/globalSt
 
 async function loadDB() {
   const fileBuffer = await readFile(DB_PATH);
-  const SQL = await initSqlJs({
-    locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm"),
-  });
-
+  const wasmBinary = await readFile(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileBuffer);
 }
 

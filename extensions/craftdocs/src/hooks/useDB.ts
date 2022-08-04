@@ -38,7 +38,8 @@ export default function useDB({ config, configLoading }: UseConfig) {
   return { databases, databasesLoading, spaces: config?.spaces };
 }
 
-const loadDb = (path: string): Promise<Database> =>
-  initSqlJs({ locateFile: () => join(environment.assetsPath, "sql-wasm-fts5.wasm") }).then(
-    (SQL) => new SQL.Database(readFileSync(path))
-  );
+const loadDb = async (path: string): Promise<Database> => {
+  const wasmBinary = readFileSync(join(environment.assetsPath, "sql-wasm-fts5.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
+  return new SQL.Database(readFileSync(path));
+};
