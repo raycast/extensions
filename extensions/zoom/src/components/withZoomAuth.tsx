@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { authorize, client } from "../api/oauth";
+import { authorize } from "../api/oauth";
 
 let token: string | null = null;
 
@@ -9,11 +9,7 @@ export function withZoomAuth(component: JSX.Element) {
 
   useEffect(() => {
     (async function () {
-      const tokens = await client.getTokens();
-
-      const accessToken = tokens?.accessToken || (await authorize());
-
-      token = accessToken;
+      token = await authorize();
 
       forceRerender(x + 1);
     })();
