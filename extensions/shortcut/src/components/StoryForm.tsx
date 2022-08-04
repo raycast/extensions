@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Form, Icon } from "@raycast/api";
 import { Story } from "@useshortcut/client";
 
-import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes } from "../helpers/storyHelpers";
+import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField } from "../helpers/storyHelpers";
 import { capitalize } from "../utils/string";
 import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
 
@@ -28,11 +28,21 @@ export default function StoryForm({ story }: { story?: Story }) {
     [workflows, workflowId]
   );
 
+  const storyFields = useFormField(story?.name || "", {
+    validator: (value) => value.length > 0,
+    errorMessage: "Name is required",
+  });
+
+  const descriptionFields = useFormField(story?.description || "", {
+    validator: (value) => !value || value.length > 100000,
+    errorMessage: "Description must be less than 100000 characters",
+  });
+
   return (
     <Form enableDrafts isLoading={isLoading}>
-      <Form.TextField title="Title" id="name" />
+      <Form.TextField title="Title" id="name" {...storyFields} />
 
-      <Form.TextArea enableMarkdown title="Description" id="description" />
+      <Form.TextArea enableMarkdown title="Description" id="description" {...descriptionFields} />
 
       <Form.Dropdown id="estimate" title="Estimate">
         {memberInfo?.workspace2.estimate_scale?.map((estimate, index) => (
@@ -41,7 +51,7 @@ export default function StoryForm({ story }: { story?: Story }) {
       </Form.Dropdown>
 
       <Form.Dropdown id="project_id" title="Project">
-        <Form.Dropdown.Item title="No project" value={""} key="no_project" />
+        <Form.Dropdown.Item title="No project" value={""} key="no_project" icon={Icon.XMarkCircleFilled} />
 
         {projects?.map((project) => (
           <Form.Dropdown.Item
@@ -57,7 +67,7 @@ export default function StoryForm({ story }: { story?: Story }) {
       </Form.Dropdown>
 
       <Form.Dropdown id="group_id" title="Team">
-        <Form.Dropdown.Item title="None" value={""} key="no_team" />
+        <Form.Dropdown.Item title="None" value={""} key="no_team" icon={Icon.XMarkCircleFilled} />
 
         {teams?.map((team) => (
           <Form.Dropdown.Item
@@ -73,7 +83,7 @@ export default function StoryForm({ story }: { story?: Story }) {
       </Form.Dropdown>
 
       <Form.Dropdown id="iteration_id" title="Iteration">
-        <Form.Dropdown.Item title="None" value={""} key="no_iteration" />
+        <Form.Dropdown.Item title="None" value={""} key="no_iteration" icon={Icon.XMarkCircleFilled} />
 
         {iterations?.map((iteration) => (
           <Form.Dropdown.Item
@@ -105,7 +115,7 @@ export default function StoryForm({ story }: { story?: Story }) {
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="type" title="Type">
+      <Form.Dropdown id="story_type" title="Type">
         {StoryTypes.map((storyType) => (
           <Form.Dropdown.Item
             title={capitalize(storyType)}

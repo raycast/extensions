@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Color, Icon, Image, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { Member, StorySlim } from "@useshortcut/client";
@@ -53,3 +54,33 @@ export const getStoryColor = (storyType: StorySlim["story_type"]) => {
 };
 
 export const StoryTypes = ["feature", "bug", "chore"];
+
+type validatorFn = (value: string) => boolean;
+
+export const useFormField = (
+  initialValue: string,
+  {
+    validator,
+    errorMessage,
+  }: {
+    validator?: validatorFn;
+    errorMessage?: string;
+  }
+) => {
+  const [value, setValue] = useState(initialValue);
+  const [error, setError] = useState<string | undefined>();
+
+  const onChange = (newValue: string) => {
+    setValue(newValue);
+  };
+
+  const onBlur = () => {
+    if (validator && !validator(value)) {
+      setError(errorMessage);
+    } else {
+      setError(undefined);
+    }
+  };
+
+  return { value, onChange, onBlur, error };
+};
