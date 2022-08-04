@@ -21,7 +21,7 @@ import path from "path";
 import React, { useEffect, useState } from "react";
 import untildify from "untildify";
 import { ScriptCommand } from "./types";
-import { codeblock, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
+import { InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
 type InputType = "text" | "clipboard";
 

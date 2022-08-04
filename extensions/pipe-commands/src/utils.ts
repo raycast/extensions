@@ -76,7 +76,3 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
   );
   return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
 }
-
-export function codeblock(code: string) {
-  return ["```", code, "```"].join("\n");
-}
