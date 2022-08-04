@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updated iconography, search improvements](https://github.com/raycast/extensions/pull/2430) - 2022-07-29
+## [Updated iconography, search improvements](https://github.com/raycast/extensions/pull/2430) - 2022-08-04
 
 - **all**: Iconography has been updated throughout the extension.
 - **search**: Add support for lucky suggestions.
