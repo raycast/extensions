@@ -37,6 +37,13 @@
       "subtitle": "Shortcut",
       "description": "Create story",
       "mode": "view"
+    },
+    {
+      "name": "search-stories",
+      "title": "Search Stories",
+      "description": "Search Stories on Shortcut",
+      "mode": "view",
+      "subtitle": "Shortcut"
     }
   ],
   "preferences": [

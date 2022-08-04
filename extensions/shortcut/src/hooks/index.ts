@@ -9,7 +9,9 @@ import {
   Member,
   MemberInfo,
   Project,
+  SearchResults,
   Story,
+  StorySearchResults,
   StorySlim,
   Workflow,
 } from "@useshortcut/client";
@@ -176,4 +178,14 @@ export const useLabelsMap = () => {
   return useMemo(() => {
     return data?.reduce((map, label) => ({ ...map, [label.id]: label }), {} as Record<Label["id"], Label>) || {};
   }, [data]);
+};
+
+export const useSearch = (query?: string) => {
+  return useCachedPromise<(query: string) => Promise<SearchResults>>(
+    (query: string) => shortcut.search({ query }).then((res) => res.data),
+    [query!],
+    {
+      execute: !!query,
+    }
+  );
 };
