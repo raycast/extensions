@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "zoom-internal",
+  "name": "zoom",
   "title": "Zoom",
   "description": "Start, schedule and join Zoom meetings.",
   "icon": "zoom.png",
