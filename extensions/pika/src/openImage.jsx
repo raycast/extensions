@@ -11,9 +11,9 @@ const getImageUrl = async ({ file }) => {
     return { error: "File does not exist" };
   }
   const fileInfo = statSync(file);
-  const fileSizeInMb = fileInfo.size / (1024 * 1024); 
+  const fileSizeInMb = fileInfo.size / (1024 * 1024);
 
-  if(fileSizeInMb > 3.9) {
+  if (fileSizeInMb > 3.9) {
     await showToast({ title: "File size cannot be more than 4MBs", style: Toast.Style.Failure });
     return { error: "File size cannot be more than 4MBs" };
   }
@@ -42,18 +42,18 @@ export default function Command() {
         if (res.url) {
           await open(`${urlPrefix}/?use=${res?.url}&utm_source=Pika%20for%20Raycast(Image)`);
           await showHUD("Opening in pika.style...");
-          return
-        } 
+          return;
+        }
 
-        if(res.error) {
+        if (res.error) {
           await showToast({ title: res.error, style: Toast.Style.Failure });
         } else {
           await showToast({ title: "Something went wrong, please try again", style: Toast.Style.Failure });
         }
       })
       .finally(() => {
-        setLoading(false)
-      })
+        setLoading(false);
+      });
   }
 
   return (
