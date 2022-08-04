@@ -11,7 +11,6 @@ import {
   Project,
   SearchResults,
   Story,
-  StorySearchResults,
   StorySlim,
   Workflow,
 } from "@useshortcut/client";
