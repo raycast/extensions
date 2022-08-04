@@ -197,6 +197,7 @@
 /extensions/google-search                            @mblode
 /extensions/google-translate                         @gebeto @FezVrasta @henriquemacedo @metakirby5
 /extensions/google-trends                            @kkange
+/extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
@@ -513,4 +514,5 @@
 /extensions/youtube-companion                        @sasivarnan
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zeplin-project-search                    @dorukgunes
+/extensions/zoom                                     @thomaslombart
 /extensions/zotero                                   @sadanand-singh
