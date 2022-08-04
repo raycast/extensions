@@ -9,7 +9,7 @@ export default function SearchStories(): JSX.Element {
   const { data, isLoading, mutate } = useSearch(query);
 
   return (
-    <List onSearchTextChange={setQuery} isLoading={!!query && isLoading}>
+    <List onSearchTextChange={setQuery} isLoading={!!query && isLoading} searchBarPlaceholder="Search stories or epics">
       <List.Section title="Epics">
         {data?.epics.data.map((epic) => (
           <EpicListItem key={epic.id} epic={epic} />
