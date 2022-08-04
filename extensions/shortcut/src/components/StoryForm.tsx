@@ -1,12 +1,20 @@
 import { useMemo, useState } from "react";
-import { Form, Icon } from "@raycast/api";
-import { Story } from "@useshortcut/client";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { CreateStoryParams, Story, UpdateStory } from "@useshortcut/client";
 
 import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField } from "../helpers/storyHelpers";
 import { capitalize } from "../utils/string";
 import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
 
-export default function StoryForm({ story }: { story?: Story }) {
+export default function StoryForm({
+  story,
+  submitTitle,
+  onSubmit,
+}: {
+  story?: Story;
+  submitTitle?: string;
+  onSubmit: (story: CreateStoryParams | UpdateStory) => void;
+}) {
   const { data: members, isLoading: isMembersLoading } = useMembers();
   const { data: memberInfo, isLoading: isMemberInfoLoading } = useMemberInfo();
   const { data: projects, isLoading: isProjectsLoading } = useProjects();
@@ -38,20 +46,63 @@ export default function StoryForm({ story }: { story?: Story }) {
     errorMessage: "Description must be less than 100000 characters",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   return (
-    <Form enableDrafts isLoading={isLoading}>
+    <Form
+      enableDrafts
+      isLoading={isLoading || isSubmitting}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title={submitTitle || "Create Story"}
+            icon={Icon.ArrowUpCircleFilled}
+            onSubmit={async (values) => {
+              setIsSubmitting(true);
+
+              try {
+                await Promise.resolve(
+                  onSubmit(
+                    Object.entries(values).reduce((acc, [key, value]) => {
+                      if (value === "") {
+                        return acc;
+                      } else {
+                        return {
+                          ...acc,
+                          [key]: value,
+                        };
+                      }
+                    }, {} as CreateStoryParams | UpdateStory)
+                  )
+                );
+              } catch (e) {
+                showToast({
+                  title: "Error",
+                  message: String(e),
+                  style: Toast.Style.Failure,
+                });
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
       <Form.TextField title="Title" id="name" {...storyFields} />
 
       <Form.TextArea enableMarkdown title="Description" id="description" {...descriptionFields} />
 
       <Form.Dropdown id="estimate" title="Estimate">
+        <Form.Dropdown.Item title="None" value={""} key="no_estimate" icon={Icon.XMarkCircleFilled} />
+
         {memberInfo?.workspace2.estimate_scale?.map((estimate, index) => (
           <Form.Dropdown.Item title={estimate.toString()} value={estimate.toString()} key={`estimate_${index}`} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown id="project_id" title="Project">
-        <Form.Dropdown.Item title="No project" value={""} key="no_project" icon={Icon.XMarkCircleFilled} />
+        <Form.Dropdown.Item title="None" value={""} key="no_project" icon={Icon.XMarkCircleFilled} />
 
         {projects?.map((project) => (
           <Form.Dropdown.Item
