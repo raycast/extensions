@@ -1,8 +1,10 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { stat, readFile, writeFile } from "fs/promises";
+import { constants as fs_constants } from "fs";
+import * as fs from "fs/promises";
 import { join as path_join } from "path";
 import { cpus } from "os";
+import { environment } from "@raycast/api";
 import * as utils from "./utils";
 import { preferences } from "./preferences";
 
@@ -165,7 +167,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
   async function updateCache(): Promise<InstallableResults> {
     const info = await installed();
     try {
-      await writeFile(installedCachePath, info);
+      await fs.writeFile(installedCachePath, info);
     } catch (err) {
       console.error("Failed to write installed cache:", err);
     }
@@ -173,7 +175,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
   }
 
   async function mtimeMs(path: string): Promise<number> {
-    return (await stat(path)).mtimeMs;
+    return (await fs.stat(path)).mtimeMs;
   }
 
   async function readCache(): Promise<InstallableResults> {
@@ -194,7 +196,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
     const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
     if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
-      const cacheBuffer = await readFile(installedCachePath);
+      const cacheBuffer = await fs.readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
       throw "Invalid cache";
@@ -276,7 +278,7 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
 export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`install ${identifier}`, cancel);
+  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel);
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
@@ -288,12 +290,12 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortCon
 
 export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`rm ${identifier}`, cancel);
+  await execBrew(`rm ${brewCaskOption(installable)} ${identifier}`, cancel);
 }
 
 export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(upgradable);
-  await execBrew(`upgrade ${identifier}`, cancel);
+  await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel);
 }
 
 export async function brewUpgradeAll(cancel?: AbortController): Promise<void> {
@@ -415,6 +417,10 @@ function brewIdentifier(item: Cask | Nameable): string {
   return isCask(item) ? item.token : item.name;
 }
 
+function brewCaskOption(maybeCask: Cask | Nameable): string {
+  return isCask(maybeCask) ? "--cask" : "";
+}
+
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
 }
@@ -433,7 +439,8 @@ function brewCompare(lhs: string, rhs: string, target: string): number {
 
 async function execBrew(cmd: string, cancel?: AbortController): Promise<ExecResult> {
   try {
-    return await execp(`${brewExecutable()} ${cmd}`, { signal: cancel?.signal, maxBuffer: 10 * 1024 * 1024 });
+    const env = await execBrewEnv();
+    return await execp(`${brewExecutable()} ${cmd}`, { signal: cancel?.signal, env: env, maxBuffer: 10 * 1024 * 1024 });
   } catch (err) {
     const execErr = err as ExecError;
     if (preferences.customBrewPath && execErr && execErr.code === 127) {
@@ -443,4 +450,16 @@ async function execBrew(cmd: string, cancel?: AbortController): Promise<ExecResu
       throw err;
     }
   }
+}
+
+async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
+  const askpassPath = path_join(environment.assetsPath, "askpass.sh");
+  try {
+    await fs.access(askpassPath, fs_constants.X_OK);
+  } catch {
+    await fs.chmod(askpassPath, 0o755);
+  }
+  const env = process.env;
+  env["SUDO_ASKPASS"] = askpassPath;
+  return env;
 }

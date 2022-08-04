@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Sudo] - 2022-08-10
+
+- The extension will now prompt for user's login password if brew requires authorization when installed or uninstalling casks.
+
 ## [Custom Path] - 2022-08-10
 
 - Add a "Custom Brew Path" preference for users with brew installed in a non-standard path
