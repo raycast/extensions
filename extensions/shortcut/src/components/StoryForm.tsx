@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { CreateStoryParams, Story, UpdateStory } from "@useshortcut/client";
 
@@ -18,6 +18,39 @@ export type StoryFormRawValues = {
   project_id?: string;
   estimate?: string;
 };
+
+function processStoryFormValues(values: StoryFormRawValues) {
+  const processed = Object.entries(values).reduce((acc, [key, value]) => {
+    if (value === "") {
+      return {
+        ...acc,
+        [key]: null,
+      };
+    } else {
+      if (key === "owner_id") {
+        return {
+          ...acc,
+          owner_ids: [value],
+        };
+      } else if (key === "iteration_id" || key === "project_id" || key === "workflow_state_id" || key === "estimate") {
+        return {
+          ...acc,
+          [key]: parseInt(value, 10),
+        };
+      } else if (key === "workflow_id") {
+        // omit workflow_id from the form values
+        return acc;
+      } else {
+        return {
+          ...acc,
+          [key]: value,
+        };
+      }
+    }
+  }, {} as CreateStoryParams | UpdateStory);
+
+  return processed;
+}
 
 export default function StoryForm({
   story,
@@ -48,12 +81,12 @@ export default function StoryForm({
     isTeamsLoading;
 
   const storyFields = useFormField(story?.name ?? (draftValues?.name || ""), {
-    validator: (value) => value.length > 0,
-    errorMessage: "Name is required",
+    validator: (value) => value.length > 0 && value.length <= 512,
+    errorMessage: "Name is required, and must be less than 512 characters",
   });
 
   const descriptionFields = useFormField(story?.description ?? (draftValues?.description || ""), {
-    validator: (value) => !value || value.length > 100000,
+    validator: (value) => !value || value.length <= 100000,
     errorMessage: "Description must be less than 100000 characters",
   });
 
@@ -74,12 +107,24 @@ export default function StoryForm({
   const workflowFields = useFormField(defaultWorkflowId || draftValues?.workflow_id || "");
 
   const defaultWorkflowStateId = story?.workflow_state_id && String(story.workflow_state_id);
-  const workflowStateFields = useFormField(defaultWorkflowStateId || draftValues?.workflow_state_id || "");
+  const workflowStateFields = useFormField(defaultWorkflowStateId || draftValues?.workflow_state_id || "", {
+    validator: (value) => !!value,
+    errorMessage: "Workflow state is required",
+  });
 
   const workflowStates = useMemo(
     () => workflows?.find((w) => w.id === parseInt(workflowFields.value, 10))?.states || [],
     [workflows, workflowFields.value]
   );
+
+  // Load the workflow states when the workflow changes
+  useEffect(() => {
+    if (!workflowFields.value && workflows && workflows?.length > 0) {
+      const workflow = workflows[0];
+      workflowFields.onChange(String(workflow.id));
+      workflowStateFields.onChange(String(workflow.default_state_id));
+    }
+  }, [workflows]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,32 +141,7 @@ export default function StoryForm({
               setIsSubmitting(true);
 
               try {
-                await Promise.resolve(
-                  onSubmit(
-                    Object.entries(values).reduce((acc, [key, value]) => {
-                      if (value === "") {
-                        return acc;
-                      } else {
-                        if (key === "owner_id") {
-                          return {
-                            ...acc,
-                            owner_ids: [value],
-                          };
-                        } else if (key === "iteration_id" || key === "project_id" || key === "workflow_id") {
-                          return {
-                            ...acc,
-                            iteration_id: parseInt(value, 10),
-                          };
-                        }
-
-                        return {
-                          ...acc,
-                          [key]: value,
-                        };
-                      }
-                    }, {} as CreateStoryParams | UpdateStory)
-                  )
-                );
+                await Promise.resolve(onSubmit(processStoryFormValues(values)));
               } catch (e) {
                 showToast({
                   title: "Error",
