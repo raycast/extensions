@@ -6,14 +6,31 @@ import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField
 import { capitalize } from "../utils/string";
 import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
 
+export type StoryFormRawValues = {
+  name?: string;
+  description?: string;
+  story_type?: string;
+  iteration_id?: string;
+  group_id?: string;
+  workflow_id?: string;
+  workflow_state_id?: string;
+  owner_id?: string;
+  project_id?: string;
+  estimate?: string;
+};
+
 export default function StoryForm({
   story,
   submitTitle,
   onSubmit,
+  draftValues,
+  enableDrafts,
 }: {
   story?: Story;
   submitTitle?: string;
   onSubmit: (story: CreateStoryParams | UpdateStory) => void;
+  draftValues?: StoryFormRawValues;
+  enableDrafts?: boolean;
 }) {
   const { data: members, isLoading: isMembersLoading } = useMembers();
   const { data: memberInfo, isLoading: isMemberInfoLoading } = useMemberInfo();
@@ -30,34 +47,52 @@ export default function StoryForm({
     isIterationsLoading ||
     isTeamsLoading;
 
-  const [workflowId, setWorkflowId] = useState<number | undefined>(undefined);
-  const workflowStates = useMemo(
-    () => workflows?.find((w) => w.id === workflowId)?.states || [],
-    [workflows, workflowId]
-  );
-
-  const storyFields = useFormField(story?.name || "", {
+  const storyFields = useFormField(story?.name ?? (draftValues?.name || ""), {
     validator: (value) => value.length > 0,
     errorMessage: "Name is required",
   });
 
-  const descriptionFields = useFormField(story?.description || "", {
+  const descriptionFields = useFormField(story?.description ?? (draftValues?.description || ""), {
     validator: (value) => !value || value.length > 100000,
     errorMessage: "Description must be less than 100000 characters",
   });
+
+  const storyTypeFields = useFormField(story?.story_type ?? (draftValues?.story_type || ""));
+  const groupFields = useFormField(story?.group_id ?? (draftValues?.group_id || ""));
+  const ownerFields = useFormField(story?.owner_ids?.[0] ?? (draftValues?.owner_id || ""));
+
+  const defaultIterationId = story?.iteration_id && String(story?.iteration_id);
+  const iterationFields = useFormField(defaultIterationId || draftValues?.iteration_id || "");
+
+  const defaultProjectId = story?.project_id && String(story?.project_id);
+  const projectFields = useFormField(defaultProjectId || draftValues?.project_id || "");
+
+  const defaultEstimate = story?.estimate && String(story.estimate);
+  const estimateFields = useFormField(defaultEstimate || draftValues?.estimate || "");
+
+  const defaultWorkflowId = story?.workflow_id && String(story.workflow_id);
+  const workflowFields = useFormField(defaultWorkflowId || draftValues?.workflow_id || "");
+
+  const defaultWorkflowStateId = story?.workflow_state_id && String(story.workflow_state_id);
+  const workflowStateFields = useFormField(defaultWorkflowStateId || draftValues?.workflow_state_id || "");
+
+  const workflowStates = useMemo(
+    () => workflows?.find((w) => w.id === parseInt(workflowFields.value, 10))?.states || [],
+    [workflows, workflowFields.value]
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <Form
-      enableDrafts
+      enableDrafts={enableDrafts}
       isLoading={isLoading || isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             title={submitTitle || "Create Story"}
             icon={Icon.ArrowUpCircleFilled}
-            onSubmit={async (values) => {
+            onSubmit={async (values: StoryFormRawValues) => {
               setIsSubmitting(true);
 
               try {
@@ -67,6 +102,18 @@ export default function StoryForm({
                       if (value === "") {
                         return acc;
                       } else {
+                        if (key === "owner_id") {
+                          return {
+                            ...acc,
+                            owner_ids: [value],
+                          };
+                        } else if (key === "iteration_id" || key === "project_id" || key === "workflow_id") {
+                          return {
+                            ...acc,
+                            iteration_id: parseInt(value, 10),
+                          };
+                        }
+
                         return {
                           ...acc,
                           [key]: value,
@@ -93,7 +140,7 @@ export default function StoryForm({
 
       <Form.TextArea enableMarkdown title="Description" id="description" {...descriptionFields} />
 
-      <Form.Dropdown id="estimate" title="Estimate">
+      <Form.Dropdown id="estimate" title="Estimate" {...estimateFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_estimate" icon={Icon.XMarkCircleFilled} />
 
         {memberInfo?.workspace2.estimate_scale?.map((estimate, index) => (
@@ -101,7 +148,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="project_id" title="Project">
+      <Form.Dropdown id="project_id" title="Project" {...projectFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_project" icon={Icon.XMarkCircleFilled} />
 
         {projects?.map((project) => (
@@ -117,7 +164,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="group_id" title="Team">
+      <Form.Dropdown id="group_id" title="Team" {...groupFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_team" icon={Icon.XMarkCircleFilled} />
 
         {teams?.map((team) => (
@@ -133,7 +180,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="iteration_id" title="Iteration">
+      <Form.Dropdown id="iteration_id" title="Iteration" {...iterationFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_iteration" icon={Icon.XMarkCircleFilled} />
 
         {iterations?.map((iteration) => (
@@ -146,11 +193,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="workflow_id"
-        title="Workflow"
-        onChange={(workflowId) => setWorkflowId(parseInt(workflowId, 10))}
-      >
+      <Form.Dropdown id="workflow_id" title="Workflow" {...workflowFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_workflow" icon={Icon.XMarkCircleFilled} />
 
         {workflows?.map((workflow) => (
@@ -158,7 +201,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="workflow_state_id" title="State">
+      <Form.Dropdown id="workflow_state_id" title="State" {...workflowStateFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_state" icon={Icon.XMarkCircleFilled} />
 
         {workflowStates?.map((state) => (
@@ -166,7 +209,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="story_type" title="Type">
+      <Form.Dropdown id="story_type" title="Type" {...storyTypeFields}>
         {StoryTypes.map((storyType) => (
           <Form.Dropdown.Item
             title={capitalize(storyType)}
@@ -180,7 +223,7 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="owner_id" title="Owner">
+      <Form.Dropdown id="owner_id" title="Owner" {...ownerFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_owner" icon={Icon.XMarkCircleFilled} />
 
         {members?.map((member) => (

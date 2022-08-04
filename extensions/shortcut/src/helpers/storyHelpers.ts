@@ -65,7 +65,7 @@ export const useFormField = (
   }: {
     validator?: validatorFn;
     errorMessage?: string;
-  }
+  } = {}
 ) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | undefined>();
