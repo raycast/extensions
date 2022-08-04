@@ -3,7 +3,7 @@ import { Form, Action, ActionPanel, showHUD, environment } from "@raycast/api";
 const urlPrefix = environment.isDevelopment ? `http://localhost:3000` : `https://pika.style`;
 
 export default function Command() {
-  const [formData, setFormData] = useState({ url: "", urlError: null });
+  const [formData, setFormData] = useState({ url: "", urlError: null, isDirty: false });
 
   const makeURL = () => {
     const prefix = `${urlPrefix}/?utm_source=Pika%20for%20Raycast(URL)&use=`;
@@ -20,9 +20,9 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open in Pika.style"
+            title="Open in pika.style"
             url={makeURL()}
-            onOpen={async () => await showHUD("Opening in Pika.style...")}
+            onOpen={async () => await showHUD("Opening in pika.style...")}
           />
         </ActionPanel>
       }
@@ -36,11 +36,19 @@ export default function Command() {
         value={formData?.url}
         onChange={(e) => {
           setFormData({
+            isDirty: true,
             url: e,
-            urlError: !e?.length > 1 || e === "" ? "Invalid URL" : null,
+            urlError: formData?.isDirty && !isValidURLRegex(e) ? "Invalid URL" :  null,
           });
         }}
       />
     </Form>
   );
+}
+
+const isValidURLRegex = (url) => {
+  var expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+  var regex = new RegExp(expression);
+
+  return url.match(regex);
 }

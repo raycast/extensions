@@ -1,14 +1,23 @@
-import { Form, ActionPanel, Icon, Action, open, environment, showHUD } from "@raycast/api";
+import { Form, ActionPanel, Icon, Action, showToast, open, Toast, environment, showHUD } from "@raycast/api";
 import { Action$ } from "raycast-toolkit";
 import { useState } from "react";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, statSync } from "fs";
 import fetch from "node-fetch";
 const urlPrefix = environment.isDevelopment ? `http://localhost:3000` : `https://pika.style`;
 
 const getImageUrl = async ({ file }) => {
   if (!existsSync(file)) {
+    await showToast({ title: "File does not exist", style: Toast.Style.Failure });
     return { error: "File does not exist" };
   }
+  const fileInfo = statSync(file);
+  const fileSizeInMb = fileInfo.size / (1024 * 1024); 
+
+  if(fileSizeInMb > 3.9) {
+    await showToast({ title: "File size cannot be more than 4MBs", style: Toast.Style.Failure });
+    return { error: "File size cannot be more than 4MBs" };
+  }
+
   const contents = readFileSync(file, { encoding: "base64" });
   const result = await fetch(`${urlPrefix}/api/addPublicImage`, {
     method: "POST",
@@ -25,21 +34,26 @@ export default function Command() {
   const [isLoading, setLoading] = useState(false);
   const [file, setFile] = useState("");
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setLoading(true);
 
     getImageUrl({ file })
       .then(async (res) => {
-        if (!res.url) {
-          await showHUD("Something went wrong, please try again");
-        } else {
+        if (res.url) {
           await open(`${urlPrefix}/?use=${res?.url}&utm_source=Pika%20for%20Raycast(Image)`);
           await showHUD("Opening in pika.style...");
+          return
+        } 
+
+        if(res.error) {
+          await showToast({ title: res.error, style: Toast.Style.Failure });
+        } else {
+          await showToast({ title: "Something went wrong, please try again", style: Toast.Style.Failure });
         }
       })
       .finally(() => {
-        setLoading(false);
-      });
+        setLoading(false)
+      })
   }
 
   return (
@@ -55,7 +69,11 @@ export default function Command() {
             prompt="Please select an image"
             type="public.image"
             shortcut={{ key: "o", modifiers: ["cmd"] }}
-            onSelect={setFile}
+            onSelect={(path) => {
+              if (path) {
+                setFile(path);
+              }
+            }}
           />
         </ActionPanel>
       }
