@@ -32,17 +32,17 @@
   "preferences": [
     {
       "name": "commandFolder",
-      "title": "Pipe Commands Folder",
+      "title": "Commands Folder",
       "required": false,
       "type": "textfield",
       "description": "The folder where your Pipe Commands are stored."
     },
     {
-      "name": "pipePrimaryAction",
+      "name": "primaryAction",
       "type": "dropdown",
       "description": "The primary action for Pipe Commands.",
       "required": false,
-      "title": "Pipe Primary Action",
+      "title": "Primary Action",
       "default": "copy",
       "data": [
         {

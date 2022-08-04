@@ -98,7 +98,7 @@ async function getInput(inputType: InputType) {
   }
 }
 
-const { pipePrimaryAction } = getPreferenceValues<{ pipePrimaryAction: "copy" | "paste" }>();
+const { primaryAction } = getPreferenceValues<{ primaryAction: "copy" | "paste" }>();
 
 function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onTrash: () => void }): JSX.Element {
   const { command, inputFrom, onTrash } = props;
@@ -238,7 +238,7 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
 
       return (
         <React.Fragment>
-          {pipePrimaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
+          {primaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
         </React.Fragment>
       );
     }
