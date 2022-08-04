@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Update] - 2022-07-24
+## [Update] - 2022-08-04
 
 - Updated Raycast API to 1.38.2
 - Added option to update random images.
