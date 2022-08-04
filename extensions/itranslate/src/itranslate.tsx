@@ -149,7 +149,7 @@ export default function Command() {
         <List.Section title={`${transResultsState[0].from.langTitle} -> ${transResultsState[0].to.langTitle}`}>
           {transResultsState.map((transRes) => {
             if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
-              return <TranslateError transRes={transRes} />;
+              return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
             } else {
               return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
             }

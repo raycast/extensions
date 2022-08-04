@@ -29,6 +29,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
               {props.transRes.targetExplains?.map((explain) => {
                 return (
                   <List.Item.Detail.Metadata.Label
+                    key={explain}
                     title={explain}
                     icon={{ source: Icon.Dot, tintColor: Color.Green }}
                   />
@@ -39,6 +40,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
               {props.transRes.derivatives?.map((derivative) => {
                 return (
                   <List.Item.Detail.Metadata.Label
+                    key={derivative.key}
                     title={`${derivative.key} -> ${derivative.value.join("; ")}`}
                     icon={{ source: Icon.Dot, tintColor: Color.Blue }}
                   />
