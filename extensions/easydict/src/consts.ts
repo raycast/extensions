@@ -2,44 +2,15 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-01 11:05
+ * @lastEditTime: 2022-07-22 23:57
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LanguageDetectType } from "./detectLanguage";
 import { LanguageItem, RequestErrorInfo } from "./types";
 
 export const clipboardQueryTextKey = "clipboardQueryTextKey";
-
-/**
- *
- */
-export const maxInputTextLength = 2000;
-
-export enum SectionType {
-  Translation = "Translate",
-  Explanations = "Explanation",
-  Forms = "Forms and Tenses",
-  WebTranslation = "Web Translation",
-  WebPhrase = "Web Phrase",
-}
-
-export enum TranslateType {
-  Youdao = "Youdao",
-  Baidu = "Baidu",
-  Tencent = "Tencent",
-  Caiyun = "Caiyun",
-  Apple = "Apple",
-}
-
-export enum DicionaryType {
-  Youdao = "Youdao Dictionary",
-  Iciba = "Iciba Dictionary",
-}
-
-export type RequestType = TranslateType | DicionaryType | LanguageDetectType;
 
 export enum YoudaoRequestStateCode {
   Success = "0",
@@ -94,7 +65,10 @@ export function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
 }
 
 /**
- * 语言代码列表
+ * Language item list.
+ * Currently support 23 languages.
+ * TODO: add more translation supported languages.
+ * TODO: add more apple detect supported languages.
  */
 export const languageItemList: LanguageItem[] = [
   {
@@ -111,7 +85,8 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "zh-CHS",
     appleLanguageId: "zh_CN",
-    appleChineseLanguageTitle: "中文",
+    appleDetectChineseLanguageTitle: "中文",
+    deepLSourceLanguageId: "ZH",
     francLanguageId: "cmn",
     aliyunLanguageId: "zh",
     tencentLanguageId: "zh",
@@ -124,12 +99,11 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "zh-CHT",
     appleLanguageId: "zh-TW",
-    appleChineseLanguageTitle: "中文",
+    appleDetectChineseLanguageTitle: "中文",
     francLanguageId: "cmn",
     aliyunLanguageId: "zh-tw",
     tencentLanguageId: "zh-TW",
     baiduLanguageId: "cht",
-    caiyunLanguageId: "zh",
     googleLanguageId: "zh-TW",
     languageTitle: "Chinese-Traditional",
     voiceList: ["Ting-Ting"],
@@ -137,7 +111,9 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "en",
     appleLanguageId: "en_US",
-    appleChineseLanguageTitle: "英语",
+    appleDetectChineseLanguageTitle: "英语",
+    deepLSourceLanguageId: "EN",
+    deepLTargetLanguageId: "EN-US", // "EN-GB" "EN-US"
     francLanguageId: "eng",
     aliyunLanguageId: "en",
     tencentLanguageId: "en",
@@ -145,14 +121,14 @@ export const languageItemList: LanguageItem[] = [
     eudicWebLanguageId: "en",
     baiduLanguageId: "en",
     caiyunLanguageId: "en",
-    googleLanguageId: "en",
     languageTitle: "English",
     voiceList: ["Alex", "Samantha"],
   },
   {
     youdaoLanguageId: "ja",
     appleLanguageId: "ja_JP",
-    appleChineseLanguageTitle: "日语",
+    appleDetectChineseLanguageTitle: "日语",
+    deepLSourceLanguageId: "JA",
     francLanguageId: "jpn",
     aliyunLanguageId: "ja",
     tencentDetectLanguageId: "jp",
@@ -166,7 +142,7 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "ko",
     appleLanguageId: "ko_KR",
-    appleChineseLanguageTitle: "韩语",
+    appleDetectChineseLanguageTitle: "韩语",
     francLanguageId: "kor",
     aliyunLanguageId: "ko",
     tencentDetectLanguageId: "kr",
@@ -179,7 +155,8 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "fr",
     appleLanguageId: "fr_FR",
-    appleChineseLanguageTitle: "法语",
+    appleDetectChineseLanguageTitle: "法语",
+    deepLSourceLanguageId: "FR",
     francLanguageId: "fra",
     aliyunLanguageId: "fr",
     tencentLanguageId: "fr",
@@ -192,7 +169,8 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "es",
     appleLanguageId: "es_ES",
-    appleChineseLanguageTitle: "西班牙语",
+    appleDetectChineseLanguageTitle: "西班牙语",
+    deepLSourceLanguageId: "ES",
     francLanguageId: "spa",
     aliyunLanguageId: "es",
     tencentLanguageId: "es",
@@ -202,9 +180,23 @@ export const languageItemList: LanguageItem[] = [
     voiceList: ["Jorge", "Juan", "Diego", "Monica", "Paulina"],
   },
   {
+    youdaoLanguageId: "pt",
+    appleLanguageId: "pt_BR",
+    appleDetectChineseLanguageTitle: "葡萄牙语",
+    deepLSourceLanguageId: "PT",
+    deepLTargetLanguageId: "PT-PT", // "PT-PT" "PT-BR"
+    francLanguageId: "por",
+    aliyunLanguageId: "pt",
+    tencentLanguageId: "pt",
+    baiduLanguageId: "pt",
+    languageTitle: "Portuguese",
+    voiceList: ["Joana", "Luciana"],
+  },
+  {
     youdaoLanguageId: "it",
     appleLanguageId: "it_IT",
-    appleChineseLanguageTitle: "意大利语",
+    appleDetectChineseLanguageTitle: "意大利语",
+    deepLSourceLanguageId: "IT",
     francLanguageId: "ita",
     aliyunLanguageId: "it",
     tencentLanguageId: "it",
@@ -215,7 +207,8 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "de",
     appleLanguageId: "de_DE",
-    appleChineseLanguageTitle: "德语",
+    appleDetectChineseLanguageTitle: "德语",
+    deepLSourceLanguageId: "DE",
     francLanguageId: "deu",
     aliyunLanguageId: "de",
     tencentLanguageId: "de",
@@ -225,20 +218,10 @@ export const languageItemList: LanguageItem[] = [
     voiceList: ["Anna"],
   },
   {
-    youdaoLanguageId: "pt",
-    appleLanguageId: "pt_BR",
-    appleChineseLanguageTitle: "葡萄牙语",
-    francLanguageId: "por",
-    aliyunLanguageId: "pt",
-    tencentLanguageId: "pt",
-    baiduLanguageId: "pt",
-    languageTitle: "Portuguese",
-    voiceList: ["Joana", "Luciana"],
-  },
-  {
     youdaoLanguageId: "ru",
     appleLanguageId: "ru_RU",
-    appleChineseLanguageTitle: "俄语",
+    appleDetectChineseLanguageTitle: "俄语",
+    deepLSourceLanguageId: "RU",
     francLanguageId: "rus",
     aliyunLanguageId: "ru",
     tencentLanguageId: "ru",
@@ -249,7 +232,7 @@ export const languageItemList: LanguageItem[] = [
   {
     youdaoLanguageId: "ar",
     appleLanguageId: "ar_AE",
-    appleChineseLanguageTitle: "阿拉伯语",
+    appleDetectChineseLanguageTitle: "阿拉伯语",
     francLanguageId: "arb",
     aliyunLanguageId: "ar",
     tencentLanguageId: "ar",
@@ -258,7 +241,28 @@ export const languageItemList: LanguageItem[] = [
     voiceList: ["Maged"],
   },
   {
+    youdaoLanguageId: "sv",
+    appleDetectChineseLanguageTitle: "瑞典语",
+    deepLSourceLanguageId: "SV",
+    francLanguageId: "swe",
+    aliyunLanguageId: "sv",
+    baiduLanguageId: "swe",
+    languageTitle: "Swedish",
+    voiceList: ["Alva"],
+  },
+  {
+    youdaoLanguageId: "ro",
+    appleDetectChineseLanguageTitle: "罗马尼亚语",
+    deepLSourceLanguageId: "RO",
+    francLanguageId: "ron",
+    aliyunLanguageId: "ro",
+    baiduLanguageId: "rom",
+    languageTitle: "Romanian",
+    voiceList: ["Ioana"],
+  },
+  {
     youdaoLanguageId: "th",
+    appleDetectChineseLanguageTitle: "泰语",
     francLanguageId: "tha",
     aliyunLanguageId: "th",
     tencentLanguageId: "th",
@@ -267,31 +271,9 @@ export const languageItemList: LanguageItem[] = [
     voiceList: ["Kanya"],
   },
   {
-    youdaoLanguageId: "sv",
-    francLanguageId: "swe",
-    aliyunLanguageId: "sv",
-    baiduLanguageId: "swe",
-    languageTitle: "Swedish",
-    voiceList: ["Alva"],
-  },
-  {
-    youdaoLanguageId: "nl",
-    francLanguageId: "nld",
-    aliyunLanguageId: "nl",
-    baiduLanguageId: "nl",
-    languageTitle: "Dutch",
-    voiceList: ["Ellen", "Xander"],
-  },
-  {
-    youdaoLanguageId: "ro",
-    francLanguageId: "ron",
-    aliyunLanguageId: "ro",
-    baiduLanguageId: "rom",
-    languageTitle: "Romanian",
-    voiceList: ["Ioana"],
-  },
-  {
     youdaoLanguageId: "sk",
+    appleDetectChineseLanguageTitle: "斯洛伐克语",
+    deepLSourceLanguageId: "SK",
     francLanguageId: "slk",
     aliyunLanguageId: "sk",
     baiduLanguageId: "slo",
@@ -299,7 +281,19 @@ export const languageItemList: LanguageItem[] = [
     voiceList: ["Laura"],
   },
   {
+    youdaoLanguageId: "nl",
+    appleDetectChineseLanguageTitle: "荷兰语",
+    deepLSourceLanguageId: "NL",
+    francLanguageId: "nld",
+    aliyunLanguageId: "nl",
+    baiduLanguageId: "nl",
+    languageTitle: "Dutch",
+    voiceList: ["Ellen", "Xander"],
+  },
+  {
     youdaoLanguageId: "hu",
+    appleDetectChineseLanguageTitle: "匈牙利语",
+    deepLSourceLanguageId: "HU",
     francLanguageId: "hun",
     aliyunLanguageId: "hu",
     baiduLanguageId: "hu",
@@ -308,6 +302,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "el",
+    appleDetectChineseLanguageTitle: "希腊语",
+    deepLSourceLanguageId: "EL",
     francLanguageId: "ell",
     aliyunLanguageId: "el",
     baiduLanguageId: "el",
@@ -316,6 +312,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "da",
+    appleDetectChineseLanguageTitle: "丹麦语",
+    deepLSourceLanguageId: "DA",
     francLanguageId: "dan",
     aliyunLanguageId: "da",
     baiduLanguageId: "dan",
@@ -324,6 +322,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "fi",
+    appleDetectChineseLanguageTitle: "芬兰语",
+    deepLSourceLanguageId: "FI",
     francLanguageId: "fin",
     aliyunLanguageId: "fi",
     baiduLanguageId: "fin",
@@ -332,6 +332,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "pl",
+    appleDetectChineseLanguageTitle: "波兰语",
+    deepLSourceLanguageId: "PL",
     francLanguageId: "pol",
     aliyunLanguageId: "pl",
     baiduLanguageId: "pl",
@@ -340,6 +342,8 @@ export const languageItemList: LanguageItem[] = [
   },
   {
     youdaoLanguageId: "cs",
+    appleDetectChineseLanguageTitle: "捷克语",
+    deepLSourceLanguageId: "CS",
     francLanguageId: "ces",
     aliyunLanguageId: "cs",
     baiduLanguageId: "cs",

@@ -1,5 +1,21 @@
 # Spotify Player Changelog
 
+## [Features & Bug Fixes] - 2022-07-27
+
+- Fixed cases when the Spotify app named not "Spotify" and most of the command didn't work
+- `Search Albums` command now is a Grid
+- Fixed subtitle updates when there is no Spotify playing
+
+## [Feature] - 2022-07-24
+
+- Add max. length preference for menubar item
+
+## [Feature] - 2022-07-21
+
+- Introduce new command "Just Play"
+- Introduce new command "Now Playing" with menu-bar 🔥
+- Introduce new command "Play Similar"
+
 ## [Feature] - 2022-05-24
 
 - Added OAuth Support

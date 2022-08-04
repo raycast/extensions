@@ -2,71 +2,70 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-03 22:23
+ * @lastEditTime: 2022-07-24 00:42
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { Fragment, useEffect, useState } from "react";
-import ListActionPanel, {
-  ActionCurrentVersion,
-  ActionFeedback,
-  ActionRecentUpdate,
-  getListItemIcon,
-  getWordAccessories,
-} from "./components";
 import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
-import {
-  LanguageItem,
-  TranslateDisplayResult,
-  TranslateTypeResult,
-  YoudaoTranslateResult,
-  TranslateFormatResult,
-  QueryWordInfo,
-  RequestErrorInfo,
-} from "./types";
-import {
-  BaiduRequestStateCode,
-  getYoudaoErrorInfo,
-  TranslateType,
-  youdaoErrorCodeUrl,
-  YoudaoRequestStateCode,
-} from "./consts";
-import {
-  defaultLanguage1,
-  defaultLanguage2,
-  getAutoSelectedTargetLanguageId,
-  myPreferences,
-  isTranslateResultTooLong,
-  isShowMultipleTranslations,
-  getLanguageItemFromYoudaoId,
-  trimTextLength,
-} from "./utils";
-import {
-  requestBaiduTextTranslate,
-  requestCaiyunTextTranslate,
-  requestTencentTextTranslate,
-  requestYoudaoDictionary,
-} from "./request";
+import { Fragment, useEffect, useState } from "react";
+import { ActionFeedback, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
+import { BaiduRequestStateCode, youdaoErrorCodeUrl, YoudaoRequestStateCode } from "./consts";
+import { detectLanguage } from "./detectLanguage";
+import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
 import {
   formatTranslateDisplayResult,
   formatYoudaoDictionaryResult,
-  updateFormateResultWithBaiduTranslation,
-  updateFormateResultWithCaiyunTranslation,
-  updateFormateResultWithTencentTranslation,
   updateFormatResultWithAppleTranslateResult,
+  updateFormatResultWithBaiduTranslation,
+  updateFormatResultWithCaiyunTranslation,
+  updateFormatResultWithTencentTranslation,
+  updateFormatTranslateResultWithDeepLResult,
+  updateFormatTranslateResultWithGoogleResult,
 } from "./formatData";
-import { detectLanguage } from "./detectLanguage";
+import { requestGoogleTranslate } from "./google";
+import {
+  requestBaiduTextTranslate,
+  requestCaiyunTextTranslate,
+  requestDeepLTextTranslate,
+  requestTencentTextTranslate,
+  requestYoudaoDictionary,
+} from "./request";
 import { appleTranslate } from "./scripts";
-import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
+import {
+  LanguageItem,
+  QueryWordInfo,
+  RequestErrorInfo,
+  RequestTypeResult,
+  TranslateDisplayResult,
+  TranslateFormatResult,
+  TranslationType,
+  YoudaoTranslateResult,
+} from "./types";
+import {
+  checkIfEudicIsInstalled,
+  checkIfShowMultipleTranslations,
+  defaultLanguage1,
+  defaultLanguage2,
+  getAutoSelectedTargetLanguageId,
+  getLanguageItemFromYoudaoId,
+  isTranslateResultTooLong,
+  myPreferences,
+  trimTextLength,
+} from "./utils";
 
-let youdaoTranslateTypeResult: TranslateTypeResult | undefined;
+let youdaoTranslateTypeResult: RequestTypeResult | undefined;
 
 /**
- * when has new input text, need to cancel previous request
+ * when has new input text, need to cancel previous request.
  */
 let isLastQuery = true;
+
+/**
+ * when input text is empty, need to cancel previous request, and clear result.
+ */
+let shouldCancelQuery = false;
 
 let delayQueryTextTimer: NodeJS.Timeout;
 let delayQueryTextInfoTimer: NodeJS.Timeout;
@@ -88,10 +87,13 @@ export default function () {
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
 
+  // Todo: need to optimize, and support Eudic Pro version.
+  const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
+
   /**
    * use to display input text
    */
-  const [inputText, setInputText] = useState<string>("");
+  const [inputText, setInputText] = useState<string>();
   /**
    * searchText = inputText.trim(), avoid frequent request API with blank input
    */
@@ -116,17 +118,26 @@ export default function () {
     console.log("enter useEffect");
 
     startTime = Date.now();
-    if (searchText.length > 0) {
+    if (searchText) {
       queryText(searchText);
       return;
     }
 
-    // try to query selected text when the extension is activated.
-    if (myPreferences.isAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
+    if (inputText === undefined) {
+      setup();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText]);
+
+  /**
+   * Do something setup when the extension is activated. Only run once.
+   */
+  function setup() {
+    if (myPreferences.isAutomaticQuerySelectedText) {
+      tryQuerySelecedtText();
+    }
+    checkIfEudicIsInstalled(setIsInstalledEudic);
+  }
 
   /**
    * Try to detect the selected text, if detect success, then query the selected text.
@@ -151,7 +162,7 @@ export default function () {
    * Query text, automatically detect the language of input text
    */
   function queryText(text: string) {
-    console.log("start queryText");
+    console.log("start queryText: " + text);
 
     setLoadingState(true);
     clearTimeout(delayQueryTextInfoTimer);
@@ -168,33 +179,33 @@ export default function () {
   /**
    * query text with from youdao language id
    */
-  function queryTextWithFromLanguageId(youdaoLanguageId: string) {
-    console.log("queryTextWithFromLanguageId:", youdaoLanguageId);
-    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(youdaoLanguageId));
+  function queryTextWithFromLanguageId(fromYoudaoLanguageId: string) {
+    console.log("queryTextWithFromLanguageId:", fromYoudaoLanguageId);
+    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(fromYoudaoLanguageId));
 
     // priority to use user selected target language, if conflict, use auto selected target language
     let targetLanguageId = userSelectedTargetLanguageItem.youdaoLanguageId;
     console.log("userSelectedTargetLanguage:", targetLanguageId);
-    if (youdaoLanguageId === targetLanguageId) {
-      targetLanguageId = getAutoSelectedTargetLanguageId(youdaoLanguageId);
+    if (fromYoudaoLanguageId === targetLanguageId) {
+      targetLanguageId = getAutoSelectedTargetLanguageId(fromYoudaoLanguageId);
       setAutoSelectedTargetLanguageItem(getLanguageItemFromYoudaoId(targetLanguageId));
       console.log("autoSelectedTargetLanguage: ", targetLanguageId);
     }
     const queryTextInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: youdaoLanguageId,
+      fromLanguage: fromYoudaoLanguageId,
       toLanguage: targetLanguageId,
-      isWord: false,
     };
     queryTextWithTextInfo(queryTextInfo);
   }
 
+  /**
+   * Query text with text info, query dictionary API or tranalsate API.
+   *
+   * Todo: need to optimize, change it to class.
+   */
   async function queryTextWithTextInfo(queryTextInfo: QueryWordInfo) {
-    const [queryText, fromLanguage, toLanguage] = [
-      queryTextInfo.word,
-      queryTextInfo.fromLanguage,
-      queryTextInfo.toLanguage,
-    ];
+    const { word: queryText, fromLanguage, toLanguage } = queryTextInfo;
     console.log(`---> query text fromTo: ${fromLanguage} -> ${toLanguage}`);
     /**
      * first, request youdao translate API, check if should show multiple translations, if not, then end.
@@ -202,21 +213,26 @@ export default function () {
      */
     try {
       youdaoTranslateTypeResult = await requestYoudaoDictionary(queryText, fromLanguage, toLanguage);
+      if (shouldCancelQuery) {
+        updateTranslateDisplayResult(null);
+        return;
+      }
+      if (!isLastQuery) {
+        console.log("---> queryTextWithTextInfo: isLastQuery is false, return");
+        return;
+      }
+
       const youdaoResult = youdaoTranslateTypeResult.result as YoudaoTranslateResult;
       console.log(`youdao translate result: ${JSON.stringify(youdaoResult, null, 2)}`);
-      console.warn(`query cost time: ${Date.now() - startTime} ms`);
+      // From the input text query, to the end of Youdao translation request.
+      console.warn(`---> Entire request cost time: ${Date.now() - startTime} ms`);
       const youdaoErrorCode = youdaoResult.errorCode;
-      youdaoTranslateTypeResult.errorInfo = getYoudaoErrorInfo(youdaoErrorCode);
 
       if (youdaoErrorCode === YoudaoRequestStateCode.AccessFrequencyLimited.toString()) {
         console.warn(
           `youdao request frequency limited error: ${youdaoErrorCode}, delay ${delayRequestTime} ms to request again`
         );
         delayQueryWithTextInfo(queryTextInfo);
-        return;
-      } else if (youdaoErrorCode !== YoudaoRequestStateCode.Success.toString()) {
-        console.error(`youdao error: ${JSON.stringify(youdaoTranslateTypeResult.errorInfo)}`);
-        updateTranslateDisplayResult(null);
         return;
       }
 
@@ -239,23 +255,62 @@ export default function () {
       updateTranslateDisplayResult(formatResult);
 
       // request other translate API to show multiple translations
-      if (isShowMultipleTranslations(formatResult)) {
+      if (checkIfShowMultipleTranslations(formatResult)) {
+        // check if enable deepl translate
+        if (myPreferences.enableDeepLTranslate) {
+          console.log("---> deep translate start");
+          requestDeepLTextTranslate(queryText, fromLanguage, toLanguage)
+            .then((deepLTypeResult) => {
+              // Todo: should use axios.CancelToken to cancel the request!
+              if (!shouldCancelQuery) {
+                updateFormatTranslateResultWithDeepLResult(formatResult, deepLTypeResult);
+                updateTranslateDisplayResult(formatResult);
+              }
+            })
+            .catch((err) => {
+              const errorInfo = err as RequestErrorInfo;
+              showToast({
+                style: Toast.Style.Failure,
+                title: `${errorInfo.type}: ${errorInfo.code}`,
+                message: errorInfo.message,
+              });
+            });
+        }
+
+        // check if enable google translate
+        if (myPreferences.enableGoogleTranslate) {
+          console.log("---> google translate start");
+          requestGoogleTranslate(queryText, fromLanguage, toLanguage)
+            .then((googleTypeResult) => {
+              if (!shouldCancelQuery) {
+                updateFormatTranslateResultWithGoogleResult(formatResult, googleTypeResult);
+                updateTranslateDisplayResult(formatResult);
+              }
+            })
+            .catch((err) => {
+              console.error(`google error: ${JSON.stringify(err, null, 2)}`);
+            });
+        }
+
         // check if enable apple translate
         if (myPreferences.enableAppleTranslate) {
           console.log("apple translate start");
           appleTranslate(queryTextInfo)
             .then((translatedText) => {
               if (translatedText) {
-                const appleTranslateResult: TranslateTypeResult = {
-                  type: TranslateType.Apple,
-                  result: { translatedText },
+                const appleTranslateResult: RequestTypeResult = {
+                  type: TranslationType.Apple,
+                  result: translatedText,
                 };
-                updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
-                updateTranslateDisplayResult(formatResult);
+                if (!shouldCancelQuery) {
+                  updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
+                  updateTranslateDisplayResult(formatResult);
+                }
               }
             })
             .catch((error) => {
-              console.warn(`apple translate error: ${error}`);
+              const errorInfo = error as RequestErrorInfo;
+              console.error(`Apple translate error: ${JSON.stringify(errorInfo, null, 4)}`);
             });
         }
 
@@ -263,9 +318,11 @@ export default function () {
         if (myPreferences.enableBaiduTranslate) {
           console.log("baidu translate start");
           requestBaiduTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((baiduRes) => {
-              formatResult = updateFormateResultWithBaiduTranslation(baiduRes, formatResult);
-              updateTranslateDisplayResult(formatResult);
+            .then((baiduTypeResult) => {
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithBaiduTranslation(baiduTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -287,9 +344,11 @@ export default function () {
         if (myPreferences.enableTencentTranslate) {
           console.log(`tencent translate start`);
           requestTencentTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((tencentRes) => {
-              formatResult = updateFormateResultWithTencentTranslation(tencentRes, formatResult);
-              updateTranslateDisplayResult(formatResult);
+            .then((tencentTypeResult) => {
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithTencentTranslation(tencentTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -305,9 +364,11 @@ export default function () {
         if (myPreferences.enableCaiyunTranslate) {
           console.log(`caiyun translate start`);
           requestCaiyunTextTranslate(queryText, fromLanguage, toLanguage)
-            .then((caiyunRes) => {
-              formatResult = updateFormateResultWithCaiyunTranslation(caiyunRes, formatResult);
-              updateTranslateDisplayResult(formatResult);
+            .then((caiyunTypeResult) => {
+              if (!shouldCancelQuery) {
+                formatResult = updateFormatResultWithCaiyunTranslation(caiyunTypeResult, formatResult);
+                updateTranslateDisplayResult(formatResult);
+              }
             })
             .catch((err) => {
               const errorInfo = err as RequestErrorInfo;
@@ -320,7 +381,14 @@ export default function () {
         }
       }
     } catch (error) {
-      console.warn(`requestYoudaoDictionary error: ${error}`);
+      console.error(`---> youdao error: ${JSON.stringify(error)}`);
+      youdaoTranslateTypeResult = {
+        type: TranslationType.Youdao,
+        result: null,
+        errorInfo: error as RequestErrorInfo,
+      };
+      updateTranslateDisplayResult(null);
+      return;
     }
   }
 
@@ -343,28 +411,27 @@ export default function () {
   }
 
   function ListDetail() {
+    // console.log("call ListDetail()");
     if (!youdaoTranslateTypeResult) {
       return null;
     }
 
-    const youdaoErrorCode = (youdaoTranslateTypeResult.result as YoudaoTranslateResult).errorCode;
-    const youdaoErrorMessage = youdaoTranslateTypeResult?.errorInfo?.message;
-    const isYoudaoRequestError = youdaoErrorCode !== YoudaoRequestStateCode.Success.toString();
-
+    const youdaoError = youdaoTranslateTypeResult.errorInfo;
+    const isYoudaoRequestError = youdaoError?.code !== YoudaoRequestStateCode.Success.toString();
     if (isYoudaoRequestError) {
       return (
         <List.Item
           title={"Youdao Request Error"}
-          subtitle={youdaoErrorMessage?.length ? `${youdaoErrorMessage}` : ""}
+          subtitle={youdaoError?.message?.length ? `${youdaoError.message}` : ""}
           accessories={[
             {
-              text: `Error Code: ${youdaoErrorCode}`,
+              text: `Error Code: ${youdaoError?.code}`,
             },
           ]}
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="See Error Code Meaning" icon={Icon.QuestionMark} url={youdaoErrorCodeUrl} />
+              <Action.OpenInBrowser title="See Error Code Meaning" icon={Icon.Info} url={youdaoErrorCodeUrl} />
               <ActionFeedback />
             </ActionPanel>
           }
@@ -408,7 +475,13 @@ export default function () {
                     subtitle={item.subtitle}
                     accessories={getWordAccessories(resultItem.type, item)}
                     detail={<List.Item.Detail markdown={item.translationMarkdown} />}
-                    actions={<ListActionPanel displayItem={item} onLanguageUpdate={updateSelectedTargetLanguageItem} />}
+                    actions={
+                      <ListActionPanel
+                        displayItem={item}
+                        isInstalledEudic={isInstalledEudic}
+                        onLanguageUpdate={updateSelectedTargetLanguageItem}
+                      />
+                    }
                   />
                 );
               })}
@@ -428,7 +501,7 @@ export default function () {
         <List>
           <List.Item
             title={"Language Conflict"}
-            icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
             subtitle={"Your first Language with second Language must be different."}
           />
         </List>
@@ -439,22 +512,29 @@ export default function () {
   /**
    * Update input text and search text, then query text according to @isNow
    *
-   * @isNow if true, query text right now, fase will delay query.
+   * @isNow if true, query text right now, false will delay query.
    */
   function updateInputTextAndQueryTextNow(text: string, isNow: boolean) {
     setInputText(text);
 
     const trimText = trimTextLength(text);
-    console.log(`update input text: ${text}`);
     if (trimText.length === 0) {
-      updateTranslateDisplayResult(null);
+      // fix bug: if input text is empty, need to update search text to empty
+      shouldCancelQuery = true;
+      if (searchText) {
+        console.log(`set search text to empty`);
+        setSearchText("");
+        updateTranslateDisplayResult(null);
+      }
       return;
     }
 
     isLastQuery = false;
+    shouldCancelQuery = false;
     clearTimeout(delayQueryTextTimer);
 
-    if (trimText !== searchText) {
+    if (text !== searchText) {
+      console.log(`update input text: ${text}, ${text.length}`);
       if (isNow) {
         setSearchText(trimText);
       } else {
@@ -466,9 +546,11 @@ export default function () {
     }
   }
 
-  function onInputChangeEvent(text: string) {
+  function onInputChange(text: string) {
     updateInputTextAndQueryTextNow(text, false);
   }
+
+  // console.log(`render interface`);
 
   return (
     <List
@@ -476,17 +558,25 @@ export default function () {
       isShowingDetail={isShowingDetail}
       searchBarPlaceholder={"Search word or translate text..."}
       searchText={inputText}
-      onSearchTextChange={onInputChangeEvent}
-      actions={
-        <ActionPanel>
-          <ActionFeedback />
-          <ActionRecentUpdate />
-          <ActionCurrentVersion />
-        </ActionPanel>
-      }
+      onSearchTextChange={onInputChange}
+      actions={null}
     >
-      <List.EmptyView icon={Icon.TextDocument} title="Type a word to look up or translate" />
+      <List.EmptyView icon={Icon.BlankDocument} title="Type a word to look up or translate" />
       <ListDetail />
     </List>
   );
 }
+
+/**
+ * Easter egg: if you use PopClip and have added a shortcut for `Easydict`, such as `Cmd + E`, then you can use PopClip to open Easydict!
+ * 
+ * Reference: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+ * 
+ * Usage: select following text, then PopClip will show "Install Easydict", click it! 
+
+  # popclip
+  name: Easydict
+  icon: search E
+  key combo: command E
+
+ */

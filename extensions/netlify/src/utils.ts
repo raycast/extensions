@@ -19,8 +19,8 @@ export function getDeployUrl(siteName: string, id: string) {
   return `https://app.netlify.com/sites/${siteName}/deploys/${id}`;
 }
 
-export function getDomainUrl(name: string) {
-  return `https://app.netlify.com/teams/destiner/dns/${name}`;
+export function getDomainUrl(team: string, name: string) {
+  return `https://app.netlify.com/teams/${team}/dns/${name}`;
 }
 
 export function formatDate(date: Date) {
