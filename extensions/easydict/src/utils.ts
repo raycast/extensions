@@ -2,25 +2,32 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 23:46
+ * @lastEditTime: 2022-07-31 23:18
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Clipboard, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { LanguageItem, MyPreferences, QueryRecoredItem, QueryWordInfo, TranslateFormatResult } from "./types";
 
+/**
+ * Eudic bundleIds.
+ *
+ * There are two Eudic versions on the Mac, one free version bundleId is `com.eusoft.freeeudic`, and the other paid version bundleId is `com.eusoft.eudic`. But their direct links are the same, eudic://
+ */
+const eudicBundleIds = ["com.eusoft.freeeudic", "com.eusoft.eudic"];
+
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
-export const clipboardQueryInterval = 10 * 60 * 1000;
+const clipboardQueryInterval = 10 * 60 * 1000;
 
 export const maxLineLengthOfChineseTextDisplay = 45;
 export const maxLineLengthOfEnglishTextDisplay = 95;
 
 export const myPreferences: MyPreferences = getPreferenceValues();
+// console.log(`myPreferences: ${JSON.stringify(myPreferences, null, 2)}`);
 export const defaultLanguage1 = getLanguageItemFromYoudaoId(myPreferences.language1) as LanguageItem;
 export const defaultLanguage2 = getLanguageItemFromYoudaoId(myPreferences.language2) as LanguageItem;
 export const preferredLanguages = [defaultLanguage1, defaultLanguage2];
@@ -225,43 +232,25 @@ export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): st
   } else if (accordingLanguageId === defaultLanguage2.youdaoLanguageId) {
     targetLanguageId = defaultLanguage1.youdaoLanguageId;
   }
-
   const targetLanguage = getLanguageItemFromYoudaoId(targetLanguageId);
-
   console.log(`languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`);
   return targetLanguage.youdaoLanguageId;
 }
 
 /**
- * traverse all applications, check if Eudic is installed
+ * Traverse all applications, check if Eudic is installed
  */
-async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInstalled: boolean) => void) {
+export async function checkIfInstalledEudic(): Promise<boolean> {
+  const startTime = new Date().getTime();
   const installedApplications = await getApplications();
-  LocalStorage.setItem(eudicBundleId, false);
-  updateIsInstalledEudic(false);
-
   for (const application of installedApplications) {
-    console.log(application.bundleId);
-    if (application.bundleId === eudicBundleId) {
-      updateIsInstalledEudic(true);
-      LocalStorage.setItem(eudicBundleId, true);
-
-      console.log("isInstalledEudic: true");
+    const appBundleId = application.bundleId;
+    if (appBundleId && eudicBundleIds.includes(appBundleId)) {
+      console.log(`checkIfEudicInstalled cost time: ${new Date().getTime() - startTime} ms`); // cost time: 22 ms
+      return Promise.resolve(true);
     }
   }
-}
-
-export function checkIfEudicIsInstalled(setIsInstalledEudic: (isInstalled: boolean) => void) {
-  LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    console.log("is install Eudic: ", isInstalledEudic);
-    if (isInstalledEudic == true) {
-      setIsInstalledEudic(true);
-    } else if (isInstalledEudic == false) {
-      setIsInstalledEudic(false);
-    } else {
-      traverseAllInstalledApplications(setIsInstalledEudic);
-    }
-  });
+  return Promise.resolve(false);
 }
 
 export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => void) {

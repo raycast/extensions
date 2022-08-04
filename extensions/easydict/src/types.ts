@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-24 00:38
+ * @lastEditTime: 2022-07-31 22:48
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -121,10 +121,11 @@ export interface YoudaoTranslateReformatResultItem {
 export interface MyPreferences {
   language1: string;
   language2: string;
-  isAutomaticQuerySelectedText: boolean;
-  isAutomaticPlayWordAudio: boolean;
-  isDisplayTargetTranslationLanguage: boolean;
-  translationDisplayOrder: string;
+  enableAutomaticQuerySelectedText: boolean;
+  enableAutomaticPlayWordAudio: boolean;
+  enableDisplayTargetTranslationLanguage: boolean;
+  enableOpenInEudic: boolean;
+  translationSortOrder: string;
 
   youdaoAppId: string;
   youdaoAppSecret: string;

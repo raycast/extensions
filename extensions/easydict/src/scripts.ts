@@ -2,16 +2,15 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-16 17:47
+ * @lastEditTime: 2022-07-31 15:50
  * @fileName: scripts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import querystring from "node:querystring";
-import { eudicBundleId } from "./components";
 import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
 import { QueryWordInfo, RequestErrorInfo, TranslationType } from "./types";
 import { getLanguageItemFromYoudaoId } from "./utils";
@@ -137,9 +136,7 @@ export const openInEudic = (queryText: string) => {
   const url = `eudic://dict/${queryText}`;
   execFile("open", [url], (error) => {
     if (error) {
-      console.log("error:", error);
-      LocalStorage.removeItem(eudicBundleId);
-
+      console.error(`open in eudic error: ${error}`);
       showToast({
         title: "Eudic is not installed.",
         style: Toast.Style.Failure,
