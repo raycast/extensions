@@ -11,9 +11,8 @@ let SQL: SqlJsStatic;
 
 const loadDatabase = async (path: string) => {
   if (!SQL) {
-    SQL = await initSqlJs({
-      locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm"),
-    });
+    const wasmBinary = await readFile(resolve(environment.assetsPath, "sql-wasm.wasm"));
+    SQL = await initSqlJs({ wasmBinary });
   }
   const fileContents = await readFile(path);
   return new SQL.Database(fileContents);

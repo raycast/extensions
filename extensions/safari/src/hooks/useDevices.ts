@@ -25,9 +25,8 @@ const loadDb = async (): Promise<Database> => {
   }
 
   const fileBuffer = await readFile(DATABASE_PATH);
-  const SQL = await initSqlJs({
-    locateFile: () => join(environment.assetsPath, "sql-wasm.wasm"),
-  });
+  const wasmBinary = await readFile(join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
 
   const db = new SQL.Database(fileBuffer);
   loadedDb = db;
