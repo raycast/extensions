@@ -41,6 +41,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               title="Edit Story"
               target={
                 <StoryForm
+                  submitTitle="Update Story"
                   story={story}
                   onSubmit={async (values) => {
                     await storyUpdateAction(async () => shortcut.updateStory(story.id, values))();
