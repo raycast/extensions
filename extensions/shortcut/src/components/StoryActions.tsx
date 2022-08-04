@@ -4,6 +4,7 @@ import { getMemberName, getStoryColor } from "../helpers/storyHelpers";
 import { useGroups, useIterations, useLabelsMap, useMemberInfo, useMemberMap, useStoryWorkflow } from "../hooks";
 
 import shortcut from "../utils/shortcut";
+import StoryForm from "./StoryForm";
 
 export default function StoryActions({ story, mutate }: { story?: Story | StorySlim; mutate: () => void }) {
   const { data: memberInfo } = useMemberInfo();
@@ -35,6 +36,20 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
         <>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
+
+            <Action.Push
+              title="Edit Story"
+              target={
+                <StoryForm
+                  story={story}
+                  onSubmit={async (values) => {
+                    await storyUpdateAction(async () => shortcut.updateStory(story.id, values))();
+                    pop();
+                  }}
+                />
+              }
+              icon={Icon.Pencil}
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Submenu
