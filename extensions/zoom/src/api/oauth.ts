@@ -26,9 +26,6 @@ export async function authorize(): Promise<string> {
     clientId,
     endpoint: "https://zoom.oauth-proxy.raycast.com/authorize",
     scope: "",
-    extraParameters: {
-      response_type: "code",
-    },
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode);
