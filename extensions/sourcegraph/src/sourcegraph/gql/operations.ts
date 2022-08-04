@@ -13,21 +13,11 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** An arbitrarily large integer encoded as a decimal string. */
   BigInt: any;
-  /**
-   * An RFC 3339-encoded UTC date string, such as 1973-11-29T21:33:09Z. This value can be parsed into a
-   * JavaScript Date using Date.parse. To produce this value from a JavaScript Date instance, use
-   * Date#toISOString.
-   */
   DateTime: any;
-  /** A Git object ID (SHA-1 hash, 40 hexadecimal characters). */
   GitObjectID: any;
-  /** A string that contains valid JSON, with additional support for //-style comments and trailing commas. */
   JSONCString: any;
-  /** A valid JSON value. */
   JSONValue: any;
-  /** A quadruple that represents all possible states of the published value: true, false, 'draft', or null. */
   PublishedValue: any;
 };
 
@@ -59,6 +49,18 @@ export enum AlertType {
   Error = "ERROR",
   Info = "INFO",
   Warning = "WARNING",
+}
+
+/** A pre-defined periods to get site analytics. */
+export enum AnalyticsDateRange {
+  /** Custom date range. */
+  Custom = "CUSTOM",
+  /** Last month date range. */
+  LastMonth = "LAST_MONTH",
+  /** Last 3 monthes date range. */
+  LastThreeMonths = "LAST_THREE_MONTHS",
+  /** Last week date range. */
+  LastWeek = "LAST_WEEK",
 }
 
 /** Denotes the type of operation of a given log entry. */
@@ -182,6 +184,7 @@ export enum ChangesetExternalState {
   Draft = "DRAFT",
   Merged = "MERGED",
   Open = "OPEN",
+  Readonly = "READONLY",
 }
 
 /** The publication state of a changeset on Sourcegraph */
@@ -243,6 +246,8 @@ export enum ChangesetSpecOperation {
   PublishDraft = "PUBLISH_DRAFT",
   /** Push a new commit to the code host. */
   Push = "PUSH",
+  /** The changeset is re-added to the batch change. */
+  Reattach = "REATTACH",
   /** Reopen the changeset on the codehost. */
   Reopen = "REOPEN",
   /** Internal operation to get around slow code host updates. */
@@ -300,6 +305,11 @@ export enum ChangesetState {
    * changeset on the code host and on Sourcegraph to the desired state.
    */
   Processing = "PROCESSING",
+  /**
+   * The changeset is published, and is now read-only, most likely due to the
+   * repository being archived.
+   */
+  Readonly = "READONLY",
   /**
    * The changeset reconciler ran into a problem while processing the
    * changeset and will retry it for a number of retries.
@@ -498,6 +508,20 @@ export enum ExternalServiceKind {
   Rustpackages = "RUSTPACKAGES",
 }
 
+/** The possible states of an external service sync job. */
+export enum ExternalServiceSyncJobState {
+  /** Sync finished successfully. */
+  Completed = "COMPLETED",
+  /** An error occured while syncing. Will be retried eventually. */
+  Errored = "ERRORED",
+  /** A fatal error occured while syncing. No retries will be made. */
+  Failed = "FAILED",
+  /** Currently syncing. */
+  Processing = "PROCESSING",
+  /** Not yet started. Will be picked up by a worker eventually. */
+  Queued = "QUEUED",
+}
+
 /** Additional options when performing a permissions sync. */
 export type FetchPermissionsOptions = {
   /**
@@ -650,6 +674,11 @@ export enum LsifUploadState {
   /** This upload was processed successfully. */
   Completed = "COMPLETED",
   /**
+   * This upload is deleted and its metadata is reconstructed from existing
+   * audit log entries.
+   */
+  Deleted = "DELETED",
+  /**
    * This upload is queued for deletion. This upload was previously in the
    * COMPLETED state and evicted, replaced by a newer upload, or deleted by
    * a user. This upload is able to answer code intelligence queries until
@@ -710,6 +739,23 @@ export type LineChartSearchInsightInput = {
   /** The default values for filters and aggregates for this line chart. */
   viewControls?: InputMaybe<InsightViewControlsInput>;
 };
+
+/** Fidelity of a lockfile index. */
+export enum LockfileIndexFidelity {
+  /**
+   * If we couldn't determine the roots of the dependency graph because it's
+   * circular. That means we can't say what's a direct dependency and what not, but
+   * we can tell which dependency depends on which other dependency.
+   */
+  Circular = "CIRCULAR",
+  /**
+   * Couldn't build a complete graph from lockfile. It's instead a flat list of
+   * dependencies found in the lockfile.
+   */
+  Flat = "FLAT",
+  /** Full dependency graph. */
+  Graph = "GRAPH",
+}
 
 /** Describes options for rendering Markdown. */
 export type MarkdownOptions = {
@@ -954,6 +1000,24 @@ export type ProductSubscriptionInput = {
   userCount: Scalars["Int"];
 };
 
+/** Input for getting insights related to a file. This input type is experimental and should be considered unstable in the API. */
+export type RelatedInsightsInput = {
+  /** The path to the file */
+  file: Scalars["String"];
+  /** The repo name for the file */
+  repo: Scalars["String"];
+  /** The revision number */
+  revision: Scalars["String"];
+};
+
+/** Input for getting insights related to a repo. This input type is experimental and should be considered unstable in the API. */
+export type RelatedInsightsRepoInput = {
+  /** The repo name for the file */
+  repo: Scalars["String"];
+  /** The revision number */
+  revision: Scalars["String"];
+};
+
 /** Input object for adding insight view to dashboard. */
 export type RemoveInsightViewFromDashboardInput = {
   /** ID of the dashboard. */
@@ -1064,6 +1128,8 @@ export enum SearchContextsOrderBy {
 export type SearchInsightLivePreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
   generatedFromCaptureGroups: Scalars["Boolean"];
+  /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
+  groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
   label: Scalars["String"];
   /** The query string. */
@@ -1097,6 +1163,8 @@ export enum SearchPatternType {
 export type SearchSeriesPreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
   generatedFromCaptureGroups: Scalars["Boolean"];
+  /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
+  groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
   label: Scalars["String"];
   /** The query string. */
@@ -1107,8 +1175,10 @@ export type SearchSeriesPreviewInput = {
 export enum SearchVersion {
   /** Search syntax that defaults to regexp search. */
   V1 = "V1",
-  /** Search syntax that defaults to literal search. */
+  /** Search syntax that defaults to literal-only search. */
   V2 = "V2",
+  /** Search syntax that defaults to standard search. */
+  V3 = "V3",
 }
 
 /** Input type for series display options. */
@@ -1186,12 +1256,10 @@ export type SurveySubmissionInput = {
    * will not be used.
    */
   email?: InputMaybe<Scalars["String"]>;
-  /** The answer to "What else do you use Sourcegraph to do?". */
+  /** The answer to "What do you use Sourcegraph for?". */
   otherUseCase?: InputMaybe<Scalars["String"]>;
   /** User's likelihood of recommending Sourcegraph to a friend, from 0-10. */
   score: Scalars["Int"];
-  /** The answer to "You use Sourcegraph to...". */
-  useCases?: InputMaybe<Array<SurveyUseCase>>;
 };
 
 /** Possible answers to "You use Sourcegraph to..." in the NPS Survey. */
@@ -1878,7 +1946,7 @@ export type MergeChangesetMutationOptions = Apollo.BaseMutationOptions<
 >;
 export const GetBatchChangesDocument = gql`
   query GetBatchChanges {
-    batchChanges(first: 100) {
+    batchChanges(first: 250) {
       nodes {
         ...BatchChange
       }
@@ -2095,6 +2163,7 @@ const result: PossibleTypesResultData = {
       "ExternalAccount",
       "ExternalChangeset",
       "ExternalService",
+      "ExternalServiceSyncJob",
       "GitCommit",
       "GitRef",
       "HiddenBatchSpecWorkspace",
@@ -2104,6 +2173,7 @@ const result: PossibleTypesResultData = {
       "InsightsDashboard",
       "LSIFIndex",
       "LSIFUpload",
+      "LockfileIndex",
       "Monitor",
       "MonitorActionEvent",
       "MonitorEmail",
@@ -2130,6 +2200,7 @@ const result: PossibleTypesResultData = {
     RegistryPublisher: ["Org", "User"],
     RepositoryComparisonInterface: ["PreviewRepositoryComparison", "RepositoryComparison"],
     RepositoryRedirect: ["Redirect", "Repository"],
+    SearchQueryInsightsResult: ["SearchQueryInsights", "SearchQueryInsightsNotAvailable"],
     SearchResult: ["CommitSearchResult", "FileMatch", "Repository"],
     SettingsSubject: ["DefaultSettings", "Org", "Site", "User"],
     StatusMessage: ["CloningProgress", "ExternalServiceSyncError", "IndexingError", "IndexingProgress", "SyncError"],
