@@ -133,4 +133,5 @@ interface UnsplashPreferences {
   wallpaperPath: string;
   applyTo: "current" | "every";
   includeDefaults: "yes" | "no";
+  updateTime: string;
 }
