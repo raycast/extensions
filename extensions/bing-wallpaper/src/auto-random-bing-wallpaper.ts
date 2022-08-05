@@ -1,11 +1,14 @@
 import fetch from "node-fetch";
 import { buildBingImageURL, buildBingWallpapersURL, getPictureName } from "./utils/bing-wallpaper-utils";
 import { getDownloadedBingWallpapers, setDownloadedWallpaper, setRandomWallpaper } from "./utils/common-utils";
-import { getPreferenceValues, showHUD } from "@raycast/api";
+import { environment, getPreferenceValues, LaunchType, showHUD } from "@raycast/api";
 import { BingResponseData } from "./types/types";
 import { Preferences } from "./types/preferences";
 
 export default async () => {
+  if (environment.launchType === LaunchType.UserInitiated) {
+    await showHUD("Downloading and setting wallpaper...");
+  }
   await getRandomWallpaper();
 };
 
