@@ -20,7 +20,10 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
         <ActionPanel>
           <NoteActions
             note={data}
-            onDeleteCallback={() => pop()}
+            onDeleteCallback={async () => {
+              if (mutate) mutate();
+              pop();
+            }}
             mutate={() => {
               if (mutate) mutate();
               mutateSingle();

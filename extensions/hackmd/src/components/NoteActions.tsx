@@ -93,10 +93,6 @@ export default function NoteActions({
                       await api.deleteNote(note.id);
                     }
 
-                    if (mutate) {
-                      mutate();
-                    }
-
                     if (onDeleteCallback) {
                       onDeleteCallback();
                     }

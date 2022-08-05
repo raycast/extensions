@@ -23,7 +23,7 @@ export default function NoteListItem({ note, mutate }: { note: Note; mutate?: ()
             title="View Detail"
           />
 
-          <NoteActions note={note} mutate={mutate} />
+          <NoteActions note={note} mutate={mutate} onDeleteCallback={mutate} />
         </ActionPanel>
       }
     />
