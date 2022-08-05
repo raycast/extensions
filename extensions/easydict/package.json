@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Look up words or translate text in an easy way. Support 23 languages, especially optimized for English and Chinese words.",
+  "description": "Easily look up words or translate text, support 23 languages, support DeepL, Google, Apple, Baidu, Tencent, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -11,7 +11,7 @@
       "name": "easydict",
       "title": "Search Word",
       "subtitle": "Easydict",
-      "description": "Easy to look up words or translate text, support MacOS system translate, DeepL, Baidu, Tencent, Youdao and Caiyun translation API.",
+      "description": "Easily look up words or translate text, support 23 languages, support DeepL, Google, Apple, Baidu, Tencent, Youdao and Caiyun translation.",
       "mode": "view"
     }
   ],
@@ -25,6 +25,7 @@
     "dictionary",
     "translate",
     "deepl",
+    "google",
     "apple",
     "youdao",
     "baidu",
@@ -78,9 +79,9 @@
       "title": "First Language",
       "name": "language1",
       "type": "dropdown",
-      "required": false,
-      "default": "Chinese-Simplified",
-      "description": "Select the first language you want to translate into",
+      "required": true,
+      "default": "English",
+      "description": "Your first language",
       "data": [
         {
           "title": "Chinese-Simplified",
@@ -180,9 +181,9 @@
       "title": "Second Language",
       "name": "language2",
       "type": "dropdown",
-      "required": false,
-      "default": "English",
-      "description": "Select the second language you want to translate into",
+      "required": true,
+      "default": "Chinese-Simplified",
+      "description": "Your second language",
       "data": [
         {
           "title": "English",
@@ -280,7 +281,7 @@
     },
     {
       "title": "Switch Boxes",
-      "name": "isAutomaticQuerySelectedText",
+      "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
       "label": "Automatic Query Selected Text",
       "required": false,
@@ -288,7 +289,15 @@
       "default": true
     },
     {
-      "name": "isAutomaticPlayWordAudio",
+      "name": "enableOpenInEudic",
+      "type": "checkbox",
+      "label": "Show Open In Eudic",
+      "required": false,
+      "description": "Show Open In Eudic in action panel if Eudic is installed",
+      "default": true
+    },
+    {
+      "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
       "label": "Automatic Play Word Audio",
       "required": false,
@@ -296,7 +305,7 @@
       "default": false
     },
     {
-      "name": "isDisplayTargetTranslationLanguage",
+      "name": "enableDisplayTargetTranslationLanguage",
       "type": "checkbox",
       "label": "Select Target Translation Language",
       "required": false,
@@ -330,6 +339,14 @@
       "default": true
     },
     {
+      "type": "checkbox",
+      "name": "enableGoogleTranslate",
+      "label": "Google Translate",
+      "required": false,
+      "description": "Turn on/off Google Translate",
+      "default": true
+    },
+    {
       "name": "enableBaiduTranslate",
       "type": "checkbox",
       "label": "Baidu Translate",
@@ -354,13 +371,13 @@
       "default": true
     },
     {
-      "title": "Translation Display Order",
-      "name": "translationDisplayOrder",
+      "title": "Translation Sort Order",
+      "name": "translationSortOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is DeepL,Apple,Baidu,Tencent,Youdao,Caiyun",
-      "default": "deepl,apple,baidu,tencent,youdao,caiyun",
-      "placeholder": "deepl,apple,baidu,tencent,youdao,caiyun"
+      "description": "Separate by comma, default is DeepL,Google,Apple,Baidu,Tencent,Youdao,Caiyun",
+      "default": "deepl,google,apple,baidu,tencent,youdao,caiyun",
+      "placeholder": "deepl,google,apple,baidu,tencent,youdao,caiyun"
     },
     {
       "title": "Youdao App ID",

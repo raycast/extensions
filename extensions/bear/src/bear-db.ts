@@ -114,7 +114,8 @@ LIMIT 400
 `;
 
 export async function loadDatabase(): Promise<BearDb> {
-  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(BEAR_DB_PATH);
   return new BearDb(new SQL.Database(db));
 }

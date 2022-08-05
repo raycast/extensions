@@ -5,6 +5,7 @@
   "description": "View your Netlify sites, domains, and team members",
   "icon": "icon.png",
   "author": "destiner",
+  "contributors": ["jonohewitt"],
   "categories": ["Developer Tools", "Web"],
   "license": "MIT",
   "commands": [

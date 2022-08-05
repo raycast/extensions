@@ -1,7 +1,13 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { likeCurrentlyPlayingTrack } from "./client/client";
+import { isAuthorized } from "./client/oauth";
 
 export default async () => {
+  const authorized = await isAuthorized();
+  if (!authorized) {
+    showHUD("⚠️ Please open any view-based command and authorize to perform the command.");
+    return;
+  }
   const toast = await showToast({ style: Toast.Style.Animated, title: "Liking Song" });
   try {
     const response = await likeCurrentlyPlayingTrack();

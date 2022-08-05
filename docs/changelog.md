@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.38.3 - 2022-08-03
+
+### 💎 Improvements
+
+- Added debug actions to all local development commands in root search
+- Menu bar commands now show an activation button in preferences
+
+### 🐞 Fixes
+
+- **Menu Bar Commands**: Fixed issues around hot reloading, unloading, and inconsistent action handler behavior
+- **No-view Commands:** Fixed returning top-level props for commands that doesn’t have arguments or drafts
+
 ## 1.38.1 - 2022-07-21
 
 ### ✨ New

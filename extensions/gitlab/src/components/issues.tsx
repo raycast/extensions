@@ -6,7 +6,6 @@ import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
   capitalizeFirstLetter,
-  ensureCleanAccessories,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -196,11 +195,11 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       title={issue.title}
       subtitle={"#" + issue.iid}
       icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
-      accessories={ensureCleanAccessories([
+      accessories={[
         { text: issue.milestone ? issue.milestone.title : undefined },
         { text: toDateString(issue.updated_at) },
         { icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle } },
-      ])}
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

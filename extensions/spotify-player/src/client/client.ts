@@ -1,10 +1,10 @@
-import { showToast, Toast } from "@raycast/api";
+import { getApplications, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 import { CurrentlyPlayingTrack, Response } from "./interfaces";
 import { authorize, oauthClient } from "./oauth";
 import { runAppleScript } from "run-applescript";
-import { isSpotifyInstalled } from "./utils";
+import { isSpotifyInstalled, spotifyApplicationName } from "./utils";
 
 const debugMode = false;
 
@@ -29,44 +29,11 @@ async function authorizeIfNeeded(): Promise<void> {
 
 export const notPlayingErrorMessage = "Spotify Is Not Playing";
 
-export enum SpotifyPlayingState {
-  Playing = "playing",
-  Paused = "paused",
-  Stopped = "stopped",
-}
-
-export async function isSpotifyPlaying(): Promise<SpotifyPlayingState> {
-  const script = `
-  if application "Spotify" is not running then
-	return "stopped"
-end if
-
-property playerState : "stopped"
-
-tell application "Spotify"
-	try
-		set playerState to player state as string
-	end try
-end tell
-
-return playerState`;
-
-  try {
-    const response = await runAppleScript(script);
-    const result = response as SpotifyPlayingState;
-    return result;
-  } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed getting playback",
-    });
-    return SpotifyPlayingState.Stopped;
-  }
-}
-
 export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
+  const spotifyName = await spotifyApplicationName();
+
   const script = `
-  if application "Spotify" is not running then
+  if application "${spotifyName}" is not running then
 	return "${notPlayingErrorMessage}"
 end if
 
@@ -98,7 +65,6 @@ end if`;
     if (error == notPlayingErrorMessage) {
       return { error };
     }
-
     const track = JSON.parse(response as string) as CurrentlyPlayingTrack;
     return { result: track };
   } catch (err) {
@@ -218,6 +184,33 @@ export async function startPlaySimilar(trackId: string | undefined): Promise<voi
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed Playing Similar",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
+}
+
+export async function play(uri?: string, context_uri?: string): Promise<void> {
+  try {
+    await authorizeIfNeeded();
+    await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Start Playing",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
+}
+
+export async function playShuffled(uri: string): Promise<void> {
+  try {
+    await authorizeIfNeeded();
+    await spotifyApi.setShuffle(true);
+    await spotifyApi.play({ context_uri: uri });
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Playing Shuffled Playlist",
       message: (e as unknown as SpotifyApi.ErrorObject).message,
     });
   }

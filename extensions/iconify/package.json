@@ -5,6 +5,9 @@
   "description": "Search icons via Iconify",
   "icon": "icon.png",
   "author": "destiner",
+  "contributors": [
+    "kidonng"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -31,13 +34,31 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.32.1",
+    "@raycast/api": "^1.38.1",
     "axios": "^0.26.1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.21",
-    "@types/react": "^17.0.40",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
     "@typescript-eslint/parser": "^5.15.0",
     "eslint": "^8.11.0",

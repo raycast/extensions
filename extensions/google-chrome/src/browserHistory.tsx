@@ -35,9 +35,8 @@ const getProfileName = () => "Default";
 const loadDb = async (profileName: string): Promise<Database> => {
   const dbPath = historyDbPath(profileName);
   const fileBuffer = await fsReadFile(dbPath);
-  const SQL = await initSqlJs({
-    locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm"),
-  });
+  const wasmBinary = await fsReadFile(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileBuffer);
 };
 

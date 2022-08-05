@@ -12,11 +12,30 @@
       "name": "index",
       "title": "Execute Shell Command",
       "description": "Execute shell command and display output",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "arguments_terminal",
+      "type": "checkbox",
+      "required": false,
+      "title": "Arguments Settings:",
+      "description": "Decide if you want to run commands inside raycast or inside a terminal application",
+      "default": false,
+      "label": "Use Terminal/iTerm"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.38.2",
     "raycast-toolkit": "^1.0.4",
     "run-applescript": "^6.0.0",
     "shell-env": "^4.0.1",
