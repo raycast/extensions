@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Search Passwords",
-      "subtitle": "gopass",
+      "subtitle": "Gopass",
       "description": "Search and copy passwords from gopass password manager",
       "mode": "view"
     }
