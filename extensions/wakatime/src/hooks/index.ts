@@ -1,11 +1,10 @@
 import { subDays } from "date-fns";
 import { useCallback } from "react";
+import { Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import { useBase } from "./base";
 import { getDuration, getLeaderBoard, getPrivateLeaderBoards, getProjects, getSummary, getUser } from "../utils";
-
-import type { List } from "@raycast/api";
 
 export function useUser() {
   const [cachedUser, setCachedUser] = useCachedState<WakaTime.User>("user");
@@ -43,12 +42,10 @@ export function useActivityChange() {
 
       if (today > 0 || yesterday > 0) {
         const timeDiff = Math.abs(today - yesterday);
-        const [quantifier, emoji] = today <= yesterday ? ["less", "⬇️"] : ["more", "⬆️"];
 
-        title = `You've spent ${getDuration(timeDiff)} ${quantifier} than yesterday`;
-
+        title = `${getDuration(timeDiff)} ${today <= yesterday ? "less" : "more"} time spent compared to yesterday`;
         if (today > 0 && yesterday > 0) {
-          accessories = [{ text: `${Math.floor((timeDiff / yesterday) * 1e2)}% ${emoji}` }];
+          accessories = [{ text: `${Math.floor((timeDiff / yesterday) * 1e2)}%`, icon: Icon.Heartbeat }];
         }
       }
 
