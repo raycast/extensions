@@ -479,7 +479,7 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
 }
 
 export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPlaylistsResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: false });
+  const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: true });
 
   let cancel = false;
 
@@ -526,7 +526,7 @@ export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPla
 }
 
 export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.MultipleCategoriesResponse>>({ isLoading: false });
+  const [response, setResponse] = useState<Response<SpotifyApi.MultipleCategoriesResponse>>({ isLoading: true });
 
   let cancel = false;
 
@@ -573,7 +573,7 @@ export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesRespon
 }
 
 export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi.PlaylistSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: false });
+  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: true });
 
   let cancel = false;
 
