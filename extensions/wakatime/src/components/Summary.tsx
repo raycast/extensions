@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { formatDistance } from "date-fns";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
@@ -17,30 +17,37 @@ export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">>
   );
 };
 
+const keys = ["categories", "editors", "languages", "projects"] as const;
+
 const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
-  const keys = ["categories", "editors", "languages", "projects"] as const;
-  const [md] = useState([
-    `## ${title}`,
-    getDuration(range.cummulative_total.seconds),
-    "---",
-    ...keys
-      .map((key) => [
+  // Item should have details if cummulative seconds is not 0 or null/undefined
+  const haveDetails = !!range.cummulative_total?.seconds;
+
+  const md = useMemo(() => {
+    if (!haveDetails) return [];
+
+    return [
+      `## ${title}`,
+      getDuration(range.cummulative_total?.seconds),
+      "---",
+      ...keys.flatMap((key) => [
         `### ${key[0].toUpperCase()}${key.slice(1)}`,
         ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
-      ])
-      .flat(),
-  ]);
+      ]),
+    ];
+  }, [range, title]);
 
-  const props: Partial<List.Item.Props> = showDetail
-    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
-    : {
-        accessories: [
-          {
-            tooltip: "Cumulative Total",
-            text: getDuration(range.cummulative_total.seconds),
-          },
-        ],
-      };
+  const props: Partial<List.Item.Props> =
+    showDetail && haveDetails
+      ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
+      : {
+          accessories: [
+            {
+              tooltip: "Cumulative Total",
+              text: getDuration(range.cummulative_total?.seconds),
+            },
+          ],
+        };
 
   return (
     <List.Item
