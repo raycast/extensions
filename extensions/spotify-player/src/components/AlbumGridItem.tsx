@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Grid, Icon, Image, List } from "@raycast/api";
-import { play, playShuffled } from "../spotify/client";
+import { Grid, Image } from "@raycast/api";
+import { AlbumsActionPanel } from "./AlbumsActionPanel";
 
 export default function AlbumGridItem(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInstalled: boolean }) {
-  const album = props.album;
-  const spotifyInstalled = props.spotifyInstalled;
+  const { album, spotifyInstalled } = props;
   const icon: Image.ImageLike = {
     source: album.images[0]?.url,
   };
@@ -18,39 +17,7 @@ export default function AlbumGridItem(props: { album: SpotifyApi.AlbumObjectSimp
       title={title}
       subtitle={subtitle}
       content={icon}
-      actions={
-        <ActionPanel title={title}>
-          <Action
-            title="Play"
-            icon={Icon.Play}
-            onAction={() => {
-              play(undefined, album.uri);
-            }}
-          />
-          <Action
-            icon={Icon.Shuffle}
-            title="Play Shuffled"
-            onAction={() => {
-              playShuffled(album.uri);
-            }}
-          />
-          <Action.OpenInBrowser
-            title={`Show Album (${album.name.trim()})`}
-            url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}
-            icon={icon}
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
-          />
-          <Action.OpenInBrowser
-            title="Show Artist"
-            url={spotifyInstalled ? `spotify:artist:${album.artists[0].id}` : album.artists[0].external_urls.spotify}
-          />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            content={album.external_urls.spotify}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        </ActionPanel>
-      }
+      actions={<AlbumsActionPanel album={album} spotifyInstalled={spotifyInstalled} />}
     />
   );
 }

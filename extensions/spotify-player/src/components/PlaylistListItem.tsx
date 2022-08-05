@@ -7,9 +7,8 @@ export default function PlaylistListItem(props: {
   playlist: SpotifyApi.PlaylistObjectSimplified;
   spotifyInstalled: boolean;
 }) {
-  const playlist = props.playlist;
+  const { playlist, spotifyInstalled } = props;
 
-  const spotifyInstalled = props.spotifyInstalled;
   const imageURL = playlist.images[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {
     source: imageURL ?? Icon.BlankDocument,

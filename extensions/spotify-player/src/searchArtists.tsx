@@ -1,8 +1,9 @@
 import { List, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ArtistListItem from "./components/ArtistListItem";
 import { useArtistsSearch } from "./spotify/client";
+import { isSpotifyInstalled } from "./utils";
 
 export default function SearchArtists() {
   const [searchText, setSearchText] = useState<string>();
@@ -11,6 +12,18 @@ export default function SearchArtists() {
   if (response.error) {
     showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
+
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function checkForSpotify() {
+      const spotifyIsInstalled = await isSpotifyInstalled();
+
+      setSpotifyInstalled(spotifyIsInstalled);
+    }
+
+    checkForSpotify();
+  }, []);
 
   return (
     <List
@@ -21,7 +34,7 @@ export default function SearchArtists() {
       isShowingDetail={!_(response.result?.artists.items).isEmpty()}
     >
       {response.result?.artists.items.map((t: SpotifyApi.ArtistObjectFull) => (
-        <ArtistListItem key={t.id} artist={t} />
+        <ArtistListItem key={t.id} artist={t} spotifyInstalled={spotifyInstalled} />
       ))}
     </List>
   );

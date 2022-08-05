@@ -1,58 +1,59 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { play, playShuffled } from "../spotify/client";
+import { Image, List } from "@raycast/api";
+import _ from "lodash";
+import { getAlbumTracks } from "../spotify/client";
+import { AlbumsActionPanel } from "./AlbumsActionPanel";
 
-export default function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInstalled: boolean }) {
-  const album = props.album;
-  const spotifyInstalled = props.spotifyInstalled;
+export default function AlbumListItem(props: {
+  album: SpotifyApi.AlbumObjectSimplified;
+  spotifyInstalled: boolean;
+  showDetails: boolean;
+}) {
+  const { album, spotifyInstalled, showDetails } = props;
   const icon: Image.ImageLike = {
     source: album.images[album.images.length - 1]?.url,
     mask: Image.Mask.Circle,
   };
 
   const title = album.name;
-  const subtitle = `${album.artists.map((a) => a.name).join(", ")}`;
+  const subtitle = showDetails ? `${album.artists.map((a) => a.name).join(", ")}` : undefined;
   return (
     <List.Item
-      title={title}
+      title={{ value: title, tooltip: title }}
       subtitle={subtitle}
+      detail={<AlbumDetail album={album} />}
       accessories={[
-        { text: album.release_date.substring(0, 4), tooltip: "release year" },
-        { text: `${album.total_tracks.toString()} songs`, tooltip: "number of tracks" },
+        { text: album.release_date.substring(0, 4), tooltip: "Release Year" },
+        showDetails ? { text: `${album.total_tracks.toString()} songs`, tooltip: "Number of Tracks" } : {},
       ]}
       icon={icon}
-      actions={
-        <ActionPanel title={title}>
-          <Action
-            title="Play"
-            icon={Icon.Play}
-            onAction={() => {
-              play(undefined, album.uri);
-            }}
-          />
-          <Action
-            icon={Icon.Shuffle}
-            title="Play Shuffled"
-            onAction={() => {
-              playShuffled(album.uri);
-            }}
-          />
-          <Action.OpenInBrowser
-            title={`Show Album (${album.name.trim()})`}
-            url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}
-            icon={icon}
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
-          />
-          <Action.OpenInBrowser
-            title="Show Artist"
-            url={spotifyInstalled ? `spotify:artist:${album.artists[0].id}` : album.artists[0].external_urls.spotify}
-          />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            content={album.external_urls.spotify}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        </ActionPanel>
-      }
+      actions={<AlbumsActionPanel album={album} spotifyInstalled={spotifyInstalled} />}
     />
   );
 }
+
+function AlbumDetail(props: { album: SpotifyApi.AlbumObjectSimplified }) {
+  const { album } = props;
+  const response = getAlbumTracks(album.id);
+  const albums = response.result?.items;
+  return <List.Item.Detail isLoading={response.isLoading} markdown={getAlbumDetailMarkdownContent(album, albums)} />;
+}
+
+const getAlbumDetailMarkdownContent = (
+  album: SpotifyApi.AlbumObjectSimplified,
+  tracks: SpotifyApi.TrackObjectSimplified[] | undefined
+) => {
+  let header = `# ${album.name}\n`;
+
+  const albumCover = _(album.images).first()?.url;
+  if (albumCover) {
+    header += `![](${albumCover})\n\n`;
+  }
+
+  const albumsString = tracks
+    ?.map((a) => {
+      return `• ${a.name}\n`;
+    })
+    .join(" \n");
+  const content = `## Tracks: \n ${albumsString ?? "Loading..."}`;
+  return `${header}\n\n${content}`;
+};

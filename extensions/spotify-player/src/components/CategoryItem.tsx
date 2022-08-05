@@ -1,5 +1,3 @@
-// This whole file is unused
-
 import { ActionPanel, Action, Image, Icon, useNavigation, Grid } from "@raycast/api";
 import CategoryPlaylist from "../categoryPlaylists";
 

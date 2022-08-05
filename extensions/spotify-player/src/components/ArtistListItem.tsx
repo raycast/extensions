@@ -3,8 +3,8 @@ import _ from "lodash";
 import { getArtistAlbums, play, startPlaySimilar } from "../spotify/client";
 import { AlbumsList } from "./artistAlbums";
 
-export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectFull }) {
-  const artist = props.artist;
+export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectFull; spotifyInstalled: boolean }) {
+  const { artist, spotifyInstalled } = props;
   const icon: Image.ImageLike = {
     source: _(artist.images).last()?.url ?? "",
     mask: Image.Mask.RoundedRectangle,
@@ -16,12 +16,13 @@ export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectF
       subtitle={artist.genres.join(", ")}
       icon={icon}
       detail={<ArtistDetail artist={artist} />}
-      actions={<ArtistsActionPanel title={title} artist={artist} />}
+      actions={<ArtistsActionPanel title={title} artist={artist} spotifyInstalled={spotifyInstalled} />}
     />
   );
 }
 
-function ArtistsActionPanel({ title, artist }: { title: string; artist: SpotifyApi.ArtistObjectFull }) {
+function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObjectFull; spotifyInstalled: boolean }) {
+  const { title, artist, spotifyInstalled } = props;
   const response = getArtistAlbums(artist.id);
   const albums = response.result?.items;
 
@@ -35,7 +36,13 @@ function ArtistsActionPanel({ title, artist }: { title: string; artist: SpotifyA
           play(undefined, artist.uri);
         }}
       />
-      {albums && <Action.Push title="Open Albums" icon={Icon.ArrowRight} target={<AlbumsList albums={albums} />} />}
+      {albums && (
+        <Action.Push
+          title="Open Albums"
+          icon={Icon.ArrowRight}
+          target={<AlbumsList albums={albums} spotifyInstalled={spotifyInstalled} />}
+        />
+      )}
       <Action
         title="Start Radio"
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
@@ -54,7 +61,7 @@ function ArtistsActionPanel({ title, artist }: { title: string; artist: SpotifyA
       <Action.CopyToClipboard
         title="Copy Artist URL"
         content={artist.external_urls.spotify}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
       />
     </ActionPanel>
   );
