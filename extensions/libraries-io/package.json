@@ -37,17 +37,17 @@
       "title": "Show Subscriptions",
       "subtitle": "Libraries.io",
       "description": "Show packages you are watching",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "token",
-          "description": "The private token used to access your Libraries.io data",
-          "placeholder": "https://libraries.io/api",
-          "type": "password",
-          "required": true,
-          "title": "Libraries.io API Key"
-        }
-      ]
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "description": "The private token used to access your Libraries.io data",
+      "placeholder": "https://libraries.io/api",
+      "type": "password",
+      "required": true,
+      "title": "Libraries.io API Key"
     }
   ],
   "keywords": [

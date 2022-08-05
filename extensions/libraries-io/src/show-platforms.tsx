@@ -1,9 +1,10 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import type { Platform } from "./types";
+import type { Preferences, Platform } from "./types";
 
 export default function Command() {
-  const { data, isLoading } = useFetch<Platform[]>("https://libraries.io/api/platforms");
+  const preferences = getPreferenceValues<Preferences>();
+  const { data, isLoading } = useFetch<Platform[]>(`https://libraries.io/api/platforms?api_key=${preferences.token}`);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter platforms..." enableFiltering throttle>

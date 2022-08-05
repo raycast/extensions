@@ -1,14 +1,15 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { PackageResult } from "./components/PackageResult";
-import type { Package, PackageSearchArguments } from "./types";
+import type { Package, PackageSearchArguments, Preferences } from "./types";
 
 export default function Command(props: { arguments: PackageSearchArguments }) {
   const [searchText, setSearchText] = useState("");
   const { platform } = props.arguments;
+  const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = useFetch<Package[]>(
-    `https://libraries.io/api/search?q=${searchText}&platforms=${platform}`,
+    `https://libraries.io/api/search?q=${searchText}&platforms=${platform}&api_key=${preferences.token}`,
     {
       execute: searchText !== "",
     }

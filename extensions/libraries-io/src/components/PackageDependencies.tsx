@@ -1,14 +1,15 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import type { Package, DependenciesResponse } from ".././types";
+import type { DependenciesResponse, Package, Preferences } from ".././types";
 
 interface Props {
   searchResult: Package;
 }
 
 export const PackageDependencies = ({ searchResult }: Props): JSX.Element => {
+  const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = useFetch<DependenciesResponse>(
-    `https://libraries.io/api/${searchResult.platform}/${searchResult.name}/latest/dependencies`
+    `https://libraries.io/api/${searchResult.platform}/${searchResult.name}/latest/dependencies?api_key=${preferences.token}`
   );
 
   return (
