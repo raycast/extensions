@@ -15,12 +15,14 @@
       "name": "databases",
       "title": "Upstash Databases",
       "description": "List of Redis Databases",
+      "subtitle": "List of Redis Databases",
       "mode": "view"
     },
     {
       "name": "clusters",
       "title": "Upstash Clusters",
       "description": "List of Kafka Clusters",
+      "subtitle": "List of Kafka Clusters",
       "mode": "view"
     }
   ],
