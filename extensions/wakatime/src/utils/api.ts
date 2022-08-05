@@ -13,9 +13,8 @@ async function routeHandler<T>(endpoint: string): Promise<Types.RouteResponse<T>
 
   try {
     const res = await fetch(`${baseURL}${endpoint}`, { headers: getAuthToken() });
-    const data = (await res.json()) as T;
 
-    return { ok: true, ...data };
+    return { ok: true, result: (await res.json()) as never };
   } catch (error) {
     return {
       ok: false,

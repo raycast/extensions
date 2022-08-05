@@ -10,7 +10,7 @@ export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">>
 
   return (
     <List.Section title="Stats Summary">
-      {summary?.data.map(([key, range]) => (
+      {summary?.map(([key, { result: range }]) => (
         <RangeStatsItem key={key} title={key} range={range} {...props} />
       ))}
     </List.Section>

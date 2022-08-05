@@ -10,9 +10,9 @@ export function useUser() {
 
   const result = useBase({
     handler: useCallback(async () => {
-      const result = await getUser();
-      if (result.ok) setCachedUser({ data: result.data });
-      return result;
+      const user = await getUser();
+      if (user.ok) setCachedUser(user.result);
+      return user;
     }, []),
     toasts: {
       loading: { title: "Loading..." },
@@ -111,7 +111,7 @@ export function useSummary() {
       });
 
       const data = await Promise.all(summaries);
-      return { data: data.filter(Boolean) as NonNullable<typeof data[number]>[], ok: true };
+      return { result: data.filter(Boolean) as NonNullable<typeof data[number]>[], ok: true };
     }, []),
     toasts: {
       error: (err) => ({

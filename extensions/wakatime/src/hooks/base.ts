@@ -12,10 +12,10 @@ export function useBase<D>({ handler, toasts = {} }: Props<D>) {
       const toast = toasts.loading ? await showToast({ ...toasts.loading, style: Toast.Style.Animated }) : undefined;
 
       try {
-        const { ok, error, ...data } = await handler();
+        const { ok, error, result } = await handler();
 
         if (!ok) throw new Error(error);
-        setData(data as D);
+        setData(result as D);
 
         if (toasts.success) {
           if (toast == undefined) return showToast({ ...toasts.success, style: Toast.Style.Success });
