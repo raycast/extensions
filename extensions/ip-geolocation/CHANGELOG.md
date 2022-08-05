@@ -1,5 +1,9 @@
 # IP Geolocation Changelog
 
+## [Support arguments for command] - {PR_MERGE_DATE}
+
+- Support arguments for command so that you can enter values right from Root Search before opening the command
+
 ## [Update command name] - 2022-05-27
 
 - Update command name
