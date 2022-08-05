@@ -1,6 +1,8 @@
 export enum QueryTypes {
   fileName = "fileName",
+  fileNameAllDrives = "fileNameAllDrives",
   fullText = "fullText",
+  fullTextAllDrives = "fullTextAllDrives",
   starred = "starred",
 }
 
@@ -23,9 +25,9 @@ function getParams(queryType: QueryTypes, queryText = "") {
 
   const escapedText = queryText.replace(/[\\']/g, "\\$&");
 
-  if (queryType === QueryTypes.fileName) {
+  if (queryType === QueryTypes.fileName || queryType === QueryTypes.fileNameAllDrives) {
     params.append("q", `name contains '${escapedText}' and trashed = false`);
-  } else if (queryType === QueryTypes.fullText) {
+  } else if (queryType === QueryTypes.fullText || queryType === QueryTypes.fullTextAllDrives) {
     params.append("q", `name contains '${escapedText}' or fullText contains '${escapedText}' and trashed = false`);
   } else if (queryType === QueryTypes.starred) {
     params.append("q", "starred and trashed = false");
@@ -37,6 +39,11 @@ function getParams(queryType: QueryTypes, queryText = "") {
     "fields",
     "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash))"
   );
+
+  if (queryType === QueryTypes.fileNameAllDrives || queryType === QueryTypes.fullTextAllDrives) {
+    params.append("supportsAllDrives", "true");
+    params.append("includeItemsFromAllDrives", "true");
+  }
 
   if (queryType === QueryTypes.fileName || queryType === QueryTypes.starred) {
     params.append("orderBy", "recency desc");

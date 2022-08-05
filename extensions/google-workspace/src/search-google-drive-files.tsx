@@ -27,8 +27,10 @@ function SearchGoogleDriveFiles() {
       searchBarPlaceholder="Search files"
       searchBarAccessory={
         <List.Dropdown tooltip="Search mode" storeValue onChange={setQueryType as (value: string) => void}>
-          <List.Dropdown.Item title="By file name" value={QueryTypes.fileName} />
-          <List.Dropdown.Item title="In full text" value={QueryTypes.fullText} />
+          <List.Dropdown.Item title="By file name at My Drive" value={QueryTypes.fileName} />
+          <List.Dropdown.Item title="By file name at My Drive and Shared Drives" value={QueryTypes.fileNameAllDrives} />
+          <List.Dropdown.Item title="By file name and full text at My Drive" value={QueryTypes.fullText} />
+          <List.Dropdown.Item title="By file name and full text at My Drive and Shared Drives" value={QueryTypes.fullTextAllDrives} />
         </List.Dropdown>
       }
       onSearchTextChange={setQuery}
