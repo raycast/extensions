@@ -94,9 +94,11 @@
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.0.7",
     "date-fns": "^2.28.0",
+    "jwt-decode": "^3.1.2",
     "node-fetch": "^3.2.6"
   },
   "devDependencies": {
+    "@types/jwt-decode": "^3.1.0",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "eslint": "^8.19.0",
