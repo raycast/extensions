@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "upstash",
+  "version": "0.0.1",
+  "title": "Upstash",
+  "description": "Displays your Upstash resources",
+  "icon": "upstash-icon-big.png",
+  "author": "ademilter",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "databases",
+      "title": "Upstash Databases",
+      "description": "List of Redis Databases",
+      "mode": "view"
+    },
+    {
+      "name": "clusters",
+      "title": "Upstash Clusters",
+      "description": "List of Kafka Clusters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your upstash email",
+      "placeholder": "Enter your upstash email"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your upstash API Key",
+      "link": "https://console.upstash.com/account/api",
+      "placeholder": "Enter your upstash API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.1.0",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
