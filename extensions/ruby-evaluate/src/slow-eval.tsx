@@ -22,7 +22,7 @@ export function SlowEval() {
     >
       {(state?.query?.length ?? 0) === 0 ? null : (
         <List.Item
-        title={`Evaluate: ${state?.query}`}
+          title={`Evaluate: ${state?.query}`}
           accessoryTitle="⏎  to evaluate"
           actions={
             <ActionPanel title="Evaluation result">
