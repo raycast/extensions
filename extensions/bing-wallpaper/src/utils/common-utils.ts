@@ -85,6 +85,54 @@ export const setWallpaper = async (title: string, url: string) => {
   }
 };
 
+export const setRandomWallpaper = async (title: string, url: string) => {
+  const { applyTo } = getPreferenceValues<Preferences>();
+  const selectedPath = environment.supportPath;
+  const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${title}.png` : `${selectedPath}/${title}.png`;
+
+  try {
+    const actualPath = fixedPathName;
+
+    const command = !fse.existsSync(actualPath)
+      ? `set cmd to "curl -o " & q_temp_folder & " " & "${url}"
+        do shell script cmd`
+      : "";
+
+    const result = await runAppleScript(`
+      set temp_folder to (POSIX path of "${actualPath}")
+      set q_temp_folder to quoted form of temp_folder
+
+      ${command}
+
+      set x to alias (POSIX file temp_folder)
+
+      try
+        tell application "System Events"
+          tell ${applyTo} desktop
+            set picture to (x as text)
+            return "ok"
+          end tell
+        end tell
+      on error
+        set dialogTitle to "Error Setting Wallpaper"
+        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
+
+        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
+          if button returned of result is "Open Preferences" then
+            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
+          end if
+
+        return "error"
+      end try
+    `);
+
+    if (result !== "ok") throw new Error("Error setting wallpaper.");
+    fse.removeSync(actualPath);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const setDownloadedWallpaper = async (path: string) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
