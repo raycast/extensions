@@ -22,7 +22,7 @@
           "name": "repository",
           "placeholder": "Repository",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
