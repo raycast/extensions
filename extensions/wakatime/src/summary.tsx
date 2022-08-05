@@ -26,12 +26,7 @@ export default function SummaryCommand() {
           />
         </List.Section>
       )}
-      {!!activityChange?.duration && (
-        <List.Item
-          title={activityChange.duration}
-          accessories={[{ text: `${activityChange.percent}%  ${activityChange.emoji}` }]}
-        />
-      )}
+      {activityChange && <List.Item {...activityChange} />}
       <RangeStatsList {...{ showDetail, setShowDetail }} />
       <ProjectsStatsList />
     </List>

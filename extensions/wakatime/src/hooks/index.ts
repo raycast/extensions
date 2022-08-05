@@ -5,6 +5,8 @@ import { useCachedState } from "@raycast/utils";
 import { useBase } from "./base";
 import { getDuration, getLeaderBoard, getPrivateLeaderBoards, getProjects, getSummary, getUser } from "../utils";
 
+import type { List } from "@raycast/api";
+
 export function useUser() {
   const [cachedUser, setCachedUser] = useCachedState<WakaTime.User>("user");
 
@@ -30,21 +32,27 @@ export function useUser() {
 export function useActivityChange() {
   const result = useBase({
     handler: useCallback(async () => {
-      const data = await getSummary("Last 1 Day", subDays(new Date(), 1));
-      if (!data.ok) throw new Error(data.error);
-      const days = Object.fromEntries(
-        data.data.map((day) => [day.range.text.toLowerCase(), day.grand_total.total_seconds])
+      const summary = await getSummary("Last 1 Day", subDays(new Date(), 1));
+      if (!summary.ok) throw new Error(summary.error);
+
+      let [title, accessories] = ["You haven't recorded any activity since yesterday", [] as List.Item.Accessory[]];
+
+      const { today = 0, yesterday = 0 } = Object.fromEntries(
+        summary.result.data.map((day) => [day.range.text.toLowerCase(), day.grand_total.total_seconds])
       );
 
-      const timeDiff = Math.abs(days.today - days.yesterday);
-      const [quantifier, emoji] = days.today <= days.yesterday ? ["less", "⬇️"] : ["more", "⬆️"];
+      if (today > 0 || yesterday > 0) {
+        const timeDiff = Math.abs(today - yesterday);
+        const [quantifier, emoji] = today <= yesterday ? ["less", "⬇️"] : ["more", "⬆️"];
 
-      return {
-        emoji,
-        ok: true,
-        percent: Math.floor((timeDiff / days.yesterday) * 1e2),
-        duration: `You've spent ${getDuration(timeDiff)} ${quantifier} compared to yesterday`,
-      };
+        title = `You've spent ${getDuration(timeDiff)} ${quantifier} than yesterday`;
+
+        if (today > 0 && yesterday > 0) {
+          accessories = [{ text: `${Math.floor((timeDiff / yesterday) * 1e2)}% ${emoji}` }];
+        }
+      }
+
+      return { ok: true, result: { title, accessories } };
     }, []),
   });
 
