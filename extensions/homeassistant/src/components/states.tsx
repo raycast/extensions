@@ -63,6 +63,7 @@ import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
+const Unavailable = "unavailable";
 
 const lightColor: Record<string, Color.ColorLike> = {
   on: Color.Yellow,
@@ -141,6 +142,12 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "power_factor") {
+      const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
+      return { source: "angle-acute.png", tintColor: color };
+    } else if (dc === "energy") {
+      const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
+      return { source: "flash.png", tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
