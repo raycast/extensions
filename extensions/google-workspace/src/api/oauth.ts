@@ -1,4 +1,5 @@
 import { OAuth } from "@raycast/api";
+import jwt_decode from "jwt-decode";
 import fetch from "node-fetch";
 
 const clientId = "859594387706-uunbhp90efuesm18epbs0pakuft1m1kt.apps.googleusercontent.com";
@@ -25,7 +26,8 @@ export async function authorize(): Promise<string> {
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId,
-    scope: "https://www.googleapis.com/auth/drive.readonly",
+    scope:
+      "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly",
   });
   const { authorizationCode } = await client.authorize(authRequest);
 
@@ -70,4 +72,16 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
 
   return tokenResponse;
+}
+
+export async function getEmail(): Promise<string | undefined> {
+  const tokenSet = await client.getTokens();
+
+  const idToken = tokenSet?.idToken;
+  if (!idToken) {
+    return;
+  }
+
+  const { email } = jwt_decode<{ email?: string }>(idToken);
+  return email;
 }
