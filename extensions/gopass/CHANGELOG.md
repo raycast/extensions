@@ -1,5 +1,11 @@
 # pass Changelog
 
+## [New Additions / Fix] - 2022-07-30
+
+- Fix an issue with clearing clipboard after password copy.
+- Fix an issue with retrieving passwords.
+- Add the functionality to open links in the browser.
+
 ## [New Additions / Fix] - 2022-07-26
 
 - Remove extra blank lines form password list.

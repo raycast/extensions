@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
-import { humanize } from "./utils";
+import { humanize, isValidUrl } from "./utils";
 import { copyPassword, pastePassword } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
@@ -15,13 +15,6 @@ async function paste(key: string, value: string): Promise<void> {
   await Clipboard.paste(value);
   await closeMainWindow();
 }
-
-const Actions = ({ copy, paste }: { copy: () => void; paste: () => void }): JSX.Element => (
-  <ActionPanel>
-    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copy} />
-    <Action title="Paste to Active App" icon={Icon.Document} onAction={paste} />
-  </ActionPanel>
-);
 
 export default function ({ entry }: { entry: string }): JSX.Element {
   const [details, setDetails] = useState<string[]>([]);
@@ -45,7 +38,12 @@ export default function ({ entry }: { entry: string }): JSX.Element {
           <List.Item
             title="Password"
             subtitle="*****************"
-            actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
+            actions={
+              <ActionPanel>
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
+                <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
+              </ActionPanel>
+            }
           />
         )}
 
@@ -58,7 +56,13 @@ export default function ({ entry }: { entry: string }): JSX.Element {
               key={index}
               title={humanize(key)}
               subtitle={value}
-              actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
+              actions={
+                <ActionPanel>
+                  {isValidUrl(value) && <Action.OpenInBrowser url={value} />}
+                  <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copy(key, value)} />
+                  <Action title="Paste to Active App" icon={Icon.Document} onAction={() => paste(key, value)} />
+                </ActionPanel>
+              }
             />
           );
         })}
