@@ -2,7 +2,7 @@ import { Clipboard, environment, Toast } from "@raycast/api";
 import { join as path_join } from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
-import fetch from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
 import { ExecError } from "./brew";
 
 /// Utils
@@ -105,7 +105,7 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
   }
 
   console.log(`${title}: ${error}`);
-  const stderr = (error as ExecError).stderr?.trim() ?? "";
+  const stderr = (error as ExecError).stderr ?? (error as FetchError).message ?? `${error}`;
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: title,
