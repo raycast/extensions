@@ -12,3 +12,7 @@ export function getIterationProgressColor(iteration: IterationSlim): Color | str
       return "#58b1e4";
   }
 }
+
+export const sortIterationByStartDateDesc = (a: IterationSlim, b: IterationSlim) => {
+  return Date.parse(b.start_date) - Date.parse(a.start_date);
+};

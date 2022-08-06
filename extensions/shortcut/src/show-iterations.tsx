@@ -1,13 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { IterationSlim } from "@useshortcut/client";
 import { IterationStories } from "./components/IterationStories";
-import { getIterationProgressColor } from "./helpers/iterationHelper";
+import { getIterationProgressColor, sortIterationByStartDateDesc } from "./helpers/iterationHelper";
 import { useIterations } from "./hooks";
-
-const sortIterationByStartDateDesc = (a: IterationSlim, b: IterationSlim) => {
-  return Date.parse(b.start_date) - Date.parse(a.start_date);
-};
 
 export default function ListIterationStories() {
   const { data: iterations, isLoading } = useIterations();
