@@ -13,196 +13,196 @@
   "commands": [
     {
       "name": "bg",
-      "title": "Translate to Bulgarian",
+      "title": "Translate into Bulgarian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Bulgarian.",
       "mode": "view"
     },
     {
       "name": "cs",
-      "title": "Translate to Czech",
+      "title": "Translate into Czech",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Czech.",
       "mode": "view"
     },
     {
       "name": "da",
-      "title": "Translate to Danish",
+      "title": "Translate into Danish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Danish.",
       "mode": "view"
     },
     {
       "name": "de",
-      "title": "Translate to German",
+      "title": "Translate into German",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to German.",
       "mode": "view"
     },
     {
       "name": "el",
-      "title": "Translate to Greek",
+      "title": "Translate into Greek",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Greek.",
       "mode": "view"
     },
     {
       "name": "en-gb",
-      "title": "Translate to British English",
+      "title": "Translate into British English",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to English.",
       "mode": "view"
     },
     {
       "name": "en-us",
-      "title": "Translate to American English",
+      "title": "Translate into American English",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to English.",
       "mode": "view"
     },
     {
       "name": "es",
-      "title": "Translate to Spanish",
+      "title": "Translate into Spanish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Spanish.",
       "mode": "view"
     },
     {
       "name": "et",
-      "title": "Translate to Estonian",
+      "title": "Translate into Estonian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Estonian.",
       "mode": "view"
     },
     {
       "name": "fi",
-      "title": "Translate to Finnish",
+      "title": "Translate into Finnish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Finnish.",
       "mode": "view"
     },
     {
       "name": "fr",
-      "title": "Translate to French",
+      "title": "Translate into French",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to French.",
       "mode": "view"
     },
     {
       "name": "hu",
-      "title": "Translate to Hungarian",
+      "title": "Translate into Hungarian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Hungarian.",
       "mode": "view"
     },
     {
       "name": "id",
-      "title": "Translate to Indonesian",
+      "title": "Translate into Indonesian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Indonesian.",
       "mode": "view"
     },
     {
       "name": "it",
-      "title": "Translate to Italian",
+      "title": "Translate into Italian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Italian.",
       "mode": "view"
     },
     {
       "name": "ja",
-      "title": "Translate to Japanese",
+      "title": "Translate into Japanese",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Japanese.",
       "mode": "view"
     },
     {
       "name": "lt",
-      "title": "Translate to Lithuanian",
+      "title": "Translate into Lithuanian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Lithuanian.",
       "mode": "view"
     },
     {
       "name": "lv",
-      "title": "Translate to Latvian",
+      "title": "Translate into Latvian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Latvian.",
       "mode": "view"
     },
     {
       "name": "nl",
-      "title": "Translate to Dutch",
+      "title": "Translate into Dutch",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Dutch.",
       "mode": "view"
     },
     {
       "name": "pl",
-      "title": "Translate to Polish",
+      "title": "Translate into Polish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Polish.",
       "mode": "view"
     },
     {
       "name": "pt-pt",
-      "title": "Translate to Portuguese",
+      "title": "Translate into Portuguese",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Portuguese.",
       "mode": "view"
     },
     {
       "name": "pt-br",
-      "title": "Translate to Brazilian Portuguese",
+      "title": "Translate into Brazilian Portuguese",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Portuguese.",
       "mode": "view"
     },
     {
       "name": "ro",
-      "title": "Translate to Romanian",
+      "title": "Translate into Romanian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Romanian.",
       "mode": "view"
     },
     {
       "name": "ru",
-      "title": "Translate to Russian",
+      "title": "Translate into Russian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Russian.",
       "mode": "view"
     },
     {
       "name": "sk",
-      "title": "Translate to Slovak",
+      "title": "Translate into Slovak",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Slovak.",
       "mode": "view"
     },
     {
       "name": "sl",
-      "title": "Translate to Slovenian",
+      "title": "Translate into Slovenian",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Slovenian.",
       "mode": "view"
     },
     {
       "name": "sv",
-      "title": "Translate to Swedish",
+      "title": "Translate into Swedish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Swedish.",
       "mode": "view"
     },
     {
       "name": "tr",
-      "title": "Translate to Turkish",
+      "title": "Translate into Turkish",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Turkish.",
       "mode": "view"
     },
     {
       "name": "zh",
-      "title": "Translate to Chinese",
+      "title": "Translate into Chinese",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Chinese.",
       "mode": "view"
@@ -228,7 +228,7 @@
       ]
     },
     {
-      "name": "apikey",
+      "name": "api_key",
       "type": "password",
       "required": true,
       "title": "API Key",
