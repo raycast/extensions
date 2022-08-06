@@ -1,18 +1,16 @@
 import { useTodaySummary } from "./hooks";
 import { getDuration } from "./utils";
 
-import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra } from "@raycast/api";
 
 export default function Command() {
   const todaySummary = useTodaySummary();
-  const preference = getPreferenceValues();
-  const showAsksSentence = preference.showAsksSentence;
 
   function getTitle(): string | undefined {
     const { seconds } = todaySummary?.data?.cummulative_total ?? {};
     if (seconds == undefined) return;
 
-    return seconds === 0 && showAsksSentence ? undefined : `Today: ${getDuration(seconds)}`;
+    return seconds === 0 ? undefined : `Today: ${getDuration(seconds)}`;
   }
 
   return (
