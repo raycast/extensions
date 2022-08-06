@@ -18,30 +18,25 @@ export function useActivityChange() {
             seconds: cur.grand_total.total_seconds,
             languages: cur.languages.reduce(
               (acc, language) => ({ ...acc, [language.name]: language.total_seconds }),
-              {}
+              {} as { [K: string]: number }
             ),
           },
         };
-      }, {} as { [K in "today" | "yesterday"]: ActivityDay });
+      }, {} as SummaryData);
 
       let title = "You haven't recorded any activity since yesterday";
       const seconds = Math.abs(today.seconds - yesterday.seconds);
-      const languages = Object.entries(yesterday.languages).reduce(
-        (acc, [name, seconds]) => ({
+      const languages = Object.entries(yesterday.languages).reduce((acc, [name, seconds]) => {
+        return {
           ...acc,
           [name]: { seconds, quantifier: "equal" as const, duration: getDuration(seconds) },
-        }),
-        {} as {
-          [K: string]: {
-            seconds: number;
-            duration: string;
-            percent?: string;
-            quantifier: "more" | "less" | "equal";
-          };
-        }
-      );
+        };
+      }, {} as { [K: string]: LanguageActivityChange });
 
-      let [percent, duration, quantifier, accessories] = ["", "0 sec", "less", [] as List.Item.Accessory[]];
+      let percent: string | undefined;
+      let duration = getDuration(0);
+      let quantifier: "more" | "less" = "less";
+      let accessories: List.Item.Accessory[] = [];
 
       if (today.seconds > 0 || yesterday.seconds > 0) {
         if (today.seconds > yesterday.seconds) quantifier = "more";
@@ -92,7 +87,16 @@ export function useActivityChange() {
   return result;
 }
 
-type ActivityDay = {
+type SummaryData = {
+  [K in "today" | "yesterday"]: {
+    seconds: number;
+    languages: { [K: string]: number };
+  };
+};
+
+type LanguageActivityChange = {
   seconds: number;
-  languages: { [K: string]: number };
+  duration: string;
+  percent?: string;
+  quantifier: "more" | "less" | "equal";
 };
