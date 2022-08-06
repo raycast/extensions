@@ -9,14 +9,10 @@ export default function Command() {
   const showAsksSentence = preference.showAsksSentence;
 
   function getTitle(): string | undefined {
-    const today = todaySummary.data;
-
-    if (today === undefined) return;
-
-    const cumulative_total = today.cummulative_total;
-    const todayText = getDuration(cumulative_total.seconds);
-
-    return cumulative_total.seconds === 0 && showAsksSentence ? undefined : `Today: ${todayText}`;
+    const { seconds } = todaySummary?.data?.cummulative_total ?? {};
+    if (seconds == undefined) return;
+    
+    return seconds === 0 && showAsksSentence ? undefined : `Today: ${getDuration(seconds)}`;
   }
 
   return (
