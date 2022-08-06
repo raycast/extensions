@@ -38,15 +38,7 @@
       "title": "Show Today Summary",
       "description": "Show Today's Summary in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "1m",
-      "preferences": [{
-        "name": "showAsksSentence",
-        "label": "Show Asks Sentence",
-        "required": true,
-        "description": "Show asks sentence for you when your coding time is zero",
-        "type": "checkbox",
-        "default": true
-      }]
+      "interval": "1m"
     }
   ],
   "preferences": [
