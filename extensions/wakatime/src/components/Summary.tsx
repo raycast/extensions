@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatDistance } from "date-fns";
+import { compareDesc, formatDistance } from "date-fns";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { useActivityChange, useProjects, useSummary } from "../hooks";
@@ -74,7 +74,7 @@ export const ProjectsStatsList: React.FC = () => {
   return (
     <List.Section title="Projects">
       {projects
-        ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        ?.sort((a, b) => compareDesc(new Date(a.last_heartbeat_at), new Date(b.last_heartbeat_at)))
         .slice(0, 5)
         .map((project) => (
           <List.Item
