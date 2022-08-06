@@ -6,20 +6,25 @@ import SourceLanguageDropdown from "./components/SourceLanguageDropdown";
 
 export default function Command(targetLanguage: Language): () => JSX.Element {
   return () => {
-    const [text, setText] = useState("");
+    const [searchText, setSearchText] = useState("");
     const [sourceLanguage, setSourceLanguage] = useState<Language | undefined>(undefined);
-    const { isLoading: isLoadingTranslation, data: translation } = useTranslation(text, sourceLanguage, targetLanguage);
+    const { isLoading: isLoadingTranslation, data: translation } = useTranslation(
+      searchText,
+      sourceLanguage,
+      targetLanguage
+    );
     const { isLoading: isLoadingUsage, data: usage, revalidate: revalidateUsage } = useUsage();
     const isLoading = isLoadingUsage || isLoadingTranslation;
-    const hasInput = text.length > 0;
-    const hasTranslation = hasInput && translation !== undefined;
+    const hasInput = searchText.length > 0;
+    const hasTranslation = translation !== undefined;
 
     useEffect(() => revalidateUsage(), [translation]);
 
     return (
       <List
         isLoading={isLoading && hasInput}
-        onSearchTextChange={setText}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
         searchBarPlaceholder={`Translate to ${targetLanguage.name} using DeepL…`}
         searchBarAccessory={
           <SourceLanguageDropdown sourceLanguages={sourceLanguages} onSourceLanguageChange={setSourceLanguage} />
