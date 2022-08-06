@@ -67,12 +67,13 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
 };
 
 export const ProjectsStatsList: React.FC = () => {
-  const projects = useProjects();
-  if (projects.isLoading !== false) return null;
+  const { data: { data: projects } = {}, isLoading } = useProjects();
+
+  if (isLoading) return null;
 
   return (
     <List.Section title="Projects">
-      {projects.data?.data
+      {projects
         ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 5)
         .map((project) => (
