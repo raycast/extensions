@@ -1,11 +1,11 @@
-import {Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast} from "@raycast/api";
-import {useCachedPromise} from "@raycast/utils";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
-import {IDatabase, IPreferences} from "./types";
-import {apiUrl, consoleUrl} from "./utils";
+import { IDatabase, IPreferences } from "./types";
+import { apiUrl, consoleUrl } from "./utils";
 
 export default function Databases() {
-  const {isLoading, error, data} = useCachedPromise(
+  const { isLoading, error, data } = useCachedPromise(
     async () => {
       const preferences: IPreferences = getPreferenceValues();
 
@@ -57,16 +57,17 @@ export default function Databases() {
             subtitle={database.endpoint}
             icon="upstash-icon.png"
             accessories={[
-              replicas === "Global" ?
-                {
-                  text: replicas,
-                  icon: {
-                    source: Icon.Globe,
-                    tintColor: Color.Green,
+              replicas === "Global"
+                ? {
+                    text: replicas,
+                    icon: {
+                      source: Icon.Globe,
+                      tintColor: Color.Green,
+                    },
+                  }
+                : {
+                    text: replicas,
                   },
-                } : {
-                  text: replicas,
-                },
               {
                 text: `TLS`,
                 tooltip: database.tls ? "Enabled" : "Disabled",
@@ -78,8 +79,8 @@ export default function Databases() {
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Browser" url={url}/>
-                <Action.CopyToClipboard title="Copy URL" content={url}/>
+                <Action.OpenInBrowser title="Open in Browser" url={url} />
+                <Action.CopyToClipboard title="Copy URL" content={url} />
               </ActionPanel>
             }
           />
