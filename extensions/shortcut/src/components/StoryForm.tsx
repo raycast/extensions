@@ -5,6 +5,7 @@ import { CreateStoryParams, Story, StorySlim, UpdateStory } from "@useshortcut/c
 import { getMemberAvatar, getMemberName, getStoryColor, StoryTypes, useFormField } from "../helpers/storyHelpers";
 import { capitalize } from "../utils/string";
 import { useGroups, useIterations, useMemberInfo, useMembers, useProjects, useWorkflows } from "../hooks";
+import { sortIterationByStartDateDesc } from "../helpers/iterationHelper";
 
 export type StoryFormRawValues = {
   name?: string;
@@ -203,7 +204,7 @@ export default function StoryForm({
       <Form.Dropdown id="iteration_id" title="Iteration" {...iterationFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_iteration" icon={Icon.XMarkCircleFilled} />
 
-        {iterations?.map((iteration) => (
+        {iterations?.sort(sortIterationByStartDateDesc).map((iteration) => (
           <Form.Dropdown.Item
             title={iteration.name}
             value={iteration.id.toString()}
