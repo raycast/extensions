@@ -20,6 +20,7 @@ export default function SummaryCommand() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={data.profile_url} title="Open in Browser" />
+                <Action.OpenInBrowser title="Official WakaTime Insights" url="https://wakatime.com/insights" />
               </ActionPanel>
             }
           />
