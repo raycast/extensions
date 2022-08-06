@@ -1,5 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Response, useFetch } from "@raycast/utils";
+import { URL, URLSearchParams } from "url";
 
 export type Language = {
   name: string;
@@ -19,22 +20,23 @@ export type Usage = {
 export function useTranslation(text: string, sourceLanguage: Language | undefined, targetLanguage: Language) {
   const preferences = getPreferenceValues();
 
-  const formData = [];
-  formData.push(`auth_key=${preferences.apikey}`);
-  formData.push(`text=${text}`);
-  formData.push(`target_lang=${targetLanguage.code}`);
+  const body = new URLSearchParams({
+    auth_key: preferences.api_key,
+    text: text,
+    target_lang: targetLanguage.code,
+  });
   if (sourceLanguage != undefined) {
-    formData.push(`source_lang=${sourceLanguage.code}`);
+    body.append("source_lang", sourceLanguage.code);
   }
 
-  return useFetch<Translation>(`${apiUrl()}translate`, {
+  return useFetch<Translation>(apiURL("translate"), {
     keepPreviousData: true,
     method: "POST",
     headers: {
       "User-Agent": "Raycast DeepL Extension",
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: formData.join("&"),
+    body: body.toString(),
     execute: text.length > 0,
     parseResponse: parseTranslationResponse,
     onError: handleError,
@@ -81,14 +83,14 @@ async function parseTranslationResponse(response: Response): Promise<Translation
 export function useUsage() {
   const preferences = getPreferenceValues();
 
-  return useFetch<Usage>(`${apiUrl()}usage`, {
+  return useFetch<Usage>(apiURL("usage"), {
     keepPreviousData: true,
     method: "POST",
     headers: {
       "User-Agent": "Raycast DeepL Extension",
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: `auth_key=${preferences.apikey}`,
+    body: `auth_key=${preferences.api_key}`,
     parseResponse: parseUsageResponse,
     onError: handleError,
   });
@@ -122,9 +124,11 @@ function handleError(error: Error) {
   }).then();
 }
 
-function apiUrl(): string {
+function apiURL(endpoint: string): URL {
   const freePlan = getPreferenceValues().plan === "free";
-  return `https://api${freePlan ? "-free" : ""}.deepl.com/v2/`;
+  const url = new URL(`https://api${freePlan ? "-free" : ""}.deepl.com/v2/`);
+  url.pathname += endpoint;
+  return url;
 }
 
 export const sourceLanguages: Language[] = [
