@@ -2,10 +2,10 @@ import { useMemo } from "react";
 import { formatDistance } from "date-fns";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
-import { useProjects, useSummary } from "../hooks";
+import { useActivityChange, useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
-export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
+export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
   const { data: summary } = useSummary();
 
   return (
@@ -98,9 +98,54 @@ export const ProjectsStatsList: React.FC = () => {
   );
 };
 
-interface SummaryItemProps {
+export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowDetail }) => {
+  const { data: activityChange, isLoading } = useActivityChange();
+
+  const md = useMemo(() => {
+    if (!activityChange) return [];
+    const { overall, languages } = activityChange;
+
+    return [
+      `## You've done ${overall.quantifier} than you did yesterday!`,
+      `### A ${overall.duration} ${overall.quantifier === "more" ? "increase" : "decrease"}${
+        overall.percent && ` and ${overall.percent} change`
+      }!!`,
+      `#### Languages`,
+      ...languages.map(
+        ([language, stat]) =>
+          `- ${language} - ${stat.duration} ${stat.percent ? `(${stat.percent} ${stat.quantifier})` : stat.quantifier}`
+      ),
+    ];
+  }, [activityChange]);
+
+  if (isLoading || !activityChange) return <List.Item title="Loading Activity Changes" icon={Icon.Heartbeat} />;
+
+  return (
+    <List.Item
+      detail={<List.Item.Detail markdown={md.join("\n\n")} />}
+      title={activityChange.title}
+      accessories={showDetail ? null : activityChange.accessories}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Sidebar}
+            onAction={() => setShowDetail(!showDetail)}
+            title={showDetail ? "Hide Details" : "Show Details"}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+interface SummaryItemProps extends ShowDetailProps {
   title: string;
   range: WakaTime.Summary;
+  showDetail: boolean;
+  setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface ShowDetailProps {
   showDetail: boolean;
   setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }

@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
-import { useActivityChange, useUser } from "./hooks";
-import { ProjectsStatsList, RangeStatsList } from "./components";
+import { useUser } from "./hooks";
+import { ActivityChange, ProjectsStatsList, RangeStatsList } from "./components";
 
 export default function SummaryCommand() {
-  const { data: activityChange } = useActivityChange();
   const { data: { data } = {}, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
 
@@ -26,7 +25,7 @@ export default function SummaryCommand() {
           />
         </List.Section>
       )}
-      {activityChange && <List.Item {...activityChange} />}
+      <ActivityChange {...{ showDetail, setShowDetail }} />
       <RangeStatsList {...{ showDetail, setShowDetail }} />
       <ProjectsStatsList />
     </List>
