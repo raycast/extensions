@@ -11,7 +11,7 @@ export default function Command() {
   function getTitle(): string | undefined {
     const { seconds } = todaySummary?.data?.cummulative_total ?? {};
     if (seconds == undefined) return;
-    
+
     return seconds === 0 && showAsksSentence ? undefined : `Today: ${getDuration(seconds)}`;
   }
 
