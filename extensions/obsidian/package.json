@@ -162,7 +162,8 @@
           "placeholder": "path/to/note",
           "title": "Default Path",
           "required": false,
-          "description": "The default path where a new note will be created"
+          "description": "The default path where a new note will be created",
+          "default": ""
         },
         {
           "name": "prefNoteName",
@@ -177,7 +178,8 @@
           "type": "textfield",
           "title": "Default Note Content",
           "required": false,
-          "description": "The default note content (supports templates)"
+          "description": "The default note content (supports templates)",
+          "default": ""
         },
         {
           "name": "fillFormWithDefaults",
@@ -194,7 +196,8 @@
           "placeholder": "untagged",
           "title": "Default Tag",
           "required": false,
-          "description": "The default selected tag"
+          "description": "The default selected tag",
+          "default": ""
         },
         {
           "name": "tags",
@@ -202,7 +205,8 @@
           "placeholder": "tag1, tag2, tag3, ...",
           "title": "Tags",
           "required": false,
-          "description": "The tags which will be suggested on note creation"
+          "description": "The tags which will be suggested on note creation",
+          "default": ""
         },
         {
           "name": "openOnCreate",
@@ -219,7 +223,8 @@
           "placeholder": "folder1, folder2, folder3, ...",
           "title": "Folder Actions",
           "required": false,
-          "description": "Add actions to folders (comma separated)"
+          "description": "Add actions to folders (comma separated)",
+          "default": ""
         }
       ]
     },

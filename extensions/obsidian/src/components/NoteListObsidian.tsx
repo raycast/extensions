@@ -22,6 +22,7 @@ export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; sear
 
   function onDelete(note: Note) {
     setNotes(notes.filter((n) => n.path !== note.path));
+    setAllNotes(allNotes.filter((n) => n.path !== note.path));
   }
 
   useEffect(() => {
