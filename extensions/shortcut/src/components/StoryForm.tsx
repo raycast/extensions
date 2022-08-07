@@ -15,7 +15,7 @@ export type StoryFormRawValues = {
   group_id?: string;
   workflow_id?: string;
   workflow_state_id?: string;
-  owner_id?: string;
+  owner_ids?: string[];
   project_id?: string;
   estimate?: string;
 };
@@ -28,15 +28,10 @@ function processStoryFormValues(values: StoryFormRawValues) {
         [key]: null,
       };
     } else {
-      if (key === "owner_id") {
+      if (key === "iteration_id" || key === "project_id" || key === "workflow_state_id" || key === "estimate") {
         return {
           ...acc,
-          owner_ids: [value],
-        };
-      } else if (key === "iteration_id" || key === "project_id" || key === "workflow_state_id" || key === "estimate") {
-        return {
-          ...acc,
-          [key]: parseInt(value, 10),
+          [key]: parseInt(value as string, 10),
         };
       } else if (key === "workflow_id") {
         // omit workflow_id from the form values
@@ -93,7 +88,7 @@ export default function StoryForm({
 
   const storyTypeFields = useFormField(story?.story_type ?? (draftValues?.story_type || ""));
   const groupFields = useFormField(story?.group_id ?? (draftValues?.group_id || ""));
-  const ownerFields = useFormField(story?.owner_ids?.[0] ?? (draftValues?.owner_id || ""));
+  const ownerFields = useFormField(story?.owner_ids ?? (draftValues?.owner_ids || []));
 
   const defaultIterationId = story?.iteration_id && String(story?.iteration_id);
   const iterationFields = useFormField(defaultIterationId || draftValues?.iteration_id || "");
@@ -158,9 +153,7 @@ export default function StoryForm({
       }
     >
       <Form.TextField title="Title" id="name" {...storyFields} />
-
       <Form.TextArea enableMarkdown title="Description" id="description" {...descriptionFields} />
-
       <Form.Dropdown id="estimate" title="Estimate" {...estimateFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_estimate" icon={Icon.XMarkCircleFilled} />
 
@@ -168,7 +161,6 @@ export default function StoryForm({
           <Form.Dropdown.Item title={estimate.toString()} value={estimate.toString()} key={`estimate_${index}`} />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="project_id" title="Project" {...projectFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_project" icon={Icon.XMarkCircleFilled} />
 
@@ -184,7 +176,6 @@ export default function StoryForm({
           />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="group_id" title="Team" {...groupFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_team" icon={Icon.XMarkCircleFilled} />
 
@@ -200,7 +191,6 @@ export default function StoryForm({
           />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="iteration_id" title="Iteration" {...iterationFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_iteration" icon={Icon.XMarkCircleFilled} />
 
@@ -213,7 +203,6 @@ export default function StoryForm({
           />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="workflow_id" title="Workflow" {...workflowFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_workflow" icon={Icon.XMarkCircleFilled} />
 
@@ -221,7 +210,6 @@ export default function StoryForm({
           <Form.Dropdown.Item title={workflow.name} value={workflow.id.toString()} key={workflow.id} />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="workflow_state_id" title="State" {...workflowStateFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_state" icon={Icon.XMarkCircleFilled} />
 
@@ -229,7 +217,6 @@ export default function StoryForm({
           <Form.Dropdown.Item title={state.name} value={state.id.toString()} key={state.id} />
         ))}
       </Form.Dropdown>
-
       <Form.Dropdown id="story_type" title="Type" {...storyTypeFields}>
         {StoryTypes.map((storyType) => (
           <Form.Dropdown.Item
@@ -243,19 +230,16 @@ export default function StoryForm({
           />
         ))}
       </Form.Dropdown>
-
-      <Form.Dropdown id="owner_id" title="Owner" {...ownerFields}>
-        <Form.Dropdown.Item title="None" value={""} key="no_owner" icon={Icon.XMarkCircleFilled} />
-
+      <Form.TagPicker id="owner_ids" title="Owner" {...ownerFields}>
         {members?.map((member) => (
-          <Form.Dropdown.Item
+          <Form.TagPicker.Item
             title={getMemberName(member)}
-            value={member.id.toString()}
+            value={member.id}
             key={member.id}
             icon={getMemberAvatar(member)}
           />
         ))}
-      </Form.Dropdown>
+      </Form.TagPicker>
     </Form>
   );
 }

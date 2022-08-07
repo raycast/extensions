@@ -55,22 +55,20 @@ export const getStoryColor = (storyType: StorySlim["story_type"]) => {
 
 export const StoryTypes = ["feature", "bug", "chore"];
 
-type validatorFn = (value: string) => boolean;
-
-export const useFormField = (
-  initialValue: string,
+export const useFormField = <T>(
+  initialValue: T,
   {
     validator,
     errorMessage,
   }: {
-    validator?: validatorFn;
+    validator?: (value: T) => boolean;
     errorMessage?: string;
   } = {}
 ) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | undefined>();
 
-  const onChange = (newValue: string) => {
+  const onChange = (newValue: T) => {
     setValue(newValue);
   };
 
