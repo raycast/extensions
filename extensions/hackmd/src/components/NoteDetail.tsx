@@ -18,14 +18,19 @@ export default function NoteDetail({ noteId, mutate }: { noteId: string; mutate?
       markdown={data?.content}
       actions={
         <ActionPanel>
-          <NoteActions
-            note={data}
-            onDeleteCallback={() => pop()}
-            mutate={() => {
-              if (mutate) mutate();
-              mutateSingle();
-            }}
-          />
+          {data && (
+            <NoteActions
+              note={data}
+              onDeleteCallback={async () => {
+                if (mutate) mutate();
+                pop();
+              }}
+              mutate={() => {
+                if (mutate) mutate();
+                mutateSingle();
+              }}
+            />
+          )}
         </ActionPanel>
       }
       metadata={
