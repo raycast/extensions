@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { LocalStorage } from "@raycast/api";
 import { Team, User } from "../types";
 import { fetchUser, fetchTeams } from "../vercel";
+import useSharedState from "./use-shared-state";
 
 const useVercel = () => {
   /* Establishing state:
    * user -- used for filtering deployments by user and displaying account information
    * selectedTeam - used for filtering deployments by team
    * teams -- used for filtering projects
-   * projects -- used for listing projects. The projects are filtered by the user and selectedTeam
    */
-  const [user, setUser] = useState<User>();
-  const [teams, setTeams] = useState<Team[]>();
-  const [selectedTeam, setSelectedTeam] = useState<Team>();
+  const [user, setUser] = useSharedState<User>("user");
+  const [teams, setTeams] = useSharedState<Team[]>("teams");
+  const [selectedTeam, setSelectedTeam] = useSharedState<Team>("selectedTeam");
 
   /*
    * Populate user, projects, and teams
@@ -42,28 +42,13 @@ const useVercel = () => {
           const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
           if (selectedTeam) {
             setSelectedTeam(selectedTeam);
+          } else {
+            setSelectedTeam(undefined);
           }
         }
       }
     };
     fetchData();
-  }, []);
-
-  // update selectedTeam on load
-  useEffect(() => {
-    async function updateSelectedTeam() {
-      if (user && teams) {
-        const selectedTeamId = await LocalStorage.getItem("selectedTeam");
-        if (selectedTeamId) {
-          const selectedTeam = teams.find((team) => team.id === selectedTeamId);
-          if (selectedTeam) {
-            setSelectedTeam(selectedTeam);
-          }
-        }
-      }
-    }
-
-    updateSelectedTeam();
   }, []);
 
   const updateSelectedTeam = async (teamIdOrUsername: string) => {

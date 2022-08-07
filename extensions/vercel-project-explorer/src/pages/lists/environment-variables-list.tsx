@@ -30,15 +30,15 @@ const EnvironmentVariables = ({ project, team }: Props) => {
     const encryptedVars: Environment[] = [];
     const secretVars: Environment[] = [];
 
-    vars.forEach((var_) => {
-      if (var_.type === "system") {
-        systemVars.push(var_);
-      } else if (var_.type === "plain") {
-        plainVars.push(var_);
-      } else if (var_.type === "encrypted") {
-        encryptedVars.push(var_);
-      } else if (var_.type === "secret") {
-        secretVars.push(var_);
+    vars.forEach((variable) => {
+      if (variable.type === "system") {
+        systemVars.push(variable);
+      } else if (variable.type === "plain") {
+        plainVars.push(variable);
+      } else if (variable.type === "encrypted") {
+        encryptedVars.push(variable);
+      } else if (variable.type === "secret") {
+        secretVars.push(variable);
       }
     });
 
@@ -48,7 +48,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
     setSecretVars(secretVars);
   }
 
-  useEffect((): void => {
+  useEffect(() => {
     fetchAndSetVars();
   }, []);
 

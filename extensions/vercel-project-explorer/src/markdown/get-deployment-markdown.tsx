@@ -41,14 +41,15 @@ const getDeploymentMarkdown = async (deployment: Deployment) => {
       intro += bold`Deployment is still building...`;
       break;
     case "FAILED":
-      intro += bold`Deployment failed:`;
+      intro += bold`Deployment failed.`;
       break;
     case "CANCELED":
       intro += bold`Deployment was canceled.`;
       break;
-    case "ERROR":
-      intro += bold`Deployment had an error:`;
+    case "ERROR": {
+      intro += bold`Deployment had an error.`;
       break;
+    }
     default:
       intro += bold`Deployment is in an unknown state...`;
   }

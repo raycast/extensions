@@ -1,7 +1,7 @@
 import { ActionPanel, open, Icon, List, useNavigation, Action, showToast, Toast } from "@raycast/api";
 import { Project } from "../../types";
 import fromNow from "../../utils/time";
-import SearchBarAccessory from "../search-projects/search-bar-accessory";
+import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import useVercel from "../../hooks/use-vercel-info";
 import { getFetchProjectsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
@@ -11,8 +11,7 @@ import DeploymentsList from "./deployments-list";
 import EnvironmentVariables from "./environment-variables-list";
 
 const ProjectListSection = () => {
-  const { selectedTeam, updateSelectedTeam, teams, user } = useVercel();
-
+  const { selectedTeam, user } = useVercel();
   const url = getFetchProjectsURL(selectedTeam?.id);
 
   const { isLoading, data, revalidate } = useFetch<{
@@ -23,8 +22,7 @@ const ProjectListSection = () => {
     headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
   });
 
-  const onTeamChange = async (teamIdOrUsername: string) => {
-    await updateSelectedTeam(teamIdOrUsername);
+  const onTeamChange = () => {
     revalidate();
   };
 
@@ -40,7 +38,7 @@ const ProjectListSection = () => {
       searchBarAccessory={
         <>
           {user && (
-            <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />
+            <SearchBarAccessory onTeamChange={onTeamChange} />
           )}
         </>
       }
@@ -67,10 +65,10 @@ const ProjectListSection = () => {
                   icon={Icon.ArrowRight}
                   onAction={async () => {
                     if (project.latestDeployments?.length) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       push(
                         <InspectDeployment
                           username={user?.username}
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           deployment={project.latestDeployments[0] as any}
                           selectedTeam={selectedTeam}
                         />

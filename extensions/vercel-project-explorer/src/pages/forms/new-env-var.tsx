@@ -1,9 +1,10 @@
-import { ActionPanel, Form, Icon, Action } from "@raycast/api";
+import { ActionPanel, Form, Action } from "@raycast/api";
 import type { Environment } from "../../types";
 
 type Props = {
   createEnvVar: (envVar: Partial<Environment>) => Promise<void>;
 };
+
 const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
   const onSubmit = (values: Form.Values) => {
     const targets = () => {
@@ -13,6 +14,7 @@ const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
       if (values["edit-form-production"]) target.push("production");
       return target;
     };
+    
     const formedValues: Partial<Environment> = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target: targets() as any,

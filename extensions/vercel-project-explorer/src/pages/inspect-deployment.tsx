@@ -80,7 +80,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
   return (
     <Detail
       navigationTitle={getCommitMessage(deployment)}
-      isLoading={isLoading || !markdown}
+      isLoading={isLoading || !markdown || !username}
       markdown={markdown}
       actions={
         <ActionPanel>

@@ -10,7 +10,6 @@ import type {
   Build,
   Pagination,
   CreateEnvironment,
-  Check,
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
@@ -396,16 +395,6 @@ export async function getAvatarImageURL(userOrTeamId: string, isTeam = false) {
   const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
 
   return imageStr;
-}
-
-export async function getChecksForDeployment(deploymentId: Deployment["uid"], teamId?: string) {
-  const teamIdString = teamId ? `teamId=${teamId}` : "";
-  const response = await fetch(apiURL + `v1/deployments/${deploymentId}/checks?${teamIdString}`, {
-    method: "get",
-    headers: headers,
-  });
-  const json = (await response.json()) as { checks: Check[] };
-  return json.checks;
 }
 
 export function getDeploymentURL(userOrTeamName: string, projectName: string, deploymentId: Deployment["uid"]) {

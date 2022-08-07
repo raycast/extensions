@@ -3,13 +3,12 @@ import useVercel from "../../hooks/use-vercel-info";
 import fromNow from "../../utils/time";
 import { Deployment, DeploymentState } from "../../types";
 import InspectDeployment from "../inspect-deployment";
-import SearchBarAccessory from "../search-projects/search-bar-accessory";
+import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
-  const { user, selectedTeam, teams, updateSelectedTeam } = useVercel();
-
+  const { user, selectedTeam } = useVercel();
   const url = getFetchDeploymentsURL(selectedTeam?.id, projectId);
 
   const { isLoading, data, revalidate } = useFetch<{
@@ -22,8 +21,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
 
   const deployments = data?.deployments;
 
-  const onTeamChange = async (teamIdOrUsername: string) => {
-    await updateSelectedTeam(teamIdOrUsername);
+  const onTeamChange = () => {
     revalidate();
   };
 
@@ -34,11 +32,11 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
       throttle
       searchBarPlaceholder="Search Deployments..."
       navigationTitle="Results"
-      isLoading={isLoading}
+      isLoading={isLoading || !user}
       searchBarAccessory={
         <>
           {user && (
-            <SearchBarAccessory selectedTeam={selectedTeam} teams={teams || []} user={user} onChange={onTeamChange} />
+            <SearchBarAccessory onTeamChange={onTeamChange}/>
           )}
         </>
       }
@@ -65,8 +63,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
               <Action.OpenInBrowser
                 title={`Visit on Vercel`}
                 url={getDeploymentURL(
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  selectedTeam ? selectedTeam.name : user!.username,
+                  selectedTeam ? selectedTeam.name : user?.username,
                   deployment.name,
                   /* @ts-expect-error Property id does not exist on type Deployment */
                   deployment.id || deployment.uid
