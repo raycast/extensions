@@ -16,10 +16,32 @@
   ],
   "preferences": [
     {
+      "name": "gridSize",
+      "type": "dropdown",
+      "title": "Grid Item Size",
+      "description": "Grid Item Size for Displaying SF Symbols.",
+      "required": false,
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "Choose to paste or copy the selected symbol by default",
+      "description": "Choose the Primary Action for SF Symbols.",
       "required": false,
       "data": [
         {
@@ -33,13 +55,26 @@
         {
           "title": "Copy Name to Clipboard",
           "value": "copyName"
+        },
+        {
+          "title": "Copy SVG Code",
+          "value": "copySVG"
         }
       ],
       "default": "paste"
+    },
+    {
+      "name": "showName",
+      "type": "checkbox",
+      "title": "Symbol Names",
+      "label": "Show Symbol Name",
+      "description": "Show Symbol Name in the Grid View.",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3"
+    "@raycast/api": "^1.38.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
