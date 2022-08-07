@@ -54,16 +54,18 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 }}
               />
               <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
-              <Action.OpenInBrowser
-                title={`Visit on Vercel`}
-                url={getDeploymentURL(
-                  selectedTeam ? selectedTeam.name : user?.username,
-                  deployment.name,
-                  /* @ts-expect-error Property id does not exist on type Deployment */
-                  deployment.id || deployment.uid
-                )}
-                icon={Icon.Link}
-              />
+              {user && (
+                <Action.OpenInBrowser
+                  title={`Visit on Vercel`}
+                  url={getDeploymentURL(
+                    selectedTeam ? selectedTeam.name : user.username,
+                    deployment.name,
+                    /* @ts-expect-error Property id does not exist on type Deployment */
+                    deployment.id || deployment.uid
+                  )}
+                  icon={Icon.Link}
+                />
+              )}
             </ActionPanel>
           }
           accessories={[

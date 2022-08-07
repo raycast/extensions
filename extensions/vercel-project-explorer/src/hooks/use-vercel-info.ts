@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LocalStorage } from "@raycast/api";
 import { Team, User } from "../types";
 import { fetchUser, fetchTeams } from "../vercel";
