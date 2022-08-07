@@ -1,6 +1,6 @@
 # Maven Central Repository Changelog
 
-## [Support arguments for command] - {PR_MERGE_DATE}
+## [Support arguments for command] - 2022-08-07
 
 - Support arguments for command so that you can enter values right from Root Search before opening the command
 
