@@ -173,6 +173,7 @@ export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expand
               title={`${mr.source_branch} ➜ ${mr.target_branch}`}
               text={props.subtitle}
             />
+            <List.Item.Detail.Metadata.Label title="Last updated" text={toDateString(mr.updated_at)} />
             <List.Item.Detail.Metadata.Separator />
             {mr.author && (
               <List.Item.Detail.Metadata.Label title="Author" text={mr.author.name} icon={userIcon(mr.author)} />
