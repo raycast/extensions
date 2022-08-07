@@ -8,7 +8,7 @@ export interface Symbol {
   categories: string[];
 }
 
-export const getSymbols = () => {
+export const getSymbols = (category: string | null) => {
   const symbolsJSON: { [key: string]: { categories: string[]; symbol: string } } = {};
   JSON.parse(fs.readFileSync(`${environment.assetsPath}/symbols.json`, { encoding: "utf8" })).map((symbol: any) => {
     symbolsJSON[symbol.name] = { categories: symbol.categories, symbol: symbol.symbol };
@@ -34,7 +34,7 @@ export const getSymbols = () => {
     }
   }
 
-  return symbols;
+  return symbols.filter((symbol: Symbol) => category === null || symbol.categories.includes(category));
 };
 
 export const categories: { names: string[]; values: string[] } = {

@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Grid, getPreferenceValues, Color } from "@raycast/api";
 import { Symbol, getSymbols, categories } from "./utils/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fs from "fs";
 
 interface Preferences {
@@ -19,12 +19,18 @@ export default function Command() {
       : Grid.ItemSize.Large;
   const showName = prefs.showName;
 
-  const symbols: Symbol[] = getSymbols();
   const [category, setCategory] = useState<string | null>(null);
+  const [symbols, setSymbols] = useState<Symbol[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setSymbols(getSymbols(category));
+    setIsLoading(false);
+  }, [category]);
 
   return (
     <Grid
-      isLoading={false}
+      isLoading={isLoading}
       itemSize={size}
       inset={Grid.Inset.Small}
       searchBarPlaceholder="Search SF Symbols..."
@@ -46,19 +52,17 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {symbols
-        .filter((symbol: Symbol) => category === null || symbol.categories.includes(category))
-        .map((symbol: Symbol) => {
-          return (
-            <Grid.Item
-              key={symbol.name}
-              title={showName ? symbol.name : undefined}
-              content={{ source: `../assets/sf-symbols/${symbol.name}.svg`, tintColor: Color.PrimaryText }}
-              keywords={symbol.categories.concat([symbol.name])}
-              actions={getActions(prefs, symbol)}
-            />
-          );
-        })}
+      {symbols.map((symbol: Symbol) => {
+        return (
+          <Grid.Item
+            key={symbol.name}
+            title={showName ? symbol.name : undefined}
+            content={{ source: `../assets/sf-symbols/${symbol.name}.svg`, tintColor: Color.PrimaryText }}
+            keywords={symbol.categories.concat([symbol.name])}
+            actions={getActions(prefs, symbol)}
+          />
+        );
+      })}
     </Grid>
   );
 }
