@@ -33,13 +33,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
       searchBarPlaceholder="Search Deployments..."
       navigationTitle="Results"
       isLoading={isLoading || !user}
-      searchBarAccessory={
-        <>
-          {user && (
-            <SearchBarAccessory onTeamChange={onTeamChange}/>
-          )}
-        </>
-      }
+      searchBarAccessory={<>{user && <SearchBarAccessory onTeamChange={onTeamChange} />}</>}
     >
       {deployments?.map((deployment) => (
         <List.Item

@@ -14,7 +14,7 @@ const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
       if (values["edit-form-production"]) target.push("production");
       return target;
     };
-    
+
     const formedValues: Partial<Environment> = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target: targets() as any,

@@ -35,13 +35,7 @@ const ProjectListSection = () => {
       searchBarPlaceholder="Search Projects..."
       navigationTitle="Results"
       isLoading={isLoading}
-      searchBarAccessory={
-        <>
-          {user && (
-            <SearchBarAccessory onTeamChange={onTeamChange} />
-          )}
-        </>
-      }
+      searchBarAccessory={<>{user && <SearchBarAccessory onTeamChange={onTeamChange} />}</>}
     >
       {projects &&
         projects.map((project) => (
