@@ -45,10 +45,6 @@ export default function PlaylistListItem(props: {
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
-          <Action.OpenInBrowser
-            title="Show Artist"
-            url={spotifyInstalled ? `spotify:artist:${playlist.owner.id}` : playlist.owner.external_urls.spotify}
-          />
           <Action.CopyToClipboard
             title="Copy URL"
             content={playlist.external_urls.spotify}
