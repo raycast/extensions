@@ -4,7 +4,7 @@ import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
 import { authorize, oauthClient } from "./oauth";
 import { isSpotifyInstalled } from "../utils";
-import { getTrack } from "./applescript";
+import { getTrack, isRunning, playTrack, setShuffling } from "./applescript";
 import { TrackInfo } from "./types";
 
 export const spotifyApi = new SpotifyWebApi();
@@ -122,7 +122,12 @@ export async function startPlaySimilar(options: object | undefined): Promise<voi
         .then((response: { body: any }) => response.body as SpotifyApi.RecommendationsFromSeedsResponse)) ?? undefined;
     const tracks = response.tracks.flatMap((track) => track.uri);
     if (tracks) {
-      await spotifyApi.play({ uris: tracks });
+      const isSpotifyRunning = await isRunning();
+      if (isSpotifyRunning) {
+        await spotifyApi.play({ uris: tracks });
+      } else {
+        playTrack(tracks[0]);
+      }
     }
   } catch (e: any) {
     await showToast({
@@ -135,8 +140,13 @@ export async function startPlaySimilar(options: object | undefined): Promise<voi
 
 export async function play(uri?: string, context_uri?: string): Promise<void> {
   try {
-    await authorizeIfNeeded();
-    await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+    const isSpotifyRunning = await isRunning();
+    if (isSpotifyRunning) {
+      await authorizeIfNeeded();
+      await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+    } else {
+      playTrack(uri ?? context_uri ?? "");
+    }
   } catch (e: any) {
     await showToast({
       style: Toast.Style.Failure,
@@ -148,9 +158,15 @@ export async function play(uri?: string, context_uri?: string): Promise<void> {
 
 export async function playShuffled(uri: string): Promise<void> {
   try {
-    await authorizeIfNeeded();
-    await spotifyApi.setShuffle(true);
-    await spotifyApi.play({ context_uri: uri });
+    const isSpotifyRunning = await isRunning();
+    if (isSpotifyRunning) {
+      await authorizeIfNeeded();
+      await spotifyApi.setShuffle(true);
+      await spotifyApi.play({ context_uri: uri });
+    } else {
+      setShuffling(true);
+      playTrack(uri ?? "");
+    }
   } catch (e: any) {
     await showToast({
       style: Toast.Style.Failure,
