@@ -20,15 +20,10 @@ export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
 const keys = ["categories", "editors", "languages", "projects"] as const;
 
 const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
-  // Item should have details if cummulative seconds is not 0 or null/undefined
-  const haveDetails = !!range.cummulative_total?.seconds;
-
   const md = useMemo(() => {
-    if (!haveDetails) return [];
-
     return [
       `## ${title}`,
-      getDuration(range.cummulative_total?.seconds),
+      getDuration(range.cummulative_total.seconds),
       "---",
       ...keys.flatMap((key) => [
         `### ${key[0].toUpperCase()}${key.slice(1)}`,
@@ -37,17 +32,16 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
     ];
   }, [range, title]);
 
-  const props: Partial<List.Item.Props> =
-    showDetail && haveDetails
-      ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
-      : {
-          accessories: [
-            {
-              tooltip: "Cumulative Total",
-              text: getDuration(range.cummulative_total?.seconds),
-            },
-          ],
-        };
+  const props: Partial<List.Item.Props> = showDetail
+    ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
+    : {
+        accessories: [
+          {
+            tooltip: "Cumulative Total",
+            text: getDuration(range.cummulative_total.seconds),
+          },
+        ],
+      };
 
   return (
     <List.Item
