@@ -1,12 +1,62 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stripe",
-  "title": "Stripe Quicklinks",
-  "description": "This extension allows you to make an invoice, create a payment, add a new product, and start a new subscription.",
+  "title": "Stripe",
+  "description": "Quick Stripe dashboard functionality and quick link access",
   "icon": "stripe.png",
   "author": "pradeepb28",
+  "contributors": [
+    "farisaziz12"
+  ],
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Finance"
+  ],
   "commands": [
+    {
+      "name": "balance-transactions",
+      "title": "View Balance Transactions",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent balance transactions",
+      "mode": "view"
+    },
+    {
+      "name": "balance",
+      "title": "View Balance",
+      "subtitle": "Stripe",
+      "description": "Shows an overview of your latest account balances",
+      "mode": "view"
+    },
+    {
+      "name": "charges",
+      "title": "View Charges",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent charges",
+      "mode": "view"
+    },
+    {
+      "name": "connected-accounts",
+      "title": "View Connected Accounts",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your connected accounts",
+      "mode": "view"
+    },
+    {
+      "name": "events",
+      "title": "View Events",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent events",
+      "mode": "view"
+    },
+    {
+      "name": "payment-intents",
+      "title": "View Payment Intents",
+      "subtitle": "Stripe",
+      "description": "Shows a detailed view of your recent payment intents",
+      "mode": "view"
+    },
     {
       "name": "create-a-new-invoice",
       "title": "Create New Invoice",
@@ -36,10 +86,31 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "stripeLiveApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Live Env API Key",
+      "description": "API Key for Live Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
+      "placeholder": "Enter your Stripe Live API Key"
+    },
+    {
+      "name": "stripeTestApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Test Env API Key",
+      "description": "API Key for Test Environment. This can be found in your Stripe Dashboard under Developers > API Keys > Secret key",
+      "placeholder": "Enter your Stripe Test API Key"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.29.1"
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.7",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.182",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
