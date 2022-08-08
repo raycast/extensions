@@ -1,12 +1,6 @@
-import { URL } from "url";
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow, popToRoot } from "@raycast/api";
 import Tab from "./components/tab";
-
-export const faviconUrl = (size: number, url: string): string => {
-  const domain = new URL(url).hostname;
-  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-};
 
 export async function openNewTabWithUrl(url: string | null | undefined): Promise<boolean | string> {
   url = url || "";

@@ -1,12 +1,11 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
-import { CurrentlyPlayingTrack, Response } from "./interfaces";
+import { Response } from "./interfaces";
 import { authorize, oauthClient } from "./oauth";
-import { runAppleScript } from "run-applescript";
-import { isSpotifyInstalled, spotifyApplicationName } from "./utils";
-
-const debugMode = false;
+import { isSpotifyInstalled } from "../utils";
+import { getTrack, isRunning, playTrack, setShuffling } from "./applescript";
+import { TrackInfo } from "./types";
 
 export const spotifyApi = new SpotifyWebApi();
 
@@ -29,62 +28,7 @@ async function authorizeIfNeeded(): Promise<void> {
 
 export const notPlayingErrorMessage = "Spotify Is Not Playing";
 
-export async function currentPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
-  const spotifyName = await spotifyApplicationName();
-
-  const script = `
-  if application "${spotifyName}" is not running then
-	return "${notPlayingErrorMessage}"
-end if
-
-property currentTrackId : "Unknown Track"
-property currentTrackArtist : "Unknown Artist"
-property currentTrackName : "Unknown Name"
-property playerState : "stopped"
-
-tell application "Spotify"
-	try
-		set currentTrackId to id of the current track
-		set currentTrackArtist to artist of the current track
-		set currentTrackName to name of the current track
-		set playerState to player state as string
-	end try
-end tell
-
-
-if playerState is "playing" then
-  return "{ \\"id\\": \\"" & currentTrackId & "\\", \\"name\\": \\"" & currentTrackName & "\\", \\"artist\\": \\"" & currentTrackArtist & "\\"}"
-else if playerState is "paused" then
-  return "{ \\"id\\": \\"" & currentTrackId & "\\", \\"name\\": \\"" & currentTrackName & "\\", \\"artist\\": \\"" & currentTrackArtist & "\\"}"
-else
-	return "${notPlayingErrorMessage}"
-end if`;
-  try {
-    const response = await runAppleScript(script);
-    const error = response as string;
-    if (error == notPlayingErrorMessage) {
-      return { error };
-    }
-    const track = JSON.parse(response as string) as CurrentlyPlayingTrack;
-    return { result: track };
-  } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed getting playing track",
-    });
-  }
-  // Spotify disabled the scope for this...
-  // await authorizeIfNeeded();
-  // try {
-  //   return await spotifyApi
-  //     .getMyCurrentPlayingTrack()
-  //     .then((response: { body: any }) => response.body as SpotifyApi.CurrentlyPlayingResponse);
-  // } catch (e: any) {
-  //   return e as unknown as SpotifyApi.ErrorObject;
-  // }
-}
-
-export async function likeCurrentlyPlayingTrack(): Promise<Response<CurrentlyPlayingTrack> | undefined> {
+export async function likeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> | undefined> {
   const isInstalled = await isSpotifyInstalled();
 
   if (!isInstalled) {
@@ -98,7 +42,7 @@ export async function likeCurrentlyPlayingTrack(): Promise<Response<CurrentlyPla
 
   await authorizeIfNeeded();
   try {
-    const track = (await currentPlayingTrack())?.result;
+    const track = await getTrack();
     if (track && track.id) {
       const trackId = track.id.replace("spotify:track:", "");
       try {
@@ -123,9 +67,9 @@ export function getArtistAlbums(artistId: string | undefined): Response<SpotifyA
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -169,16 +113,21 @@ export function getArtistAlbums(artistId: string | undefined): Response<SpotifyA
   return response;
 }
 
-export async function startPlaySimilar(trackId: string | undefined): Promise<void> {
+export async function startPlaySimilar(options: object | undefined): Promise<void> {
   try {
     await authorizeIfNeeded();
     const response =
       (await spotifyApi
-        .getRecommendations({ seed_tracks: trackId })
+        .getRecommendations(options)
         .then((response: { body: any }) => response.body as SpotifyApi.RecommendationsFromSeedsResponse)) ?? undefined;
     const tracks = response.tracks.flatMap((track) => track.uri);
     if (tracks) {
-      await spotifyApi.play({ uris: tracks });
+      const isSpotifyRunning = await isRunning();
+      if (isSpotifyRunning) {
+        await spotifyApi.play({ uris: tracks });
+      } else {
+        playTrack(tracks[0]);
+      }
     }
   } catch (e: any) {
     await showToast({
@@ -191,8 +140,13 @@ export async function startPlaySimilar(trackId: string | undefined): Promise<voi
 
 export async function play(uri?: string, context_uri?: string): Promise<void> {
   try {
-    await authorizeIfNeeded();
-    await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+    const isSpotifyRunning = await isRunning();
+    if (isSpotifyRunning) {
+      await authorizeIfNeeded();
+      await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+    } else {
+      playTrack(uri ?? context_uri ?? "");
+    }
   } catch (e: any) {
     await showToast({
       style: Toast.Style.Failure,
@@ -204,9 +158,15 @@ export async function play(uri?: string, context_uri?: string): Promise<void> {
 
 export async function playShuffled(uri: string): Promise<void> {
   try {
-    await authorizeIfNeeded();
-    await spotifyApi.setShuffle(true);
-    await spotifyApi.play({ context_uri: uri });
+    const isSpotifyRunning = await isRunning();
+    if (isSpotifyRunning) {
+      await authorizeIfNeeded();
+      await spotifyApi.setShuffle(true);
+      await spotifyApi.play({ context_uri: uri });
+    } else {
+      setShuffling(true);
+      playTrack(uri ?? "");
+    }
   } catch (e: any) {
     await showToast({
       style: Toast.Style.Failure,
@@ -216,14 +176,64 @@ export async function playShuffled(uri: string): Promise<void> {
   }
 }
 
+export function useSearch(query: string | undefined): Response<SpotifyApi.SearchResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.SearchResponse>>({ isLoading: false });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      if (!query) {
+        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+      try {
+        const response =
+          (await spotifyApi
+            .search(query, ["track", "artist", "album", "playlist"], { limit: 10 })
+            .then((response: { body: any }) => response.body as SpotifyApi.SearchResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, [query]);
+
+  return response;
+}
+
 export function useArtistsSearch(query: string | undefined): Response<SpotifyApi.ArtistSearchResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistSearchResponse>>({ isLoading: false });
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -272,9 +282,9 @@ export function getAlbumTracks(albumId: string | undefined): Response<SpotifyApi
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -323,9 +333,9 @@ export function useAlbumSearch(query: string | undefined): Response<SpotifyApi.A
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -374,9 +384,9 @@ export function useTrackSearch(query: string | undefined): Response<SpotifyApi.T
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -439,9 +449,9 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }
@@ -484,14 +494,143 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   return response;
 }
 
-function debugLog(...params: unknown[]): void {
-  if (!debugMode) return;
-  const logParams: unknown[] = params.map((val) => {
-    try {
-      return JSON.stringify(val);
-    } catch (error) {
-      return `Could not stringify debug log: ${error}`;
+export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPlaylistsResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: true });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const response =
+          (await spotifyApi
+            .getFeaturedPlaylists({ limit: 50 })
+            .then((response: { body: any }) => response.body as SpotifyApi.ListOfFeaturedPlaylistsResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
     }
-  });
-  console.log(...logParams);
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return response;
+}
+
+export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.MultipleCategoriesResponse>>({ isLoading: true });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const response =
+          (await spotifyApi
+            .getCategories({ limit: 50 })
+            .then((response: { body: any }) => response.body as SpotifyApi.MultipleCategoriesResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return response;
+}
+
+export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi.PlaylistSearchResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: true });
+
+  let cancel = false;
+
+  useEffect(() => {
+    authorizeIfNeeded();
+
+    async function fetchData() {
+      if (cancel) {
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const response =
+          (await spotifyApi
+            .getPlaylistsForCategory(categoryId, { limit: 50 })
+            .then((response: { body: any }) => response.body as SpotifyApi.PlaylistSearchResponse)
+            .catch((error) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, [categoryId]);
+
+  return response;
 }

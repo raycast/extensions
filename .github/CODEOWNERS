@@ -333,6 +333,7 @@
 /extensions/pexels                                   @koinzhang
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pie-for-pihole                           @GLaDO8
+/extensions/pika                                     @rishimohan
 /extensions/pinboard                                 @fe9lix
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
@@ -423,12 +424,12 @@
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7
-/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000
+/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
 /extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
-/extensions/stripe                                   @pradeepb28
+/extensions/stripe                                   @pradeepb28 @farisaziz12
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/supernotes                               @acnebs
 /extensions/surge                                    @ysj151215

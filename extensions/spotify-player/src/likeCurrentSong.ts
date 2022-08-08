@@ -1,6 +1,6 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { likeCurrentlyPlayingTrack } from "./client/client";
-import { isAuthorized } from "./client/oauth";
+import { likeCurrentlyPlayingTrack } from "./spotify/client";
+import { isAuthorized } from "./spotify/oauth";
 
 export default async () => {
   const authorized = await isAuthorized();
