@@ -1,11 +1,11 @@
 import { Icon, Image, List } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 import NotesList from "./components/NotesList";
 import api from "./lib/api";
 
 export default function BrowseNotes() {
-  const { data: user } = usePromise(() => api.getMe());
+  const { data: user } = useCachedPromise(() => api.getMe());
 
   const teams = useMemo(() => user?.teams ?? [], [user]);
   const [teamPath, setTeamPath] = useCachedState<string>("team", "");
