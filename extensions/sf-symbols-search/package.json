@@ -10,6 +10,7 @@
     {
       "name": "index",
       "title": "Search SF Symbols",
+      "subtitle": "SF Symbols",
       "description": "Search and copy SF Symbols",
       "mode": "view"
     }
