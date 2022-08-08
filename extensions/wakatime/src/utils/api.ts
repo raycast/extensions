@@ -13,8 +13,10 @@ async function routeHandler<T>(endpoint: string): Promise<Types.RouteResponse<T>
 
   try {
     const res = await fetch(`${baseURL}${endpoint}`, { headers: getAuthToken() });
+    const result = (await res.json()) as T | { error: string };
 
-    return { ok: true, result: (await res.json()) as never };
+    if ("error" in result) throw new Error(result.error);
+    return { ok: true, result };
   } catch (error) {
     return {
       ok: false,
