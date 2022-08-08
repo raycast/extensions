@@ -6,6 +6,12 @@
 - Added tooltips for menu bar command actions
 - Menu bar title will now be updated after performing `Next/Previous Track` actions
 
+## [Feature] - 2022-08-01
+
+- Introduce new command "Spotify Player" with live interface for viewing the current track
+- Introduce new command "Featured Playlists"
+- Introduce new command "Browse All"
+
 ## [Features & Bug Fixes] - 2022-07-27
 
 - Added Play Shuffled actions to `Search Playlist`, `Search Albums` commands
