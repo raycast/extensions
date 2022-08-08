@@ -10,14 +10,25 @@ function headers(token: string) {
   };
 }
 
-function request(url: string, method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH" = "GET", body?: object) {
+async function request(url: string, method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH" = "GET", body?: object) {
   const { host, hakunaApiKey: token } = getPreferenceValues<PreferenceValues>();
 
-  return fetch(`https://${host}.hakuna.ch/api/v1/${url}`, {
+  const response = await fetch(`https://${host}.hakuna.ch/api/v1/${url}`, {
     method: method,
     headers: headers(token),
     body: body ? JSON.stringify(body) : null,
   });
+
+  if (response.status === 401) {
+    throw new Error("Your API Key / Host combination is invalid.");
+  }
+
+  if (response.status !== 200) {
+    const errorResponse = (await response.json()) as { error: string };
+    throw new Error(errorResponse.error);
+  }
+
+  return response;
 }
 
 export async function getTimer() {

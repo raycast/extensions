@@ -9,11 +9,23 @@ import useSWR from "swr";
 import { PreferenceValues } from "./@types/preferences";
 
 export default function Hakuna() {
-  const { data: timer, mutate } = useSWR("timer", getTimer);
+  const { data: timer, mutate, error } = useSWR("timer", getTimer);
 
-  const { data: timeEntries, mutate: mutateEntries } = useSWR("timeEntries", () => listTimeEntries(today(), today()));
+  const {
+    data: timeEntries,
+    mutate: mutateEntries,
+    error: entryError,
+  } = useSWR("timeEntries", () => listTimeEntries(today(), today()));
 
   const { host: subdomain } = getPreferenceValues<PreferenceValues>();
+
+  if (error) {
+    return <EmptyView title={error.message} icon={Icon.BoltDisabled} />;
+  }
+
+  if (entryError) {
+    return <EmptyView title={entryError.message} icon={Icon.BoltDisabled} />;
+  }
 
   if (timeEntries === undefined || timer === undefined) {
     return <EmptyView title="Loading data..." />;

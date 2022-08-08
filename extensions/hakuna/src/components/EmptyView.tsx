@@ -1,9 +1,9 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, Image, List } from "@raycast/api";
 
-export default function EmptyView({ title }: { title: string }) {
+export default function EmptyView({ title, icon = Icon.Binoculars }: { title: string; icon?: Image.ImageLike | null }) {
   return (
     <List>
-      <List.EmptyView icon={Icon.Binoculars} title={title} />
+      <List.EmptyView icon={icon} title={title} />
     </List>
   );
 }
