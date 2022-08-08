@@ -23,7 +23,6 @@ class NoteCreator {
     let name = this.noteProps.name == "" ? this.pref.prefNoteName : this.noteProps.name;
     let content = fillDefaults ? this.pref.prefNoteContent : this.noteProps.content;
 
-
     content = this.addYAMLFrontmatter(content);
     content = await applyTemplates(content);
     name = await applyTemplates(name);
