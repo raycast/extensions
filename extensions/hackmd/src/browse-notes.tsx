@@ -40,7 +40,7 @@ export default function BrowseNotes() {
     <NotesList
       notes={notes}
       mutate={mutateFn}
-      isLoading={isLoading && isMyNotesLoading}
+      isLoading={isLoading || isMyNotesLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Select a Workspace" onChange={(path) => setTeamPath(path)} storeValue>
           <List.Dropdown.Item
