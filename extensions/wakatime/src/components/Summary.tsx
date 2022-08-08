@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { compareDesc, formatDistance } from "date-fns";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 
 import { useActivityChange, useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
@@ -100,7 +100,7 @@ export const ProjectsStatsList: React.FC = () => {
 };
 
 export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowDetail }) => {
-  const { data: activityChange, isLoading } = useActivityChange();
+  const { data: activityChange, isLoading, error } = useActivityChange();
 
   const md = useMemo(() => {
     if (!activityChange) return [];
@@ -119,13 +119,18 @@ export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowD
     ];
   }, [activityChange]);
 
-  if (isLoading || !activityChange) return <List.Item title="Loading Activity Changes" icon={Icon.Heartbeat} />;
+  if (error) {
+    showToast(Toast.Style.Failure, "Error in Activity", error.message);
+    return null;
+  }
+
+  if (isLoading) return <List.Item title="Loading Activity Changes" icon={Icon.Heartbeat} />;
 
   return (
     <List.Item
       detail={<List.Item.Detail markdown={md.join("\n\n")} />}
-      title={activityChange.title}
-      accessories={showDetail ? null : activityChange.accessories}
+      title={activityChange?.title ?? "Activity Change"}
+      accessories={showDetail ? null : activityChange?.accessories}
       actions={
         <ActionPanel>
           <Action

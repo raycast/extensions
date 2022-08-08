@@ -26,7 +26,7 @@ declare global {
         /** whether this user's photo should be shown on the public leader board */
         photo_public: boolean;
         /** user's timezone in Country/Region format */
-        timezone: string;
+        timezone: string | null;
         /** time of most recent heartbeat received in ISO 8601 format */
         last_heartbeat_at: string;
         /** user-agent string from the last plugin used */

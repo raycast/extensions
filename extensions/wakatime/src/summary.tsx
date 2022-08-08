@@ -15,7 +15,11 @@ export default function SummaryCommand() {
           <List.Item
             subtitle={data.username}
             title={data.display_name}
-            accessories={showDetail ? null : [{ icon: Icon.Globe, tooltip: "Timezone", text: data.timezone }]}
+            accessories={
+              showDetail
+                ? null
+                : [{ icon: Icon.Globe, tooltip: "Timezone", text: data.timezone ?? "Timezone is missing" }]
+            }
             icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
