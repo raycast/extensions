@@ -12,6 +12,7 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { existsSync, mkdirSync } from "fs";
 import { readFile, writeFile } from "fs/promises";
 import Fuse from "fuse.js";
@@ -19,22 +20,12 @@ import fetch from "node-fetch";
 import open from "open";
 import { resolve } from "path";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { URL } from "url";
 import { Doc, Entry } from "./types";
 import { useVisitedDocs } from "./useVisitedDocs";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
 if (!existsSync(environment.supportPath)) {
   mkdirSync(environment.supportPath, { recursive: true });
-}
-
-export function faviconUrl(size: number, url: string): string {
-  try {
-    const domain = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-  } catch (err) {
-    return Icon.Globe;
-  }
 }
 
 interface FetchResult<T> {
@@ -169,7 +160,7 @@ function OpenInDevdocsAction(props: { url: string; onOpen?: () => void }) {
 function DocItem(props: { doc: Doc; onVisit: () => void }) {
   const { doc, onVisit } = props;
   const { name, slug, links, version, release } = doc;
-  const icon = links?.home ? faviconUrl(64, links.home) : Icon.Dot;
+  const icon = links?.home ? getFavicon(links.home, { fallback: Icon.Globe }) : Icon.Dot;
   return (
     <List.Item
       key={slug}

@@ -9,11 +9,12 @@ import {
   OpenInBrowserAction,
   showToast,
   ToastStyle,
+  Image,
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory";
 import { useEffect, useState, ReactElement } from "react";
-import { faviconUrl } from "./utils";
+import { getFavicon } from "@raycast/utils";
 
 class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
@@ -40,8 +41,8 @@ class Tab {
     return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
   }
 
-  googleFavicon(): string {
-    return faviconUrl(64, this.url);
+  googleFavicon(): Image.ImageLike {
+    return getFavicon(this.url);
   }
 }
 
@@ -187,7 +188,7 @@ const NewTabActions = (props: { query: string | undefined }): ReactElement => {
 const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
   const { url, title } = props.entry;
   const id = props.entry.id.toString();
-  const favicon = faviconUrl(64, url);
+  const favicon = getFavicon(url);
 
   return (
     <List.Item

@@ -1,4 +1,5 @@
-import { faviconUrl } from "../utils/urlUtils";
+import { Image } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 
 export class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
@@ -29,7 +30,7 @@ export class Tab {
     return this.urlWithoutScheme().split("/")[0];
   }
 
-  googleFavicon(): string {
-    return faviconUrl(64, this.url);
+  googleFavicon(): Image.ImageLike {
+    return getFavicon(this.url);
   }
 }

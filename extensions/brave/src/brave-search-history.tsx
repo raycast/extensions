@@ -1,8 +1,8 @@
 import { List, ToastStyle, showToast, ActionPanel, CopyToClipboardAction } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState, ReactElement } from "react";
 import { useAsync } from "react-async";
 import { HistoryEntry, useBraveHistorySearch } from "./browserHistory";
-import { faviconUrl } from "./utils";
 import BraveOpenNewTab from "./components/brave-open-new-tab";
 
 type GroupedEntries = Map<string, HistoryEntry[]>;
@@ -52,7 +52,7 @@ const groupTitle = (d: Date): string => {
 const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
   const { url, title } = props.entry;
   const id = props.entry.id.toString();
-  const favicon = faviconUrl(64, url);
+  const favicon = getFavicon(url);
 
   return <List.Item id={id} title={title} subtitle={url} icon={favicon} actions={<Actions entry={props.entry} />} />;
 };

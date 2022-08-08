@@ -36,6 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.37.1",
+    "@raycast/utils": "^1.1.0",
     "dayjs": "^1.11.3",
     "node-fetch": "3.2.6"
   },
