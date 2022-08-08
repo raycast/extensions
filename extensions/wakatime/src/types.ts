@@ -108,7 +108,7 @@ declare global {
         seconds: number;
         /** cummulative total coding activity in human readable format */
         text: string;
-      } | null;
+      };
     }
 
     interface SummaryStat {
