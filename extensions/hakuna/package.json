@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hakuna",
+  "title": "Hakuna - Time Tracking",
+  "description": "Manage your Hakuna clock",
+  "icon": "hakuna-logo.png",
+  "author": "Sparclex",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hakuna",
+      "title": "Time Tracking",
+      "description": "Hakuna",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hakunaApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Hakuna Api Key",
+      "description": "Get the api key from your hakuna profile",
+      "placeholder": "API Key"
+    },
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "Hakuna Host",
+      "description": "Subdomain used to access hakuna {mysubdomain}.hakuna.ch",
+      "placeholder": "mysubdomain"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.1.0",
+    "node-fetch": "^3.2.10",
+    "swr": "^1.3.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "date-fns": "^2.29.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
