@@ -19,7 +19,6 @@ Not affiliated with Vercel.
 ## Contributing
 The [Vercel REST API docs](https://vercel.com/docs/rest-api) and [Raycast developer docs](https://developers.raycast.com/) are good places to start. Feel free to open an issue or [ping me on Twitter](https://twitter.com/max_leiter) if you want to help out.
 
-This is a (heavily) modified fork of the [vercast](https://github.com/raycast/extensions/tree/main/extensions/vercast) extension.
 
 ## Screenshots:
 <img src="media/vercast-1.png" width="600">
