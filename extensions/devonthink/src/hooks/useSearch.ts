@@ -12,6 +12,8 @@ export type SearchResult = {
   uuid: string;
   name: string;
   score: number;
+  path: string;
+  tags: string[];
 }
 
 const useSearch = (query: string) => {
