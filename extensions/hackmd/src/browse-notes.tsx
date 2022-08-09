@@ -1,16 +1,20 @@
 import { Icon, Image, List } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 import NotesList from "./components/NotesList";
 import api from "./lib/api";
 
 export default function BrowseNotes() {
-  const { data: user } = usePromise(() => api.getMe());
+  const { data: user } = useCachedPromise(() => api.getMe());
 
   const teams = useMemo(() => user?.teams ?? [], [user]);
   const [teamPath, setTeamPath] = useCachedState<string>("team", "");
 
-  const { isLoading, data, mutate } = useCachedPromise((path: string) => api.getTeamNotes(path), [teamPath], {
+  const {
+    isLoading: isTeamNotesLoading,
+    data,
+    mutate,
+  } = useCachedPromise((path: string) => api.getTeamNotes(path), [teamPath], {
     execute: !!teamPath,
   });
 
@@ -36,11 +40,19 @@ export default function BrowseNotes() {
     }
   }, [teamPath, mutate, mutateMyNotes]);
 
+  const isNotesLoading = useMemo(() => {
+    if (teamPath) {
+      return isTeamNotesLoading;
+    } else {
+      return isMyNotesLoading;
+    }
+  }, [teamPath, isTeamNotesLoading, isMyNotesLoading]);
+
   return (
     <NotesList
       notes={notes}
       mutate={mutateFn}
-      isLoading={isLoading && isMyNotesLoading}
+      isLoading={isNotesLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Select a Workspace" onChange={(path) => setTeamPath(path)} storeValue>
           <List.Dropdown.Item
