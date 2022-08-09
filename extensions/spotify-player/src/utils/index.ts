@@ -1,6 +1,6 @@
 import { getApplications, showHUD, showToast, Toast } from "@raycast/api";
 import { getState, getTrack } from "../spotify/applescript";
-import { SpotifyPlayingState } from "../spotify/types";
+import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 
 export interface Preferences {
   closeWindowOnAction: boolean;
@@ -29,24 +29,18 @@ export async function spotifyApplicationName(): Promise<string> {
   return "Spotify";
 }
 
-export async function showTrackNotification() {
-  try {
-    const [state, track] = await Promise.all([getState(), getTrack()]);
+export async function showTrackNotification(state: SpotifyState | null, track: TrackInfo | null) {
+  const trackName = (() => {
+    if (state?.state == SpotifyPlayingState.Playing && track != null) {
+      return `${track.name} by ${track.artist}`;
+    } else if (state?.state === SpotifyPlayingState.Paused && track != null) {
+      return `${track.name} by ${track.artist} (Paused)`;
+    } else {
+      return "Not playing";
+    }
+  })();
 
-    const trackName = (() => {
-      if (state.state == SpotifyPlayingState.Playing) {
-        return `${track.name} by ${track.artist}`;
-      } else if (state.state === SpotifyPlayingState.Paused) {
-        return `${track.name} by ${track.artist} (Paused)`;
-      } else {
-        return "Not playing";
-      }
-    })();
-
-    await showHUD("🎧 " + trackName);
-  } catch (err) {
-    console.error(err);
-  }
+  await showHUD("🎧 " + trackName);
 }
 
 export function msToHMS(milliseconds: number): string {

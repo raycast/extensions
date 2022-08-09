@@ -26,41 +26,45 @@ export default function NowPlayingMenuBar() {
   const [authorized, setAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPlayerAndTrackState = async () => {
-      // Check if Spotify is installed (only try this once)
-      let isInstalled = spotifyInstalled;
-      if (isInstalled == undefined) {
-        isInstalled = await isSpotifyInstalled();
-        setSpotifyInstalled(await isSpotifyInstalled());
-      }
+  const fetchPlayerAndTrackState = async () => {
+    let result: [SpotifyState | null, TrackInfo | null] = [null, null];
 
-      setAuthorized(await isAuthorized());
+    // Check if Spotify is installed (only try this once)
+    let isInstalled = spotifyInstalled;
+    if (isInstalled == undefined) {
+      isInstalled = await isSpotifyInstalled();
+      setSpotifyInstalled(await isSpotifyInstalled());
+    }
 
-      // If Spotify is installed then fetch the player and track state
-      if (isInstalled) {
-        try {
-          const [state, track] = await Promise.all([getState(), getTrack()]);
+    setAuthorized(await isAuthorized());
 
-          setCurrentSpotifyState(state);
-          setCurrentlyPlayingTrack(track);
+    // If Spotify is installed then fetch the player and track state
+    if (isInstalled) {
+      try {
+        const [state, track] = await Promise.all([getState(), getTrack()]);
 
-          let newSubtitle: string | undefined;
-          if (track.id) {
-            newSubtitle = `${track.artist} – ${track.name}`;
-          }
-          await updateCommandMetadata({ subtitle: newSubtitle });
-        } catch (err) {
-          await updateCommandMetadata({ subtitle: undefined });
-          if (environment.launchType != LaunchType.Background) {
-            showToast(Toast.Style.Failure, String(err));
-          }
+        setCurrentSpotifyState(state);
+        setCurrentlyPlayingTrack(track);
+
+        let newSubtitle: string | undefined;
+        if (track.id) {
+          newSubtitle = `${track.artist} – ${track.name}`;
+        }
+        await updateCommandMetadata({ subtitle: newSubtitle });
+        result = [state, track];
+      } catch (err) {
+        await updateCommandMetadata({ subtitle: undefined });
+        if (environment.launchType != LaunchType.Background) {
+          showToast(Toast.Style.Failure, String(err));
         }
       }
+    }
 
-      setIsLoading(false);
-    };
+    setIsLoading(false);
+    return result;
+  };
 
+  useEffect(() => {
     fetchPlayerAndTrackState();
   }, []);
 
@@ -88,8 +92,12 @@ export default function NowPlayingMenuBar() {
     await pause();
   };
 
-  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped) {
+  if (isLoading) {
     return <MenuBarExtra isLoading={isLoading}></MenuBarExtra>;
+  }
+
+  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped) {
+    return null;
   }
 
   const trackTitle =
@@ -128,8 +136,22 @@ export default function NowPlayingMenuBar() {
               (await currentSpotifyState?.state) === SpotifyPlayingState.Playing ? handlePause() : handlePlay();
             }}
           />
-          <MenuBarExtra.Item icon={Icon.Forward} title={"Next Track"} onAction={() => nextTrack()} />
-          <MenuBarExtra.Item icon={Icon.Rewind} title={"Previous Track"} onAction={() => previousTrack()} />
+          <MenuBarExtra.Item
+            icon={Icon.Forward}
+            title={"Next Track"}
+            onAction={async () => {
+              await nextTrack();
+              await fetchPlayerAndTrackState();
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={Icon.Rewind}
+            title={"Previous Track"}
+            onAction={async () => {
+              await previousTrack();
+              await fetchPlayerAndTrackState();
+            }}
+          />
           {authorized && (
             <MenuBarExtra.Item
               title="Start Radio"
