@@ -2,7 +2,7 @@
 
 ## [Feature] - 2022-08-08
 
-- Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Spotify Menu Bar")
+- Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Now Playing Menu Bar")
 - Introduce new command "Featured Playlists"
 - Introduce new command "Browse All"
 

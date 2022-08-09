@@ -38,7 +38,7 @@
     },
     {
       "name": "nowPlayingMenuBar",
-      "title": "Spotify Menu Bar",
+      "title": "Now Playing Menu Bar",
       "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
       "subtitle": "Spotify",
       "mode": "menu-bar",
