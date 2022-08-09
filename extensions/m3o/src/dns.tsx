@@ -42,16 +42,6 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "DNS retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Copy to Clipboard",
-          onAction: async (toast) => {
-            await Clipboard.copy(JSON.stringify(response.data));
-
-            toast.style = Toast.Style.Success;
-            toast.title = "DNS copied to clipboard";
-          },
-        };
 
         setOutput(JSON.stringify(response.data));
       })
@@ -67,6 +57,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get DNS" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          <Action.CopyToClipboard title="Copy to Clipboard" content={output} />
         </ActionPanel>
       }
     >

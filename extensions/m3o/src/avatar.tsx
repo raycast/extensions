@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
+import { useState } from "react";
 import axios from "axios";
 import fs from "fs";
 import { homedir } from "os";
@@ -15,6 +16,9 @@ interface CommandForm {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [url, setUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [format, setFormat] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     if (values.format == "") {
@@ -45,39 +49,10 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Avatar retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Download Image",
-          onAction: async (toast) => {
-            toast.style = Toast.Style.Animated;
-            toast.title = "Saving avatar";
 
-            await axios
-              .get(response.data.url, { responseType: "stream" })
-              .then((response) => {
-                const filename = values.username ? values.username.split(" ").join("_") : "avatar";
-                const type = values.format === "png" ? "png" : "jpeg";
-                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
-
-                toast.style = Toast.Style.Success;
-                toast.title = "Avatar saved successfully";
-              })
-              .catch((error) => {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Unable to download avatar";
-                toast.message = error.response.data.error.message ?? "";
-              });
-          },
-        };
-        toast.secondaryAction = {
-          title: "Copy URL",
-          onAction: async (toast) => {
-            await Clipboard.copy(response.data.url);
-
-            toast.title = "Copied to clipboard";
-            toast.secondaryAction = undefined;
-          },
-        };
+        setUsername(values.username);
+        setFormat(values.format);
+        setUrl(response.data.url);
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -86,11 +61,40 @@ export default function Command() {
       });
   }
 
+  async function download() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving avatar...",
+    });
+
+    await axios
+      .get(url, { responseType: "stream" })
+      .then((response) => {
+        const filename = username ? username.split(" ").join("_") : "avatar";
+        const type = format === "png" ? "png" : "jpeg";
+        response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Avatar saved successfully";
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to download avatar";
+        toast.message = error.response.data.error.message ?? "";
+      });
+  }
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Avatar" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url && (
+            <>
+              <Action title="Download" onAction={download} icon={Icon.Download} />
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+            </>
+          )}
         </ActionPanel>
       }
     >
