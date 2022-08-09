@@ -7,6 +7,9 @@
   "author": "MaxLeiter",
   "license": "MIT",
   "access": "public",
+  "contributors": [
+    "matt"
+  ],
   "commands": [
     {
       "name": "search-projects",
