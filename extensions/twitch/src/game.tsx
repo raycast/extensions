@@ -44,7 +44,6 @@ export default function main() {
       searchBarPlaceholder="Search for game..."
       onSearchTextChange={(text) => setQuery(text)}
       itemSize={Grid.ItemSize.Medium}
-      // inset={Grid.Inset.Small}
     >
       {items.map((item: Game) => {
         return (
