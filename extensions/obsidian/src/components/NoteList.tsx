@@ -1,5 +1,6 @@
 import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
+import fs from "fs";
 
 import { Note, Vault, SearchNotePreferences, SearchArguments } from "../utils/interfaces";
 import {
@@ -13,7 +14,7 @@ import {
 } from "../utils/utils";
 import { isNotePinned } from "../utils/pinNoteUtils";
 import { NoteAction } from "../utils/constants";
-import { deleteNoteFromCache, updateNoteInCache } from "../utils/cache";
+import { deleteNoteFromCache, renewCache, updateNoteInCache } from "../utils/cache";
 import { tagsForNotes } from "../utils/yaml";
 
 export function NoteListItem(props: {
@@ -27,6 +28,12 @@ export function NoteListItem(props: {
   const { note, vault, pref, onDelete, action } = props;
   const [content, setContent] = useState(note.content);
   const [pinned, setPinned] = useState(isNotePinned(note, vault));
+
+  const noteHasBeenMoved = !fs.existsSync(note.path);
+
+  if (noteHasBeenMoved) {
+    renewCache(vault);
+  }
 
   function reloadContent() {
     const newContent = getNoteFileContent(note.path);
@@ -60,7 +67,7 @@ export function NoteListItem(props: {
     }
   }
 
-  return (
+  return !noteHasBeenMoved ? (
     <List.Item
       title={note.title}
       accessories={[{ text: pinned ? "⭐️" : "" }]}
@@ -99,7 +106,7 @@ export function NoteListItem(props: {
         </ActionPanel>
       }
     />
-  );
+  ) : null;
 }
 
 export function NoteList(props: {
