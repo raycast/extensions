@@ -102,7 +102,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
       <Action
         title="Delete"
         onAction={async () => {
-          if (await confirmAlert({ title: `Are you sure you want to delete ${v.key}}?` })) {
+          if (await confirmAlert({ title: `Are you sure you want to delete ${v.key}?` })) {
             Promise.all([deleteEnvironmentVariableById(project.id, v.id), fetchAndSetVars()]);
           }
         }}
