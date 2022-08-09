@@ -24,6 +24,7 @@ interface EnrichmentItem {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState({} as EnrichmentItem);
+  const [url, setUrl] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     if (values.domain == "") {
@@ -46,24 +47,8 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Company enrichment retrieved successfully";
         toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Copy to Clipboard",
-          onAction: async (toast) => {
-            await Clipboard.copy(JSON.stringify(response.data));
-
-            toast.title = "Company enrichment output copied to clipboard";
-            toast.message = undefined;
-          },
-        };
-
+        setUrl(url);
         setOutput(response.data);
       })
       .catch((error) => {
@@ -78,6 +63,12 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get Enrichment Data" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url ? (
+            <>
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={url} />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >

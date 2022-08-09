@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceV
 import axios from "axios";
 import fs from "fs";
 import { homedir } from "os";
+import { useState } from "react";
 
 interface Preferences {
   avatarsApiKey: string;
@@ -13,6 +14,8 @@ interface CommandForm {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     if (values.name == "") {
@@ -34,37 +37,9 @@ export default function Command() {
       .then(() => {
         toast.style = Toast.Style.Success;
         toast.title = "Avatar retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Download",
-          onAction: async (toast) => {
-            toast.style = Toast.Style.Animated;
-            toast.title = "Saving avatar";
-
-            await axios
-              .get(url, { responseType: "stream" })
-              .then((response) => {
-                const filename = values.name.split(" ").join("_");
-                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
-
-                toast.style = Toast.Style.Success;
-                toast.title = "Avatar saved successfully";
-              })
-              .catch((error) => {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Unable to download avatar";
-                toast.message = error.response.data.error.message ?? "";
-              });
-          },
-        };
+        setName(name);
+        setUrl(url);
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -73,11 +48,39 @@ export default function Command() {
       });
   }
 
+  async function download() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving avatar...",
+    });
+
+    await axios
+      .get(url, { responseType: "stream" })
+      .then((response) => {
+        const filename = name.split(" ").join("_");
+        response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Avatar saved successfully";
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to download avatar";
+        toast.message = error.response.data.error.message ?? "";
+      });
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Avatar" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url ? (
+            <>
+              <Action title="Download" onAction={download} icon={Icon.Download} />
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >

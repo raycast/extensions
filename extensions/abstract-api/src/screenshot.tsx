@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceV
 import axios from "axios";
 import fs from "fs";
 import { homedir } from "os";
+import { useState } from "react";
 import { extractHostname } from "./utils";
 
 interface Preferences {
@@ -14,6 +15,8 @@ interface CommandForm {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [url, setUrl] = useState("");
 
   async function handleSubmit(values: CommandForm) {
     if (values.websiteUrl == "") {
@@ -35,37 +38,31 @@ export default function Command() {
       .then(() => {
         toast.style = Toast.Style.Success;
         toast.title = "Screenshot retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Download",
-          onAction: async (toast) => {
-            toast.style = Toast.Style.Animated;
-            toast.title = "Saving screenshot";
+        setWebsiteUrl(values.websiteUrl);
+        setUrl(url);
+      })
+      .catch((error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to retrieve screenshot";
+        toast.message = error.response.data.error.message ?? "";
+      });
+  }
 
-            await axios
-              .get(url, { responseType: "stream" })
-              .then((response) => {
-                const hostname = extractHostname(values.websiteUrl);
-                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
+  async function download() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving screenshot...",
+    });
 
-                toast.style = Toast.Style.Success;
-                toast.title = "Screenshot saved successfully";
-              })
-              .catch((error) => {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Unable to retrieve screenshot";
-                toast.message = error.response.data.error.message ?? "";
-              });
-          },
-        };
+    await axios
+      .get(url, { responseType: "stream" })
+      .then((response) => {
+        const hostname = extractHostname(websiteUrl);
+        response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.png`));
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Screenshot saved successfully";
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -79,6 +76,12 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Screenshot" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url ? (
+            <>
+              <Action title="Download" onAction={download} icon={Icon.Download} />
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >
