@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
+import { validate } from "json-schema";
 import { homedir } from "os";
 import { useState } from "react";
 
@@ -12,6 +13,15 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [name, setName] = useState("");
 
+  function validate() {
+    if (name == "") {
+      showToast(Toast.Style.Failure, "Error", "Name is required");
+      return false;
+    }
+
+    return true;
+  }
+
   function getUrl() {
     const baseUrl = "https://avatars.abstractapi.com/v1";
     const urlFriendlyName = encodeURIComponent(name);
@@ -20,8 +30,7 @@ export default function Command() {
   }
 
   async function submitAndOpen() {
-    if (name == "") {
-      showToast(Toast.Style.Failure, "Error", "Name is required");
+    if (!validate()) {
       return;
     }
 
@@ -29,6 +38,10 @@ export default function Command() {
   }
 
   async function submitAndDownload() {
+    if (!validate()) {
+      return;
+    }
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving avatar...",
