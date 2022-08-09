@@ -1,5 +1,5 @@
 # OpenJike Changelog
 
-## [Initial Version] - 2022-05-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 Initial version code
