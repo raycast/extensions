@@ -56,10 +56,10 @@ export default function Command() {
               .get(url, { responseType: "stream" })
               .then((response) => {
                 const hostname = extractHostname(values.url);
-                response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${hostname}.html`));
+                response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${hostname}.html`));
 
                 toast.style = Toast.Style.Success;
-                toast.title = "Scrape saved successfully";
+                toast.title = "Scrape saved to downloads successfully";
               })
               .catch((error) => {
                 toast.style = Toast.Style.Failure;

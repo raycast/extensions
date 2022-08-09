@@ -1,7 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
-import { validate } from "json-schema";
 import { homedir } from "os";
 import { useState } from "react";
 
@@ -14,10 +13,19 @@ export default function Command() {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string | undefined>();
 
+  function dropNameErrorIfNeeded() {
+    if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+
   function validate() {
-    if (name == "") {
-      showToast(Toast.Style.Failure, "Error", "Name is required");
+    if (name.length == 0) {
+      setNameError("The field is required!");
+
       return false;
+    } else {
+      dropNameErrorIfNeeded();
     }
 
     return true;
@@ -52,10 +60,10 @@ export default function Command() {
       .get(getUrl(), { responseType: "stream" })
       .then((response) => {
         const filename = name.split(" ").join("_");
-        response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.png`));
+        response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${filename}.png`));
 
         toast.style = Toast.Style.Success;
-        toast.title = "Avatar saved successfully";
+        toast.title = "Avatar saved to downloads successfully";
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -77,7 +85,11 @@ export default function Command() {
         id="name"
         title="Name"
         placeholder="John Doe"
-        onChange={(value) => setName(value)}
+        error={nameError}
+        onChange={(value) => {
+          setName(value);
+          dropNameErrorIfNeeded();
+        }}
       />
     </Form>
   );
