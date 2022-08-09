@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Maintenance Update] - 2022-07-31
+## [Maintenance Update] - 2022-08-09
 
 - Updated to latest Raycast API
 - Improved components
