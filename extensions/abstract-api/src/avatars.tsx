@@ -21,7 +21,7 @@ export default function Command() {
 
   function validate() {
     if (name.length == 0) {
-      setNameError("The field is required!");
+      setNameError("This field is required!");
 
       return false;
     } else {
