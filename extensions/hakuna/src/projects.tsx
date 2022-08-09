@@ -1,14 +1,19 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { getProjects } from "./api/hakuna";
-import { useCachedPromise } from "@raycast/utils";
 import { Project, Task } from "./@types/models";
+import useSWR from "swr";
+import EmptyView from "./components/EmptyView";
 
 export default function ProjectList() {
-  const { data: projects, isLoading } = useCachedPromise(getProjects);
+  const { data: projects } = useSWR("projects", getProjects);
+
+  if (projects === undefined) {
+    return <EmptyView isLoading title="Loading projects..." />;
+  }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Projects">
-      {projects?.map((project) => (
+    <List navigationTitle="Projects">
+      {projects.map((project) => (
         <List.Item
           key={project.id}
           title={project.name}

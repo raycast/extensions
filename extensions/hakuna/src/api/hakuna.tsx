@@ -56,30 +56,6 @@ export function deleteTimeEntry(id: number) {
 }
 
 export async function getProjects() {
-  return [
-    {
-      id: 1,
-      name: "Launch Rocket",
-      archived: false,
-      client: "SpaceX",
-      tasks: [],
-    },
-    {
-      id: 2,
-      name: "Supporting the Ukraine",
-      archived: false,
-      client: "The World",
-      tasks: [],
-    },
-    {
-      id: 3,
-      name: "Drawing Mona Lisa",
-      archived: false,
-      client: "Leonardo da Vinci",
-      tasks: [],
-    },
-  ] as Project[];
-
   return (await (await request("projects")).json()) as Project[];
 }
 
