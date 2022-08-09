@@ -8,7 +8,7 @@ type State = {
   results: SearchResult[];
 };
 
-type SearchResult = {
+export type SearchResult = {
   uuid: string;
   name: string;
   score: number;
@@ -18,7 +18,14 @@ const useSearch = (query: string) => {
   const [state, setState] = useState<State>({isLoading: true, results: []})
 
   useEffect(() => {
-    searchInDEVONThink(query)
+    if (query.length === 0) {
+      setState(prev => ({...prev, isLoading: false}));
+      return;
+    }
+
+    Promise.resolve()
+      .then(() => setState(prev => ({...prev, isLoading: true})))
+      .then(() => searchInDEVONThink(query))
       .then(results => setState(prev => ({...prev, results})))
       .catch(handleError)
       .finally(() => setState(prev => ({...prev, isLoading: false})))
