@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-import { Team } from "../types/standings.types";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 
@@ -9,12 +8,12 @@ const Standings = () => {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Eastern Conference">
-        {data?.eastern.map((team: Team) => {
+        {data?.eastern.map((team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
       </List.Section>
       <List.Section title="Western Conference">
-        {data?.western.map((team: Team) => {
+        {data?.western.map((team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
       </List.Section>

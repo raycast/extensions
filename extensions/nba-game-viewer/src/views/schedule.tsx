@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-import { Day } from "../types/schedule.types";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 
@@ -8,7 +7,7 @@ const Schedue = () => {
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((day: Day) => (
+      {data?.map((day) => (
         <DayComponent key={day.date} day={day} />
       ))}
     </List>

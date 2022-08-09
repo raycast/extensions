@@ -1,5 +1,4 @@
 import useNews from "../hooks/useNews";
-import { Article } from "../types/news.types";
 import ArticleComponent from "../components/Article";
 import { useState } from "react";
 import { List } from "@raycast/api";
@@ -11,7 +10,7 @@ const Articles = () => {
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
-      {data?.map((article: Article) => {
+      {data?.map((article) => {
         return (
           <ArticleComponent
             key={article.title}
