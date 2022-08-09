@@ -1,60 +1,36 @@
 import getNews from "../utils/getNews";
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import type { Article, Category } from "../types/news.types";
-import { Cache } from "@raycast/api";
-
-const cache = new Cache();
+import { useCachedPromise } from "@raycast/utils";
 
 const useNews = () => {
-  const [news, setNews] = useState<Array<Article>>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
+  const fetchNews = useCallback(async () => {
+    const data = await getNews();
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      let data: any = null;
+    const articles: Article[] = data.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (article: any): Article => ({
+        title: article.headline,
+        description: article.description,
+        url: article.links.web.href,
+        imageURL: article.images[0].url,
+        imageCaption: article.images[0].caption,
+        publishedAt: article.published,
+        categories: article.categories.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (category: any): Category => ({
+            id: category.id,
+            name: category.description,
+            type: category.type,
+          })
+        ),
+      })
+    );
 
-      const cachedData = cache.get("news");
-      if (cachedData) {
-        const cachedNews = JSON.parse(cachedData);
-        setNews(cachedNews);
-      }
-
-      try {
-        data = await getNews();
-      } catch (error) {
-        setError(true);
-        return error;
-      }
-
-      const articles: Article[] = data.map(
-        (article: any): Article => ({
-          title: article.headline,
-          description: article.description,
-          url: article.links.web.href,
-          imageURL: article.images[0].url,
-          imageCaption: article.images[0].caption,
-          publishedAt: article.published,
-          categories: article.categories.map(
-            (category: any): Category => ({
-              id: category.id,
-              name: category.description,
-              type: category.type,
-            })
-          ),
-        })
-      );
-
-      setNews(articles);
-      setLoading(false);
-
-      cache.set("news", JSON.stringify(articles));
-    };
-
-    fetchNews();
+    return articles;
   }, []);
 
-  return { news, loading, error };
+  return useCachedPromise(fetchNews);
 };
 
 export default useNews;
