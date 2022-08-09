@@ -1,35 +1,13 @@
 import {List} from "@raycast/api";
-import {useEffect, useState} from "react";
-import {jxa} from "osascript-tag";
+import {useState} from "react";
+import useSearch from "./hooks/useSearch";
 
 const search = () => {
+  const [query, setQuery] = useState("");
+  const {isLoading, results} = useSearch(query);
 
-  useEffect(() => {
-    const dodo = async (query: string) => {
-      const out = await jxa`
-    const DT = Application("DEVONthink 3");
-    
-    const results = DT.search(${query});
-    
-    return results.map(result => ({
-      uuid: result.uuid(),
-      name: result.name(),
-      score: result.score(),
-      tags: result.tags(),
-      path: result.path(),
-      location: result.location(),
-      type: result.type(),
-    }));
-    `;
-
-      console.log(out);
-    };
-
-    dodo("hello");
-  }, []);
-
-  return <List>
-    <List.Item title="hello world"/>
+  return <List isLoading={isLoading} onSearchTextChange={setQuery}>
+    {results.map(result => <List.Item key={result.uuid} title={result.name}/>)}
   </List>
 };
 
