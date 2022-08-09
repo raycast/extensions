@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vercast",
   "title": "Vercast",
-  "description": "An extension for viewing and modifying Vercel projects and deployments.",
+  "description": "View and modify your Vercel projects and deployments.",
   "icon": "icon.png",
   "author": "MaxLeiter",
   "license": "MIT",
