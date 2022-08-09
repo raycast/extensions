@@ -10,7 +10,8 @@
     "Web"
   ],
   "license": "MIT",
-  "commands": [{
+  "commands": [
+    {
       "name": "ip-geolocation",
       "title": "Get IP Geolocation Info for Any IP",
       "subtitle": "Abstract API",
@@ -67,7 +68,8 @@
       "mode": "view"
     }
   ],
-  "preferences": [{
+  "preferences": [
+    {
       "name": "ipGeolocationApiKey",
       "type": "password",
       "required": false,
@@ -125,7 +127,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.38.3",
     "axios": "^0.26.1"
   },
   "devDependencies": {
