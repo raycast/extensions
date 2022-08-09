@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
@@ -57,9 +57,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get DNS" onSubmit={handleSubmit} icon={Icon.Pencil} />
-          {output && (
-            <Action.CopyToClipboard title="Copy to Clipboard" content={output} />
-          )}
+          {output && <Action.CopyToClipboard title="Copy to Clipboard" content={output} />}
         </ActionPanel>
       }
     >
@@ -78,12 +76,20 @@ export default function Command() {
           {Object.values(output).map((record: any, index: number) => {
             if (Array.isArray(record)) {
               return record.map((record: any, index: number) => (
-                <Form.Description key={index} title={Object.keys(record)[index]} text={`${Object.values(record)[index]}`} />
+                <Form.Description
+                  key={index}
+                  title={Object.keys(record)[index]}
+                  text={`${Object.values(record)[index]}`}
+                />
               ));
             }
 
             return (
-              <Form.Description key={index} title={Object.keys(output)[index]} text={`${Object.values(output)[index]}`} />
+              <Form.Description
+                key={index}
+                title={Object.keys(output)[index]}
+                text={`${Object.values(output)[index]}`}
+              />
             );
           })}
         </>

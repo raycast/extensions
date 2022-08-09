@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import axios from "axios";
 import fs from "fs";
@@ -19,13 +19,27 @@ export default function Command() {
   const [url, setUrl] = useState("");
   const [username, setUsername] = useState("");
   const [format, setFormat] = useState("");
+  const [usernameError, setUsernameError] = useState<string | undefined>();
 
-  async function handleSubmit(values: CommandForm) {
-    if (values.format == "") {
-      showToast(Toast.Style.Failure, "Error", "Name is required");
-      return;
+  function dropUsernameErrorIfNeeded() {
+    if (usernameError && usernameError.length > 0) {
+      setUsernameError(undefined);
+    }
+  }
+
+  function validate() {
+    if (username.length == 0) {
+      setUsernameError("The field is required!");
+
+      return false;
+    } else {
+      dropUsernameErrorIfNeeded();
     }
 
+    return true;
+  }
+
+  async function handleSubmit(values: CommandForm) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Retrieving avatar...",
