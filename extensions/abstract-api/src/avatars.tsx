@@ -68,7 +68,7 @@ export default function Command() {
         toast.title = "Unable to download avatar";
         toast.message = error.response.data.error.message ?? "";
       });
-  };
+  }
 
   return (
     <Form
