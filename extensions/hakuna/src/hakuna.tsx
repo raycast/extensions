@@ -1,4 +1,13 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, updateCommandMetadata } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { getTimer, listTimeEntries } from "./api/hakuna";
 import { TimeEntry, Timer } from "./@types/models";
 import { format } from "date-fns";
@@ -41,10 +50,19 @@ export default function Hakuna() {
             <ActionPanel>
               <Action
                 title={timer.task ? "Stop Timer" : "Start Timer"}
-                onAction={async () => {
-                  await toggleTimer();
-                  mutate();
-                  mutateEntries();
+                onAction={() => {
+                  toggleTimer()
+                    .then(() => {
+                      mutate();
+                      mutateEntries();
+                    })
+                    .catch((error) =>
+                      showToast({
+                        style: Toast.Style.Failure,
+                        message: error.message,
+                        title: "Error while trying to toggle timer",
+                      })
+                    );
                 }}
               />
             </ActionPanel>

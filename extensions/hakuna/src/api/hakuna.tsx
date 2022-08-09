@@ -23,7 +23,7 @@ async function request(url: string, method: "POST" | "GET" | "PUT" | "DELETE" | 
     throw new Error("Your API Key / Host combination is invalid.");
   }
 
-  if (response.status !== 200) {
+  if (response.status >= 400) {
     const errorResponse = (await response.json()) as { error: string };
     throw new Error(errorResponse.error);
   }
