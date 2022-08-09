@@ -6,10 +6,11 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  Image,
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useEffect, useState } from "react";
-import { faviconUrl } from "./utils";
+import { getFavicon } from "@raycast/utils";
 
 class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
@@ -40,8 +41,8 @@ class Tab {
     return this.urlWithoutScheme().split("/")[0];
   }
 
-  googleFavicon(): string {
-    return faviconUrl(64, this.url);
+  googleFavicon(): Image.ImageLike {
+    return getFavicon(this.url);
   }
 }
 
@@ -94,7 +95,7 @@ interface State {
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
 
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>();
 
   useEffect(() => {
     async function getTabs() {
@@ -105,8 +106,8 @@ export default function Command() {
   }, []);
 
   return (
-    <List>
-      {state.tabs?.map((tab) => (
+    <List isLoading={state === undefined}>
+      {state?.tabs?.map((tab) => (
         <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
       ))}
     </List>

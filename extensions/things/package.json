@@ -49,6 +49,14 @@
       "subtitle": "Things",
       "description": "Create To-Dos in any list",
       "mode": "view"
+    },
+    {
+      "name": "show-today-in-menu-bar",
+      "title": "Show Today in Menu Bar",
+      "subtitle": "Things",
+      "description": "See your Today list in MacOS menu-bar",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [

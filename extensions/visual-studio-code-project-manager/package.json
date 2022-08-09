@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "MarkusLanger",
   "contributors": [
-    "GastroGeek"
+    "GastroGeek",
+    "4very"
   ],
   "license": "MIT",
   "commands": [
@@ -76,6 +77,10 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     }

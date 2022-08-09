@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-fonts",
+  "title": "Google Fonts",
+  "description": "Search and use fonts from Google Fonts",
+  "icon": "icon.png",
+  "author": "GastroGeek",
+  "license": "MIT",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "development",
+    "fonts",
+    "google",
+    "web"
+  ],
+  "commands": [
+    {
+      "name": "search-fonts",
+      "title": "Search Fonts",
+      "description": "Search and use fonts from Google Fonts",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "lodash.startcase": "^4.4.0",
+    "lodash.xor": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/lodash.startcase": "^4.4.7",
+    "@types/lodash.xor": "^4.5.7",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

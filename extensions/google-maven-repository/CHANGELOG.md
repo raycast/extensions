@@ -1,5 +1,9 @@
 # Google Maven Repository Changelog
 
+## [Support arguments for command] - 2022-08-09
+
+- Support arguments for command so that you can enter values right from Root Search before opening the command
+
 ## [Initial Version] - 2022-05-06
 
 - Add filter items to the Search Google Maven Repository command

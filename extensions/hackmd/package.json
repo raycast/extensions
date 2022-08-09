@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hackmd",
+  "title": "HackMD",
+  "description": "HackMD Raycast extension",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-notes",
+      "title": "Browse Notes",
+      "subtitle": "HackMD",
+      "description": "Browse HackMD Notes",
+      "mode": "view"
+    },
+    {
+      "name": "view-release-notes",
+      "title": "View Release Notes",
+      "subtitle": "HackMD",
+      "description": "View HackMD Release Notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "HackMD",
+      "description": "Create a HackMD Note",
+      "mode": "view"
+    },
+    {
+      "name": "view-history",
+      "title": "View History",
+      "subtitle": "HackMD",
+      "description": "View HackMD History",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "title": "HackMD API Token",
+      "description": "The API token you created on HackMD",
+      "name": "api_token",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "HackMD API Base URL",
+      "description": "The base URL of HackMD API",
+      "name": "api_base_url",
+      "default": "https://api.hackmd.io/v1",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "HackMD Instance URL",
+      "description": "The base URL of HackMD instance",
+      "name": "instance_url",
+      "default": "https://hackmd.io",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@hackmd/api": "2.1.0",
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.7",
+    "mdast-util-to-markdown": "^1.3.0",
+    "minisearch": "^5.0.0",
+    "remark": "^14.0.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
