@@ -13,7 +13,7 @@ interface CommandForm {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState({} as any);
 
   async function handleSubmit(values: CommandForm) {
     if (values.domain == "") {
@@ -43,7 +43,7 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "DNS retrieved successfully";
 
-        setOutput(JSON.stringify(response.data));
+        setOutput(response.data);
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
@@ -57,7 +57,9 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get DNS" onSubmit={handleSubmit} icon={Icon.Pencil} />
-          <Action.CopyToClipboard title="Copy to Clipboard" content={output} />
+          {output && (
+            <Action.CopyToClipboard title="Copy to Clipboard" content={output} />
+          )}
         </ActionPanel>
       }
     >
@@ -73,7 +75,17 @@ export default function Command() {
       {output ? (
         <>
           <Form.Separator />
-          <Form.TextArea id="output" title="Output" value={output} />
+          {Object.values(output).map((record: any, index: number) => {
+            if (Array.isArray(record)) {
+              return record.map((record: any, index: number) => (
+                <Form.Description key={index} title={Object.keys(record)[index]} text={`${Object.values(record)[index]}`} />
+              ));
+            }
+
+            return (
+              <Form.Description key={index} title={Object.keys(output)[index]} text={`${Object.values(output)[index]}`} />
+            );
+          })}
         </>
       ) : null}
     </Form>
