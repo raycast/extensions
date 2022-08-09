@@ -1,16 +1,16 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-08-08
+
+- Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Spotify Menu Bar")
+- Introduce new command "Featured Playlists"
+- Introduce new command "Browse All"
+
 ## [Bug Fixes] - 2022-08-01
 
 - Properly handled states for unauthorized state in menu bar and no-view commands
 - Added tooltips for menu bar command actions
 - Menu bar title will now be updated after performing `Next/Previous Track` actions
-
-## [Feature] - 2022-08-01
-
-- Introduce new command "Spotify Player" with live interface for viewing the current track
-- Introduce new command "Featured Playlists"
-- Introduce new command "Browse All"
 
 ## [Features & Bug Fixes] - 2022-07-27
 
