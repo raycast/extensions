@@ -3,7 +3,6 @@ import isValidToken from "./utils/is-valid-token";
 
 function Main() {
   isValidToken();
-
   return <ProjectListSection />;
 }
 

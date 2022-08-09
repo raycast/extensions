@@ -98,50 +98,6 @@ export async function deleteEnvironmentVariableById(
   }
 }
 
-export async function fetchProjectById(projectId: Project["id"]) {
-  try {
-    const response = await fetch(apiURL + `v8/projects/${projectId}`, {
-      method: "get",
-      headers: headers,
-    });
-
-    const json = (await response.json()) as Project;
-    return json;
-  } catch (err) {
-    console.error(err);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to fetch project",
-    });
-    throw new Error("Failed to fetch project");
-  }
-}
-
-// https://vercel.com/api/v6/now/deployments?projectId=QmV9keBmvL9dHT4gaCpxaSAAk6Qq5mNYpBRi5aT2mt9yeb&limit=50&target=production
-export async function fetchDeploymentsForProject(project: Project, teamId?: string, limit = 75, target = "production") {
-  try {
-    const query = new URLSearchParams({
-      projectId: project.id,
-      limit: limit.toString(),
-      teamId: teamId?.toString() || "",
-      target,
-    });
-    const response = await fetch(apiURL + `v6/deployments?${query.toString()}`, {
-      method: "get",
-      headers: headers,
-    });
-    const json = (await response.json()) as { deployments: Deployment[] };
-    return json.deployments;
-  } catch (err) {
-    console.error(err);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to fetch deployments",
-    });
-    throw new Error("Failed to fetch deployments");
-  }
-}
-
 export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100) {
   const url = apiURL + `v6/deployments`;
 
@@ -252,16 +208,6 @@ export async function updateEnvironmentVariable(
   return environmentVariable;
 }
 
-export async function updateProject(projectId: string, project: Partial<Project>, teamId?: string): Promise<Project> {
-  const response = await fetch(getFetchProjectsURL(teamId), {
-    method: "patch",
-    headers: headers,
-    body: JSON.stringify(project),
-  });
-  const json = (await response.json()) as Project;
-  return json;
-}
-
 // TODO: use Omit<>
 export async function createEnvironmentVariable(
   projectId: Project["id"],
@@ -337,27 +283,10 @@ export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
   return imageStr;
 }
 
-export async function getAvatarImageURL(userOrTeamId: string, isTeam = false) {
-  const image = await fetch(`https://vercel.com/api/www/avatar/${isTeam ? `?teamId=${userOrTeamId}` : userOrTeamId}`, {
-    method: "get",
-    headers: headers,
-  });
-
-  const arrayBuffer = await image.arrayBuffer();
-  const base64Flag = "data:image/png;base64,";
-  const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
-
-  return imageStr;
-}
-
 export function getDeploymentURL(userOrTeamName: string, projectName: string, deploymentId: Deployment["uid"]) {
   if (deploymentId.startsWith("dpl_")) {
     deploymentId = deploymentId.substring(4);
   }
 
   return `https://vercel.com/${userOrTeamName}/${projectName}/${deploymentId}`;
-}
-
-export function getProjectURL(userOrTeamName: string, projectName: string) {
-  return `https://vercel.com/${userOrTeamName}/${projectName}`;
 }

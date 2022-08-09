@@ -22,18 +22,6 @@ const useVercel = () => {
       if (!user || !teams) {
         const [fetchedUser, fetchedTeams] = await Promise.all([fetchUser(), fetchTeams()]);
 
-        // // add avatar to fetched teams
-        // const fetchedTeamsWithAvatar = await Promise.all(fetchedTeams.map(async (team) => {
-        //   const id = team.id;
-        //   let avatarURL
-        //   if (id) {
-        //     // avatarURL = await getAvatarImageURL(id, true);
-        //   } else {
-        //   }
-
-        //   return { ...team, avatar: avatarURL || "" };
-        // }));
-
         setUser(fetchedUser);
         setTeams(fetchedTeams);
 
