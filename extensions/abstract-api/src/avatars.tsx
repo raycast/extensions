@@ -12,6 +12,7 @@ interface Preferences {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState<string | undefined>();
 
   function validate() {
     if (name == "") {
@@ -75,7 +76,7 @@ export default function Command() {
       <Form.TextField
         id="name"
         title="Name"
-        placeholder="Enter name"
+        placeholder="John Doe"
         onChange={(value) => setName(value)}
       />
     </Form>
