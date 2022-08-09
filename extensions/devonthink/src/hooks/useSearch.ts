@@ -40,7 +40,7 @@ const searchInDEVONThink = async (query: string) => {
   const results =  (await jxa({parse: true})`
       const DT = Application("DEVONthink 3");
     
-      const results = DT.search("${query}");
+      const results = DT.search('${query.replaceAll("'", "\\'")}');
       
       if (results.length === 0) {
         return [];
