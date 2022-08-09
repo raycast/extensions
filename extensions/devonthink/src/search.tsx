@@ -9,7 +9,7 @@ const search = () => {
 
   const mapResult = (result: SearchResult) => <SearchResultItem key={result.uuid} result={result}/>;
 
-  return <List isLoading={isLoading} onSearchTextChange={setQuery}>
+  return <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
     {results.map(mapResult)}
   </List>
 };
