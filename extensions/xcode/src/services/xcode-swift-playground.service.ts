@@ -5,9 +5,9 @@ import { execAsync } from "../shared/exec-async";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
-import { joinPathComponents } from "../shared/join-path-components";
 import untildify from "untildify";
 import { getPreferenceValues } from "@raycast/api";
+import * as Path from "path";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -16,7 +16,7 @@ export class XcodeSwiftPlaygroundService {
   /**
    * The scaffold Swift Playground TemplateFiles
    */
-  private scaffoldTemplateFiles: TemplateFile[] = [
+  private static scaffoldTemplateFiles: TemplateFile[] = [
     {
       name: "timeline",
       extension: "xctimeline",
@@ -45,7 +45,7 @@ export class XcodeSwiftPlaygroundService {
   /**
    * The default location where a Swift Playground should be created
    */
-  get defaultSwiftPlaygroundLocation(): string {
+  static get defaultSwiftPlaygroundLocation(): string {
     // Retrieve the preference values
     const preferences = getPreferenceValues();
     // Retrieve the excluded Xcode Project paths string from preference values
@@ -57,7 +57,7 @@ export class XcodeSwiftPlaygroundService {
    * @param parameters The XcodeSwiftPlaygroundCreationParameters
    * @param forceCreate Bool value if the creation of a Swift Playground should be enforced
    */
-  async createSwiftPlayground(
+  static async createSwiftPlayground(
     parameters: XcodeSwiftPlaygroundCreationParameters,
     forceCreate: boolean
   ): Promise<XcodeSwiftPlayground> {
@@ -80,7 +80,7 @@ export class XcodeSwiftPlaygroundService {
     await makeDirectoryAsync(playgroundPath);
     // Initialize template files
     const templateFiles = [
-      ...this.scaffoldTemplateFiles,
+      ...XcodeSwiftPlaygroundService.scaffoldTemplateFiles,
       XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(parameters.template),
       XcodeSwiftPlaygroundService.contentsTemplateFile(parameters.platform),
     ];
@@ -93,12 +93,12 @@ export class XcodeSwiftPlaygroundService {
           // Check if template file has a path
           if (templateFile.path) {
             // Join current file path with template file path
-            filePath = joinPathComponents(filePath, templateFile.path);
+            filePath = Path.join(filePath, templateFile.path);
             // Make directory
             await makeDirectoryAsync(filePath);
           }
           // Join current file path with file name
-          filePath = joinPathComponents(filePath, [templateFile.name, templateFile.extension].join("."));
+          filePath = Path.join(filePath, [templateFile.name, templateFile.extension].join("."));
           // Write file
           await writeFileAsync(filePath, dedent(templateFile.contents));
         })
@@ -148,7 +148,7 @@ export class XcodeSwiftPlaygroundService {
         iteration == null
           ? `${filename}-${dateString}.playground`
           : `${filename}-${dateString}-${iteration}.playground`;
-      path = joinPathComponents(targetLocation, name);
+      path = Path.join(targetLocation, name);
       iteration = iteration == null ? 1 : iteration + 1;
     } while ((await existsAsync(path)) && forceCreate);
     return path;

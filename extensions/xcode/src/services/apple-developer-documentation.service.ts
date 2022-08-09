@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
+import * as Path from "path";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
-import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * AppleDeveloperDocumentationService
@@ -9,17 +9,16 @@ export class AppleDeveloperDocumentationService {
   /**
    * The host URL
    */
-  private hostUrl = "https://developer.apple.com";
-
+  private static hostUrl = "https://developer.apple.com";
   /**
    * Search Developer Documentation by search text
    * @param searchText The search text
    */
-  async search(searchText: string): Promise<AppleDeveloperDocumentationEntry[]> {
+  static async search(searchText: string): Promise<AppleDeveloperDocumentationEntry[]> {
     // Fetch Documentation Response
     const response = await fetch(
-      joinPathComponents(
-        this.hostUrl,
+      Path.join(
+        AppleDeveloperDocumentationService.hostUrl,
         `/search/search_data.php?q=${encodeURIComponent(searchText)}&results=500&group=documentation`
       ),
       {
@@ -37,7 +36,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = joinPathComponents(this.hostUrl, entry.url);
+      entry.url = Path.join(this.hostUrl, entry.url);
     }
     // Return Documentation Entries
     return entries;
