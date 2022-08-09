@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Window Support] - 2022-08-01
+## [Window Support] - {PR_MERGE_DATE}
 - Add icon and state support for window device class
 - Add actions to `Edit` or `Debug` scripts or automations in the browser
 - Add action to `Edit` scenes in the browser
