@@ -8,7 +8,7 @@ export default function Command(props: { arguments: PackageSearchArguments }) {
   const [searchText, setSearchText] = useState("");
   const { platform } = props.arguments;
   const preferences = getPreferenceValues<Preferences>();
-  const { data, isLoading } = useFetch<Package[]>(
+  const { data, error } = useFetch<Package[]>(
     `https://libraries.io/api/search?q=${searchText}&platforms=${platform}&api_key=${preferences.token}`,
     {
       execute: searchText !== "",
@@ -17,8 +17,7 @@ export default function Command(props: { arguments: PackageSearchArguments }) {
 
   return (
     <List
-      isLoading={isLoading}
-      searchText={searchText}
+      isLoading={!data && !error && searchText !== ""}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search packages on Libraries.io..."
       throttle
