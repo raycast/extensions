@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Custom Path] - 2022-08-04
+## [Custom Path] - 2022-08-10
 
 - Add a "Custom Brew Path" preference for users with brew installed in a non-standard path
 
