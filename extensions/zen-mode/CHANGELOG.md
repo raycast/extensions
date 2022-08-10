@@ -1,5 +1,15 @@
 # Zen Mode Changelog
 
+## [New Additions] - 2022-08-10
+
+With this update, you can now manage multiple modes from the extension.🎊
+
+This release contains three commands
+
+- Create Mode
+- Show My Spaces
+- Stop Mode
+
 ## [Initial Version] - 2022-06-15
 
 If you have the Zen Mode app, you can access it straight from Raycast.

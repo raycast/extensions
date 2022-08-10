@@ -4,10 +4,9 @@ import { isZenModeInstalled } from "./checkInstall";
 
 export default async () => {
   if (await isZenModeInstalled()) {
-    const url = "zenmode://deactivate";
+    const url = "zenmode://stop";
     open(url);
     await closeMainWindow();
-    await showHUD("Zen Mode - Deactivated");
   } else {
     await showHUD("Zen Mode app is not installed");
   }
