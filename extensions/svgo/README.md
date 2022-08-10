@@ -1,4 +1,4 @@
-<p align="center"><img src="./assets/svgo.png"/></p>
+<p align="center"><img src="./assets/svgo.png" width="80"/></p>
 
 <h1 align="center">SVGO</h1>
 
