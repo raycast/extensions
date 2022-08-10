@@ -6,6 +6,7 @@ This extension utilizes Fantastical natural language processing to add events an
     - [Adding Reminders](#adding-reminders)
     - [Adding a list or calendar to an event or reminder](#adding-a-list-or-calendar-to-an-event-or-reminder)
   - [Contributing](#contributing)
+
 ### Adding Events
 
 You can add events simply by typing `fan add event`, `add event` or `event` then type the event you want to add.

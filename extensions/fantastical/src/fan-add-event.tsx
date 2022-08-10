@@ -13,10 +13,18 @@ export default async (props: { arguments: Arguments }) => {
             \n parse sentence "${args.add}" \n
         end tell`);
   } else {
-    await showToast({
-      title: "Fantastical is not installed",
+    const options: Toast.Options = {
       style: Toast.Style.Failure,
+      title: "Fantastical is not installed",
       message: "Please first install Fantastical to use this extension.",
-    });
+      primaryAction: {
+        title: "Install Fantastical",
+        onAction: () => {
+          open("https://fantastical.app/");
+        },
+      },
+    };
+
+    showToast(options);
   }
 };
