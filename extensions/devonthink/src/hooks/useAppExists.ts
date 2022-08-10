@@ -16,6 +16,6 @@ const useAppExists = () => {
   }, []);
 
   return state;
-}
+};
 
 export default useAppExists;
