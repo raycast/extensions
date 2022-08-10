@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { Bookmark } from "../types";
-import { faviconUrl } from "../utils";
+import { getFavicon } from "@raycast/utils";
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
@@ -33,10 +33,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark }) {
   return (
     <List.Item
       id={String(bookmark._id)}
-      icon={{
-        source: faviconUrl(64, bookmark.link),
-        fallback: "raindrop-icon.png",
-      }}
+      icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
       title={bookmark.title}
       subtitle={bookmark.tags.map((tag) => `#${tag}`).join(" ")}

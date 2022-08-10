@@ -4,8 +4,13 @@ import { searchArtifacts } from "./hooks/hooks";
 import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
 import { isEmpty } from "./utils/common-utils";
 
-export default function SearchGoogleMavenRepository() {
-  const [searchContent, setSearchContent] = useState<string>("");
+interface RepositoryArgument {
+  repository: string;
+}
+
+export default function SearchGoogleMavenRepository(props: { arguments: RepositoryArgument }) {
+  const { repository } = props.arguments;
+  const [searchContent, setSearchContent] = useState<string>(repository);
   const [filter, setFilter] = useState<string>("All");
   const { artifactInfo, loading } = searchArtifacts(searchContent.trim());
 
@@ -26,6 +31,7 @@ export default function SearchGoogleMavenRepository() {
     <List
       isLoading={loading}
       searchBarPlaceholder={'Search artifacts, like "androidx:viewpager2"'}
+      searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
       searchBarAccessory={

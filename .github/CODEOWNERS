@@ -197,6 +197,7 @@
 /extensions/google-search                            @mblode
 /extensions/google-translate                         @gebeto @FezVrasta @henriquemacedo @metakirby5
 /extensions/google-trends                            @kkange
+/extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
@@ -239,6 +240,7 @@
 /extensions/json-format                              @Destiner
 /extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
+/extensions/just-focus                               @koinzhang
 /extensions/justwatch-search                         @RishabSwift
 /extensions/jwt-decoder                              @gdsmith
 /extensions/kaalam                                   @heertheeswaran
@@ -331,6 +333,7 @@
 /extensions/pexels                                   @koinzhang
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pie-for-pihole                           @GLaDO8
+/extensions/pika                                     @rishimohan
 /extensions/pinboard                                 @fe9lix
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
@@ -382,6 +385,7 @@
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman
 /extensions/rsync-commands                           @maxfahl
+/extensions/ruby-evaluate                            @obahareth
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann
 /extensions/screen-saver                             @koinzhang
@@ -421,15 +425,16 @@
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7
-/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000
+/extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
 /extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
-/extensions/stripe                                   @pradeepb28
+/extensions/stripe                                   @pradeepb28 @farisaziz12
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/supernotes                               @acnebs
 /extensions/surge                                    @ysj151215
+/extensions/svgo                                     @kaichii
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg
 /extensions/swift-package-index                      @maximkrouk
@@ -478,7 +483,7 @@
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta
 /extensions/unix-timestamp                           @Destiner
 /extensions/unogs                                    @mohitkyadav
-/extensions/unsplash                                 @eggsy
+/extensions/unsplash                                 @eggsy @kkange
 /extensions/upcoming-holidays                        @rodrigouroz
 /extensions/url-tools                                @joshauh46
 /extensions/uuid-generator                           @jmaeso
@@ -512,4 +517,5 @@
 /extensions/youtube-companion                        @sasivarnan
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zeplin-project-search                    @dorukgunes
+/extensions/zoom                                     @thomaslombart
 /extensions/zotero                                   @sadanand-singh

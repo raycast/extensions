@@ -3,7 +3,7 @@ import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
 
-import { Icon, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 import { HistoryItem, Tab } from "./types";
 
@@ -55,17 +55,6 @@ export const getUrlDomain = (url: string) => {
   if (parsedUrl && parsedUrl.hostname) {
     return parsedUrl.hostname.replace(/^www\./, "");
   }
-};
-
-export const getFaviconUrl = (domain: string | undefined) => {
-  if (!domain) {
-    return Icon.Globe;
-  }
-
-  return {
-    source: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`,
-    fallback: Icon.Globe,
-  };
 };
 
 export const formatDate = (date: string) =>
