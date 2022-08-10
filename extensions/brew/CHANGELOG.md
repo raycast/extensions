@@ -3,7 +3,8 @@
 ## [Improvements] - 2022-08-10
 
 - Add a "Custom Brew Path" preference for users with brew installed in a non-standard path
-- The extension will now prompt for user's login password if brew requires authorization when installed or uninstalling casks.
+- The extension will now prompt for user's login password if brew requires authorization when installed or uninstalling casks
+- Improved reporting of fetch errors
 
 ## [Improvements] - 2022-06-06
 
