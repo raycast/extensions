@@ -37,8 +37,8 @@
       "name": "CamelCase",
       "type": "checkbox",
       "title": "Enabled Transformations",
-      "description": "Enable the Camel Case Transformation",
-      "label": "Capital Case",
+      "description": "Enable the \"camelCase\" Transformation",
+      "label": "Camel Case",
       "default": true,
       "required": false
     },
@@ -46,7 +46,7 @@
       "name": "CapitalCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Capital Case Transformation",
+      "description": "Enable the \"Capital Case\" Transformation",
       "label": "Capital Case",
       "default": true,
       "required": false
@@ -55,7 +55,7 @@
       "name": "ConstantCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Constant Case Transformation",
+      "description": "Enable the \"CONSTANT_CASE\" Transformation",
       "label": "Constant Case",
       "default": true,
       "required": false
@@ -64,7 +64,7 @@
       "name": "DotCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Dot Case Transformation",
+      "description": "Enable the \"dot.case\" Transformation",
       "label": "Dot Case",
       "default": true,
       "required": false
@@ -73,7 +73,7 @@
       "name": "HeaderCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Header Case Transformation",
+      "description": "Enable the \"Header-Case\" Transformation",
       "label": "Header Case",
       "default": true,
       "required": false
@@ -82,7 +82,7 @@
       "name": "KebabCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Kebab Case Transformation",
+      "description": "Enable the \"kebab-case\" Transformation",
       "label": "Kebab Case",
       "default": true,
       "required": false
@@ -91,7 +91,7 @@
       "name": "LowerCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Lower Case Transformation",
+      "description": "Enable the \"lower case\" Transformation",
       "label": "Lower Case",
       "default": true,
       "required": false
@@ -100,7 +100,7 @@
       "name": "LowerFirst",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Lower First Transformation",
+      "description": "Enable the \"lower First\" Transformation",
       "label": "Lower First",
       "default": true,
       "required": false
@@ -109,7 +109,7 @@
       "name": "MacroCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Macro Case Transformation",
+      "description": "Enable the \"MACRO_CASE\" Transformation",
       "label": "Macro Case",
       "default": true,
       "required": false
@@ -118,7 +118,7 @@
       "name": "NoCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the No Case Transformation",
+      "description": "Enable the \"no case\" Transformation",
       "label": "No Case",
       "default": true,
       "required": false
@@ -127,7 +127,7 @@
       "name": "ParamCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Param Case Transformation",
+      "description": "Enable the \"param-case\" Transformation",
       "label": "Param Case",
       "default": true,
       "required": false
@@ -136,7 +136,7 @@
       "name": "PascalCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Pascal Case Transformation",
+      "description": "Enable the \"PascalCase\" Transformation",
       "label": "Pascal Case",
       "default": true,
       "required": false
@@ -145,7 +145,7 @@
       "name": "PathCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Path Case Transformation",
+      "description": "Enable the \"path/case\" Transformation",
       "label": "Path Case",
       "default": true,
       "required": false
@@ -154,7 +154,7 @@
       "name": "RandomCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Random Case Transformation",
+      "description": "Enable the \"rAndOm cAsE\" Transformation",
       "label": "Random Case",
       "default": true,
       "required": false
@@ -163,7 +163,7 @@
       "name": "SentenceCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Sentence Case Transformation",
+      "description": "Enable the \"Sentence case\" Transformation",
       "label": "Sentence Case",
       "default": true,
       "required": false
@@ -172,7 +172,7 @@
       "name": "SnakeCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Snake Case Transformation",
+      "description": "Enable the \"snake_case\" Transformation",
       "label": "Snake Case",
       "default": true,
       "required": false
@@ -181,7 +181,7 @@
       "name": "SwapCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Swap Case Transformation",
+      "description": "Enable the \"sWAP cASE\" Transformation",
       "label": "Swap Case",
       "default": true,
       "required": false
@@ -190,7 +190,7 @@
       "name": "TitleCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Title Case Transformation",
+      "description": "Enable the \"Title Case\" Transformation",
       "label": "Title Case",
       "default": true,
       "required": false
@@ -199,7 +199,7 @@
       "name": "UpperCase",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Upper Case Transformation",
+      "description": "Enable the \"UPPER CASE\" Transformation",
       "label": "Upper Case",
       "default": true,
       "required": false
@@ -208,26 +208,26 @@
       "name": "UpperFirst",
       "type": "checkbox",
       "title": "",
-      "description": "Enable the Upper First Transformation",
+      "description": "Enable the \"Upper first\" Transformation",
       "label": "Upper First",
       "default": true,
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.38.3",
     "change-case-all": "^1.0.14",
-    "execa": "^6.0.0"
+    "execa": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~17.0.8",
-    "@types/react": "^17.0.38",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.22.1",
-    "typescript": "^4.5.4"
+    "@types/node": "~18.6.4",
+    "@types/react": "^18.0.15",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.25.0",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",

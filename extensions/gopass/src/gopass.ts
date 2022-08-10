@@ -8,7 +8,8 @@ function gopass(args: string[]): Promise<string> {
       env: {
         HOME: homedir(),
         PATH: [
-          "/usr/bin", // pbcopy
+          "/bin", // osascript
+          "/usr/bin", // osascript
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
           "/opt/homebrew/bin", // homebrew on macOS Apple Silicon

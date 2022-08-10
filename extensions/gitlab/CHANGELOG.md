@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [MR Details] - 2022-08-04
+
+- Add date to list view MR details.
+
 ## [MR Details] - 2022-07-28
 
 - Add a new setting to show details in merge request list via a metadata view.

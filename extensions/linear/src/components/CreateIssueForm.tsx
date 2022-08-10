@@ -238,6 +238,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         id="description"
         title="Description"
         placeholder="Add some details (supports Markdown, e.g. **bold**)"
+        enableMarkdown
         value={description}
         onChange={setDescription}
       />

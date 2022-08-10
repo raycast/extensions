@@ -1,5 +1,5 @@
 import { Clipboard, environment, Toast } from "@raycast/api";
-import { join as path_join } from "path";
+import path from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import fetch, { FetchError } from "node-fetch";
@@ -7,7 +7,7 @@ import { ExecError } from "./brew";
 
 /// Utils
 
-export const supportPath = (() => {
+export const supportPath: string = (() => {
   try {
     mkdirSync(environment.supportPath, { recursive: true });
   } catch (err) {
@@ -16,8 +16,19 @@ export const supportPath = (() => {
   return environment.supportPath;
 })();
 
-export function cachePath(path: string): string {
-  return path_join(supportPath, path);
+export const bundleIdentifier: string = (() => {
+  return (
+    environment.supportPath.split(path.sep).find((comp) => {
+      if (comp.startsWith("com.raycast")) {
+        return true;
+      }
+      return false;
+    }) ?? "com.raycast.macos"
+  );
+})();
+
+export function cachePath(name: string): string {
+  return path.join(supportPath, name);
 }
 
 export interface Remote<T> {

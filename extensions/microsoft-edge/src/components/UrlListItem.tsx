@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { ReactElement } from "react";
-import { faviconUrl } from "../utils/urlUtils";
 import { UrlActions } from "./UrlAction";
 
 export interface UrlResourceEntry {
@@ -14,7 +14,7 @@ export interface UrlListItemProps {
 }
 
 export const UrlListItem = ({ entry: { url, title, id } }: UrlListItemProps): ReactElement => {
-  const favicon = faviconUrl(64, url);
+  const favicon = getFavicon(url);
 
   return (
     <List.Item

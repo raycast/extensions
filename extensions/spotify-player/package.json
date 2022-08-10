@@ -10,16 +10,10 @@
     "dillionverma",
     "andreaselia",
     "stuart",
-    "tonka3000"
+    "tonka3000",
+    "dancannon"
   ],
   "commands": [
-    {
-      "name": "searchTracks",
-      "title": "Search Tracks",
-      "subtitle": "Spotify",
-      "description": "Search & Play tracks in Spotify",
-      "mode": "view"
-    },
     {
       "name": "justPlay",
       "title": "Just Play",
@@ -36,7 +30,7 @@
       ]
     },
     {
-      "name": "nowPlaying",
+      "name": "nowPlayingMenuBar",
       "title": "Now Playing",
       "description": "Shows currently playing song in the Subtitle and in the Menu Bar. It also automatically refreshes in the background once per minute.",
       "subtitle": "Spotify",
@@ -60,6 +54,13 @@
       "mode": "no-view"
     },
     {
+      "name": "searchTracks",
+      "title": "Search Tracks",
+      "subtitle": "Spotify",
+      "description": "Search & Play tracks in Spotify",
+      "mode": "view"
+    },
+    {
       "name": "searchAlbums",
       "title": "Search Albums",
       "subtitle": "Spotify",
@@ -81,18 +82,44 @@
       "mode": "view"
     },
     {
-      "name": "like_current_song",
+      "name": "featuredPlaylists",
+      "title": "Featured Playlists",
+      "subtitle": "Spotify",
+      "description": "View featured playlists in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "browseAll",
+      "title": "Browse All",
+      "subtitle": "Spotify",
+      "description": "Browse genres in Spotify",
+      "mode": "view"
+    },
+    {
+      "name": "likeCurrentSong",
       "subtitle": "Spotify",
       "title": "Like Current Song",
       "description": "Likes currently playing song",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "closeWindowOnAction",
+      "type": "checkbox",
+      "label": "Yes/No",
+      "required": false,
+      "default": true,
+      "title": "Close Window On Action",
+      "description": "If checked then the Raycast window will be closed on action (Play/Pause)"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "1.38.1",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.3",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "spotify-web-api-node": "^5.0.2"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.180",
@@ -103,11 +130,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "js-base64": "^3.6.1",
-    "open": "^8.2.1",
     "prettier": "^2.6.2",
     "react-devtools": "^4.19.2",
-    "spotify-web-api-node": "^5.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -1,5 +1,12 @@
 # Home Assistant Changelog
 
+## [Window Support] - 2022-08-09
+- Add icon and state support for window device class
+- Add actions to `Edit` or `Debug` scripts or automations in the browser
+- Add action to `Edit` scenes in the browser
+- Add Notifications Menubar
+- Add icon support for device classes `power_factor` and `energy`
+
 ## [Fan entity support] - 2022-06-18
 - Adds support for Fan entities
 
