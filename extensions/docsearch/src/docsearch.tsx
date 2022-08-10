@@ -1,4 +1,4 @@
-import APIData from "./algolia/apiData";
+import APIData from "./algolia/APIData";
 import type { IAPIData } from "./algolia/types";
 
 import { ActionPanel, List, Action, showToast, Toast, useNavigation } from "@raycast/api";
@@ -103,7 +103,7 @@ export default function ChooseSearchDocumentation() {
           icon={API.icon}
           key={API.apiKey}
           title={API.name}
-          subtitle={API.subtitle}
+          subtitle={API.lang}
           actions={
             <ActionPanel>
               <Action
