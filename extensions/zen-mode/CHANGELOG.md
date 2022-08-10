@@ -8,3 +8,13 @@ This release contains two commands
 
 - Activate: The command activates Zen Mode based on the preferences set by you in the app.
 - Deactivate: The command deactivates Zen Mode.
+
+## [New Additions] - 2022-08-09
+
+With this update, you can now manage multiple modes from the extension.🎊
+
+This release contains three commands
+
+- Create Mode
+- Show My Spaces
+- Stop Mode
