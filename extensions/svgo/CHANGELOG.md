@@ -1,5 +1,5 @@
 # SVGO Changelog
 
-## [SVGO Extension] - 2022-08-02
+## [SVGO Extension] - 2022-08-10
 
 - Added SVGO extension

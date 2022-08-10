@@ -20,7 +20,7 @@ export default async function Command() {
     }
   } else {
     showToast({
-      title: "Please copy a svg first",
+      title: "Please copy a svg string",
       style: Toast.Style.Failure,
     });
   }

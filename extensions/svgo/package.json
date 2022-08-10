@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "optimize",
-      "title": "Optimize",
+      "title": "Optimize SVG",
       "subtitle": "SVGO",
       "description": "optimize svg",
       "mode": "no-view"
