@@ -1,27 +1,5 @@
-import { Action, ActionPanel, environment, Icon, showToast, Toast } from "@raycast/api";
-import { clearCache } from "./cache";
+import { Action, ActionPanel } from "@raycast/api";
 import { Issue } from "./types";
-
-function DevelopmentActions() {
-  async function handleClearCache() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Clearing cache" });
-    try {
-      await clearCache();
-      toast.style = Toast.Style.Success;
-      toast.title = "Cleared cache";
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed clearing cache";
-      toast.message = e instanceof Error ? e.message : undefined;
-    }
-  }
-
-  return environment.isDevelopment ? (
-    <ActionPanel.Section>
-      <Action icon={Icon.Trash} title="Clear Cache" onAction={handleClearCache} />
-    </ActionPanel.Section>
-  ) : null;
-}
 
 export function Actions(props: { issue: Issue }) {
   return (
@@ -41,7 +19,6 @@ export function Actions(props: { issue: Issue }) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
-      <DevelopmentActions />
     </ActionPanel>
   );
 }

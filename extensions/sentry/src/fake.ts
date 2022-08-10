@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { environment } from "@raycast/api";
 import { Project, Issue, Organization } from "./types";
 
 function fakeOrganization() {
@@ -37,7 +36,7 @@ function fakeIssue(project: Project) {
   };
 }
 
-export function fakeProjects(organization?: Organization) {
+export async function fakeProjects(organization?: Organization) {
   const org = organization ?? fakeOrganization();
   const projects = new Array<Project>();
   for (let i = 0; i < 5; i++) {
@@ -47,7 +46,7 @@ export function fakeProjects(organization?: Organization) {
   return projects;
 }
 
-export function fakeIssues(project?: Project) {
+export async function fakeIssues(project?: Project) {
   const proj = project ?? fakeProject(fakeOrganization());
   const issues = new Array<Issue>();
   for (let i = 0; i < 10; i++) {

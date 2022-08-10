@@ -4,31 +4,20 @@ import { IssueListItem } from "./IssueListItem";
 import { useIssues } from "./hooks";
 import { Project } from "./types";
 import { ProjectDropdown } from "./ProjectDropdown";
-import { SWRConfig } from "swr";
-import { cacheProvider } from "./cache";
-import { isFakeData } from "./fake";
 
-function IssueList() {
+export default function Command() {
   const [project, setProject] = useState<Project>();
-  const { data: issues, isValidating } = useIssues(project);
+  const { data, isLoading } = useIssues(project);
 
   return (
     <List
-      isLoading={project === undefined || isValidating}
-      searchBarPlaceholder="Filter issues by title"
+      isLoading={project === undefined || isLoading}
+      searchBarPlaceholder="Filter issues by title or assignee"
       searchBarAccessory={<ProjectDropdown onProjectChange={setProject} />}
     >
-      {issues?.map((issue) => (
+      {data?.map((issue) => (
         <IssueListItem key={issue.id} issue={issue} />
       ))}
     </List>
-  );
-}
-
-export default function Command() {
-  return (
-    <SWRConfig value={{ provider: isFakeData ? undefined : cacheProvider }}>
-      <IssueList />
-    </SWRConfig>
   );
 }

@@ -23,4 +23,17 @@ export interface Issue {
   shortId: string;
   userCount: number;
   project: Project;
+  assignedTo?: User | Team;
+}
+
+export interface User {
+  email: string;
+  type: "user";
+  id: string;
+  name: string;
+}
+
+export interface Team {
+  type: "team";
+  name: string;
 }

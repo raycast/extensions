@@ -1,24 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-import useSWR from "swr";
-import { fakeProjects, fakeIssues, isFakeData } from "./fake";
-import { Project, Issue } from "./types";
+import { useFetch } from "@raycast/utils";
+import { Issue, Project } from "./types";
 
-async function fetcher<T>(url: string) {
-  const { token } = getPreferenceValues();
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, ContentType: "application/json" },
-  });
-  return (await response.json()) as Promise<T>;
-}
+const { token } = getPreferenceValues();
+const headers = { Authorization: `Bearer ${token}`, ContentType: "application/json" };
 
 export function useProjects() {
-  return useSWR<Project[]>("https://sentry.io/api/0/projects/", isFakeData ? fakeProjects : fetcher);
+  return useFetch<Project[]>("https://sentry.io/api/0/projects/", { headers });
 }
 
 export function useIssues(project?: Project) {
-  return useSWR<Issue[]>(
-    project ? `https://sentry.io/api/0/projects/${project.organization.slug}/${project.slug}/issues/` : null,
-    isFakeData ? fakeIssues : fetcher
-  );
+  return useFetch<Issue[]>(`https://sentry.io/api/0/projects/${project?.organization.slug}/${project?.slug}/issues/`, {
+    headers,
+    execute: !!project,
+  });
 }

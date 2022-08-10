@@ -1,5 +1,4 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect } from "react";
+import { Icon, List } from "@raycast/api";
 import { useProjects } from "./hooks";
 import { Project } from "./types";
 
@@ -14,16 +13,10 @@ function ProjectDropdownItem(props: { project: Project }) {
 }
 
 export function ProjectDropdown(props: { onProjectChange: (project: Project) => void }) {
-  const { data: projects, error } = useProjects();
-
-  useEffect(() => {
-    if (error) {
-      showToast({ style: Toast.Style.Failure, title: "Failed retrieving projects", message: error.message });
-    }
-  }, [error]);
+  const { data } = useProjects();
 
   function handleProjectChange(projectSlug: string) {
-    const project = projects?.find((p) => p.slug === projectSlug);
+    const project = data?.find((p) => p.slug === projectSlug);
     if (project) {
       props.onProjectChange(project);
     } else {
@@ -33,7 +26,7 @@ export function ProjectDropdown(props: { onProjectChange: (project: Project) => 
 
   return (
     <List.Dropdown tooltip="Change Project" onChange={handleProjectChange} storeValue>
-      {projects?.map((project) => (
+      {data?.map((project) => (
         <ProjectDropdownItem key={project.id} project={project} />
       ))}
     </List.Dropdown>
