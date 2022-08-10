@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {showToast, Toast} from "@raycast/api";
 import {jxa} from "osascript-tag";
 import Style = Toast.Style;
+import useAppExists from "./useAppExists";
 
 type State = {
   isLoading: boolean;
@@ -17,10 +18,11 @@ export type SearchResult = {
 }
 
 const useSearch = (query: string) => {
-  const [state, setState] = useState<State>({isLoading: true, results: []})
+  const [state, setState] = useState<State>({isLoading: true, results: []});
+  const {appExists, appExistsLoading} = useAppExists();
 
   useEffect(() => {
-    if (query.length === 0) {
+    if (!appExists || query.length === 0) {
       setState(prev => ({...prev, isLoading: false}));
       return;
     }
@@ -31,9 +33,9 @@ const useSearch = (query: string) => {
       .then(results => setState(prev => ({...prev, results})))
       .catch(handleError)
       .finally(() => setState(prev => ({...prev, isLoading: false})))
-  }, [query]);
+  }, [appExistsLoading, query]);
 
-  return state;
+  return {...state, appExists, appExistsLoading};
 };
 
 export default useSearch;
