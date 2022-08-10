@@ -4,27 +4,15 @@ import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { join } from "path";
 import { pythonbin } from "./index";
+import { Item } from "./types"
 
-interface Item {
-  title: string;
-  uid: string;
-  link: string;
-  year: number;
-  month: number;
-  content: string;
-  tags: [];
-  authors_tag: [];
-  authors_string: string;
-  pdf: string;
-}
-
-export function ListBibmItem(props: { item: Item; index: number }) {
+export function ListBibmItem(props: { item: Item}) {
   return (
     <List.Item
       icon={Icon.Dot}
       title={props.item.uid ?? "No title"}
       actions={<Actions item={props.item} />}
-      keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
+      // keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
       detail={getItemDetail(props.item)}
     />
   );

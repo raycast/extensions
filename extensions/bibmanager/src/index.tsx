@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import { List, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ListBibmItem } from "./ListBibmItem";
+import { Preferences, State } from "./types";
 import { spawn } from "child_process";
 import { join } from "path";
+import { filterFct } from "./filtering"
 import { homedir } from "os";
-
-interface State {
-  isLoading: boolean;
-  items: [];
-  error?: Error;
-}
-
-interface Preferences {
-  python: string;
-}
 
 const preferences = getPreferenceValues<Preferences>();
 export const pythonbin = preferences["python"].replace("~", homedir());
@@ -46,11 +38,22 @@ export default function Command() {
     }
     loadItems();
   }, []);
+
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(state.items);
+
+  useEffect(() => {
+        filterList(state.items?.filter((item) => filterFct(item, searchText)));
+      },
+      [searchText]);
+
   return (
-    <List isShowingDetail isLoading={(!state.items && !state.error) || state.isLoading}>
-      {state.items?.map((item, index) => (
-        <ListBibmItem key={index} item={item} index={index} />
-      ))}
+    <List
+        isShowingDetail
+        isLoading={(!state.items && !state.error) || state.isLoading}
+        enableFiltering={false}
+        onSearchTextChange={setSearchText}>
+      {filteredList.map((item, index) => (<ListBibmItem key={index} item={item} />))}
     </List>
   );
 }
