@@ -1,4 +1,4 @@
-import { getPreferenceValues, List } from "@raycast/api";
+import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { PackageResult } from "./components/PackageResult";
 import type { Preferences, Subscription } from "./types";
@@ -6,7 +6,12 @@ import type { Preferences, Subscription } from "./types";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = useFetch<Subscription[]>(
-    `https://libraries.io/api/subscriptions?api_key=${preferences.token}`
+    `https://libraries.io/api/subscriptions?api_key=${preferences.token}`,
+    {
+      onError: () => {
+        showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+      },
+    }
   );
 
   return (

@@ -1,10 +1,14 @@
-import { ActionPanel, Action, getPreferenceValues, List } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { Preferences, Platform } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const { data, isLoading } = useFetch<Platform[]>(`https://libraries.io/api/platforms?api_key=${preferences.token}`);
+  const { data, isLoading } = useFetch<Platform[]>(`https://libraries.io/api/platforms?api_key=${preferences.token}`, {
+    onError: () => {
+      showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+    },
+  });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter platforms..." enableFiltering throttle>

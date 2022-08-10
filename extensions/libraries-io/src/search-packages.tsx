@@ -1,4 +1,4 @@
-import { getPreferenceValues, List } from "@raycast/api";
+import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { PackageResult } from "./components/PackageResult";
@@ -12,6 +12,9 @@ export default function Command(props: { arguments: PackageSearchArguments }) {
     `https://libraries.io/api/search?q=${searchText}&platforms=${platform}&api_key=${preferences.token}`,
     {
       execute: searchText !== "",
+      onError: () => {
+        showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+      },
     }
   );
 
