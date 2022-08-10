@@ -16,6 +16,174 @@
       "subtitle": "DocSearch",
       "description": "Search documentation",
       "mode": "view"
+    },
+    {
+      "name": "arthas",
+      "icon": "../assets/logo/arthas.ico",
+      "title": "Search Documentation",
+      "subtitle": "Arthas",
+      "description": "Search Arthas documentation",
+      "mode": "view"
+    },
+    {
+      "name": "bootstrap",
+      "icon": "../assets/logo/bootstrap.ico",
+      "title": "Search Documentation",
+      "subtitle": "Bootstrap",
+      "description": "Search Bootstrap documentation",
+      "mode": "view"
+    },
+    {
+      "name": "echarts",
+      "icon": "../assets/logo/echarts.png",
+      "title": "Search Documentation",
+      "subtitle": "Echarts",
+      "description": "Search Echarts documentation",
+      "mode": "view"
+    },
+    {
+      "name": "echarts_zh-Hans",
+      "icon": "../assets/logo/echarts.png",
+      "title": "Search Documentation",
+      "subtitle": "Echarts(zh-Hans)",
+      "description": "Search Echarts documentation",
+      "mode": "view"
+    },
+    {
+      "name": "homebrew",
+      "icon": "../assets/logo/homebrew.png",
+      "title": "Search Documentation",
+      "subtitle": "Homebrew",
+      "description": "Search Homebrew documentation",
+      "mode": "view"
+    },
+    {
+      "name": "laravel9",
+      "icon": "../assets/logo/laravel.png",
+      "title": "Search Documentation",
+      "subtitle": "Laravel 9.x",
+      "description": "Search Laravel 9.x documentation",
+      "mode": "view"
+    },
+    {
+      "name": "prettier",
+      "icon": "../assets/logo/prettier.png",
+      "title": "Search Documentation",
+      "subtitle": "Prettier",
+      "description": "Search Prettier documentation",
+      "mode": "view"
+    },
+    {
+      "name": "react",
+      "icon": "../assets/logo/react.ico",
+      "title": "Search Documentation",
+      "subtitle": "React",
+      "description": "Search React documentation",
+      "mode": "view"
+    },
+    {
+      "name": "react_zh-Hans",
+      "icon": "../assets/logo/react.ico",
+      "title": "Search Documentation",
+      "subtitle": "React(zh-Hans)",
+      "description": "Search React documentation",
+      "mode": "view"
+    },
+    {
+      "name": "rsshub",
+      "icon": "../assets/logo/rsshub.png",
+      "title": "Search Documentation",
+      "subtitle": "RSSHub",
+      "description": "Search RSSHub documentation",
+      "mode": "view"
+    },
+    {
+      "name": "slidev_zh-Hans",
+      "icon": "../assets/logo/slidev.png",
+      "title": "Search Documentation",
+      "subtitle": "Slidev(zh-Hans)",
+      "description": "Search Slidev documentation",
+      "mode": "view"
+    },
+    {
+      "name": "tailwindcss3",
+      "icon": "../assets/logo/tailwindcss.png",
+      "title": "Search Documentation",
+      "subtitle": "TailwindCSS v3",
+      "description": "Search TailwindCss documentation",
+      "mode": "view"
+    },
+    {
+      "name": "unidata",
+      "icon": "../assets/logo/unidata.png",
+      "title": "Search Documentation",
+      "subtitle": "Unidata",
+      "description": "Search Unidata documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vite",
+      "icon": "../assets/logo/vite.png",
+      "title": "Search Documentation",
+      "subtitle": "Vite",
+      "description": "Search Vite documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vite_zh-Hans",
+      "icon": "../assets/logo/vite.png",
+      "title": "Search Documentation",
+      "subtitle": "Vite(zh-Hans)",
+      "description": "Search Vite documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vitest",
+      "icon": "../assets/logo/vitest.png",
+      "title": "Search Documentation",
+      "subtitle": "Vitest",
+      "description": "Search Vitest documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vue3",
+      "icon": "../assets/logo/vue.png",
+      "title": "Search Documentation",
+      "subtitle": "Vue3",
+      "description": "Search Vue3 documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vueRouter4",
+      "icon": "../assets/logo/vue.png",
+      "title": "Search Documentation",
+      "subtitle": "Vue Router4",
+      "description": "Search Vue Router4 documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vueuse",
+      "icon": "../assets/logo/vueuse.png",
+      "title": "Search Documentation",
+      "subtitle": "VueUse",
+      "description": "Search VueUse documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vuepress1",
+      "icon": "../assets/logo/vuepress.png",
+      "title": "Search Documentation",
+      "subtitle": "Vuepress v1",
+      "description": "Search Vuepress v1 documentation",
+      "mode": "view"
+    },
+    {
+      "name": "vuepress2",
+      "icon": "../assets/logo/vuepress.png",
+      "title": "Search Documentation",
+      "subtitle": "Vuepress v2",
+      "description": "Search Vuepress v2 documentation",
+      "mode": "view"
     }
   ],
   "dependencies": {
