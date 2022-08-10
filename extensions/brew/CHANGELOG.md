@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Filter] - 2022-08-10
+
+-  Add a search bar filter for the installable type (formula or cask).
+
 ## [Improvements] - 2022-06-06
 
 - Removed --dry-run flag when running the Upgrade command so the casks and formulas actually upgraded
