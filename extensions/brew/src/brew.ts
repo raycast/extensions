@@ -461,5 +461,8 @@ async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
   }
   const env = process.env;
   env["SUDO_ASKPASS"] = askpassPath;
+  // Use HOMEBREW_BROWSER to pass through the app's bundle identifier.
+  // Brew will ignore custom environment variables.
+  env["HOMEBREW_BROWSER"] = utils.bundleIdentifier;
   return env;
 }
