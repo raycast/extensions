@@ -1,0 +1,317 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "itranslate",
+  "title": "iTranslate",
+  "description": "A translation extension that can customize translation service providers and support multiple languages",
+  "icon": "itranslate-icon.png",
+  "author": "JinShi",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "itranslate",
+      "title": "Translate",
+      "subtitle": "iTranslate",
+      "description": "translate everything ~",
+      "icon": "itranslate-icon.png",
+      "mode": "view",
+      "keywords": [
+        "itranslate",
+        "translate",
+        "trans",
+        "fanyi",
+        "翻译"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "langFirst",
+      "type": "dropdown",
+      "required": true,
+      "title": "First Language",
+      "description": "Select your first language",
+      "data": [
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        }
+      ]
+    },
+    {
+      "name": "langSecond",
+      "type": "dropdown",
+      "required": true,
+      "title": "Second Language",
+      "description": "Select your second language",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        }
+      ]
+    },
+    {
+      "name": "defaultServiceProvider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Service Provider",
+      "description": "Select default translation service provider",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DeepL",
+          "value": "deepl"
+        },
+        {
+          "title": "Youdao",
+          "value": "youdao"
+        },
+        {
+          "title": "Baidu",
+          "value": "baidu"
+        },
+        {
+          "title": "Tencent",
+          "value": "tencent"
+        }
+      ]
+    },
+    {
+      "name": "deeplAuthKey",
+      "type": "password",
+      "required": false,
+      "title": "DeepL Auth Key",
+      "description": "DeepL Auth Key",
+      "placeholder": "Enter DeepL Auth Key"
+    },
+    {
+      "name": "deeplApiPro",
+      "type": "checkbox",
+      "required": false,
+      "label": "DeepL API Pro",
+      "description": "Check if you have DeepL API Pro",
+      "default": false
+    },
+    {
+      "name": "disableDeepL",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable DeepL",
+      "description": "Disable DeepL translation service provider",
+      "default": false
+    },
+    {
+      "name": "youdaoAppId",
+      "type": "password",
+      "required": false,
+      "title": "Youdao App ID",
+      "description": "Youdao App ID",
+      "placeholder": "Enter Youdao App ID"
+    },
+    {
+      "name": "youdaoAppKey",
+      "type": "password",
+      "required": false,
+      "title": "Youdao App Secret",
+      "description": "Youdao App Secret",
+      "placeholder": "Enter Youdao App Secret"
+    },
+    {
+      "name": "disableYoudao",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Youdao",
+      "description": "Disable Youdao translation service provider",
+      "default": false
+    },
+    {
+      "name": "baiduAppId",
+      "type": "password",
+      "required": false,
+      "title": "Baidu App ID",
+      "description": "Baidu App ID",
+      "placeholder": "Enter Baidu App ID"
+    },
+    {
+      "name": "baiduAppKey",
+      "type": "password",
+      "required": false,
+      "title": "Baidu App Secret",
+      "description": "Baidu App Secret",
+      "placeholder": "Enter Baidu App Secret"
+    },
+    {
+      "name": "disableBaidu",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Baidu",
+      "description": "Disable Baidu translation service provider",
+      "default": false
+    },
+    {
+      "name": "tencentAppId",
+      "type": "password",
+      "required": false,
+      "title": "Tencent Secret ID",
+      "description": "Tencent Secret ID",
+      "placeholder": "Enter Tencent Secret ID"
+    },
+    {
+      "name": "tencentAppKey",
+      "type": "password",
+      "required": false,
+      "title": "Tencent Secret Key",
+      "description": "Tencent Secret Key",
+      "placeholder": "Enter Tencent Secret Key"
+    },
+    {
+      "name": "disableTencent",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Tencent",
+      "description": "Disable Tencent translation service provider",
+      "default": false
+    },
+    {
+      "name": "selectedDefault",
+      "type": "checkbox",
+      "required": false,
+      "title": "Translate Default",
+      "label": "Selected Content",
+      "description": "Translate the selected content as the default",
+      "default": true
+    },
+    {
+      "name": "quickSwitchLang",
+      "type": "checkbox",
+      "required": false,
+      "title": "Switch Language",
+      "label": "Enable Quick Switch",
+      "description": "You can quickly switch the target language in the action panel",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "@vitalets/google-translate-api": "^8.0.0",
+    "axios": "^0.25.0"
+  },
+  "keywords": [
+    "itranslate",
+    "translate",
+    "trans",
+    "fanyi",
+    "翻译"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
