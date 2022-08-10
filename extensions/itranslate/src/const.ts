@@ -83,5 +83,5 @@ export const TRANS_SERVICES_AUTH_NAMES = new Map<TransServiceProviderTp, string[
   [TransServiceProviderTp.DeepL, ["Deepl Auth Key"]],
   [TransServiceProviderTp.Youdao, ["Youdao App ID", "Youdao App Secret"]],
   [TransServiceProviderTp.Baidu, ["Baidu App ID", "Baidu App Secret"]],
-  [TransServiceProviderTp.Tencent, ["Tencent SecretId", "Tencent SecretKey"]],
+  [TransServiceProviderTp.Tencent, ["Tencent Secret ID", "Tencent Secret Key"]],
 ]);

@@ -1,5 +1,5 @@
 # iTranslate Changelog
 
-## [Initial Version] - 2022-07-30
+## [Initial Version] - 2022-08-10
 
 Initial version code & Basic features

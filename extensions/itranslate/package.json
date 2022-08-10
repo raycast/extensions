@@ -33,7 +33,7 @@
       "type": "dropdown",
       "required": true,
       "title": "First Language",
-      "description": "Select you first language",
+      "description": "Select your first language",
       "data": [
         {
           "title": "Chinese-Simplified",
@@ -90,7 +90,7 @@
       "type": "dropdown",
       "required": true,
       "title": "Second Language",
-      "description": "Select you second language",
+      "description": "Select your second language",
       "data": [
         {
           "title": "English",
@@ -247,17 +247,17 @@
       "name": "tencentAppId",
       "type": "password",
       "required": false,
-      "title": "Tencent SecretId",
-      "description": "Tencent SecretId",
-      "placeholder": "Enter Tencent SecretId"
+      "title": "Tencent Secret ID",
+      "description": "Tencent Secret ID",
+      "placeholder": "Enter Tencent Secret ID"
     },
     {
       "name": "tencentAppKey",
       "type": "password",
       "required": false,
-      "title": "Tencent SecretKey",
-      "description": "Tencent SecretKey",
-      "placeholder": "Enter Tencent SecretKey"
+      "title": "Tencent Secret Key",
+      "description": "Tencent Secret Key",
+      "placeholder": "Enter Tencent Secret Key"
     },
     {
       "name": "disableTencent",

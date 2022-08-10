@@ -85,7 +85,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
           <Action.CopyToClipboard content={props.transRes.res} />
           {props.transRes.isWord && (
             <Action.CreateSnippet
-              title="Save vocab as Snippet"
+              title="Save Vocab as Snippet"
               snippet={{
                 text: generateSnippetText(),
                 name: props.transRes.origin,
@@ -100,7 +100,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
             onAction={openCommandPreferences}
           />
           <ActionPanel.Submenu
-            title="Select target language"
+            title="Select Target Language"
             icon={Icon.Repeat}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           >

@@ -122,7 +122,7 @@ export default function Command() {
     if (!preferences.selectedDefault) {
       return (
         <ActionPanel>
-          <Action icon={Icon.Text} title="Translate selected content" onAction={transSelected} />
+          <Action icon={Icon.Text} title="Translate Selected Content" onAction={transSelected} />
           <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       );

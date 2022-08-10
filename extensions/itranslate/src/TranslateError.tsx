@@ -16,9 +16,9 @@ export function TranslateError(props: { transRes: ITranslateRes }) {
   return (
     <List.Item
       icon={{ source: `${props.transRes.serviceProvider}.png` }}
-      title="opps!!"
+      title="Opps!!"
       accessories={[{ icon }]}
-      detail={<List.Item.Detail markdown={`Sorry! We have some problems..`} />}
+      detail={<List.Item.Detail markdown={`Sorry! We have some problems...`} />}
     />
   );
 }
@@ -30,7 +30,7 @@ export function LanguageConflict() {
   const markdown = `
   # Language Conflict \n
   Your first Language with second Language must be different.\n
-  > ⚙️ Please enter \`↵\` to open iTranslate Preferences and update the language configuration~
+  > ⚙️ Please enter \`↵\` to open iTranslate Preferences and update the language configuration ~
   `;
   return (
     <Detail
