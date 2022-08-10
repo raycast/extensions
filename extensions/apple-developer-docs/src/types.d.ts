@@ -25,6 +25,7 @@ type FeaturedResult = Pick<SearchResult, "title" | "description" | "url"> & {
   score: number;
   type: "featured";
 };
+type ResultLike = SearchResult | FeaturedResult;
 
 type SuggestedQuery = {
   query: string;
@@ -38,3 +39,7 @@ type PayloadResponse = {
   suggested_query: SuggestedQuery | "";
   uuid: string;
 };
+
+interface Visitable {
+  onVisit: (result: ResultLike) => void;
+}

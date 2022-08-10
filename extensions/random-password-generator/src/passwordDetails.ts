@@ -13,15 +13,4 @@ const options = {
 
 zxcvbnOptions.setOptions(options);
 
-export function getPasswordDetails(password: string) {
-  const result = zxcvbn(password);
-  const sequence = result.sequence;
-
-  return {
-    crackTime: result.crackTimesDisplay.offlineFastHashing1e10PerSecond,
-    score: result.score,
-    warning: result.feedback.warning,
-    suggestions: result.feedback.suggestions,
-    sequence,
-  };
-}
+export const getPasswordDetails = (password: string) => zxcvbn(password);

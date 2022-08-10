@@ -88,7 +88,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.38.2",
     "aws-sdk": "^2.1023.0",
     "node-fetch": "^3.0.0"
   },

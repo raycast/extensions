@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Detail } from "@raycast/api";
 import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
 
-import { authorize, oauthClient } from "../api/oauth";
+import { authorize } from "../api/oauth";
 
 let linearClient: LinearClient | null = null;
 
@@ -11,9 +11,7 @@ export function withLinearClient(component: JSX.Element) {
 
   useEffect(() => {
     (async function () {
-      const tokens = await oauthClient.getTokens();
-
-      const accessToken = tokens?.accessToken || (await authorize());
+      const accessToken = await authorize();
 
       linearClient = new LinearClient({ accessToken });
 
