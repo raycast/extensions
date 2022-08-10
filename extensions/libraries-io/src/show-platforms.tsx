@@ -8,6 +8,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter platforms..." enableFiltering throttle>
+      <List.EmptyView icon="no-view.png" description="No Results" />
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />

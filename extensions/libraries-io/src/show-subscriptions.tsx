@@ -11,6 +11,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter subscriptions..." enableFiltering throttle>
+      <List.EmptyView icon="no-view.png" description="No Results" />
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((searchResult) => (
           <PackageResult key={searchResult.project.name} searchResult={searchResult.project} />

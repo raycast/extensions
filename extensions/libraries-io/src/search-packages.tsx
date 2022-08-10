@@ -22,6 +22,7 @@ export default function Command(props: { arguments: PackageSearchArguments }) {
       searchBarPlaceholder="Search packages on Libraries.io..."
       throttle
     >
+      <List.EmptyView icon="no-view.png" description="No Results" />
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((searchResult) => (
           <PackageResult key={searchResult.name + searchResult.platform} searchResult={searchResult} />
