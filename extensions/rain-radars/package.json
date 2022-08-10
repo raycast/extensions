@@ -3,7 +3,7 @@
   "name": "rain-radars",
   "title": "Rain Radars",
   "description": "Search for available rain radars for a location.",
-  "icon": "rain-radar-icon.svg",
+  "icon": "rain-radar-icon.png",
   "author": "danieldbird",
   "contributors": [
     "koinzhang"
@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "search-rain-radars",
-      "icon": "rain-radar-icon.svg",
+      "icon": "rain-radar-icon.png",
       "title": "Search Rain Radars",
       "description": "Search for available rain radars.",
       "mode": "view"
