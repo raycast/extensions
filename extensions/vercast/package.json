@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vercast",
-  "title": "Vercel Deployments",
+  "title": "Vercel",
   "description": "View and modify your Vercel projects and deployments.",
   "icon": "icon.png",
   "author": "MaxLeiter",
