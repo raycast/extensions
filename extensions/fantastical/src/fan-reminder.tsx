@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { isInstalled } from "./isInstalled";
 

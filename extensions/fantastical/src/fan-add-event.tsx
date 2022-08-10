@@ -1,4 +1,4 @@
-import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { isInstalled } from "./isInstalled";
 interface Arguments {
