@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { IssueListItem } from "./IssueListItem";
-import { useIssues } from "./hooks";
+import { useIssues } from "./sentry";
 import { Project } from "./types";
 import { ProjectDropdown } from "./ProjectDropdown";
 

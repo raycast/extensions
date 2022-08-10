@@ -1,5 +1,5 @@
 import { Icon, List } from "@raycast/api";
-import { useProjects } from "./hooks";
+import { useProjects } from "./sentry";
 import { Project } from "./types";
 
 function ProjectDropdownItem(props: { project: Project }) {
