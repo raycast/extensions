@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Detail } from "@raycast/api";
 import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
 
@@ -9,7 +9,8 @@ let linearClient: LinearClient | null = null;
 export function withLinearClient(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
 
-  useEffect(() => {
+  // we use a `useMemo` instead of `useEffect` to avoid a render
+  useMemo(() => {
     (async function () {
       const accessToken = await authorize();
 
