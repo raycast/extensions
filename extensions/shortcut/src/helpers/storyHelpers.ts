@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Color, Icon, Image, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { Member, StorySlim } from "@useshortcut/client";
@@ -72,13 +72,13 @@ export const useFormField = <T>(
     setValue(newValue);
   };
 
-  const onBlur = () => {
+  useEffect(() => {
     if (validator && !validator(value)) {
       setError(errorMessage);
     } else {
       setError(undefined);
     }
-  };
+  }, [value]);
 
-  return { value, onChange, onBlur, error };
+  return { value, onChange, error };
 };
