@@ -1,6 +1,6 @@
 # Tapo Smart Devices Changelog
 
-## [v1.1.0] - 2022-08-06
+## [v1.1.0] - {PR_MERGE_DATE}
 
 * Add support for turning devices on and off from the menu bar
 
