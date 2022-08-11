@@ -5,22 +5,6 @@ export default function useStates(teamId?: string, config?: { execute?: boolean 
   const { linearClient } = getLinearClient();
 
   const {
-    data: allStates,
-    error: allStatesError,
-    isLoading: isLoadingAllStates,
-  } = useCachedPromise(
-    async () => {
-      const states = await linearClient.workflowStates();
-      return states.nodes;
-    },
-    [],
-    {
-      initialData: [],
-      execute: config?.execute !== false,
-    }
-  );
-
-  const {
     data: states,
     error: statesError,
     isLoading: isLoadingStates,
@@ -36,5 +20,5 @@ export default function useStates(teamId?: string, config?: { execute?: boolean 
     }
   );
 
-  return { allStates, states, isLoadingAllStates, isLoadingStates, allStatesError, statesError };
+  return { states, isLoadingStates, statesError };
 }
