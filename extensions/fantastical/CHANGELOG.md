@@ -1,3 +1,3 @@
 # Fantastical Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2022-08-11
