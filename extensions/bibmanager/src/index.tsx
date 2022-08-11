@@ -44,7 +44,7 @@ export default function Command() {
 
   useEffect(() => {
     filterList(filterFct(state.items, searchText));
-  }, [searchText]);
+  }, [searchText, state.items]);
 
   return (
     <List
@@ -53,7 +53,7 @@ export default function Command() {
       enableFiltering={false}
       onSearchTextChange={setSearchText}
     >
-      {filteredList.map((item, index) => (
+      {filteredList?.map((item, index) => (
         <ListBibmItem key={index} item={item} />
       ))}
     </List>
