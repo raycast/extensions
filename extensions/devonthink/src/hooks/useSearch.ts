@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react";
-import {showToast, Toast} from "@raycast/api";
-import {jxa} from "osascript-tag";
+import { useEffect, useState } from "react";
+import { showToast, Toast } from "@raycast/api";
+import { jxa } from "osascript-tag";
 import Style = Toast.Style;
-import {UseAppExists} from "./useAppExists";
+import { UseAppExists } from "./useAppExists";
 
 type State = {
   isLoading: boolean;
@@ -17,21 +17,21 @@ export type SearchResult = {
   tags: string[];
 };
 
-const useSearch = ({appExists}: UseAppExists, query: string, databaseUUID: string) => {
-  const [state, setState] = useState<State>({isLoading: true, results: []});
+const useSearch = ({ appExists }: UseAppExists, query: string, databaseUUID: string) => {
+  const [state, setState] = useState<State>({ isLoading: true, results: [] });
 
   useEffect(() => {
     if (!appExists || query.length === 0) {
-      setState((prev) => ({...prev, isLoading: false}));
+      setState((prev) => ({ ...prev, isLoading: false }));
       return;
     }
 
     Promise.resolve()
-      .then(() => setState((prev) => ({...prev, isLoading: true})))
+      .then(() => setState((prev) => ({ ...prev, isLoading: true })))
       .then(() => searchInDEVONThink(databaseUUID, query))
-      .then((results) => setState((prev) => ({...prev, results})))
+      .then((results) => setState((prev) => ({ ...prev, results })))
       .catch(handleError)
-      .finally(() => setState((prev) => ({...prev, isLoading: false})));
+      .finally(() => setState((prev) => ({ ...prev, isLoading: false })));
   }, [appExists, query, databaseUUID]);
 
   return state;
@@ -41,7 +41,7 @@ export default useSearch;
 
 const searchInDEVONThink = async (databaseUUID: string, query: string) => {
   // language=JavaScript
-  const results = (await jxa({parse: true})`
+  const results = (await jxa({ parse: true })`
       const DT = Application("DEVONthink 3");
 
       let results;

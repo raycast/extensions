@@ -1,7 +1,7 @@
-import {useEffect, useState} from "react";
-import {UseAppExists} from "./useAppExists";
-import {jxa} from "osascript-tag";
-import {handleError} from "./useSearch";
+import { useEffect, useState } from "react";
+import { UseAppExists } from "./useAppExists";
+import { jxa } from "osascript-tag";
+import { handleError } from "./useSearch";
 
 type DevonDBs = {
   databasesAreLoading: boolean;
@@ -13,20 +13,20 @@ type DevonDB = {
   name: string;
 };
 
-const useDevonDB = ({appExists}: UseAppExists) => {
-  const [state, setState] = useState<DevonDBs>({databasesAreLoading: true, databases: []});
+const useDevonDB = ({ appExists }: UseAppExists) => {
+  const [state, setState] = useState<DevonDBs>({ databasesAreLoading: true, databases: [] });
 
   useEffect(() => {
     if (!appExists) {
-      setState(prev => ({...prev, databasesAreLoading: false}));
+      setState((prev) => ({ ...prev, databasesAreLoading: false }));
 
       return;
     }
 
     getDevonDBs()
-      .then(list => setState(prev => ({...prev, databases: list})))
+      .then((list) => setState((prev) => ({ ...prev, databases: list })))
       .catch(handleError)
-      .finally(() => setState(prev => ({...prev, databasesAreLoading: false})));
+      .finally(() => setState((prev) => ({ ...prev, databasesAreLoading: false })));
   }, [appExists]);
 
   return state;
@@ -35,9 +35,9 @@ const useDevonDB = ({appExists}: UseAppExists) => {
 export default useDevonDB;
 
 const getDevonDBs =
-// language=JavaScript
+  // language=JavaScript
   async () =>
-    ((await jxa({parse: true})`
+    (await jxa({ parse: true })`
         const DT = Application("DEVONthink 3");
 
         const databases = DT.databases();
@@ -46,4 +46,4 @@ const getDevonDBs =
             uuid: db.uuid(),
             name: db.name()
         }))
-    `) as DevonDB[]);
+    `) as DevonDB[];
