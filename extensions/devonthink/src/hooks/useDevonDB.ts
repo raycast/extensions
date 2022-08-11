@@ -4,8 +4,8 @@ import {jxa} from "osascript-tag";
 import {handleError} from "./useSearch";
 
 type DevonDBs = {
-  isLoading: boolean;
-  list: DevonDB[];
+  databasesAreLoading: boolean;
+  databases: DevonDB[];
 };
 
 type DevonDB = {
@@ -14,19 +14,19 @@ type DevonDB = {
 };
 
 const useDevonDB = ({appExists}: UseAppExists) => {
-  const [state, setState] = useState<DevonDBs>({isLoading: true, list: []});
+  const [state, setState] = useState<DevonDBs>({databasesAreLoading: true, databases: []});
 
   useEffect(() => {
     if (!appExists) {
-      setState(prev => ({...prev, isLoading: false}));
+      setState(prev => ({...prev, databasesAreLoading: false}));
 
       return;
     }
 
     getDevonDBs()
-      .then(list => setState(prev => ({...prev, list})))
+      .then(list => setState(prev => ({...prev, databases: list})))
       .catch(handleError)
-      .finally(() => setState(prev => ({...prev, isLoading: false})));
+      .finally(() => setState(prev => ({...prev, databasesAreLoading: false})));
   }, [appExists]);
 
   return state;
