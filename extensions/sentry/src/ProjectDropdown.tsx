@@ -1,4 +1,5 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { useProjects } from "./sentry";
 import { Project } from "./types";
 
@@ -7,7 +8,7 @@ function ProjectDropdownItem(props: { project: Project }) {
     <List.Dropdown.Item
       value={props.project.slug}
       title={props.project.slug}
-      icon={{ source: Icon.Circle, tintColor: props.project.color }}
+      icon={getAvatarIcon(props.project.name, { background: props.project.color })}
     />
   );
 }
