@@ -8,10 +8,12 @@ export default function StoriesList({
   stories,
   isLoading,
   mutate,
+  error,
 }: {
   stories: StorySlim[] | undefined;
   isLoading: boolean;
   mutate?: () => void;
+  error: Error | undefined;
 }) {
   const projectIdMap = useProjectMap();
   const workflowMap = useWorkflowMap();
@@ -33,29 +35,32 @@ export default function StoriesList({
   }, [workflowMap, stories]);
 
   return (
-    <List isLoading={isLoading}>
-      {possibleWorkflowIdsFromStories.map((workflowId) => {
-        const workflow = workflowMap[workflowId];
+    <List isLoading={isLoading && !error}>
+      {error && <List.EmptyView title="Error" description={error.message} />}
 
-        return workflow?.states.map((state) => {
-          const stories = groupedStoriesByWorkflowStateId[state.id] || [];
+      {!error &&
+        possibleWorkflowIdsFromStories.map((workflowId) => {
+          const workflow = workflowMap[workflowId];
 
-          return (
-            <List.Section key={state.id} title={state.name} subtitle={`${stories.length} stories`}>
-              {stories?.map((story) => {
-                return (
-                  <StoryListItem
-                    story={story}
-                    project={projectIdMap[story.project_id!]}
-                    key={story.id}
-                    mutate={mutate}
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        });
-      })}
+          return workflow?.states.map((state) => {
+            const stories = groupedStoriesByWorkflowStateId[state.id] || [];
+
+            return (
+              <List.Section key={state.id} title={state.name} subtitle={`${stories.length} stories`}>
+                {stories?.map((story) => {
+                  return (
+                    <StoryListItem
+                      story={story}
+                      project={projectIdMap[story.project_id!]}
+                      key={story.id}
+                      mutate={mutate}
+                    />
+                  );
+                })}
+              </List.Section>
+            );
+          });
+        })}
     </List>
   );
 }
