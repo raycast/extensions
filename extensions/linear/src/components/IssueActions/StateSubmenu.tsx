@@ -1,8 +1,7 @@
-import { WorkflowState } from "@linear/sdk";
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { useState } from "react";
 
-import { IssueResult } from "../../api/getIssues";
+import { IssueResult, IssueState } from "../../api/getIssues";
 
 import { getOrderedStates, statusIcons } from "../../helpers/states";
 
@@ -22,7 +21,7 @@ export default function StateSubmenu({
 
   const orderedStates = getOrderedStates(states || []);
 
-  async function setStatus(state: WorkflowState) {
+  async function setStatus(state: IssueState) {
     const currentState = issue.state;
     updateIssue({
       animatedTitle: "Setting status",

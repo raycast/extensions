@@ -22,6 +22,7 @@ import ParentIssueSubmenu from "./ParentIssueSubmenu";
 import StateSubmenu from "./StateSubmenu";
 import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
+import IssueCommentForm from "../IssueCommentForm";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -405,6 +406,13 @@ export default function IssueActions({
           icon={Icon.List}
           target={<SubIssues issue={issue} mutateList={mutateList} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        />
+
+        <Action.Push
+          title="Add Comment"
+          icon={Icon.Plus}
+          target={<IssueCommentForm issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "n" }}
         />
 
         <Action.Push
