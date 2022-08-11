@@ -49,6 +49,14 @@
           "title": "WakaTime API Key"
         }
       ]
+    },
+    {
+      "name": "today-summary",
+      "subtitle": "WakaTime",
+      "title": "Show Today Summary",
+      "description": "Show Today's Summary in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [

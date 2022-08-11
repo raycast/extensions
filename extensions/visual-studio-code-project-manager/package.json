@@ -5,6 +5,10 @@
   "description": "Search and open projects from Visual Studio Code Project Manager",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek",
+    "4very"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -73,6 +77,10 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     }

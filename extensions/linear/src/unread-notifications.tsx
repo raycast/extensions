@@ -10,7 +10,9 @@ function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
   async function openNotification(notification: NotificationResult) {
-    await open(notification.issue.url);
+    const applications = await getApplications();
+    const linearApp = applications.find((app) => app.bundleId === "com.linear");
+    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
@@ -21,6 +23,7 @@ function UnreadNotifications() {
           notifications: data?.notifications?.map((x) => (x.id === notification.id ? { ...x, readAt: new Date() } : x)),
         };
       },
+      shouldRevalidateAfter: true,
     });
   }
 
@@ -46,17 +49,22 @@ function UnreadNotifications() {
       <MenuBarExtra.Item
         title={unreadNotifications.length !== 0 ? "Unread Notifications" : "No Unread Notifications"}
       />
-      {unreadNotifications.map((notification) => (
-        <MenuBarExtra.Item
-          key={notification.id}
-          icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
-          title={`${notification.issue.identifier}: ${getNotificationTitle(notification)} by ${
-            notification.actor ? notification.actor.displayName : "Linear"
-          }`}
-          tooltip={notification.issue.title}
-          onAction={() => openNotification(notification)}
-        />
-      ))}
+      {unreadNotifications.map((notification) => {
+        const baseTitle = `${getNotificationTitle(notification)} by ${
+          notification.actor ? notification.actor.displayName : "Linear"
+        }`;
+
+        return (
+          <MenuBarExtra.Item
+            key={notification.id}
+            icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
+            title={notification.issue ? `${notification.issue.identifier}: ${baseTitle}` : baseTitle}
+            tooltip={notification.issue?.title}
+            onAction={() => openNotification(notification)}
+          />
+        );
+      })}
+
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
         title="Configure Command"

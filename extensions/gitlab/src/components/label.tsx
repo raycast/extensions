@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { ensureCleanAccessories } from "../utils";
 
 export function LabelDetail(props: { label: Label }): JSX.Element {
   const l = props.label;
@@ -20,7 +19,7 @@ export function LabelListItem(props: { label: Label }): JSX.Element {
       key={l.id.toString()}
       title={l.name}
       icon={{ source: Icon.Circle, tintColor: l.color }}
-      accessories={ensureCleanAccessories([{ text: accessoryTitle }])}
+      accessories={[{ text: accessoryTitle }]}
       actions={
         <ActionPanel>
           <Action.Push

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "icons8",
+  "title": "Icons8",
+  "description": "Search and download icons using Icons8 large library.",
+  "icon": "Icons8.png",
+  "author": "yug2005",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "Icons8",
+      "description": "Search and preview icons.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API Key for Icons8.",
+      "type": "password",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Grid size for displaying Icons8.",
+      "type": "dropdown",
+      "default": "small",
+      "required": false,
+      "data": [
+        {
+          "value": "small",
+          "title": "Small"
+        },
+        {
+          "value": "medium",
+          "title": "Medium"
+        }
+      ]
+    },
+    {
+      "name": "numResults",
+      "title": "Number of Results",
+      "description": "Number of results to show.",
+      "type": "dropdown",
+      "default": "50",
+      "required": false,
+      "data": [
+        {
+          "value": "80",
+          "title": "80"
+        },
+        {
+          "value": "160",
+          "title": "160"
+        },
+        {
+          "value": "240",
+          "title": "240"
+        },
+        {
+          "value": "320",
+          "title": "320"
+        }
+      ]
+    },
+    {
+      "name": "numRecent",
+      "title": "Number of Recent Icons",
+      "description": "Number of recent icons to show.",
+      "type": "dropdown",
+      "default": "32",
+      "required": false,
+      "data": [
+        {
+          "value": "8",
+          "title": "8"
+        },
+        {
+          "value": "16",
+          "title": "16"
+        },
+        {
+          "value": "24",
+          "title": "24"
+        },
+        {
+          "value": "32",
+          "title": "32"
+        },
+        {
+          "value": "40",
+          "title": "40"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "d3-color": "^3.1.0",
+    "javascript-time-ago": "^2.5.6",
+    "node-fetch": "^3.2.9"
+  },
+  "devDependencies": {
+    "@types/d3-color": "^3.1.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

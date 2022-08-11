@@ -4,13 +4,13 @@ import { deepLAuthKey } from "./crypto";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 15:42
+ * @lastEditTime: 2022-07-31 22:55
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
@@ -367,9 +367,14 @@ export async function requestDeepLTextTranslate(
     target_lang: targetLang,
   };
   // console.log(`---> deepL params: ${JSON.stringify(params, null, 4)}`);
+  const headers = {
+    headers: {
+      timeout: 5000,
+    },
+  };
 
   try {
-    const response = await axios.post(url, querystring.stringify(params));
+    const response = await axios.post(url, querystring.stringify(params), headers);
     const deepLResult = response.data as DeepLTranslateResult;
     const translatedText = deepLResult.translations[0].text;
     console.log(
@@ -382,14 +387,21 @@ export async function requestDeepLTextTranslate(
       result: deepLResult,
     });
   } catch (err) {
-    const error = err as { response: AxiosResponse };
-    console.error("deepL error: ", JSON.stringify(error.response, null, 4));
+    console.error(`DeepL translate error: ${err}`);
+    const error = err as AxiosError;
+    console.error("error response: ", error.response);
+
+    const errorCode = error.response?.status;
+    let errorMessage = error.response?.statusText || "Something error 😭";
+    if (errorCode === 456) {
+      errorMessage = "Quota exceeded"; // https://www.deepl.com/zh/docs-api/accessing-the-api/error-handling/
+    }
     const errorInfo: RequestErrorInfo = {
       type: TranslationType.DeepL,
-      code: error.response.status.toString(),
-      message: error.response.statusText,
+      code: errorCode?.toString() || "",
+      message: errorMessage,
     };
-    console.warn("deepL error info: ", errorInfo);
+    console.error("deepL error info: ", errorInfo);
     return Promise.reject(errorInfo);
   }
 }

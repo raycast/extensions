@@ -1,9 +1,12 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { stat, readFile, writeFile } from "fs/promises";
+import { constants as fs_constants } from "fs";
+import * as fs from "fs/promises";
 import { join as path_join } from "path";
 import { cpus } from "os";
+import { environment } from "@raycast/api";
 import * as utils from "./utils";
+import { preferences } from "./preferences";
 
 const execp = promisify(exec);
 
@@ -109,13 +112,19 @@ export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-const brewExecutable: string = path_join(brewPrefix, "bin/brew");
+function brewExecutable(): string {
+  if (preferences.customBrewPath && preferences.customBrewPath.length > 0) {
+    return preferences.customBrewPath;
+  } else {
+    return path_join(brewPrefix, "bin/brew");
+  }
+}
 
 /// Commands
 
 export async function brewDoctorCommand(): Promise<string> {
   try {
-    const output = await execp(`${brewExecutable} doctor`);
+    const output = await execBrew(`doctor`);
     return output.stdout;
   } catch (err) {
     const execErr = err as ExecError;
@@ -128,16 +137,16 @@ export async function brewDoctorCommand(): Promise<string> {
 }
 
 export async function brewUpgradeCommand(greedy: boolean, cancel?: AbortController): Promise<string> {
-  let cmd = `${brewExecutable} upgrade`;
+  let cmd = `upgrade`;
   if (greedy) {
     cmd += " --greedy";
   }
-  const output = await execSignal(cmd, cancel);
+  const output = await execBrew(cmd, cancel);
   return output.stdout;
 }
 
 export async function brewUpdateCommand(cancel?: AbortController): Promise<void> {
-  await execSignal(`${brewExecutable} update`, cancel);
+  await execBrew(`update`, cancel);
 }
 
 /// Fetching
@@ -148,7 +157,7 @@ const caskCachePath = utils.cachePath("cask.json");
 
 export async function brewFetchInstalled(useCache: boolean, cancel?: AbortController): Promise<InstallableResults> {
   async function installed(): Promise<string> {
-    return (await execSignal(`${brewExecutable} info --json=v2 --installed`, cancel)).stdout;
+    return (await execBrew(`info --json=v2 --installed`, cancel)).stdout;
   }
 
   if (!useCache) {
@@ -158,7 +167,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
   async function updateCache(): Promise<InstallableResults> {
     const info = await installed();
     try {
-      await writeFile(installedCachePath, info);
+      await fs.writeFile(installedCachePath, info);
     } catch (err) {
       console.error("Failed to write installed cache:", err);
     }
@@ -166,7 +175,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
   }
 
   async function mtimeMs(path: string): Promise<number> {
-    return (await stat(path)).mtimeMs;
+    return (await fs.stat(path)).mtimeMs;
   }
 
   async function readCache(): Promise<InstallableResults> {
@@ -187,7 +196,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
     const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
     if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
-      const cacheBuffer = await readFile(installedCachePath);
+      const cacheBuffer = await fs.readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
       throw "Invalid cache";
@@ -202,13 +211,13 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
 }
 
 export async function brewFetchOutdated(greedy: boolean, cancel?: AbortController): Promise<OutdatedResults> {
-  let cmd = `${brewExecutable} outdated --json=v2`;
+  let cmd = `outdated --json=v2`;
   if (greedy) {
     cmd += " --greedy"; // include auto_update casks
   }
   // 'outdated' is only reliable after performing a 'brew update'
   await brewUpdateCommand(cancel);
-  const output = await execSignal(cmd, cancel);
+  const output = await execBrew(cmd, cancel);
   return JSON.parse(output.stdout);
 }
 
@@ -269,7 +278,7 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
 export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execSignal(`${brewExecutable} install ${identifier}`, cancel);
+  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel);
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
@@ -281,25 +290,25 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortCon
 
 export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execSignal(`${brewExecutable} rm ${identifier}`, cancel);
+  await execBrew(`rm ${brewCaskOption(installable)} ${identifier}`, cancel);
 }
 
 export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(upgradable);
-  await execSignal(`${brewExecutable} upgrade ${identifier}`, cancel);
+  await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel);
 }
 
 export async function brewUpgradeAll(cancel?: AbortController): Promise<void> {
-  await execSignal(`${brewExecutable} upgrade`, cancel);
+  await execBrew(`upgrade`, cancel);
 }
 
 export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
-  await execp(`${brewExecutable} pin ${formula.name}`);
+  await execBrew(`pin ${formula.name}`);
   formula.pinned = true;
 }
 
 export async function brewUnpinFormula(formula: Formula | OutdatedFormula): Promise<void> {
-  await execp(`${brewExecutable} unpin ${formula.name}`);
+  await execBrew(`unpin ${formula.name}`);
   formula.pinned = false;
 }
 
@@ -408,6 +417,10 @@ function brewIdentifier(item: Cask | Nameable): string {
   return isCask(item) ? item.token : item.name;
 }
 
+function brewCaskOption(maybeCask: Cask | Nameable): string {
+  return isCask(maybeCask) ? "--cask" : "";
+}
+
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
 }
@@ -424,6 +437,32 @@ function brewCompare(lhs: string, rhs: string, target: string): number {
   }
 }
 
-async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
-  return await execp(cmd, { signal: cancel?.signal, maxBuffer: 10 * 1024 * 1024 });
+async function execBrew(cmd: string, cancel?: AbortController): Promise<ExecResult> {
+  try {
+    const env = await execBrewEnv();
+    return await execp(`${brewExecutable()} ${cmd}`, { signal: cancel?.signal, env: env, maxBuffer: 10 * 1024 * 1024 });
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (preferences.customBrewPath && execErr && execErr.code === 127) {
+      execErr.stderr = `Brew executable not found at: ${preferences.customBrewPath}`;
+      throw execErr;
+    } else {
+      throw err;
+    }
+  }
+}
+
+async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
+  const askpassPath = path_join(environment.assetsPath, "askpass.sh");
+  try {
+    await fs.access(askpassPath, fs_constants.X_OK);
+  } catch {
+    await fs.chmod(askpassPath, 0o755);
+  }
+  const env = process.env;
+  env["SUDO_ASKPASS"] = askpassPath;
+  // Use HOMEBREW_BROWSER to pass through the app's bundle identifier.
+  // Brew will ignore custom environment variables.
+  env["HOMEBREW_BROWSER"] = utils.bundleIdentifier;
+  return env;
 }

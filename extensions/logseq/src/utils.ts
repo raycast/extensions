@@ -105,3 +105,21 @@ export const formatFilePath = (pageName: string) => {
   const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
   return finalURL;
 };
+
+const getCurrentTime = () => {
+  return dayjs().format("HH:mm");
+};
+
+export const addLeadingTimeToContentIfNecessary = (content: string) => {
+  let result = content;
+
+  if (getPreferenceValues().addQuickCaptureTag) {
+    result = `[[quick capture]]: ` + result;
+  }
+
+  if (getPreferenceValues().insertTime) {
+    result = `**${getCurrentTime()}** ` + result;
+  }
+
+  return result;
+};

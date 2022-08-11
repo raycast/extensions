@@ -45,6 +45,13 @@
       "description": "Include auto-updating casks when upgrading or checking for outdated items.",
       "default": false,
       "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
     }
   ],
   "dependencies": {

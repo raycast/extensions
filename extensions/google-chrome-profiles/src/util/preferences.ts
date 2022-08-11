@@ -1,8 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
+  newBlankTabURL: string;
+  /**
+   * The URL used for search.
+   */
   newTabURL: string;
-  shouldShowNewTabInBookmarks: boolean;
 }
 
 export default function getPrefs() {

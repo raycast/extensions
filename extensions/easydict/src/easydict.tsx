@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 15:42
+ * @lastEditTime: 2022-07-31 23:08
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
 import { Fragment, useEffect, useState } from "react";
-import ListActionPanel, { ActionFeedback, getListItemIcon, getWordAccessories } from "./components";
+import { ActionFeedback, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { BaiduRequestStateCode, youdaoErrorCodeUrl, YoudaoRequestStateCode } from "./consts";
 import { detectLanguage } from "./detectLanguage";
 import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
@@ -22,7 +22,9 @@ import {
   updateFormatResultWithCaiyunTranslation,
   updateFormatResultWithTencentTranslation,
   updateFormatTranslateResultWithDeepLResult,
+  updateFormatTranslateResultWithGoogleResult,
 } from "./formatData";
+import { requestGoogleTranslate } from "./google";
 import {
   requestBaiduTextTranslate,
   requestCaiyunTextTranslate,
@@ -42,7 +44,7 @@ import {
   YoudaoTranslateResult,
 } from "./types";
 import {
-  checkIfEudicIsInstalled,
+  checkIfInstalledEudic,
   checkIfShowMultipleTranslations,
   defaultLanguage1,
   defaultLanguage2,
@@ -131,10 +133,12 @@ export default function () {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    if (myPreferences.isAutomaticQuerySelectedText) {
+    if (myPreferences.enableAutomaticQuerySelectedText) {
       tryQuerySelecedtText();
     }
-    checkIfEudicIsInstalled(setIsInstalledEudic);
+    checkIfInstalledEudic().then((isInstalled) => {
+      setIsInstalledEudic(isInstalled);
+    });
   }
 
   /**
@@ -177,33 +181,33 @@ export default function () {
   /**
    * query text with from youdao language id
    */
-  function queryTextWithFromLanguageId(youdaoLanguageId: string) {
-    console.log("queryTextWithFromLanguageId:", youdaoLanguageId);
-    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(youdaoLanguageId));
+  function queryTextWithFromLanguageId(fromYoudaoLanguageId: string) {
+    console.log("queryTextWithFromLanguageId:", fromYoudaoLanguageId);
+    setCurrentFromLanguageItem(getLanguageItemFromYoudaoId(fromYoudaoLanguageId));
 
     // priority to use user selected target language, if conflict, use auto selected target language
     let targetLanguageId = userSelectedTargetLanguageItem.youdaoLanguageId;
     console.log("userSelectedTargetLanguage:", targetLanguageId);
-    if (youdaoLanguageId === targetLanguageId) {
-      targetLanguageId = getAutoSelectedTargetLanguageId(youdaoLanguageId);
+    if (fromYoudaoLanguageId === targetLanguageId) {
+      targetLanguageId = getAutoSelectedTargetLanguageId(fromYoudaoLanguageId);
       setAutoSelectedTargetLanguageItem(getLanguageItemFromYoudaoId(targetLanguageId));
       console.log("autoSelectedTargetLanguage: ", targetLanguageId);
     }
     const queryTextInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: youdaoLanguageId,
+      fromLanguage: fromYoudaoLanguageId,
       toLanguage: targetLanguageId,
-      isWord: false,
     };
     queryTextWithTextInfo(queryTextInfo);
   }
 
+  /**
+   * Query text with text info, query dictionary API or tranalsate API.
+   *
+   * Todo: need to optimize, change it to class.
+   */
   async function queryTextWithTextInfo(queryTextInfo: QueryWordInfo) {
-    const [queryText, fromLanguage, toLanguage] = [
-      queryTextInfo.word,
-      queryTextInfo.fromLanguage,
-      queryTextInfo.toLanguage,
-    ];
+    const { word: queryText, fromLanguage, toLanguage } = queryTextInfo;
     console.log(`---> query text fromTo: ${fromLanguage} -> ${toLanguage}`);
     /**
      * first, request youdao translate API, check if should show multiple translations, if not, then end.
@@ -236,7 +240,8 @@ export default function () {
 
       let formatResult = formatYoudaoDictionaryResult(youdaoTranslateTypeResult);
       // if enable automatic play audio and query is word, then download audio and play it
-      const enableAutomaticDownloadAudio = myPreferences.isAutomaticPlayWordAudio && formatResult.queryWordInfo.isWord;
+      const enableAutomaticDownloadAudio =
+        myPreferences.enableAutomaticPlayWordAudio && formatResult.queryWordInfo.isWord;
       if (enableAutomaticDownloadAudio && isLastQuery) {
         playYoudaoWordAudioAfterDownloading(formatResult.queryWordInfo);
       }
@@ -256,6 +261,7 @@ export default function () {
       if (checkIfShowMultipleTranslations(formatResult)) {
         // check if enable deepl translate
         if (myPreferences.enableDeepLTranslate) {
+          console.log("---> deepL translate start");
           requestDeepLTextTranslate(queryText, fromLanguage, toLanguage)
             .then((deepLTypeResult) => {
               // Todo: should use axios.CancelToken to cancel the request!
@@ -268,9 +274,24 @@ export default function () {
               const errorInfo = err as RequestErrorInfo;
               showToast({
                 style: Toast.Style.Failure,
-                title: `${errorInfo.type}: ${errorInfo.code}`,
+                title: `${errorInfo.type} error: ${errorInfo.code}`,
                 message: errorInfo.message,
               });
+            });
+        }
+
+        // check if enable google translate
+        if (myPreferences.enableGoogleTranslate) {
+          console.log("---> google translate start");
+          requestGoogleTranslate(queryText, fromLanguage, toLanguage)
+            .then((googleTypeResult) => {
+              if (!shouldCancelQuery) {
+                updateFormatTranslateResultWithGoogleResult(formatResult, googleTypeResult);
+                updateTranslateDisplayResult(formatResult);
+              }
+            })
+            .catch((err) => {
+              console.error(`Google error: ${JSON.stringify(err, null, 2)}`);
             });
         }
 
@@ -282,7 +303,7 @@ export default function () {
               if (translatedText) {
                 const appleTranslateResult: RequestTypeResult = {
                   type: TranslationType.Apple,
-                  result: { translatedText },
+                  result: translatedText,
                 };
                 if (!shouldCancelQuery) {
                   updateFormatResultWithAppleTranslateResult(formatResult, appleTranslateResult);
@@ -316,7 +337,7 @@ export default function () {
               }
               showToast({
                 style: Toast.Style.Failure,
-                title: `${errorInfo.type}: ${errorInfo.code}`,
+                title: `${errorInfo.type} error: ${errorInfo.code}`,
                 message: errorInfo.message,
               });
             });
@@ -336,7 +357,7 @@ export default function () {
               const errorInfo = err as RequestErrorInfo;
               showToast({
                 style: Toast.Style.Failure,
-                title: `tencent translate error`,
+                title: `Tencent translate error`,
                 message: errorInfo.message,
               });
             });
@@ -460,7 +481,7 @@ export default function () {
                     actions={
                       <ListActionPanel
                         displayItem={item}
-                        isInstalledEudic={isInstalledEudic}
+                        isInstalledEudic={isInstalledEudic && myPreferences.enableOpenInEudic}
                         onLanguageUpdate={updateSelectedTargetLanguageItem}
                       />
                     }
