@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { jxa } from "osascript-tag";
 import Style = Toast.Style;
-import useAppExists from "./useAppExists";
+import {UseAppExists} from "./useAppExists";
 
 type State = {
   isLoading: boolean;
@@ -17,9 +17,8 @@ export type SearchResult = {
   tags: string[];
 };
 
-const useSearch = (query: string) => {
+const useSearch = ({appExists}: UseAppExists, query: string) => {
   const [state, setState] = useState<State>({ isLoading: true, results: [] });
-  const { appExists, appExistsLoading } = useAppExists();
 
   useEffect(() => {
     if (!appExists || query.length === 0) {
@@ -33,9 +32,9 @@ const useSearch = (query: string) => {
       .then((results) => setState((prev) => ({ ...prev, results })))
       .catch(handleError)
       .finally(() => setState((prev) => ({ ...prev, isLoading: false })));
-  }, [appExistsLoading, query]);
+  }, [appExists, query]);
 
-  return { ...state, appExists, appExistsLoading };
+  return state;
 };
 
 export default useSearch;
@@ -64,7 +63,7 @@ const searchInDEVONThink = async (query: string) => {
   return results.sort((a, b) => b.score - a.score);
 };
 
-const handleError = (err: Error) => {
+export const handleError = (err: Error) => {
   console.log(err);
   return showToast(Style.Failure, err.message);
 };
