@@ -12,8 +12,12 @@ export default function Command(props: { arguments: PackageSearchArguments }) {
     `https://libraries.io/api/search?q=${searchText}&platforms=${platform}&api_key=${preferences.token}`,
     {
       execute: searchText !== "",
-      onError: () => {
-        showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+      onError: (error) => {
+        showToast(
+          Toast.Style.Failure,
+          "Error",
+          error.message === "Forbidden" ? "Check credentials and try again" : error.message
+        );
       },
     }
   );

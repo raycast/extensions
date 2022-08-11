@@ -5,8 +5,12 @@ import type { Preferences, Platform } from "./types";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading } = useFetch<Platform[]>(`https://libraries.io/api/platforms?api_key=${preferences.token}`, {
-    onError: () => {
-      showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+    onError: (error) => {
+      showToast(
+        Toast.Style.Failure,
+        "Error",
+        error.message === "Forbidden" ? "Check credentials and try again" : error.message
+      );
     },
   });
 

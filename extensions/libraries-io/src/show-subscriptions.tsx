@@ -8,8 +8,12 @@ export default function Command() {
   const { data, isLoading } = useFetch<Subscription[]>(
     `https://libraries.io/api/subscriptions?api_key=${preferences.token}`,
     {
-      onError: () => {
-        showToast(Toast.Style.Failure, "Error", "Check credentials and try again");
+      onError: (error) => {
+        showToast(
+          Toast.Style.Failure,
+          "Error",
+          error.message === "Forbidden" ? "Check credentials and try again" : error.message
+        );
       },
     }
   );
