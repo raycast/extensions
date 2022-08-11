@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { List, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ListBibmItem } from "./ListBibmItem";
-import { Preferences, State } from "./types";
+import { Item, Preferences, State } from "./types";
 import { spawn } from "child_process";
 import { join } from "path";
-import { filterFct } from "./filtering"
+import { filterFct } from "./filtering";
 import { homedir } from "os";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -12,6 +12,9 @@ export const pythonbin = preferences["python"].replace("~", homedir());
 
 export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const [filteredList, filterList] = useState<Item[]>(state.items);
+  const [searchText, setSearchText] = useState<string>("");
+
   useEffect(() => {
     async function loadItems() {
       showToast(Toast.Style.Animated, "Browsing bibmanager");
@@ -39,21 +42,20 @@ export default function Command() {
     loadItems();
   }, []);
 
-  const [searchText, setSearchText] = useState("");
-  const [filteredList, filterList] = useState(state.items);
-
   useEffect(() => {
-        filterList(state.items?.filter((item) => filterFct(item, searchText)));
-      },
-      [searchText]);
+    filterList(filterFct(state.items, searchText));
+  }, [searchText]);
 
   return (
     <List
-        isShowingDetail
-        isLoading={(!state.items && !state.error) || state.isLoading}
-        enableFiltering={false}
-        onSearchTextChange={setSearchText}>
-      {filteredList.map((item, index) => (<ListBibmItem key={index} item={item} />))}
+      isShowingDetail
+      isLoading={(!state.items && !state.error) || state.isLoading}
+      enableFiltering={false}
+      onSearchTextChange={setSearchText}
+    >
+      {filteredList.map((item, index) => (
+        <ListBibmItem key={index} item={item} />
+      ))}
     </List>
   );
 }

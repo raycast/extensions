@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { Action, ActionPanel, environment, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, List, Toast, Keyboard } from "@raycast/api";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { join } from "path";
 import { pythonbin } from "./index";
-import { Item } from "./types"
+import { Item } from "./types";
 
-export function ListBibmItem(props: { item: Item}) {
+const openADSShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "enter" };
+const copyLinkShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
+const copyBibkeyShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "b" };
+const copyBibtexShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "t" };
+
+export function ListBibmItem(props: { item: Item }) {
   return (
     <List.Item
       icon={Icon.Dot}
       title={props.item.uid ?? "No title"}
       actions={<Actions item={props.item} />}
-      // keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
       detail={getItemDetail(props.item)}
     />
   );
@@ -23,16 +27,22 @@ function Actions(props: { item: Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {PDFDownloaded && (
-          <Action.OpenWith path={PDFDownloaded} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
-        )}
-        {props.item.link && <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" />}
+        {PDFDownloaded && <Action.OpenWith path={PDFDownloaded} title="Open PDF" />}
         {!PDFDownloaded && (
           <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
-        {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
-        {props.item.content && <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" />}
-        {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
+        {props.item.link && (
+          <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" shortcut={openADSShortcut} />
+        )}
+        {props.item.uid && (
+          <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" shortcut={copyBibkeyShortcut} />
+        )}
+        {props.item.content && (
+          <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" shortcut={copyBibtexShortcut} />
+        )}
+        {props.item.link && (
+          <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" shortcut={copyLinkShortcut} />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
