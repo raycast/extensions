@@ -1,9 +1,11 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import OSS from "ali-oss";
 import path from "node:path";
 import { FileTypeResult } from "file-type";
 import fsSync from "node:fs/promises";
 import fs from "node:fs";
+import { ACL } from "./const";
+import { homedir } from "os";
 
 let ossClient: OSS;
 
@@ -126,11 +128,7 @@ async function getFileDownloadLocation(): Promise<string> {
     await folderExists(downloadLoc);
     return downloadLoc;
   }
-  const folders = environment.supportPath.split("/");
-  if (folders.length >= 3) {
-    return `/${folders[1]}/${folders[2]}/Desktop/`;
-  }
-  return "/Users/";
+  return `${homedir()}/Desktop/`;
 }
 
 async function mkdir(folder: string): Promise<boolean> {
@@ -157,5 +155,39 @@ async function folderExists(folder: string): Promise<boolean> {
       return await mkdir(folder);
     }
     return false;
+  }
+}
+
+export function getLocalKeyByFolder(folder: string): string {
+  const preferences: IPreferences = getPreferenceValues();
+  return `${preferences.bucket}_${folder}`;
+}
+
+export function getFolderByLocalKey(key: string): string {
+  const preferences: IPreferences = getPreferenceValues();
+  return key.slice(preferences.bucket.length + 1, key.length);
+}
+
+export function filterBookmark(key: string): boolean {
+  const preferences: IPreferences = getPreferenceValues();
+  return key.indexOf(`${preferences.bucket}_`) === 0;
+}
+
+export async function getObjUrl(file: IObject): Promise<string> {
+  const preferences: IPreferences = getPreferenceValues();
+  try {
+    const objACL = await ossClient.getACL(file.name);
+    if (objACL.acl == ACL.Private) {
+      return ossClient.signatureUrl(file.name);
+    }
+    if (`${objACL.acl}` == ACL.Default) {
+      const bucketACL = await ossClient.getBucketACL(preferences.bucket);
+      if (bucketACL.acl == ACL.Private) {
+        return ossClient.signatureUrl(file.name);
+      }
+    }
+    return file.url;
+  } catch (error) {
+    return file.url;
   }
 }

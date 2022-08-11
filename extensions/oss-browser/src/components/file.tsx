@@ -2,12 +2,15 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Color,
   confirmAlert,
   Detail,
   Form,
   Icon,
   List,
+  open,
+  showHUD,
   showInFinder,
   showToast,
   Toast,
@@ -25,6 +28,7 @@ import {
   downloadObject,
   deleteObject,
   copyObject,
+  getObjUrl,
 } from "../utils";
 
 function RenameFile(props: { file: IObject; refresh: () => void }) {
@@ -134,13 +138,16 @@ function FileItemAction(props: { file: IObject; refresh: () => void; marks: stri
 function FileDetail(props: { file: IObject; refresh: () => void }) {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
   const [fileTypeState, updateFileTypeState] = useState<FileTypeResult>();
+  const [urlState, updateUrlState] = useState<string>("");
   useEffect(() => {
     init();
   }, []);
 
   async function init() {
     updateLoadingState(true);
-    const stream = got.stream(props.file.url);
+    const url = await getObjUrl(props.file);
+    updateUrlState(url);
+    const stream = got.stream(url);
     const type = await fileTypeFromStream(stream);
     updateFileTypeState(type);
     updateLoadingState(false);
@@ -166,7 +173,7 @@ function FileDetail(props: { file: IObject; refresh: () => void }) {
               text={new Date(props.file.lastModified).toLocaleString()}
             ></Detail.Metadata.Label>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Link title="Link" text="Open the Link" target={props.file.url} />
+            <Detail.Metadata.Link title="Link" text="Open the Link" target={urlState} />
           </Detail.Metadata>
         )
       }
@@ -276,8 +283,23 @@ function FileCommonActions(props: { file: IObject; refresh: () => void; isDetail
           target={<FileDetail file={props.file} refresh={props.refresh} />}
         />
       )}
-      <Action.CopyToClipboard title="Copy URL to Clipboard" content={props.file.url}></Action.CopyToClipboard>
-      <Action.OpenInBrowser url={props.file.url} shortcut={{ modifiers: ["cmd"], key: "o" }}></Action.OpenInBrowser>
+      <Action
+        title="Copy URL to Clipboard"
+        icon={Icon.CopyClipboard}
+        shortcut={{ modifiers: ["cmd"], key: "return" }}
+        onAction={async () => {
+          await Clipboard.copy(await getObjUrl(props.file));
+          await showHUD("Copied to Clipboard");
+        }}
+      ></Action>
+      <Action
+        title="Open in Browser"
+        icon={Icon.Globe}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        onAction={async () => {
+          open(await getObjUrl(props.file));
+        }}
+      ></Action>
       <Action
         title="Download File"
         icon={Icon.Download}

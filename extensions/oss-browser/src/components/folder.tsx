@@ -13,7 +13,14 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import path from "node:path";
-import { listPage, folderIsEmpty, deleteObject } from "../utils";
+import {
+  listPage,
+  folderIsEmpty,
+  deleteObject,
+  filterBookmark,
+  getFolderByLocalKey,
+  getLocalKeyByFolder,
+} from "../utils";
 import { CommonActions, ErrView, uploadFiles } from "./common";
 import { FileItem } from "./file";
 
@@ -37,7 +44,7 @@ export function Folder(props: { path: string }) {
       updateQueryState(query);
       updateLoadingState(true);
       const [res, bookmarks] = await Promise.all([listPage(query, marker), LocalStorage.allItems()]);
-      updateBookmarksState(Object.keys(bookmarks));
+      updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
       updateObjectsState((oldObjects) => {
         const searchObjects = res.objects
           .filter((o) => o.size != 0)
@@ -162,7 +169,7 @@ function FolderItem(props: { folder: string; refresh: (targetPath?: string) => v
       icon={{ source: Icon.Folder, tintColor: Color.Blue }}
       accessories={
         props.marks.includes(props.folder)
-          ? [{ text: "Folder" }, { icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Bookmark added" }]
+          ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Bookmark added" }, { text: "Folder" }]
           : [{ text: "Folder" }]
       }
       actions={FolderAction({ folder: props.folder, refresh: props.refresh, marks: props.marks })}
@@ -239,7 +246,7 @@ function FolderAction(props: { folder: string; refresh: (targetPath?: string) =>
             shortcut={{ modifiers: ["cmd"], key: "b" }}
             onAction={async () => {
               await LocalStorage.setItem(
-                props.folder,
+                getLocalKeyByFolder(props.folder),
                 JSON.stringify({
                   key: props.folder,
                   ctime: new Date(),
@@ -259,7 +266,7 @@ function FolderAction(props: { folder: string; refresh: (targetPath?: string) =>
             icon={Icon.StarDisabled}
             shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
             onAction={async () => {
-              await LocalStorage.removeItem(props.folder);
+              await LocalStorage.removeItem(getLocalKeyByFolder(props.folder));
               props.refresh();
               await showToast({
                 title: "Bookmark removed",
