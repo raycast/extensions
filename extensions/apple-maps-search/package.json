@@ -19,24 +19,34 @@
   "commands": [
     {
       "name": "travelHome",
-      "title": "Travel Home",
+      "title": "Directions Home",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions from your current location to your home.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "travel"
+      ]
     },
     {
       "name": "travelTo",
-      "title": "Travel To",
+      "title": "Directions To",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions to a destination.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "travel"
+      ]
     },
     {
       "name": "find",
-      "title": "Find Place",
+      "title": "Search Maps",
       "subtitle": "Apple Maps",
       "description": "Find a specific place or category on Apple Maps.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "find",
+        "place"
+      ]
     }
   ],
   "preferences": [
