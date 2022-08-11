@@ -8,7 +8,8 @@ import useDevonDB from "./hooks/useDevonDB";
 const search = () => {
   const appExists = useAppExists();
   const [query, setQuery] = useState("");
-  const {isLoading, results} = useSearch(appExists, query);
+  const [databaseUUID, setDatabaseUUID] = useState("");
+  const {isLoading, results} = useSearch(appExists, query, databaseUUID);
   const {databasesAreLoading, databases} = useDevonDB(appExists);
 
   const mapResult = (result: SearchResult) => <SearchResultItem key={result.uuid} result={result}/>;
@@ -20,7 +21,7 @@ const search = () => {
       isLoading={appExists.appExistsLoading || isLoading || databasesAreLoading}
       onSearchTextChange={setQuery}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select database">
+        <List.Dropdown tooltip="Select database" onChange={setDatabaseUUID} storeValue>
           <List.Dropdown.Item title="All databases" value="" />
           <List.Dropdown.Section title="Specific database">
             {databases.map(({name, uuid}) => (
