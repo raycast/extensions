@@ -104,6 +104,7 @@ export default function StoryForm({
 
   const defaultWorkflowStateId = story?.workflow_state_id && String(story.workflow_state_id);
   const workflowStateFields = useFormField(defaultWorkflowStateId || draftValues?.workflow_state_id || "", {
+    // also valid when no workflow is selected
     validator: (value) => !!value,
     errorMessage: "Workflow state is required",
   });
@@ -204,15 +205,11 @@ export default function StoryForm({
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="workflow_id" title="Workflow" {...workflowFields}>
-        <Form.Dropdown.Item title="None" value={""} key="no_workflow" icon={Icon.XMarkCircleFilled} />
-
         {workflows?.map((workflow) => (
           <Form.Dropdown.Item title={workflow.name} value={workflow.id.toString()} key={workflow.id} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="workflow_state_id" title="State" {...workflowStateFields}>
-        <Form.Dropdown.Item title="None" value={""} key="no_state" icon={Icon.XMarkCircleFilled} />
-
         {workflowStates?.map((state) => (
           <Form.Dropdown.Item title={state.name} value={state.id.toString()} key={state.id} />
         ))}
