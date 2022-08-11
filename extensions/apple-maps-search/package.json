@@ -42,7 +42,15 @@
       "title": "Search Maps",
       "subtitle": "Apple Maps",
       "description": "Find a specific place or category on Apple Maps.",
-      "mode": "view",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Location or Category",
+          "type": "text",
+          "required": true
+        }
+      ],
       "keywords": [
         "find",
         "place"
@@ -86,7 +94,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1"
+    "@raycast/api": "^1.38.1",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
