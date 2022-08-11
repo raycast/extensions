@@ -22,13 +22,17 @@ const parseQuery = (q: string) => {
 export function filterFct(items: Item[], searchText: string) {
   const { qss, tss } = parseQuery(searchText);
 
+  if (!qss.trim() && tss.length < 1) {
+    return items;
+  }
+
   const options = {
     isCaseSensitive: false,
     includeScore: false,
     shouldSort: true,
     includeMatches: false,
     findAllMatches: true,
-    minMatchCharLength: 3,
+    minMatchCharLength: 1,
     threshold: 0.1,
     ignoreLocation: true,
     keys: [
@@ -64,10 +68,6 @@ export function filterFct(items: Item[], searchText: string) {
         $or: options.keys.map((x) => Object.fromEntries(new Map([[x.name, z.replace(/\+/gi, " ")]]))),
       })),
   };
-
-  if (!qss.trim() && tss.length < 1) {
-    return items;
-  }
 
   if (tss.length > 0 && query["$and"]) {
     query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });

@@ -11,9 +11,8 @@ const preferences = getPreferenceValues<Preferences>();
 export const pythonbin = preferences["python"].replace("~", homedir());
 
 export default function Command() {
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
-  const [filteredList, filterList] = useState<Item[]>(state.items);
-  const [searchText, setSearchText] = useState<string>("");
+  const [state, setState] = useState<State>({ items: [], isLoading: true, searchText: ""});
+  const [filteredList, filterList] = useState<Item[]>()
 
   useEffect(() => {
     async function loadItems() {
@@ -43,15 +42,17 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    filterList(filterFct(state.items, searchText));
-  }, [searchText, state.items]);
+    if (state.items.length > 0) {
+      filterList(filterFct(state.items, state.searchText));
+    }
+  }, [state.searchText, state.items]);
 
   return (
     <List
       isShowingDetail
       isLoading={(!state.items && !state.error) || state.isLoading}
       enableFiltering={false}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={(text) => setState((previous) => ({...previous, searchText: text}))}
     >
       {filteredList?.map((item, index) => (
         <ListBibmItem key={index} item={item} />

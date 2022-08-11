@@ -15,6 +15,7 @@ export interface State {
   isLoading: boolean;
   items: [];
   error?: Error;
+  searchText: string;
 }
 
 export interface Preferences {
