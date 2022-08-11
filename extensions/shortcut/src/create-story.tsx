@@ -1,11 +1,9 @@
-import { popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
+import { popToRoot, showToast, Toast, open } from "@raycast/api";
 import { CreateStoryParams, UpdateStory } from "@useshortcut/client";
 import StoryForm, { StoryFormRawValues } from "./components/StoryForm";
 import shortcut from "./utils/shortcut";
-import StoryDetail from "./components/StoryDetail";
 
 export default function CreateStory({ draftValues }: { draftValues: StoryFormRawValues }) {
-  const { push } = useNavigation();
   const onSubmit = async (story: CreateStoryParams | UpdateStory) => {
     const values = Object.entries(story).reduce((acc, [key, value]) => {
       return value === null
@@ -26,16 +24,11 @@ export default function CreateStory({ draftValues }: { draftValues: StoryFormRaw
         primaryAction: {
           title: "View Story",
           onAction: () => {
-            push(<StoryDetail storyId={story.id} />);
-          },
-        },
-        secondaryAction: {
-          title: "Close",
-          onAction: () => {
-            popToRoot();
+            open(story.app_url);
           },
         },
       });
+      popToRoot();
     } catch (error) {
       showToast({
         title: "Could not create story",
