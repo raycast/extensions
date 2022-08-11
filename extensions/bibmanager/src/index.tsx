@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import { List, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ListBibmItem } from "./ListBibmItem";
 import { Item, Preferences, State } from "./types";
@@ -12,9 +12,8 @@ export const pythonbin = preferences["python"].replace("~", homedir());
 
 export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true, searchText: "" });
-  const [filteredList, filterList] = useState<Item[]>();
 
-  useMemo(() => {
+  useEffect(() => {
     async function loadItems() {
       showToast(Toast.Style.Animated, "Browsing bibmanager");
       const python = spawn(pythonbin, [join(environment.assetsPath, "bibm_list.py"), "-u"]);
@@ -41,11 +40,7 @@ export default function Command() {
     loadItems();
   }, []);
 
-  useMemo(() => {
-    if (state.items.length > 0) {
-      filterList(filterFct(state.items, state.searchText));
-    }
-  }, [state.searchText, state.items]);
+  const filteredList: Item[] = useMemo(() => filterFct(state.items, state.searchText), [state.searchText, state.items]);
 
   return (
     <List
