@@ -17,7 +17,12 @@ export default function CreateStory({ draftValues }: { draftValues: StoryFormRaw
     }, {} as CreateStoryParams);
 
     try {
-      await shortcut.createStory(values);
+      const story = await shortcut.createStory(values);
+      showToast({
+        title: `Story #${story.data.id} created`,
+        style: Toast.Style.Success,
+      });
+
       popToRoot();
     } catch (error) {
       showToast({
