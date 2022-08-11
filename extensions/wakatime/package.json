@@ -56,7 +56,16 @@
       "title": "Show Today Summary",
       "description": "Show Today's Summary in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "description": "Use your WakaTime API key to use your account",
+          "type": "password",
+          "required": true,
+          "title": "WakaTime API Key"
+        }
+      ]
     }
   ],
   "preferences": [
