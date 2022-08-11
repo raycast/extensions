@@ -8,7 +8,7 @@ import { MutatePromise } from "@raycast/utils";
 type IssueCommentFormProps = {
   issue: IssueResult;
   comment?: CommentResult;
-  mutateComments: MutatePromise<CommentResult[] | undefined>;
+  mutateComments?: MutatePromise<CommentResult[] | undefined>;
 };
 
 export default function IssueCommentForm({ comment, issue, mutateComments }: IssueCommentFormProps) {
@@ -28,7 +28,10 @@ export default function IssueCommentForm({ comment, issue, mutateComments }: Iss
       await showToast({ style: Toast.Style.Success, title: `${comment ? "Updated" : "Added"} comment` });
 
       pop();
-      mutateComments();
+
+      if (mutateComments) {
+        mutateComments();
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
