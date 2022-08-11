@@ -184,6 +184,14 @@
       "subtitle": "Vuepress v2",
       "description": "Search Vuepress v2 documentation",
       "mode": "view"
+    },
+    {
+      "name": "ipfs",
+      "icon": "../assets/logo/ipfs.png",
+      "title": "Search Documentation",
+      "subtitle": "IPFS",
+      "description": "Search IPFS documentation",
+      "mode": "view"
     }
   ],
   "dependencies": {

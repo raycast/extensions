@@ -4,12 +4,6 @@ Link **all DocSearch** into Raycast.
 
 ![interface](./metadata/docsearch-1.png)
 
-### Install
-
-<a title="Install DocSearch Raycast Extension" href="https://www.raycast.com/Fatpandac/docsearch#install">
-   <img height="64" style="height: 64px" src="https://assets.raycast.com/Fatpandac/docsearch/install_button@2x.png">
-</a> 
-
 ### Add Other Documentation
 
 1. The documentation web is supported [DocSearch](https://docsearch.camunda.com/).
