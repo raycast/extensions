@@ -1,0 +1,32 @@
+name: Publish to store
+
+on:
+  push:
+    tags:        
+      - '*'
+  workflow_dispatch:
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  copy-files:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Pushes test file
+      uses: dmnemec/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source_file: '.'
+        destination_repo: 'Sparclex/raycast-extensions'
+        destination_folder: 'extensions/hakuna'
+        user_email: 'silvan@kbuhl.ch'
+        user_name: 'Sparclex'
+        commit-message: 'Hakuna Release ${{ env.RELEASE_VERSION }}'
