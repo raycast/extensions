@@ -19,6 +19,7 @@ const search = () => {
   return (
     <List
       isLoading={appExists.appExistsLoading || isLoading || databasesAreLoading}
+      searchBarPlaceholder="DEVON search query..."
       onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Select database" onChange={setDatabaseUUID} storeValue>
