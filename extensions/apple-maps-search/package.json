@@ -24,7 +24,7 @@
       "description": "Open Apple Maps with directions from your current location to your home.",
       "mode": "no-view",
       "keywords": [
-        "travel"
+        "travel home"
       ]
     },
     {
@@ -34,7 +34,7 @@
       "description": "Open Apple Maps with directions to a destination.",
       "mode": "view",
       "keywords": [
-        "travel"
+        "travel to"
       ]
     },
     {
@@ -52,8 +52,7 @@
         }
       ],
       "keywords": [
-        "find",
-        "place"
+        "find place"
       ]
     }
   ],
