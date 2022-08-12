@@ -59,15 +59,15 @@ export default function Databases() {
             accessories={[
               replicas === "Global"
                 ? {
-                  text: replicas,
-                  icon: {
-                    source: Icon.Globe,
-                    tintColor: Color.Green,
-                  },
-                }
+                    text: replicas,
+                    icon: {
+                      source: Icon.Globe,
+                      tintColor: Color.Green,
+                    },
+                  }
                 : {
-                  text: replicas,
-                },
+                    text: replicas,
+                  },
               {
                 text: `TLS`,
                 tooltip: database.tls ? "Enabled" : "Disabled",
