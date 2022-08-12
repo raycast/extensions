@@ -72,7 +72,7 @@ const searchInDEVONThink = async (databaseUUID: string, query: string) => {
   return results.sort((a, b) => b.score - a.score);
 };
 
-export const handleError = (err: Error) => {
+export const handleError = (err: string) => {
   console.log(err);
-  return showToast(Style.Failure, err.message);
+  return showToast(Style.Failure, "Failed to perform the operation", err);
 };
