@@ -35,7 +35,7 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
       {story && (
         <>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open story on Shortcut" url={story?.app_url} icon="command-icon.png" />
+            <Action.OpenInBrowser title="Open Story on Shortcut" url={story?.app_url} icon="command-icon.png" />
 
             <Action.Push
               title="Edit Story"
@@ -246,6 +246,10 @@ export default function StoryActions({ story, mutate }: { story?: Story | StoryS
               style={Action.Style.Destructive}
               title="Delete Story"
               icon={Icon.Trash}
+              shortcut={{
+                modifiers: ["cmd", "shift"],
+                key: "backspace",
+              }}
               onAction={() => {
                 confirmAlert({
                   title: "Delete Story",
