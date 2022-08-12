@@ -32,7 +32,7 @@ const search = () => {
       }
       throttle
     >
-      {appExists ? results.map(mapResult) : noApp}
+      {appExists.appExists ? results.map(mapResult) : noApp}
     </List>
   );
 };
