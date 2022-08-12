@@ -18,7 +18,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "travelHome",
+      "name": "directionsHome",
       "title": "Directions Home",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions from your current location to your home.",
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "name": "travelTo",
+      "name": "directionsTo",
       "title": "Directions To",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions to a destination.",
@@ -38,7 +38,7 @@
       ]
     },
     {
-      "name": "find",
+      "name": "searchMaps",
       "title": "Search Maps",
       "subtitle": "Apple Maps",
       "description": "Find a specific place or category on Apple Maps.",
