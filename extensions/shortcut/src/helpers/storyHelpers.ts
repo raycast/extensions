@@ -82,6 +82,8 @@ export const useFormField = <T>(
 
   const onChange = (newValue: T) => {
     setValue(newValue);
+
+    setError(undefined);
   };
 
   const onBlur = () => {
