@@ -1,7 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
-import { toTitleCase } from "./util";
 
 interface Preferences {
   apiKey: string;
@@ -99,7 +98,7 @@ export default function Command() {
               return record.map((record: any, index: number) => (
                 <Form.Description
                   key={index}
-                  title={toTitleCase(Object.keys(record)[index])}
+                  title={Object.keys(record)[index]}
                   text={`${Object.values(record)[index]}`}
                 />
               ));
@@ -108,7 +107,7 @@ export default function Command() {
             return (
               <Form.Description
                 key={index}
-                title={toTitleCase(Object.keys(output)[index])}
+                title={Object.keys(output)[index]}
                 text={`${Object.values(output)[index]}`}
               />
             );
