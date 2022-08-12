@@ -5,6 +5,6 @@ export interface IAPIData {
   apiKey: string;
   indexName: string;
   homepage: string;
-  subtitle?: string;
+  lang?: string;
   searchParameters?: object;
 }
