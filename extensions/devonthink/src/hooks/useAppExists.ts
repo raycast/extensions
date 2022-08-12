@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {getApplications, open, showToast, Toast} from "@raycast/api";
+import { getApplications, open, showToast, Toast } from "@raycast/api";
 
 export type UseAppExists = {
   appExistsLoading: boolean;
@@ -24,10 +24,8 @@ const useAppExists = () => {
       title: "DEVONthink 3 is not installed",
       primaryAction: {
         title: "Download app",
-        onAction: (toast) =>
-          open("https://www.devontechnologies.com/apps/devonthink")
-            .then(() => toast.hide())
-      }
+        onAction: (toast) => open("https://www.devontechnologies.com/apps/devonthink").then(() => toast.hide()),
+      },
     });
   }, [state.appExistsLoading, state.appExists]);
 
