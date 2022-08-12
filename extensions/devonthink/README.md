@@ -13,4 +13,7 @@ Make sure to give Raycast permissions for automation for DEVONthink.
 You can manage permissions of Raycast to automate DEVONthink in
 System Preferences > Security & Privacy > Privacy > Automation.
 
+Extension delegates search to the app itself, so you can use the same [search operators][2] you're using in the app.
+
 [1]: https://www.devontechnologies.com/apps/devonthink
+[2]: https://www.devontechnologies.com/blog/20200818-advanced-searching-devonthink
