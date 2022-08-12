@@ -25,10 +25,17 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState({} as EnrichmentItem);
   const [url, setUrl] = useState("");
+  const [domainError, setDomainError] = useState<string | undefined>();
+
+  function dropDomainErrorIfNeeded() {
+    if (domainError && domainError.length > 0) {
+      setDomainError(undefined);
+    }
+  }
 
   async function handleSubmit(values: CommandForm) {
-    if (values.domain == "") {
-      showToast(Toast.Style.Failure, "Error", "Domain is required");
+    if (values.domain.length == 0) {
+      setDomainError("This field is required!");
       return;
     }
 
@@ -45,15 +52,14 @@ export default function Command() {
       .get(url)
       .then((response) => {
         toast.style = Toast.Style.Success;
-        toast.title = "Company enrichment retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
+        toast.title = "Company enrichment data retrieved";
 
         setUrl(url);
         setOutput(response.data);
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
-        toast.title = "Unable to retrieve company enrichment";
+        toast.title = "Unable to retrieve company enrichment data";
         toast.message = error.response.data.error.message ?? "";
       });
   }
@@ -72,7 +78,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="domain" title="Domain" placeholder="Enter domain" />
+      <Form.TextField
+        id="domain"
+        title="Domain"
+        placeholder="Enter domain"
+        error={domainError}
+        onChange={dropDomainErrorIfNeeded}
+      />
       {output.name ? (
         <>
           <Form.Separator />

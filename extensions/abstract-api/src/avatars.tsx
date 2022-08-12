@@ -34,16 +34,13 @@ export default function Command() {
   function getUrl() {
     const baseUrl = "https://avatars.abstractapi.com/v1";
     const urlFriendlyName = encodeURIComponent(name);
-
     return `${baseUrl}/?api_key=${preferences.avatarsApiKey}&name=${urlFriendlyName}&image_format=png`;
   }
 
   async function submitAndOpen() {
-    if (!validate()) {
-      return;
+    if (validate()) {
+      open(getUrl());
     }
-
-    open(getUrl());
   }
 
   async function submitAndDownload() {
@@ -63,7 +60,7 @@ export default function Command() {
         response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${filename}.png`));
 
         toast.style = Toast.Style.Success;
-        toast.title = "Avatar saved to downloads successfully";
+        toast.title = "Avatar saved to downloads";
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;

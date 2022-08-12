@@ -9,71 +9,64 @@ interface Preferences {
   scrapeApiKey: string;
 }
 
-interface CommandForm {
-  url: string;
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [websiteUrlError, setWebsiteUrlError] = useState<string | undefined>();
 
-  async function handleSubmit(values: CommandForm) {
-    if (values.url == "") {
-      showToast(Toast.Style.Failure, "Error", "URL is required");
+  function dropWebsiteUrlErrorIfNeeded() {
+    if (websiteUrlError && websiteUrlError.length > 0) {
+      setWebsiteUrlError(undefined);
+    }
+  }
+
+  function validate() {
+    if (websiteUrl.length == 0) {
+      setWebsiteUrlError("This field is required!");
+
+      return false;
+    } else {
+      dropWebsiteUrlErrorIfNeeded();
+    }
+
+    return true;
+  }
+
+  function getUrl() {
+    const baseUrl = "https://scrape.abstractapi.com/v1";
+    const formUrl = encodeURIComponent(websiteUrl);
+    return `${baseUrl}/?api_key=${preferences.scrapeApiKey}&url=${formUrl}`;
+  }
+
+  async function submitAndOpen() {
+    if (validate()) {
+      open(getUrl());
+    }
+  }
+
+  async function submitAndDownload() {
+    if (!validate()) {
       return;
     }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Retrieving scrape...",
+      title: "Saving scrape...",
     });
 
-    const baseUrl = "https://scrape.abstractapi.com/v1";
-    const formUrl = encodeURIComponent(values.url);
-    const url = `${baseUrl}/?api_key=${preferences.scrapeApiKey}&url=${formUrl}`;
-
     await axios
-      .get(url)
+      .get(getUrl(), { responseType: "stream" })
       .then((response) => {
+        const hostname = extractHostname(websiteUrl);
+        response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${hostname}.html`));
+
         toast.style = Toast.Style.Success;
-        toast.title = "Scrape retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
-
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Download",
-          onAction: async (toast) => {
-            toast.style = Toast.Style.Animated;
-            toast.title = "Saving scrape";
-
-            await axios
-              .get(url, { responseType: "stream" })
-              .then((response) => {
-                const hostname = extractHostname(values.url);
-                response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${hostname}.html`));
-
-                toast.style = Toast.Style.Success;
-                toast.title = "Scrape saved to downloads successfully";
-              })
-              .catch((error) => {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Unable to retrieve scrape";
-                toast.message = error.response.data.error.message ?? "";
-              });
-          },
-        };
-
-        setOutput(JSON.stringify(response.data));
+        toast.title = "Scraped website saved to downloads";
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
-        toast.title = "Unable to retrieve scrape";
+        toast.title = "Unable to scrape website";
         toast.message = error.response.data.error.message ?? "";
       });
   }
@@ -82,11 +75,21 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Scrape" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          <Action.SubmitForm title="Download" onSubmit={submitAndDownload} icon={Icon.Download} />
+          <Action.SubmitForm title="Open in Browser" onSubmit={submitAndOpen} icon={Icon.Globe} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="Enter url" />
+      <Form.TextField
+        id="websiteUrl"
+        title="Website URL"
+        placeholder="https://raycast.com"
+        error={websiteUrlError}
+        onChange={(value) => {
+          setWebsiteUrl(value);
+          dropWebsiteUrlErrorIfNeeded();
+        }}
+      />
       {output ? (
         <>
           <Form.Separator />

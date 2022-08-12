@@ -26,34 +26,21 @@ interface HolidayItem {
   week_day: string;
 }
 
-function HolidaysItem(props: { item: HolidayItem }) {
-  const item = props.item;
-
-  return (
-    <>
-      <Form.Description title="Name" text={`${item.name}`} />
-      <Form.Description title="Name Local" text={`${item.name_local}`} />
-      <Form.Description title="Language" text={`${item.language}`} />
-      <Form.Description title="Description" text={`${item.description}`} />
-      <Form.Description title="Country" text={`${item.country}`} />
-      <Form.Description title="Location" text={`${item.location}`} />
-      <Form.Description title="Type" text={`${item.type}`} />
-      <Form.Description title="Date" text={`${item.date}`} />
-      <Form.Description title="Date Year" text={`${item.date_year}`} />
-      <Form.Description title="Date Month" text={`${item.date_month}`} />
-      <Form.Description title="Date Day" text={`${item.date_day}`} />
-      <Form.Description title="Week Day" text={`${item.week_day}`} />
-    </>
-  );
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState([] as HolidayItem[]);
+  const [url, setUrl] = useState("");
+  const [countryError, setCountryError] = useState<string | undefined>();
+
+  function dropCountryErrorIfNeeded() {
+    if (countryError && countryError.length > 0) {
+      setCountryError(undefined);
+    }
+  }
 
   async function handleSubmit(values: CommandForm) {
     if (values.country == "") {
-      showToast(Toast.Style.Failure, "Error", "Country is required");
+      setCountryError("This field is required!");
       return;
     }
 
@@ -80,25 +67,8 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Holidays retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Copy to Clipboard",
-          onAction: async (toast) => {
-            await Clipboard.copy(JSON.stringify(response.data));
-
-            toast.title = "Holidays output copied to clipboard";
-            toast.message = undefined;
-          },
-        };
-
+        setUrl(url);
         setOutput(response.data);
       })
       .catch((error) => {
@@ -116,7 +86,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="country" title="Country" placeholder="Enter country" />
+      <Form.TextField
+        id="country"
+        title="Country"
+        placeholder="Enter country"
+        error={countryError}
+        onChange={dropCountryErrorIfNeeded}
+      />
       <Form.DatePicker id="date" title="Date" defaultValue={new Date()} />
       {output.length > 0 ? (
         <>
@@ -127,5 +103,26 @@ export default function Command() {
         </>
       ) : null}
     </Form>
+  );
+}
+
+function HolidaysItem(props: { item: HolidayItem }) {
+  const item = props.item;
+
+  return (
+    <>
+      <Form.Description title="Name" text={`${item.name}`} />
+      <Form.Description title="Name Local" text={`${item.name_local}`} />
+      <Form.Description title="Language" text={`${item.language}`} />
+      <Form.Description title="Description" text={`${item.description}`} />
+      <Form.Description title="Country" text={`${item.country}`} />
+      <Form.Description title="Location" text={`${item.location}`} />
+      <Form.Description title="Type" text={`${item.type}`} />
+      <Form.Description title="Date" text={`${item.date}`} />
+      <Form.Description title="Date Year" text={`${item.date_year}`} />
+      <Form.Description title="Date Month" text={`${item.date_month}`} />
+      <Form.Description title="Date Day" text={`${item.date_day}`} />
+      <Form.Description title="Week Day" text={`${item.week_day}`} />
+    </>
   );
 }

@@ -14,10 +14,17 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState({} as any);
   const [url, setUrl] = useState("");
+  const [ipAddressError, setIpAddressError] = useState<string | undefined>();
+
+  function dropIpAddressErrorIfNeeded() {
+    if (ipAddressError && ipAddressError.length > 0) {
+      setIpAddressError(undefined);
+    }
+  }
 
   async function handleSubmit(values: CommandForm) {
     if (values.ipAddress == "") {
-      showToast(Toast.Style.Failure, "Error", "IP address is required");
+      setIpAddressError("This field is required!");
       return;
     }
 
@@ -59,7 +66,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="ipAddress" title="IP Address" placeholder="Enter IP address" />
+      <Form.TextField
+        id="ipAddress"
+        title="IP Address"
+        placeholder="Enter IP address"
+        error={ipAddressError}
+        onChange={dropIpAddressErrorIfNeeded}
+      />
       {output.ip_address ? (
         <>
           <Form.Separator />

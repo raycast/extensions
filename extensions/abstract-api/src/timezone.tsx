@@ -25,10 +25,12 @@ interface TimezoneOutput {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState({} as TimezoneOutput);
+  const [url, setUrl] = useState("");
+  const [locationError, setLocationError] = useState<string | undefined>();
 
   async function handleSubmit(values: CommandForm) {
     if (values.location == "") {
-      showToast(Toast.Style.Failure, "Error", "Location is required");
+      setLocationError("This field is required!");
       return;
     }
 
@@ -46,25 +48,8 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Timezone retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Copy to Clipboard",
-          onAction: async (toast) => {
-            await Clipboard.copy(JSON.stringify(response.data));
-
-            toast.title = "Timezone output copied to clipboard";
-            toast.message = undefined;
-          },
-        };
-
+        setUrl(url);
         setOutput(response.data);
       })
       .catch((error) => {
@@ -79,6 +64,12 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get Timezone" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url ? (
+            <>
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={url} />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >

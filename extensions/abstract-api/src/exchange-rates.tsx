@@ -14,15 +14,30 @@ interface CommandForm {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState("");
+  const [url, setUrl] = useState("");
+  const [targetError, setTargetError] = useState<string | undefined>();
+  const [baseError, setBaseError] = useState<string | undefined>();
+
+  function dropTargetErrorIfNeeded() {
+    if (targetError && targetError.length > 0) {
+      setTargetError(undefined);
+    }
+  }
+
+  function dropBaseErrorIfNeeded() {
+    if (baseError && baseError.length > 0) {
+      setBaseError(undefined);
+    }
+  }
 
   async function handleSubmit(values: CommandForm) {
     if (values.base == "") {
-      showToast(Toast.Style.Failure, "Error", "Base is required");
+      setTargetError("This field is required!");
       return;
     }
 
     if (values.target == "") {
-      showToast(Toast.Style.Failure, "Error", "Target is required");
+      setBaseError("This field is required!");
       return;
     }
 
@@ -41,25 +56,8 @@ export default function Command() {
       .then((response) => {
         toast.style = Toast.Style.Success;
         toast.title = "Exchange rates retrieved successfully";
-        toast.message = "Hover over the toast to see available actions";
-        toast.primaryAction = {
-          title: "Open in Browser",
-          onAction: (toast) => {
-            open(url);
 
-            toast.hide();
-          },
-        };
-        toast.secondaryAction = {
-          title: "Copy to Clipboard",
-          onAction: async (toast) => {
-            await Clipboard.copy(JSON.stringify(response.data));
-
-            toast.title = "Exchange rates output copied to clipboard";
-            toast.message = undefined;
-          },
-        };
-
+        setUrl(url);
         setOutput(JSON.stringify(response.data));
       })
       .catch((error) => {
@@ -74,11 +72,29 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Get Exchange Rates" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url ? (
+            <>
+              <Action.OpenInBrowser title="Open in Browser" url={url} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={url} />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >
-      <Form.TextField id="base" title="Base" placeholder="Enter base" />
-      <Form.TextField id="target" title="Target" placeholder="Enter target" />
+      <Form.TextField
+        id="base"
+        title="Base"
+        placeholder="Enter base"
+        error={baseError}
+        onChange={dropBaseErrorIfNeeded}
+      />
+      <Form.TextField
+        id="target"
+        title="Target"
+        placeholder="Enter target"
+        error={targetError}
+        onChange={dropTargetErrorIfNeeded}
+      />
       {output ? (
         <>
           <Form.Separator />
