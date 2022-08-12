@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { ActionCopyScreenshotUrl, ActionDeleteIncident } from "./actions";
