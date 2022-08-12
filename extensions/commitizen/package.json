@@ -13,7 +13,7 @@
     {
       "name": "commitizen",
       "title": "Commitizen",
-      "description": "",
+      "description": "The commitizen utility",
       "mode": "view"
     }
   ],
