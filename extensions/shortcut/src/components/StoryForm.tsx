@@ -76,7 +76,7 @@ export default function StoryForm({
     isIterationsLoading ||
     isTeamsLoading;
 
-  const storyFields = useFormField(story?.name ?? (draftValues?.name || ""), {
+  const storyNameFields = useFormField(story?.name ?? (draftValues?.name || ""), {
     validator: (value) => value.length > 0 && value.length <= 512,
     errorMessage: "Name is required, and must be less than 512 characters",
   });
@@ -114,6 +114,8 @@ export default function StoryForm({
     [workflows, workflowFields.value]
   );
 
+  const requiredFields = [storyNameFields, workflowFields, workflowStateFields];
+
   // Load the workflow states when the workflow changes
   useEffect(() => {
     if (!workflowFields.value && workflows && workflows?.length > 0) {
@@ -135,6 +137,10 @@ export default function StoryForm({
             title={submitTitle || "Create Story"}
             icon={Icon.ArrowUpCircleFilled}
             onSubmit={async (values: StoryFormRawValues) => {
+              if (requiredFields.some((field) => !field.validate())) {
+                return;
+              }
+
               setIsSubmitting(true);
 
               try {
@@ -153,7 +159,7 @@ export default function StoryForm({
         </ActionPanel>
       }
     >
-      <Form.TextField title="Title" id="name" {...storyFields} />
+      <Form.TextField title="Title" id="name" {...storyNameFields} />
       <Form.TextArea enableMarkdown title="Description" id="description" {...descriptionFields} />
       <Form.Dropdown id="estimate" title="Estimate" {...estimateFields}>
         <Form.Dropdown.Item title="None" value={""} key="no_estimate" icon={Icon.XMarkCircleFilled} />

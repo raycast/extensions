@@ -68,17 +68,25 @@ export const useFormField = <T>(
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | undefined>();
 
+  const validate = () => {
+    if (validator && !validator(value)) {
+      setError(errorMessage);
+
+      return false;
+    } else {
+      setError(undefined);
+
+      return true;
+    }
+  };
+
   const onChange = (newValue: T) => {
     setValue(newValue);
   };
 
-  useEffect(() => {
-    if (validator && !validator(value)) {
-      setError(errorMessage);
-    } else {
-      setError(undefined);
-    }
-  }, [value]);
+  const onBlur = () => {
+    validate();
+  };
 
-  return { value, onChange, error };
+  return { value, onChange, error, onBlur, validate };
 };
