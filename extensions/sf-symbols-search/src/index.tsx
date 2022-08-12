@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Grid, getPreferenceValues, Color } from "@raycast/api";
 import { Symbol, getSymbols, categories } from "./utils/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import fs from "fs";
 
 interface Preferences {
@@ -19,18 +19,10 @@ export default function Command() {
       : Grid.ItemSize.Large;
   const showName = prefs.showName;
 
-  const [category, setCategory] = useState<string | null>(null);
   const [symbols, setSymbols] = useState<Symbol[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setSymbols(getSymbols(category));
-    setIsLoading(false);
-  }, [category]);
 
   return (
     <Grid
-      isLoading={isLoading}
       itemSize={size}
       inset={Grid.Inset.Small}
       searchBarPlaceholder="Search SF Symbols..."
@@ -39,8 +31,11 @@ export default function Command() {
           storeValue={true}
           tooltip="Categories"
           onChange={(value: string) => {
-            if (value) setCategory(value);
-            else setCategory(null);
+            if (value) {
+              setSymbols(getSymbols(value));
+            } else {
+              setSymbols(getSymbols(null));
+            }
           }}
         >
           <Grid.Dropdown.Item value={""} title="All Categories" />
