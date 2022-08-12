@@ -163,6 +163,21 @@ export default <IAPIData[]>[
     appId: "ML0LEBN7FQ",
     indexName: "vuejs",
     homepage: "https://vuejs.org/",
+    searchParameters: {
+      facetFilters: ["version:v3"],
+    },
+  },
+  {
+    name: "Vue3",
+    icon: "../assets/logo/vue.png",
+    apiKey: "c23eb8e7895f42daeaf2bf6f63eb4bf6",
+    appId: "UURH1MHAF7",
+    indexName: "vuejs_cn2",
+    lang: "zh-Hans",
+    homepage: "https://vuejs.org/",
+    searchParameters: {
+      facetFilters: ["version:v3"],
+    },
   },
   {
     name: "Vue Router4",

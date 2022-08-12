@@ -154,6 +154,14 @@
       "mode": "view"
     },
     {
+      "name": "vue3_zh-Hans",
+      "icon": "../assets/logo/vue.png",
+      "title": "Search Documentation",
+      "subtitle": "Vue3(zh-Hans)",
+      "description": "Search Vue3 documentation",
+      "mode": "view"
+    },
+    {
       "name": "vueRouter4",
       "icon": "../assets/logo/vue.png",
       "title": "Search Documentation",
