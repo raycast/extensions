@@ -37,7 +37,8 @@ export default function Command() {
         <ActionPanel>
           <Action.OpenInBrowser
             url={makeDirectionsURL(originAddress, destination, mode)}
-            icon={Icon.Globe}
+            icon={Icon.Map}
+            title="Open in Apple Maps"
             onOpen={() => popToRoot()}
           />
           <Action.CopyToClipboard
