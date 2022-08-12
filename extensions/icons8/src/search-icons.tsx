@@ -1,7 +1,7 @@
 import { Grid, Color } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
-import { getStoredOptions, setStoredOptions } from "./utils/options";
+import { defaultOptions, getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
 import { gridSize, numRecent } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
@@ -61,19 +61,19 @@ export default function SearchIcons() {
     };
   }, [searchText, style]);
 
-  const [imageOptions, setImageOptions] = useState<Options>();
+  const [options, setOptions] = useState<Options>(defaultOptions);
 
   useEffect(() => {
-    const getImageOptions = async () => setImageOptions(await getStoredOptions());
-    getImageOptions();
+    const getOptions = async () => setOptions(await getStoredOptions());
+    getOptions();
   }, []);
 
   useEffect(() => {
-    const storeImageOptions = async () => {
-      if (imageOptions) await setStoredOptions(imageOptions);
+    const storeOptions = async () => {
+      if (options) await setStoredOptions(options);
     };
-    storeImageOptions();
-  }, [imageOptions]);
+    storeOptions();
+  }, [options]);
 
   return styles ? (
     <Grid
@@ -134,8 +134,8 @@ export default function SearchIcons() {
                     refresh={refreshIcons}
                     pinned={true}
                     movement={movement}
-                    options={imageOptions}
-                    setOptions={setImageOptions}
+                    options={options}
+                    setOptions={setOptions}
                   />
                 );
               })}
@@ -148,8 +148,8 @@ export default function SearchIcons() {
                   platform={style}
                   refresh={refreshIcons}
                   recent={true}
-                  options={imageOptions}
-                  setOptions={setImageOptions}
+                  options={options}
+                  setOptions={setOptions}
                 />
               ))}
             </Grid.Section>
@@ -161,8 +161,8 @@ export default function SearchIcons() {
           icon={icon}
           platform={style}
           refresh={refreshIcons}
-          options={imageOptions}
-          setOptions={setImageOptions}
+          options={options}
+          setOptions={setOptions}
         />
       ))}
     </Grid>

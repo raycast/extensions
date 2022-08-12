@@ -28,7 +28,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
       isColor: icon.isColor,
     }));
     return icons8;
-  } catch (e: any) {
+  } catch (e) {
     console.error(e);
     return [];
   }
@@ -52,7 +52,7 @@ export const getStyles = async (): Promise<Style[] | null> => {
       url: platform.preview,
     }));
     return styles;
-  } catch (e: any) {
+  } catch (e) {
     console.error(e);
     return null;
   }

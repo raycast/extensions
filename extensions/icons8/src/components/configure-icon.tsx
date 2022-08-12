@@ -1,6 +1,6 @@
 import { Form, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import { ConfigureProps } from "../types/types";
+import { ConfigureProps, Format } from "../types/types";
 import { color as d3color } from "d3-color";
 import { homedir } from "os";
 import fs from "fs";
@@ -76,7 +76,7 @@ const ImageFormat = (props: ConfigureProps): JSX.Element => {
       title="Image Format"
       defaultValue={props.options.format}
       onChange={(value: string) => {
-        props.setOptions({ ...props.options, format: value });
+        props.setOptions({ ...props.options, format: value as Format });
       }}
     >
       {formats.map((format: string, index: number) => (
@@ -116,7 +116,7 @@ const IconColor = (props: ConfigureProps): JSX.Element => {
       info={infoMessage}
       onChange={(value: string) => {
         value = value.trim();
-        let color = d3color(value) || d3color(`#${value}`);
+        const color = d3color(value) || d3color(`#${value}`);
         if (color) {
           setError(undefined);
           props.setOptions({ ...props.options, color: color.formatHex() });

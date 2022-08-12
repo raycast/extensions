@@ -35,13 +35,15 @@ export interface Style {
   url: string;
 }
 
+export type Format = "png" | "jpg" | "webp";
+
 export interface Options {
   path: string;
   color: string;
   bgcolor: string | null;
   padding: number;
   size: number;
-  format: "png" | "jpg" | "webp";
+  format: Format;
 }
 
 export interface PinnedMovement {
@@ -58,8 +60,8 @@ export interface IconProps {
   pinned?: boolean;
   recent?: boolean;
   movement?: PinnedMovement;
-  options: any;
-  setOptions: (options: any) => void;
+  options: Options;
+  setOptions: (options: Options) => void;
 }
 
 export interface IconActionProps {
@@ -71,5 +73,5 @@ export interface IconActionProps {
 export interface ConfigureProps {
   icon: Icon8;
   options: Options;
-  setOptions: (options: any) => void;
+  setOptions: (options: Options) => void;
 }
