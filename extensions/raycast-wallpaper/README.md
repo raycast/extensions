@@ -2,7 +2,9 @@
 
 Set Raycast official wallpapers as desktop wallpaper.
 
-**Tips:** If you can't set the wallpaper correctly, please use the Clear Picture Cache action to clear the cache.
+**Tips:**
+
+- If you don't like the automatic wallpaper switching feature, turn it off by turning off the Background Refresh function in the command's preferences
 
 Want more **Media** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

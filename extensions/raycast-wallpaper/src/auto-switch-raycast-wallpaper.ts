@@ -1,10 +1,17 @@
-import { setWallpaper } from "./utils/common-utils";
+import { autoSetWallpaper } from "./utils/common-utils";
 import { LocalStorageKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper } from "./types/types";
-import { LocalStorage, showHUD } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, showHUD } from "@raycast/api";
 import axios from "axios";
 
 export default async () => {
+  if (environment.launchType === LaunchType.UserInitiated) {
+    await showHUD("Downloading and setting wallpaper...");
+  }
+  await getRandomWallpaper();
+};
+
+export const getRandomWallpaper = async () => {
   try {
     const _localStorage = await LocalStorage.getItem<string>(LocalStorageKey.WALLPAPER_LIST_CACHE);
     const _wallpaperList =
@@ -12,7 +19,7 @@ export default async () => {
 
     if (_wallpaperList.length !== 0) {
       const randomImage = _wallpaperList[Math.floor(Math.random() * _wallpaperList.length)];
-      await setWallpaper(randomImage);
+      await autoSetWallpaper(randomImage);
     } else {
       //cache picture
       await axios({
@@ -25,7 +32,7 @@ export default async () => {
         .then((axiosRes) => {
           const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
           const randomImage = _raycastWallpaper[Math.floor(Math.random() * _raycastWallpaper.length)];
-          setWallpaper(randomImage);
+          autoSetWallpaper(randomImage);
 
           //cache list
           LocalStorage.setItem(LocalStorageKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
