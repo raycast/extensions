@@ -58,7 +58,7 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: any; onDeleted:
         });
 
         await axios
-          .delete(`https://betteruptime.com/api/v2/heartbeats/${item.id}`, {
+          .delete(`https://betteruptime.com/api/v2/monitors/${item.id}`, {
             headers: { Authorization: `Bearer ${preferences.apiKey}` },
           })
           .then(() => {
