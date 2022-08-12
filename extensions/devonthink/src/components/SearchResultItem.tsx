@@ -8,6 +8,8 @@ const SearchResultItem = ({ result }: { result: SearchResult }) => (
     actions={
       <ActionPanel>
         <Action.Open title="Open in DEVONthink" target={`x-devonthink-item://${result.uuid}`} />
+        <Action.Open title="Open in the default app" target={result.path} />
+        <Action.Open title="Reveal in DEVONthink" target={`x-devonthink-item://${result.uuid}?reveal=1`} />
       </ActionPanel>
     }
   />
