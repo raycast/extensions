@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Toast, showToast, Icon, Color, LocalStorage } from "@raycast/api";
 import React from "react";
-import { Icon8 } from "../types/types";
-import { IconProps } from "../components/icon";
-import { getGridSize } from "./grid";
+import { Icon8, IconProps, PinnedMovement } from "../types/types";
+import { gridSize } from "./utils";
 
 export const IconStorageActions = (args: { props: IconProps; showMovement?: boolean }) => {
   const props = args.props;
@@ -169,16 +168,9 @@ const clearPinnedIcons = async (platform?: string) => {
   }
 };
 
-export interface PinnedMovement {
-  up: boolean;
-  right: boolean;
-  down: boolean;
-  left: boolean;
-}
-
 export const getPinnedMovement = (icons: Icon8[], id: string): PinnedMovement => {
   const index = icons.findIndex((icon: Icon8) => icon.id === id);
-  const itemsPerRow = getGridSize() === "small" ? 8 : 5;
+  const itemsPerRow = gridSize === "small" ? 8 : 5;
   const up = index >= itemsPerRow && index % itemsPerRow === 0;
   const down = index < Math.floor(icons.length / itemsPerRow) * itemsPerRow && (index + 1) % itemsPerRow === 0;
   const right = !down && index !== icons.length - 1;

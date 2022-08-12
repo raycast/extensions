@@ -3,15 +3,13 @@ import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
-import { getGridSize, numRecent } from "./utils/grid";
+import { gridSize, numRecent } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8Item } from "./components/icon";
-import { Icon8, Style } from "./types/types";
+import { Icon8, Options, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 
 export default function SearchIcons() {
-  const gridSize: Grid.ItemSize = getGridSize();
-
   const [searchText, setSearchText] = useState("");
   const [icons, setIcons] = useState<Icon8[] | null>([]);
 
@@ -21,8 +19,9 @@ export default function SearchIcons() {
 
   useEffect(() => {
     const fetchStyles = async () => {
-      setStyles(await getStyles());
+      await getStoredIcons();
       setIsLoading(false);
+      setStyles(await getStyles());
     };
     fetchStyles();
   }, []);
@@ -32,15 +31,12 @@ export default function SearchIcons() {
 
   const getStoredIcons = async () => {
     let pinned = await getPinnedIcons();
-    if (style) {
-      pinned = pinned.filter((icon) => icon.platform === style);
-    }
-    setPinnedIcons(pinned);
     let recent = await getRecentIcons();
     if (style) {
-      recent = recent.filter((icon) => icon.platform === style);
+      pinned = pinned.filter((icon) => icon.platform === style);
+      recent = recent.filter((icon) => icon.platform === style).slice(0, numRecent);
     }
-    recent = recent.slice(0, numRecent);
+    setPinnedIcons(pinned);
     setRecentIcons(recent);
   };
 
@@ -48,10 +44,8 @@ export default function SearchIcons() {
   const refreshIcons = () => setRefresh(!refresh);
 
   useEffect(() => {
-    if (styles && styles.length > 0) {
-      getStoredIcons();
-    }
-  }, [refresh, style, styles]);
+    getStoredIcons();
+  }, [refresh, style]);
 
   useEffect(() => {
     const fetchIcons = async () => {
@@ -59,30 +53,25 @@ export default function SearchIcons() {
         setIcons(null);
         const icons = await getIcons(searchText, style);
         setIcons(icons);
-      } else {
-        setIcons([]);
       }
     };
     fetchIcons();
+    return () => {
+      setIcons([]);
+    };
   }, [searchText, style]);
 
-  const [imageOptions, setImageOptions] = useState(undefined);
-
-  const getImageOptions = async () => {
-    setImageOptions(await getStoredOptions());
-  };
-
-  const storeImageOptions = async () => {
-    if (imageOptions) {
-      await setStoredOptions(imageOptions);
-    }
-  };
+  const [imageOptions, setImageOptions] = useState<Options>();
 
   useEffect(() => {
+    const getImageOptions = async () => setImageOptions(await getStoredOptions());
     getImageOptions();
   }, []);
 
   useEffect(() => {
+    const storeImageOptions = async () => {
+      if (imageOptions) await setStoredOptions(imageOptions);
+    };
     storeImageOptions();
   }, [imageOptions]);
 
@@ -92,9 +81,10 @@ export default function SearchIcons() {
       itemSize={gridSize}
       inset={Grid.Inset.Small}
       onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Icons"
       throttle={true}
       searchBarAccessory={
-        styles?.length > 0 ? (
+        styles ? (
           <Grid.Dropdown
             tooltip="Styles"
             defaultValue={style}
@@ -128,7 +118,7 @@ export default function SearchIcons() {
         ) : null
       }
     >
-      {(icons === null || icons.length === 0) &&
+      {(!icons || icons?.length === 0) &&
         (pinnedIcons?.length === 0 && recentIcons?.length === 0 ? (
           <EmptyView />
         ) : (

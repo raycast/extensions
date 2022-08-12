@@ -3,9 +3,8 @@ import { IconStorageActions, appendRecentIcon } from "../utils/storage";
 import { ConfigureAction } from "./configure-icon";
 import { IconDetail } from "./icon-detail";
 import { getIconDetail } from "../hooks/api";
-import { IconProps } from "./icon";
-import { Icon8 } from "../types/types";
-import { getDownloadLink } from "../utils/utils";
+import { Icon8, IconProps, IconActionProps } from "../types/types";
+import { getIconImageLink } from "../utils/utils";
 import fetch from "node-fetch";
 import fs from "fs";
 
@@ -14,12 +13,12 @@ const addRecentIcon = async (icon: Icon8, refresh: () => void) => {
   refresh();
 };
 
-export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX.Element => {
+export const IconActionPanel = (args: { props: IconProps; detailView?: boolean }): JSX.Element => {
   const props = args.props;
 
   return (
     <ActionPanel>
-      {args.item && <ViewIcon {...props} />}
+      {!args.detailView && <ViewIcon {...props} />}
       <OpenInBrowser {...props} />
       <ConfigureAction {...props} />
       <ActionPanel.Section>
@@ -28,7 +27,7 @@ export const IconActionPanel = (args: { props: IconProps; item?: boolean }): JSX
         <CopySVGCode {...props} />
         <CopyImageURL {...props} />
       </ActionPanel.Section>
-      <IconStorageActions props={props} showMovement={args.item} />
+      <IconStorageActions props={props} showMovement={!args.detailView} />
     </ActionPanel>
   );
 };
@@ -54,23 +53,17 @@ const OpenInBrowser = (props: { icon: Icon8; refresh: () => void }): JSX.Element
   );
 };
 
-interface IconActionProps {
-  icon: Icon8;
-  options: any;
-  refresh: () => void;
-}
-
 const CopySVGCode = (props: IconActionProps): JSX.Element => {
   return (
     <Action
       title="Copy SVG Code"
       icon={Icon.Code}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
       onAction={async () => {
         let icon = props.icon;
         if (!icon.svg) {
           showToast(Toast.Style.Animated, "Getting SVG Code...");
-          icon = await getIconDetail(icon, props.options.color);
+          icon = await getIconDetail(icon, props.options);
         }
         Clipboard.copy(icon.svg);
         showToast(Toast.Style.Success, "Copied SVG Code");
@@ -80,14 +73,14 @@ const CopySVGCode = (props: IconActionProps): JSX.Element => {
   );
 };
 
-const CopyImageURL = (props: { icon: Icon8; refresh: () => void }): JSX.Element => {
+const CopyImageURL = (props: IconActionProps): JSX.Element => {
   return (
     <Action
       title="Copy Image URL"
       icon={Icon.Link}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       onAction={async () => {
-        Clipboard.copy(props.icon.url);
+        Clipboard.copy(getIconImageLink(props.icon, props.options));
         showToast(Toast.Style.Success, "Copied Image URL");
         await addRecentIcon(props.icon, props.refresh);
       }}
@@ -105,7 +98,7 @@ const DownloadSVGIcon = (props: IconActionProps): JSX.Element => {
         showToast(Toast.Style.Animated, "Downloading SVG Icon ...");
         let icon = props.icon;
         if (!icon.svg) {
-          icon = await getIconDetail(props.icon, props.options.color);
+          icon = await getIconDetail(props.icon, props.options);
         }
         if (icon.svg) {
           const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.svg`;
@@ -151,7 +144,7 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
         showToast(Toast.Style.Animated, `Downloading ${formatName} Icon ...`);
         const icon = props.icon;
         const filePath = `${props.options.path}/${icon.downloadName ? icon.downloadName : icon.name}.${format}`;
-        const downloadLink = getDownloadLink(icon, props.options);
+        const downloadLink = getIconImageLink(icon, props.options);
         try {
           const response = await fetch(downloadLink);
           const buffer = Buffer.from(await response.arrayBuffer());

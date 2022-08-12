@@ -1,12 +1,9 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { defaultStyles, getPreviewLink, recolorSVG } from "../utils/utils";
-import { Preferences, Icon8, Style } from "../types/types";
+import { defaultStyles, configureSVG } from "../utils/utils";
+import { Icon8, Style, Options } from "../types/types";
 import fetch from "node-fetch";
 
-const preferences: Preferences = getPreferenceValues();
-
-const api: string = preferences.apiKey;
-const numResults: number = preferences.numResults;
+const { apiKey: api, numResults } = getPreferenceValues();
 
 export const getIcons = async (search: string, style?: string): Promise<Icon8[]> => {
   let query = `https://search.icons8.com/api/iconsets/v5/search?term=${search}&token=${api}&amount=${numResults}`;
@@ -57,11 +54,11 @@ export const getStyles = async (): Promise<Style[] | null> => {
     return styles;
   } catch (e: any) {
     console.error(e);
-    return [];
+    return null;
   }
 };
 
-export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8> => {
+export const getIconDetail = async (icon8: Icon8, options: Options): Promise<Icon8> => {
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
   if (response.status !== 200) {
@@ -80,8 +77,8 @@ export const getIconDetail = async (icon8: Icon8, color: string): Promise<Icon8>
     isFree: icon.isFree,
     isAnimated: icon.isAnimated,
     published: new Date(icon.publishedAt),
+    mdImage: `https://img.icons8.com/${icon8.platform}/300$color/${icon.commonName}.png`,
   };
-  icon8.svg = recolorSVG(icon8.svg, color);
-  icon8.mdImage = `<img src="${getPreviewLink(icon, color)}" />`;
+  icon8.svg = configureSVG(icon8, options);
   return icon8;
 };
