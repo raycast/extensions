@@ -20,184 +20,184 @@
     {
       "name": "arthas",
       "icon": "logo/arthas.ico",
-      "title": "Search Documentation",
-      "subtitle": "Arthas",
+      "title": "Arthas",
+      "subtitle": "DocSearch",
       "description": "Search Arthas documentation",
       "mode": "view"
     },
     {
       "name": "bootstrap",
       "icon": "logo/bootstrap.ico",
-      "title": "Search Documentation",
-      "subtitle": "Bootstrap",
+      "title": "Bootstrap",
+      "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
       "mode": "view"
     },
     {
       "name": "echarts",
       "icon": "logo/echarts.png",
-      "title": "Search Documentation",
-      "subtitle": "Echarts",
+      "title": "Echarts",
+      "subtitle": "DocSearch",
       "description": "Search Echarts documentation",
       "mode": "view"
     },
     {
       "name": "echarts_zh-Hans",
       "icon": "logo/echarts.png",
-      "title": "Search Documentation",
-      "subtitle": "Echarts(zh-Hans)",
+      "title": "Echarts(zh-Hans)",
+      "subtitle": "DocSearch",
       "description": "Search Echarts(zh-Hans) documentation",
       "mode": "view"
     },
     {
       "name": "homebrew",
       "icon": "logo/homebrew.png",
-      "title": "Search Documentation",
-      "subtitle": "Homebrew",
+      "title": "Homebrew",
+      "subtitle": "DocSearch",
       "description": "Search Homebrew documentation",
       "mode": "view"
     },
     {
       "name": "laravel9",
       "icon": "logo/laravel.png",
-      "title": "Search Documentation",
-      "subtitle": "Laravel 9.x",
+      "title": "Laravel 9.x",
+      "subtitle": "DocSearch",
       "description": "Search Laravel 9.x documentation",
       "mode": "view"
     },
     {
       "name": "prettier",
       "icon": "logo/prettier.png",
-      "title": "Search Documentation",
-      "subtitle": "Prettier",
+      "title": "Prettier",
+      "subtitle": "DocSearch",
       "description": "Search Prettier documentation",
       "mode": "view"
     },
     {
       "name": "react",
       "icon": "logo/react.ico",
-      "title": "Search Documentation",
-      "subtitle": "React",
+      "title": "React",
+      "subtitle": "DocSearch",
       "description": "Search React documentation",
       "mode": "view"
     },
     {
       "name": "react_zh-Hans",
       "icon": "logo/react.ico",
-      "title": "Search Documentation",
-      "subtitle": "React(zh-Hans)",
+      "title": "React(zh-Hans)",
+      "subtitle": "DocSearch",
       "description": "Search React(zh-Hans) documentation",
       "mode": "view"
     },
     {
       "name": "rsshub",
       "icon": "logo/rsshub.png",
-      "title": "Search Documentation",
-      "subtitle": "RSSHub",
+      "title": "RSSHub",
+      "subtitle": "DocSearch",
       "description": "Search RSSHub documentation",
       "mode": "view"
     },
     {
       "name": "slidev_zh-Hans",
       "icon": "logo/slidev.png",
-      "title": "Search Documentation",
-      "subtitle": "Slidev(zh-Hans)",
+      "title": "Slidev(zh-Hans)",
+      "subtitle": "DocSearch",
       "description": "Search Slidev(zh-Hans) documentation",
       "mode": "view"
     },
     {
       "name": "tailwindcss3",
       "icon": "logo/tailwindcss.png",
-      "title": "Search Documentation",
-      "subtitle": "TailwindCSS v3",
+      "title": "TailwindCSS v3",
+      "subtitle": "DocSearch",
       "description": "Search TailwindCss documentation",
       "mode": "view"
     },
     {
       "name": "unidata",
       "icon": "logo/unidata.png",
-      "title": "Search Documentation",
-      "subtitle": "Unidata",
+      "title": "Unidata",
+      "subtitle": "DocSearch",
       "description": "Search Unidata documentation",
       "mode": "view"
     },
     {
       "name": "vite",
       "icon": "logo/vite.png",
-      "title": "Search Documentation",
-      "subtitle": "Vite",
+      "title": "Vite",
+      "subtitle": "DocSearch",
       "description": "Search Vite documentation",
       "mode": "view"
     },
     {
       "name": "vite_zh-Hans",
       "icon": "logo/vite.png",
-      "title": "Search Documentation",
-      "subtitle": "Vite(zh-Hans)",
+      "title": "Vite(zh-Hans)",
+      "subtitle": "DocSearch",
       "description": "Search Vite(zh-Hans) documentation",
       "mode": "view"
     },
     {
       "name": "vitest",
       "icon": "logo/vitest.png",
-      "title": "Search Documentation",
-      "subtitle": "Vitest",
+      "title": "Vitest",
+      "subtitle": "DocSearch",
       "description": "Search Vitest documentation",
       "mode": "view"
     },
     {
       "name": "vue3",
       "icon": "logo/vue.png",
-      "title": "Search Documentation",
-      "subtitle": "Vue3",
+      "title": "Vue3",
+      "subtitle": "DocSearch",
       "description": "Search Vue3 documentation",
       "mode": "view"
     },
     {
       "name": "vue3_zh-Hans",
       "icon": "logo/vue.png",
-      "title": "Search Documentation",
-      "subtitle": "Vue3(zh-Hans)",
+      "title": "Vue3(zh-Hans)",
+      "subtitle": "DocSearch",
       "description": "Search Vue3(zh-Hans) documentation",
       "mode": "view"
     },
     {
       "name": "vueRouter4",
       "icon": "logo/vue.png",
-      "title": "Search Documentation",
-      "subtitle": "Vue Router4",
+      "title": "Vue Router4",
+      "subtitle": "DocSearch",
       "description": "Search Vue Router4 documentation",
       "mode": "view"
     },
     {
       "name": "vueuse",
       "icon": "logo/vueuse.png",
-      "title": "Search Documentation",
-      "subtitle": "VueUse",
+      "title": "VueUse",
+      "subtitle": "DocSearch",
       "description": "Search VueUse documentation",
       "mode": "view"
     },
     {
       "name": "vuepress1",
       "icon": "logo/vuepress.png",
-      "title": "Search Documentation",
-      "subtitle": "Vuepress v1",
+      "title": "Vuepress v1",
+      "subtitle": "DocSearch",
       "description": "Search Vuepress v1 documentation",
       "mode": "view"
     },
     {
       "name": "vuepress2",
       "icon": "logo/vuepress.png",
-      "title": "Search Documentation",
-      "subtitle": "Vuepress v2",
+      "title": "Vuepress v2",
+      "subtitle": "DocSearch",
       "description": "Search Vuepress v2 documentation",
       "mode": "view"
     },
     {
       "name": "ipfs",
       "icon": "logo/ipfs.png",
-      "title": "Search Documentation",
-      "subtitle": "IPFS",
+      "title": "IPFS",
+      "subtitle": "DocSearch",
       "description": "Search IPFS documentation",
       "mode": "view"
     }
