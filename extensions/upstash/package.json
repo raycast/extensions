@@ -13,16 +13,16 @@
   "commands": [
     {
       "name": "databases",
-      "title": "Upstash Databases",
+      "title": "Search Redis Databases",
       "description": "List of Redis Databases",
-      "subtitle": "List of Redis Databases",
+      "subtitle": "Upstash",
       "mode": "view"
     },
     {
       "name": "clusters",
-      "title": "Upstash Clusters",
+      "title": "Search Kafka Clusters",
       "description": "List of Kafka Clusters",
-      "subtitle": "List of Kafka Clusters",
+      "subtitle": "Upstash",
       "mode": "view"
     }
   ],
