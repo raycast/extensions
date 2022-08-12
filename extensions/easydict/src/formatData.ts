@@ -3,7 +3,7 @@ import { DeepLTranslateResult } from "./types";
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-23 00:38
+ * @lastEditTime: 2022-07-31 16:22
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -219,7 +219,7 @@ export function getTranslationResultOrder(): string[] {
 
   const userOrder: string[] = [];
   // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
-  const manualOrder = myPreferences.translationDisplayOrder.toLowerCase().split(","); // "Baidu,DeepL,Tencent"
+  const manualOrder = myPreferences.translationSortOrder.toLowerCase().split(","); // "Baidu,DeepL,Tencent"
   // console.log("manualOrder:", manualOrder);
   if (manualOrder.length > 0) {
     for (let translationName of manualOrder) {

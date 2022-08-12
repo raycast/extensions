@@ -1,5 +1,9 @@
 # bibmanager Changelog
 
+## [1.2.0] - 2022-08-11
+- Adds keyboard shortcuts for Actions
+- Adds a new fuzzy search, similar to the fuzzy search from the zotero extension
+
 ## [1.1.0] - 2022-07-04
 Improve the feedback to the user on possible failures.
 

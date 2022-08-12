@@ -7,7 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import initSqlJs, { Database } from "sql.js";
 
 async function openDb() {
-  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm-fts5.wasm") });
+  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm-fts5.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(readFileSync(path.join(environment.assetsPath, "dict.db")));
 }
 

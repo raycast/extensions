@@ -7,7 +7,8 @@ import { PermissionError } from "../utils";
 
 const loadDatabase = async (path: string) => {
   const fileContents = await readFile(path);
-  const SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = await readFile(resolve(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileContents);
 };
 

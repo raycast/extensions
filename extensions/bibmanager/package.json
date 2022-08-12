@@ -5,9 +5,12 @@
   "description": "Search Bibmanager Database from Raycast",
   "icon": "command-icon.png",
   "author": "aaronschneider",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
-  "categories": ["Productivity","Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "commands": [
     {
       "name": "index",
@@ -29,7 +32,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1"
+    "@raycast/api": "^1.37.1",
+    "fuse.js": "^6.6.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

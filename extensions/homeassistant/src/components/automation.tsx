@@ -34,3 +34,31 @@ export function AutomationTurnOffAction(props: { state: State }): JSX.Element | 
   }
   return null;
 }
+
+export function AutomationEditInBrowserAction(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  if (s.entity_id.startsWith("automation")) {
+    const id = props.state.attributes.id as number | undefined;
+    if (id !== undefined) {
+      const url = ha.urlJoin(`config/automation/edit/${id}`);
+      return (
+        <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+      );
+    }
+  }
+  return null;
+}
+
+export function AutomationDebugInBrowserAction(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  if (s.entity_id.startsWith("automation")) {
+    const id = props.state.attributes.id as number | undefined;
+    if (id !== undefined) {
+      const url = ha.urlJoin(`config/automation/trace/${id}`);
+      return (
+        <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+      );
+    }
+  }
+  return null;
+}
