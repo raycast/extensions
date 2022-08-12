@@ -58,9 +58,9 @@ export default function Command() {
       />
       <Form.Separator />
       <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
-        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon="📍" />
-        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon="🏠" />
-        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon="✏️" />
+        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon={Icon.Geopin} />
+        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon={Icon.House} />
+        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon={Icon.Pencil} />
       </Form.Dropdown>
       {origin === orginOption.Custom && (
         <Form.TextField
@@ -72,10 +72,10 @@ export default function Command() {
         />
       )}
       <Form.Dropdown id="transport-type" title="Transport Type" value={mode} onChange={setMode}>
-        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon="🚗" />
-        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon="🚶‍♀️" />
-        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon="🚆" />
-        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon="🚲" />
+        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
+        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
+        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
+        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
     </Form>
   );
