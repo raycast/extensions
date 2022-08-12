@@ -61,7 +61,7 @@ export default function Command() {
           .then((response) => {
             const filename = values.username ? values.username.split(" ").join("_") : "avatar";
             const type = values.format === "png" ? "png" : "jpeg";
-            response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
+            response.data.pipe(fs.createWriteStream(`${homedir()}/Downloads/${filename}.${type}`));
 
             toast.style = Toast.Style.Success;
             toast.title = "Avatar saved to downloads";
