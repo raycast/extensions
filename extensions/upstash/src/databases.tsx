@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { IDatabase, IPreferences } from "./types";
@@ -17,7 +17,7 @@ export default function Databases() {
       });
 
       if (!response.ok) {
-        return [];
+        throw new Error(`${response.statusText} - ${response.status}`);
       }
 
       const json = await response.json();
@@ -31,11 +31,11 @@ export default function Databases() {
   );
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Something went wrong",
-      message: error.message,
-    });
+    return (
+      <List>
+        <List.EmptyView title="Check your Email and API Key" description={error.message} />
+      </List>
+    );
   }
 
   return (
@@ -59,15 +59,15 @@ export default function Databases() {
             accessories={[
               replicas === "Global"
                 ? {
-                    text: replicas,
-                    icon: {
-                      source: Icon.Globe,
-                      tintColor: Color.Green,
-                    },
-                  }
-                : {
-                    text: replicas,
+                  text: replicas,
+                  icon: {
+                    source: Icon.Globe,
+                    tintColor: Color.Green,
                   },
+                }
+                : {
+                  text: replicas,
+                },
               {
                 text: `TLS`,
                 tooltip: database.tls ? "Enabled" : "Disabled",

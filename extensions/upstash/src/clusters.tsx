@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Toast, getPreferenceValues, Icon, Color } from "@raycast/api";
+import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import fetch from "node-fetch";
 import { ICluster, IPreferences } from "./types";
@@ -17,7 +17,7 @@ export default function Clusters() {
       });
 
       if (!response.ok) {
-        return [];
+        throw new Error(`${response.statusText} - ${response.status}`);
       }
 
       const json = await response.json();
@@ -31,11 +31,11 @@ export default function Clusters() {
   );
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Something went wrong",
-      message: error.message,
-    });
+    return (
+      <List>
+        <List.EmptyView title="Check your Email and API Key" description={error.message} />
+      </List>
+    );
   }
 
   return (
