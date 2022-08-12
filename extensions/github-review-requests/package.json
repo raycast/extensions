@@ -22,7 +22,7 @@
       "title": "Pending Pull Requests",
       "description": "List actionable pending pull requests",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "5m"
     }
   ],
   "preferences": [
