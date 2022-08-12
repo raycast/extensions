@@ -7,5 +7,6 @@ interface SearchQueryArguments {
 
 export default async (props: { arguments: SearchQueryArguments }) => {
   const { query } = props.arguments;
-  open(makeSearchURL(query));
+  const searchURL = makeSearchURL(query);
+  open(searchURL);
 };
