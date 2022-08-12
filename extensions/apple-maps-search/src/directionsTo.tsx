@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Icon, getPreferenceValues, popToRoot, Action } from "@raycast/api";
 import { useState } from "react";
-import { TravelMode, makeDirectionsURL, Preferences } from "./utils";
+import { TransportType, makeDirectionsURL, Preferences } from "./utils";
 
 enum orginOption {
   CurLoc = "",
@@ -70,11 +70,11 @@ export default function Command() {
           onChange={setOriginAddress}
         />
       )}
-      <Form.Dropdown id="travelmode" title="Transport Type" value={mode} onChange={setMode}>
-        <Form.Dropdown.Item value={TravelMode.Driving} title="Driving" icon="🚗" />
-        <Form.Dropdown.Item value={TravelMode.Walking} title="Walking" icon="🚶‍♀️" />
-        <Form.Dropdown.Item value={TravelMode.Transit} title="Transit" icon="🚆" />
-        <Form.Dropdown.Item value={TravelMode.Cycling} title="Cycling" icon="🚲" />
+      <Form.Dropdown id="transport-type" title="Transport Type" value={mode} onChange={setMode}>
+        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon="🚗" />
+        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon="🚶‍♀️" />
+        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon="🚆" />
+        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon="🚲" />
       </Form.Dropdown>
     </Form>
   );
