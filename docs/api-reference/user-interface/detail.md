@@ -29,7 +29,6 @@ export default function Command() {
 
 ```typescript
 import { Detail } from "@raycast/api";
-import path from "path";
 import { pathToFileURL } from "url";
 
 const image = pathToFileURL(`${environment.assetsPath}/image.png`).href;
