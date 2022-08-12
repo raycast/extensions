@@ -44,7 +44,7 @@ export function ActionCopyScreenshotUrl({ url }: { url: string }) {
   );
 }
 
-export function ActionDeleteMonitor({ item, onDeleted }: { item: any, onDeleted: () => void }) {
+export function ActionDeleteMonitor({ item, onDeleted }: { item: any; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -77,7 +77,7 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: any, onDeleted:
   );
 }
 
-export function ActionDeleteIncident({ item, onDeleted }: { item: any, onDeleted: () => void }) {
+export function ActionDeleteIncident({ item, onDeleted }: { item: any; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -110,7 +110,7 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: any, onDeleted
   );
 }
 
-export function ActionDeleteHeartbeat({ item, onDeleted }: { item: any, onDeleted: () => void }) {
+export function ActionDeleteHeartbeat({ item, onDeleted }: { item: any; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
