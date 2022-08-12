@@ -13,7 +13,7 @@ export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
   const [icons, setIcons] = useState<Icon8[] | null>([]);
 
-  const [style, setStyle] = useState<string | undefined>(undefined);
+  const [style, setStyle] = useState<string | undefined>();
   const [styles, setStyles] = useState<Style[] | null>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

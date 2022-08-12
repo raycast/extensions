@@ -115,12 +115,13 @@ const IconColor = (props: ConfigureProps): JSX.Element => {
       error={error}
       info={infoMessage}
       onChange={(value: string) => {
-        const color = d3color(value.trim());
+        value = value.trim();
+        let color = d3color(value) || d3color(`#${value}`);
         if (color) {
           setError(undefined);
           props.setOptions({ ...props.options, color: color.formatHex() });
         } else {
-          setError("Invalid color");
+          setError("Invalid Color");
         }
       }}
     />
