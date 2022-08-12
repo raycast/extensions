@@ -74,19 +74,19 @@
       "default": "r",
       "data": [
         {
-          "title": "🚗 Driving",
+          "title": "Driving",
           "value": "d"
         },
         {
-          "title": "🚶‍♀️ Walking",
+          "title": "Walking",
           "value": "w"
         },
         {
-          "title": "🚆 Transit",
+          "title": "Transit",
           "value": "r"
         },
         {
-          "title": "🚲 Cycling",
+          "title": "Cycling",
           "value": "c"
         }
       ]
