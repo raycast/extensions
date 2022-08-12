@@ -1,5 +1,5 @@
 import { SearchDocumentation } from "./components";
 
-export default function rsshub() {
+export default function Command() {
   return <SearchDocumentation docsName="Arthas" />;
 }
