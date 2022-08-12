@@ -52,6 +52,14 @@ export default <IAPIData[]>[
     homepage: "https://brew.sh/",
   },
   {
+    name: "IPFS",
+    icon: "../assets/logo/ipfs.png",
+    apiKey: "e56fc7c611806522df45191e22ed15ac",
+    appId: "BH4D9OD16A",
+    indexName: "ipfs-docs",
+    homepage: "https://docs.ipfs.tech/",
+  },
+  {
     name: "Laravel 9.x",
     icon: "../assets/logo/laravel.png",
     apiKey: "1fa3a8fec06eb1858d6ca137211225c0",
@@ -73,6 +81,14 @@ export default <IAPIData[]>[
     homepage: "https://prettier.io/",
   },
   {
+    name: "RSSHub",
+    icon: "../assets/logo/rsshub.png",
+    apiKey: "6247bc0db93150fd9e531b93a3fa4046",
+    appId: "BH4D9OD16A",
+    indexName: "rsshub",
+    homepage: "https://docs.rsshub.app/",
+  },
+  {
     name: "React",
     icon: "../assets/logo/react.ico",
     apiKey: "36221914cce388c46d0420343e0bb32e",
@@ -88,14 +104,6 @@ export default <IAPIData[]>[
     indexName: "reactjs_zh-hans",
     homepage: "https://zh-hans.reactjs.org/",
     lang: "zh-Hans",
-  },
-  {
-    name: "RSSHub",
-    icon: "../assets/logo/rsshub.png",
-    apiKey: "6247bc0db93150fd9e531b93a3fa4046",
-    appId: "BH4D9OD16A",
-    indexName: "rsshub",
-    homepage: "https://docs.rsshub.app/",
   },
   {
     name: "Slidev",
@@ -157,6 +165,14 @@ export default <IAPIData[]>[
     homepage: "https://vitest.dev/",
   },
   {
+    name: "Vue Router4",
+    icon: "../assets/logo/vue.png",
+    apiKey: "771d10c8c5cc48f7922f15048b4d931c",
+    appId: "BTNTW3I1XP",
+    indexName: "next_router_vuejs",
+    homepage: "https://router.vuejs.org/",
+  },
+  {
     name: "Vue3",
     icon: "../assets/logo/vue.png",
     apiKey: "f49cbd92a74532cc55cfbffa5e5a7d01",
@@ -178,14 +194,6 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["version:v3"],
     },
-  },
-  {
-    name: "Vue Router4",
-    icon: "../assets/logo/vue.png",
-    apiKey: "771d10c8c5cc48f7922f15048b4d931c",
-    appId: "BTNTW3I1XP",
-    indexName: "next_router_vuejs",
-    homepage: "https://router.vuejs.org/",
   },
   {
     name: "VueUse",
@@ -210,13 +218,5 @@ export default <IAPIData[]>[
     appId: "34YFD9IUQ2",
     indexName: "vuepress",
     homepage: "https://v2.vuepress.vuejs.org/",
-  },
-  {
-    name: "IPFS",
-    icon: "../assets/logo/ipfs.png",
-    apiKey: "e56fc7c611806522df45191e22ed15ac",
-    appId: "BH4D9OD16A",
-    indexName: "ipfs-docs",
-    homepage: "https://docs.ipfs.tech/",
   },
 ];
