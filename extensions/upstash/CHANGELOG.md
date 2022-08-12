@@ -1,3 +1,3 @@
 # upstash Changelog
 
-## [Initial Version] - 2022-08-04
+## [Initial Version] - {PR_MERGE_DATE}
