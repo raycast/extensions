@@ -46,7 +46,7 @@
       "icon": "../assets/logo/echarts.png",
       "title": "Search Documentation",
       "subtitle": "Echarts(zh-Hans)",
-      "description": "Search Echarts documentation",
+      "description": "Search Echarts(zh-Hans) documentation",
       "mode": "view"
     },
     {
@@ -86,7 +86,7 @@
       "icon": "../assets/logo/react.ico",
       "title": "Search Documentation",
       "subtitle": "React(zh-Hans)",
-      "description": "Search React documentation",
+      "description": "Search React(zh-Hans) documentation",
       "mode": "view"
     },
     {
@@ -102,7 +102,7 @@
       "icon": "../assets/logo/slidev.png",
       "title": "Search Documentation",
       "subtitle": "Slidev(zh-Hans)",
-      "description": "Search Slidev documentation",
+      "description": "Search Slidev(zh-Hans) documentation",
       "mode": "view"
     },
     {
@@ -134,7 +134,7 @@
       "icon": "../assets/logo/vite.png",
       "title": "Search Documentation",
       "subtitle": "Vite(zh-Hans)",
-      "description": "Search Vite documentation",
+      "description": "Search Vite(zh-Hans) documentation",
       "mode": "view"
     },
     {
@@ -158,7 +158,7 @@
       "icon": "../assets/logo/vue.png",
       "title": "Search Documentation",
       "subtitle": "Vue3(zh-Hans)",
-      "description": "Search Vue3 documentation",
+      "description": "Search Vue3(zh-Hans) documentation",
       "mode": "view"
     },
     {
