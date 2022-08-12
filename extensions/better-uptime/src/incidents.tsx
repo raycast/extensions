@@ -87,7 +87,15 @@ export default function Command() {
                   <ActionCopyScreenshotUrl url={item.attributes.screenshot_url} />
                 </>
               )}
-              <ActionDeleteIncident item={item} />
+              <ActionDeleteIncident
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
+                }}
+              />
             </ActionPanel>
           }
         />

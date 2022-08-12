@@ -44,7 +44,7 @@ export function ActionCopyScreenshotUrl({ url }: { url: string }) {
   );
 }
 
-export function ActionDeleteMonitor({ item }: { item: any }) {
+export function ActionDeleteMonitor({ item, onDeleted }: { item: any, onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -52,22 +52,32 @@ export function ActionDeleteMonitor({ item }: { item: any }) {
       title="Delete Monitor"
       icon={Icon.Trash}
       onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Deleting monitor...",
+        });
+
         await axios
           .delete(`https://betteruptime.com/api/v2/heartbeats/${item.id}`, {
             headers: { Authorization: `Bearer ${preferences.apiKey}` },
           })
           .then(() => {
-            showToast({ title: "Success", message: "Successfully deleted monitor" });
+            toast.style = Toast.Style.Success;
+            toast.title = "Monitor deleted successfully";
+
+            onDeleted();
           })
           .catch((error) => {
-            showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+            toast.style = Toast.Style.Failure;
+            toast.title = "Unable to delete monitor";
+            toast.message = error.response.data.errors;
           });
       }}
     />
   );
 }
 
-export function ActionDeleteIncident({ item }: { item: any }) {
+export function ActionDeleteIncident({ item, onDeleted }: { item: any, onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -75,22 +85,32 @@ export function ActionDeleteIncident({ item }: { item: any }) {
       title="Delete Incident"
       icon={Icon.Trash}
       onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Deleting incident...",
+        });
+
         await axios
           .delete(`https://betteruptime.com/api/v2/incidents/${item.id}`, {
             headers: { Authorization: `Bearer ${preferences.apiKey}` },
           })
           .then(() => {
-            showToast({ title: "Success", message: "Successfully deleted incident" });
+            toast.style = Toast.Style.Success;
+            toast.title = "Incident deleted successfully";
+
+            onDeleted();
           })
           .catch((error) => {
-            showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+            toast.style = Toast.Style.Failure;
+            toast.title = "Unable to delete incident";
+            toast.message = error.response.data.errors;
           });
       }}
     />
   );
 }
 
-export function ActionDeleteHeartbeat({ item }: { item: any }) {
+export function ActionDeleteHeartbeat({ item, onDeleted }: { item: any, onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -98,15 +118,25 @@ export function ActionDeleteHeartbeat({ item }: { item: any }) {
       title="Delete Heartbeat"
       icon={Icon.Trash}
       onAction={async () => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Deleting heartbeat...",
+        });
+
         await axios
           .delete(`https://betteruptime.com/api/v2/heartbeats/${item.id}`, {
             headers: { Authorization: `Bearer ${preferences.apiKey}` },
           })
           .then(() => {
-            showToast({ title: "Success", message: "Successfully deleted heartbeat" });
+            toast.style = Toast.Style.Success;
+            toast.title = "Heartbeat deleted successfully";
+
+            onDeleted();
           })
           .catch((error) => {
-            showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+            toast.style = Toast.Style.Failure;
+            toast.title = "Unable to delete heartbeat";
+            toast.message = error.response.data.errors;
           });
       }}
     />

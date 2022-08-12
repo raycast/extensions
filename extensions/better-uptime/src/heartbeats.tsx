@@ -76,7 +76,15 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
               <ActionCopyHeartbeatUrl url={item.attributes.url} />
-              <ActionDeleteHeartbeat item={item} />
+              <ActionDeleteHeartbeat
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
+                }}
+              />
             </ActionPanel>
           }
         />

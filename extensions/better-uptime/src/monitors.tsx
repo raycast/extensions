@@ -89,7 +89,15 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
               <ActionCopyUrl url={item.attributes.url} />
-              <ActionDeleteMonitor item={item} />
+              <ActionDeleteMonitor
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
+                }}
+              />
             </ActionPanel>
           }
         />
