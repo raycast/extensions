@@ -68,8 +68,8 @@
     },
     {
       "name": "preferredMode",
-      "title": "Preferred Mode of Travel",
-      "description": "Select your default mode of travel.",
+      "title": "Preferred Mode of Transport",
+      "description": "Select your preferred type of transport.",
       "type": "dropdown",
       "required": true,
       "default": "r",

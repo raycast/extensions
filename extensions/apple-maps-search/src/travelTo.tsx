@@ -70,7 +70,7 @@ export default function Command() {
           onChange={setOriginAddress}
         />
       )}
-      <Form.Dropdown id="travelmode" title="Travel Mode" value={mode} onChange={setMode}>
+      <Form.Dropdown id="travelmode" title="Transport Type" value={mode} onChange={setMode}>
         <Form.Dropdown.Item value={TravelMode.Driving} title="Driving" icon="🚗" />
         <Form.Dropdown.Item value={TravelMode.Walking} title="Walking" icon="🚶‍♀️" />
         <Form.Dropdown.Item value={TravelMode.Transit} title="Transit" icon="🚆" />
