@@ -17,8 +17,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import got from "got";
-import { fileTypeFromStream, FileTypeResult } from "file-type";
 import path from "node:path";
 import { CommonActions } from "./common";
 import {
@@ -137,19 +135,18 @@ function FileItemAction(props: { file: IObject; refresh: () => void; marks: stri
 
 function FileDetail(props: { file: IObject; refresh: () => void }) {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
-  const [fileTypeState, updateFileTypeState] = useState<FileTypeResult>();
-  const [urlState, updateUrlState] = useState<string>("");
+  const [urlAclState, updateUrlAclState] = useState<IObjectURLAndACL>();
+  const [markdownState, updateMarkdownState] = useState<string>("");
   useEffect(() => {
     init();
   }, []);
 
   async function init() {
     updateLoadingState(true);
-    const url = await getObjUrl(props.file);
-    updateUrlState(url);
-    const stream = got.stream(url);
-    const type = await fileTypeFromStream(stream);
-    updateFileTypeState(type);
+    const urlAcl = await getObjUrl(props.file);
+    updateUrlAclState(urlAcl);
+    const markdown = await getFileDetailMarkdown(props.file, urlAcl.url);
+    updateMarkdownState(markdown);
     updateLoadingState(false);
   }
 
@@ -157,25 +154,33 @@ function FileDetail(props: { file: IObject; refresh: () => void }) {
     <Detail
       isLoading={isLoadingState}
       navigationTitle={props.file.name}
-      markdown={isLoadingState ? "" : getFileDetailMarkdown(props.file, fileTypeState)}
+      markdown={markdownState}
       metadata={
-        !isLoadingState && (
-          <Detail.Metadata>
-            <Detail.Metadata.TagList title="Kind">
-              <Detail.Metadata.TagList.Item
-                text={fileTypeState?.mime || (isLoadingState ? "" : "unknown")}
-                color={Color.Orange}
-              />
-            </Detail.Metadata.TagList>
-            <Detail.Metadata.Label title="Size" text={formatFileSize(props.file.size)}></Detail.Metadata.Label>
-            <Detail.Metadata.Label
-              title="Date added"
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Name">
+            <Detail.Metadata.TagList.Item text={path.basename(props.file.name)} color={Color.Blue} />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Kind">
+            <Detail.Metadata.TagList.Item text={path.extname(props.file.name)} color={Color.PrimaryText} />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Size">
+            <Detail.Metadata.TagList.Item text={formatFileSize(props.file.size)} color={Color.PrimaryText} />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Date added">
+            <Detail.Metadata.TagList.Item
               text={new Date(props.file.lastModified).toLocaleString()}
-            ></Detail.Metadata.Label>
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Link title="Link" text="Open the Link" target={urlState} />
-          </Detail.Metadata>
-        )
+              color={Color.PrimaryText}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="ACL">
+            <Detail.Metadata.TagList.Item text={urlAclState?.acl || "unknown"} color={Color.PrimaryText} />
+          </Detail.Metadata.TagList>
+          {urlAclState?.bucketAcl && (
+            <Detail.Metadata.TagList title="Bucket ACL">
+              <Detail.Metadata.TagList.Item text={urlAclState?.bucketAcl || "unknown"} color={Color.PrimaryText} />
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
       }
       actions={FileDetailAction({ file: props.file, refresh: props.refresh })}
     ></Detail>
@@ -288,7 +293,7 @@ function FileCommonActions(props: { file: IObject; refresh: () => void; isDetail
         icon={Icon.CopyClipboard}
         shortcut={{ modifiers: ["cmd"], key: "return" }}
         onAction={async () => {
-          await Clipboard.copy(await getObjUrl(props.file));
+          await Clipboard.copy((await getObjUrl(props.file)).url);
           await showHUD("Copied to Clipboard");
         }}
       ></Action>
@@ -297,7 +302,7 @@ function FileCommonActions(props: { file: IObject; refresh: () => void; isDetail
         icon={Icon.Globe}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
         onAction={async () => {
-          open(await getObjUrl(props.file));
+          open((await getObjUrl(props.file)).url);
         }}
       ></Action>
       <Action

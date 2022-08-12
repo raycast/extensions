@@ -121,7 +121,6 @@
   "dependencies": {
     "@raycast/api": "^1.38.2",
     "ali-oss": "^6.17.1",
-    "file-type": "^17.1.6",
     "got": "^12.3.0"
   },
   "devDependencies": {

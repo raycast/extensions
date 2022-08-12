@@ -1,11 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import OSS from "ali-oss";
 import path from "node:path";
-import { FileTypeResult } from "file-type";
 import fsSync from "node:fs/promises";
 import fs from "node:fs";
-import { ACL } from "./const";
+import { ACL, CodeExts, ImgExts, MdExt, PlainTextExts } from "./const";
 import { homedir } from "os";
+import got from "got";
 
 let ossClient: OSS;
 
@@ -108,14 +108,24 @@ export async function createFolder(name: string, targetFolder: string) {
   await ossClient.put(`${targetFolder}${name}`, Buffer.from(""));
 }
 
-export function getFileDetailMarkdown(file: IObject, fileType?: FileTypeResult): string {
-  let markdown = `# ${path.basename(file.name)}\n`;
-  if (fileType?.mime.startsWith("image/")) {
-    markdown += `![](${file.url})`;
-    return markdown;
+export async function getFileDetailMarkdown(file: IObject, url: string): Promise<string> {
+  const ext = path.extname(file.name);
+  if (ImgExts.includes(ext.toLowerCase())) {
+    return `![](${url})`;
   }
-  markdown += `⚠️ Sorry ~ Raycast does not yet support previewing ${fileType?.ext || "this type"} files`;
-  return markdown;
+  if (CodeExts.includes(ext.toLowerCase())) {
+    const code = await got.get(url);
+    return "```\n" + code.body + "\n```";
+  }
+  if (MdExt === ext.toLowerCase()) {
+    const md = await got.get(url);
+    return md.body;
+  }
+  if (PlainTextExts.includes(ext.toLowerCase())) {
+    const text = await got.get(url);
+    return text.body;
+  }
+  return `⚠️ Sorry ~ Raycast does not yet support previewing ${path.extname(file.name)} files`;
 }
 
 async function getFileDownloadLocation(): Promise<string> {
@@ -173,21 +183,19 @@ export function filterBookmark(key: string): boolean {
   return key.indexOf(`${preferences.bucket}_`) === 0;
 }
 
-export async function getObjUrl(file: IObject): Promise<string> {
+export async function getObjUrl(file: IObject): Promise<IObjectURLAndACL> {
   const preferences: IPreferences = getPreferenceValues();
-  try {
-    const objACL = await ossClient.getACL(file.name);
-    if (objACL.acl == ACL.Private) {
-      return ossClient.signatureUrl(file.name);
-    }
-    if (`${objACL.acl}` == ACL.Default) {
-      const bucketACL = await ossClient.getBucketACL(preferences.bucket);
-      if (bucketACL.acl == ACL.Private) {
-        return ossClient.signatureUrl(file.name);
-      }
-    }
-    return file.url;
-  } catch (error) {
-    return file.url;
+  const objACL = await ossClient.getACL(file.name);
+  let bucketACL = "";
+  if (objACL.acl == ACL.Private) {
+    return { url: ossClient.signatureUrl(file.name), acl: objACL.acl };
   }
+  if (`${objACL.acl}` == ACL.Default) {
+    const bACL = await ossClient.getBucketACL(preferences.bucket);
+    bucketACL = bACL.acl;
+    if (bucketACL == ACL.Private) {
+      return { url: ossClient.signatureUrl(file.name), acl: objACL.acl, bucketAcl: bucketACL };
+    }
+  }
+  return { url: file.url, acl: objACL.acl, bucketAcl: bucketACL };
 }

@@ -18,6 +18,12 @@ interface IObject {
   size: number;
 }
 
+interface IObjectURLAndACL {
+  url: string;
+  acl: string;
+  bucketAcl?: string;
+}
+
 interface IMark {
   key: string;
   ctime: Date;
