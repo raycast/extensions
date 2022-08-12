@@ -32,17 +32,25 @@ export default function Command(): JSX.Element {
       return false;
     }
 
-    axios
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating monitor...",
+    });
+
+    await axios
       .post("https://betteruptime.com/api/v2/monitors", item, {
         headers: { Authorization: `Bearer ${preferences.apiKey}` },
       })
       .then(() => {
-        popToRoot();
+        toast.style = Toast.Style.Success;
+        toast.title = "Monitor created successfully";
 
-        showToast({ title: "Success", message: "Successfully added monitor" });
+        popToRoot();
       })
       .catch((error) => {
-        showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to create monitor";
+        toast.message = error.response.data.errors;
       });
   }
 

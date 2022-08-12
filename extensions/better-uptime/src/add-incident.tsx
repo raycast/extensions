@@ -31,17 +31,25 @@ export default function Command(): JSX.Element {
       return false;
     }
 
-    axios
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating incident...",
+    });
+
+    await axios
       .post("https://betteruptime.com/api/v2/incidents", item, {
         headers: { Authorization: `Bearer ${preferences.apiKey}` },
       })
       .then(() => {
-        popToRoot();
+        toast.style = Toast.Style.Success;
+        toast.title = "Incident created successfully";
 
-        showToast({ title: "Success", message: "Successfully added incident" });
+        popToRoot();
       })
       .catch((error) => {
-        showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to create incident";
+        toast.message = error.response.data.errors;
       });
   }
 

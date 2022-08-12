@@ -31,17 +31,25 @@ export default function Command(): JSX.Element {
       return false;
     }
 
-    axios
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating heartbeat...",
+    });
+
+    await axios
       .post("https://betteruptime.com/api/v2/heartbeats", item, {
         headers: { Authorization: `Bearer ${preferences.apiKey}` },
       })
       .then(() => {
-        popToRoot();
+        toast.style = Toast.Style.Success;
+        toast.title = "Heartbeat created successfully";
 
-        showToast({ title: "Success", message: "Successfully added heartbeat" });
+        popToRoot();
       })
       .catch((error) => {
-        showToast(Toast.Style.Failure, "An error occurred", error.response.data.errors);
+        toast.style = Toast.Style.Failure;
+        toast.title = "Unable to create heartbeat";
+        toast.message = error.response.data.errors;
       });
   }
 
