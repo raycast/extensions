@@ -23,6 +23,10 @@ const actionablePullRequests = () => {
           />
         ))}
 
+      {updatedPulls.length === 0 && recentlyVisitedPulls.length === 0 && (
+        <MenuBarExtra.Item title={`No updated pulls at this time`} />
+      )}
+
       {showSeparator && <MenuBarExtra.Separator />}
 
       {recentlyVisitedPulls.length > 0 && (
