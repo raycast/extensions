@@ -14,10 +14,17 @@ interface CommandForm {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [output, setOutput] = useState({} as any);
+  const [domainError, setDomainError] = useState<string | undefined>();
+
+  function dropDomainErrorIfNeeded() {
+    if (domainError && domainError.length > 0) {
+      setDomainError(undefined);
+    }
+  }
 
   async function handleSubmit(values: CommandForm) {
     if (values.domain == "") {
-      showToast(Toast.Style.Failure, "Error", "Domain is required");
+      setDomainError("This field is required!");
       return;
     }
 
@@ -61,7 +68,20 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="domain" title="Domain" placeholder="Enter domain" />
+      <Form.TextField
+        id="domain"
+        title="Domain"
+        placeholder="Enter domain"
+        error={domainError}
+        onChange={dropDomainErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setDomainError("The field is required!");
+          } else {
+            dropDomainErrorIfNeeded();
+          }
+        }}
+      />
 
       <Form.Dropdown id="type" title="Select type" defaultValue="A">
         <Form.Dropdown.Item value="A" title="A" />

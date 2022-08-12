@@ -17,8 +17,6 @@ interface CommandForm {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [url, setUrl] = useState("");
-  const [username, setUsername] = useState("");
-  const [format, setFormat] = useState("");
   const [usernameError, setUsernameError] = useState<string | undefined>();
 
   function dropUsernameErrorIfNeeded() {
@@ -27,74 +25,57 @@ export default function Command() {
     }
   }
 
-  function validate() {
-    if (username.length == 0) {
-      setUsernameError("The field is required!");
-
-      return false;
-    } else {
-      dropUsernameErrorIfNeeded();
+  async function handleSubmit(values: CommandForm) {
+    if (values.username == "") {
+      setUsernameError("This field is required!");
+      return;
     }
 
-    return true;
-  }
-
-  async function handleSubmit(values: CommandForm) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Retrieving avatar...",
-    });
-
-    const data = {
-      format: values.format,
-      gender: values.gender,
-      upload: true, // this is so the API returns a URL to the generated avatar
-      username: values.username,
-    };
-
-    const options = {
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-      },
-    };
-
-    await axios
-      .post("https://api.m3o.com/v1/avatar/Generate", data, options)
-      .then((response) => {
-        toast.style = Toast.Style.Success;
-        toast.title = "Avatar retrieved successfully";
-
-        setUsername(values.username);
-        setFormat(values.format);
-        setUrl(response.data.url);
-      })
-      .catch((error) => {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to retrieve avatar";
-        toast.message = error.response.data.detail ?? "";
-      });
-  }
-
-  async function download() {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving avatar...",
     });
 
     await axios
-      .get(url, { responseType: "stream" })
-      .then((response) => {
-        const filename = username ? username.split(" ").join("_") : "avatar";
-        const type = format === "png" ? "png" : "jpeg";
-        response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
-
+      .post(
+        "https://api.m3o.com/v1/avatar/Generate",
+        {
+          format: values.format,
+          gender: values.gender,
+          upload: true, // this is so the API returns a URL to the generated avatar
+          username: values.username,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        }
+      )
+      .then(async (response) => {
         toast.style = Toast.Style.Success;
-        toast.title = "Avatar saved successfully";
+
+        setUrl(response.data.url);
+
+        await axios
+          .get(response.data.url, { responseType: "stream" })
+          .then((response) => {
+            const filename = values.username ? values.username.split(" ").join("_") : "avatar";
+            const type = values.format === "png" ? "png" : "jpeg";
+            response.data.pipe(fs.createWriteStream(`${homedir()}/Desktop/${filename}.${type}`));
+
+            toast.style = Toast.Style.Success;
+            toast.title = "Avatar saved to downloads";
+          })
+          .catch((error) => {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Unable to download avatar";
+            toast.message = error.response.data.error.message ?? "";
+          });
       })
       .catch((error) => {
         toast.style = Toast.Style.Failure;
         toast.title = "Unable to download avatar";
-        toast.message = error.response.data.error.message ?? "";
+        toast.message = error.response.data.detail ?? "";
       });
   }
 
@@ -102,13 +83,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate Avatar" onSubmit={handleSubmit} icon={Icon.Pencil} />
-          {url && (
-            <>
-              <Action title="Download" onAction={download} icon={Icon.Download} />
-              <Action.OpenInBrowser title="Open in Browser" url={url} />
-            </>
-          )}
+          <Action.SubmitForm title="Download" onSubmit={handleSubmit} icon={Icon.Pencil} />
+          {url && <Action.OpenInBrowser title="Open in Browser" url={url} />}
         </ActionPanel>
       }
     >
@@ -122,7 +98,13 @@ export default function Command() {
         <Form.Dropdown.Item value="female" title="Female" />
       </Form.Dropdown>
 
-      <Form.TextField id="username" title="Username" placeholder="Enter username" />
+      <Form.TextField
+        id="username"
+        title="Username"
+        placeholder="Enter username"
+        error={usernameError}
+        onChange={dropUsernameErrorIfNeeded}
+      />
     </Form>
   );
 }
