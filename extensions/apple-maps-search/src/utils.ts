@@ -22,7 +22,7 @@ export interface Preferences {
  *
  * @param origin The origin address
  * @param destination The destination address
- * @param transportType One of three possible travel modes
+ * @param transportType One of four possible travel modes
  * @returns A properly URI encoded string according to Apple Maps documentation
  */
 export function makeDirectionsURL(origin: string, destination: string, transportType: string): string {
