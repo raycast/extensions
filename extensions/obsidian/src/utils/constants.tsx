@@ -25,6 +25,7 @@ export const INLINE_TAGS_REGEX = /[\s\n](#[a-zA-Z_0-9/-]+)/g;
 export const YAML_FRONTMATTER_REGEX = /---\s([\s\S]*)---/g;
 export const LATEX_REGEX = /\$\$(.|\n)*?\$\$/gm;
 export const LATEX_INLINE_REGEX = /\$(.|\n)*?\$/gm;
+export const CODE_BLOCK_REGEX = /```(.|\n)*?```/gm;
 
 export const DAY_NUMBER_TO_STRING: Record<number, string> = {
   0: "Sun",

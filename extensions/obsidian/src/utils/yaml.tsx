@@ -1,7 +1,7 @@
 import YAML from "yaml";
 
 import { Note } from "./interfaces";
-import { INLINE_TAGS_REGEX, YAML_FRONTMATTER_REGEX } from "./constants";
+import { CODE_BLOCK_REGEX, INLINE_TAGS_REGEX, YAML_FRONTMATTER_REGEX } from "./constants";
 import { sortByAlphabet } from "./utils";
 
 export function parsedYAMLFrontmatter(str: string) {
@@ -48,7 +48,9 @@ export function yamlTitleForString(str: string) {
 function inlineTagsForNotes(notes: Note[]) {
   const foundTags: string[] = [];
   for (const note of notes) {
-    const tags = [...note.content.matchAll(INLINE_TAGS_REGEX)];
+    // Ignoring codeblocks to avoid matching hex color codes
+    const cleanedContent = note.content.replaceAll(CODE_BLOCK_REGEX, "");
+    const tags = [...cleanedContent.matchAll(INLINE_TAGS_REGEX)];
     for (const tag of tags) {
       if (!foundTags.includes(tag[1])) {
         foundTags.push(tag[1]);
