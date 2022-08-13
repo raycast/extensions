@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 
 export default {
-  state: (applicationName: string) => `if application "Spotify" is running then
+  state: (applicationName: string) => `if application "${applicationName}" is running then
   tell application "${applicationName}"
   set cstate to "{"
   set cstate to cstate & "\\"track_id\\": \\"" & current track's id & "\\""
@@ -24,7 +24,7 @@ end if`,
   return string_to_escape
 end escape_quotes
 
-if application "Spotify" is running then
+if application "${applicationName}" is running then
   tell application "${applicationName}"
     set ctrack to "{"
     set ctrack to ctrack & "\\"artist\\": \\"" & my escape_quotes(current track's artist) & "\\""
