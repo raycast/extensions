@@ -1,7 +1,8 @@
 /* eslint-disable no-useless-escape */
 
 export default {
-  state: (applicationName: string) => `tell application "${applicationName}"
+  state: (applicationName: string) => `if application "Spotify" is running then
+  tell application "${applicationName}"
   set cstate to "{"
   set cstate to cstate & "\\"track_id\\": \\"" & current track's id & "\\""
   set cstate to cstate & ",\\"volume\\": " & sound volume
@@ -10,7 +11,10 @@ export default {
   set cstate to cstate & "}"
 
   return cstate
-end tell`,
+end tell
+else
+  set cstate to "{\\"state\\": \\"stopped\\"}"
+end if`,
   track: (applicationName: string) => `on escape_quotes(string_to_escape)
   set AppleScript's text item delimiters to the "\\""
   set the item_list to every text item of string_to_escape
@@ -20,22 +24,24 @@ end tell`,
   return string_to_escape
 end escape_quotes
 
-tell application "${applicationName}"
-  set ctrack to "{"
-  set ctrack to ctrack & "\\"artist\\": \\"" & my escape_quotes(current track's artist) & "\\""
-  set ctrack to ctrack & ",\\"album\\": \\"" & my escape_quotes(current track's album) & "\\""
-  set ctrack to ctrack & ",\\"disc_number\\": " & current track's disc number
-  set ctrack to ctrack & ",\\"duration\\": " & current track's duration
-  set ctrack to ctrack & ",\\"played_count\\": " & current track's played count
-  set ctrack to ctrack & ",\\"track_number\\": " & current track's track number
-  set ctrack to ctrack & ",\\"popularity\\": " & current track's popularity
-  set ctrack to ctrack & ",\\"id\\": \\"" & current track's id & "\\""
-  set ctrack to ctrack & ",\\"name\\": \\"" & my escape_quotes(current track's name) & "\\""
-  set ctrack to ctrack & ",\\"album_artist\\": \\"" & my escape_quotes(current track's album artist) & "\\""
-  set ctrack to ctrack & ",\\"artwork_url\\": \\"" & current track's artwork url & "\\""
-  set ctrack to ctrack & ",\\"spotify_url\\": \\"" & current track's spotify url & "\\""
-  set ctrack to ctrack & "}"
-end tell`,
+if application "Spotify" is running then
+  tell application "${applicationName}"
+    set ctrack to "{"
+    set ctrack to ctrack & "\\"artist\\": \\"" & my escape_quotes(current track's artist) & "\\""
+    set ctrack to ctrack & ",\\"album\\": \\"" & my escape_quotes(current track's album) & "\\""
+    set ctrack to ctrack & ",\\"disc_number\\": " & current track's disc number
+    set ctrack to ctrack & ",\\"duration\\": " & current track's duration
+    set ctrack to ctrack & ",\\"played_count\\": " & current track's played count
+    set ctrack to ctrack & ",\\"track_number\\": " & current track's track number
+    set ctrack to ctrack & ",\\"popularity\\": " & current track's popularity
+    set ctrack to ctrack & ",\\"id\\": \\"" & current track's id & "\\""
+    set ctrack to ctrack & ",\\"name\\": \\"" & my escape_quotes(current track's name) & "\\""
+    set ctrack to ctrack & ",\\"album_artist\\": \\"" & my escape_quotes(current track's album artist) & "\\""
+    set ctrack to ctrack & ",\\"artwork_url\\": \\"" & current track's artwork url & "\\""
+    set ctrack to ctrack & ",\\"spotify_url\\": \\"" & current track's spotify url & "\\""
+    set ctrack to ctrack & "}"
+  end tell
+end if`,
   volumeUp: (applicationName: string) => `on min(x, y)
   if x ≤ y then
     return x

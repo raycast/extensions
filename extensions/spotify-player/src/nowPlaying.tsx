@@ -24,9 +24,9 @@ import NowPlayingDetailMetadata from "./components/NowPlayingDetailMetadata";
 import NowPlayingEmptyDetail from "./components/NowPlayingEmptyDetail";
 
 export default function NowPlayingMenuBar() {
-  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | undefined>();
-  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | undefined>();
-  const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | undefined>();
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | null>(null);
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>(null);
+  const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>(null);
   const [authorized, setAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,7 +35,7 @@ export default function NowPlayingMenuBar() {
 
     // Check if Spotify is installed (only try this once)
     let isInstalled = spotifyInstalled;
-    if (isInstalled == undefined) {
+    if (isInstalled == null) {
       isInstalled = await isSpotifyInstalled();
       setSpotifyInstalled(await isSpotifyInstalled());
     }
@@ -51,7 +51,7 @@ export default function NowPlayingMenuBar() {
         setCurrentlyPlayingTrack(track);
 
         let newSubtitle: string | undefined;
-        if (track.id) {
+        if (track && track.id) {
           newSubtitle = `${track.artist} – ${track.name}`;
         }
         await updateCommandMetadata({ subtitle: newSubtitle });
@@ -80,7 +80,7 @@ export default function NowPlayingMenuBar() {
   const handlePlay = async () => {
     await closeMainWindow();
     await setCurrentSpotifyState((oldState) => {
-      if (!oldState) return;
+      if (!oldState) return null;
       return {
         ...oldState,
 
@@ -93,7 +93,7 @@ export default function NowPlayingMenuBar() {
   const handlePause = async () => {
     await closeMainWindow();
     await setCurrentSpotifyState((oldState) => {
-      if (!oldState) return;
+      if (!oldState) return null;
       return {
         ...oldState,
 
@@ -117,16 +117,15 @@ export default function NowPlayingMenuBar() {
     await showTrackNotification(state, track);
   };
 
-  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped) {
-    return <Detail isLoading={isLoading}></Detail>;
-  }
-
   const trackTitle =
     spotifyInstalled && currentlyPlayingTrack
       ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`
       : undefined;
 
-  if (!currentlyPlayingTrack || !currentSpotifyState) return <NowPlayingEmptyDetail text="Not Playing" />;
+  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped)
+    return <NowPlayingEmptyDetail title="Not Playing" showLoadingImage={false} />;
+  if (!currentlyPlayingTrack || !currentSpotifyState)
+    return <NowPlayingEmptyDetail title="Loading" showLoadingImage={true} />;
 
   return (
     <Detail
