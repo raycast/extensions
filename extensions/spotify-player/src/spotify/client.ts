@@ -145,13 +145,19 @@ export async function play(uri?: string, context_uri?: string): Promise<void> {
       await authorizeIfNeeded();
       await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
     } else {
-      playTrack(uri ?? context_uri ?? "");
+      await playTrack(uri ?? context_uri ?? "");
     }
   } catch (e: any) {
+    const errorMessage = (e as unknown as SpotifyApi.ErrorObject).message;
+    if (errorMessage.includes("NO_ACTIVE_DEVICE")) {
+      await playTrack(uri ?? context_uri ?? "");
+      return;
+    }
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed Start Playing",
-      message: (e as unknown as SpotifyApi.ErrorObject).message,
+      message: errorMessage,
     });
   }
 }
