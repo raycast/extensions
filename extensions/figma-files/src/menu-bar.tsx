@@ -15,7 +15,15 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra icon="figma-menubar-icon.png" tooltip="Figma files">
+    <MenuBarExtra
+      icon={{
+        source: {
+          light: "figma-menubar-icon-dark.png",
+          dark: "figma-menubar-icon-light.png",
+        },
+      }}
+      tooltip="Figma files"
+    >
       {hasError && <MenuBarExtra.Item title="Error" />}
       {visitedFiles && (
         <>

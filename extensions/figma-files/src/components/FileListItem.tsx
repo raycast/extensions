@@ -15,9 +15,8 @@ export default function FileListItem(props: {
   extraKey?: string;
   onVisit: (file: File) => void;
   showingDetail: boolean;
-  setShowingDetail: (showingDetail: boolean) => void;
 }) {
-  const { file, extraKey, onVisit, showingDetail, setShowingDetail } = props;
+  const { file, extraKey, onVisit, showingDetail } = props;
 
   const dateUpdated = String(timeAgo.format(new Date(file.last_modified)));
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
@@ -30,7 +29,6 @@ export default function FileListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
             <OpenProjectFileAction file={props.file} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
