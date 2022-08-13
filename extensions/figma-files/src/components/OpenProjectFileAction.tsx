@@ -1,16 +1,10 @@
-import { Application, getApplications, Action } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action } from "@raycast/api";
+import { useFigmaApp } from "../hooks/useFigmaApp";
 
 import type { File } from "../types";
 
 export function OpenProjectFileAction(props: { file: File; onVisit: (file: File) => void }) {
-  const [desktopApp, setDesktopApp] = useState<Application>();
-
-  useEffect(() => {
-    getApplications()
-      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-      .then(setDesktopApp);
-  }, []);
+  const desktopApp = useFigmaApp();
 
   return desktopApp ? (
     <Action.Open
