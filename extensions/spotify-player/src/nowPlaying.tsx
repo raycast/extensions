@@ -1,5 +1,4 @@
 import {
-  MenuBarExtra,
   updateCommandMetadata,
   open,
   showToast,
@@ -10,7 +9,6 @@ import {
   Clipboard,
   Icon,
   Color,
-  getPreferenceValues,
   Detail,
   closeMainWindow,
   Action,
@@ -174,7 +172,7 @@ export default function NowPlayingMenuBar() {
               shortcut={{ modifiers: ["cmd"], key: "," }}
               onAction={() => handlePreviousTrack()}
             />
-            {currentlyPlayingTrack && (
+            {authorized && currentlyPlayingTrack && (
               <Action
                 title="Start Radio"
                 icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
@@ -191,21 +189,23 @@ export default function NowPlayingMenuBar() {
 
           {currentlyPlayingTrack && (
             <ActionPanel.Section>
-              <Action
-                icon={Icon.Heart}
-                title="Like"
-                onAction={async () => {
-                  try {
-                    const response = await likeCurrentlyPlayingTrack();
-                    if (response?.result) {
-                      const title = `${response.result.artist} – ${response.result.name}`;
-                      showHUD(`💚 ${title}`);
+              {authorized && (
+                <Action
+                  icon={Icon.Heart}
+                  title="Like"
+                  onAction={async () => {
+                    try {
+                      const response = await likeCurrentlyPlayingTrack();
+                      if (response?.result) {
+                        const title = `${response.result.artist} – ${response.result.name}`;
+                        showHUD(`💚 ${title}`);
+                      }
+                    } catch (err) {
+                      console.error(err);
                     }
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }}
-              />
+                  }}
+                />
+              )}
               <Action
                 key={currentlyPlayingTrack.id}
                 icon={"icon.png"}
