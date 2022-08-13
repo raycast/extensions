@@ -4,6 +4,9 @@
   "title": "Brew",
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
+  "contributors": [
+    "Aayush9029"
+  ],
   "license": "MIT",
   "icon": "icon.png",
   "commands": [
