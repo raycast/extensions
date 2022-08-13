@@ -28,7 +28,13 @@ export interface Preferences {
 export function makeDirectionsURL(origin: string, destination: string, transportType: string): string {
   const mapsBase = "maps://";
   return (
-    mapsBase + "?saddr=" + encodeURI(origin) + "&daddr=" + encodeURI(destination) + "&dirflg=" + encodeURI(transportType)
+    mapsBase +
+    "?saddr=" +
+    encodeURI(origin) +
+    "&daddr=" +
+    encodeURI(destination) +
+    "&dirflg=" +
+    encodeURI(transportType)
   );
 }
 
