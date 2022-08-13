@@ -1,4 +1,4 @@
-import * as Types from "../schema.generated";
+import * as Types from "./schema.generated";
 
 import { GraphQLClient } from "graphql-request";
 import * as Dom from "graphql-request/dist/types.dom";
@@ -2059,11 +2059,7 @@ export const SearchPullRequestsDocument = gql`
     $numberOfClosedItems: Int!
     $avatarSize: Int!
   ) {
-    createdOpen: search(
-      query: $createdOpenQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2071,11 +2067,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    createdClosed: search(
-      query: $createdClosedQuery
-      type: ISSUE
-      first: $numberOfClosedItems
-    ) {
+    createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2083,11 +2075,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    assignedOpen: search(
-      query: $assignedOpenQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2095,11 +2083,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    assignedClosed: search(
-      query: $assignedClosedQuery
-      type: ISSUE
-      first: $numberOfClosedItems
-    ) {
+    assignedClosed: search(query: $assignedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2107,11 +2091,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    mentionedOpen: search(
-      query: $mentionedOpenQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2119,11 +2099,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    mentionedClosed: search(
-      query: $mentionedClosedQuery
-      type: ISSUE
-      first: $numberOfClosedItems
-    ) {
+    mentionedClosed: search(query: $mentionedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2131,11 +2107,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    reviewRequestsOpen: search(
-      query: $reviewRequestsOpenQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    reviewRequestsOpen: search(query: $reviewRequestsOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2143,11 +2115,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    reviewRequestsClosed: search(
-      query: $reviewRequestsClosedQuery
-      type: ISSUE
-      first: $numberOfClosedItems
-    ) {
+    reviewRequestsClosed: search(query: $reviewRequestsClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2155,11 +2123,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    reviewedByOpen: search(
-      query: $reviewedByOpenQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    reviewedByOpen: search(query: $reviewedByOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2167,11 +2131,7 @@ export const SearchPullRequestsDocument = gql`
         }
       }
     }
-    reviewedByClosed: search(
-      query: $reviewedByClosedQuery
-      type: ISSUE
-      first: $numberOfOpenItems
-    ) {
+    reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
         pullRequest: node {
           __typename
@@ -2189,16 +2149,9 @@ export type SdkFunctionWrapper = <T>(
   operationType?: string
 ) => Promise<T>;
 
-const defaultWrapper: SdkFunctionWrapper = (
-  action,
-  _operationName,
-  _operationType
-) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
 
-export function getSdk(
-  client: GraphQLClient,
-  withWrapper: SdkFunctionWrapper = defaultWrapper
-) {
+export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     SearchPullRequests(
       variables: SearchPullRequestsQueryVariables,
@@ -2206,11 +2159,10 @@ export function getSdk(
     ): Promise<SearchPullRequestsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<SearchPullRequestsQuery>(
-            SearchPullRequestsDocument,
-            variables,
-            { ...requestHeaders, ...wrappedRequestHeaders }
-          ),
+          client.request<SearchPullRequestsQuery>(SearchPullRequestsDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
         "SearchPullRequests",
         "query"
       );

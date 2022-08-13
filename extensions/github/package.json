@@ -3,7 +3,7 @@
   "name": "github",
   "title": "Github",
   "description": "Github community extension",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "qeude",
   "categories": [
     "Developer Tools"
@@ -15,6 +15,14 @@
       "title": "My Pull Requests",
       "description": "List pull requests you created, participated or were mentioned.",
       "mode": "view"
+    },
+    {
+      "name": "menu",
+      "title": "Pending Review Requests",
+      "subtitle": "GitHub",
+      "description": "Shows pending review requests.",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [

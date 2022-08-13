@@ -144,11 +144,7 @@ query SearchPullRequests(
   $numberOfClosedItems: Int!
   $avatarSize: Int!
 ) {
-  createdOpen: search(
-    query: $createdOpenQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -156,11 +152,7 @@ query SearchPullRequests(
       }
     }
   }
-  createdClosed: search(
-    query: $createdClosedQuery
-    type: ISSUE
-    first: $numberOfClosedItems
-  ) {
+  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -168,11 +160,7 @@ query SearchPullRequests(
       }
     }
   }
-  assignedOpen: search(
-    query: $assignedOpenQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -180,11 +168,7 @@ query SearchPullRequests(
       }
     }
   }
-  assignedClosed: search(
-    query: $assignedClosedQuery
-    type: ISSUE
-    first: $numberOfClosedItems
-  ) {
+  assignedClosed: search(query: $assignedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -192,11 +176,7 @@ query SearchPullRequests(
       }
     }
   }
-  mentionedOpen: search(
-    query: $mentionedOpenQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -204,11 +184,7 @@ query SearchPullRequests(
       }
     }
   }
-  mentionedClosed: search(
-    query: $mentionedClosedQuery
-    type: ISSUE
-    first: $numberOfClosedItems
-  ) {
+  mentionedClosed: search(query: $mentionedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -216,11 +192,7 @@ query SearchPullRequests(
       }
     }
   }
-  reviewRequestsOpen: search(
-    query: $reviewRequestsOpenQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  reviewRequestsOpen: search(query: $reviewRequestsOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -228,11 +200,7 @@ query SearchPullRequests(
       }
     }
   }
-  reviewRequestsClosed: search(
-    query: $reviewRequestsClosedQuery
-    type: ISSUE
-    first: $numberOfClosedItems
-  ) {
+  reviewRequestsClosed: search(query: $reviewRequestsClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -240,11 +208,7 @@ query SearchPullRequests(
       }
     }
   }
-  reviewedByOpen: search(
-    query: $reviewedByOpenQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  reviewedByOpen: search(query: $reviewedByOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename
@@ -252,11 +216,7 @@ query SearchPullRequests(
       }
     }
   }
-  reviewedByClosed: search(
-    query: $reviewedByClosedQuery
-    type: ISSUE
-    first: $numberOfOpenItems
-  ) {
+  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
       pullRequest: node {
         __typename

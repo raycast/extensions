@@ -2,10 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { GraphQLClient } from "graphql-request";
 
-import {
-  getSdk,
-  PullRequestFieldsFragment,
-} from "./SearchPullRequests.generated";
+import { getSdk, PullRequestFieldsFragment } from "./SearchPullRequests.generated";
 
 const api = getSdk(
   new GraphQLClient("https://api.github.com/graphql", {
@@ -19,6 +16,13 @@ export type Section = {
   requests: PullRequestFieldsFragment[];
 };
 
+export type Result = {
+  reviewRequested: Section;
+  opened: Section;
+  mentioned: Section;
+  closed: Section;
+};
+
 export const useSearchPullRequests = () => {
   {
     return useCachedPromise(async () => {
@@ -30,13 +34,10 @@ export const useSearchPullRequests = () => {
           assignedClosedQuery: "is:pr assignee:@me archived:false is:closed",
           mentionedOpenQuery: "is:pr mentions:@me archived:false is:open",
           mentionedClosedQuery: "is:pr mentions:@me archived:false is:closed",
-          reviewRequestsOpenQuery:
-            "is:pr review-requested:@me archived:false is:open",
-          reviewRequestsClosedQuery:
-            "is:pr review-requested:@me archived:false is:closed",
+          reviewRequestsOpenQuery: "is:pr review-requested:@me archived:false is:open",
+          reviewRequestsClosedQuery: "is:pr review-requested:@me archived:false is:closed",
           reviewedByOpenQuery: "is:pr reviewed-by:@me archived:false is:open",
-          reviewedByClosedQuery:
-            "is:pr reviewed-by:@me archived:false is:closed",
+          reviewedByClosedQuery: "is:pr reviewed-by:@me archived:false is:closed",
           numberOfOpenItems: 20,
           numberOfClosedItems: 20,
           avatarSize: 64,
@@ -58,11 +59,7 @@ export const useSearchPullRequests = () => {
         const closed = createdClosed
           .concat(assignedClosed)
           .concat(mentionedClosed)
-          .sort(
-            (a, b) =>
-              new Date(b.updatedDate).getTime() -
-              new Date(a.updatedDate).getTime()
-          );
+          .sort((a, b) => new Date(b.updatedDate).getTime() - new Date(a.updatedDate).getTime());
         const uniqueClosedIds = new Set();
 
         const reviewRequested =
@@ -78,11 +75,11 @@ export const useSearchPullRequests = () => {
             ?.map((item) => item?.pullRequest as PullRequestFieldsFragment)
             .filter((item) => item !== null) ?? [];
 
-        const sections: Section[] = [
-          { title: "Need Review", requests: reviewRequested },
-          { title: "Opened", requests: open },
-          { title: "Mentioned", requests: mentioned },
-          {
+        const result: Result = {
+          reviewRequested: { title: "Need Review", requests: reviewRequested },
+          opened: { title: "Opened", requests: open },
+          mentioned: { title: "Mentioned", requests: mentioned },
+          closed: {
             title: "Recently Closed",
             requests: closed.filter((element) => {
               const isDuplicate = uniqueClosedIds.has(element.nodeId);
@@ -96,8 +93,8 @@ export const useSearchPullRequests = () => {
               return false;
             }),
           },
-        ];
-        return sections;
+        };
+        return result;
       } catch (error) {
         console.log(error);
       }

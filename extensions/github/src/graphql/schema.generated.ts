@@ -3,10 +3,8 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
 };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -2610,13 +2608,9 @@ export type ContributionsCollection = {
   /** The first issue the user opened on GitHub. This will be null if that issue was opened outside the collection's time range and ignoreTimeRange is false. If the issue is not visible but the user has opted to show private contributions, a RestrictedContribution will be returned. */
   firstIssueContribution?: Maybe<CreatedIssueOrRestrictedContribution>;
   /** The first pull request the user opened on GitHub. This will be null if that pull request was opened outside the collection's time range and ignoreTimeRange is not true. If the pull request is not visible but the user has opted to show private contributions, a RestrictedContribution will be returned. */
-  firstPullRequestContribution?: Maybe<
-    CreatedPullRequestOrRestrictedContribution
-  >;
+  firstPullRequestContribution?: Maybe<CreatedPullRequestOrRestrictedContribution>;
   /** The first repository the user created on GitHub. This will be null if that first repository was created outside the collection's time range and ignoreTimeRange is false. If the repository is not visible, then a RestrictedContribution is returned. */
-  firstRepositoryContribution?: Maybe<
-    CreatedRepositoryOrRestrictedContribution
-  >;
+  firstRepositoryContribution?: Maybe<CreatedRepositoryOrRestrictedContribution>;
   /** Does the user have any more activity in the timeline that occurred prior to the collection's time range? */
   hasActivityInThePast: Scalars["Boolean"];
   /** Determine if there are any contributions in this collection. */
@@ -2660,9 +2654,7 @@ export type ContributionsCollection = {
   /** Pull request contributions made by the user. */
   pullRequestContributions: CreatedPullRequestContributionConnection;
   /** Pull request contributions made by the user, grouped by repository. */
-  pullRequestContributionsByRepository: Array<
-    PullRequestContributionsByRepository
-  >;
+  pullRequestContributionsByRepository: Array<PullRequestContributionsByRepository>;
   /**
    * Pull request review contributions made by the user. Returns the most recently
    * submitted review for each PR reviewed by the user.
@@ -2670,9 +2662,7 @@ export type ContributionsCollection = {
    */
   pullRequestReviewContributions: CreatedPullRequestReviewContributionConnection;
   /** Pull request review contributions made by the user, grouped by repository. */
-  pullRequestReviewContributionsByRepository: Array<
-    PullRequestReviewContributionsByRepository
-  >;
+  pullRequestReviewContributionsByRepository: Array<PullRequestReviewContributionsByRepository>;
   /** A list of repositories owned by the user that the user created in this time range. */
   repositoryContributions: CreatedRepositoryContributionConnection;
   /** A count of contributions made by the user that the viewer cannot access. Only non-zero when the user has chosen to share their private contribution counts. */
@@ -3514,9 +3504,7 @@ export type CreatedIssueContributionEdge = {
 };
 
 /** Represents either a issue the viewer can access or a restricted contribution. */
-export type CreatedIssueOrRestrictedContribution =
-  | CreatedIssueContribution
-  | RestrictedContribution;
+export type CreatedIssueOrRestrictedContribution = CreatedIssueContribution | RestrictedContribution;
 
 /** Represents the contribution a user made on GitHub by opening a pull request. */
 export type CreatedPullRequestContribution = Contribution & {
@@ -3566,9 +3554,7 @@ export type CreatedPullRequestContributionEdge = {
 };
 
 /** Represents either a pull request the viewer can access or a restricted contribution. */
-export type CreatedPullRequestOrRestrictedContribution =
-  | CreatedPullRequestContribution
-  | RestrictedContribution;
+export type CreatedPullRequestOrRestrictedContribution = CreatedPullRequestContribution | RestrictedContribution;
 
 /** Represents the contribution a user made by leaving a review on a pull request. */
 export type CreatedPullRequestReviewContribution = Contribution & {
@@ -3669,9 +3655,7 @@ export type CreatedRepositoryContributionEdge = {
 };
 
 /** Represents either a repository the viewer can access or a restricted contribution. */
-export type CreatedRepositoryOrRestrictedContribution =
-  | CreatedRepositoryContribution
-  | RestrictedContribution;
+export type CreatedRepositoryOrRestrictedContribution = CreatedRepositoryContribution | RestrictedContribution;
 
 /** Represents a mention made by one issue or pull request to another. */
 export type CrossReferencedEvent = Node &
@@ -5586,9 +5570,7 @@ export type EnterpriseOwnerInfo = {
   /** The setting value for whether members of organizations in the enterprise can create public repositories. */
   membersCanCreatePublicRepositoriesSetting?: Maybe<Scalars["Boolean"]>;
   /** The setting value for whether members of organizations in the enterprise can create repositories. */
-  membersCanCreateRepositoriesSetting?: Maybe<
-    EnterpriseMembersCanCreateRepositoriesSettingValue
-  >;
+  membersCanCreateRepositoriesSetting?: Maybe<EnterpriseMembersCanCreateRepositoriesSettingValue>;
   /** A list of enterprise organizations configured with the provided repository creation setting value. */
   membersCanCreateRepositoriesSettingOrganizations: OrganizationConnection;
   /** The setting value for whether members with admin permissions for repositories can delete issues. */
@@ -9123,9 +9105,7 @@ export type Mutation = {
   /** Clear all of a customer's queued migrations */
   abortQueuedMigrations?: Maybe<AbortQueuedMigrationsPayload>;
   /** Accepts a pending invitation for a user to become an administrator of an enterprise. */
-  acceptEnterpriseAdministratorInvitation?: Maybe<
-    AcceptEnterpriseAdministratorInvitationPayload
-  >;
+  acceptEnterpriseAdministratorInvitation?: Maybe<AcceptEnterpriseAdministratorInvitationPayload>;
   /** Applies a suggested topic to the repository. */
   acceptTopicSuggestion?: Maybe<AcceptTopicSuggestionPayload>;
   /** Adds assignees to an assignable object. */
@@ -9137,9 +9117,7 @@ export type Mutation = {
   /** Vote for an option in a discussion poll. */
   addDiscussionPollVote?: Maybe<AddDiscussionPollVotePayload>;
   /** Adds a support entitlement to an enterprise member. */
-  addEnterpriseSupportEntitlement?: Maybe<
-    AddEnterpriseSupportEntitlementPayload
-  >;
+  addEnterpriseSupportEntitlement?: Maybe<AddEnterpriseSupportEntitlementPayload>;
   /** Adds labels to a labelable object. */
   addLabelsToLabelable?: Maybe<AddLabelsToLabelablePayload>;
   /** Adds a card to a ProjectColumn. Either `contentId` or `note` must be provided but **not** both. */
@@ -9181,9 +9159,7 @@ export type Mutation = {
   /** Marks a repository as archived. */
   archiveRepository?: Maybe<ArchiveRepositoryPayload>;
   /** Cancels a pending invitation for an administrator to join an enterprise. */
-  cancelEnterpriseAdminInvitation?: Maybe<
-    CancelEnterpriseAdminInvitationPayload
-  >;
+  cancelEnterpriseAdminInvitation?: Maybe<CancelEnterpriseAdminInvitationPayload>;
   /** Cancel an active sponsorship. */
   cancelSponsorship?: Maybe<CancelSponsorshipPayload>;
   /** Update your status on GitHub. */
@@ -9332,9 +9308,7 @@ export type Mutation = {
   /** Dismisses an approved or rejected pull request review. */
   dismissPullRequestReview?: Maybe<DismissPullRequestReviewPayload>;
   /** Dismisses the Dependabot alert. */
-  dismissRepositoryVulnerabilityAlert?: Maybe<
-    DismissRepositoryVulnerabilityAlertPayload
-  >;
+  dismissRepositoryVulnerabilityAlert?: Maybe<DismissRepositoryVulnerabilityAlertPayload>;
   /** Enable the default auto-merge on a pull request. */
   enablePullRequestAutoMerge?: Maybe<EnablePullRequestAutoMergePayload>;
   /** Follow an organization. */
@@ -9342,9 +9316,7 @@ export type Mutation = {
   /** Follow a user. */
   followUser?: Maybe<FollowUserPayload>;
   /** Grant the migrator role to a user for all organizations under an enterprise account. */
-  grantEnterpriseOrganizationsMigratorRole?: Maybe<
-    GrantEnterpriseOrganizationsMigratorRolePayload
-  >;
+  grantEnterpriseOrganizationsMigratorRole?: Maybe<GrantEnterpriseOrganizationsMigratorRolePayload>;
   /** Grant the migrator role to a user or a team. */
   grantMigratorRole?: Maybe<GrantMigratorRolePayload>;
   /** Invite someone to become an administrator of the enterprise. */
@@ -9372,13 +9344,9 @@ export type Mutation = {
   /** Pin an issue to a repository */
   pinIssue?: Maybe<PinIssuePayload>;
   /** Regenerates the identity provider recovery codes for an enterprise */
-  regenerateEnterpriseIdentityProviderRecoveryCodes?: Maybe<
-    RegenerateEnterpriseIdentityProviderRecoveryCodesPayload
-  >;
+  regenerateEnterpriseIdentityProviderRecoveryCodes?: Maybe<RegenerateEnterpriseIdentityProviderRecoveryCodesPayload>;
   /** Regenerates a verifiable domain's verification token. */
-  regenerateVerifiableDomainToken?: Maybe<
-    RegenerateVerifiableDomainTokenPayload
-  >;
+  regenerateVerifiableDomainToken?: Maybe<RegenerateVerifiableDomainTokenPayload>;
   /** Reject all pending deployments under one or more environments */
   rejectDeployments?: Maybe<RejectDeploymentsPayload>;
   /** Removes assignees from an assignable object. */
@@ -9386,15 +9354,11 @@ export type Mutation = {
   /** Removes an administrator from the enterprise. */
   removeEnterpriseAdmin?: Maybe<RemoveEnterpriseAdminPayload>;
   /** Removes the identity provider from an enterprise */
-  removeEnterpriseIdentityProvider?: Maybe<
-    RemoveEnterpriseIdentityProviderPayload
-  >;
+  removeEnterpriseIdentityProvider?: Maybe<RemoveEnterpriseIdentityProviderPayload>;
   /** Removes an organization from the enterprise */
   removeEnterpriseOrganization?: Maybe<RemoveEnterpriseOrganizationPayload>;
   /** Removes a support entitlement from an enterprise member. */
-  removeEnterpriseSupportEntitlement?: Maybe<
-    RemoveEnterpriseSupportEntitlementPayload
-  >;
+  removeEnterpriseSupportEntitlement?: Maybe<RemoveEnterpriseSupportEntitlementPayload>;
   /** Removes labels from a Labelable object. */
   removeLabelsFromLabelable?: Maybe<RemoveLabelsFromLabelablePayload>;
   /** Removes outside collaborator from all repositories in an organization. */
@@ -9416,17 +9380,13 @@ export type Mutation = {
   /** Marks a review thread as resolved. */
   resolveReviewThread?: Maybe<ResolveReviewThreadPayload>;
   /** Revoke the migrator role to a user for all organizations under an enterprise account. */
-  revokeEnterpriseOrganizationsMigratorRole?: Maybe<
-    RevokeEnterpriseOrganizationsMigratorRolePayload
-  >;
+  revokeEnterpriseOrganizationsMigratorRole?: Maybe<RevokeEnterpriseOrganizationsMigratorRolePayload>;
   /** Revoke the migrator role from a user or a team. */
   revokeMigratorRole?: Maybe<RevokeMigratorRolePayload>;
   /** Creates or updates the identity provider for an enterprise. */
   setEnterpriseIdentityProvider?: Maybe<SetEnterpriseIdentityProviderPayload>;
   /** Set an organization level interaction limit for an organization's public repositories. */
-  setOrganizationInteractionLimit?: Maybe<
-    SetOrganizationInteractionLimitPayload
-  >;
+  setOrganizationInteractionLimit?: Maybe<SetOrganizationInteractionLimitPayload>;
   /** Sets an interaction limit setting for a repository. */
   setRepositoryInteractionLimit?: Maybe<SetRepositoryInteractionLimitPayload>;
   /** Set a user level interaction limit for an user's public repositories. */
@@ -9448,9 +9408,7 @@ export type Mutation = {
   /** Unlock a lockable object */
   unlockLockable?: Maybe<UnlockLockablePayload>;
   /** Unmark a discussion comment as the chosen answer for discussions in an answerable category. */
-  unmarkDiscussionCommentAsAnswer?: Maybe<
-    UnmarkDiscussionCommentAsAnswerPayload
-  >;
+  unmarkDiscussionCommentAsAnswer?: Maybe<UnmarkDiscussionCommentAsAnswerPayload>;
   /** Unmark a pull request file as viewed */
   unmarkFileAsViewed?: Maybe<UnmarkFileAsViewedPayload>;
   /** Unmark an issue as a duplicate of another issue. */
@@ -9472,95 +9430,55 @@ export type Mutation = {
   /** Update the contents of a comment on a Discussion */
   updateDiscussionComment?: Maybe<UpdateDiscussionCommentPayload>;
   /** Updates the role of an enterprise administrator. */
-  updateEnterpriseAdministratorRole?: Maybe<
-    UpdateEnterpriseAdministratorRolePayload
-  >;
+  updateEnterpriseAdministratorRole?: Maybe<UpdateEnterpriseAdministratorRolePayload>;
   /** Sets whether private repository forks are enabled for an enterprise. */
-  updateEnterpriseAllowPrivateRepositoryForkingSetting?: Maybe<
-    UpdateEnterpriseAllowPrivateRepositoryForkingSettingPayload
-  >;
+  updateEnterpriseAllowPrivateRepositoryForkingSetting?: Maybe<UpdateEnterpriseAllowPrivateRepositoryForkingSettingPayload>;
   /** Sets the base repository permission for organizations in an enterprise. */
-  updateEnterpriseDefaultRepositoryPermissionSetting?: Maybe<
-    UpdateEnterpriseDefaultRepositoryPermissionSettingPayload
-  >;
+  updateEnterpriseDefaultRepositoryPermissionSetting?: Maybe<UpdateEnterpriseDefaultRepositoryPermissionSettingPayload>;
   /** Sets whether organization members with admin permissions on a repository can change repository visibility. */
-  updateEnterpriseMembersCanChangeRepositoryVisibilitySetting?: Maybe<
-    UpdateEnterpriseMembersCanChangeRepositoryVisibilitySettingPayload
-  >;
+  updateEnterpriseMembersCanChangeRepositoryVisibilitySetting?: Maybe<UpdateEnterpriseMembersCanChangeRepositoryVisibilitySettingPayload>;
   /** Sets the members can create repositories setting for an enterprise. */
-  updateEnterpriseMembersCanCreateRepositoriesSetting?: Maybe<
-    UpdateEnterpriseMembersCanCreateRepositoriesSettingPayload
-  >;
+  updateEnterpriseMembersCanCreateRepositoriesSetting?: Maybe<UpdateEnterpriseMembersCanCreateRepositoriesSettingPayload>;
   /** Sets the members can delete issues setting for an enterprise. */
-  updateEnterpriseMembersCanDeleteIssuesSetting?: Maybe<
-    UpdateEnterpriseMembersCanDeleteIssuesSettingPayload
-  >;
+  updateEnterpriseMembersCanDeleteIssuesSetting?: Maybe<UpdateEnterpriseMembersCanDeleteIssuesSettingPayload>;
   /** Sets the members can delete repositories setting for an enterprise. */
-  updateEnterpriseMembersCanDeleteRepositoriesSetting?: Maybe<
-    UpdateEnterpriseMembersCanDeleteRepositoriesSettingPayload
-  >;
+  updateEnterpriseMembersCanDeleteRepositoriesSetting?: Maybe<UpdateEnterpriseMembersCanDeleteRepositoriesSettingPayload>;
   /** Sets whether members can invite collaborators are enabled for an enterprise. */
-  updateEnterpriseMembersCanInviteCollaboratorsSetting?: Maybe<
-    UpdateEnterpriseMembersCanInviteCollaboratorsSettingPayload
-  >;
+  updateEnterpriseMembersCanInviteCollaboratorsSetting?: Maybe<UpdateEnterpriseMembersCanInviteCollaboratorsSettingPayload>;
   /** Sets whether or not an organization admin can make purchases. */
-  updateEnterpriseMembersCanMakePurchasesSetting?: Maybe<
-    UpdateEnterpriseMembersCanMakePurchasesSettingPayload
-  >;
+  updateEnterpriseMembersCanMakePurchasesSetting?: Maybe<UpdateEnterpriseMembersCanMakePurchasesSettingPayload>;
   /** Sets the members can update protected branches setting for an enterprise. */
-  updateEnterpriseMembersCanUpdateProtectedBranchesSetting?: Maybe<
-    UpdateEnterpriseMembersCanUpdateProtectedBranchesSettingPayload
-  >;
+  updateEnterpriseMembersCanUpdateProtectedBranchesSetting?: Maybe<UpdateEnterpriseMembersCanUpdateProtectedBranchesSettingPayload>;
   /** Sets the members can view dependency insights for an enterprise. */
-  updateEnterpriseMembersCanViewDependencyInsightsSetting?: Maybe<
-    UpdateEnterpriseMembersCanViewDependencyInsightsSettingPayload
-  >;
+  updateEnterpriseMembersCanViewDependencyInsightsSetting?: Maybe<UpdateEnterpriseMembersCanViewDependencyInsightsSettingPayload>;
   /** Sets whether organization projects are enabled for an enterprise. */
-  updateEnterpriseOrganizationProjectsSetting?: Maybe<
-    UpdateEnterpriseOrganizationProjectsSettingPayload
-  >;
+  updateEnterpriseOrganizationProjectsSetting?: Maybe<UpdateEnterpriseOrganizationProjectsSettingPayload>;
   /** Updates the role of an enterprise owner with an organization. */
-  updateEnterpriseOwnerOrganizationRole?: Maybe<
-    UpdateEnterpriseOwnerOrganizationRolePayload
-  >;
+  updateEnterpriseOwnerOrganizationRole?: Maybe<UpdateEnterpriseOwnerOrganizationRolePayload>;
   /** Updates an enterprise's profile. */
   updateEnterpriseProfile?: Maybe<UpdateEnterpriseProfilePayload>;
   /** Sets whether repository projects are enabled for a enterprise. */
-  updateEnterpriseRepositoryProjectsSetting?: Maybe<
-    UpdateEnterpriseRepositoryProjectsSettingPayload
-  >;
+  updateEnterpriseRepositoryProjectsSetting?: Maybe<UpdateEnterpriseRepositoryProjectsSettingPayload>;
   /** Sets whether team discussions are enabled for an enterprise. */
-  updateEnterpriseTeamDiscussionsSetting?: Maybe<
-    UpdateEnterpriseTeamDiscussionsSettingPayload
-  >;
+  updateEnterpriseTeamDiscussionsSetting?: Maybe<UpdateEnterpriseTeamDiscussionsSettingPayload>;
   /** Sets whether two factor authentication is required for all users in an enterprise. */
-  updateEnterpriseTwoFactorAuthenticationRequiredSetting?: Maybe<
-    UpdateEnterpriseTwoFactorAuthenticationRequiredSettingPayload
-  >;
+  updateEnterpriseTwoFactorAuthenticationRequiredSetting?: Maybe<UpdateEnterpriseTwoFactorAuthenticationRequiredSettingPayload>;
   /** Updates an environment. */
   updateEnvironment?: Maybe<UpdateEnvironmentPayload>;
   /** Sets whether an IP allow list is enabled on an owner. */
-  updateIpAllowListEnabledSetting?: Maybe<
-    UpdateIpAllowListEnabledSettingPayload
-  >;
+  updateIpAllowListEnabledSetting?: Maybe<UpdateIpAllowListEnabledSettingPayload>;
   /** Updates an IP allow list entry. */
   updateIpAllowListEntry?: Maybe<UpdateIpAllowListEntryPayload>;
   /** Sets whether IP allow list configuration for installed GitHub Apps is enabled on an owner. */
-  updateIpAllowListForInstalledAppsEnabledSetting?: Maybe<
-    UpdateIpAllowListForInstalledAppsEnabledSettingPayload
-  >;
+  updateIpAllowListForInstalledAppsEnabledSetting?: Maybe<UpdateIpAllowListForInstalledAppsEnabledSettingPayload>;
   /** Updates an Issue. */
   updateIssue?: Maybe<UpdateIssuePayload>;
   /** Updates an IssueComment object. */
   updateIssueComment?: Maybe<UpdateIssueCommentPayload>;
   /** Update the setting to restrict notifications to only verified or approved domains available to an owner. */
-  updateNotificationRestrictionSetting?: Maybe<
-    UpdateNotificationRestrictionSettingPayload
-  >;
+  updateNotificationRestrictionSetting?: Maybe<UpdateNotificationRestrictionSettingPayload>;
   /** Sets whether private repository forks are enabled for an organization. */
-  updateOrganizationAllowPrivateRepositoryForkingSetting?: Maybe<
-    UpdateOrganizationAllowPrivateRepositoryForkingSettingPayload
-  >;
+  updateOrganizationAllowPrivateRepositoryForkingSetting?: Maybe<UpdateOrganizationAllowPrivateRepositoryForkingSettingPayload>;
   /** Updates an existing project. */
   updateProject?: Maybe<UpdateProjectPayload>;
   /** Updates an existing project card. */
@@ -11656,9 +11574,7 @@ export type OrgRemoveOutsideCollaboratorAuditEntry = AuditEntry &
     createdAt: Scalars["PreciseDateTime"];
     id: Scalars["ID"];
     /** The types of membership the outside collaborator has with the organization. */
-    membershipTypes?: Maybe<
-      Array<OrgRemoveOutsideCollaboratorAuditEntryMembershipType>
-    >;
+    membershipTypes?: Maybe<Array<OrgRemoveOutsideCollaboratorAuditEntryMembershipType>>;
     /** The corresponding operation type for the action */
     operationType?: Maybe<OperationType>;
     /** The Organization associated with the Audit Entry. */
@@ -11883,13 +11799,9 @@ export type OrgUpdateDefaultRepositoryPermissionAuditEntry = AuditEntry &
     /** The HTTP URL for the organization */
     organizationUrl?: Maybe<Scalars["URI"]>;
     /** The new base repository permission level for the organization. */
-    permission?: Maybe<
-      OrgUpdateDefaultRepositoryPermissionAuditEntryPermission
-    >;
+    permission?: Maybe<OrgUpdateDefaultRepositoryPermissionAuditEntryPermission>;
     /** The former base repository permission level for the organization. */
-    permissionWas?: Maybe<
-      OrgUpdateDefaultRepositoryPermissionAuditEntryPermission
-    >;
+    permissionWas?: Maybe<OrgUpdateDefaultRepositoryPermissionAuditEntryPermission>;
     /** The user affected by the action */
     user?: Maybe<User>;
     /** For actions involving two users, the actor is the initiator and the user is the affected user. */
@@ -12009,9 +11921,7 @@ export type OrgUpdateMemberRepositoryCreationPermissionAuditEntry = AuditEntry &
     /** The HTTP URL for the user. */
     userUrl?: Maybe<Scalars["URI"]>;
     /** The permission for visibility level of repositories for this organization. */
-    visibility?: Maybe<
-      OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility
-    >;
+    visibility?: Maybe<OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility>;
   };
 
 /** The permissions available for repository creation on an Organization. */
@@ -14581,10 +14491,7 @@ export type ProjectV2FieldCommon = {
 };
 
 /** Configurations for project fields. */
-export type ProjectV2FieldConfiguration =
-  | ProjectV2Field
-  | ProjectV2IterationField
-  | ProjectV2SingleSelectField;
+export type ProjectV2FieldConfiguration = ProjectV2Field | ProjectV2IterationField | ProjectV2SingleSelectField;
 
 /** The connection type for ProjectV2FieldConfiguration. */
 export type ProjectV2FieldConfigurationConnection = {
@@ -16873,9 +16780,7 @@ export type Query = {
   /** Look up a pending enterprise administrator invitation by invitee, enterprise and role. */
   enterpriseAdministratorInvitation?: Maybe<EnterpriseAdministratorInvitation>;
   /** Look up a pending enterprise administrator invitation by invitation token. */
-  enterpriseAdministratorInvitationByToken?: Maybe<
-    EnterpriseAdministratorInvitation
-  >;
+  enterpriseAdministratorInvitationByToken?: Maybe<EnterpriseAdministratorInvitation>;
   /** Look up an open source license by its key */
   license?: Maybe<License>;
   /** Return a list of known open source licenses */
@@ -19617,9 +19522,7 @@ export type RepositorySubmodulesArgs = {
 export type RepositoryVulnerabilityAlertsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
-  dependencyScopes?: InputMaybe<
-    Array<RepositoryVulnerabilityAlertDependencyScope>
-  >;
+  dependencyScopes?: InputMaybe<Array<RepositoryVulnerabilityAlertDependencyScope>>;
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
   states?: InputMaybe<Array<RepositoryVulnerabilityAlertState>>;
