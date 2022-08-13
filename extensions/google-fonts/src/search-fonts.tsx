@@ -126,7 +126,18 @@ export default function Command() {
           key={`font-${fontIndex}`}
           content={{ source: utils.generateFontPreviewUrl(font), tintColor: { light: "black", dark: "white" } }}
           actions={
-            <ActionPanel>{<Action.Push title="Font Variants" target={<FontVariantsView font={font} />} />}</ActionPanel>
+            <ActionPanel>
+              <ActionPanel.Section title="Google Fonts">
+                <Action.Push title="Font Variants" target={<FontVariantsView font={font} />} />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="fonts.google.com">
+                <Action.OpenInBrowser title={`View ${font.family}`} url={utils.generateGoogleFontsURL(font, "view")} />
+                <Action.OpenInBrowser
+                  title={`Download ${font.family}`}
+                  url={utils.generateGoogleFontsURL(font, "download")}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
           }
         />
       ))}
