@@ -27,6 +27,7 @@ import {
   deleteObject,
   copyObject,
   getObjUrl,
+  getFileIcon,
 } from "../utils";
 
 function RenameFile(props: { file: IObject; refresh: () => void }) {
@@ -106,7 +107,7 @@ export function FileItem(props: { file: IObject; refresh: () => void; marks: str
       key={props.file.name}
       id={props.file.name}
       title={path.basename(props.file.name)}
-      icon={{ source: Icon.Document, tintColor: Color.Green }}
+      icon={{ source: getFileIcon(props.file.name), tintColor: Color.PrimaryText }}
       accessories={[
         { text: formatFileSize(props.file.size) },
         {
@@ -149,7 +150,6 @@ function FileDetail(props: { file: IObject; refresh: () => void }) {
     updateMarkdownState(markdown);
     updateLoadingState(false);
   }
-
   return (
     <Detail
       isLoading={isLoadingState}
@@ -161,7 +161,10 @@ function FileDetail(props: { file: IObject; refresh: () => void }) {
             <Detail.Metadata.TagList.Item text={path.basename(props.file.name)} color={Color.Blue} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Kind">
-            <Detail.Metadata.TagList.Item text={path.extname(props.file.name)} color={Color.PrimaryText} />
+            <Detail.Metadata.TagList.Item
+              text={path.extname(props.file.name).substring(1).toUpperCase()}
+              color={Color.PrimaryText}
+            />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Size">
             <Detail.Metadata.TagList.Item text={formatFileSize(props.file.size)} color={Color.PrimaryText} />

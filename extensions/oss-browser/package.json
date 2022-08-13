@@ -9,14 +9,14 @@
     "Data",
     "Developer Tools",
     "Productivity",
-    "Media"
+    "Applications"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "oss-manager",
       "title": "Manage Aliyun OSS",
-      "description": "Browse and manage Aliyun Object Storage Service",
+      "description": "Browse and manage Aliyun Object Storage",
       "mode": "view",
       "keywords": [
         "OSS",
@@ -124,7 +124,7 @@
     "got": "^12.3.0"
   },
   "devDependencies": {
-    "@types/ali-oss": "^6.16.3",
+    "@types/ali-oss": "^6.16.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

@@ -1,3 +1,5 @@
-# OSS Manager Changelog
+# OSS Browser Changelog
 
-## [Initial Version] - 2022-08-01
+## [Added OSS Browser] - 2022-08-14
+
+Initial version code

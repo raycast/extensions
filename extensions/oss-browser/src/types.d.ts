@@ -18,6 +18,11 @@ interface IObject {
   size: number;
 }
 
+interface IBucket {
+  name: string;
+  region: string;
+}
+
 interface IObjectURLAndACL {
   url: string;
   acl: string;

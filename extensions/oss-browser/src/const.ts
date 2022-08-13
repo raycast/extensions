@@ -5,7 +5,18 @@ export enum ACL {
   PublicReadWrite = "public-read-write",
 }
 
+export enum FileType {
+  Img,
+  Code,
+  Text,
+  MarkDown,
+  Video,
+  Audio,
+  Unknown,
+}
+
 export const ImgExts = [".png", ".jpeg", ".jpg", ".svg", ".webp", ".gif"];
+
 export const CodeExts = [
   ".go",
   ".js",
@@ -30,3 +41,7 @@ export const CodeExts = [
 export const MdExt = ".md";
 
 export const PlainTextExts = [".txt"];
+
+export const AudioExts = [".mp3", ".flac", ".wav"];
+
+export const VideoExts = [".mp4", ".avi", ".mov", ".flv"];

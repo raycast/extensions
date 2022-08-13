@@ -36,7 +36,7 @@ export function CommonActions(props: { currentFolder: string; file?: IObject; re
       <Action
         icon={Icon.ComputerChip}
         title="Open Preferences"
-        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         onAction={openCommandPreferences}
       />
     </ActionPanel.Section>

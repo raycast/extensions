@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   confirmAlert,
+  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
@@ -20,9 +21,38 @@ import {
   filterBookmark,
   getFolderByLocalKey,
   getLocalKeyByFolder,
+  getAllBuckets,
+  newOssClient,
 } from "../utils";
 import { CommonActions, ErrView, uploadFiles } from "./common";
 import { FileItem } from "./file";
+
+function BucketDropdown(props: { buckets: IBucket[]; onBucketChange: (bucket: string) => void }) {
+  const preferences: IPreferences = getPreferenceValues();
+  const { buckets, onBucketChange } = props;
+  const regions = new Set<string>();
+  buckets.forEach((b) => regions.add(b.region));
+  return (
+    <List.Dropdown
+      tooltip="Select Bucket"
+      storeValue={true}
+      defaultValue={preferences.bucket}
+      onChange={(bucket) => {
+        onBucketChange(bucket);
+      }}
+    >
+      {Array.from(regions).map((region) => (
+        <List.Dropdown.Section title={`Region: ${region}`} key={region}>
+          {buckets
+            .filter((b) => b.region === region)
+            .map((bucket) => (
+              <List.Dropdown.Item key={bucket.name} title={bucket.name} value={bucket.name} />
+            ))}
+        </List.Dropdown.Section>
+      ))}
+    </List.Dropdown>
+  );
+}
 
 export function Folder(props: { path: string }) {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
@@ -32,49 +62,124 @@ export function Folder(props: { path: string }) {
   const [bookmarksState, updateBookmarksState] = useState<string[]>([]);
   const [markerState, updateMarkerState] = useState<string>("");
   const [queryState, updateQueryState] = useState<string>("");
+  const [bucketsState, updateBucketsState] = useState<IBucket[]>([]);
   const { push } = useNavigation();
 
   useEffect(() => {
-    onSearch(props.path, "");
+    init();
   }, []);
 
-  async function onSearch(query: string, marker: string) {
+  async function init() {
     try {
+      if (!props.path) {
+        const preferences: IPreferences = getPreferenceValues();
+        newOssClient("", preferences.region);
+        try {
+          const buckets = await getAllBuckets();
+          updateBucketsState(buckets);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          if (error.code === "AccessDenied") {
+            updateBucketsState([{ region: preferences.region, name: preferences.bucket }]);
+          }
+        }
+      } else {
+        updateLoadingState(true);
+        const [bookmarks] = await Promise.all([LocalStorage.allItems(), searchByMark(props.path, "")]);
+        updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
+      }
+    } catch (error) {
+      updateErrState(true);
+    } finally {
       updateLoadingState(false);
-      updateQueryState(query);
+    }
+  }
+
+  async function refresh(targetPath?: string, bookmark?: boolean) {
+    if (targetPath) {
+      push(<Folder path={targetPath} />);
+      return;
+    }
+    try {
+      if (bookmark) {
+        const bookmarks = await LocalStorage.allItems();
+        updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
+        return;
+      }
       updateLoadingState(true);
-      const [res, bookmarks] = await Promise.all([listPage(query, marker), LocalStorage.allItems()]);
-      updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
-      updateObjectsState((oldObjects) => {
-        const searchObjects = res.objects
-          .filter((o) => o.size != 0)
-          .map((o) => {
-            return {
-              name: o.name,
-              url: o.url,
-              lastModified: o.lastModified,
-              type: o.type,
-              size: o.size,
-            };
-          });
-        if (marker) {
-          oldObjects.push(...searchObjects);
-          return oldObjects;
-        }
-        return searchObjects;
-      });
-      updateFoldersState((oldFolders) => {
-        const searchFolders = res.prefixes || [];
-        if (marker) {
-          oldFolders.push(...(searchFolders || []));
-        }
-        if (marker) {
-          oldFolders.push(...searchFolders);
-          return oldFolders;
-        }
-        return searchFolders;
-      });
-      updateMarkerState(res.nextMarker);
+      await searchByMark(props.path, "");
+    } catch (error) {
+      updateErrState(true);
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function onSearch(text: string) {
+    try {
+      updateLoadingState(true);
+      await searchByMark(`${props.path}${text}`, "");
+    } catch (error) {
+      updateErrState(true);
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function loadMore() {
+    if (isLoadingState) {
+      return;
+    }
+    try {
+      updateLoadingState(true);
+      await searchByMark(queryState, markerState);
+    } catch (error) {
+      updateErrState(true);
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function searchByMark(query: string, marker: string) {
+    updateQueryState(query);
+    const res = await listPage(query, marker);
+    updateObjectsState((oldObjects) => {
+      const searchObjects = res.objects
+        .filter((o) => o.size != 0)
+        .map((o) => {
+          return {
+            name: o.name,
+            url: o.url,
+            lastModified: o.lastModified,
+            type: o.type,
+            size: o.size,
+          };
+        });
+      if (marker) {
+        oldObjects.push(...searchObjects);
+        return oldObjects;
+      }
+      return searchObjects;
+    });
+    updateFoldersState((oldFolders) => {
+      const searchFolders = res.prefixes || [];
+      if (marker) {
+        oldFolders.push(...(searchFolders || []));
+        return oldFolders;
+      }
+      return searchFolders;
+    });
+    updateMarkerState(res.nextMarker);
+  }
+
+  async function onBucketChange(bucket: string) {
+    try {
+      const bucketInfo = bucketsState.find((b) => b.name === bucket);
+      if (bucketInfo && newOssClient(bucketInfo.name, bucketInfo.region)) {
+        updateLoadingState(true);
+        const [bookmarks] = await Promise.all([LocalStorage.allItems(), searchByMark(props.path, "")]);
+        updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
+      }
     } catch (error) {
       updateErrState(true);
     } finally {
@@ -89,17 +194,14 @@ export function Folder(props: { path: string }) {
     <List
       isLoading={isLoadingState}
       throttle={true}
-      searchBarPlaceholder={`Search in $root/${props.path} by prefix...`}
-      onSearchTextChange={(text) => {
-        onSearch(`${props.path}${text}`, "");
-      }}
+      searchBarPlaceholder={`Search in $Root/${props.path}`}
+      onSearchTextChange={onSearch}
+      searchBarAccessory={
+        !props.path ? <BucketDropdown buckets={bucketsState} onBucketChange={onBucketChange} /> : null
+      }
       actions={
         <ActionPanel>
-          <CommonActions
-            currentFolder={props.path}
-            refresh={() => onSearch(queryState, markerState)}
-            marks={bookmarksState}
-          />
+          <CommonActions currentFolder={props.path} refresh={refresh} marks={bookmarksState} />
         </ActionPanel>
       }
     >
@@ -109,13 +211,7 @@ export function Folder(props: { path: string }) {
           {foldersState.map((folder) =>
             FolderItem({
               folder,
-              refresh: (targetPath?: string) => {
-                if (targetPath) {
-                  push(<Folder path={targetPath} />);
-                  return;
-                }
-                onSearch(queryState, markerState);
-              },
+              refresh: refresh,
               marks: bookmarksState,
             })
           )}
@@ -126,15 +222,13 @@ export function Folder(props: { path: string }) {
           {objectsState.map((file) =>
             FileItem({
               file,
-              refresh: () => {
-                onSearch(queryState, markerState);
-              },
+              refresh: refresh,
               marks: bookmarksState,
             })
           )}
         </List.Section>
       )}
-      {markerState && (
+      {markerState && foldersState.length + objectsState.length && (
         <List.Item
           key={"load_more"}
           id="load_more"
@@ -142,16 +236,7 @@ export function Folder(props: { path: string }) {
           icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.PrimaryText }}
           actions={
             <ActionPanel>
-              <Action
-                icon={Icon.RotateAntiClockwise}
-                title="Load more"
-                onAction={() => {
-                  if (isLoadingState) {
-                    return;
-                  }
-                  onSearch(queryState, markerState);
-                }}
-              ></Action>
+              <Action icon={Icon.RotateAntiClockwise} title="Load more" onAction={loadMore}></Action>
             </ActionPanel>
           }
         ></List.Item>
@@ -160,7 +245,7 @@ export function Folder(props: { path: string }) {
   );
 }
 
-function FolderItem(props: { folder: string; refresh: (targetPath?: string) => void; marks: string[] }) {
+function FolderItem(props: { folder: string; refresh: () => void; marks: string[] }) {
   return (
     <List.Item
       key={props.folder}
@@ -177,7 +262,11 @@ function FolderItem(props: { folder: string; refresh: (targetPath?: string) => v
   );
 }
 
-function FolderAction(props: { folder: string; refresh: (targetPath?: string) => void; marks: string[] }) {
+function FolderAction(props: {
+  folder: string;
+  refresh: (targetPath?: string, bookmark?: boolean) => void;
+  marks: string[];
+}) {
   async function deleteFolder() {
     if (!(await folderIsEmpty(props.folder))) {
       await showToast({
@@ -199,7 +288,7 @@ function FolderAction(props: { folder: string; refresh: (targetPath?: string) =>
             title: "Deleting the Folder...",
           });
           try {
-            await deleteObject(props.folder);
+            await Promise.all([deleteObject(props.folder), LocalStorage.removeItem(getLocalKeyByFolder(props.folder))]);
             await showToast({
               style: Toast.Style.Success,
               title: "Folder deleted",
@@ -252,7 +341,7 @@ function FolderAction(props: { folder: string; refresh: (targetPath?: string) =>
                   ctime: new Date(),
                 })
               );
-              props.refresh();
+              props.refresh("", true);
               await showToast({
                 title: "Bookmark added",
                 style: Toast.Style.Success,
@@ -267,7 +356,7 @@ function FolderAction(props: { folder: string; refresh: (targetPath?: string) =>
             shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
             onAction={async () => {
               await LocalStorage.removeItem(getLocalKeyByFolder(props.folder));
-              props.refresh();
+              props.refresh("", true);
               await showToast({
                 title: "Bookmark removed",
                 style: Toast.Style.Success,

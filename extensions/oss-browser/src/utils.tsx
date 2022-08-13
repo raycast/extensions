@@ -1,26 +1,41 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 import OSS from "ali-oss";
 import path from "node:path";
 import fsSync from "node:fs/promises";
 import fs from "node:fs";
-import { ACL, CodeExts, ImgExts, MdExt, PlainTextExts } from "./const";
+import { ACL, AudioExts, CodeExts, FileType, ImgExts, MdExt, PlainTextExts, VideoExts } from "./const";
 import { homedir } from "os";
 import got from "got";
 
 let ossClient: OSS;
+let currentBucket: string;
 
-export function newOssClient() {
-  if (ossClient) {
-    return;
+export function newOssClient(bucket?: string, region?: string): boolean {
+  if (bucket === currentBucket && ossClient) {
+    return false;
   }
   const preferences: IPreferences = getPreferenceValues();
   ossClient = new OSS({
     endpoint: preferences.endPoint,
     cname: preferences.useCustomDomain,
-    region: preferences.region,
+    region: region,
     accessKeyId: preferences.accessKeyId,
     accessKeySecret: preferences.accessKeySecret,
-    bucket: preferences.bucket,
+    bucket: bucket,
+    secure: true,
+  });
+  if (bucket) currentBucket = bucket;
+  return true;
+}
+
+export async function getAllBuckets(): Promise<IBucket[]> {
+  const buckets = await ossClient.listBuckets({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (buckets as any).buckets.map((b: any) => {
+    return {
+      name: b.name,
+      region: b.region,
+    };
   });
 }
 
@@ -109,23 +124,76 @@ export async function createFolder(name: string, targetFolder: string) {
 }
 
 export async function getFileDetailMarkdown(file: IObject, url: string): Promise<string> {
-  const ext = path.extname(file.name);
+  const fileType = getFileType(file.name);
+  let markdown = "";
+  switch (fileType) {
+    case FileType.Img:
+      markdown = `![](${url})`;
+      break;
+    case FileType.Code:
+      markdown = "```\n" + (await got.get(url)).body + "\n```";
+      break;
+    case FileType.MarkDown:
+      markdown = (await got.get(url)).body;
+      break;
+    case FileType.Text:
+      markdown = (await got.get(url)).body;
+      break;
+    default:
+      markdown = `⚠️ Sorry ~ Raycast does not yet support previewing ${path.extname(file.name)} files`;
+  }
+  return markdown;
+}
+
+export function getFileType(name: string): FileType {
+  const ext = path.extname(name);
   if (ImgExts.includes(ext.toLowerCase())) {
-    return `![](${url})`;
+    return FileType.Img;
   }
   if (CodeExts.includes(ext.toLowerCase())) {
-    const code = await got.get(url);
-    return "```\n" + code.body + "\n```";
+    return FileType.Code;
   }
   if (MdExt === ext.toLowerCase()) {
-    const md = await got.get(url);
-    return md.body;
+    return FileType.MarkDown;
   }
   if (PlainTextExts.includes(ext.toLowerCase())) {
-    const text = await got.get(url);
-    return text.body;
+    return FileType.Text;
   }
-  return `⚠️ Sorry ~ Raycast does not yet support previewing ${path.extname(file.name)} files`;
+  if (AudioExts.includes(ext.toLowerCase())) {
+    return FileType.Audio;
+  }
+  if (VideoExts.includes(ext.toLowerCase())) {
+    return FileType.Video;
+  }
+  return FileType.Unknown;
+}
+
+export function getFileIcon(name: string): Icon {
+  let icon: Icon;
+  switch (getFileType(name)) {
+    case FileType.Img:
+      icon = Icon.Image;
+      break;
+    case FileType.Code:
+      icon = Icon.CodeBlock;
+      break;
+    case FileType.Text:
+      icon = Icon.Text;
+      break;
+    case FileType.MarkDown:
+      icon = Icon.QuoteBlock;
+      break;
+    case FileType.Video:
+      icon = Icon.FilmStrip;
+      break;
+    case FileType.Audio:
+      icon = Icon.SpeakerOn;
+      break;
+    default:
+      icon = Icon.Document;
+      break;
+  }
+  return icon;
 }
 
 async function getFileDownloadLocation(): Promise<string> {
@@ -169,29 +237,25 @@ async function folderExists(folder: string): Promise<boolean> {
 }
 
 export function getLocalKeyByFolder(folder: string): string {
-  const preferences: IPreferences = getPreferenceValues();
-  return `${preferences.bucket}_${folder}`;
+  return `${currentBucket}_${folder}`;
 }
 
 export function getFolderByLocalKey(key: string): string {
-  const preferences: IPreferences = getPreferenceValues();
-  return key.slice(preferences.bucket.length + 1, key.length);
+  return key.slice(currentBucket.length + 1, key.length);
 }
 
 export function filterBookmark(key: string): boolean {
-  const preferences: IPreferences = getPreferenceValues();
-  return key.indexOf(`${preferences.bucket}_`) === 0;
+  return key.indexOf(`${currentBucket}_`) === 0;
 }
 
 export async function getObjUrl(file: IObject): Promise<IObjectURLAndACL> {
-  const preferences: IPreferences = getPreferenceValues();
   const objACL = await ossClient.getACL(file.name);
   let bucketACL = "";
   if (objACL.acl == ACL.Private) {
     return { url: ossClient.signatureUrl(file.name), acl: objACL.acl };
   }
   if (`${objACL.acl}` == ACL.Default) {
-    const bACL = await ossClient.getBucketACL(preferences.bucket);
+    const bACL = await ossClient.getBucketACL(currentBucket);
     bucketACL = bACL.acl;
     if (bucketACL == ACL.Private) {
       return { url: ossClient.signatureUrl(file.name), acl: objACL.acl, bucketAcl: bucketACL };
