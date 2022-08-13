@@ -6,10 +6,13 @@ async function routeHandler<T>(endpoint: string): Promise<(T & { ok: true }) | {
   const URL = "https://wakatime.com/api/v1";
 
   try {
-    const response = await fetch(`${URL}${endpoint}`, setAuthHeader());
+    const res = await fetch(`${URL}${endpoint}`, setAuthHeader());
+    const result = (await res.json()) as T | { error: string };
+
+    if ("error" in result) throw new Error(result.error);
     return {
       ok: true,
-      ...((await response.json()) as T),
+      ...result,
     };
   } catch (error) {
     return {

@@ -153,6 +153,7 @@
 /extensions/everhour                                 @farisaziz12
 /extensions/f1-standings                             @csigritz @sxn @qeude
 /extensions/facetime                                 @ron-myers
+/extensions/fantastical                              @devahschaefers
 /extensions/fathom-analytics                         @DanielFerguson
 /extensions/fibonacci-sequence                       @adambutler
 /extensions/figma-files                              @michaelwschultz
@@ -177,7 +178,7 @@
 /extensions/github-gist                              @koinzhang
 /extensions/github-menu-bar                          @fe9lix
 /extensions/github-repository-search                 @thomaspaulmann @immint023
-/extensions/github-review-requests                   @resessh
+/extensions/github-review-requests                   @resessh @kudrykv
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
@@ -405,6 +406,7 @@
 /extensions/shell                                    @KELiON
 /extensions/shopify-developer-changelog              @sandypockets
 /extensions/short-io                                 @koinzhang
+/extensions/shortcut                                 @Yukaii
 /extensions/signal                                   @leeraymond78
 /extensions/simon                                    @andreaselia @pernielsentikaer
 /extensions/simple-youdao                            @xeric
