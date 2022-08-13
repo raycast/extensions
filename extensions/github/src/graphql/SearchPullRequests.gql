@@ -1,0 +1,267 @@
+fragment PullRequestFields on PullRequest {
+  nodeId: id
+  permalink
+  title
+  isMerged: merged
+  number
+  isDraft
+  isClosed: closed
+  fromBranch: headRef {
+    nodeId: id
+    name
+    commit: target {
+      ... on Commit {
+        date: authoredDate
+        sha: oid
+        message
+      }
+    }
+  }
+  mergingState: mergeable
+  reviewDecision
+  date: updatedAt
+  createdDate: createdAt
+  updatedDate: updatedAt
+  author {
+    ... on Bot {
+      nodeId: id
+      githubUsername: login
+      avatarURL: avatarUrl(size: $avatarSize)
+    }
+    ... on User {
+      nodeId: id
+      githubUsername: login
+      name
+      avatarURL: avatarUrl(size: $avatarSize)
+    }
+    ... on Mannequin {
+      nodeId: id
+      githubUsername: login
+      avatarURL: avatarUrl(size: $avatarSize)
+    }
+    ... on Organization {
+      nodeId: id
+      githubUsername: login
+      name
+      avatarURL: avatarUrl(size: $avatarSize)
+    }
+    ... on EnterpriseUserAccount {
+      nodeId: id
+      githubUsername: login
+      name
+      avatarURL: avatarUrl(size: $avatarSize)
+    }
+  }
+  milestone {
+    ... on Milestone {
+      nodeId: id
+      title
+      number
+    }
+  }
+  repository {
+    ... on Repository {
+      id: databaseId
+      nodeId: id
+      owner {
+        githubUsername: login
+        avatarURL: avatarUrl(size: $avatarSize)
+      }
+      name
+      url
+      hasIssuesEnabled
+      isArchived
+      isDisabled
+      isLocked
+      mergeCommitAllowed
+      squashMergeAllowed
+      rebaseMergeAllowed
+      deleteBranchOnMerge
+      date: updatedAt
+      isStarred: viewerHasStarred
+      numberOfStars: stargazerCount
+      primaryLanguage {
+        nodeId: id
+        name
+        color
+      }
+    }
+  }
+  commits(last: 1) {
+    totalCount
+    nodes {
+      commit {
+        nodeId: id
+        hash: oid
+        message
+        statusCheckRollup {
+          state
+        }
+      }
+    }
+  }
+  reviewRequests(first: 50) {
+    totalCount
+    nodes {
+      requestedReviewer {
+        ... on User {
+          isViewer
+        }
+      }
+    }
+  }
+  comments(first: 0) {
+    totalCount
+  }
+  reviewThreads(first: 100) {
+    totalCount
+    nodes {
+      comments(first: 0) {
+        totalCount
+      }
+    }
+  }
+  reviews(first: 100) {
+    totalCount
+    nodes {
+      bodyText
+    }
+  }
+}
+
+query SearchPullRequests(
+  $createdOpenQuery: String!
+  $createdClosedQuery: String!
+  $assignedOpenQuery: String!
+  $assignedClosedQuery: String!
+  $mentionedOpenQuery: String!
+  $mentionedClosedQuery: String!
+  $reviewRequestsOpenQuery: String!
+  $reviewRequestsClosedQuery: String!
+  $reviewedByOpenQuery: String!
+  $reviewedByClosedQuery: String!
+  $numberOfOpenItems: Int!
+  $numberOfClosedItems: Int!
+  $avatarSize: Int!
+) {
+  createdOpen: search(
+    query: $createdOpenQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  createdClosed: search(
+    query: $createdClosedQuery
+    type: ISSUE
+    first: $numberOfClosedItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  assignedOpen: search(
+    query: $assignedOpenQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  assignedClosed: search(
+    query: $assignedClosedQuery
+    type: ISSUE
+    first: $numberOfClosedItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  mentionedOpen: search(
+    query: $mentionedOpenQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  mentionedClosed: search(
+    query: $mentionedClosedQuery
+    type: ISSUE
+    first: $numberOfClosedItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewRequestsOpen: search(
+    query: $reviewRequestsOpenQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewRequestsClosed: search(
+    query: $reviewRequestsClosedQuery
+    type: ISSUE
+    first: $numberOfClosedItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewedByOpen: search(
+    query: $reviewedByOpenQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewedByClosed: search(
+    query: $reviewedByClosedQuery
+    type: ISSUE
+    first: $numberOfOpenItems
+  ) {
+    pullRequests: edges {
+      pullRequest: node {
+        __typename
+        ...PullRequestFields
+      }
+    }
+  }
+}

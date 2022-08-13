@@ -1,5 +1,6 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Grid, Image, PasteAction, environment, getPreferenceValues, ImageMask } from "@raycast/api";
 import fs from "node:fs";
+import textToImage from 'text-to-image';
 
 interface Preferences {
   primaryAction: string;
@@ -12,18 +13,19 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={false} searchBarPlaceholder="Filter SF Symbols...">
+    <Grid isLoading={false} searchBarPlaceholder="Filter SF Symbols..." itemSize={Grid.ItemSize.Small}
+    >
       {symbols.map((symbol) => (
-        <List.Item
+        <Grid.Item
           key={symbol.symbol}
-          title={symbol.symbol}
-          subtitle={symbol.name}
-          accessoryTitle={symbol.categories.join(", ")}
+          content={symbol.symbol}
+          // subtitle={symbol.name}
+          // accessoryTitle={symbol.categories.join(", ")}
           keywords={symbol.categories.concat([symbol.name])} // Add symbol name to categories so it can be searched, since the title is only the symbol
           actions={getActions(prefs, symbol.symbol, symbol.name)}
         />
       ))}
-    </List>
+    </Grid>
   );
 }
 

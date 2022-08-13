@@ -5,7 +5,7 @@ typealias CategoryDictionary = Dictionary<String, Array<String>>
 
 struct Symbol: Codable {
     let name: String
-    let symbol: String
+    let imagePath: String
     let categories: [String]
 }
 

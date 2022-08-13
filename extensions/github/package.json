@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github",
+  "title": "Github",
+  "description": "Github community extension",
+  "icon": "command-icon.png",
+  "author": "qeude",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-pull-requests",
+      "title": "My Pull Requests",
+      "description": "List pull requests you created, participated or were mentioned.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Github API token.",
+      "link": "https://github.com/settings/tokens",
+      "placeholder": "Enter your Github API token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.11.6",
+    "@graphql-codegen/near-operation-file-preset": "^2.4.1",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
+    "@raycast/utils": "^1.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "moment": "^2.29.4",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "gen": "graphql-codegen --config codegen.yml",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
