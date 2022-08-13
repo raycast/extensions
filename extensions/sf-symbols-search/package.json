@@ -10,17 +10,42 @@
     {
       "name": "index",
       "title": "Search SF Symbols",
-      "subtitle": "SF Symbols",
       "description": "Search and copy SF Symbols",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "gridSize",
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose a primary action",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Symbol to Clipboard",
+          "value": "copySymbol"
+        },
+        {
+          "title": "Paste Symbol to Active App",
+          "value": "pasteSymbol"
+        },
+        {
+          "title": "Copy Name to Clipboard",
+          "value": "copyName"
+        },
+        {
+          "title": "Paste Name to Active App",
+          "value": "pasteName"
+        }
+      ],
+      "default": "copySymbol"
+    },
+    {
+      "name": "gridItemSize",
       "type": "dropdown",
       "title": "Grid Item Size",
-      "description": "Grid Item Size for Displaying SF Symbols.",
+      "description": "Grid item size for displaying SF Symbols",
       "required": false,
       "data": [
         {
@@ -30,47 +55,17 @@
         {
           "title": "Medium",
           "value": "medium"
-        },
-        {
-          "title": "Large",
-          "value": "large"
         }
       ],
-      "default": "medium"
+      "default": "small"
     },
     {
-      "name": "primaryAction",
-      "type": "dropdown",
-      "title": "Primary Action",
-      "description": "Choose the Primary Action for SF Symbols.",
-      "required": false,
-      "data": [
-        {
-          "title": "Paste to Active App",
-          "value": "paste"
-        },
-        {
-          "title": "Copy to Clipboard",
-          "value": "copy"
-        },
-        {
-          "title": "Copy Name to Clipboard",
-          "value": "copyName"
-        },
-        {
-          "title": "Copy SVG Code",
-          "value": "copySVG"
-        }
-      ],
-      "default": "paste"
-    },
-    {
-      "name": "showName",
-      "type": "checkbox",
-      "title": "Symbol Names",
-      "label": "Show Symbol Name",
-      "description": "Show Symbol Name in the Grid View.",
-      "required": false,
+      "name": "showName", 
+      "type": "checkbox", 
+      "title": "Show SF Symbols Name",
+      "label": "Show Name", 
+      "description": "Show SF Symbols name in grid view",
+      "required": false, 
       "default": true
     }
   ],
@@ -78,19 +73,18 @@
     "@raycast/api": "^1.38.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "2.5.1",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

@@ -1,119 +1,131 @@
-import { ActionPanel, Action, Grid, getPreferenceValues, Color } from "@raycast/api";
-import { Symbol, getSymbols, categories } from "./utils/utils";
+import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import fs from "fs";
+import fs from "node:fs";
 
-interface Preferences {
-  gridSize: "small" | "medium" | "large";
-  primaryAction: "paste" | "copy" | "copyName" | "copySVG";
+export interface Preferences {
+  primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
+  gridItemSize: Grid.ItemSize;
   showName: boolean;
 }
 
-export default function Command() {
-  const prefs: Preferences = getPreferenceValues();
-  const size: Grid.ItemSize =
-    prefs.gridSize === "small"
-      ? Grid.ItemSize.Small
-      : prefs.gridSize === "medium"
-      ? Grid.ItemSize.Medium
-      : Grid.ItemSize.Large;
-  const showName = prefs.showName;
+export interface Symbol {
+  name: string;
+  symbol: string;
+  categories: string[];
+  searchTerms: string[];
+}
 
-  const [symbols, setSymbols] = useState<Symbol[]>([]);
+export interface Category {
+  name: string;
+  title: string;
+  symbol: string;
+}
+
+const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
+
+export default function Command() {
+  const data: {
+    symbols: Symbol[];
+    categories: Category[];
+  } = JSON.parse(fs.readFileSync(`${environment.assetsPath}/symbols/data.json`, { encoding: "utf8" }));
+
+  const [category, setCategory] = useState<string | undefined>();
 
   return (
     <Grid
-      itemSize={size}
-      inset={Grid.Inset.Small}
+      isLoading={category === undefined}
       searchBarPlaceholder="Search SF Symbols..."
+      inset={Grid.Inset.Large}
+      itemSize={gridItemSize}
       searchBarAccessory={
         <Grid.Dropdown
+          tooltip="Select SF Symbol Category"
           storeValue={true}
-          tooltip="Categories"
-          onChange={(value: string) => {
-            if (value) {
-              setSymbols(getSymbols(value));
-            } else {
-              setSymbols(getSymbols(null));
-            }
-          }}
+          onChange={(newValue) => setCategory(newValue)}
         >
-          <Grid.Dropdown.Item value={""} title="All Categories" />
+          <Grid.Dropdown.Item
+            value={data.categories[0].name}
+            title={data.categories[0].title}
+            icon={{ source: `symbols/images/${data.categories[0].symbol}.png`, tintColor: Color.PrimaryText }}
+          />
           <Grid.Dropdown.Section>
-            {categories.names.map((name: string, index: number) => (
-              <Grid.Dropdown.Item key={index} value={categories.values[index]} title={name} />
+            {data.categories.slice(1).map((category, index) => (
+              <Grid.Dropdown.Item
+                key={index}
+                value={category.name}
+                title={category.title}
+                icon={{ source: `symbols/images/${category.symbol}.png`, tintColor: Color.PrimaryText }}
+              />
             ))}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
     >
-      {symbols.map((symbol: Symbol) => {
-        return (
-          <Grid.Item
-            key={symbol.name}
-            title={showName ? symbol.name : undefined}
-            content={{ source: `../assets/sf-symbols/${symbol.name}.svg`, tintColor: Color.PrimaryText }}
-            keywords={symbol.categories.concat([symbol.name])}
-            actions={getActions(prefs, symbol)}
-          />
-        );
-      })}
+      {category &&
+        data.symbols
+          .filter((s) => category === "all" || s.categories.includes(category))
+          .map((symbol: Symbol, index: number) => (
+            <Grid.Item
+              key={index}
+              title={showName ? symbol.name : undefined}
+              content={{ source: `symbols/images/${symbol.name}.png`, tintColor: Color.PrimaryText }}
+              keywords={symbol.searchTerms.concat([symbol.name])}
+              actions={<SymbolActions name={symbol.name} symbol={symbol.symbol} />}
+            />
+          ))}
     </Grid>
   );
 }
 
-function getActions(prefs: Preferences, symbol: Symbol) {
-  if (prefs.primaryAction === "paste") {
-    return (
-      <ActionPanel>
-        {symbol.symbol && <Action.Paste title="Paste Symbol" content={symbol.symbol} />}
-        {symbol.symbol && <Action.CopyToClipboard title="Copy Symbol" content={symbol.symbol} />}
-        <Action.CopyToClipboard title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-        <Action.CopyToClipboard
-          title="Copy SVG Code"
-          content={fs.readFileSync(symbol.svg, "utf8")}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        />
-      </ActionPanel>
-    );
-  } else if (prefs.primaryAction === "copy") {
-    return (
-      <ActionPanel>
-        {symbol.symbol && <Action.CopyToClipboard title="Copy Symbol" content={symbol.symbol} />}
-        {symbol.symbol && <Action.Paste title="Paste Symbol" content={symbol.symbol} />}
-        <Action.CopyToClipboard title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-        <Action.CopyToClipboard
-          title="Copy SVG Code"
-          content={fs.readFileSync(symbol.svg, "utf8")}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        />
-      </ActionPanel>
-    );
-  } else if (prefs.primaryAction === "copyName") {
-    return (
-      <ActionPanel>
-        <Action.CopyToClipboard title="Copy Name" content={symbol.name} />
-        {symbol.symbol && <Action.CopyToClipboard title="Copy Symbol" content={symbol.symbol} />}
-        {symbol.symbol && (
-          <Action.Paste title="Paste Symbol" content={symbol.symbol} shortcut={{ modifiers: ["cmd"], key: "v" }} />
-        )}
-        <Action.CopyToClipboard
-          title="Copy SVG Code"
-          content={fs.readFileSync(symbol.svg, "utf8")}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        />
-      </ActionPanel>
-    );
-  } else if (prefs.primaryAction === "copySVG") {
-    return (
-      <ActionPanel>
-        <Action.CopyToClipboard title="Copy SVG Code" content={fs.readFileSync(symbol.svg, "utf8")} />
-        {symbol.symbol && <Action.CopyToClipboard title="Copy Symbol" content={symbol.symbol} />}
-        <Action.CopyToClipboard title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-        {symbol.symbol && (
-          <Action.Paste title="Paste Symbol" content={symbol.symbol} shortcut={{ modifiers: ["cmd"], key: "v" }} />
-        )}
-      </ActionPanel>
-    );
+const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => {
+  const { name, symbol } = props;
+
+  const actions: { [key: string]: JSX.Element } = {
+    paste: (
+      <Action.Paste
+        key="paste"
+        title="Paste Symbol"
+        content={symbol}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+      />
+    ),
+    copy: (
+      <Action.CopyToClipboard
+        key="copy"
+        title="Copy Symbol"
+        content={symbol}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+      />
+    ),
+    pasteName: (
+      <Action.Paste
+        key="pasteName"
+        title="Paste Name"
+        content={name}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+      />
+    ),
+    copyName: (
+      <Action.CopyToClipboard
+        key="copyName"
+        title="Copy Name"
+        content={name}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+      />
+    ),
+  };
+
+  let order: JSX.Element[] = [];
+
+  if (primaryAction == "pasteSymbol") {
+    order = [actions["paste"], actions["copy"], actions["copyName"], actions["pasteName"]];
+  } else if (primaryAction == "copySymbol") {
+    order = [actions["copy"], actions["paste"], actions["copyName"], actions["pasteName"]];
+  } else if (primaryAction == "pasteName") {
+    order = [actions["pasteName"], actions["copyName"], actions["paste"], actions["copy"]];
+  } else if (primaryAction == "copyName") {
+    order = [actions["copyName"], actions["pasteName"], actions["copy"], actions["paste"]];
   }
-}
+
+  return <ActionPanel title={name}>{...order}</ActionPanel>;
+};

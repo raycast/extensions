@@ -277,6 +277,8 @@ person.badge.minus
 person.fill.badge.minus
 person.badge.clock
 person.badge.clock.fill
+person.badge.key
+person.badge.key.fill
 shareplay
 shareplay.slash
 rectangle.inset.filled.and.person.filled
@@ -486,6 +488,7 @@ cursorarrow.click.2
 contextualmenu.and.cursorarrow
 filemenu.and.cursorarrow
 filemenu.and.selection
+dots.and.line.vertical.and.cursorarrow.rectangle
 dot.circle.and.hand.point.up.left.fill
 dot.circle.and.cursorarrow
 cursorarrow.motionlines
@@ -1860,6 +1863,9 @@ leaf.fill
 leaf.circle
 leaf.circle.fill
 leaf.arrow.triangle.circlepath
+camera.macro
+camera.macro.circle
+camera.macro.circle.fill
 film
 film.fill
 film.circle
@@ -1892,6 +1898,7 @@ person.fill.viewfinder
 text.viewfinder
 dot.viewfinder
 dot.circle.viewfinder
+key.viewfinder
 photo
 photo.fill
 photo.circle
