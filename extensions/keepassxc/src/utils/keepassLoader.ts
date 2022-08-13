@@ -41,7 +41,6 @@ const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 
 const keyFileOption = keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 // cli options
 const cliOptions = [...keyFileOption, "-q", "-a"];
-
 const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
@@ -183,6 +182,5 @@ const copyUsername = async (entry: string) =>
       await showHUD("Protect copy failed...");
     }
   }
-
   
 export { loadEntries, copyAndPastePassword, getPassword, copyPassword, copyUsername, copyAndPasteUsername, getOTP, copyOTP };
