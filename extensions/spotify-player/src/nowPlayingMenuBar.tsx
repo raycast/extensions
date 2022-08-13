@@ -1,6 +1,5 @@
 import {
   MenuBarExtra,
-  updateCommandMetadata,
   open,
   showToast,
   Toast,
@@ -42,18 +41,10 @@ export default function NowPlayingMenuBar() {
     if (isInstalled) {
       try {
         const [state, track] = await Promise.all([getState(), getTrack()]);
-
         setCurrentSpotifyState(state);
         setCurrentlyPlayingTrack(track);
-
-        let newSubtitle: string | undefined;
-        if (track.id) {
-          newSubtitle = `${track.artist} – ${track.name}`;
-        }
-        await updateCommandMetadata({ subtitle: newSubtitle });
         result = [state, track];
       } catch (err) {
-        await updateCommandMetadata({ subtitle: undefined });
         if (environment.launchType != LaunchType.Background) {
           showToast(Toast.Style.Failure, String(err));
         }
