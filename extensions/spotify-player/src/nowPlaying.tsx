@@ -1,5 +1,4 @@
 import {
-  updateCommandMetadata,
   open,
   showToast,
   Toast,
@@ -50,14 +49,8 @@ export default function NowPlayingMenuBar() {
         setCurrentSpotifyState(state);
         setCurrentlyPlayingTrack(track);
 
-        let newSubtitle: string | undefined;
-        if (track && track.id) {
-          newSubtitle = `${track.artist} – ${track.name}`;
-        }
-        await updateCommandMetadata({ subtitle: newSubtitle });
         result = [state, track];
       } catch (err) {
-        await updateCommandMetadata({ subtitle: undefined });
         if (environment.launchType != LaunchType.Background) {
           showToast(Toast.Style.Failure, String(err));
         }
