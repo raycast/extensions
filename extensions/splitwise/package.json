@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "splitwise",
+  "title": "Splitwise",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-expense",
+      "title": "Add Expense",
+      "subtitle": "Splitwise",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "list-expenses",
+      "title": "List Expenses",
+      "subtitle": "Splitwise",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "consumerKey",
+      "title": "Consumer Key",
+      "required": true,
+      "type": "password",
+      "description": "The consumer key for your Splitwise account"
+    },
+    {
+      "name": "consumerSecret",
+      "title": "Consumer Secret",
+      "required": true,
+      "type": "password",
+      "description": "The consumer secret for your Splitwise account"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.1.0",
+    "node-fetch": "^3.2.10",
+    "simple-oauth2": "^4.3.0",
+    "splitwise": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/simple-oauth2": "^4.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
