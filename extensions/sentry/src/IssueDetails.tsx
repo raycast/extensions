@@ -1,7 +1,8 @@
 import { Detail, Icon } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { Actions } from "./Actions";
 import { useLatestEvent } from "./sentry";
-import { Breadcrumb, Breadcrumbs, Event, Exception, Issue, Tag } from "./types";
+import { Breadcrumb, Breadcrumbs, Event, Exception, Issue, Organization, Tag } from "./types";
 import { getFormattedEventsCount, getFormattedAffectedUsersCount, getAssigneeIcon } from "./utils";
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", { timeStyle: "medium" });
@@ -110,7 +111,13 @@ function formatException(lastEvent?: Event) {
   return `\n## Exception\n${fomattedException}`;
 }
 
-export function IssueDetails(props: { issue: Issue }) {
+export type IssueDetailsProps = {
+  issue: Issue;
+  organization?: Organization;
+  mutateList?: MutatePromise<Issue[] | undefined>;
+};
+
+export function IssueDetails(props: IssueDetailsProps) {
   const { data, isLoading } = useLatestEvent(props.issue);
 
   const markdown = `# ${props.issue.title}\n${formatException(data)}\n${formatLastEvent(data)}\n${formatBreadcrumbs(
@@ -123,7 +130,7 @@ export function IssueDetails(props: { issue: Issue }) {
       isLoading={isLoading}
       markdown={markdown}
       metadata={<IssueMetadata issue={props.issue} lastEvent={data} />}
-      actions={<Actions issue={props.issue} isDetail />}
+      actions={<Actions issue={props.issue} organization={props.organization} mutateList={props.mutateList} isDetail />}
     />
   );
 }

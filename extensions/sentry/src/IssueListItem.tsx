@@ -1,9 +1,16 @@
 import { List } from "@raycast/api";
-import { Issue } from "./types";
+import { Issue, Organization } from "./types";
 import { Actions } from "./Actions";
 import { getIcon, getKeywords, getAccessories } from "./utils";
+import { MutatePromise } from "@raycast/utils";
 
-export function IssueListItem(props: { issue: Issue }) {
+export type IssueListItemProps = {
+  issue: Issue;
+  organization?: Organization;
+  mutateList: MutatePromise<Issue[] | undefined>;
+};
+
+export function IssueListItem(props: IssueListItemProps) {
   return (
     <List.Item
       icon={getIcon(props.issue)}
@@ -11,7 +18,7 @@ export function IssueListItem(props: { issue: Issue }) {
       subtitle={props.issue.shortId}
       keywords={getKeywords(props.issue)}
       accessories={getAccessories(props.issue)}
-      actions={<Actions issue={props.issue} />}
+      actions={<Actions issue={props.issue} organization={props.organization} mutateList={props.mutateList} />}
     />
   );
 }

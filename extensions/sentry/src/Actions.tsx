@@ -1,15 +1,35 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Toast } from "@raycast/api";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { IssueDetails } from "./IssueDetails";
-import { Issue } from "./types";
+import { updateIssue, useUsers } from "./sentry";
+import { Issue, Organization, User } from "./types";
 
-export function Actions(props: { issue: Issue; isDetail?: boolean }) {
+export type ActionsProps = {
+  issue: Issue;
+  organization?: Organization;
+  mutateList?: MutatePromise<Issue[] | undefined>;
+  isDetail?: boolean;
+};
+
+export function Actions(props: ActionsProps) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
         {!props.isDetail && (
-          <Action.Push icon={Icon.Sidebar} title="Show Details" target={<IssueDetails issue={props.issue} />} />
+          <Action.Push
+            icon={Icon.Sidebar}
+            title="Show Details"
+            target={
+              <IssueDetails issue={props.issue} organization={props.organization} mutateList={props.mutateList} />
+            }
+          />
         )}
         <Action.OpenInBrowser url={props.issue.permalink} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        {props.organization ? (
+          <AssignToAction issue={props.issue} organization={props.organization} mutateList={props.mutateList} />
+        ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -24,5 +44,49 @@ export function Actions(props: { issue: Issue; isDetail?: boolean }) {
         />
       </ActionPanel.Section>
     </ActionPanel>
+  );
+}
+
+function AssignToAction(props: {
+  issue: Issue;
+  organization: Organization;
+  mutateList?: MutatePromise<Issue[] | undefined>;
+}) {
+  const { data } = useUsers(props.organization.slug, props.issue.project.id);
+
+  async function assignTo(user: User) {
+    const toast = new Toast({ style: Toast.Style.Animated, title: "Assigning issue" });
+    await toast.show();
+
+    try {
+      if (props.mutateList) {
+        await props.mutateList(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+          optimisticUpdate: (data) => {
+            return data;
+          },
+        });
+      }
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Assigned issue";
+      toast.message = `Assigned ${props.issue.shortId} to ${user.name}`;
+    } catch (e) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed assigning issue";
+      toast.message = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu icon={Icon.AddPerson} title="Assign To" shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}>
+      {data?.map((user) => (
+        <Action
+          key={user.id}
+          icon={getAvatarIcon(user.name) ?? Icon.PersonCircle}
+          title={`${user.name} (${user.email})`}
+          onAction={() => assignTo(user)}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }

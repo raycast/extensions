@@ -7,7 +7,7 @@ import { ProjectDropdown } from "./ProjectDropdown";
 
 export default function Command() {
   const [project, setProject] = useState<Project>();
-  const { data, isLoading } = useIssues(project);
+  const { data, isLoading, mutate } = useIssues(project);
 
   return (
     <List
@@ -16,7 +16,7 @@ export default function Command() {
       searchBarAccessory={<ProjectDropdown onProjectChange={setProject} />}
     >
       {data?.map((issue) => (
-        <IssueListItem key={issue.id} issue={issue} />
+        <IssueListItem key={issue.id} issue={issue} organization={project?.organization} mutateList={mutate} />
       ))}
     </List>
   );

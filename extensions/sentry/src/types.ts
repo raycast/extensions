@@ -22,7 +22,11 @@ export type Issue = {
   title: string;
   shortId: string;
   userCount: number;
-  project: Project;
+  project: {
+    id: string;
+    name: string;
+    slug: string;
+  };
   assignedTo?: User | Team;
   culprit: string;
   firstSeen: string;
@@ -219,6 +223,9 @@ export type User = {
   type: "user";
   id: string;
   name: string;
+  user?: {
+    id: string;
+  };
 };
 
 export type Team = {
