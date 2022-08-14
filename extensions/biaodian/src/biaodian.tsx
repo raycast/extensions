@@ -57,7 +57,7 @@ const PunctuationMarksListItem = (props: { mark: Mark }) => {
 };
 
 export default () => (
-  <List searchBarPlaceholder="Search chinese punctuation marks...">
+  <List searchBarPlaceholder="Search chinese punctuation marks…">
     {punctuationMarks.map((mark) => (
       <PunctuationMarksListItem key={mark.symbol} mark={mark} />
     ))}
