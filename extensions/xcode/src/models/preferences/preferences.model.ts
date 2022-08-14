@@ -23,7 +23,7 @@ export interface Preferences {
    */
   showRecentProjectsInMenuBar_showSwiftPlaygrounds: boolean;
   /**
-   * [search-recent-projects.command] - Show Xcode Projects
+   * [search-recent-projects.command] - Excluded Xcode Project Paths
    */
   excludedXcodeProjectPaths?: string;
   /**
