@@ -15,9 +15,8 @@ const items = [
   { name: "Path Case", function: changeCase.pathCase },
   { name: "Capital Case", function: changeCase.capitalCase },
   { name: "Constant Case", function: changeCase.constantCase },
-  { name: "Sentence Case", function: changeCase.sentenceCase }
+  { name: "Sentence Case", function: changeCase.sentenceCase },
 ];
-
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -42,4 +41,3 @@ export default function Command() {
     </List>
   );
 }
-
