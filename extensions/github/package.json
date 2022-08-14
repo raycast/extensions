@@ -30,8 +30,8 @@
       "name": "token",
       "type": "password",
       "required": true,
-      "title": "API Token",
-      "description": "Your Github API token.",
+      "title": "Github personal access token",
+      "description": "Your Github personal access token. Needs following scopes 'read:discussion', 'read:enterprise', 'read:gpg_key', 'read:packages', 'read:public_key', 'read:repo_hook', 'repo', 'user'",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your Github API token."
     }

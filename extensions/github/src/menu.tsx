@@ -5,8 +5,12 @@ import { useSearchPullRequests } from "./graphql/useSearchPullRequests";
 export default function Menu() {
   const { isLoading, data } = useSearchPullRequests();
   return (
-    <MenuBarExtra isLoading={isLoading} icon={getIcon(data?.closed.requests)} tooltip="Pending requested reviews">
-      {data?.closed.requests.map((pr) => (
+    <MenuBarExtra
+      isLoading={isLoading}
+      icon={getIcon(data?.reviewRequested.requests)}
+      tooltip="Pending requested reviews"
+    >
+      {data?.reviewRequested.requests.map((pr) => (
         <MenuBarExtra.Item
           key={pr.repository.name + pr.number}
           title={pr.title}
@@ -21,7 +25,7 @@ export default function Menu() {
           onAction={() => open(pr.permalink)}
         ></MenuBarExtra.Item>
       ))}
-      {data?.closed.requests.length === 0 && <MenuBarExtra.Item title={`🎉 Nothing to review.`} />}
+      {data?.reviewRequested.requests.length === 0 && <MenuBarExtra.Item title={`🎉 Nothing to review.`} />}
     </MenuBarExtra>
   );
 }
