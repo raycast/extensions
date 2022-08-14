@@ -1,9 +1,11 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast } from "@raycast/api";
-import { loadEntries, pastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
+import { ActionPanel, closeMainWindow, Icon, List, showToast, showHUD, ToastStyle, clearClipboard } from "@raycast/api";
+import { loadEntries, copyAndPastePassword, copyPassword, copyUsername, copyOTP } from "./utils/keepassLoader";
+import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
-  console.error(e);
+  console.log(e.message);
+  console.log(e);
   let invalidPreference = "";
   if (e.message.includes("Invalid credentials were provided")) {
     invalidPreference = "Password";
@@ -21,7 +23,7 @@ const errorHandler = (e: { message: string }) => {
     toastTitle = `Invalid Preference: ${invalidPreference}`;
     toastMessage = "Please Check Extension Preference.";
   }
-  showToast(Toast.Style.Failure, toastTitle, toastMessage);
+  showToast(ToastStyle.Failure, toastTitle, toastMessage);
 };
 
 export default function Command() {
@@ -36,7 +38,7 @@ export default function Command() {
       });
   }, []);
   useEffect(() => {
-    console.debug(entries);
+    console.log(entries);
   }, [entries]);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Type to Search in KeepassXC" throttle={true}>
@@ -55,14 +57,14 @@ export default function Command() {
           keywords={entry.split("/").slice(1)}
           actions={
             <ActionPanel>
-              <Action
+              <ActionPanel.Item
                 title="Paste"
-                icon={Icon.BlankDocument}
+                icon={Icon.TextDocument}
                 onAction={() => {
-                  pastePassword(entry).then(() => closeMainWindow());
+                  copyAndPastePassword(entry).then(() => closeMainWindow());
                 }}
               />
-              <Action
+              <ActionPanel.Item
                 title="Copy Password"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
@@ -70,12 +72,21 @@ export default function Command() {
                   copyPassword(entry).then(() => closeMainWindow());
                 }}
               />
-              <Action
+              <ActionPanel.Item
                 title="Copy Username"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "b" }}
                 onAction={() => {
                   copyUsername(entry).then(() => closeMainWindow());
+                }}
+              />
+              <ActionPanel.Item
+                title="Copy OTP"
+                icon={Icon.Clipboard}
+                shortcut={{ modifiers: ["control", "cmd"], key: "c" }}
+                onAction={() => {
+                  // copyOTP(entry).then(() => closeMainWindow());
+                  copyOTP(entry).then(() => closeMainWindow());
                 }}
               />
             </ActionPanel>
@@ -84,4 +95,22 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+export async function protectedCopy(concealString: string) {
+  // await closeMainWindow();
+  const script = `
+    use framework "Foundation"
+    set type to current application's NSPasteboardTypeString
+	  set pb to current application's NSPasteboard's generalPasteboard()
+    pb's clearContents()
+	  pb's setString:"" forType:"org.nspasteboard.ConcealedType"
+    pb's setString:"${concealString}" forType:type
+  `
+  try {
+    await runAppleScript(script);
+  } catch {
+    // Applescript failed to conceal what is being placed in the pasteboard
+    await showHUD("Protect copy failed...");
+  }
 }
