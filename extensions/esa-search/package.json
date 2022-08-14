@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "esa-search",
+  "title": "esa search",
+  "description": "Search for posts by your team's esa. No official esa.io product.",
+  "icon": "icon.png",
+  "author": "kawamataryo",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchPost",
+      "title": "Search esa Post",
+      "description": "Search for esa post.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "keyword",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "createPost",
+      "title": "Create esa Post",
+      "description": "Create post for esa.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "default show detail",
+      "name": "isShowDetail",
+      "description": "Show detail screen in initial view",
+      "type": "dropdown",
+      "default": "false",
+      "data": [
+        {
+          "value": "true",
+          "title": "true"
+        },
+        {
+          "value": "false",
+          "title": "false"
+        }
+      ],
+      "required": false
+    },
+    {
+      "title": "team name",
+      "name": "primaryTeamName",
+      "description": "Your esa team name",
+      "type": "textfield",
+      "placeholder": "esa",
+      "required": true
+    },
+    {
+      "title": "token",
+      "name": "primaryToken",
+      "description": "Your esa access token",
+      "type": "textfield",
+      "placeholder": "xxx",
+      "required": true
+    },
+    {
+      "title": "secondary team name",
+      "name": "secondaryTeamName",
+      "description": "Your esa team name",
+      "type": "textfield",
+      "placeholder": "esa",
+      "required": false
+    },
+    {
+      "title": "secondary token",
+      "name": "secondaryToken",
+      "description": "Your esa access token",
+      "type": "textfield",
+      "placeholder": "xxx",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.1.0",
+    "@suin/esa-api": "^4.0.0",
+    "dayjs": "^1.11.5",
+    "swr": "^1.3.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
