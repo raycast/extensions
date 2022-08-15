@@ -1,4 +1,5 @@
 import { TodoItem, TodoSections } from "./atoms";
+import { setTimeout } from "timers/promises";
 
 import { MenuBarExtra } from "@raycast/api";
 import { useTodo } from "./hooks/useTodo";
@@ -14,5 +15,13 @@ export default function MenuBarTodoItem({
 }) {
   const { toggleTodo } = useTodo({ item, idx, sectionKey });
 
-  return <MenuBarExtra.Item title={`${item.completed ? "✓" : "○"}  ${item.title}`} onAction={() => toggleTodo()} />;
+  return (
+    <MenuBarExtra.Item
+      title={`${item.completed ? "✓" : "○"}  ${item.title}`}
+      onAction={async () => {
+        toggleTodo();
+        await setTimeout(1);
+      }}
+    />
+  );
 }

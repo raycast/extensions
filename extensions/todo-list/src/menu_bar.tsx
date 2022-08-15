@@ -8,11 +8,19 @@ import { useAtom } from "jotai";
 export default function MenuBar() {
   const [todoSections] = useAtom(todoAtom);
 
+  const todoLength = Object.values(todoSections).reduce((acc, section) => acc + section.length, 0);
+
   return (
-    <MenuBarExtra icon="../assets/command-icon-menubar.png" tooltip="Your Pull Requests">
-      <TodoList sectionKey="pinned" todos={todoSections["pinned"]} />
-      <TodoList sectionKey="todo" todos={todoSections["todo"]} />
-      <TodoList sectionKey="completed" todos={todoSections["completed"]} />
+    <MenuBarExtra icon="../assets/command-icon-menubar.png" tooltip="Your Todo List">
+      {todoLength > 0 ? (
+        <>
+          <TodoList sectionKey="pinned" todos={todoSections["pinned"]} />
+          <TodoList sectionKey="todo" todos={todoSections["todo"]} />
+          <TodoList sectionKey="completed" todos={todoSections["completed"]} />
+        </>
+      ) : (
+        <MenuBarExtra.Item title="No Todos" />
+      )}
     </MenuBarExtra>
   );
 }
