@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Search Media Command, Menu Bar Item, Command Arguments, Custom Icons & More | Version 1.8.0] - 2022-08-05
+## [Search Media Command, Menu Bar Item, Command Arguments, Custom Icons & More | Version 1.8.0] - 2022-08-15
 
 - Add `Search Media` command which lets you search for media like images, video, audio or pdfs in your vault
 - Add `Image Size` preference for `Search Media` command
