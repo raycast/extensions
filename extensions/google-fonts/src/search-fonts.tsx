@@ -128,7 +128,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Google Fonts">
-                <Action.Push title="Font Variants" target={<FontVariantsView font={font} />} />
+                <Action.Push title="Font Variants" icon={ Icon.Lowercase } target={<FontVariantsView font={font} />} />
               </ActionPanel.Section>
               <ActionPanel.Section title="fonts.google.com">
                 <Action.OpenInBrowser title={`View ${font.family}`} url={utils.generateGoogleFontsURL(font, "view")} />
