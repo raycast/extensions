@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Purge Everything Command] - {PR_MERGE_DATE}
+## [Add Purge Everything Command] - 2022-08-15
 
 - Add purge everything command
 - Add local site cache
