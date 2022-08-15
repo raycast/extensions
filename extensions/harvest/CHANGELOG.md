@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Updated branding & icons] - 2022-08-02
+
+- Updated brading and icons
+- Updated Raycast API
+
 ## [Edit Time Entries] 2022-04-08
 
 - Added: You can now edit previous time entries from the action menu or `cmd + E`.

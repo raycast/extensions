@@ -2,25 +2,32 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-21 11:53
+ * @lastEditTime: 2022-07-31 23:18
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Clipboard, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { eudicBundleId } from "./components";
 import { clipboardQueryTextKey, languageItemList } from "./consts";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { LanguageItem, MyPreferences, QueryRecoredItem, QueryWordInfo, TranslateFormatResult } from "./types";
 
+/**
+ * Eudic bundleIds.
+ *
+ * There are two Eudic versions on the Mac, one free version bundleId is `com.eusoft.freeeudic`, and the other paid version bundleId is `com.eusoft.eudic`. But their direct links are the same, eudic://
+ */
+const eudicBundleIds = ["com.eusoft.freeeudic", "com.eusoft.eudic"];
+
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
-export const clipboardQueryInterval = 10 * 60 * 1000;
+const clipboardQueryInterval = 10 * 60 * 1000;
 
 export const maxLineLengthOfChineseTextDisplay = 45;
 export const maxLineLengthOfEnglishTextDisplay = 95;
 
 export const myPreferences: MyPreferences = getPreferenceValues();
+// console.log(`myPreferences: ${JSON.stringify(myPreferences, null, 2)}`);
 export const defaultLanguage1 = getLanguageItemFromYoudaoId(myPreferences.language1) as LanguageItem;
 export const defaultLanguage2 = getLanguageItemFromYoudaoId(myPreferences.language2) as LanguageItem;
 export const preferredLanguages = [defaultLanguage1, defaultLanguage2];
@@ -94,18 +101,6 @@ export function isValidLanguageId(languageId: string): boolean {
   }
   return true;
 }
-
-/**
- * get another language item expcept chinese from language item array
- */
-export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
-  if (youdaoLanguageIds[0] === "zh-CHS") {
-    return youdaoLanguageIds[1];
-  } else {
-    return youdaoLanguageIds[0];
-  }
-}
-
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
@@ -134,38 +129,45 @@ export function isTranslateResultTooLong(formatResult: TranslateFormatResult | n
   return false;
 }
 
-export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getEudicWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
   const eudicWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
-  if (languageId) {
+  if (eudicWebLanguageId) {
     return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getYoudaoWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
-  const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).eudicWebLanguageId;
+  const youdaoWebLanguageId = getLanguageItemFromYoudaoId(languageId).youdaoWebLanguageId;
   if (youdaoWebLanguageId) {
     return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryTextInfo.word)}`;
   }
-  return "";
 }
 
-export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+/**
+ * Get another language item expcept chinese from language item array
+ */
+export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string {
+  return youdaoLanguageIds[0] === "zh-CHS" ? youdaoLanguageIds[1] : youdaoLanguageIds[0];
+}
+
+export function getGoogleWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
+  const text = encodeURI(queryTextInfo.word);
   const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
   const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
   const fromLanguageId = fromLanguageItem.googleLanguageId || fromLanguageItem.youdaoLanguageId;
   const toLanguageId = toLanguageItem.googleLanguageId || toLanguageItem.youdaoLanguageId;
-  const text = encodeURI(queryTextInfo.word);
-  return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  if (fromLanguageId && toLanguageId) {
+    return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
+  }
 }
 
 /**
  * Get DeepL web translate url
  * https://www.deepl.com/translator#en/zh/look
  */
-export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string {
+export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string | undefined {
   const fromLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage);
   const toLanguageItem = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage);
   const fromLanguageId = fromLanguageItem.deepLSourceLanguageId;
@@ -174,7 +176,6 @@ export function getDeepLWebTranslateURL(queryTextInfo: QueryWordInfo): string {
   if (fromLanguageId && toLanguageId) {
     return `https://www.deepl.com/translator#${fromLanguageId}/${toLanguageId}/${text}`;
   }
-  return "";
 }
 
 /**
@@ -231,43 +232,25 @@ export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): st
   } else if (accordingLanguageId === defaultLanguage2.youdaoLanguageId) {
     targetLanguageId = defaultLanguage1.youdaoLanguageId;
   }
-
   const targetLanguage = getLanguageItemFromYoudaoId(targetLanguageId);
-
   console.log(`languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`);
   return targetLanguage.youdaoLanguageId;
 }
 
 /**
- * traverse all applications, check if Eudic is installed
+ * Traverse all applications, check if Eudic is installed
  */
-async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInstalled: boolean) => void) {
+export async function checkIfInstalledEudic(): Promise<boolean> {
+  const startTime = new Date().getTime();
   const installedApplications = await getApplications();
-  LocalStorage.setItem(eudicBundleId, false);
-  updateIsInstalledEudic(false);
-
   for (const application of installedApplications) {
-    console.log(application.bundleId);
-    if (application.bundleId === eudicBundleId) {
-      updateIsInstalledEudic(true);
-      LocalStorage.setItem(eudicBundleId, true);
-
-      console.log("isInstalledEudic: true");
+    const appBundleId = application.bundleId;
+    if (appBundleId && eudicBundleIds.includes(appBundleId)) {
+      console.log(`checkIfEudicInstalled cost time: ${new Date().getTime() - startTime} ms`); // cost time: 22 ms
+      return Promise.resolve(true);
     }
   }
-}
-
-export function checkIfEudicIsInstalled(setIsInstalledEudic: (isInstalled: boolean) => void) {
-  LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    console.log("is install Eudic: ", isInstalledEudic);
-    if (isInstalledEudic == true) {
-      setIsInstalledEudic(true);
-    } else if (isInstalledEudic == false) {
-      setIsInstalledEudic(false);
-    } else {
-      traverseAllInstalledApplications(setIsInstalledEudic);
-    }
-  });
+  return Promise.resolve(false);
 }
 
 export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => void) {

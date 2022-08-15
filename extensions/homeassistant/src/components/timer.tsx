@@ -11,7 +11,7 @@ export function TimerStartAction(props: { state: State }): JSX.Element | null {
     await ha.callService("timer", "start", { entity_id: s.entity_id });
   };
   const title = s.state === "active" ? "Restart" : "Start";
-  const iconSource = s.state === "active" ? Icon.TwoArrowsClockwise : "play.png";
+  const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.png";
   return (
     <Action
       title={title}
@@ -53,7 +53,7 @@ export function TimerCancelAction(props: { state: State }): JSX.Element | null {
       title="Cancel"
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       onAction={handle}
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
     />
   );
 }

@@ -2,89 +2,17 @@ import _ from 'lodash';
 import { List, Detail, Icon, ActionPanel, showToast, Action, LocalStorage, Toast } from '@raycast/api';
 import { useCallback, useEffect, useState, Fragment } from 'react';
 import dayjs from 'dayjs';
-import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
+import {
+  ListName,
+  Todo,
+  setTodoProperty,
+  deleteTodo,
+  getTodoGroup,
+  thingsNotRunningError,
+  getTodoGroupId,
+  getListTodos,
+} from './shared';
 import AddNewTodo from './add-new-todo';
-
-enum TodoStatus {
-  open = 'open',
-  completed = 'completed',
-  canceled = 'canceled',
-}
-
-interface Todo {
-  id: string;
-  name: string;
-  status: TodoStatus;
-  tags: string;
-  project: TodoGroup;
-  area: TodoGroup;
-  dueDate: string;
-  notes: string;
-  // creationDate: string;
-  // activationDate: string;
-  // modificationDate: string;
-  // completionDate: string;
-  // cancellationDate: string;
-}
-
-interface TodoGroup {
-  id: string;
-  name: string;
-  tags: string;
-  area?: TodoGroup;
-}
-
-const listNameToListIdMapping = {
-  Inbox: 'TMInboxListSource',
-  Today: 'TMTodayListSource',
-  Anytime: 'TMNextListSource',
-  Upcoming: 'TMCalendarListSource',
-  Someday: 'TMSomedayListSource',
-};
-
-const getListTodos = (listName: ListName) =>
-  executeJxa(`
-  const things = Application('${preferences.thingsAppIdentifier}');
-  const todos = things.lists.byId('${listNameToListIdMapping[listName]}').toDos();
-  return todos.map(todo => ({
-    id: todo.id(),
-    name: todo.name(),
-    status: todo.status(),
-    notes: todo.notes(),
-    tags: todo.tagNames(),
-    dueDate: todo.dueDate() && todo.dueDate().toISOString(),
-    project: todo.project() && {
-      id: todo.project().id(),
-      name: todo.project().name(),
-      tags: todo.project().tagNames(),
-      area: todo.project().area() && {
-        id: todo.project().area().id(),
-        name: todo.project().area().name(),
-        tags: todo.project().area().tagNames(),
-      },
-    },
-    area: todo.area() && {
-      id: todo.area().id(),
-      name: todo.area().name(),
-      tags: todo.area().tagNames(),
-    },
-  }));
-`);
-
-const setTodoProperty = (todoId: string, key: string, value: string) =>
-  executeJxa(`
-  const things = Application('${preferences.thingsAppIdentifier}');
-  things.toDos.byId('${todoId}').${key} = '${value}';
-`);
-
-const deleteTodo = (todoId: string) =>
-  executeJxa(`
-  const things = Application('${preferences.thingsAppIdentifier}');
-  things.delete(things.toDos.byId('${todoId}'));
-`);
-
-const getTodoGroupId = (todo: Todo) => todo.project?.id || todo.area?.id;
-const getTodoGroup = (todo: Todo) => todo.project || todo.area;
 
 // Start of day as ISO
 const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
@@ -104,7 +32,7 @@ const formatDueDate = (dueDate: string) => {
 const statusIcons = {
   open: Icon.Circle,
   completed: Icon.Checkmark,
-  canceled: Icon.XmarkCircle,
+  canceled: Icon.XMarkCircle,
 };
 
 function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: ListName }) {

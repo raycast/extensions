@@ -1,4 +1,4 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
@@ -98,7 +98,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
       key={pipeline.name}
       title={pipeline.name || "Unknown pipeline name"}
       subtitle={status}
-      icon={`codepipeline/${status}.png`}
+      icon={iconMap[status]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
@@ -120,3 +120,11 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
     />
   );
 }
+
+const iconMap: { [key: string]: Icon } = {
+  Failed: Icon.ExclamationMark,
+  Idle: Icon.Circle,
+  InProgress: Icon.CircleProgress50,
+  Succeeded: Icon.CircleProgress100,
+  Stopped: Icon.CircleFilled,
+};

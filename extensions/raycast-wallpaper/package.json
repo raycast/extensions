@@ -20,11 +20,12 @@
       "mode": "view"
     },
     {
-      "name": "random-raycast-wallpaper",
+      "name": "auto-switch-raycast-wallpaper",
       "icon": "random-icon.png",
-      "title": "Random Raycast Wallpaper",
-      "description": "Set random Raycast wallpapers as desktop wallpaper.",
-      "mode": "no-view"
+      "title": "Auto Switch Raycast Wallpaper",
+      "description": "Auto-switch random Raycast wallpapers as desktop wallpaper every 1 hour.",
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "preferences": [
@@ -97,7 +98,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.38.3",
     "axios": "^0.27.2",
     "file-url": "^4.0.0",
     "fs-extra": "^10.0.1",
