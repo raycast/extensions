@@ -1,5 +1,5 @@
 # M3O Changelog
 
-## [Added M3O] - {PR_MERGE_DATE}
+## [Added M3O] - 2022-08-15
 
 - Initial version code
