@@ -47,6 +47,7 @@ export default function ListIterationStories() {
                     title="Open Stories"
                     icon={Icon.List}
                   />
+                  <Action.OpenInBrowser url={iteration.app_url} />
                 </ActionPanel>
               }
             />
