@@ -3,7 +3,7 @@ import { useState } from "react";
 import fs from "node:fs";
 
 export interface Preferences {
-  primaryAction: string;
+  primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
   gridItemSize: Grid.ItemSize;
   showName: boolean;
 }
@@ -102,7 +102,7 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         key="pasteName"
         title="Paste Name"
         content={name}
-        shortcut={{ modifiers: ["shift"], key: "n" }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
       />
     ),
     copyName: (
@@ -110,91 +110,22 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         key="copyName"
         title="Copy Name"
         content={name}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "n" }}
-      />
-    ),
-    pasteImage: (
-      <Action.Paste
-        key="pasteImage"
-        title="Paste Swift UI Image"
-        content={`Image(systemName: "${name}")`}
-        icon={"../assets/swift.svg"}
-        shortcut={{ modifiers: ["cmd"], key: "i" }}
-      />
-    ),
-    copyImage: (
-      <Action.CopyToClipboard
-        key="copyImage"
-        title="Copy Swift UI Image"
-        content={`Image(systemName: "${name}")`}
-        icon={"../assets/swift.svg"}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "i" }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
       />
     ),
   };
 
   let order: JSX.Element[] = [];
 
-  if (primaryAction == "copySymbol") {
-    order = [
-      actions["copy"],
-      actions["paste"],
-      actions["copyName"],
-      actions["pasteName"],
-      actions["copyImage"],
-      actions["pasteImage"],
-    ];
-  } else if (primaryAction == "pasteSymbol") {
-    order = [
-      actions["paste"],
-      actions["copy"],
-      actions["pasteName"],
-      actions["copyName"],
-      actions["pasteImage"],
-      actions["copyImage"],
-    ];
-  } else if (primaryAction == "copyName") {
-    order = [
-      actions["copyName"],
-      actions["pasteName"],
-      actions["copy"],
-      actions["paste"],
-      actions["copyImage"],
-      actions["pasteImage"],
-    ];
+  if (primaryAction == "pasteSymbol") {
+    order = [actions["paste"], actions["copy"], actions["copyName"], actions["pasteName"]];
+  } else if (primaryAction == "copySymbol") {
+    order = [actions["copy"], actions["paste"], actions["copyName"], actions["pasteName"]];
   } else if (primaryAction == "pasteName") {
-    order = [
-      actions["pasteName"],
-      actions["copyName"],
-      actions["paste"],
-      actions["copy"],
-      actions["copyImage"],
-      actions["pasteImage"],
-    ];
-  } else if (primaryAction == "copyImage") {
-    order = [
-      actions["copyImage"],
-      actions["pasteImage"],
-      actions["copyName"],
-      actions["pasteName"],
-      actions["copy"],
-      actions["paste"],
-    ];
-  } else if (primaryAction == "pasteImage") {
-    order = [
-      actions["pasteImage"],
-      actions["copyImage"],
-      actions["pasteName"],
-      actions["copyName"],
-      actions["paste"],
-      actions["copy"],
-    ];
+    order = [actions["pasteName"], actions["copyName"], actions["paste"], actions["copy"]];
+  } else if (primaryAction == "copyName") {
+    order = [actions["copyName"], actions["pasteName"], actions["copy"], actions["paste"]];
   }
 
-  return (
-    <ActionPanel title={name}>
-      {...order.slice(0, 2)}
-      <ActionPanel.Section>{...order.slice(2)}</ActionPanel.Section>
-    </ActionPanel>
-  );
+  return <ActionPanel title={name}>{...order}</ActionPanel>;
 };
