@@ -37,6 +37,14 @@
         {
           "title": "Paste Name to Active App",
           "value": "pasteName"
+        },
+        {
+          "title": "Copy Swift UI Image Code",
+          "value": "copyImage"
+        },
+        {
+          "title": "Paste Swift UI Image Code",
+          "value": "pasteImage"
         }
       ],
       "default": "copySymbol"
