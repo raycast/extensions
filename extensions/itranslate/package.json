@@ -284,6 +284,32 @@
       "label": "Enable Quick Switch",
       "description": "You can quickly switch the target language in the action panel",
       "default": true
+    },
+    {
+      "name": "delayTransInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Delayed translation interval",
+      "description": "Prevent an immediate translation request when the input content is changed",
+      "default": "800",
+      "data": [
+        {
+          "title": "500ms",
+          "value": "500"
+        },
+        {
+          "title": "800ms",
+          "value": "800"
+        },
+        {
+          "title": "1000ms",
+          "value": "1000"
+        },
+        {
+          "title": "1200ms",
+          "value": "1200"
+        }
+      ]
     }
   ],
   "dependencies": {
