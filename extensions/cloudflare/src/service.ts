@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { Cache } from '@raycast/api';
 
 interface Response<T> {
   result: T;
@@ -164,6 +165,7 @@ interface Member {
 
 class Service {
   client: AxiosInstance;
+  cache: Cache = new Cache();
 
   constructor(email: string, key: string) {
     this.client = axios.create({
@@ -177,8 +179,17 @@ class Service {
   }
 
   async listAccounts(): Promise<Account[]> {
-    const response = await this.client.get<Response<AccountItem[]>>('accounts');
-    return response.data.result.map((item) => {
+    let data;
+    if (this.cache.has('accounts')) {
+      data = JSON.parse(this.cache.get('accounts')!) as Response<AccountItem[]>;
+    } else {
+      const response = await this.client.get<Response<AccountItem[]>>(
+        'accounts',
+      );
+      data = response.data;
+      this.cache.set('accounts', JSON.stringify(data));
+    }
+    return data.result.map((item) => {
       const { id, name } = item;
       return {
         id,
@@ -187,14 +198,25 @@ class Service {
     });
   }
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   async listZones(account: Account): Promise<Zone[]> {
     const { id } = account;
-    const response = await this.client.get<Response<ZoneItem[]>>('zones', {
-      params: {
-        'account.id': id,
-      },
-    });
-    return response.data.result.map((item) => formatZone(item));
+    let data;
+    if (this.cache.has(`zones-${id}`)) {
+      data = JSON.parse(this.cache.get(`zones-${id}`)!) as Response<ZoneItem[]>;
+    } else {
+      const response = await this.client.get<Response<ZoneItem[]>>('zones', {
+        params: {
+          'account.id': id,
+        },
+      });
+      data = response.data;
+      this.cache.set(`zones-${id}`, JSON.stringify(data));
+    }
+    return data.result.map((item) => formatZone(item));
   }
 
   async getZone(id: string): Promise<Zone> {
@@ -220,6 +242,17 @@ class Service {
       `zones/${zoneId}/purge_cache`,
       {
         files: urls,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeEverything(zoneId: string): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        purge_everything: true,
       },
     );
     const { success, errors, messages, result } = response.data;
