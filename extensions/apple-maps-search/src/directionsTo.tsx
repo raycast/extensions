@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Icon, getPreferenceValues, popToRoot, Action } from "@raycast/api";
 import { useState } from "react";
-import { TravelMode, makeDirectionsURL, Preferences } from "./utils";
+import { TransportType, makeDirectionsURL, Preferences } from "./utils";
 
 enum orginOption {
   CurLoc = "",
@@ -37,7 +37,8 @@ export default function Command() {
         <ActionPanel>
           <Action.OpenInBrowser
             url={makeDirectionsURL(originAddress, destination, mode)}
-            icon={Icon.Globe}
+            icon={Icon.Map}
+            title="Open in Apple Maps"
             onOpen={() => popToRoot()}
           />
           <Action.CopyToClipboard
@@ -57,9 +58,9 @@ export default function Command() {
       />
       <Form.Separator />
       <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
-        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon="📍" />
-        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon="🏠" />
-        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon="✏️" />
+        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon={Icon.Geopin} />
+        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon={Icon.House} />
+        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon={Icon.Pencil} />
       </Form.Dropdown>
       {origin === orginOption.Custom && (
         <Form.TextField
@@ -70,11 +71,11 @@ export default function Command() {
           onChange={setOriginAddress}
         />
       )}
-      <Form.Dropdown id="travelmode" title="Travel Mode" value={mode} onChange={setMode}>
-        <Form.Dropdown.Item value={TravelMode.Driving} title="Driving" icon="🚗" />
-        <Form.Dropdown.Item value={TravelMode.Walking} title="Walking" icon="🚶‍♀️" />
-        <Form.Dropdown.Item value={TravelMode.Transit} title="Transit" icon="🚆" />
-        <Form.Dropdown.Item value={TravelMode.Cycling} title="Cycling" icon="🚲" />
+      <Form.Dropdown id="transport-type" title="Transport Type" value={mode} onChange={setMode}>
+        <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
+        <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
+        <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
+        <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
     </Form>
   );
