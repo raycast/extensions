@@ -10,6 +10,7 @@ import {
   Icon,
   Color,
   getPreferenceValues,
+  updateCommandMetadata,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
@@ -44,7 +45,14 @@ export default function NowPlayingMenuBar() {
         setCurrentSpotifyState(state);
         setCurrentlyPlayingTrack(track);
         result = [state, track];
+
+        let newSubtitle: string | undefined;
+        if (track && track.id) {
+          newSubtitle = `${track.artist} – ${track.name}`;
+        }
+        await updateCommandMetadata({ subtitle: newSubtitle });
       } catch (err) {
+        await updateCommandMetadata({ subtitle: undefined });
         if (environment.launchType != LaunchType.Background) {
           showToast(Toast.Style.Failure, String(err));
         }
