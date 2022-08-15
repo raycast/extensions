@@ -1,7 +1,8 @@
 import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
 import React, { useState } from "react";
+import fs from "fs";
 
-import { Note, Vault, SearchNotePreferences } from "../utils/interfaces";
+import { Note, Vault, SearchNotePreferences, SearchArguments } from "../utils/interfaces";
 import {
   readingTime,
   wordCount,
@@ -13,6 +14,8 @@ import {
 } from "../utils/utils";
 import { isNotePinned } from "../utils/pinNoteUtils";
 import { NoteAction } from "../utils/constants";
+import { deleteNoteFromCache, renewCache, updateNoteInCache } from "../utils/cache";
+import { tagsForNotes } from "../utils/yaml";
 
 export function NoteListItem(props: {
   note: Note;
@@ -26,10 +29,21 @@ export function NoteListItem(props: {
   const [content, setContent] = useState(note.content);
   const [pinned, setPinned] = useState(isNotePinned(note, vault));
 
+  const noteHasBeenMoved = !fs.existsSync(note.path);
+
+  if (noteHasBeenMoved) {
+    renewCache(vault);
+  }
+
   function reloadContent() {
     const newContent = getNoteFileContent(note.path);
     note.content = newContent;
     setContent(newContent);
+  }
+
+  function reloadTags() {
+    const newTags = tagsForNotes([note]);
+    note.tags = newTags;
   }
 
   function actionCallback(action: NoteAction) {
@@ -39,16 +53,21 @@ export function NoteListItem(props: {
         break;
       case NoteAction.Delete:
         onDelete(note);
+        deleteNoteFromCache(vault, note);
         break;
       case NoteAction.Edit:
         reloadContent();
+        reloadTags();
+        updateNoteInCache(vault, note);
         break;
       case NoteAction.Append:
         reloadContent();
+        reloadTags();
+        updateNoteInCache(vault, note);
     }
   }
 
-  return (
+  return !noteHasBeenMoved ? (
     <List.Item
       title={note.title}
       accessories={[{ text: pinned ? "⭐️" : "" }]}
@@ -87,7 +106,7 @@ export function NoteListItem(props: {
         </ActionPanel>
       }
     />
-  );
+  ) : null;
 }
 
 export function NoteList(props: {
@@ -98,11 +117,12 @@ export function NoteList(props: {
   isLoading?: boolean;
   title?: string;
   vault: Vault;
+  searchArguments: SearchArguments;
   action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
   onSearchChange: (search: string) => void;
   onDelete: (note: Note) => void;
 }) {
-  const { notes, allNotes, vault, isLoading, title, tags, action, onSearchChange, onDelete } = props;
+  const { notes, allNotes, vault, isLoading, title, tags, searchArguments, action, onSearchChange, onDelete } = props;
   const pref = getPreferenceValues<SearchNotePreferences>();
   const { showDetail } = pref;
 
@@ -121,6 +141,11 @@ export function NoteList(props: {
       return (
         <List.Dropdown
           tooltip="Search For"
+          defaultValue={
+            searchArguments.tagArgument.startsWith("#")
+              ? searchArguments.tagArgument
+              : "#" + searchArguments.tagArgument
+          }
           onChange={(value) => {
             if (value != "all") {
               if (props.setNotes) {
@@ -151,6 +176,7 @@ export function NoteList(props: {
       isShowingDetail={showDetail}
       onSearchTextChange={onSearchChange}
       navigationTitle={title}
+      searchText={searchArguments.searchArgument}
       searchBarAccessory={<DropDownList />}
     >
       {notes?.map((note) => (
