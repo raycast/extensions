@@ -5,16 +5,18 @@ import { spotifyApplicationName } from "../utils";
 
 export type SpotifyPlayingState = "playing" | "paused" | "stopped";
 
-export async function getTrack(): Promise<TrackInfo> {
+export async function getTrack(): Promise<TrackInfo | null> {
   const applicationName = await spotifyApplicationName();
   const response = await runAppleScript(scripts.track(applicationName));
 
+  if (response === "") return null;
   return JSON.parse(response) as TrackInfo;
 }
-export async function getState(): Promise<SpotifyState> {
+export async function getState(): Promise<SpotifyState | null> {
   const applicationName = await spotifyApplicationName();
   const response = await runAppleScript(scripts.state(applicationName));
 
+  if (response === "") return null;
   return JSON.parse(response) as SpotifyState;
 }
 export async function playTrack(uri: string) {

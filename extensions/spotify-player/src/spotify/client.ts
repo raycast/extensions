@@ -600,9 +600,9 @@ export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi
   let cancel = false;
 
   useEffect(() => {
-    authorizeIfNeeded();
-
     async function fetchData() {
+      await authorizeIfNeeded();
+
       if (cancel) {
         return;
       }

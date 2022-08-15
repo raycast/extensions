@@ -1,5 +1,6 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
+import { URLSearchParams } from "url";
 
 const clientId = "7bbb789c01ff44ed842907b7a80c404f";
 const scope = "user-library-modify user-modify-playback-state";
