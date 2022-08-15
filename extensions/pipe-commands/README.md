@@ -6,7 +6,7 @@ Select / Copy some text and use the `Pipe [Selection, Clipboard] to Command` com
 
 ## Adding Additional Pipe Commands
 
-Use the `Create Script Command` command to generate a new script commands, then change the `@raycast.mode` to `pipe`.
+Use the `Create Script Command` command to generate a new script command, then change the `@raycast.mode` value to `pipe`.
 
 The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
