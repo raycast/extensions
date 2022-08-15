@@ -1,3 +1,3 @@
 # Libraries.io Changelog
 
-## [Initial Version] - 2022-08-10
+## [Initial Version] - 2022-08-15
