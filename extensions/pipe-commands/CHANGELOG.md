@@ -1,6 +1,6 @@
 # Pipe Commands Changelog
 
-## [Improve Compatibility with Script Commands, Restore file argument] - {PR_MERGE_DATE}
+## [Improve Compatibility with Script Commands, Restore file argument] - 2022-08-15
 
 ### Added
 
