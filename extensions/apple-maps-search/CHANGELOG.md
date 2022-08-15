@@ -1,6 +1,6 @@
 # Apple Maps Search Changelog
 
-## [Command Changes] - 2022-08-13
+## [Command Changes] - 2022-08-15
 
 - Update command names and copy to better reflect Apple Maps terminology
 - Set command keywords so original command names still work
