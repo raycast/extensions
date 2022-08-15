@@ -20,7 +20,7 @@
     },
     {
       "name": "dns",
-      "title": "Get DNS for domain",
+      "title": "Get DNS for Domain",
       "subtitle": "M3O",
       "description": "Retrieve DNS over HTTPS (DoH) information for a given domain.",
       "mode": "view"
