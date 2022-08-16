@@ -1,0 +1,7 @@
+# UUID Generator Changelog
+
+## [Added Multi-UUID support] - 2022-08-16
+
+- Added the ability to create any number of UUIDs (up to 10000) in one go via an optional argument.
+
+## [Initial Version] - 2021-11-26
