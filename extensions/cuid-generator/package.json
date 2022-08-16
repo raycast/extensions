@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "generate",
-      "title": "Generate cuid",
+      "title": "Copy CUID",
       "description": "Generates a new cuid",
       "mode": "no-view"
     }
