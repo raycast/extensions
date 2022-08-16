@@ -1,6 +1,4 @@
 import {
-  MenuBarExtra,
-  updateCommandMetadata,
   open,
   showToast,
   Toast,
@@ -10,188 +8,220 @@ import {
   Clipboard,
   Icon,
   Color,
-  getPreferenceValues,
+  Detail,
+  closeMainWindow,
+  Action,
+  ActionPanel,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./client/client";
-import { CurrentlyPlayingTrack } from "./client/interfaces";
-import { isAuthorized } from "./client/oauth";
-import { isSpotifyInstalled, spotifyPlayingState, SpotifyPlayingState } from "./client/utils";
-import { currentPlayingTrack, nextTrack, pause, play, previousTrack } from "./controls/spotify-applescript";
+import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
+import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
+import { isSpotifyInstalled, showTrackNotification } from "./utils";
+import { getState, getTrack, nextTrack, pause, play, playPause, previousTrack } from "./spotify/applescript";
+import { isAuthorized } from "./spotify/oauth";
+import NowPlayingDetailMetadata from "./components/NowPlayingDetailMetadata";
+import NowPlayingEmptyDetail from "./components/NowPlayingEmptyDetail";
 
-interface State {
-  isLoading: boolean;
-  currentlyPlayingTrack?: CurrentlyPlayingTrack;
-  spotifyInstalled?: boolean;
-  playingState: SpotifyPlayingState;
-  isAuthorized: boolean;
-}
+export default function NowPlayingMenuBar() {
+  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | null>(null);
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>(null);
+  const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function Main() {
-  const [state, setState] = useState<State>({
-    isLoading: true,
-    playingState: SpotifyPlayingState.Stopped,
-    isAuthorized: false,
-  });
+  const fetchPlayerAndTrackState = async () => {
+    let result: [SpotifyState | null, TrackInfo | null] = [null, null];
 
-  async function updatePlayingTrack() {
-    const spotifyInstalled = await isSpotifyInstalled();
-    const playingState = await spotifyPlayingState();
-    const authorized = await isAuthorized();
-    setState((prevState) => ({ ...prevState, spotifyInstalled, playingState, isAuthorized: authorized }));
-    const response = await currentPlayingTrack();
+    // Check if Spotify is installed (only try this once)
+    let isInstalled = spotifyInstalled;
+    if (isInstalled == null) {
+      isInstalled = await isSpotifyInstalled();
+      setSpotifyInstalled(await isSpotifyInstalled());
+    }
 
-    let newSubtitle: string | undefined;
-    if (response?.result) {
-      setState((prevState) => ({ ...prevState, currentlyPlayingTrack: response?.result }));
-      newSubtitle = `${response?.result.artist} – ${response?.result.name}`;
-    } else if (response?.error) {
-      await updateCommandMetadata({ subtitle: undefined });
-      if (environment.launchType != LaunchType.Background) {
-        showToast(Toast.Style.Failure, response.error);
+    setAuthorized(await isAuthorized());
+
+    // If Spotify is installed then fetch the player and track state
+    if (isInstalled) {
+      try {
+        const [state, track] = await Promise.all([getState(), getTrack()]);
+
+        setCurrentSpotifyState(state);
+        setCurrentlyPlayingTrack(track);
+
+        result = [state, track];
+      } catch (err) {
+        if (environment.launchType != LaunchType.Background) {
+          showToast(Toast.Style.Failure, String(err));
+        }
       }
     }
 
-    await updateCommandMetadata({ subtitle: newSubtitle });
-    setState((prevState) => ({ ...prevState, isLoading: false }));
-  }
-
-  useEffect(() => {
-    updatePlayingTrack();
-  }, []);
-
-  if (state.isLoading) {
-    return <MenuBarExtra isLoading={state.isLoading}></MenuBarExtra>;
-  }
-
-  if (state.playingState == SpotifyPlayingState.Stopped) {
-    return null;
-  }
-
-  const trackTitle =
-    state.spotifyInstalled && state.currentlyPlayingTrack
-      ? `${state.currentlyPlayingTrack.artist} – ${state.currentlyPlayingTrack.name}`
-      : undefined;
-
-  const optimizeTitle = (title: string | undefined) => {
-    if (title === undefined) {
-      return title;
-    }
-    const prefs = getPreferenceValues();
-    const max = Number(prefs.maxtitlelength);
-    if (Number.isNaN(max)) {
-      return title;
-    }
-    if (max <= 0) {
-      return title;
-    }
-    return title.slice(0, max);
+    setIsLoading(false);
+    return result;
   };
 
-  return (
-    <MenuBarExtra
-      icon={state.spotifyInstalled && state.currentlyPlayingTrack ? "icon.png" : undefined}
-      title={optimizeTitle(trackTitle)}
-      tooltip={trackTitle}
-      isLoading={state.isLoading}
-    >
-      {state.currentlyPlayingTrack && state.currentlyPlayingTrack.id && (
-        <>
-          <MenuBarExtra.Item
-            icon={state.playingState == SpotifyPlayingState.Playing ? Icon.Pause : Icon.Play}
-            title={state.playingState == SpotifyPlayingState.Playing ? "Pause" : "Play"}
-            onAction={async () => {
-              setState((prevState) => ({
-                ...prevState,
-                playingState:
-                  prevState.playingState == SpotifyPlayingState.Playing
-                    ? SpotifyPlayingState.Paused
-                    : SpotifyPlayingState.Playing,
-              }));
-              await (state.playingState == SpotifyPlayingState.Playing ? pause() : play());
-            }}
-          />
-          <MenuBarExtra.Item
-            icon={Icon.Forward}
-            title={"Next Track"}
-            onAction={async () => {
-              await nextTrack();
-              await updatePlayingTrack();
-            }}
-          />
-          <MenuBarExtra.Item
-            icon={Icon.Rewind}
-            title={"Previous Track"}
-            onAction={async () => {
-              await previousTrack();
-              await updatePlayingTrack();
-            }}
-          />
-          {state.isAuthorized && (
-            <MenuBarExtra.Item
-              title="Start Radio"
-              tooltip="Starts playing Radio for currently playing song"
-              icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
-              onAction={async () => {
-                if (state.currentlyPlayingTrack && state.currentlyPlayingTrack.id) {
-                  const trackId = state.currentlyPlayingTrack.id.replace("spotify:track:", "");
-                  await startPlaySimilar(trackId);
-                  showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
-                }
-              }}
-            />
-          )}
+  useEffect(() => {
+    fetchPlayerAndTrackState();
+  }, []);
 
-          {state.isAuthorized && (
-            <>
-              <MenuBarExtra.Separator />
-              <MenuBarExtra.Item
-                icon={Icon.Heart}
-                title="Like"
-                tooltip="Likes the currently playing song"
+  const handlePlayPause = async () => {
+    await closeMainWindow();
+    await playPause();
+  };
+
+  const handlePlay = async () => {
+    await closeMainWindow();
+    await setCurrentSpotifyState((oldState) => {
+      if (!oldState) return null;
+      return {
+        ...oldState,
+
+        state: SpotifyPlayingState.Playing,
+      };
+    });
+    await play();
+  };
+
+  const handlePause = async () => {
+    await closeMainWindow();
+    await setCurrentSpotifyState((oldState) => {
+      if (!oldState) return null;
+      return {
+        ...oldState,
+
+        state: SpotifyPlayingState.Paused,
+      };
+    });
+    await pause();
+  };
+
+  const handleNextTrack = async () => {
+    await closeMainWindow();
+    await nextTrack();
+    const [state, track] = await fetchPlayerAndTrackState();
+    await showTrackNotification(state, track);
+  };
+
+  const handlePreviousTrack = async () => {
+    await closeMainWindow();
+    await previousTrack();
+    const [state, track] = await fetchPlayerAndTrackState();
+    await showTrackNotification(state, track);
+  };
+
+  const trackTitle =
+    spotifyInstalled && currentlyPlayingTrack
+      ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`
+      : undefined;
+
+  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped)
+    return <NowPlayingEmptyDetail title="Not Playing" showLoadingImage={false} />;
+  if (!currentlyPlayingTrack || !currentSpotifyState)
+    return <NowPlayingEmptyDetail title="Loading" showLoadingImage={true} />;
+
+  return (
+    <Detail
+      navigationTitle={trackTitle}
+      isLoading={isLoading}
+      metadata={<NowPlayingDetailMetadata trackInfo={currentlyPlayingTrack} playerState={currentSpotifyState} />}
+      markdown={`# ${trackTitle}\n![${currentlyPlayingTrack.album}](${currentlyPlayingTrack.artwork_url}?raycast-width=275&raycast-height=275)`}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action
+              icon={
+                currentSpotifyState
+                  ? currentSpotifyState.state === SpotifyPlayingState.Playing
+                    ? Icon.PauseFilled
+                    : Icon.PlayFilled
+                  : Icon.Pause
+              }
+              title={
+                currentSpotifyState
+                  ? currentSpotifyState.state === SpotifyPlayingState.Playing
+                    ? "Pause"
+                    : "Play"
+                  : "Play/Pause"
+              }
+              onAction={() =>
+                currentSpotifyState
+                  ? currentSpotifyState.state === SpotifyPlayingState.Playing
+                    ? handlePause()
+                    : handlePlay()
+                  : handlePlayPause()
+              }
+            />
+            <Action
+              icon={Icon.Forward}
+              title={"Next Track"}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              onAction={() => handleNextTrack()}
+            />
+            <Action
+              icon={Icon.Rewind}
+              title={"Previous Track"}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+              onAction={() => handlePreviousTrack()}
+            />
+            {authorized && currentlyPlayingTrack && (
+              <Action
+                title="Start Radio"
+                icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
                 onAction={async () => {
-                  try {
-                    const response = await likeCurrentlyPlayingTrack();
-                    if (response?.result) {
-                      const title = `${response.result.artist} – ${response.result.name}`;
-                      showHUD(`💚 ${title}`);
-                    }
-                  } catch (err) {
-                    console.error(err);
+                  if (currentlyPlayingTrack && currentlyPlayingTrack.id) {
+                    const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
+                    await startPlaySimilar({ seed_tracks: trackId });
+                    showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
                   }
                 }}
               />
-            </>
-          )}
-          <MenuBarExtra.Item
-            key={state.currentlyPlayingTrack.id}
-            icon={"icon.png"}
-            title={`Open in Spotify`}
-            onAction={() => open(`${state.currentlyPlayingTrack?.id}`)}
-          />
-          <MenuBarExtra.Separator />
-          <MenuBarExtra.Item
-            title="Copy Song Link"
-            icon={Icon.Link}
-            tooltip="Copies the link for currently playing song"
-            onAction={async () => {
-              const trackId = state.currentlyPlayingTrack?.id.replace("spotify:track:", "");
-              Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
-              showHUD(`♫ Copied URL – ${trackTitle}`);
-            }}
-          />
-          {!state.isAuthorized && (
-            <>
-              <MenuBarExtra.Separator />
-              <MenuBarExtra.Item
-                icon={Icon.PersonCircle}
-                title="Signed Out"
-                tooltip="Open any Spotify view command and authorize to get more features here!"
+            )}
+          </ActionPanel.Section>
+
+          {currentlyPlayingTrack && (
+            <ActionPanel.Section>
+              {authorized && (
+                <Action
+                  icon={Icon.Heart}
+                  title="Like"
+                  onAction={async () => {
+                    try {
+                      const response = await likeCurrentlyPlayingTrack();
+                      if (response?.result) {
+                        const title = `${response.result.artist} – ${response.result.name}`;
+                        showHUD(`💚 ${title}`);
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                />
+              )}
+              <Action
+                key={currentlyPlayingTrack.id}
+                icon={"icon.png"}
+                title={`Open in Spotify`}
+                onAction={() => open(`${currentlyPlayingTrack.id}`)}
               />
-            </>
+            </ActionPanel.Section>
           )}
-        </>
-      )}
-    </MenuBarExtra>
+
+          {currentlyPlayingTrack && (
+            <ActionPanel.Section>
+              <Action
+                title="Copy Song Link"
+                icon={Icon.Link}
+                onAction={async () => {
+                  const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
+                  Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
+                  showHUD(`♫ Copied URL – ${trackTitle}`);
+                }}
+              />
+            </ActionPanel.Section>
+          )}
+        </ActionPanel>
+      }
+    />
   );
 }

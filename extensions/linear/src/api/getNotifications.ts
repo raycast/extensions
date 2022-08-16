@@ -5,7 +5,7 @@ import { getLinearClient } from "../helpers/withLinearClient";
 export type NotificationResult = Pick<Notification, "id" | "type" | "createdAt" | "readAt" | "reactionEmoji"> & {
   comment: Pick<Comment, "body">;
 } & {
-  issue: IssueResult;
+  issue?: IssueResult;
 } & {
   actor?: Pick<User, "displayName" | "avatarUrl">;
 };

@@ -11,9 +11,10 @@ import {
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useBraveHistorySearch } from "./browserHistory";
 import React, { useEffect, useState, ReactElement } from "react";
-import { faviconUrl, openNewTabWithUrl } from "./utils";
+import { openNewTabWithUrl } from "./utils";
 import Tab from "./components/tab";
 import BraveOpenNewTab from "./components/brave-open-new-tab";
+import { getFavicon } from "@raycast/utils";
 
 async function getOpenTabs(): Promise<Tab[]> {
   const faviconFormula = '""';
@@ -144,7 +145,7 @@ const NewTabActions = (props: { query: string | undefined }): ReactElement => {
 const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
   const { url, title } = props.entry;
   const id = props.entry.id.toString();
-  const favicon = faviconUrl(64, url);
+  const favicon = getFavicon(url);
 
   return (
     <List.Item

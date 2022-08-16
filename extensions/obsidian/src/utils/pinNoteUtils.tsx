@@ -2,9 +2,10 @@ import { showToast, Toast, environment, Icon, confirmAlert } from "@raycast/api"
 import fs from "fs";
 
 import { Note, Vault, PinnedNotesJSON } from "./interfaces";
-import { getCurrentPinnedVersion, getNoteFileContent, isNote, tagsFor } from "./utils";
+import { getCurrentPinnedVersion, getNoteFileContent, isNote } from "./utils";
 import { noteAlreadyPinnedToast, notePinnedToast, noteUnpinnedToast } from "../components/Toasts";
 import { CURRENT_EXTENSION_VERSION } from "./constants";
+import { tagsForString } from "./yaml";
 
 export function getInfoFor(vault: Vault): { pinnedNotes: string[]; vault: Vault; data: PinnedNotesJSON[] } {
   if (!fs.existsSync(environment.supportPath + "/data.json")) {
@@ -63,7 +64,7 @@ export function getPinnedNotes(vault: Vault) {
         const note: Note = {
           title: name,
           path: p,
-          tags: tagsFor(content),
+          tags: tagsForString(content),
           content: content,
         };
         return note;
