@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Detail, Grid, useNavigation } from "@raycast/api";
 import { RadarImage } from "../types/types";
-import { ListEmptyView } from "./list-empty-view";
 
 export function RadarGridLayout(props: { isLoading: boolean; radars: RadarImage[] }) {
   const { push } = useNavigation();
@@ -8,7 +7,11 @@ export function RadarGridLayout(props: { isLoading: boolean; radars: RadarImage[
 
   return (
     <Grid itemSize={Grid.ItemSize.Large} isLoading={isLoading} searchBarPlaceholder={"Search rain radar location"}>
-      <ListEmptyView layout={"grid"} />
+      <Grid.EmptyView
+        icon={{ source: { light: "rain-radar-icon.png", dark: "rain-radar-icon.png" } }}
+        title={"No radars found..."}
+        description={""}
+      />
       <Grid.Section title={"Available Radars"}>
         {radars.map((radar, index) => {
           return (
