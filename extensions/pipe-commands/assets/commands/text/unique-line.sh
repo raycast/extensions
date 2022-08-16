@@ -1,8 +1,9 @@
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Unique Lines
-# @raycast.mode replace
-# @raycast.icon Text
-# @raycast.argument1 {"type": "text", "percentEncoded": false}
+# @raycast.icon 🔤
+# @raycast.mode pipe
+# @raycast.icon 
 
-uniq <<< "$1"
+uniq

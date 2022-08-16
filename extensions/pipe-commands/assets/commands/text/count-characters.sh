@@ -1,8 +1,9 @@
 #!/bin/bash
 
+# @raycast.schemaVersion 1
 # @raycast.title Count Characters
 # @raycast.mode silent
-# @raycast.icon List
+# @raycast.icon 🔢
 # @raycast.argument1 {"type": "text", "percentEncoded": false}
 
-echo -n "${#1}"
+wc -c
