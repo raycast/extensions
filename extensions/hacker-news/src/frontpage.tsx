@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import Parser from "rss-parser";
 import { startCase } from "lodash";
+import { getRandom as randomUseragent } from "random-useragent";
 import { StoryListItem } from "./StoryListItem";
 
 enum Topic {
@@ -29,7 +30,11 @@ interface State {
   error?: Error;
 }
 
-const parser = new Parser();
+const parser = new Parser({
+  headers: {
+    "User-Agent": randomUseragent(),
+  },
+});
 
 export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true, topic: null });

@@ -1,5 +1,9 @@
 # Hacker News Changelog
 
+## [🐛 Fixes] - (2022-08-16)
+
+- Set a random UA string in API calls to prevent 429 error responses.
+
 ## [🎉 Added all of the RSS feeds] - (2022-03-21)
 
 - Merge `Show HN` and `Front Page` commands into a single command + adds the following new [HNRSS](https://hnrss.github.io/) feeds:

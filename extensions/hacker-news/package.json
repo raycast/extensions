@@ -9,6 +9,7 @@
     "News"
   ],
   "contributors": [
+    "GastroGeek",
     "sxn"
   ],
   "license": "MIT",
@@ -23,11 +24,13 @@
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "lodash": "^4.17.21",
+    "random-useragent": "^0.5.0",
     "rss-parser": "3.12.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.180",
     "@types/node": "~16.10.0",
+    "@types/random-useragent": "^0.3.1",
     "@types/react": "17.0.41",
     "@typescript-eslint/eslint-plugin": "5.15.0",
     "@typescript-eslint/parser": "5.15.0",
