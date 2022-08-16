@@ -1,5 +1,12 @@
 # Pipe Commands Changelog
 
+## [Improve Documentation] - 2022-08-15
+
+### Fixed
+
+- Fix outdated documentation
+- update `unique line` and `count-character` commands
+
 ## [Improve Compatibility with Script Commands, Restore file argument] - 2022-08-15
 
 ### Added
