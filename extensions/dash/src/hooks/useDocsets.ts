@@ -10,10 +10,10 @@ import { Application } from "@raycast/api";
 export default function useDocsets(): [Docset[], boolean] {
   const [isLoading, setLoading] = useState(true);
   const [docsets, setDocsets, isDocsetsLoading] = usePersistentState<Docset[]>("docsets-v1", []);
-  const dashApp = useDashApp();
+  const [dashApp, isDashAppLoading] = useDashApp();
 
   useEffect(() => {
-    if (!dashApp) {
+    if (!dashApp || isDashAppLoading) {
       return;
     }
     (async () => {
