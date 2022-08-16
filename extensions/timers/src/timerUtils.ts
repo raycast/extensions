@@ -52,7 +52,10 @@ async function getTimers() {
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
-      timer.timeLeft = Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000);
+      timer.timeLeft = Math.max(
+        0,
+        Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000)
+      );
       setOfTimers.push(timer);
     }
   });
