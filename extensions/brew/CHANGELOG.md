@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Bug Fix] - 2022-08-15
+
+- Fix error when loading "Show Outdated" command
+
 ## [Improvements] - 2022-08-10
 
 - Add a "Custom Brew Path" preference for users with brew installed in a non-standard path

@@ -25,7 +25,7 @@ export default function Main(): JSX.Element {
       })
       .catch((err) => {
         showFailureToast("Brew outdated failed", err);
-        setState({ isLoading: false, filter: InstallableFilterType.all });
+        setState((oldState) => ({ ...oldState, isLoading: false }));
       });
   }, [state]);
 
@@ -37,7 +37,9 @@ export default function Main(): JSX.Element {
       searchBarAccessory={
         <InstallableFilterDropdown
           onSelect={(filterType) => {
-            setState((oldState) => ({ ...oldState, filter: filterType }));
+            if (state.filter != filterType) {
+              setState((oldState) => ({ ...oldState, filter: filterType }));
+            }
           }}
         />
       }
