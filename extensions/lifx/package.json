@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lifx",
+  "title": "LIFX",
+  "description": "Control your lifx lights with this extension",
+  "icon": "lifx-extension-icon.png",
+  "author": "felixb1010",
+  "categories": [
+    "Fun",
+    "Applications",
+    "Other",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View lights",
+      "subtitle": "LIFX",
+      "description": "Toggle lights on and off",
+      "mode": "view"
+    },
+    {
+      "name": "setLightState",
+      "title": "Set light",
+      "subtitle": "LIFX",
+      "description": "Set the state of a light",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "color",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "brightness",
+          "placeholder": "Brightness",
+          "type": "text",
+          "default": "1.0"
+        },
+        {
+          "name": "power",
+          "placeholder": "Power",
+          "type": "text",
+          "default": "on"
+        }
+      ]
+    },
+    {
+      "name": "toggleLight",
+      "title": "Toggle light",
+      "subtitle": "LIFX",
+      "description": "Turn on or off on of your lifx light or lights",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "light",
+          "placeholder": "Light",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lifx_token",
+      "title": "LIFX Token",
+      "description": "Your LIFX token",
+      "type": "textfield",
+      "default": "Token",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
