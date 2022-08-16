@@ -27,7 +27,7 @@ export default function SearchArtists() {
 
   return (
     <List
-      searchBarPlaceholder="Drake, Linkin Park, Motorama..."
+      searchBarPlaceholder="Search artists..."
       onSearchTextChange={setSearchText}
       isLoading={response.isLoading}
       throttle
