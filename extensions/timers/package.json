@@ -5,6 +5,9 @@
   "description": "Start, stop, and save countdown timers, directly in Raycast, with no external dependencies.",
   "icon": "command-icon.png",
   "author": "ThatNerd",
+  "contributors": [
+    "GastroGeek"
+  ],
   "categories": ["Productivity", "System"],
   "license": "MIT",
   "commands": [
