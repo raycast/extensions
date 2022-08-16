@@ -4,6 +4,7 @@ import DashResult from "../components/DashResult";
 import { useDocsets, useDocsetSearch } from "../hooks";
 import SingleDocsetSearch from "./SingleDocsetSearch";
 import { DashArgumentes, Docset } from "../types";
+import useDashApp from "../hooks/useDashApp";
 
 const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
   docsets.filter(
@@ -14,10 +15,32 @@ const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
 
 export default function MultiDocsetSearch(props: { arguments: DashArgumentes }) {
   const [searchText, setSearchText] = useState(props.arguments.searchstring);
+  const [dashApp, isDashAppLoading] = useDashApp();
   const [docsets, isLoadingDocsets] = useDocsets();
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
   const filteredDocsets = getFilteredDocsets(docsets, searchText);
   const docsetKeywords = docsets.map((item) => item.docsetKeyword);
+
+  if (!isDashAppLoading && !dashApp) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Dash.app not found"
+          description="You need to have Dash installed to use this extension."
+          icon="empty-view-icon.png"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Get Dash"
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+                url="https://kapeli.com/dash"
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List
