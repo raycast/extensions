@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mail",
+  "title": "Mail",
+  "description": "Extension for Apple Mail.",
+  "icon": "mail.png",
+  "author": "yug2005",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-draft",
+      "title": "New Draft",
+      "description": "Create a email draft.",
+      "mode": "view"
+    },
+    {
+      "name": "see-recent-mail",
+      "title": "See Recent Mail",
+      "description": "See recent unread messages.",
+      "mode": "view"
+    },
+    {
+      "name": "see-important-mail",
+      "title": "See Important Mail",
+      "description": "See messages in the important mailboxes.",
+      "mode": "view"
+    },
+    {
+      "name": "see-mail-accounts",
+      "title": "See Mail Accounts",
+      "description": "See all inboxes for all your Mail accounts.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "node-fetch": "^3.2.10",
+    "run-applescript": "^6.0.0",
+    "time-ago": "^0.2.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
