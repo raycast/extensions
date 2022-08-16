@@ -14,7 +14,7 @@
       "name": "generate",
       "title": "Generate cuid",
       "description": "Generates a new cuid",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
