@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import CreateArticle from "../create-article";
-import { RootObject } from "../types/articles";
-import { preference } from "../utils/utils";
+import { Article } from "../types/articles";
+import { preference } from "../utils/functions";
 
-export function ArticleAction({ article }: { article: RootObject }) {
+export function ArticleAction({ article }: { article: Article }) {
   const { body_markdown, url } = article;
   return (
     <>

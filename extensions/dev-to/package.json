@@ -32,6 +32,12 @@
       "title": "Create Article",
       "description": "Create dev.to article",
       "mode": "view"
+    },
+    {
+      "name": "search-reading-list",
+      "title": "Search Reading List",
+      "description": "Search dev.to reading list",
+      "mode": "view"
     }
   ],
   "dependencies": {

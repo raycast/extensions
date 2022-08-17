@@ -2,9 +2,9 @@ import { ActionPanel, List } from "@raycast/api";
 import { ArticleAction } from "./components/article-action";
 import { getArticles } from "./hooks/hooks";
 
-export default function Command() {
-  const { articles, loading } = getArticles();
-  const { articles: drafts, loading: draftsLoading } = getArticles("/unpublished");
+export default function SearchArticle() {
+  const { articles, loading } = getArticles("/articles/me/published");
+  const { articles: drafts, loading: draftsLoading } = getArticles("/articles/me/unpublished");
   console.log("articles", articles);
 
   return (

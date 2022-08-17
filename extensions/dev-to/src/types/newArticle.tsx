@@ -1,20 +1,27 @@
-export interface Article {
+export interface NewArticle {
+  body_html: string;
   body_markdown: string;
   canonical_url: string;
+  collection_id: null;
   comments_count: number;
   cover_image: null;
+  created_at: Date;
+  crossposted_at: null;
   description: string;
+  edited_at: null;
   id: number;
-  page_views_count: number;
+  last_comment_at: Date;
   path: string;
   positive_reactions_count: number;
   public_reactions_count: number;
-  published: boolean;
-  published_at: Date;
-  published_timestamp: Date;
+  published_at: null;
+  published_timestamp: string;
+  readable_publish_date: null;
   reading_time_minutes: number;
   slug: string;
-  tag_list: string[];
+  social_image: string;
+  tag_list: string;
+  tags: any[];
   title: string;
   type_of: string;
   url: string;

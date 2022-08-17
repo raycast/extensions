@@ -1,16 +1,12 @@
 import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { RootObject } from "../types/articles";
+import { Article } from "../types/articles";
+import { ReadingList } from "../types/readingList";
 import fetch, { Headers } from "node-fetch";
-import { preference } from "../utils/utils";
+import { preference } from "../utils/functions";
 
-//for refresh useState
-export const refreshNumber = () => {
-  return new Date().getTime();
-};
-
-export const getArticles = (endpoint = "") => {
-  const [articles, setArticles] = useState<RootObject[]>([]);
+export const getArticles = (endpoint: string) => {
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -20,13 +16,13 @@ export const getArticles = (endpoint = "") => {
         "api-key": preference.accessToken,
       });
 
-      const response = await fetch("https://dev.to/api/articles/me" + endpoint, {
+      const response = await fetch("https://dev.to/api" + endpoint, {
         method: "GET",
         headers: headers,
       });
 
       if (response.ok) {
-        const result = (await response.json()) as RootObject[];
+        const result = (await response.json()) as Article[];
         console.log(result);
         setArticles(result);
       }
@@ -41,4 +37,38 @@ export const getArticles = (endpoint = "") => {
   }, [fetchData]);
 
   return { articles: articles, loading: loading };
+};
+
+export const getReadingList = (endpoint: string) => {
+  const [readingList, setReadingList] = useState<ReadingList[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const headers = new Headers({
+        "api-key": preference.accessToken,
+      });
+
+      const response = await fetch("https://dev.to/api" + endpoint, {
+        method: "GET",
+        headers: headers,
+      });
+
+      if (response.ok) {
+        const result = (await response.json()) as ReadingList[];
+        console.log(result);
+        setReadingList(result);
+      }
+    } catch (e) {
+      await showToast(Toast.Style.Failure, String(e));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { readingList: readingList, loading: loading };
 };

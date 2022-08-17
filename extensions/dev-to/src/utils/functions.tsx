@@ -1,6 +1,7 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
-import { RootObject } from "../types/publish";
+import { NewArticle } from "../types/newArticle";
+import { ArticleById } from "../types/articleById";
 import Values = LocalStorage.Values;
 
 export const commonPreferences = () => {
@@ -48,7 +49,7 @@ export const createArticle = async (
     });
 
     if (response.ok) {
-      const result = (await response.json()) as RootObject;
+      const result = (await response.json()) as NewArticle;
       console.log(result);
 
       const options: Toast.Options = {
@@ -77,4 +78,26 @@ export const createArticle = async (
   } catch (e) {
     await showToast(Toast.Style.Failure, String(e));
   }
+};
+
+export const getArticleMarkdown = async (id: number) => {
+  try {
+    const headers = new Headers({
+      "api-key": preference.accessToken,
+    });
+
+    const response = await fetch(`https://dev.to/api/articles/${id}`, {
+      method: "GET",
+      headers: headers,
+    });
+
+    if (response.ok) {
+      const result = (await response.json()) as ArticleById;
+      console.log(result);
+      return result.body_markdown;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return "";
 };
