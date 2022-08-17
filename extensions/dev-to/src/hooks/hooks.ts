@@ -5,7 +5,11 @@ import { ReadingList } from "../types/readingList";
 import fetch, { Headers } from "node-fetch";
 import { preference } from "../utils/functions";
 
-export const getArticles = (endpoint: string) => {
+export const refreshNumber = () => {
+  return new Date().getTime();
+};
+
+export const getArticles = (refresh: number, endpoint: string) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,7 +34,7 @@ export const getArticles = (endpoint: string) => {
       await showToast(Toast.Style.Failure, String(e));
     }
     setLoading(false);
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     void fetchData();

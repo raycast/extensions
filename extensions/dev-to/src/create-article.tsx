@@ -3,12 +3,14 @@ import { useState } from "react";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { Article } from "./types/articles";
 import { createArticle } from "./utils/functions";
-import SearchArticle from "./search-article";
+import { refreshNumber } from "./hooks/hooks";
+import useStore from "./utils/state";
 
 export default function CreateArticle({ article }: { article: Article | undefined }) {
   const isEdit = typeof article != "undefined";
   const isDraft = isEdit && article.published === false;
 
+  const { setRefresh } = useStore();
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(isEdit ? article.title : "");
@@ -34,7 +36,10 @@ export default function CreateArticle({ article }: { article: Article | undefine
                 : await createArticle(isEdit, title, isPublic, body, tags);
 
               setIsLoading(false);
-              if (isEdit) pop();
+              if (isEdit) {
+                setRefresh(refreshNumber());
+                pop();
+              }
             }}
           />
           <ActionOpenPreferences command={false} />

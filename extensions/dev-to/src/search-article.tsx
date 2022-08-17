@@ -1,10 +1,13 @@
 import { ActionPanel, List } from "@raycast/api";
 import { ArticleAction } from "./components/article-action";
 import { getArticles } from "./hooks/hooks";
+import useStore from "./utils/state";
 
 export default function SearchArticle() {
-  const { articles, loading } = getArticles("/articles/me/published");
-  const { articles: drafts, loading: draftsLoading } = getArticles("/articles/me/unpublished");
+  const { refresh } = useStore();
+
+  const { articles, loading } = getArticles(refresh, "/articles/me/published");
+  const { articles: drafts, loading: draftsLoading } = getArticles(refresh, "/articles/me/unpublished");
   console.log("articles", articles);
 
   return (
