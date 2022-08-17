@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { defaultOptions, getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
-import { allStylesImage, gridSize, numRecent } from "./utils/utils";
+import { allStylesImage, gridSize } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8Item } from "./components/icon";
 import { Icon8, Options, Style } from "./types/types";
@@ -41,7 +41,7 @@ export default function SearchIcons() {
     getStoredIcons();
   }, [refresh, style]);
 
-  const fetchIcons = async (hideEmptyView: boolean = false) => {
+  const fetchIcons = async () => {
     if (searchText) {
       setIsLoading(true);
       const icons = await getIcons(searchText, style);
