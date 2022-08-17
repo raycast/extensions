@@ -19,9 +19,11 @@ interface ITranslateReformatResult {
 interface ITranslateReformatResultItem {
     key: string
     title: string
+    fullTitle?: string
     subtitle?: string
     copyText: string
     url?: string
+    codeUrl?: string
 }
 
 interface ITranslateResultWebItem {
@@ -47,14 +49,24 @@ interface IPreferences {
 }
 
 interface IListItemActionPanelItem {
-    copyText?: string
-    title?: string
+    copyText: string
+    title: string
     url?: string
+    codeUrl?: string
+    details?: string
 }
 
 interface IReformatTranslateResult {
     title: string
     value: string
+}
+
+interface EmojiAllDetail {
+    details?: string
+    title: string
+    url: string
+    codeUrl: string
+    copyText: string
 }
 
 interface IActionCopyListSection {
@@ -80,6 +92,7 @@ interface EmojiDataItem {
     value: string
     title: string
     description: string
+    emoji_symbol_urlencode: string
 }
 
 interface BaiduTranslateResult {

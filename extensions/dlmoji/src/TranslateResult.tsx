@@ -1,6 +1,6 @@
 import { Component, Fragment } from "react"
 import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
-import { Action, ActionPanel, Clipboard, Color, Icon, List, getPreferenceValues, Keyboard } from "@raycast/api"
+import { Action, ActionPanel, Clipboard, Color, Icon, List, getPreferenceValues, Keyboard, Detail } from "@raycast/api"
 import { clamp, truncate } from "./utils"
 
 interface ITranslateResult {
@@ -19,7 +19,7 @@ function reformatCopyTextArray(data: string[], limitResultAmount = 10): IReforma
     return finalData.map((text, idx) => {
         return {
             // title: finalData.length - 1 === idx && idx > 0 ? "All" : truncate(text),
-            title: idx === dataLength ? "All" : truncate(text, 40),
+            title: idx === dataLength && dataLength > 1 ? "All" : truncate(text, 40),
             value: text,
         }
     })
@@ -57,13 +57,49 @@ function ActionCopyListSection(props: IActionCopyListSection) {
     )
 }
 
+function EmojiAllDescription(props: EmojiAllDetail) {
+    const markdown = `# ${props.title}\r${props.details}`
+    return (
+        <Detail
+            markdown={markdown}
+            navigationTitle={props.title}
+            metadata={
+                <Detail.Metadata>
+                    <Detail.Metadata.Link title="Basic" target={props.url} text="Detail Page" />
+                    <Detail.Metadata.Link title="Advanced Usage" target={props.codeUrl} text="Unicode Information" />
+                </Detail.Metadata>
+            }
+            actions={
+                <ActionPanel>
+                    <ActionCopyListSection copyText={props.copyText} />
+                    <Action.OpenInBrowser url={props.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+                </ActionPanel>
+            }
+        />
+    )
+}
+
 class ListActionPanel extends Component<IListItemActionPanelItem> {
     render() {
         return (
             <ActionPanel title={this.props.title}>
                 <ActionCopyListSection copyText={this.props.copyText} />
-                {this.props.url && (
-                    <ActionPanel.Section>
+                {this.props.url && this.props.codeUrl && (
+                    <ActionPanel.Section title="EmojiAll">
+                        <Action.Push
+                            icon={Icon.Document}
+                            title="Description"
+                            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                            target={
+                                <EmojiAllDescription
+                                    title={this.props.title}
+                                    details={this.props.details}
+                                    url={this.props.url}
+                                    codeUrl={this.props.codeUrl}
+                                    copyText={this.props.copyText}
+                                />
+                            }
+                        />
                         <Action.OpenInBrowser url={this.props.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
                     </ActionPanel.Section>
                 )}
@@ -109,9 +145,11 @@ export default function TranslateResult(props: ITranslateResult) {
                                     detail={<List.Item.Detail markdown={item.title} />}
                                     actions={
                                         <ListActionPanel
-                                            title={item.subtitle || item.title}
-                                            copyText={item?.copyText || item.key || item.subtitle}
+                                            title={item.fullTitle || item.title}
+                                            details={item.subtitle}
+                                            copyText={item.copyText}
                                             url={item.url}
+                                            codeUrl={item.codeUrl}
                                         />
                                     }
                                 />

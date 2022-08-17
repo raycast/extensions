@@ -39,17 +39,19 @@ export function formatDeepmoji(preds: EmojiScore[]): ITranslateReformatResultIte
 export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateReformatResult[] | undefined {
     if (!data) return
 
-    function extract(item: EmojiDataItem, url: string) {
+    function extract(item: EmojiDataItem, url: string, codeUrl: string) {
         const title = decode(item.value)
         const description = decode(item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "")) // 去掉换行,空格,html标签
         const emoji = item.emoji_symbol
-        const copyText = description ? emoji + COPY_SEPARATOR + description : emoji
+        // const copyText = description ? emoji + COPY_SEPARATOR + description : emoji
         return {
-            title: truncate(title, 26) + "  " + item.emoji_symbol,
+            title: truncate(title, 26) + "  " + emoji,
+            fullTitle: title + "  " + emoji,
             subtitle: description,
             key: emoji,
-            copyText: copyText,
+            copyText: emoji,
             url: url,
+            codeUrl: codeUrl,
         }
     }
 
@@ -58,10 +60,12 @@ export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateRe
     data.forEach((item) => {
         if (item.type === "emoji") {
             lang = lang === "zh" ? "zh-hans" : lang
-            const url = "https://www.emojiall.com/" + lang + "/code/" + item.emoji_symbol.codePointAt(0)?.toString(16)
-            emojiList.push(extract(item, url))
+            const codeUrl =
+                "https://www.emojiall.com/" + lang + "/code/" + item.emoji_symbol.codePointAt(0)?.toString(16)
+            const url = "https://www.emojiall.com/" + lang + "/emoji/" + item.emoji_symbol_urlencode
+            emojiList.push(extract(item, url, codeUrl))
         } else if (item.type === "combine") {
-            combineList.push(extract(item, ""))
+            combineList.push(extract(item, "", ""))
         }
     })
     emojiList.splice(MAX_LENGTH)

@@ -4,7 +4,7 @@
 <p align="center">
   <strong>raycast-DLmoji</strong>
 </p>
-<p align="center">An intelligent Emoji Dictionary🙃 helps to get related Emojis, Phrases, and AI-powered Translations in Raycast.</p>
+<p align="center">An intelligent Emoji Dictionary🙃 helps to get related Emojis, Phrases, and Translations in Raycast, powered by <b>D</b>eep <b>L</b>earning E<b>moji</b> Prediction (<b>DLmoji</b>) and comparable intelligent APIs.</p>
 
 ## Feature
 
