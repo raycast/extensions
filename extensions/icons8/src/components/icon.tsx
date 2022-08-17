@@ -1,25 +1,15 @@
 import { Grid } from "@raycast/api";
 import { IconActionPanel } from "./actions";
-import { Icon8 } from "../types/types";
-import { PinnedMovement } from "../utils/storage";
-import { previewSize } from "../utils/grid";
-
-export interface IconProps {
-  icon: Icon8;
-  refresh: () => void;
-  platform?: string;
-  pinned?: boolean;
-  recent?: boolean;
-  movement?: PinnedMovement;
-  options: any;
-  setOptions: (options: any) => void;
-}
+import { IconProps } from "../types/types";
+import { previewSize } from "../utils/utils";
 
 export const Icon8Item = (props: IconProps): JSX.Element => {
   const icon = props.icon;
+  const id = `${props.pinned ? "pinned" : props.recent ? "recent" : ""}-${icon.id}`;
 
   return (
     <Grid.Item
+      id={id}
       key={icon.id}
       content={{
         value: {
@@ -29,7 +19,7 @@ export const Icon8Item = (props: IconProps): JSX.Element => {
         tooltip: icon.name,
       }}
       subtitle={icon.name}
-      actions={<IconActionPanel props={props} item={true} />}
+      actions={<IconActionPanel props={props} />}
     />
   );
 };
