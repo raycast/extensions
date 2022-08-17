@@ -23,6 +23,7 @@ export default function Command() {
         },
       }}
       tooltip="Figma files"
+      isLoading={isLoadingVisitedFiles || isLoadingProjectFiles}
     >
       {hasError && <MenuBarExtra.Item title="Error" />}
       {visitedFiles && (
