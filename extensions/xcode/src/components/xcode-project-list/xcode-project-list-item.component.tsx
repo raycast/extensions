@@ -8,7 +8,11 @@ import { XcodeService } from "../../services/xcode.service";
 /**
  * Xcode Project List Item
  */
-export function XcodeProjectListItem(props: { project: XcodeProject; actions?: JSX.Element }): JSX.Element {
+export function XcodeProjectListItem(props: {
+  project: XcodeProject;
+  isFavorite: boolean;
+  onToggleFavoriteAction: () => void;
+}): JSX.Element {
   const navigation = useNavigation();
   return (
     <List.Item
@@ -19,19 +23,24 @@ export function XcodeProjectListItem(props: { project: XcodeProject; actions?: J
       keywords={props.project.keywords}
       icon={XcodeProjectIcon(props.project.type)}
       actions={
-        props.actions ?? (
-          <ActionPanel>
-            <Action.Open
-              application={XcodeService.bundleIdentifier}
-              key="open-with-xcode"
-              title="Open with Xcode"
-              target={props.project.filePath}
-              icon={Icon.Hammer}
-              onOpen={navigation.pop}
-            />
-            <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} />
-          </ActionPanel>
-        )
+        <ActionPanel>
+          <Action.Open
+            application={XcodeService.bundleIdentifier}
+            key="open-with-xcode"
+            title="Open with Xcode"
+            target={props.project.filePath}
+            icon={Icon.Hammer}
+            onOpen={navigation.pop}
+          />
+          <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} />
+          <Action
+            key="favorite"
+            title={props.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            icon={props.isFavorite ? Icon.StarDisabled : Icon.Star}
+            onAction={props.onToggleFavoriteAction}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          />
+        </ActionPanel>
       }
     />
   );
