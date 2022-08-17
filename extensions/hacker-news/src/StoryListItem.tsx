@@ -65,8 +65,8 @@ function getIcon(index: number): Image.ImageLike {
   font-family="Verdana"
   text-anchor="middle"
   alignment-baseline="baseline"
-  x="21"
-  y="32">${index}</text>
+  x="20.5"
+  y="32.5">${index}</text>
 </svg>
   `.replaceAll("\n", "");
 
