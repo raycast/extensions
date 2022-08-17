@@ -1,4 +1,4 @@
-import { Icon, Detail, ActionPanel, Action, showToast } from "@raycast/api";
+import { Icon, Detail, ActionPanel, Action, showToast, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import getProjectMarkdown from "../markdown/get-deployment-markdown";
 import fromNow from "../utils/time";
@@ -52,6 +52,12 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     return "No commit message";
   };
 
+  const getCommitDeploymentBranch = (deployment: Deployment) => {
+    // TODO: support other providers beside GitHub
+    return deployment.meta.githubCommitRef ?? null;
+  };
+  const branchName = getCommitDeploymentBranch(deployment);
+
   const getStateText = () => {
     return mostRecentBuild?.readyState
       ? mostRecentBuild.readyState.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
@@ -99,6 +105,13 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             <Detail.Metadata.Link title={"Visit on Vercel"} text={deployment.url} target={deploymentURL()} />
+          )}
+          {branchName && (
+            <Detail.Metadata.Label
+              title="Git Branch"
+              text={branchName}
+              icon={{ source: "boxicon-git-branch.svg", tintColor: Color.SecondaryText }}
+            />
           )}
           <Detail.Metadata.Label title={"Commit Message"} text={getCommitMessage(deployment)} />
           <Detail.Metadata.Separator />

@@ -4,7 +4,21 @@
 
 # Obsidian for Raycast
 
-This is a raycast extension with commands for the note taking and knowledge management app Obsidian. To use it, install the extension from the [Raycast Store](https://www.raycast.com/marcjulian/obsidian), open Raycast Search and type one of the following commands:
+This is a raycast extension with commands for the note taking and knowledge management app Obsidian. To use it, install the extension from the [Raycast Store](https://www.raycast.com/marcjulian/obsidian), open Raycast Search and type one of the following commands.
+
+## Overview
+
+- [Search Note](https://github.com/marcjulianschwarz/obsidian-raycast#search-note)
+  - [Actions for Search Note Command](https://github.com/marcjulianschwarz/obsidian-raycast#actions-for-search-note-command)
+  - [Quick Look Action](https://github.com/marcjulianschwarz/obsidian-raycast#quick-look-action)
+- [Search Media](https://github.com/marcjulianschwarz/obsidian-raycast#search-media)
+  - [Actions for Search Media Command](https://github.com/marcjulianschwarz/obsidian-raycast#actions-for-search-media-command)
+- [Random Notes](https://github.com/marcjulianschwarz/obsidian-raycast#random-note)
+- [Open Vault](https://github.com/marcjulianschwarz/obsidian-raycast#open-vault)
+- [Create Note](https://github.com/marcjulianschwarz/obsidian-raycast#create-note)
+- [Daily Note](https://github.com/marcjulianschwarz/obsidian-raycast#daily-note)
+- [Pinned Note](https://github.com/marcjulianschwarz/obsidian-raycast#pinned-notes)
+- [Obsidian Menu Bar Item](https://github.com/marcjulianschwarz/obsidian-raycast#obsidian-menu-bar-item)
 
 ## Search Note
 
@@ -24,12 +38,19 @@ Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will s
 <img width="1000" alt="Search Note Command" src="https://user-images.githubusercontent.com/67844154/178247431-2c8be700-7dca-469d-9c99-cd0fde565524.png">
 <img width="1000" alt="Search Note Command Tag Filter" src="https://user-images.githubusercontent.com/67844154/178251441-eeb0c4f9-c848-4899-aa12-62aae9ba3094.png">
 
-
 ### Actions for Search Note command
+
 It features several actions which you can trigger with these keyboard shortcuts (or search for them with `cmd + k`):
+
+**Open Note Actions:**
+Depending on the primary action set in preferences, the keyboard shortcuts can be different.
 
 - `enter` will open the note in "Quick Look"
 - `cmd + enter` will open the note in Obsidian
+- `Open in new Pane` will open the note in a new pane in Obsidian (only for vaults with advanced-uri plugin)
+
+**Other Actions:**
+
 - `opt + enter` will open the notes path in Finder
 - `opt + e` will let you edit the note (supports templates)
 - `opt + d` will let you delete the note
@@ -48,8 +69,24 @@ The primary action (`enter`) can be changed in the extensions preferences.
 <img width="1000" alt="Search Note Command actions" src="https://user-images.githubusercontent.com/67844154/178247714-0d0b48a4-ae43-4a08-8e63-246634a8d421.png">
 
 ### Quick Look Action
+
+The Quick Look actions will open your note in Raycast itself. From here you can read the note or perform additional actions in the action bar (`cmd + k`).
+
 <img width="1000" alt="obsidian-5" src="https://user-images.githubusercontent.com/67844154/178248667-6b90bd65-0861-41e4-b68c-256f30d89d1d.png">
 
+## Search Media
+
+This command allows for quick access to all of the media (images, video, audio and PDFs) in your vaults.
+Use the type filter in the top right corner (`cmd + p`) to filter the media by its type / file extension.
+
+### Actions for Search Media command
+
+It features several actions which you can trigger with these keyboard shortcuts (or search for them with `cmd + k`):
+
+- `enter` will open the file in Apples Preview app
+- `cmd + enter` will open the file in Obsidian
+
+<img width="1000" alt="obsidian-10" src="https://user-images.githubusercontent.com/67844154/180800668-08706bf6-4c17-4aca-b5fa-e4c420d04eb6.png">
 
 ## Random Note
 
@@ -83,7 +120,6 @@ Both the note name and note content support these templates:
 
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">
 
-
 ## Daily Note
 
 This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
@@ -99,6 +135,13 @@ Additional actions:
 
 <img width="1000" alt="Pinned Notes Command" src="https://user-images.githubusercontent.com/67844154/178248422-2668fad8-8936-490b-8cf1-1dea0793712a.png">
 
+## Obsidian Menu Bar Item
+
+Use this command to add a menu bar item to the top of the screen (Obsidian icon).
+Clicking it will reveal a list of your vaults. You can view your pinned notes, perform actions on them or open a daily note.
+
+<img width="635" alt="Obsidian Menu Bar Item" src="https://user-images.githubusercontent.com/67844154/180802502-3c6243ae-e3f9-4ddc-95ba-f205dab46721.png">
+
 ## Preferences
 
 ### General settings
@@ -112,7 +155,7 @@ Additional actions:
 - hide YAML frontmatter in "Quick Look" and copy/paste
 - hide wikilinks in "Quick Look" and copy/paste
 - hide LaTeX in "Quick Look" and copy/paste
-- prefix for append action
+- templates for append actions
 - show note content in detail view
 - show metadata about note in detail view
 - enable content search
@@ -134,11 +177,25 @@ Additional actions:
 - hide YAML frontmatter in "Quick Look" and copy/paste
 - hide wikilinks in "Quick Look" and copy/paste
 - hide LaTeX in "Quick Look" and copy/paste
-- prefix for append action
+- templates for append actions
 - show note content in detail view
 - show metadata about note in detail view
 - enable content search
 - select primary action (for `enter`)
+
+### Random Note
+
+- exclude folders, files and paths so notes from them won't show up
+- hide YAML frontmatter in "Quick Look" and copy/paste
+- hide wikilinks in "Quick Look" and copy/paste
+- hide LaTeX in "Quick Look" and copy/paste
+- templates for append actions
+- select primary action (for `enter`)
+
+### Search Media
+
+- exclude folders, files and paths so they don't show up in the search
+- select image size (small, medium, large)
 
 ## Blog posts:
 

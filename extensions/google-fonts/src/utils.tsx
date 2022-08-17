@@ -116,4 +116,25 @@ const reducerFontCategory = (categories: string[], font: Font) => {
   return categories;
 };
 
-export { friendlyFontVariant, filterFontSearch, generateFontPreviewUrl, generateHTMLContent, reducerFontCategory };
+const generateGoogleFontsURL = (font: Font, type: string) => {
+  const webSafeFontFamily = font.family.split(" ").join("+");
+
+  let googleFontsUrl = "https://fonts.google.com";
+
+  if (type === "view") {
+    googleFontsUrl += `/specimen/${webSafeFontFamily}`;
+  } else if (type === "download") {
+    googleFontsUrl += `/download?family=${webSafeFontFamily}`;
+  }
+
+  return googleFontsUrl;
+};
+
+export {
+  friendlyFontVariant,
+  filterFontSearch,
+  generateFontPreviewUrl,
+  generateHTMLContent,
+  reducerFontCategory,
+  generateGoogleFontsURL,
+};

@@ -6,7 +6,7 @@ export enum InstallableFilterType {
   casks = "casks",
 }
 
-export function InstallableFilterDropdown(props: { onSelect: (value: InstallableFilterType) => void }) {
+export function InstallableFilterDropdown(props: { onSelect: (value: InstallableFilterType) => void }): JSX.Element {
   return (
     <List.Dropdown
       tooltip="Filter by formula or cask"
