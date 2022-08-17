@@ -101,10 +101,16 @@ export default function ExpenseList({ groupId }: ExpenseListProps) {
     <List isLoading={isLoading}>
       {data.map((expense) => {
         if (expense.payment) {
-          return <RepaymentListItem expense={expense} group={group} groupMembers={groupMembers} />;
+          return <RepaymentListItem key={expense.id} expense={expense} group={group} groupMembers={groupMembers} />;
         } else {
           return (
-            <ExpenseListItem expense={expense} group={group} groupMembers={groupMembers} categoryMap={categoryMap} />
+            <ExpenseListItem
+              key={expense.id}
+              expense={expense}
+              group={group}
+              groupMembers={groupMembers}
+              categoryMap={categoryMap}
+            />
           );
         }
       })}
