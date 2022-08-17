@@ -13,6 +13,7 @@ export function XcodeProjectsMenuBar(): JSX.Element {
       <MenuBarExtra.Item
         title={isLoading ? "Loading..." : data?.length ? "Recent Xcode Projects" : "No Recent Xcode Projects"}
       />
+      {data?.length ? <MenuBarExtra.Separator /> : null}
       {data?.map((xcodeProject) => {
         return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
       })}
