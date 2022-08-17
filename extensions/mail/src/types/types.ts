@@ -1,15 +1,29 @@
 export interface Account {
   id: string;
   name: string;
+  userName: string;
+  fullName: string;
   email: string;
-  messages: Message[];
+  mailboxes?: MailBox[];
+  messages?: Message[];
 }
 
 export interface Message {
   id: string;
+  account: string; 
   subject: string;
-  body: string;
-  from: Account;
-  to: Account;
-  date: Date;
+  content: string;
+  sender: string;
+  date: string;
+  read: string;
+  replyTo: string;
+  replied: string;
+  forwarded: string;
+  redirected: string;
+}
+
+export interface MailBox {
+  id: string;
+  name: string;
+  messages?: Message[];
 }

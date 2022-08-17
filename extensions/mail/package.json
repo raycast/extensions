@@ -39,9 +39,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
+    "javascript-time-ago": "^2.5.7",
     "node-fetch": "^3.2.10",
-    "run-applescript": "^6.0.0",
-    "time-ago": "^0.2.1"
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
