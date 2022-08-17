@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brew",
+  "title": "Brew",
+  "description": "Search and install Homebrew formulae",
+  "author": "nhojb",
+  "contributors": [
+    "Aayush9029"
+  ],
+  "license": "MIT",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "installed",
+      "title": "Show Installed",
+      "subtitle": "Brew",
+      "description": "List installed brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Brew",
+      "description": "Search brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "outdated",
+      "title": "Show Outdated",
+      "subtitle": "Brew",
+      "description": "Show outdated brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "node-fetch": "^2.6.7",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.26",
+    "@types/node-fetch": "^2.6.1",
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "typescript": "^4.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
