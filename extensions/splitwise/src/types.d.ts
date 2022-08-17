@@ -158,6 +158,10 @@ declare module "splitwise" {
         large: string;
         xlarge: string;
       };
+      transparent: {
+        large: string;
+        xlarge: string;
+      };
     };
     subcategories: Category[];
   };
