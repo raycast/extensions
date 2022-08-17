@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -24,6 +24,85 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "show-recent-projects-in-menu-bar.command",
+      "title": "Show Recent Projects in Menu Bar",
+      "subtitle": "Xcode",
+      "description": "View and open your recent Xcode Projects from the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "showRecentProjectsInMenuBar_projectsLimit",
+          "type": "dropdown",
+          "required": false,
+          "title": "Number of visible projects",
+          "description": "Select the amount of projects that should be shown in the menu bar.",
+          "default": "10",
+          "data": [
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "15",
+              "value": "15"
+            },
+            {
+              "title": "20",
+              "value": "20"
+            },
+            {
+              "title": "25",
+              "value": "25"
+            },
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "All",
+              "value": "-1"
+            }
+          ]
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showXcodeProjects",
+          "type": "checkbox",
+          "required": false,
+          "title": "Filter",
+          "description": "Show Xcode Projects",
+          "default": true,
+          "label": "Show Xcode Projects"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showXcodeWorkspaces",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Xcode Workspaces",
+          "default": true,
+          "label": "Show Xcode Workspaces"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showSwiftPackages",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Swift Package",
+          "default": true,
+          "label": "Show Swift Package"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showSwiftPlaygrounds",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Swift Playgrounds",
+          "default": true,
+          "label": "Show Swift Playgrounds"
+        }
+      ]
+    },
     {
       "name": "search-recent-projects.command",
       "title": "Search Recent Projects",

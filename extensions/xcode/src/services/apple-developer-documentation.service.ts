@@ -25,7 +25,7 @@ export class AppleDeveloperDocumentationService {
         method: "GET",
         headers: {
           // Important search_data endpoint requires a refer HTTP header
-          Referer: this.hostUrl,
+          Referer: AppleDeveloperDocumentationService.hostUrl,
         },
       }
     );
@@ -36,7 +36,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = Path.join(this.hostUrl, entry.url);
+      entry.url = Path.join(AppleDeveloperDocumentationService.hostUrl, entry.url);
     }
     // Return Documentation Entries
     return entries;

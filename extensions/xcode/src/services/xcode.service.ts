@@ -34,7 +34,7 @@ export class XcodeService {
       [
         // Open Xcode in background (-j)
         // via bundle identifier (-b)
-        `open -j -b ${this.bundleIdentifier}`,
+        `open -j -b ${XcodeService.bundleIdentifier}`,
         // Sleep for two seconds to ensure
         // the process is truly running
         "sleep 2",

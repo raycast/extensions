@@ -6,8 +6,8 @@ import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import untildify from "untildify";
-import { getPreferenceValues } from "@raycast/api";
 import * as Path from "path";
+import { getPreferences } from "../shared/get-preferences";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -46,10 +46,7 @@ export class XcodeSwiftPlaygroundService {
    * The default location where a Swift Playground should be created
    */
   static get defaultSwiftPlaygroundLocation(): string {
-    // Retrieve the preference values
-    const preferences = getPreferenceValues();
-    // Retrieve the excluded Xcode Project paths string from preference values
-    return preferences.playgroundDefaultLocation as string;
+    return getPreferences().playgroundDefaultLocation;
   }
 
   /**

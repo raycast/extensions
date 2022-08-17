@@ -1,10 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
 import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 import { XcodeProjectType } from "../models/xcode-project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
 import { runAppleScript } from "../shared/run-apple-script";
 import untildify from "untildify";
 import * as Path from "path";
+import { getPreferences } from "../shared/get-preferences";
 
 /**
  * XcodeProjectService
@@ -15,10 +15,8 @@ export class XcodeProjectService {
    * which are configured via the Raycast Preferences
    */
   private static excludedXcodeProjectPaths(): string[] {
-    // Retrieve the preference values
-    const preferences = getPreferenceValues();
     // Retrieve the excluded Xcode Project paths string from preference values
-    const excludedXcodeProjectPathsString = preferences.excludedXcodeProjectPaths as string;
+    const excludedXcodeProjectPathsString = getPreferences().excludedXcodeProjectPaths;
     // Check if excluded Xcode Project path string is falsy
     if (!excludedXcodeProjectPathsString) {
       // Return an empty array
