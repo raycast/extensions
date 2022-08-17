@@ -1,6 +1,9 @@
 import { Action, ActionPanel, Detail, Grid, useNavigation } from "@raycast/api";
 import { RadarImage } from "../types/types";
 
+// ensure image is not cached and rain radar image is not stale
+const timeStamp = "?" + new Date().getTime();
+
 export function RadarGridLayout(props: { isLoading: boolean; radars: RadarImage[] }) {
   const { push } = useNavigation();
   const { isLoading, radars } = props;
@@ -19,7 +22,7 @@ export function RadarGridLayout(props: { isLoading: boolean; radars: RadarImage[
               id={index + radar.url}
               key={index + radar.url}
               content={{
-                value: radar.url,
+                value: radar.url + timeStamp,
                 tooltip: radar.location,
               }}
               title={radar.location}
@@ -44,7 +47,7 @@ function WallpaperView(props: { image: string; location: string }) {
 
   return (
     <Detail
-      markdown={`![${location}](${image})`}
+      markdown={`![${location}](${image + timeStamp})`}
       actions={
         <ActionPanel title="Radar">
           <Action.OpenInBrowser url={`${image}`} />
