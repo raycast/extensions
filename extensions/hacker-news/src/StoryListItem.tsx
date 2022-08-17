@@ -3,7 +3,7 @@ import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
+  const [state, setState] = useState<{ icon: Image.ImageLike; accessories: List.Item.Accessory[] }>({
     icon: getIcon(props.index),
     accessories: [],
   });
