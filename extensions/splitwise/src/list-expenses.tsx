@@ -1,10 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
-
-import { splitwise } from "./lib/splitwise";
 import GroupList from "./components/GroupList";
+import { useGroups } from "./lib/hooks";
 
 export default function ListExpenses() {
-  const { data: groups, isLoading } = useCachedPromise(() => splitwise.getGroups(), []);
+  const { data: groups, isLoading } = useGroups();
 
   return <GroupList groups={groups} isLoading={isLoading} />;
 }

@@ -1,6 +1,7 @@
-import { Image, List } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { Group } from "splitwise";
+import ExpenseList from "./ExpenseList";
 
 type GroupListProps = {
   groups?: Group[];
@@ -30,6 +31,11 @@ export default function GroupList({ groups = [], isLoading = false }: GroupListP
                 text: group.group_type,
               },
             ]}
+            actions={
+              <ActionPanel>
+                <Action.Push target={<ExpenseList groupId={group.id} />} title="View Expenses" />
+              </ActionPanel>
+            }
           />
         );
       })}

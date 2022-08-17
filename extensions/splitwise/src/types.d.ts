@@ -1,5 +1,4 @@
 declare module "splitwise" {
-  // "apartment" "house" "trip" "other"
   export enum GroupType {
     APARTMENT = "apartment",
     HOUSE = "house",
@@ -71,7 +70,7 @@ declare module "splitwise" {
     amount: string;
   };
 
-  type Category = {
+  type CategorySlim = {
     id: number;
     name: string;
   };
@@ -89,7 +88,7 @@ declare module "splitwise" {
     user: User | null;
   };
 
-  type Expense = {
+  export type Expense = {
     cost: string;
     description: string;
     details: string;
@@ -115,7 +114,7 @@ declare module "splitwise" {
     updated_by: Omit<User, "balance">;
     deleted_at: string;
     deleted_by: Omit<User, "balance">;
-    category: Category;
+    category: CategorySlim;
     receipt: {
       large: string;
       original: string;
@@ -130,15 +129,45 @@ declare module "splitwise" {
     comments: Comment[];
   };
 
+  type GetExpenseParam = {
+    group_id: number;
+    friendship_id: number;
+    dated_after: string;
+    dated_before: string;
+    updated_after: string;
+    updated_before: string;
+    limit: number;
+    offset: number;
+  };
+
   type SplitwiseContructorOptions = {
     consumerKey: string;
     consumerSecret: string;
   };
 
+  export type Category = {
+    id: number;
+    name: string;
+    icon: string;
+    icon_types: {
+      slim: {
+        small: string;
+        large: string;
+      };
+      square: {
+        large: string;
+        xlarge: string;
+      };
+    };
+    subcategories: Category[];
+  };
+
   type SplitwiseClient = {
     getCurrentUser(): Promise<unknown>;
     getGroups(): Promise<Group[]>;
-    getExpenses();
+    getExpenses(props?: Partial<GetExpenseParam>): Promise<Expense[]>;
+    getGroup({ id: number }): Promise<Group>;
+    getCategories(): Promise<Category[]>;
   };
 
   function Splitwise(options: SplitwiseContructorOptions): SplitwiseClient;
