@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
-    icon: getIcon(100),
+  const [state, setState] = useState<{ icon: Image.ImageLike; accessories: List.Item.Accessory[] }>({
+    icon: getIcon(props.index),
     accessories: [],
   });
 
@@ -54,21 +54,25 @@ function Actions(props: { item: Parser.Item }) {
     </ActionPanel>
   );
 }
-const iconToEmojiMap = new Map<number, string>([
-  [1, "1️⃣"],
-  [2, "2️⃣"],
-  [3, "3️⃣"],
-  [4, "4️⃣"],
-  [5, "5️⃣"],
-  [6, "6️⃣"],
-  [7, "7️⃣"],
-  [8, "8️⃣"],
-  [9, "9️⃣"],
-  [10, "🔟"],
-]);
 
-function getIcon(index: number) {
-  return iconToEmojiMap.get(index) ?? "⏺";
+function getIcon(index: number): Image.ImageLike {
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <rect x="0" y="0" width="40" height="40" fill="#DD7949"></rect>
+  <text
+  font-size="22"
+  fill="white"
+  font-family="Verdana"
+  text-anchor="middle"
+  alignment-baseline="baseline"
+  x="21"
+  y="32">${index}</text>
+</svg>
+  `.replaceAll("\n", "");
+
+  return {
+    source: `data:image/svg+xml,${svg}`,
+  };
 }
 
 function getPoints(item: Parser.Item) {
