@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="binance/assets/binance-logo.png" height="128">
+   <img src="assets/binance-logo.png" height="128">
    <h1 align="center">Binance Portfolio</h1>
  </p>
 
