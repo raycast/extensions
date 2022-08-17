@@ -5,7 +5,7 @@ import { getMailAccounts } from "./scripts/account";
 import { Account } from "./types/types";
 
 export default function MailAccounts() {
-  const [accounts, setAccounts] = useState<Account[] | null>([]);
+  const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {

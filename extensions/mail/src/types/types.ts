@@ -14,12 +14,13 @@ export interface Message {
   subject: string;
   content: string;
   sender: string;
-  date: string;
-  read: string;
+  senderEmail?: string;
+  date: Date;
+  read: boolean;
   replyTo: string;
-  replied: string;
-  forwarded: string;
-  redirected: string;
+  replied: boolean;
+  forwarded: boolean;
+  redirected: boolean;
 }
 
 export interface MailBox {

@@ -1,6 +1,6 @@
 import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { Account } from "../types/types";
-import { Messages } from "./mail";
+import { Messages } from "./messages";
 
 export const MailAccount = (account: Account): JSX.Element => {
   return (

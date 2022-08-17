@@ -13,9 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "new-draft",
-      "title": "New Draft",
-      "description": "Create a email draft.",
+      "name": "new-message",
+      "title": "New Message",
+      "description": "Compose a new message.",
       "mode": "view"
     },
     {
@@ -39,6 +39,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
+    "email-regex": "^5.0.0",
     "javascript-time-ago": "^2.5.7",
     "node-fetch": "^3.2.10",
     "run-applescript": "^6.0.0"

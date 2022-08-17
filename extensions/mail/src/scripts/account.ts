@@ -1,7 +1,7 @@
 import { runAppleScript } from "run-applescript";
 import { Account } from "../types/types";
 
-export const getMailAccounts = async (): Promise<Account[] | null> => {
+export const getMailAccounts = async (): Promise<Account[] | undefined> => {
   try {
     const script = `
       set output to ""
@@ -26,6 +26,6 @@ export const getMailAccounts = async (): Promise<Account[] | null> => {
     return accounts;
   } catch (error: any) {
     console.error(error);
-    return null;
+    return undefined;
   }
 };

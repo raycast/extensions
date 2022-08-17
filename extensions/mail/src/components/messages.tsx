@@ -1,11 +1,11 @@
-import { List, Detail, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Detail, Icon, Action, ActionPanel, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getAccountMessages, getMessageContent } from "../scripts/messages";
 import { Message, Account } from "../types/types";
-import { shortenText } from "../utils/utils";
+import { shortenText, formatDate } from "../utils/utils";
 
 export const Messages = (account: Account): JSX.Element => {
-  const [messages, setMessages] = useState<Message[] | null>([]);
+  const [messages, setMessages] = useState<Message[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -26,36 +26,46 @@ export const Messages = (account: Account): JSX.Element => {
   return (
     <List isLoading={isLoading}>
       {messages?.map((message: Message, index: number) => (
-        <List.Item
-          key={index}
-          title={message.subject}
-          subtitle={message.content}
-          accessories={[
-            { text: message.date, icon: Icon.Calendar },
-            { text: shortenText(message.sender, 20), icon: Icon.Person },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action title="See in Mail" icon={"../assets/mail.png"} onAction={() => {}} />
-              <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<MailMessage {...message} />} />
-              <Action title="Reply" icon={Icon.Reply} onAction={() => {}} shortcut={{ modifiers: ["cmd"], key: "r" }} />
-              <Action
-                title="Forward"
-                icon={Icon.ArrowUpCircle}
-                onAction={() => {}}
-                shortcut={{ modifiers: ["cmd"], key: "f" }}
-              />
-              <Action
-                title="Redirect"
-                icon={Icon.ArrowRightCircle}
-                onAction={() => {}}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
+        <MessageListItem key={index} {...message} />
       ))}
     </List>
+  );
+};
+
+export const MessageListItem = (message: Message): JSX.Element => {
+  return (
+    <List.Item
+      title={shortenText(message.subject, 60)}
+      accessories={[
+        { text: formatDate(message.date), icon: Icon.Calendar },
+        { text: shortenText(message.sender, 20), icon: Icon.Person },
+        {
+          icon: {
+            source: !message.read ? Icon.CircleFilled : Icon.Circle,
+            tintColor: !message.read ? Color.Blue : Color.SecondaryText,
+          },
+        },
+      ]}
+      actions={
+        <ActionPanel>
+          <Action title="See in Mail" icon={"../assets/mail.png"} onAction={() => {}} />
+          <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<MailMessage {...message} />} />
+          <Action title="Reply" icon={Icon.Reply} onAction={() => {}} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+          <Action
+            title="Forward"
+            icon={Icon.ArrowUpCircle}
+            onAction={() => {}}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+          />
+          <Action
+            title="Redirect"
+            icon={Icon.ArrowRightCircle}
+            onAction={() => {}}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          />
+        </ActionPanel>
+      }
+    />
   );
 };
 
@@ -82,7 +92,7 @@ export const MailMessage = (message: Message): JSX.Element => {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="From" text={message.sender} icon={Icon.Person} />
-          <Detail.Metadata.Label title="Received" text={message.date} icon={Icon.Calendar} />
+          <Detail.Metadata.Label title="Received" text={formatDate(message.date)} icon={Icon.Calendar} />
         </Detail.Metadata>
       }
       actions={
