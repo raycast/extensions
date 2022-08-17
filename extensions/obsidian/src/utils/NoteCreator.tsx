@@ -18,8 +18,12 @@ class NoteCreator {
   }
 
   async createNote() {
+    const fillDefaults = !this.pref.fillFormWithDefaults && this.noteProps.content.length == 0;
+
     let name = this.noteProps.name == "" ? this.pref.prefNoteName : this.noteProps.name;
-    let content = this.pref.prefNoteContent;
+    let content = fillDefaults ? this.pref.prefNoteContent : this.noteProps.content;
+
+    console.log(this.noteProps.content);
 
     content = this.addYAMLFrontmatter(content);
     content = await applyTemplates(content);
@@ -31,9 +35,12 @@ class NoteCreator {
       const target =
         "obsidian://open?path=" + encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md"));
       if (saved) {
-        open(target);
+        setTimeout(() => {
+          open(target);
+        }, 200);
       }
     }
+    return saved;
   }
 
   addYAMLFrontmatter(content: string) {
@@ -43,8 +50,8 @@ class NoteCreator {
         content += '"' + this.noteProps.tags[i] + '",';
       }
       content += '"' + this.noteProps.tags.pop() + '"]\n---\n';
+      content += this.noteProps.content;
     }
-    content += this.noteProps.content;
 
     return content;
   }

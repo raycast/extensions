@@ -8,9 +8,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import CompetitionDropdown, {
-  competitions,
-} from "./components/competition_dropdown";
+import CompetitionDropdown from "./components/competition_dropdown";
 import { Match } from "./types";
 import { getCurrentGameWeek, getMatches } from "./api";
 
@@ -20,16 +18,18 @@ interface Matchday {
 
 export default function Fixture() {
   const [matches, setMatches] = useState<Matchday>();
-  const [competition, setCompetition] = useState<string>(competitions[0].value);
+  const [competition, setCompetition] = useState<string>("");
   const [matchday, setMatchday] = useState<number>(0);
 
   useEffect(() => {
-    setMatchday(0);
-    setMatches(undefined);
+    if (competition) {
+      setMatchday(0);
+      setMatches(undefined);
 
-    getCurrentGameWeek(competition).then((gameweek) => {
-      setMatchday(gameweek.week);
-    });
+      getCurrentGameWeek(competition).then((gameweek) => {
+        setMatchday(gameweek.week);
+      });
+    }
   }, [competition]);
 
   useEffect(() => {

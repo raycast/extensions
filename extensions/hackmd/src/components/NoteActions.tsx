@@ -12,12 +12,10 @@ export default function NoteActions({
   mutate,
   onDeleteCallback,
 }: {
-  note?: Note;
+  note: Note;
   mutate?: () => void;
   onDeleteCallback?: () => void;
 }) {
-  if (!note) return null;
-
   const noteUrl = getNoteUrl(note);
 
   const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
@@ -91,10 +89,6 @@ export default function NoteActions({
                       await api.deleteTeamNote(note.teamPath, note.id);
                     } else {
                       await api.deleteNote(note.id);
-                    }
-
-                    if (mutate) {
-                      mutate();
                     }
 
                     if (onDeleteCallback) {

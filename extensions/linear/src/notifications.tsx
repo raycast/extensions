@@ -182,7 +182,9 @@ function Notifications() {
                   }`}
                   key={notification.id}
                   icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
-                  subtitle={`${notification.issue.identifier} ${notification.issue.title}`}
+                  {...(notification.issue
+                    ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
+                    : {})}
                   accessories={[
                     {
                       date: createdAt,
@@ -218,20 +220,24 @@ function Notifications() {
                       ) : null}
 
                       <ActionPanel.Section>
-                        <Action.Push
-                          title="Open Issue in Raycast"
-                          target={
-                            <IssueDetail issue={notification.issue} priorities={priorities} users={users} me={me} />
-                          }
-                          icon={Icon.Sidebar}
-                          shortcut={{ modifiers: ["cmd"], key: "o" }}
-                        />
+                        {notification.issue ? (
+                          <>
+                            <Action.Push
+                              title="Open Issue in Raycast"
+                              target={
+                                <IssueDetail issue={notification.issue} priorities={priorities} users={users} me={me} />
+                              }
+                              icon={Icon.Sidebar}
+                              shortcut={{ modifiers: ["cmd"], key: "o" }}
+                            />
 
-                        <Action.OpenInBrowser
-                          title="Open Issue in Browser"
-                          url={notification.issue.url}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                        />
+                            <Action.OpenInBrowser
+                              title="Open Issue in Browser"
+                              url={notification.issue.url}
+                              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                            />
+                          </>
+                        ) : null}
 
                         <Action
                           title="Delete Notification"
@@ -242,21 +248,23 @@ function Notifications() {
                         />
                       </ActionPanel.Section>
 
-                      <ActionPanel.Section>
-                        <Action.CopyToClipboard
-                          icon={Icon.Clipboard}
-                          content={notification.issue.url}
-                          title="Copy Issue URL"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-                        />
+                      {notification.issue ? (
+                        <ActionPanel.Section>
+                          <Action.CopyToClipboard
+                            icon={Icon.Clipboard}
+                            content={notification.issue.url}
+                            title="Copy Issue URL"
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                          />
 
-                        <Action.CopyToClipboard
-                          icon={Icon.Clipboard}
-                          content={notification.issue.title}
-                          title="Copy Issue Title"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
-                        />
-                      </ActionPanel.Section>
+                          <Action.CopyToClipboard
+                            icon={Icon.Clipboard}
+                            content={notification.issue.title}
+                            title="Copy Issue Title"
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+                          />
+                        </ActionPanel.Section>
+                      ) : null}
 
                       <ActionPanel.Section>
                         <Action

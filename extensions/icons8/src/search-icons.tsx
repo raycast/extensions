@@ -1,28 +1,27 @@
 import { Grid, Color } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
-import { getStoredOptions, setStoredOptions } from "./utils/options";
+import { defaultOptions, getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
-import { getGridSize, numRecent } from "./utils/grid";
+import { allStylesImage, gridSize } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8Item } from "./components/icon";
-import { Icon8, Style } from "./types/types";
+import { Icon8, Options, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 
 export default function SearchIcons() {
-  const gridSize: Grid.ItemSize = getGridSize();
-
   const [searchText, setSearchText] = useState("");
   const [icons, setIcons] = useState<Icon8[] | null>([]);
 
-  const [style, setStyle] = useState<string | undefined>(undefined);
+  const [style, setStyle] = useState<string | undefined>();
   const [styles, setStyles] = useState<Style[] | null>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchStyles = async () => {
-      setStyles(await getStyles());
+      await getStoredIcons();
       setIsLoading(false);
+      setStyles(await getStyles());
     };
     fetchStyles();
   }, []);
@@ -31,70 +30,56 @@ export default function SearchIcons() {
   const [recentIcons, setRecentIcons] = useState<Icon8[]>();
 
   const getStoredIcons = async () => {
-    let pinned = await getPinnedIcons();
-    if (style) {
-      pinned = pinned.filter((icon) => icon.platform === style);
-    }
-    setPinnedIcons(pinned);
-    let recent = await getRecentIcons();
-    if (style) {
-      recent = recent.filter((icon) => icon.platform === style);
-    }
-    recent = recent.slice(0, numRecent);
-    setRecentIcons(recent);
+    setPinnedIcons(await getPinnedIcons(style));
+    setRecentIcons(await getRecentIcons(style));
   };
 
   const [refresh, setRefresh] = useState(false);
   const refreshIcons = () => setRefresh(!refresh);
 
   useEffect(() => {
-    if (styles && styles.length > 0) {
-      getStoredIcons();
+    getStoredIcons();
+  }, [refresh, style]);
+
+  const fetchIcons = async () => {
+    if (searchText) {
+      setIsLoading(true);
+      const icons = await getIcons(searchText, style);
+      setIcons(icons);
+      setIsLoading(false);
+    } else {
+      setIcons([]);
     }
-  }, [refresh, style, styles]);
+  };
 
   useEffect(() => {
-    const fetchIcons = async () => {
-      if (searchText) {
-        setIcons(null);
-        const icons = await getIcons(searchText, style);
-        setIcons(icons);
-      } else {
-        setIcons([]);
-      }
-    };
     fetchIcons();
   }, [searchText, style]);
 
-  const [imageOptions, setImageOptions] = useState(undefined);
-
-  const getImageOptions = async () => {
-    setImageOptions(await getStoredOptions());
-  };
-
-  const storeImageOptions = async () => {
-    if (imageOptions) {
-      await setStoredOptions(imageOptions);
-    }
-  };
+  const [options, setOptions] = useState<Options>(defaultOptions);
 
   useEffect(() => {
-    getImageOptions();
+    const getOptions = async () => setOptions(await getStoredOptions());
+    getOptions();
   }, []);
 
   useEffect(() => {
-    storeImageOptions();
-  }, [imageOptions]);
+    const storeOptions = async () => {
+      if (options) await setStoredOptions(options);
+    };
+    storeOptions();
+  }, [options]);
 
   return styles ? (
     <Grid
-      isLoading={isLoading || icons === null}
+      isLoading={isLoading}
       itemSize={gridSize}
       inset={Grid.Inset.Small}
       onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Icons"
       throttle={true}
       searchBarAccessory={
-        styles?.length > 0 ? (
+        styles ? (
           <Grid.Dropdown
             tooltip="Styles"
             defaultValue={style}
@@ -104,11 +89,7 @@ export default function SearchIcons() {
             }}
           >
             <Grid.Dropdown.Section>
-              <Grid.Dropdown.Item
-                title="All Styles"
-                value={""}
-                icon={{ source: "https://maxst.icons8.com/vue-static/icon/all-styles.png" }}
-              />
+              <Grid.Dropdown.Item title="All Styles" value={""} icon={{ source: allStylesImage }} />
             </Grid.Dropdown.Section>
             <Grid.Dropdown.Section>
               {styles &&
@@ -128,7 +109,7 @@ export default function SearchIcons() {
         ) : null
       }
     >
-      {(icons === null || icons.length === 0) &&
+      {(!icons || icons?.length === 0) &&
         (pinnedIcons?.length === 0 && recentIcons?.length === 0 ? (
           <EmptyView />
         ) : (
@@ -144,8 +125,8 @@ export default function SearchIcons() {
                     refresh={refreshIcons}
                     pinned={true}
                     movement={movement}
-                    options={imageOptions}
-                    setOptions={setImageOptions}
+                    options={options}
+                    setOptions={setOptions}
                   />
                 );
               })}
@@ -158,8 +139,8 @@ export default function SearchIcons() {
                   platform={style}
                   refresh={refreshIcons}
                   recent={true}
-                  options={imageOptions}
-                  setOptions={setImageOptions}
+                  options={options}
+                  setOptions={setOptions}
                 />
               ))}
             </Grid.Section>
@@ -171,8 +152,8 @@ export default function SearchIcons() {
           icon={icon}
           platform={style}
           refresh={refreshIcons}
-          options={imageOptions}
-          setOptions={setImageOptions}
+          options={options}
+          setOptions={setOptions}
         />
       ))}
     </Grid>
