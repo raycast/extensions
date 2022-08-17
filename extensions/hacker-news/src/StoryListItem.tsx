@@ -3,33 +3,23 @@ import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const [state, setState] = useState<{ icon: Image.ImageLike; accessories: List.Item.Accessory[] }>({
-    icon: getIcon(props.index),
-    accessories: [],
-  });
-
-  useEffect(() => {
-    const icon = getIcon(props.index + 1);
-    const accessories = [];
-
-    const points = getPoints(props.item);
-    const comments = getComments(props.item);
-    if (comments !== null) {
-      accessories.push({ icon: Icon.Bubble, text: comments });
-    }
-    if (points !== null) {
-      accessories.push({ icon: "👍", text: points });
-    }
-
-    setState({ icon, accessories });
-  }, [props.item, props.index]);
+  const icon = getIcon(props.index + 1);
+  const accessories = [];
+  const points = getPoints(props.item);
+  const comments = getComments(props.item);
+  if (comments !== null) {
+    accessories.push({ icon: Icon.Bubble, text: comments });
+  }
+  if (points !== null) {
+    accessories.push({ icon: "👍", text: points });
+  }
 
   return (
     <List.Item
-      icon={state.icon}
+      icon={icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator}
-      accessories={state.accessories}
+      accessories={accessories}
       actions={<Actions item={props.item} />}
     />
   );
