@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.1] - 2022-08-17
+
+- Added branch name to entries
+
 ## [2.0] - 2022-08-10
 
 - Two new commands: `Search Projects` and `Search Deployments`
