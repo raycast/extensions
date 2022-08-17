@@ -2,7 +2,7 @@
 
 ## [🐛 Fixes] - (2022-08-16)
 
-- Set a random UA string in API calls to prevent 429 error responses.
+- Use custom User Agent + cache responses for each topic for 5 minutes to avoid being rate limited
 
 ## [🎉 Added all of the RSS feeds] - (2022-03-21)
 

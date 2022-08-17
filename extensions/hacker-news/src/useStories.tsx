@@ -57,12 +57,14 @@ export const useStories = (topic: Topic | null): [Parser.Item[], boolean, Error 
             setState((previous) => ({ ...previous, items: parsed.items, isLoading: false }));
             return;
           }
-        } catch (e) {}
+        } catch (e) {
+          // nothing to do
+        }
       }
 
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const feed = await parser.parseURL(`https://hnrss.org/${topic}?count=50`);
+        const feed = await parser.parseURL(`https://hnrss.org/${topic}?count=30`);
         setState((previous) => ({ ...previous, items: feed.items, isLoading: false }));
         cache.set(topic, JSON.stringify({ timestamp: Date.now(), items: feed.items }));
       } catch (error) {
