@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" height="128">
+  <img src="assets/icon.png" width="128">
 </p>
 
 The latest news, info and stats for clubs in 2021-2022 can be found in [Raycast](https://raycast.com/)
