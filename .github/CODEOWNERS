@@ -278,6 +278,7 @@
 /extensions/lobsters                                 @dev99problems
 /extensions/logseq                                   @futantan @futantan
 /extensions/lorem-ipsum                              @AntonNiklasson
+/extensions/lucide-icons                             @gBasil
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
 /extensions/mailsy                                   @BalliAsghar
@@ -495,7 +496,7 @@
 /extensions/uuid-generator                           @jmaeso
 /extensions/v2ex                                     @mopig
 /extensions/vault                                    @ricoberger
-/extensions/vercast                                  @gleich @gleich
+/extensions/vercast                                  @gleich @gleich @dgrcode
 /extensions/vim-bro                                  @ajaypremshankar
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @macbookandrew @immint023 @pernielsentikaer
