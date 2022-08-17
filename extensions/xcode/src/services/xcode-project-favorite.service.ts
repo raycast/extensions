@@ -43,19 +43,6 @@ export class XcodeProjectFavoriteService {
   }
 
   /**
-   * Toggle favorite state for a given Xcode Project
-   * @param project The Xcode Project
-   */
-  static async toggleFavorite(project: XcodeProject) {
-    const favorites = await XcodeProjectFavoriteService.favorites();
-    if (favorites.includes(project.filePath)) {
-      await XcodeProjectFavoriteService.removeFromFavorites(project);
-    } else {
-      await XcodeProjectFavoriteService.addToFavorites(project);
-    }
-  }
-
-  /**
    * Save favorite Xcode Project file paths
    * @param favorites The Xcode Project file paths that should be saved
    */
