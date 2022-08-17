@@ -55,6 +55,8 @@ export const getIconImageLink = (icon: Icon8, options: Options) => {
   return `https://img.icons8.com/${icon.platform}/${options.size}${color}/${icon.commonName}.png`;
 };
 
+export const allStylesImage = "https://maxst.icons8.com/vue-static/icon/all-styles.png";
+
 // boolean represents whether the preview image for the style requires color tint
 export const defaultStyles: { [key: string]: boolean } = {
   iOS: true,

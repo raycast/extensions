@@ -5,10 +5,11 @@ import { previewSize } from "../utils/utils";
 
 export const Icon8Item = (props: IconProps): JSX.Element => {
   const icon = props.icon;
+  const id = `${props.pinned ? "pinned" : props.recent ? "recent" : ""}-${icon.id}`;
 
   return (
     <Grid.Item
-      id={icon.id}
+      id={id}
       key={icon.id}
       content={{
         value: {

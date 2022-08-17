@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { defaultOptions, getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
-import { gridSize, numRecent } from "./utils/utils";
+import { allStylesImage, gridSize, numRecent } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8Item } from "./components/icon";
 import { Icon8, Options, Style } from "./types/types";
@@ -30,14 +30,8 @@ export default function SearchIcons() {
   const [recentIcons, setRecentIcons] = useState<Icon8[]>();
 
   const getStoredIcons = async () => {
-    let pinned = await getPinnedIcons();
-    let recent = await getRecentIcons();
-    if (style) {
-      pinned = pinned.filter((icon) => icon.platform === style);
-      recent = recent.filter((icon) => icon.platform === style).slice(0, numRecent);
-    }
-    setPinnedIcons(pinned);
-    setRecentIcons(recent);
+    setPinnedIcons(await getPinnedIcons(style));
+    setRecentIcons(await getRecentIcons(style));
   };
 
   const [refresh, setRefresh] = useState(false);
@@ -47,18 +41,19 @@ export default function SearchIcons() {
     getStoredIcons();
   }, [refresh, style]);
 
-  useEffect(() => {
-    const fetchIcons = async () => {
-      if (searchText) {
-        setIcons(null);
-        const icons = await getIcons(searchText, style);
-        setIcons(icons);
-      }
-    };
-    fetchIcons();
-    return () => {
+  const fetchIcons = async (hideEmptyView: boolean = false) => {
+    if (searchText) {
+      setIsLoading(true);
+      const icons = await getIcons(searchText, style);
+      setIcons(icons);
+      setIsLoading(false);
+    } else {
       setIcons([]);
-    };
+    }
+  };
+
+  useEffect(() => {
+    fetchIcons();
   }, [searchText, style]);
 
   const [options, setOptions] = useState<Options>(defaultOptions);
@@ -77,7 +72,7 @@ export default function SearchIcons() {
 
   return styles ? (
     <Grid
-      isLoading={isLoading || icons === null}
+      isLoading={isLoading}
       itemSize={gridSize}
       inset={Grid.Inset.Small}
       onSearchTextChange={setSearchText}
@@ -94,11 +89,7 @@ export default function SearchIcons() {
             }}
           >
             <Grid.Dropdown.Section>
-              <Grid.Dropdown.Item
-                title="All Styles"
-                value={""}
-                icon={{ source: "https://maxst.icons8.com/vue-static/icon/all-styles.png" }}
-              />
+              <Grid.Dropdown.Item title="All Styles" value={""} icon={{ source: allStylesImage }} />
             </Grid.Dropdown.Section>
             <Grid.Dropdown.Section>
               {styles &&
