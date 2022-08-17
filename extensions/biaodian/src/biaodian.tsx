@@ -13,7 +13,7 @@ const punctuationMarks = [
   { name: "(", symbol: "（", description: "Brackets" },
   { name: ")", symbol: "）", description: "Brackets" },
   { name: "?", symbol: "？", description: "Question mark" },
-  { name: "!", symbol: "！", description: "Excamation mark" },
+  { name: "!", symbol: "！", description: "Exclamation mark" },
   { name: "-", symbol: "─", description: "Dash" },
   { name: "~", symbol: "～", description: "Swung Dash" },
   { name: ".", symbol: "…", description: "Elipsis" },
