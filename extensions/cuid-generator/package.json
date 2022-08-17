@@ -13,7 +13,7 @@
     {
       "name": "generate",
       "title": "Copy CUID",
-      "description": "Generates a new cuid",
+      "description": "Generates a new CUID",
       "mode": "no-view"
     }
   ],
