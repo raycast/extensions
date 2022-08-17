@@ -15,7 +15,7 @@ export default async (props: { arguments: UUIDArguments }) => {
   }
 
   try {
-    const parseableNumber = parseInt(numberOfUUIDsToGenerate);
+    const parseableNumber = parseInt(numberOfUUIDsToGenerate, 10);
 
     if (isNaN(parseableNumber)) {
       throw new Error("INVALID_NUMBER");
