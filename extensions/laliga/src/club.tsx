@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Team } from "./types";
 import { getTeams } from "./api";
-import CompetitionDropdown, {
-  competitions,
-} from "./components/competition_dropdown";
+import CompetitionDropdown from "./components/competition_dropdown";
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import ClubDetails from "./components/club";
 
 export default function Club() {
   const [clubs, setClubs] = useState<Team[]>();
-  const [competition, setCompetition] = useState<string>(competitions[0].value);
+  const [competition, setCompetition] = useState<string>("");
 
   useEffect(() => {
-    setClubs(undefined);
-    getTeams(competition).then((data) => {
-      setClubs(data);
-    });
+    if (competition) {
+      setClubs(undefined);
+      getTeams(competition).then((data) => {
+        setClubs(data);
+      });
+    }
   }, [competition]);
 
   return (
