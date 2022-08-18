@@ -1,6 +1,6 @@
 # Bing Wallpaper Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2022-08-18
 
 - Fix the bug that the [Auto Random Bing Wallpaper] command occasionally fails
 
