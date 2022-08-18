@@ -19,15 +19,15 @@
 
 - Search Reading List. It is the list of all the articles saved in dev.to.
 
-![notebooks](metadata/1-reading-list.png)
+![notebooks](media/1-reading-list.png)
 
 - Search Articles. Explore and manage all the articles published by you or still in draft.
 
-![notebooks](metadata/2-articles.png)
+![notebooks](media/2-articles.png)
 
 - Create Article. Start a new article directly from Raycast.
 
-![notebooks](metadata/3-create-article.png)
+![notebooks](media/3-create-article.png)
 
 ## Changelog
 
