@@ -15,13 +15,13 @@ export function ReadingListItemAction({ article, bodyMarkdown }: { article: Arti
           url={url}
         />
         <Action.Push
-          title={"Open Here"}
+          title={"Show Details"}
           icon={Icon.QuoteBlock}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           target={<ReadingListDetail bodyMarkdown={bodyMarkdown} />}
         />
         <Action.CopyToClipboard
-          title={"Copy Article Link"}
+          title={"Copy Link"}
           icon={Icon.Link}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
           content={url}

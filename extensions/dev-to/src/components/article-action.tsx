@@ -15,7 +15,7 @@ export function ArticleAction({ article }: { article: Article }) {
           url={url}
         />
         <Action.CopyToClipboard
-          title={"Copy Article Link"}
+          title={"Copy Link"}
           icon={Icon.Link}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
           content={url}

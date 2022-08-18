@@ -49,7 +49,7 @@ export default function CreateArticle({ article }: { article: Article | undefine
       <Form.TextField
         id={"title"}
         title={"Title"}
-        placeholder={"Article Title..."}
+        placeholder={"How to implement..."}
         value={title}
         onChange={(newValue) => {
           setTitle(newValue);
@@ -58,7 +58,7 @@ export default function CreateArticle({ article }: { article: Article | undefine
       <Form.TextArea
         id={"body_markdown"}
         title={"Body"}
-        placeholder={"Article Body..."}
+        placeholder={"React imports all the components..."}
         value={body}
         onChange={(newValue) => {
           setBody(newValue);
@@ -100,6 +100,7 @@ export default function CreateArticle({ article }: { article: Article | undefine
         <Form.TagPicker.Item value="vscode" title="vscode" />
         <Form.TagPicker.Item value="web3" title="web3" />
         <Form.TagPicker.Item value="programming" title="programming" />
+        <Form.TagPicker.Item value="python" title="python" />
       </Form.TagPicker>
 
       {(isDraft || !isEdit) && (

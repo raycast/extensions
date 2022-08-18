@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dev-to",
   "title": "DEV Community",
-  "description": "List of your dev.to articles",
+  "description": "Search and create articles to DEV Community. Read saved article list",
   "icon": "dev-to.png",
   "author": "lin",
   "categories": [
