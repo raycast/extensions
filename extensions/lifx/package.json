@@ -22,7 +22,7 @@
     },
     {
       "name": "setLightState",
-      "title": "Set light",
+      "title": "Set Light",
       "subtitle": "LIFX",
       "description": "Set the state of a light",
       "mode": "no-view",
