@@ -63,7 +63,7 @@ export default function Command() {
       }
     >
       <Form.TextArea id="thoughts" title="Thoughts" placeholder="What's on your mind?" defaultValue={text} onChange={setText} />
-      <Form.TextField id="sourceUrl" title="SourceUrl" placeholder="Where's come from?" defaultValue={url} onChange={setUrl} />
+      <Form.TextField id="sourceUrl" title="SourceUrl" placeholder="https://" defaultValue={url} onChange={setUrl} />
     </Form>
   );
 }

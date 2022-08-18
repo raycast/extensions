@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "send-to-napkin",
-      "title": "Send Thoughts",
-      "subtitle": "Napkin",
+      "title": "Send thoughts",
       "description": "Send your thoughts to Napkin",
       "mode": "view"
     }
