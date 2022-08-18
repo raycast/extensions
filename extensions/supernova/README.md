@@ -1,4 +1,4 @@
-![Supernova](./metadata/heading.png)
+![Supernova](./media/heading.png)
 
 This Raycast extension allows you to access your [Supernova.io](https://supernova.io/) design system contents like tokens, assets and component directly from your command bar. Additionally, you can search through your entire knowledge library using its advanced documentation search and reader.
 
@@ -10,7 +10,7 @@ First, you'll need API key to access your design system data. If you've already 
 
 After you have provided your API token, you'll have the option to select a workspace and design system. You have access to all workspaces and design systems that are allowed under your API key. Select one and you can access all your data right away.
 
-![Supernova](./metadata/selected-design-system.png)
+![Supernova](./media/selected-design-system.png)
 
 If you ever need to change design system, use command `Select Design System` to show this view again.
 
