@@ -16,6 +16,7 @@ import { environment } from "@raycast/api";
 console.log(`Raycast version: ${environment.raycastVersion}`);
 console.log(`Extension name: ${environment.extensionName}`);
 console.log(`Command name: ${environment.commandName}`);
+console.log(`Command mode: ${environment.commandMode}`);
 console.log(`Assets path: ${environment.assetsPath}`);
 console.log(`Support path: ${environment.supportPath}`);
 console.log(`Is development mode: ${environment.isDevelopment}`);
@@ -28,6 +29,7 @@ console.log(`LaunchType: ${environment.launchType}`);
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
+| commandMode<mark style="color:red;">*</mark> | The mode of the launched command, as specified in package.json | <code>"no-view"</code> or <code>"view"</code> or <code>"menu-bar"</code> |
 | commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
 | extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
 | isDevelopment<mark style="color:red;">*</mark> | Indicates whether the command is a development command (vs. an installed command from the Store). | <code>boolean</code> |

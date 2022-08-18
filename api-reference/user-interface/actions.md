@@ -335,7 +335,7 @@ export default function Command() {
 | icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | The title displayed for the item. | <code>string</code> | `"Submit Form"` |
-| onSubmit | Callback that is triggered when the submit was submitted. Use the handler to perform custom validation logic and call other Raycast API methods. The handler receives a the values object containing the user input. | <code>(input: [Form.Values](form.md#form.values)) => void</code> | - |
+| onSubmit | Callback that is triggered when the submit was submitted. Use the handler to perform custom validation logic and call other Raycast API methods. The handler receives a the values object containing the user input. | <code>(input: [Form.Values](form.md#form.values)) => boolean \| void \| Promise&lt;boolean \| void></code> | - |
 
 ### Action.Trash
 

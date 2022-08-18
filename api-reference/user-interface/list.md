@@ -28,12 +28,7 @@ Note that `enableFiltering` is also implicitly set to false if an `onSearchTextC
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
 
-const items = [
-  "Augustiner Helles",
-  "Camden Hells",
-  "Leffe Blonde",
-  "Sierra Nevada IPA",
-];
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -56,10 +51,7 @@ export default function Command() {
           title={item}
           actions={
             <ActionPanel>
-              <Action
-                title="Select"
-                onAction={() => console.log(`${item} selected`)}
-              />
+              <Action title="Select" onAction={() => console.log(`${item} selected`)} />
             </ActionPanel>
           }
         />
@@ -79,12 +71,7 @@ To do so, you can use the `searchText` [prop](#props).
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
 
-const items = [
-  "Augustiner Helles",
-  "Camden Hells",
-  "Leffe Blonde",
-  "Sierra Nevada IPA",
-];
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -243,16 +230,9 @@ export default function CommandWithCustomEmptyView() {
   }, [state.searchText]);
 
   return (
-    <List
-      onSearchTextChange={(newValue) =>
-        setState((previous) => ({ ...previous, searchText: newValue }))
-      }
-    >
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
       {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
       ) : (
         state.items.map((item) => <List.Item key={item} title={item} />)
       )}
@@ -280,10 +260,7 @@ import { List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List
-      navigationTitle="Search Beers"
-      searchBarPlaceholder="Search your favorite beer"
-    >
+    <List navigationTitle="Search Beers" searchBarPlaceholder="Search your favorite beer">
       <List.Item title="Augustiner Helles" />
       <List.Item title="Camden Hells" />
       <List.Item title="Leffe Blonde" />
@@ -332,11 +309,7 @@ function DrinkDropdown(props: DrinkDropdownProps) {
     >
       <List.Dropdown.Section title="Alcoholic Beverages">
         {drinkTypes.map((drinkType) => (
-          <List.Dropdown.Item
-            key={drinkType.id}
-            title={drinkType.name}
-            value={drinkType.id}
-          />
+          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
@@ -355,12 +328,7 @@ export default function Command() {
     <List
       navigationTitle="Search Beers"
       searchBarPlaceholder="Search your favorite drink"
-      searchBarAccessory={
-        <DrinkDropdown
-          drinkTypes={drinkTypes}
-          onDrinkTypeChange={onDrinkTypeChange}
-        />
-      }
+      searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={onDrinkTypeChange} />}
     >
       <List.Item title="Augustiner Helles" />
       <List.Item title="Camden Hells" />
@@ -394,16 +362,18 @@ A dropdown item in a [List.Dropdown](#list.dropdown)
 import { List } from "@raycast/api";
 
 export default function Command() {
-    return (
-      <List searchBarAccessory={
+  return (
+    <List
+      searchBarAccessory={
         <List.Dropdown tooltip="Dropdown With Items">
           <List.Dropdown.Item title="One" value="one" />
           <List.Dropdown.Item title="Two" value="two" />
           <List.Dropdown.Item title="Three" value="three" />
         </List.Dropdown>
-      }>
-        <List.Item title="Item in the Main List" />
-      </List>
+      }
+    >
+      <List.Item title="Item in the Main List" />
+    </List>
   );
 }
 ```
@@ -479,16 +449,9 @@ export default function CommandWithCustomEmptyView() {
   }, [state.searchText]);
 
   return (
-    <List
-      onSearchTextChange={(newValue) =>
-        setState((previous) => ({ ...previous, searchText: newValue }))
-      }
-    >
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
       {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
       ) : (
         state.items.map((item) => <List.Item key={item} title={item} />)
       )}
@@ -522,12 +485,7 @@ import { Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        icon={Icon.Star}
-        title="Augustiner Helles"
-        subtitle="0,5 Liter"
-        accessories={[{ text: "Germany" }]}
-      />
+      <List.Item icon={Icon.Star} title="Augustiner Helles" subtitle="0,5 Liter" accessories={[{ text: "Germany" }]} />
     </List>
   );
 }
@@ -615,15 +573,9 @@ There is a plant seed on its back right from the day this Pokémon is born. The 
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Types" />
-                <List.Item.Detail.Metadata.Label
-                  title="Grass"
-                  icon="pokemon_types/grass.svg"
-                />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Poison"
-                  icon="pokemon_types/poison.svg"
-                />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Chracteristics" />
                 <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
@@ -631,15 +583,9 @@ There is a plant seed on its back right from the day this Pokémon is born. The 
                 <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Abilities" />
-                <List.Item.Detail.Metadata.Label
-                  title="Chlorophyll"
-                  text="Main Series"
-                />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Overgrow"
-                  text="Main Series"
-                />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
                 <List.Item.Detail.Metadata.Separator />
               </List.Item.Detail.Metadata>
             }
@@ -670,15 +616,9 @@ export default function Metadata() {
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Types" />
-                <List.Item.Detail.Metadata.Label
-                  title="Grass"
-                  icon="pokemon_types/grass.svg"
-                />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Poison"
-                  icon="pokemon_types/poison.svg"
-                />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Chracteristics" />
                 <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
@@ -686,15 +626,9 @@ export default function Metadata() {
                 <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Abilities" />
-                <List.Item.Detail.Metadata.Label
-                  title="Chlorophyll"
-                  text="Main Series"
-                />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Overgrow"
-                  text="Main Series"
-                />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
                 <List.Item.Detail.Metadata.Separator />
               </List.Item.Detail.Metadata>
             }
@@ -736,11 +670,7 @@ export default function Metadata() {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title="Type"
-                  icon="pokemon_types/grass.svg"
-                  text="Grass"
-                />
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
               </List.Item.Detail.Metadata>
             }
           />
@@ -758,6 +688,101 @@ export default function Metadata() {
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | text | The text value of the item. | <code>string</code> | - |
+
+### List.Item.Detail.Metadata.Link
+
+An item to display a link.
+
+![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Link
+                  title="Evolution"
+                  target="https://www.pokemon.com/us/pokedex/pikachu"
+                  text="Raichu"
+                />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| target<mark style="color:red;">*</mark> | The target of the link. | <code>string</code> | - |
+| text<mark style="color:red;">*</mark> | The text value of the item. | <code>string</code> | - |
+| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
+
+### List.Item.Detail.Metadata.TagList
+
+A list of [`Tags`](list.md#list.item.detail.metadata.taglist.item) displayed in a row.
+
+![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.TagList title="Type">
+                  <List.Item.Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children<mark style="color:red;">*</mark> | The tags contained in the TagList. | <code>React.ReactNode</code> | - |
+| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
+
+### List.Item.Detail.Metadata.TagList.Item
+
+A Tag in a `List.Item.Detail.Metadata.TagList`.
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| text<mark style="color:red;">*</mark> | The text of the tag. | <code>string</code> | - |
+| color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> | - |
+| icon | An optional icon in front of the text of the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 
 ### List.Item.Detail.Metadata.Separator
 
@@ -779,17 +804,9 @@ export default function Metadata() {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title="Type"
-                  icon="pokemon_types/grass.svg"
-                  text="Grass"
-                />
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label
-                  title="Type"
-                  icon="pokemon_types/poison.svg"
-                  text="Poison"
-                />
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/poison.svg" text="Poison" />
               </List.Item.Detail.Metadata>
             }
           />
