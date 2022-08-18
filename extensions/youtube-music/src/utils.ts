@@ -37,7 +37,7 @@ export async function runJSInYouTubeMusicTab(code: string) {
     if (jsResult === "false") {
       await showToast({
         style: Toast.Style.Failure,
-        title: "The YouTube Music tab hasn't been found",
+        title: "The YouTube Music tab was not found",
         message: `Try to check selected browser in extension preferences.`,
       });
 
