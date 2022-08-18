@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Toast, showToast, Icon, Color, open, showInFinder, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Toast,
+  showToast,
+  Icon,
+  Color,
+  open,
+  showInFinder,
+  Clipboard,
+  closeMainWindow,
+} from "@raycast/api";
 import { IconStorageActions, appendRecentIcon } from "../utils/storage";
 import { ConfigureAction } from "./configure-icon";
 import { IconDetail } from "./icon-detail";
@@ -111,6 +122,7 @@ const DownloadSVGIcon = (props: IconActionProps): JSX.Element => {
               onAction: (toast: Toast) => {
                 open(filePath);
                 toast.hide();
+                closeMainWindow();
               },
             },
             secondaryAction: {
@@ -118,6 +130,7 @@ const DownloadSVGIcon = (props: IconActionProps): JSX.Element => {
               onAction: (toast: Toast) => {
                 showInFinder(filePath);
                 toast.hide();
+                closeMainWindow();
               },
             },
           };
@@ -157,6 +170,7 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
               onAction: (toast) => {
                 open(filePath);
                 toast.hide();
+                closeMainWindow();
               },
             },
             secondaryAction: {
@@ -164,6 +178,7 @@ const DownloadIconImage = (props: IconActionProps): JSX.Element => {
               onAction: (toast) => {
                 showInFinder(filePath);
                 toast.hide();
+                closeMainWindow();
               },
             },
           };
