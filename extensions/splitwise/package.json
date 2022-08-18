@@ -42,7 +42,6 @@
     "@raycast/api": "^1.38.3",
     "@raycast/utils": "^1.1.0",
     "node-fetch": "^3.2.10",
-    "simple-oauth2": "^4.3.0",
     "splitwise": "^1.0.0"
   },
   "devDependencies": {
