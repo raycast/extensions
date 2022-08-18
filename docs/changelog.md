@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.39.0 - 2022-08-18
+
+### ✨ New
+
+- **List.Item.Detail.Metadata**: We’ve added support for new `Link` and `TagList` item types.
+- **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ *via* `environment.commandMode`.
+
+### 💎 Improvements
+
+- **CLI**: The ray CLI is now code-signed
+- **CLI**: We’ve updated esbuild to v0.14.52
+- **NPM size:** is now 0.5MB instead of 25MB _(binary files for ray CLI have been moved out of the NPM package)_
+
+### 🐞 Fixes
+
+- **Navigation**: Top-level components can now dynamically return a different view type when used inside a navigation stack
+- **Background Refresh**: Fixed an edge case where commands would run into a timeout that prevented further refreshing
+- **Menu Bar Commands**: Fixed a bug where the error screen of menu bar commands would repeatedly be shown in the root search
+- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn’t work entirely
+- **Form:** `TextArea` placeholder now won’t highlight markdowns if it has `enabledMarkdown`
+
+
 ## 1.38.3 - 2022-08-03
 
 ### 💎 Improvements
