@@ -13,7 +13,7 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
   try {
     const response = await fetch(query);
     if (response.status !== 200) {
-      showToast(Toast.Style.Failure, `Error Fetching Icons.`);
+      await showToast(Toast.Style.Failure, `Error Fetching Icons.`);
       return [];
     }
     const data: any = await response.json();
@@ -62,7 +62,7 @@ export const getIconDetail = async (icon8: Icon8, options: Options): Promise<Ico
   const query = `https://api-icons.icons8.com/publicApi/icons/icon?id=${icon8.id}&token=${api}`;
   const response = await fetch(query);
   if (response.status !== 200) {
-    showToast(Toast.Style.Failure, `Error Fetching Icon.`);
+    await showToast(Toast.Style.Failure, `Error Fetching Icon.`);
     return icon8;
   }
   const data: any = await response.json();
