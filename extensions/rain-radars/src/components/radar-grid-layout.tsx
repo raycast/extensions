@@ -2,7 +2,11 @@ import { Action, ActionPanel, Detail, Grid, useNavigation } from "@raycast/api";
 import { RadarImage } from "../types/types";
 
 // ensure image is not cached and rain radar image is not stale
-const timeStamp = "?" + new Date().getTime();
+const interval = 10;
+
+const ms = 1000 * 60 * interval;
+
+const timeStamp = "?" + new Date(Math.round(new Date().getTime() / ms) * ms).getTime();
 
 export function RadarGridLayout(props: { isLoading: boolean; radars: RadarImage[] }) {
   const { push } = useNavigation();
