@@ -99,8 +99,16 @@ function getItemDetail(item: Item) {
       markdown={getMarkdown(item)}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Tags" text={`${item.tags.length > 0 ? item.tags.join(", ") : ""}`} />
-          <List.Item.Detail.Metadata.Separator />
+          {item.tags.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Tags">
+              {item.tags.map((tag, uid) => (
+                <List.Item.Detail.Metadata.TagList.Item key={uid} text={tag} color={"#3295a8"} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
+          {item.tags.length > 0 && <List.Item.Detail.Metadata.Separator />}
+          {item.link && <List.Item.Detail.Metadata.Link title="SAO/NASA ADS" text={item.uid} target={item.link} />}
+          {item.link && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Publication Date"
             text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
@@ -115,9 +123,6 @@ function getMarkdown(item: Item) {
   return `## ${item.title}
   
   **Authors**: ${item.authors_string ? item.authors_string : ""}
-  
-  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-  
   `;
 }
 
