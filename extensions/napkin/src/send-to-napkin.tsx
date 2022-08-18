@@ -9,7 +9,7 @@ interface Preferences {
 
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
-  const postUrl = 'https://app.napkin.one/api/createThought';
+  const postUrl = "https://app.napkin.one/api/createThought";
   const [text, setText] = useState<string>("");
   const [url, setUrl] = useState<string>("");
 
@@ -23,13 +23,13 @@ export default function Command() {
         title: "Sending",
       });
 
-      const data = { 
+      const data = {
         email: preferences.email,
         token: preferences.api,
         thought: content,
-      }
+      };
 
-      const response = await axios.post(postUrl,sourceUrl ? {...data, sourceUrl} : data);
+      const response = await axios.post(postUrl, sourceUrl ? { ...data, sourceUrl } : data);
 
       if (response.data?.thoughtId) {
         showToast({
@@ -62,7 +62,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="thoughts" title="Thoughts" placeholder="What's on your mind?" defaultValue={text} onChange={setText} />
+      <Form.TextArea
+        id="thoughts"
+        title="Thoughts"
+        placeholder="What's on your mind?"
+        defaultValue={text}
+        onChange={setText}
+      />
       <Form.TextField id="sourceUrl" title="SourceUrl" placeholder="https://" defaultValue={url} onChange={setUrl} />
     </Form>
   );
