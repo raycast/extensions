@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { buildBingImageURL, buildBingWallpapersURL, getPictureName } from "./utils/bing-wallpaper-utils";
 import { BingResponseData } from "./types/types";
-import { setRandomWallpaper } from "./utils/common-utils";
+import { setWallpaperWithoutToast } from "./utils/common-utils";
 import { environment, LaunchType, showHUD } from "@raycast/api";
 
 export default async () => {
@@ -16,7 +16,7 @@ const getLatestWallpaper = async () => {
   const bingWallpaperHD = ((await firstResponse.json()) as BingResponseData).images;
 
   const randomImage = bingWallpaperHD[0];
-  await setRandomWallpaper(
+  await setWallpaperWithoutToast(
     getPictureName(randomImage.url) + "-" + randomImage.startdate,
     buildBingImageURL(randomImage.url, "raw")
   );
