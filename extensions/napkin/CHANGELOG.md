@@ -1,3 +1,3 @@
 # Napkin Changelog
 
-## [Initial Version] - 2022-08-13
+## [Initial Version] - {PR_MERGE_DATE}
