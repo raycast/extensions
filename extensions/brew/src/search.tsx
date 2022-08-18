@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { showFailureToast } from "./utils";
-import { Cask, Formula, InstallableResults } from "./brew";
-import { brewSearch, brewFetchInstalled } from "./brew";
-import { FormulaList } from "./components/list";
+import { brewFetchInstalled, brewSearch, Cask, Formula, InstallableResults } from "./brew";
 import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
+import { FormulaList } from "./components/list";
+import { showFailureToast } from "./utils";
 
 /// Main
 

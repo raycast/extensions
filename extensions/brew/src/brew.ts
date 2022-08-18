@@ -112,7 +112,7 @@ export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-function brewExecutable(): string {
+export function brewExecutable(): string {
   if (preferences.customBrewPath && preferences.customBrewPath.length > 0) {
     return preferences.customBrewPath;
   } else {
