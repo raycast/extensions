@@ -94,7 +94,7 @@ export default function Command() {
             detail={<List.Item.Detail markdown={generateMarkdown(light)} />}
             actions={
               <ActionPanel>
-                <Action title="Toggle power" onAction={() => togglePowerLight(light.id)} />
+                <Action title="Toggle power" icon={Icon.LightBulbOff} onAction={() => togglePowerLight(light.id)} />
               </ActionPanel>
             }
           />
