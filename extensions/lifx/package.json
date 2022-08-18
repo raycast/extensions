@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "View lights",
+      "title": "View Lights",
       "subtitle": "LIFX",
       "description": "Toggle lights on and off",
       "mode": "view"
