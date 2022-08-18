@@ -11,14 +11,14 @@
       "name": "add-expense",
       "title": "Add Expense",
       "subtitle": "Splitwise",
-      "description": "",
+      "description": "Add an expense on Splitwise",
       "mode": "view"
     },
     {
       "name": "list-expenses",
       "title": "List Expenses",
       "subtitle": "Splitwise",
-      "description": "",
+      "description": "List expenses on Splitwise",
       "mode": "view"
     }
   ],
