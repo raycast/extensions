@@ -13,7 +13,8 @@
     {
       "name": "send-to-napkin",
       "title": "Send Thoughts",
-      "description": "Napkin",
+      "subtitle": "Napkin",
+      "description": "Send your thoughts to Napkin",
       "mode": "view"
     }
   ],
