@@ -14,6 +14,7 @@ interface MessageForm {
 interface MessageDraft {
   reply?: boolean;
   forward?: boolean;
+  redirect?: boolean;
   recipient?: string;
 }
 
@@ -59,7 +60,7 @@ export const ComposeMessage = (props: MessageDraft) => {
         <ActionPanel>
           <Action.SubmitForm
             title={props.reply ? "Send Reply" : props.forward ? "Forward Message" : "Send Message"}
-            icon={props.reply ? Icon.Reply : props.forward ? Icon.ArrowUpCircle : "../assets/send.svg"}
+            icon={props.reply ? Icon.Reply : props.forward ? Icon.ArrowUpCircle : "../assets/icons/send.svg"}
             onSubmit={handleSubmit}
           />
         </ActionPanel>

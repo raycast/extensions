@@ -4,6 +4,7 @@ export interface Account {
   userName: string;
   fullName: string;
   email: string;
+  numUnread: number;
   mailboxes?: MailBox[];
   messages?: Message[];
 }

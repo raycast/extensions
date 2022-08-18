@@ -1,6 +1,53 @@
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Message } from "../types/types";
 import { constructDate } from "../utils/utils";
+import { Message } from "../types/types";
+
+const tellMessage = async (message: Message, script: string): Promise<string> => {
+  if (!script.includes("msg")) return "";
+  return await runAppleScript(`
+    tell application "Mail"
+      set acc to (first account whose id is "${message.account}")
+      tell acc
+        set msg to (first message of (first mailbox whose name is "All Mail") whose id is "${message.id}")
+        ${script.trim()}
+      end tell
+      activate
+    end tell
+  `);
+};
+
+export const openMessage = async (message: Message): Promise<void> => {
+  await tellMessage(message, "open msg\nactivate");
+};
+
+export const toggleMessageRead = async (message: Message): Promise<void> => {
+  await tellMessage(message, "tell msg to set read status to not read status");
+};
+
+export const moveMessage = async (message: Message, mailbox: string): Promise<void> => {
+  await tellMessage(message, `set mailbox of msg to (first mailbox whose name is "${mailbox}")`);
+};
+
+export const moveToJunk = async (message: Message): Promise<void> => {
+  try {
+    await moveMessage(message, "Spam");
+    await showToast(Toast.Style.Success, "Moved Message to Junk");
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error Moving Message To Junk");
+    console.error(error);
+  }
+};
+
+export const deleteMessage = async (message: Message): Promise<void> => {
+  try {
+    await moveMessage(message, "Trash");
+    await showToast(Toast.Style.Success, "Message Deleted");
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error Deleting Message");
+    console.error(error);
+  }
+};
 
 export const getAccountMessages = async (
   accountId: string,
@@ -27,7 +74,7 @@ export const getAccountMessages = async (
               set replied to was replied to of msg
               set forwarded to was forwarded of msg
               set redirected to was redirected of msg
-              set output to output & msgId & "$break" & msgSubject & "$break" & msgSender & "$break" & msgSenderEmail & "$break" & msgData & "$break" & msgRead & "$break" & msgReplyTo & "$break" & replied & "$break" & forwarded & "$break" & redirected & "$break" & "$end"
+              set output to output & msgId & "$break" & msgSubject & "$break" & msgSender & "$break" & msgSenderEmail & "$break" & msgData & "$break" & msgRead & "$break" & msgReplyTo & "$break" & replied & "$break" & forwarded & "$break" & redirected & "$end"
             end try
           end repeat
       end tell
@@ -36,7 +83,8 @@ export const getAccountMessages = async (
     const response: string[] = (await runAppleScript(script)).split("$end");
     response.pop();
     const messages: Message[] = response.map((line: string) => {
-      const [id, subject, sender, senderEmail, date, read, replyTo, replied, forwarded, redirected] = line.split("$break");
+      const [id, subject, sender, senderEmail, date, read, replyTo, replied, forwarded, redirected] =
+        line.split("$break");
       return {
         id,
         account: accountId,
@@ -61,15 +109,8 @@ export const getAccountMessages = async (
 
 export const getMessageContent = async (message: Message): Promise<Message> => {
   try {
-    const script = `
-      tell application "Mail"
-        set mailAccount to first account whose id is "${message.account}"
-        set msg to first message of first mailbox of mailAccount whose id is "${message.id}"
-        return content of msg
-      end tell
-    `;
-    const response: string = (await runAppleScript(script)).trim();
-    return { ...message, content: response };
+    const content = await tellMessage(message, "tell msg to return content");
+    return { ...message, content };
   } catch (error: any) {
     console.error(error);
     return message;

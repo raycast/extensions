@@ -13,15 +13,16 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
           set accUser to user name of mailAcc
           set fullName to full name of mailAcc
           set accEmail to email addresses of mailAcc
-          set output to output & accId & "," & accName & "," & accUser & "," & fullName & "," & accEmail & "," & "\n"
+          set numUnread to unread count of (first mailbox of mailAcc whose name is "All Mail")
+          set output to output & accId & "," & accName & "," & accUser & "," & fullName & "," & accEmail & "," & numUnread & "\n"
         end repeat
       end tell
       return output`;
     const response: string[] = (await runAppleScript(script)).split("\n");
     response.pop(); 
     const accounts: Account[] = response.map((line: string) => {
-      const [id, name, userName, fullName, email] = line.split(",");
-      return { id, name, userName, fullName, email };
+      const [id, name, userName, fullName, email, numUnread] = line.split(",");
+      return { id, name, userName, fullName, email, numUnread: parseInt(numUnread) };
     });
     return accounts;
   } catch (error: any) {
