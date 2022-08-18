@@ -44,7 +44,7 @@
 /extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/brave                                    @ron-myers @rgomezcasas
-/extensions/brew                                     @nhojb
+/extensions/brew                                     @nhojb @Aayush9029
 /extensions/brew-services                            @es183923
 /extensions/brightness-control                       @CaliCastle
 /extensions/browsers-profiles                        @skydiver
@@ -204,7 +204,7 @@
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
-/extensions/hacker-news                              @thomaspaulmann @sxn
+/extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn
 /extensions/hackmd                                   @Yukaii
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
@@ -495,7 +495,7 @@
 /extensions/unsplash                                 @eggsy @kkange
 /extensions/upcoming-holidays                        @rodrigouroz
 /extensions/url-tools                                @joshauh46
-/extensions/uuid-generator                           @jmaeso
+/extensions/uuid-generator                           @jmaeso @GastroGeek
 /extensions/v2ex                                     @mopig
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @gleich @gleich @dgrcode
@@ -524,6 +524,7 @@
 /extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
 /extensions/youtube-companion                        @sasivarnan
+/extensions/youtube-music                            @danieldbird @AlexStrNik
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zeplin-project-search                    @dorukgunes
 /extensions/zoom                                     @thomaslombart
