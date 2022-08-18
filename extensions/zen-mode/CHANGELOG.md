@@ -1,5 +1,9 @@
 # Zen Mode Changelog
 
+## [Bug fix] - 2020-08-18
+
+- Bug fixes
+
 ## [New Additions] - 2022-08-10
 
 With this update, you can now manage multiple modes from the extension.🎊
