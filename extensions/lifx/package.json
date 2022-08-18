@@ -49,7 +49,7 @@
     },
     {
       "name": "toggleLight",
-      "title": "Toggle light",
+      "title": "Toggle Light",
       "subtitle": "LIFX",
       "description": "Turn on or off on of your lifx light or lights",
       "mode": "no-view",
