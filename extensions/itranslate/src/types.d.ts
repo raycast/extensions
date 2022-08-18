@@ -16,6 +16,7 @@ interface IPreferences {
   disableTencent: boolean;
   selectedDefault: boolean;
   quickSwitchLang: boolean;
+  delayTransInterval: number;
 }
 
 interface ILangItem {

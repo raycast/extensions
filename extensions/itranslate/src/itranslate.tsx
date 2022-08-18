@@ -19,6 +19,8 @@ import {
 import { TranslateError } from "./TranslateError";
 import { TranslateResult } from "./TranslateResult";
 
+let delayFetchTranslateAPITimer: NodeJS.Timeout;
+
 export default function Command() {
   const preferences: IPreferences = getPreferenceValues<IPreferences>();
   const langSecond: ILangItem = getLang(preferences.langSecond);
@@ -26,6 +28,7 @@ export default function Command() {
   if (check) return check;
 
   const [inputState, updateInputState] = useState<string>("");
+  const [inputTempState, updateInputTempState] = useState<string>("");
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
   const [isShowDetail, updateShowDetail] = useState<boolean>(false);
   const [transResultsState, updateTransResultsState] = useState<ITranslateRes[]>([]);
@@ -39,13 +42,13 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    if (inputState.trim().length > 0) {
+    if (inputTempState.trim().length > 0) {
       translate(currentTargetLang);
     } else {
       updateTransResultsState([]);
       updateShowDetail(false);
     }
-  }, [inputState]);
+  }, [inputTempState]);
 
   function transSelected() {
     getSelectedText()
@@ -53,6 +56,7 @@ export default function Command() {
         const text = selectedText.trim();
         if (text.length > 0) {
           updateInputState(text);
+          updateInputTempState(text);
         }
       })
       .catch((e) => e);
@@ -61,15 +65,19 @@ export default function Command() {
   function onInputChange(queryText: string) {
     updateLoadingState(false);
     updateInputState(queryText);
+    clearTimeout(delayFetchTranslateAPITimer);
+    delayFetchTranslateAPITimer = setTimeout(() => {
+      updateInputTempState(queryText);
+    }, preferences.delayTransInterval || 800);
   }
 
-  function parseInputPre(): string {
-    return inputState.replace(/([a-z])([A-Z])/g, "$1_$2").replace(/([_])/g, " ");
+  function parseSearchPre(): string {
+    return inputTempState.replace(/([a-z])([A-Z])/g, "$1_$2").replace(/([_])/g, " ");
   }
 
   function translate(targetLang: ILangItem) {
-    if (!inputState) return;
-    const contentToTrans = parseInputPre();
+    if (!inputTempState) return;
+    const contentToTrans = parseSearchPre();
     updateLoadingState(true);
 
     const transPromises: Promise<ITranslateRes>[] = fetchTransAPIs(contentToTrans, targetLang);
@@ -137,7 +145,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoadingState}
-      throttle={true}
       isShowingDetail={isShowDetail}
       searchText={inputState}
       searchBarPlaceholder={"Translate text"}

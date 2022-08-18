@@ -429,6 +429,7 @@ function fetchTencentTransAPI(
   provider: ITransServiceProvider
 ): Promise<ITranslateRes> {
   return new Promise<ITranslateRes>((resolve) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function sha256(message: string, secret = "", encoding?: any) {
       const hmac = crypto.createHmac("sha256", secret);
       return hmac.update(message).digest(encoding);
