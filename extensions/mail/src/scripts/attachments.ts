@@ -1,4 +1,4 @@
-import { showToast, Toast, open, showInFinder, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Preferences, Attachment, Message } from "../types/types";
 import { tellMessage } from "./messages";
@@ -74,19 +74,21 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
       style: Toast.Style.Success,
       primaryAction: {
         title: "Open Attachment",
-        onAction: (toast: Toast) => {
-          open(`${attachmentsDirectory}/${name}`)
-          toast.hide(); 
-        }
+        onAction: async (toast: Toast) => {
+          await open(`${attachmentsDirectory}/${name}`);
+          await toast.hide();
+          await closeMainWindow();
+        },
       },
       secondaryAction: {
         title: "Show in Finder",
-        onAction: (toast: Toast) => {
-          showInFinder(`${attachmentsDirectory}/${name}`)
-          toast.hide();
-        }
-      }
-    }
+        onAction: async (toast: Toast) => {
+          await showInFinder(`${attachmentsDirectory}/${name}`);
+          await toast.hide();
+          await closeMainWindow();
+        },
+      },
+    };
     showToast(options);
   } catch (error) {
     showToast(Toast.Style.Failure, "Error Saving Attachment");
@@ -112,12 +114,13 @@ export const saveAllAttachments = async (message: Message) => {
       style: Toast.Style.Success,
       primaryAction: {
         title: "Show in Finder",
-        onAction: (toast: Toast) => {
-          open(attachmentsDirectory)
-          toast.hide();
-        }
-      }
-    }
+        onAction: async (toast: Toast) => {
+          await open(attachmentsDirectory);
+          await toast.hide();
+          await closeMainWindow();
+        },
+      },
+    };
     showToast(options);
   } catch (error) {
     showToast(Toast.Style.Failure, "Error Saving Attachments");
