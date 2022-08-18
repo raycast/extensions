@@ -22,7 +22,7 @@ function retrieveModes() {
     const mode = new Mode();
 
     if (modeItem.startsWith("(\n")) {
-      const filteredModeItem = modeItem.replace("(\n", "").trim().replaceAll('"', "");
+      const filteredModeItem = modeItem.replace("(\n", "").trim().replaceAll('"', "").replace("\n)", "");
 
       mode.name = filteredModeItem;
       mode.url = "zenmode://" + filteredModeItem.replace(/ /g, "").toLowerCase();
