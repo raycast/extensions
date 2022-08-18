@@ -1,6 +1,6 @@
 # Changelog
 
-## [Pagination support for zones] - {PR_MERGE_DATE}
+## [Pagination support for zones] - 2022-08-18
 
 - Added pagination support for getting account zones
 
