@@ -107,7 +107,9 @@ function getItemDetail(item: Item) {
             </List.Item.Detail.Metadata.TagList>
           )}
           {item.tags.length > 0 && <List.Item.Detail.Metadata.Separator />}
-          {item.link && <List.Item.Detail.Metadata.Link title="SAO/NASA ADS" text={item.link.split("/")[4]} target={item.link} />}
+          {item.link && (
+            <List.Item.Detail.Metadata.Link title="SAO/NASA ADS" text={item.link.split("/")[4]} target={item.link} />
+          )}
           {item.link && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Publication Date"
