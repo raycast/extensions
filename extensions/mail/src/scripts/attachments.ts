@@ -1,4 +1,4 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, open, showInFinder, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Preferences, Attachment, Message } from "../types/types";
 import { tellMessage } from "./messages";
@@ -8,6 +8,7 @@ import { homedir } from "os";
 
 const preferences: Preferences = getPreferenceValues();
 let downloadDirectory = preferences.attachmentsDirectory.replace("~", homedir());
+export const attachmentsDirectory = downloadDirectory;
 if (existsSync(downloadDirectory)) {
   downloadDirectory = downloadDirectory.replace(homedir() + "/", "").replaceAll("/", ":");
 } else {
@@ -68,7 +69,25 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
   `;
   try {
     await tellMessage(message, script);
-    showToast(Toast.Style.Success, `Attachment ${name} Saved`);
+    const options: Toast.Options = {
+      title: `Saved Attachment ${name}`,
+      style: Toast.Style.Success,
+      primaryAction: {
+        title: "Open Attachment",
+        onAction: (toast: Toast) => {
+          open(`${attachmentsDirectory}/${name}`)
+          toast.hide(); 
+        }
+      },
+      secondaryAction: {
+        title: "Show in Finder",
+        onAction: (toast: Toast) => {
+          showInFinder(`${attachmentsDirectory}/${name}`)
+          toast.hide();
+        }
+      }
+    }
+    showToast(options);
   } catch (error) {
     showToast(Toast.Style.Failure, "Error Saving Attachment");
     console.error(error);
@@ -88,7 +107,18 @@ export const saveAllAttachments = async (message: Message) => {
   `;
   try {
     await tellMessage(message, script);
-    showToast(Toast.Style.Success, "Attachments Saved");
+    const options: Toast.Options = {
+      title: "Saved Attachments",
+      style: Toast.Style.Success,
+      primaryAction: {
+        title: "Show in Finder",
+        onAction: (toast: Toast) => {
+          open(attachmentsDirectory)
+          toast.hide();
+        }
+      }
+    }
+    showToast(options);
   } catch (error) {
     showToast(Toast.Style.Failure, "Error Saving Attachments");
     console.error(error);

@@ -127,7 +127,7 @@ export const MessageListItem = (message: Message): JSX.Element => {
                   target={<Attachments {...message} />}
                 />
                 <Action
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
                   icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
                   title={`Save ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
                   onAction={async () => {
