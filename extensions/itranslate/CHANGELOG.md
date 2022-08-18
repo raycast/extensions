@@ -1,6 +1,6 @@
 # iTranslate Changelog
 
-## [Optimize Experience] - 2022-08-15
+## [Optimize Experience] - 2022-08-18
 
 - Replace List.throttle with setTimeout to optimize the user input experience
 - Provide a configuration that users can customize the translation delay interval
