@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "splitwise",
   "title": "Splitwise",
-  "description": "",
+  "description": "Splitwise Raycast extension",
   "icon": "command-icon.png",
   "author": "Yukai",
   "license": "MIT",
