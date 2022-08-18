@@ -289,7 +289,7 @@
       "name": "delayTransInterval",
       "type": "dropdown",
       "required": false,
-      "title": "Delayed translation interval",
+      "title": "Delayed Translation Interval",
       "description": "Prevent an immediate translation request when the input content is changed",
       "default": "800",
       "data": [
