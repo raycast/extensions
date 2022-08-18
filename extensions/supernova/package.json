@@ -112,7 +112,7 @@
     ],
     "dependencies": {
         "@raycast/api": "1.38.2",
-        "@supernovaio/supernova-sdk": "1.7.30",
+        "@supernovaio/supernova-sdk": "1.7.31",
         "color-namer": "^1.4.0",
         "fuse.js": "^6.6.2",
         "node-fetch": "^3.0.0",

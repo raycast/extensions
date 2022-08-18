@@ -22,7 +22,7 @@ export const DocPageDetailView = (props: DocPageDetailViewProps) => {
   // --- Render
   return (
     <Detail
-      navigationTitle={props.page.title}
+      navigationTitle={`Documentation / ${props.page.title}`}
       markdown={props.page.markdown ?? ""}
       actions={<DocPageDetailActions page={props.page} canPushDetail={false} />}
     />
