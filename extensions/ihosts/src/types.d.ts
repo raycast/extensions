@@ -3,7 +3,7 @@ interface IHostFolder {
   name: string;
   state: State;
   mode: HostFolderMode;
-  hosts: IHost[];
+  hosts?: IHost[];
 }
 
 interface IHost {
@@ -11,4 +11,14 @@ interface IHost {
   name: string;
   state: State;
   content: string;
+}
+
+interface IHostCommon {
+  id: string;
+  name: string;
+  state: State;
+  folderState: State;
+  content?: string;
+  isFolder: boolean;
+  mode?: HostFolderMode;
 }

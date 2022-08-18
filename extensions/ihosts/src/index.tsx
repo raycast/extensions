@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { useEffect } from "react";
 import { HostFolderMode, State } from "./const";
 import { v4 as uuidv4 } from "uuid";
+import { convertFolders2Common } from "./utils";
 
 const hostFolders: IHostFolder[] = [
   {
@@ -59,6 +60,35 @@ export default function Command() {
     console.log("start");
   }, []);
 
+  function getItemIcon(item: IHostCommon) {
+    if (!item.isFolder) {
+      if (item.state == State.Disable) {
+        return {
+          source: Icon.Circle,
+          tintColor: item.folderState === State.Disable ? Color.SecondaryText : Color.Green,
+        };
+      } else {
+        return {
+          source: Icon.CheckCircle,
+          tintColor: item.folderState === State.Disable ? Color.SecondaryText : Color.Green,
+        };
+      }
+    }
+  }
+
+  function getItemAccessories(item: IHostCommon) {
+    const accessories = [];
+    if (item.isFolder) {
+      if (item.state == State.Enable) {
+        accessories.push({ icon: { source: Icon.CheckCircle, tintColor: Color.Green } });
+      } else {
+        accessories.push({ icon: { source: Icon.Circle, tintColor: Color.Green } });
+      }
+      accessories.push({ text: `Folder` });
+    }
+    return accessories;
+  }
+
   return (
     <List>
       <List.Item
@@ -66,18 +96,11 @@ export default function Command() {
         icon={{ source: Icon.ComputerChip, tintColor: Color.Blue }}
         actions={systemHostsActions(false)}
       />
-      {hostFolders.map((folder) => {
+      {convertFolders2Common(hostFolders).map((item) => {
         return (
-          <List.Item title={folder.name}></List.Item>
-          // {folder.hosts.map((host) => {
-          //   return <List.Item title={host.name}></List.Item>
-          // })}
+          <List.Item title={item.name} icon={getItemIcon(item)} accessories={getItemAccessories(item)}></List.Item>
         );
       })}
-      {/* 
-      <List.Item title={"Uat"} icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} />
-      <List.Item title={"Pre"} icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />
-      <List.Item title={"Prod"} icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} /> */}
     </List>
   );
 }
