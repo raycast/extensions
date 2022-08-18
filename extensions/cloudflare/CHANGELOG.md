@@ -1,5 +1,9 @@
 # Changelog
 
+## [Change auth to API tokens] - {PR_MERGE_DATE}
+
+- Change the authentication method to use API tokens instead of legacy API keys. This will require you to create and use a new token for this extension.
+
 ## [Pagination support for zones] - 2022-08-18
 
 - Added pagination support for getting account zones
