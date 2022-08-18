@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [Search Command] = 2022-07-14
+## [Search Command] = 2022-08-18
 
 Add `search` command
 
