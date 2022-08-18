@@ -204,19 +204,25 @@ class Service {
 
   async listZones(account: Account): Promise<Zone[]> {
     const { id } = account;
-    let data;
+    let result;
+    // get from cache if page is null and cache is available
     if (this.cache.has(`zones-${id}`)) {
-      data = JSON.parse(this.cache.get(`zones-${id}`)!) as Response<ZoneItem[]>;
+      result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
     } else {
       const response = await this.client.get<Response<ZoneItem[]>>('zones', {
-        params: {
-          'account.id': id,
-        },
+        params: { 'account.id': id, per_page: 20 },
       });
-      data = response.data;
-      this.cache.set(`zones-${id}`, JSON.stringify(data));
+      result = response.data.result;
+      // if page is not the last page, fetch the remaining pages
+      for (let i = 2; i <= response.data.result_info.total_pages; i++) {
+        const next = await this.client.get<Response<ZoneItem[]>>('zones', {
+          params: { 'account.id': id, per_page: 20, page: i },
+        });
+        result = result.concat(next.data.result);
+      }
+      this.cache.set(`zones-${id}`, JSON.stringify(result));
     }
-    return data.result.map((item) => formatZone(item));
+    return result.map((item) => formatZone(item));
   }
 
   async getZone(id: string): Promise<Zone> {
