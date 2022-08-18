@@ -85,7 +85,7 @@ export const setWallpaper = async (title: string, url: string) => {
   }
 };
 
-export const setRandomWallpaper = async (title: string, url: string) => {
+export const setWallpaperWithoutToast = async (title: string, url: string) => {
   const { applyTo } = getPreferenceValues<Preferences>();
   const selectedPath = environment.supportPath;
   const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${title}.png` : `${selectedPath}/${title}.png`;
@@ -133,13 +133,9 @@ export const setRandomWallpaper = async (title: string, url: string) => {
   }
 };
 
-export const setDownloadedWallpaper = async (path: string) => {
-  const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
-
+const setDownloadedWallpaperAction = async (path: string) => {
   const { applyTo } = getPreferenceValues<Preferences>();
-
-  try {
-    const result = await runAppleScript(`
+  return await runAppleScript(`
       set temp_folder to (POSIX path of "${path}")
       set q_temp_folder to quoted form of temp_folder
  
@@ -165,6 +161,13 @@ export const setDownloadedWallpaper = async (path: string) => {
         return "error"
       end try
     `);
+};
+
+export const setDownloadedWallpaper = async (path: string) => {
+  const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
+
+  try {
+    const result = await setDownloadedWallpaperAction(path);
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (toast) {
@@ -179,6 +182,16 @@ export const setDownloadedWallpaper = async (path: string) => {
       toast.title = "Something went wrong.";
       toast.message = "Try with another image or check your internet connection.";
     }
+  }
+};
+
+export const setDownloadedWallpaperWithoutToast = async (path: string) => {
+  try {
+    const result = await setDownloadedWallpaperAction(path);
+
+    if (result !== "ok") throw new Error("Error setting wallpaper.");
+  } catch (err) {
+    console.error(err);
   }
 };
 

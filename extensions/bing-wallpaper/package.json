@@ -142,9 +142,9 @@
       "name": "auto-switch-bing-wallpaper",
       "icon": "auto-switch-wallpaper-icon.png",
       "title": "Auto Switch Bing Wallpaper",
-      "description": "Auto-switch latest Bing wallpapers to desktop every day.",
+      "description": "Auto-switch latest Bing wallpapers to desktop every day (refresh every 3 hours).",
       "mode": "no-view",
-      "interval": "1d"
+      "interval": "3h"
     }
   ],
   "dependencies": {
