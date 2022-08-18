@@ -1,4 +1,6 @@
-import { State } from "./const";
+import { State, SystemHostFilePath } from "./const";
+import crypto from "node:crypto";
+import fs from "node:fs";
 
 export function convertFolders2Common(folders: IHostFolder[]): IHostCommon[] {
   const list: IHostCommon[] = [];
@@ -23,4 +25,13 @@ function convertHost2Common(host: IHost, folderState: State): IHostCommon {
     folderState: folderState,
     isFolder: false,
   };
+}
+
+export function getSysHostFileHash(): string {
+  const sysHostFileBuf = fs.readFileSync(SystemHostFilePath);
+  return crypto.createHash("md5").update(sysHostFileBuf).digest("hex");
+}
+
+export function getSysHostFile(): string {
+  return fs.readFileSync(SystemHostFilePath, "utf8");
 }
