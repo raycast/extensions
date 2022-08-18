@@ -1,9 +1,11 @@
 import { List, Detail, Icon, Action, ActionPanel, Color, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import * as messageScripts from "../scripts/messages";
+import { saveAllAttachments } from "../scripts/attachments";
 import { ComposeMessage } from "./compose";
 import { Message, Account } from "../types/types";
 import { shortenText, formatDate, formatMarkdown } from "../utils/utils";
+import { Attachments } from "./attachments";
 
 export const Messages = (account: Account): JSX.Element => {
   const [messages, setMessages] = useState<Message[] | undefined>([]);
@@ -12,7 +14,7 @@ export const Messages = (account: Account): JSX.Element => {
   useEffect(() => {
     const getMessages = async () => {
       const start = new Date().getTime();
-      const messages = await messageScripts.getAccountMessages(account.id);
+      const messages = await messageScripts.getAccountMessages(account.id, 100);
       setMessages(messages);
       const time_elapsed = new Date().getTime() - start;
       console.log(`Time elapsed: ${time_elapsed / 1000}s`);
@@ -36,7 +38,7 @@ export const Messages = (account: Account): JSX.Element => {
 export const MessageListItem = (message: Message): JSX.Element => {
   return (
     <List.Item
-      title={shortenText(message.subject, 60)}
+      title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
       icon={
         message.read
           ? {
@@ -50,7 +52,13 @@ export const MessageListItem = (message: Message): JSX.Element => {
       }
       accessories={[
         { text: formatDate(message.date), icon: Icon.Calendar },
-        { text: shortenText(message.sender, 20), icon: Icon.Person },
+        { text: shortenText(message.senderName, 20), icon: Icon.Person },
+        message.numAttachments > 0
+          ? {
+              text: `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`,
+              icon: Icon.Paperclip,
+            }
+          : {},
       ]}
       actions={
         <ActionPanel>
@@ -73,7 +81,7 @@ export const MessageListItem = (message: Message): JSX.Element => {
               title="Reply"
               icon={Icon.Reply}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              target={<ComposeMessage reply={true} recipient={message.senderEmail} />}
+              target={<ComposeMessage reply={true} recipient={message.senderAddress} />}
             />
             <Action.Push
               title="Forward"
@@ -91,6 +99,7 @@ export const MessageListItem = (message: Message): JSX.Element => {
           <ActionPanel.Section>
             <Action
               title={message.read ? "Mark as Unread" : "Mark as Read"}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
               icon={
                 message.read
                   ? {
@@ -109,14 +118,34 @@ export const MessageListItem = (message: Message): JSX.Element => {
                 }
               }}
             />
+            {message.numAttachments > 0 && (
+              <React.Fragment>
+                <Action.Push
+                  icon={Icon.Paperclip}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  title={`See ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
+                  target={<Attachments {...message} />}
+                />
+                <Action
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
+                  title={`Save ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
+                  onAction={async () => {
+                    await saveAllAttachments(message);
+                  }}
+                />
+              </React.Fragment>
+            )}
             <Action
               title="Move to Junk"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
               icon={{ source: "../assets/icons/junk.svg", tintColor: Color.PrimaryText }}
               onAction={async () => await messageScripts.moveToJunk(message)}
             />
             <Action
               title="Delete Message"
-              icon={Icon.Trash}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              icon={{ source: Icon.Trash, tintColor: Color.Red }}
               onAction={async () => await messageScripts.deleteMessage(message)}
             />
           </ActionPanel.Section>
@@ -132,6 +161,8 @@ export const MailMessage = (message: Message): JSX.Element => {
 
   useEffect(() => {
     const getContent = async () => {
+      console.log(message.account);
+      console.log(message.id);
       message = await messageScripts.getMessageContent(message);
       setContent(message.content);
       setIsLoading(false);
@@ -148,7 +179,7 @@ export const MailMessage = (message: Message): JSX.Element => {
       markdown={!isLoading && content ? formatMarkdown(message.subject, content) : undefined}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="From" text={message.sender} icon={Icon.Person} />
+          <Detail.Metadata.Label title="From" text={message.senderName} icon={Icon.Person} />
           <Detail.Metadata.Label title="Received" text={formatDate(message.date)} icon={Icon.Calendar} />
         </Detail.Metadata>
       }

@@ -1,10 +1,10 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { constructDate } from "../utils/utils";
-import { Message } from "../types/types";
+import { Attachment, Message } from "../types/types";
 
-const tellMessage = async (message: Message, script: string): Promise<string> => {
-  if (!script.includes("msg")) return "";
+export const tellMessage = async (message: Message, script: string): Promise<string> => {
+  if (!script.includes("msg")) throw("Script must include msg");
   return await runAppleScript(`
     tell application "Mail"
       set acc to (first account whose id is "${message.account}")
@@ -12,7 +12,6 @@ const tellMessage = async (message: Message, script: string): Promise<string> =>
         set msg to (first message of (first mailbox whose name is "All Mail") whose id is "${message.id}")
         ${script.trim()}
       end tell
-      activate
     end tell
   `);
 };
@@ -64,17 +63,12 @@ export const getAccountMessages = async (
           repeat with i from 1 to ${numMessages}
             try 
               set msg to message i of accMailBox
-              set msgId to id of msg
-              set msgSubject to subject of msg
-              set msgSender to extract name from sender of msg
-              set msgSenderEmail to extract address from sender of msg
-              set msgData to date sent of msg
-              set msgRead to read status of msg
-              set msgReplyTo to reply to of msg
-              set replied to was replied to of msg
-              set forwarded to was forwarded of msg
-              set redirected to was redirected of msg
-              set output to output & msgId & "$break" & msgSubject & "$break" & msgSender & "$break" & msgSenderEmail & "$break" & msgData & "$break" & msgRead & "$break" & msgReplyTo & "$break" & replied & "$break" & forwarded & "$break" & redirected & "$end"
+              tell msg 
+                set senderName to extract name from sender
+                set senderAddress to extract address from sender
+                set numAttachments to count of mail attachments
+                set output to output & id & "$break" & subject & "$break" & senderName & "$break" & senderAddress & "$break" & date sent & "$break" & read status & "$break" & numAttachments & "$end"
+              end tell
             end try
           end repeat
       end tell
@@ -83,21 +77,17 @@ export const getAccountMessages = async (
     const response: string[] = (await runAppleScript(script)).split("$end");
     response.pop();
     const messages: Message[] = response.map((line: string) => {
-      const [id, subject, sender, senderEmail, date, read, replyTo, replied, forwarded, redirected] =
-        line.split("$break");
+      const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
       return {
         id,
         account: accountId,
         subject,
         content: "",
-        sender,
-        senderEmail,
+        senderName,
+        senderAddress,
         date: constructDate(date),
         read: read === "true",
-        replyTo,
-        replied: replied === "true",
-        forwarded: forwarded === "true",
-        redirected: redirected === "true",
+        numAttachments: parseInt(numAttachments),
       };
     });
     return unreadOnly ? messages.filter((msg: Message) => !msg.read) : messages;
@@ -112,6 +102,7 @@ export const getMessageContent = async (message: Message): Promise<Message> => {
     const content = await tellMessage(message, "tell msg to return content");
     return { ...message, content };
   } catch (error: any) {
+    showToast(Toast.Style.Failure, "Error Getting Message Content");
     console.error(error);
     return message;
   }

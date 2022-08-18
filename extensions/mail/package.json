@@ -11,6 +11,16 @@
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "attachmentsDirectory",
+      "title": "Attachments Directory",
+      "description": "Directory to save mail attachments.",
+      "type": "textfield", 
+      "default": "~/Downloads",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "new-message",
@@ -43,11 +53,13 @@
     "email-regex": "^5.0.0",
     "javascript-time-ago": "^2.5.7",
     "json2md": "^1.12.0",
+    "mime-types": "^2.1.35",
     "node-fetch": "^3.2.10",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/json2md": "^1.5.1",
+    "@types/mime-types": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
