@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lifx",
   "title": "LIFX",
-  "description": "Control your lifx lights with this extension",
+  "description": "Control your lifx lights",
   "icon": "lifx-extension-icon.png",
   "author": "felixb1010",
   "categories": [
