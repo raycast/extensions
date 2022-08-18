@@ -1,39 +1,12 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface IncidentItem {
-  id: string;
-  type: string;
-  attributes: IncidentItemAttributes;
-}
-
-interface IncidentItemAttributes {
-  name: string;
-  url: string;
-  http_method: string;
-  cause: string;
-  started_at: string;
-  screenshot_url: string;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-}
-
-interface State {
-  isLoading: boolean;
-  items: IncidentItem[];
-  error?: any;
-}
+import { ActionCopyScreenshotUrl, ActionDeleteIncident } from "./actions";
+import { IncidentItem, IncidentsState, Preferences } from "./interface";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
+  const [state, setState] = useState<IncidentsState>({ items: [], isLoading: true });
 
   useEffect(() => {
     async function fetchIncidents() {
@@ -109,22 +82,20 @@ export default function Command() {
           actions={
             <ActionPanel>
               {item.attributes.screenshot_url && (
-                <Action.OpenInBrowser title="Open Screenshot in Browser" url={item.attributes.screenshot_url} />
+                <>
+                  <Action.OpenInBrowser title="Open Screenshot in Browser" url={item.attributes.screenshot_url} />
+                  <ActionCopyScreenshotUrl url={item.attributes.screenshot_url} />
+                </>
               )}
-              {item.attributes.screenshot_url && (
-                <Action
-                  title="Copy Screenshot URL"
-                  icon={Icon.Clipboard}
-                  onAction={async () => {
-                    await Clipboard.copy(item.attributes.screenshot_url);
-
-                    showToast({
-                      title: "Copied",
-                      message: "Screenshot URL copied to clipboard",
-                    });
-                  }}
-                />
-              )}
+              <ActionDeleteIncident
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
+                }}
+              />
             </ActionPanel>
           }
         />

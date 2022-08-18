@@ -35,50 +35,58 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
       isLoading={isLoading || !user}
       searchBarAccessory={<>{user && <SearchBarAccessory onTeamChange={onTeamChange} />}</>}
     >
-      {deployments?.map((deployment) => (
-        <List.Item
-          title={`${getCommitMessage(deployment)}`}
-          icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
-          subtitle={`${!projectId ? ` ${deployment.name}` : ""}`}
-          keywords={[deployment.name, getCommitMessage(deployment) || ""]}
-          key={deployment.uid}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Show Details"
-                icon={Icon.Binoculars}
-                onAction={() => {
-                  push(
-                    <InspectDeployment username={user?.username} deployment={deployment} selectedTeam={selectedTeam} />
-                  );
-                }}
-              />
-              <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
-              {user && (
-                <Action.OpenInBrowser
-                  title={`Visit on Vercel`}
-                  url={getDeploymentURL(
-                    selectedTeam ? selectedTeam.name : user.username,
-                    deployment.name,
-                    /* @ts-expect-error Property id does not exist on type Deployment */
-                    deployment.id || deployment.uid
-                  )}
-                  icon={Icon.Link}
+      {deployments?.map((deployment) => {
+        const branchName = getCommitDeploymentBranch(deployment);
+        return (
+          <List.Item
+            title={`${getCommitMessage(deployment)}`}
+            icon={StateIcon(deployment.readyState ? deployment.readyState : deployment.state)}
+            subtitle={`${!projectId ? ` ${deployment.name}` : ""}`}
+            keywords={[deployment.name, getCommitMessage(deployment) || "", branchName]}
+            key={deployment.uid}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Show Details"
+                  icon={Icon.Binoculars}
+                  onAction={() => {
+                    push(
+                      <InspectDeployment
+                        username={user?.username}
+                        deployment={deployment}
+                        selectedTeam={selectedTeam}
+                      />
+                    );
+                  }}
                 />
-              )}
-            </ActionPanel>
-          }
-          accessories={[
-            {
-              text: deployment.readyState ? deployment.readyState.toLowerCase() : deployment.state?.toLowerCase(),
-            },
-            {
-              text: deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : "",
-              tooltip: deployment.createdAt ? new Date(deployment.createdAt).toLocaleString() : "",
-            },
-          ]}
-        />
-      ))}
+                <Action.OpenInBrowser title={`Visit in Browser`} url={`https://${deployment.url}`} icon={Icon.Link} />
+                {user && (
+                  <Action.OpenInBrowser
+                    title={`Visit on Vercel`}
+                    url={getDeploymentURL(
+                      selectedTeam ? selectedTeam.name : user.username,
+                      deployment.name,
+                      /* @ts-expect-error Property id does not exist on type Deployment */
+                      deployment.id || deployment.uid
+                    )}
+                    icon={Icon.Link}
+                  />
+                )}
+              </ActionPanel>
+            }
+            accessories={[
+              {
+                text: branchName,
+                icon: branchName ? { source: "boxicon-git-branch.svg", tintColor: Color.SecondaryText } : null,
+              },
+              {
+                text: deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : "",
+                tooltip: deployment.createdAt ? new Date(deployment.createdAt).toLocaleString() : "",
+              },
+            ]}
+          />
+        );
+      })}
     </List>
   );
 };
@@ -91,6 +99,11 @@ const getCommitMessage = (deployment: Deployment) => {
     return deployment.meta.githubCommitMessage;
   }
   return "No commit message";
+};
+
+const getCommitDeploymentBranch = (deployment: Deployment) => {
+  // TODO: support other providers beside GitHub
+  return deployment.meta.githubCommitRef ?? null;
 };
 
 const StateIcon = (state?: DeploymentState) => {

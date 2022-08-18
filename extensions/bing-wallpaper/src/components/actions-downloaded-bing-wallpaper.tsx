@@ -38,7 +38,7 @@ export function ActionsDownloadedBingWallpaper(props: {
       />
       <ActionPanel.Section>
         <Action
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.ArrowClockwise}
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {

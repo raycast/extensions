@@ -5,13 +5,24 @@
   "description": "A quick way to generate UUIDs without opening the browser",
   "icon": "command-icon.png",
   "author": "jmaeso",
+  "contributors": [
+    "GastroGeek"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "generate",
-      "title": "Generate UUID",
-      "description": "Copy a generated UUID to the clipboard",
-      "mode": "no-view"
+      "title": "Generate UUIDs",
+      "description": "Copy generated UUIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name" : "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
