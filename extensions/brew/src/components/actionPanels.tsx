@@ -1,5 +1,11 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { brewIsInstalled, brewInstallPath, brewExecutable } from "../brew";
+import {
+  brewIsInstalled,
+  brewInstallPath,
+  brewInstallCommand,
+  brewUninstallCommand,
+  brewUpgradeCommand,
+} from "../brew";
 import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
@@ -34,14 +40,14 @@ export function CaskActionPanel(props: {
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
           <Action.CopyToClipboard
             title="Copy Uninstall Command"
-            content={`${brewExecutable()} uninstall --cask ${cask.name}`}
+            content={brewUninstallCommand(cask)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
             title="Run Uninstall In Terminal"
             icon={Icon.Terminal}
             onAction={() => {
-              runCommandInTerminal(`${brewExecutable()} uninstall --cask ${cask.name}`);
+              runCommandInTerminal(brewUninstallCommand(cask));
             }}
           />
         </ActionPanel.Section>
@@ -82,14 +88,14 @@ export function CaskActionPanel(props: {
           />
           <Action.CopyToClipboard
             title="Copy Install Command"
-            content={`${brewExecutable()} install --cask ${cask.name}`}
+            content={brewInstallCommand(cask)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
             title="Run Install In Terminal"
             icon={Icon.Terminal}
             onAction={() => {
-              runCommandInTerminal(`${brewExecutable()} install --cask ${cask.name}`);
+              runCommandInTerminal(brewInstallCommand(cask));
             }}
           />
         </ActionPanel.Section>
@@ -138,14 +144,14 @@ export function FormulaActionPanel(props: {
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
           <Action.CopyToClipboard
             title="Copy Uninstall Command"
-            content={`${brewExecutable()} uninstall ${formula.name}`}
+            content={brewUninstallCommand(formula)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
             title="Run Uninstall In Terminal"
             icon={Icon.Terminal}
             onAction={() => {
-              runCommandInTerminal(`${brewExecutable()} uninstall ${formula.name}`);
+              runCommandInTerminal(brewUninstallCommand(formula));
             }}
           />
         </ActionPanel.Section>
@@ -178,14 +184,14 @@ export function FormulaActionPanel(props: {
 
           <Action.CopyToClipboard
             title="Copy Install Command"
-            content={`${brewExecutable()} install ${formula.name}`}
+            content={brewInstallCommand(formula)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
             title="Run Install In Terminal"
             icon={Icon.Terminal}
             onAction={() => {
-              runCommandInTerminal(`${brewExecutable()} install ${formula.name}`);
+              runCommandInTerminal(brewInstallCommand(formula));
             }}
           />
         </ActionPanel.Section>
@@ -222,7 +228,29 @@ export function OutdatedActionPanel(props: {
         {isPinable(outdated) && <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />}
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title="Copy Upgrade Command"
+          content={brewUpgradeCommand(outdated)}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
+        <Action
+          title="Run Upgrade In Terminal"
+          icon={Icon.Terminal}
+          onAction={() => {
+            runCommandInTerminal(brewUpgradeCommand(outdated));
+          }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
         <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
+        <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
+        <Action
+          title="Run Uninstall In Terminal"
+          icon={Icon.Terminal}
+          onAction={() => {
+            runCommandInTerminal(brewUninstallCommand(outdated));
+          }}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );
