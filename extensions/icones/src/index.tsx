@@ -92,11 +92,11 @@ export default function Command() {
                   title="Copy to Clipboard"
                   icon={Icon.Clipboard}
                   onAction={async () => {
-                    const snippte = await getIconSnippet(icon, copySelect, true);
-                    if (snippte) {
+                    try {
+                      const snippte = (await getIconSnippet(icon, copySelect, true)) ?? "";
                       await Clipboard.copy(snippte);
                       await showHUD("Copied to Clipboard 🎉");
-                    } else {
+                    } catch (err) {
                       await showHUD("Error copying to clipboard 😞");
                     }
                   }}
@@ -105,11 +105,11 @@ export default function Command() {
                   title="Paste to Cursor"
                   icon={Icon.TextCursor}
                   onAction={async () => {
-                    const snippte = await getIconSnippet(icon, copySelect, false);
-                    if (snippte) {
+                    try {
+                      const snippte = (await getIconSnippet(icon, copySelect, false)) ?? "";
                       await Clipboard.paste(snippte);
                       await closeMainWindow();
-                    } else {
+                    } catch (error) {
                       await showHUD("Error pasting to cursor 😞");
                     }
                   }}
