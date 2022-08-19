@@ -3,7 +3,7 @@ import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getGitLabGQL } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
+import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -62,7 +62,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessories={ensureCleanAccessories([{ text: issueCounter }])}
+      accessories={[{ text: issueCounter }]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={milestone.webUrl} />

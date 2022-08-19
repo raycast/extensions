@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { Cache } from '@raycast/api';
 
 interface Response<T> {
   result: T;
@@ -164,6 +165,7 @@ interface Member {
 
 class Service {
   client: AxiosInstance;
+  cache: Cache = new Cache();
 
   constructor(email: string, key: string) {
     this.client = axios.create({
@@ -177,8 +179,17 @@ class Service {
   }
 
   async listAccounts(): Promise<Account[]> {
-    const response = await this.client.get<Response<AccountItem[]>>('accounts');
-    return response.data.result.map((item) => {
+    let data;
+    if (this.cache.has('accounts')) {
+      data = JSON.parse(this.cache.get('accounts')!) as Response<AccountItem[]>;
+    } else {
+      const response = await this.client.get<Response<AccountItem[]>>(
+        'accounts',
+      );
+      data = response.data;
+      this.cache.set('accounts', JSON.stringify(data));
+    }
+    return data.result.map((item) => {
       const { id, name } = item;
       return {
         id,
@@ -187,14 +198,40 @@ class Service {
     });
   }
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   async listZones(account: Account): Promise<Zone[]> {
     const { id } = account;
+
+    let result;
+    // get from cache if cache is available
+    if (this.cache.has(`zones-${id}`)) {
+      try {
+        result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
+        return result.map((item) => formatZone(item));
+      } catch (e) {
+        // Whenever the cache can't be parsed, clear it and fetch from API
+        this.cache.remove(`zones-${id}`);
+      }
+    }
+
     const response = await this.client.get<Response<ZoneItem[]>>('zones', {
-      params: {
-        'account.id': id,
-      },
+      params: { 'account.id': id, per_page: 20 },
     });
-    return response.data.result.map((item) => formatZone(item));
+    result = response.data.result;
+
+    // if page is not the last page, fetch the remaining pages
+    for (let i = 2; i <= response.data.result_info.total_pages; i++) {
+      const next = await this.client.get<Response<ZoneItem[]>>('zones', {
+        params: { 'account.id': id, per_page: 20, page: i },
+      });
+      result = result.concat(next.data.result);
+    }
+
+    this.cache.set(`zones-${id}`, JSON.stringify(response.data));
+    return result.map((item) => formatZone(item));
   }
 
   async getZone(id: string): Promise<Zone> {
@@ -220,6 +257,17 @@ class Service {
       `zones/${zoneId}/purge_cache`,
       {
         files: urls,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeEverything(zoneId: string): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        purge_everything: true,
       },
     );
     const { success, errors, messages, result } = response.data;

@@ -3,7 +3,7 @@ export const annotations = [
     info: {
       name: "File Head Annotation",
       id: "build_in_1647440326836",
-      icon: "doc-plaintext-16",
+      icon: "blank-document-16",
       source: "Build-in",
       visibility: true,
       tag: ["Annotation"],

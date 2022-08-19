@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Add automatic wallpaper switching function] - 2022-08-12
+
+- Change command [Random Raycast Wallpaper] to [Auto Switch Raycast Wallpaper] that will automatically switch random wallpaper every 1 hour when you call it first
+
 ## [Add new wallpaper layout options] - 2022-06-09
 
 - Add new wallpaper layout options: List or Grid.

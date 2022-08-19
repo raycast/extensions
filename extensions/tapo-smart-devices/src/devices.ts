@@ -80,7 +80,7 @@ export const turnDeviceOff = async (device: Device): Promise<void> => {
 };
 
 export const locateDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> => {
-  const localDevices = await find(undefined, true, "/usr/sbin/arp");
+  const localDevices = await find(null, true, "/usr/sbin/arp");
 
   return devices.map((device) => {
     const localDevice = localDevices.find(

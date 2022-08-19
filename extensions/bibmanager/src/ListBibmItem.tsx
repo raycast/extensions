@@ -1,30 +1,22 @@
 import { useState } from "react";
-import { Action, ActionPanel, environment, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, Keyboard, List, Toast } from "@raycast/api";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { join } from "path";
 import { pythonbin } from "./index";
+import { Item } from "./types";
 
-interface Item {
-  title: string;
-  uid: string;
-  link: string;
-  year: number;
-  month: number;
-  content: string;
-  tags: [];
-  authors_tag: [];
-  authors_string: string;
-  pdf: string;
-}
+const openADSShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "enter" };
+const copyLinkShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
+const copyBibkeyShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "b" };
+const copyBibtexShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "t" };
 
-export function ListBibmItem(props: { item: Item; index: number }) {
+export function ListBibmItem(props: { item: Item }) {
   return (
     <List.Item
       icon={Icon.Dot}
       title={props.item.uid ?? "No title"}
       actions={<Actions item={props.item} />}
-      keywords={[props.item.year.toString(), props.item.title, ...props.item.authors_tag, ...props.item.tags]}
       detail={getItemDetail(props.item)}
     />
   );
@@ -35,16 +27,22 @@ function Actions(props: { item: Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {PDFDownloaded && (
-          <Action.OpenWith path={PDFDownloaded} title="Open PDF" shortcut={{ modifiers: [], key: "enter" }} />
-        )}
-        {props.item.link && <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" />}
+        {PDFDownloaded && <Action.OpenWith path={PDFDownloaded} title="Open PDF" />}
         {!PDFDownloaded && (
           <Action.SubmitForm title="Download PDF" icon={Icon.Download} onSubmit={() => DownloadPDF(props.item.uid)} />
         )}
-        {props.item.uid && <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" />}
-        {props.item.content && <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" />}
-        {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" />}
+        {props.item.link && (
+          <Action.OpenInBrowser url={props.item.link} title="Open ADS Link in Browser" shortcut={openADSShortcut} />
+        )}
+        {props.item.uid && (
+          <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" shortcut={copyBibkeyShortcut} />
+        )}
+        {props.item.content && (
+          <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" shortcut={copyBibtexShortcut} />
+        )}
+        {props.item.link && (
+          <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" shortcut={copyLinkShortcut} />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -101,8 +99,16 @@ function getItemDetail(item: Item) {
       markdown={getMarkdown(item)}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Tags" text={`${item.tags.length > 0 ? item.tags.join(", ") : ""}`} />
-          <List.Item.Detail.Metadata.Separator />
+          {item.tags.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Tags">
+              {item.tags.map((tag, uid) => (
+                <List.Item.Detail.Metadata.TagList.Item key={uid} text={tag} color={stringToColour(tag)} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
+          {item.tags.length > 0 && <List.Item.Detail.Metadata.Separator />}
+          {item.link && <List.Item.Detail.Metadata.Link title="SAO/NASA ADS" text={item.adscode} target={item.link} />}
+          {item.link && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Publication Date"
             text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
@@ -117,9 +123,6 @@ function getMarkdown(item: Item) {
   return `## ${item.title}
   
   **Authors**: ${item.authors_string ? item.authors_string : ""}
-  
-  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-  
   `;
 }
 
@@ -141,3 +144,25 @@ const monthMap = new Map<number, string>([
   [11, "November"],
   [12, "December"],
 ]);
+
+function stringToColour(text: string) {
+  const colors: Color.ColorLike[] = [
+    Color.Blue,
+    Color.Brown,
+    Color.Green,
+    Color.Magenta,
+    Color.Orange,
+    Color.Purple,
+    Color.Red,
+    Color.Yellow,
+  ];
+
+  let hash = 0;
+  if (text.length === 0) return colors[0];
+  for (let i = 0; i < text.length; i++) {
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
+  }
+  hash = ((hash % colors.length) + colors.length) % colors.length;
+  return colors[hash];
+}

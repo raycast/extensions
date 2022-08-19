@@ -1,5 +1,13 @@
 # Spaces Changelog
 
+## [Bug fixes] - 2022-08-17
+
+- Bug fixes
+
+## [New Additions] - 2022-07-29
+
+- Added screenshots
+
 ## [New Additions] - 2022-07-08
 
 - A new command "Stop Space" has been introduced that allows you to stop any space that is active.

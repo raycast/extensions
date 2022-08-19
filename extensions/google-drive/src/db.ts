@@ -52,7 +52,8 @@ export const dumpDb = (db: Database) => {
 };
 
 const dbConnection = async () => {
-  const SQL = await initSqlJs({ locateFile: () => join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   if (!existsSync(DB_FILE_PATH)) {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());

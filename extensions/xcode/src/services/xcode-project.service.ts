@@ -1,53 +1,22 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { XcodeProject } from "../models/project/xcode-project.model";
-import { XcodeProjectType } from "../models/project/xcode-project-type.model";
+import { XcodeProject } from "../models/xcode-project/xcode-project.model";
+import { XcodeProjectType } from "../models/xcode-project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
 import { runAppleScript } from "../shared/run-apple-script";
-import { joinPathComponents } from "../shared/join-path-components";
 import untildify from "untildify";
+import * as Path from "path";
+import { getPreferences } from "../shared/get-preferences";
 
 /**
  * XcodeProjectService
  */
 export class XcodeProjectService {
   /**
-   * The XcodeProjects JSON LocalStorage Key
-   */
-  private xcodeProjectsJSONLocalStorageKey = "xcode-projects";
-
-  /**
-   * Retrieve the cached XcodeProjects, if available
-   */
-  async cachedXcodeProjects(): Promise<XcodeProject[] | undefined> {
-    // Retrieve XcodeProjects JSON from LocalStorage
-    const xcodeProjectsJSON = await LocalStorage.getItem<string>(this.xcodeProjectsJSONLocalStorageKey);
-    // Check if XcodeProjects JSON is not available
-    if (!xcodeProjectsJSON) {
-      // Return undefined
-      return undefined;
-    }
-    // Return parsed XcodeProjects
-    return JSON.parse(xcodeProjectsJSON);
-  }
-
-  /**
-   * Cache XcodeProjects
-   * @param xcodeProjects The XcodeProjects that should be cached
-   */
-  private cacheXcodeProjects(xcodeProjects: XcodeProject[]): Promise<void> {
-    // Store XcodeProjects JSON in LocalStorage
-    return LocalStorage.setItem(this.xcodeProjectsJSONLocalStorageKey, JSON.stringify(xcodeProjects));
-  }
-
-  /**
    * Retrieve the excluded Xcode Project paths
    * which are configured via the Raycast Preferences
    */
-  private excludedXcodeProjectPaths(): string[] {
-    // Retrieve the preference values
-    const preferences = getPreferenceValues();
+  private static excludedXcodeProjectPaths(): string[] {
     // Retrieve the excluded Xcode Project paths string from preference values
-    const excludedXcodeProjectPathsString = preferences.excludedXcodeProjectPaths as string;
+    const excludedXcodeProjectPathsString = getPreferences().excludedXcodeProjectPaths;
     // Check if excluded Xcode Project path string is falsy
     if (!excludedXcodeProjectPathsString) {
       // Return an empty array
@@ -68,7 +37,7 @@ export class XcodeProjectService {
   /**
    * Retrieve XcodeProjects
    */
-  async xcodeProjects(): Promise<XcodeProject[]> {
+  static async xcodeProjects(): Promise<XcodeProject[]> {
     // Initialize Spotlight Search Parameters
     const spotlightSearchParameters = [
       "kMDItemDisplayName == *.xcodeproj",
@@ -79,7 +48,7 @@ export class XcodeProjectService {
     // Execute command
     const output = await execAsync(`mdfind '${spotlightSearchParameters.join(" || ")}'`);
     // Retrieve the excluded Xcode Project Paths
-    const excludedXcodeProjectPaths = this.excludedXcodeProjectPaths();
+    const excludedXcodeProjectPaths = XcodeProjectService.excludedXcodeProjectPaths();
     // Initialize XcodeProjects
     const xcodeProjects = output.stdout
       // Split standard output by new line
@@ -100,8 +69,6 @@ export class XcodeProjectService {
       .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
       // Filter out null values
       .filter((xcodeProject) => !!xcodeProject) as XcodeProject[];
-    // Cache XcodeProjects
-    this.cacheXcodeProjects(xcodeProjects).then();
     // Return XcodeProjects
     return xcodeProjects;
   }
@@ -109,7 +76,7 @@ export class XcodeProjectService {
   /**
    * Retrieve the currently opened XcodeProjects
    */
-  async openedXcodeProjects(): Promise<XcodeProject[]> {
+  static async openedXcodeProjects(): Promise<XcodeProject[]> {
     // Declare opened XcodeProject paths
     let openedXcodeProjectPaths: string;
     try {
@@ -144,7 +111,7 @@ export class XcodeProjectService {
             // the opened XcodeProject path is a Swift Package Project
             // which has been opened by clicking the "Package.swift" file.
             // Therefore, the path will be appended with the "Package.swift" file
-            return joinPathComponents(path, "Package.swift");
+            return Path.join(path, "Package.swift");
           } else {
             // Otherwise, return unmodified path
             return path;
@@ -172,7 +139,7 @@ export class XcodeProjectService {
     switch (fileExtension) {
       case XcodeProjectType.project:
       case XcodeProjectType.workspace:
-      case XcodeProjectType.swiftPlayground:
+      case XcodeProjectType.swiftPlayground: {
         // Initialize file name components
         const fileNameComponent = lastPathComponent.split(".");
         // Pop last file name component
@@ -180,6 +147,7 @@ export class XcodeProjectService {
         // Initialize name with re-joined file name components
         name = fileNameComponent.join(".");
         break;
+      }
       case XcodeProjectType.swiftPackage:
         // Initialize name by using the parent directory name otherwise use last path component
         name = xcodeProjectPath.split("/").at(-2) ?? lastPathComponent;

@@ -1,5 +1,12 @@
 # bibmanager Changelog
 
+## [1.2.1] - 2022-08-19
+Migrate to API version 1.39.0 with TagList and Links in Metadata 
+
+## [1.2.0] - 2022-08-11
+- Adds keyboard shortcuts for Actions
+- Adds a new fuzzy search, similar to the fuzzy search from the zotero extension
+
 ## [1.1.0] - 2022-07-04
 Improve the feedback to the user on possible failures.
 

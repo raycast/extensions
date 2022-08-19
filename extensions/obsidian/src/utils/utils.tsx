@@ -11,7 +11,7 @@ import {
 
 import fs from "fs";
 import fsPath from "path";
-import YAML from "yaml";
+import path from "path";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { useEffect, useMemo, useState } from "react";
@@ -24,19 +24,20 @@ import {
   SearchNotePreferences,
   Vault,
   QuickLookPreferences,
+  MediaState,
+  Media,
 } from "../utils/interfaces";
 
 import {
   BYTES_PER_KILOBYTE,
   DAY_NUMBER_TO_STRING,
-  INLINE_TAGS_REGEX,
   LATEX_INLINE_REGEX,
   LATEX_REGEX,
   MONTH_NUMBER_TO_STRING,
-  YAML_FRONTMATTER_REGEX,
 } from "./constants";
 import { isNotePinned, unpinNote } from "./pinNoteUtils";
-import NoteLoader from "./NoteLoader";
+import { useNotes } from "./cache";
+import { MediaLoader } from "./loader";
 
 export function filterContent(content: string) {
   const pref: QuickLookPreferences = getPreferenceValues();
@@ -191,24 +192,6 @@ export function sortNoteByAlphabet(a: Note, b: Note) {
   return sortByAlphabet(a.title, b.title);
 }
 
-export function filterNotes(notes: Note[], input: string, byContent: boolean) {
-  if (input.length === 0) {
-    return notes;
-  }
-  return notes
-    .filter((note) => {
-      if (byContent) {
-        return (
-          note.title.toLowerCase().includes(input.toLowerCase()) ||
-          note.content.toLowerCase().includes(input.toLowerCase())
-        );
-      } else {
-        return note.title.toLowerCase().includes(input.toLowerCase());
-      }
-    })
-    .sort(sortNoteByAlphabet);
-}
-
 export function wordCount(str: string) {
   return str.split(" ").length;
 }
@@ -303,89 +286,23 @@ export const getOpenVaultTarget = (vault: Vault) => {
   return "obsidian://open?vault=" + encodeURIComponent(vault.name);
 };
 
+export const getOpenPathInObsidianTarget = (path: string) => {
+  return "obsidian://open?path=" + encodeURIComponent(path);
+};
+
 export const getDailyNoteTarget = (vault: Vault) => {
   return "obsidian://advanced-uri?vault=" + encodeURIComponent(vault.name) + "&daily=true";
 };
 
-function getListOfInlineTags(notes: Note[]) {
-  const foundTags: string[] = [];
-  for (const note of notes) {
-    const tags = [...note.content.matchAll(INLINE_TAGS_REGEX)];
-    for (const tag of tags) {
-      if (!foundTags.includes(tag[1])) {
-        foundTags.push(tag[1]);
-      }
+export function getListOfExtensions(media: Media[]) {
+  const foundExtensions: string[] = [];
+  for (const mediaItem of media) {
+    const extension = path.extname(mediaItem.path);
+    if (!foundExtensions.includes(extension) && extension != "") {
+      foundExtensions.push(extension);
     }
   }
-  return foundTags;
-}
-
-export function inlineTagsFor(content: string) {
-  const foundTags: string[] = [];
-  const tags = [...content.matchAll(INLINE_TAGS_REGEX)];
-  for (const tag of tags) {
-    if (!foundTags.includes(tag[1])) {
-      foundTags.push(tag[1]);
-    }
-  }
-  return foundTags;
-}
-
-export function YAMLTagsFor(content: string) {
-  let foundTags: string[] = [];
-  const frontmatter = content.match(YAML_FRONTMATTER_REGEX);
-  if (frontmatter) {
-    try {
-      const parsedYAML = YAML.parse(frontmatter[0].replaceAll("---", ""));
-
-      if (Object.prototype.hasOwnProperty.call(parsedYAML, "tag")) {
-        foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
-      } else if (Object.prototype.hasOwnProperty.call(parsedYAML, "tags")) {
-        foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
-      }
-    } catch {
-      //console.log("Error parsing file: " + note.title);
-    }
-  }
-  foundTags = foundTags.filter((tag: string) => tag != "");
-  return foundTags.map((tag) => "#" + tag);
-}
-
-export function tagsFor(content: string) {
-  const foundTags = inlineTagsFor(content);
-  const foundYAMLTags = YAMLTagsFor(content);
-  for (const tag of foundYAMLTags) {
-    if (!foundTags.includes(tag)) {
-      foundTags.push(tag);
-    }
-  }
-
-  return foundTags.sort(sortByAlphabet);
-}
-
-function getListOfYAMLTags(notes: Note[]) {
-  const foundTags: string[] = [];
-  for (const note of notes) {
-    const tags = YAMLTagsFor(note.content);
-    for (const tag of tags) {
-      if (!foundTags.includes(tag)) {
-        foundTags.push(tag);
-      }
-    }
-  }
-  return foundTags;
-}
-
-export function getListOfTags(notes: Note[]) {
-  const foundTags = getListOfInlineTags(notes);
-  const foundYAMLTags = getListOfYAMLTags(notes);
-  for (const tag of foundYAMLTags) {
-    if (!foundTags.includes(tag)) {
-      foundTags.push(tag);
-    }
-  }
-
-  return foundTags.sort(sortByAlphabet);
+  return foundExtensions;
 }
 
 function setExtensionVersion(version: string) {
@@ -410,14 +327,100 @@ export function getRandomNote(vault: Vault | Vault[]) {
   let notes: Note[] = [];
   if (Array.isArray(vault)) {
     for (const v of vault) {
-      const nl = new NoteLoader(v);
-      notes = [...notes, ...nl.loadNotes()];
+      notes = [...notes, ...useNotes(v)];
     }
   } else {
-    const nl = new NoteLoader(vault);
-    notes = nl.loadNotes();
+    notes = useNotes(vault);
   }
 
   const randomNote = notes[Math.floor(Math.random() * notes.length)];
   return randomNote;
+}
+
+export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
+  const files = fs.readdirSync(dirPath);
+
+  arrayOfFiles = arrayOfFiles || [];
+
+  for (const file of files) {
+    const next = fs.statSync(dirPath + "/" + file);
+    if (next.isDirectory() && !file.includes(".obsidian")) {
+      arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
+    } else {
+      if (
+        validFileEnding(file, fileEndings) &&
+        file !== ".md" &&
+        !file.includes(".excalidraw") &&
+        !dirPath.includes(".obsidian") &&
+        validFolder(dirPath, exFolders)
+      ) {
+        arrayOfFiles.push(path.join(dirPath, "/", file));
+      }
+    }
+  }
+
+  return arrayOfFiles;
+}
+
+export function validFolder(folder: string, exFolders: string[]) {
+  for (const f of exFolders) {
+    if (folder.includes(f)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function validFileEnding(file: string, fileEndings: string[]) {
+  for (const ending of fileEndings) {
+    if (file.endsWith(ending)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function prefExcludedFolders() {
+  const pref: SearchNotePreferences = getPreferenceValues();
+  const foldersString = pref.excludedFolders;
+  if (foldersString) {
+    const folders = foldersString.split(",");
+    for (let i = 0; i < folders.length; i++) {
+      folders[i] = folders[i].trim();
+    }
+    return folders;
+  } else {
+    return [];
+  }
+}
+
+export function useMedia(vault: Vault) {
+  const [media, setMedia] = useState<MediaState>({
+    ready: false,
+    media: [],
+  });
+
+  useEffect(() => {
+    async function fetch() {
+      if (!media.ready) {
+        try {
+          await fs.promises.access(vault.path + "/.");
+
+          const ml = new MediaLoader(vault);
+          const media = ml.loadMedia().sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
+
+          setMedia({ ready: true, media });
+        } catch (error) {
+          showToast({
+            title: "The path set in preferences doesn't exist",
+            message: "Please set a valid path in preferences",
+            style: Toast.Style.Failure,
+          });
+        }
+      }
+    }
+    fetch();
+  }, []);
+
+  return media;
 }

@@ -1,5 +1,15 @@
 # Xcode Changelog
 
+## [Menu Bar] - 2022-08-17
+
+- Added "Show Recent Projects in Menu Bar" command to view and open your recent Xcode Projects from the menu bar
+- Added search bar accessory to "Search Recent Projects" command to filter the results based on the project type. 
+
+## [Maintenance Update] - 2022-08-09
+
+- Updated to latest Raycast API
+- Improved components
+
 ## [Open Project Fix] - 2022-04-26
 
 - Always open Xcode Project, Workspace or Swift Package with Xcode
