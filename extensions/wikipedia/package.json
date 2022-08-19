@@ -5,6 +5,7 @@
   "description": "Search Wikipedia articles and view them",
   "icon": "wikipedia.png",
   "author": "vimtor",
+  "contributors": ["shubzkothekar"],
   "license": "MIT",
   "commands": [
     {
