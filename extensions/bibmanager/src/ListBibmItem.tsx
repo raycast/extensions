@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, environment, Icon, List, Toast, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, Keyboard, List, Toast } from "@raycast/api";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { join } from "path";
@@ -99,8 +99,16 @@ function getItemDetail(item: Item) {
       markdown={getMarkdown(item)}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Tags" text={`${item.tags.length > 0 ? item.tags.join(", ") : ""}`} />
-          <List.Item.Detail.Metadata.Separator />
+          {item.tags.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Tags">
+              {item.tags.map((tag, uid) => (
+                <List.Item.Detail.Metadata.TagList.Item key={uid} text={tag} color={stringToColour(tag)} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
+          {item.tags.length > 0 && <List.Item.Detail.Metadata.Separator />}
+          {item.link && <List.Item.Detail.Metadata.Link title="SAO/NASA ADS" text={item.adscode} target={item.link} />}
+          {item.link && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Publication Date"
             text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
@@ -115,9 +123,6 @@ function getMarkdown(item: Item) {
   return `## ${item.title}
   
   **Authors**: ${item.authors_string ? item.authors_string : ""}
-  
-  ${item.link ? "[Open in ADS](" + item.link + ")" : ""}
-  
   `;
 }
 
@@ -139,3 +144,25 @@ const monthMap = new Map<number, string>([
   [11, "November"],
   [12, "December"],
 ]);
+
+function stringToColour(text: string) {
+  const colors: Color.ColorLike[] = [
+    Color.Blue,
+    Color.Brown,
+    Color.Green,
+    Color.Magenta,
+    Color.Orange,
+    Color.Purple,
+    Color.Red,
+    Color.Yellow,
+  ];
+
+  let hash = 0;
+  if (text.length === 0) return colors[0];
+  for (let i = 0; i < text.length; i++) {
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
+  }
+  hash = ((hash % colors.length) + colors.length) % colors.length;
+  return colors[hash];
+}
