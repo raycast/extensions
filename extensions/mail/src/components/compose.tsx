@@ -21,7 +21,7 @@ interface OutgoingMessageForm {
   account: string;
   to: string[];
   cc: string[];
-  bcc: string[];  
+  bcc: string[];
   subject: string;
   content: string;
 }
@@ -70,10 +70,10 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       recipients: values.to,
       ccs: values.cc,
       bccs: values.bcc,
-      subject: values.subject, 
+      subject: values.subject,
       content: values.content,
-      attachments: attachments
-    }
+      attachments: attachments,
+    };
     await newOutgoingMessage(message);
   };
 
@@ -94,11 +94,19 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
           <Action.Push
             title="Add Attachments"
             icon={Icon.Paperclip}
-            target={<SelectAttachments setAttachments={setMailAttachments} />}
+            target={<SelectAttachments attachments={attachments} setAttachments={setMailAttachments} />}
           />
         </ActionPanel>
       }
     >
+      <Form.Description
+        title=""
+        text={
+          attachments.length === 0
+            ? "To add attachments, press ⌘ + ⇧ + ⏎"
+            : "See attachments at the bottom, press ⌘ + ⇧ + ⏎ to edit"
+        }
+      />
       <Form.Dropdown id="account" title="From" onChange={setAccount}>
         {accounts?.map((account: Account, index: number) => (
           <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
@@ -109,14 +117,13 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
         title="To"
         autoFocus={true}
         recipients={recipients}
-        defaultValue={props.recipient ? [props.recipient] : undefined}
+        recipient={props.recipient}
         required={true}
       />
       <SelectRecipients id="cc" recipients={recipients} />
       <SelectRecipients id="bcc" recipients={recipients} />
       <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
       <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
-      {attachments.length === 0 && <Form.Description title="Attach" text={"To add attachments, press ⌘ + ⇧ + ⏎"} />}
       {attachments.map((attachment: string, index: number) => (
         <Form.Description key={index} title={index === 0 ? "Attachments" : ""} text={attachment} />
       ))}
@@ -124,10 +131,12 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
   );
 };
 
-type SelectRecipientsProps = Form.TagPicker.Props & {
+type SelectRecipientsProps = any & {
   recipients: string[];
+  recipient?: string;
   required?: boolean;
-}
+  useTextField?: boolean;
+};
 
 const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
   const requiredError = props.required ? "This field cannot be empty" : undefined;
@@ -140,15 +149,16 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
         setError("Invalid email address");
       }
     } else {
-      setError("This field cannot be empty");
+      setError("Email address cannot be empty");
     }
   };
-  return (
+  return !(props.recipients.length < 25 || props.useTextField) ? (
     <Form.TagPicker
       {...props}
-      title={titleCase(props.id)}
-      placeholder="Enter email address..."
       error={error}
+      title={titleCase(props.id)}
+      defaultValue={[props.recipient]}
+      placeholder="Enter email address..."
       onChange={(values: string[]) => {
         if (values.length > 0) {
           values.forEach((value: string) => checkRecipient(value));
@@ -161,5 +171,17 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
         <Form.TagPicker.Item key={index} value={account} title={account} />
       ))}
     </Form.TagPicker>
+  ) : (
+    <Form.TextField
+      {...props}
+      error={error}
+      title={titleCase(props.id)}
+      defaultValue={props.recipient}
+      placeholder="Enter email address..."
+      info="Enter email addresses separated by commas"
+      onChange={(value: string) => {
+        value.split(",").forEach((recipient: string) => checkRecipient(recipient.trim()));
+      }}
+    />
   );
 };

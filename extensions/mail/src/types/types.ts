@@ -49,5 +49,6 @@ export interface Attachment {
 }
 
 export interface Preferences {
-  attachmentsDirectory: string;
+  saveDirectory: string;
+  selectDirectory: string;
 }

@@ -7,13 +7,12 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 
 const preferences: Preferences = getPreferenceValues();
-let downloadDirectory = preferences.attachmentsDirectory.replace("~", homedir());
-export const attachmentsDirectory = downloadDirectory;
-if (existsSync(downloadDirectory)) {
-  downloadDirectory = downloadDirectory.replace(homedir() + "/", "").replaceAll("/", ":");
-} else {
-  downloadDirectory = "Downloads";
+let downloadDirectory = preferences.saveDirectory.replace("~", homedir());
+const attachmentsDirectory = downloadDirectory;
+if (!existsSync(downloadDirectory)) {
+  downloadDirectory = `${homedir()}/Downloads`;
 }
+downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
 
 export const getMessageAttachments = async (message: Message): Promise<Attachment[]> => {
   try {
@@ -59,7 +58,7 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
     name = attachment.name;
   }
   const script = `
-    set attachmentsFolder to ((path to home folder as text) & "${downloadDirectory}") as text
+    set attachmentsFolder to "${downloadDirectory}"
     tell msg
       set selectedAttachment to (first mail attachment whose id is "${attachment.id}")
       set attachmentName to "${name}"
@@ -98,7 +97,7 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
 
 export const saveAllAttachments = async (message: Message) => {
   const script = `
-    set attachmentsFolder to ((path to home folder as text) & "${downloadDirectory}") as text
+    set attachmentsFolder to "${downloadDirectory}"
     tell msg 
       repeat with selectedAttachment in mail attachments
         set attachmentName to name of selectedAttachment

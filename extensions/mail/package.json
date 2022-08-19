@@ -13,9 +13,17 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "attachmentsDirectory",
-      "title": "Attachments Directory",
+      "name": "saveDirectory",
+      "title": "Save Attachments To",
       "description": "Directory to save mail attachments.",
+      "type": "textfield",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "selectDirectory", 
+      "title": "Select Attachments From",
+      "description": "Directory to select mail attachments.",
       "type": "textfield",
       "default": "~/Downloads",
       "required": false
