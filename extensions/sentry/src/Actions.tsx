@@ -8,6 +8,7 @@ export type ActionsProps = {
   issue: Issue;
   organization?: Organization;
   mutateList?: MutatePromise<Issue[] | undefined>;
+  mutateDetail?: MutatePromise<Issue | undefined>;
   isDetail?: boolean;
 };
 
@@ -28,7 +29,12 @@ export function Actions(props: ActionsProps) {
       </ActionPanel.Section>
       <ActionPanel.Section>
         {props.organization ? (
-          <AssignToAction issue={props.issue} organization={props.organization} mutateList={props.mutateList} />
+          <AssignToAction
+            issue={props.issue}
+            organization={props.organization}
+            mutateList={props.mutateList}
+            mutateDetail={props.mutateDetail}
+          />
         ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -51,6 +57,7 @@ function AssignToAction(props: {
   issue: Issue;
   organization: Organization;
   mutateList?: MutatePromise<Issue[] | undefined>;
+  mutateDetail?: MutatePromise<Issue | undefined>;
 }) {
   const { data } = useUsers(props.organization.slug, props.issue.project.id);
 
@@ -61,8 +68,24 @@ function AssignToAction(props: {
     try {
       if (props.mutateList) {
         await props.mutateList(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
-          optimisticUpdate: (data) => {
-            return data;
+          optimisticUpdate(data) {
+            if (!data) {
+              return;
+            }
+
+            return data.map((x) => (x.id === props.issue.id ? { ...x, assignedTo: user } : x));
+          },
+        });
+      }
+
+      if (props.mutateDetail) {
+        await props.mutateDetail(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return;
+            }
+
+            return { ...data, assignedTo: user };
           },
         });
       }

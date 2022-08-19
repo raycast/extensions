@@ -18,10 +18,13 @@ export function useIssues(project?: Project) {
   });
 }
 
-export function useLatestEvent(issue?: Issue) {
-  return useFetch<Event>(`https://sentry.io/api/0/issues/${issue?.id}/events/latest/`, {
+export function useIssueDetails(issue: Issue) {
+  return useFetch<Issue>(`https://sentry.io/api/0/issues/${issue.id}/`, { headers });
+}
+
+export function useLatestEvent(issue: Issue) {
+  return useFetch<Event>(`https://sentry.io/api/0/issues/${issue.id}/events/latest/`, {
     headers,
-    execute: !!issue,
   });
 }
 

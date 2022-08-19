@@ -131,7 +131,7 @@ export type Breadcrumbs = {
   };
 };
 
-export type Breadcrumb = DefaultBreadcrumb | HTTPBreadcrumb | DebugBreadcrumb | InfoBreadcrumb;
+export type Breadcrumb = DefaultBreadcrumb | HTTPBreadcrumb | DebugBreadcrumb | InfoBreadcrumb | ErrorBreadcrumb;
 
 export type DefaultBreadcrumb = {
   category: string;
@@ -172,6 +172,15 @@ export type DebugBreadcrumb = {
 
 export type InfoBreadcrumb = {
   type: "info";
+  timestamp: string;
+  level: string;
+  message: string;
+  category: "string";
+  data: object;
+};
+
+export type ErrorBreadcrumb = {
+  type: "error";
   timestamp: string;
   level: string;
   message: string;

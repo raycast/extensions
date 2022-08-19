@@ -1,7 +1,7 @@
 import { Detail, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { Actions } from "./Actions";
-import { useLatestEvent } from "./sentry";
+import { useIssueDetails, useLatestEvent } from "./sentry";
 import { Breadcrumb, Breadcrumbs, Event, Exception, Issue, Organization, Tag } from "./types";
 import { getFormattedEventsCount, getFormattedAffectedUsersCount, getAssigneeIcon } from "./utils";
 
@@ -22,6 +22,10 @@ function formatBreadcrumb(breadcrumb: Breadcrumb) {
         breadcrumb.data
       )} _(${breadcrumb.category})_`;
     case "info":
+      return `- **${timeFormatter.format(new Date(breadcrumb.timestamp))}:** ${breadcrumb.message} ${JSON.stringify(
+        breadcrumb.data
+      )} _(${breadcrumb.category})_`;
+    case "error":
       return `- **${timeFormatter.format(new Date(breadcrumb.timestamp))}:** ${breadcrumb.message} ${JSON.stringify(
         breadcrumb.data
       )} _(${breadcrumb.category})_`;
@@ -118,38 +122,55 @@ export type IssueDetailsProps = {
 };
 
 export function IssueDetails(props: IssueDetailsProps) {
-  const { data, isLoading } = useLatestEvent(props.issue);
+  const { data: latestEvent, isLoading: isLoadingLatestEvent } = useLatestEvent(props.issue);
+  const { data: issue, isLoading: isLoadingIssueDetails, mutate } = useIssueDetails(props.issue);
 
-  const markdown = `# ${props.issue.title}\n${formatException(data)}\n${formatLastEvent(data)}\n${formatBreadcrumbs(
-    data
-  )}`;
+  const markdown = `# ${props.issue.title}\n${formatException(latestEvent)}\n${formatLastEvent(
+    latestEvent
+  )}\n${formatBreadcrumbs(latestEvent)}`;
 
   return (
     <Detail
       navigationTitle={props.issue.shortId}
-      isLoading={isLoading}
+      isLoading={isLoadingLatestEvent || isLoadingIssueDetails}
       markdown={markdown}
-      metadata={<IssueMetadata issue={props.issue} lastEvent={data} />}
-      actions={<Actions issue={props.issue} organization={props.organization} mutateList={props.mutateList} isDetail />}
+      metadata={<IssueMetadata issue={issue} lastEvent={latestEvent} />}
+      actions={
+        <Actions
+          issue={props.issue}
+          organization={props.organization}
+          mutateList={props.mutateList}
+          mutateDetail={mutate}
+          isDetail
+        />
+      }
     />
   );
 }
 
-function IssueMetadata(props: { issue: Issue; lastEvent?: Event }) {
+function IssueMetadata(props: { issue?: Issue; lastEvent?: Event }) {
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label icon={Icon.ArrowClockwise} title="Events" text={getFormattedEventsCount(props.issue)} />
-      <Detail.Metadata.Label icon={Icon.Person} title="Users" text={getFormattedAffectedUsersCount(props.issue)} />
-      <Detail.Metadata.Label
-        icon={Icon.Clock}
-        title="Last Seen"
-        text={new Date(props.issue.lastSeen).toLocaleString()}
-      />
-      <Detail.Metadata.Label
-        icon={getAssigneeIcon(props.issue)}
-        title="Assignee"
-        text={props.issue.assignedTo?.name ?? "Unassigned"}
-      />
+      {props.issue && (
+        <Detail.Metadata.Label icon={Icon.ArrowClockwise} title="Events" text={getFormattedEventsCount(props.issue)} />
+      )}
+      {props.issue && (
+        <Detail.Metadata.Label icon={Icon.Person} title="Users" text={getFormattedAffectedUsersCount(props.issue)} />
+      )}
+      {props.issue && (
+        <Detail.Metadata.Label
+          icon={Icon.Clock}
+          title="Last Seen"
+          text={new Date(props.issue.lastSeen).toLocaleString()}
+        />
+      )}
+      {props.issue && (
+        <Detail.Metadata.Label
+          icon={getAssigneeIcon(props.issue)}
+          title="Assignee"
+          text={props.issue.assignedTo?.name ?? "Unassigned"}
+        />
+      )}
       <Detail.Metadata.Separator />
       <EventTagList tags={props.lastEvent?.tags ?? []} />
     </Detail.Metadata>
