@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Fix bug] - 2022-08-19
 
 - Fix the bug that the icon is not displayed
 
