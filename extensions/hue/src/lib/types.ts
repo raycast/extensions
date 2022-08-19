@@ -88,7 +88,6 @@ export interface Scene {
   id: string;
   name: string;
   type: "LightScene" | "GroupScene";
-  group: id,
+  group: id;
   lights: id[];
-
 }

@@ -1,4 +1,3 @@
-
 export class NoHueBridgeConfiguredError extends Error {
   constructor() {
     super("No Hue Bridge configured");
