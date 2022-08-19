@@ -1,5 +1,9 @@
 # Text Shortcuts Changelog
 
+## [Fix bug] - 2022-08-19
+
+- Fix the bug that the icon is not displayed
+
 ## [Add tags in Grid Layout] - 2022-06-20
 
 - Add tags in Grid Layout

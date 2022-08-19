@@ -3,6 +3,7 @@ export interface Item {
   uid: string;
   link: string;
   year: number;
+  adscode: string;
   month: number;
   content: string;
   tags: [];

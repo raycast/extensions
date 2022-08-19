@@ -4,6 +4,7 @@ import { showToast, Toast } from '@raycast/api'
 import {
   loadTags,
   loadTodos,
+  loadDatabase,
   storeHasDoneToday,
   storeTodos,
 } from '@/services/storage'
@@ -31,6 +32,10 @@ export function useTodos() {
 
   const getInitialData = async () => {
     try {
+      const localDatabase = await loadDatabase()
+      if (localDatabase.databaseUrl) {
+        setNotionDbUrl(formatNotionUrl(localDatabase.databaseUrl))
+      }
       const localTodos = await loadTodos()
       setData(localTodos)
       const localTags = await loadTags()
