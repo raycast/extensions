@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, Icon, getPreferenceValues, popToRoot } from "@raycast/api";
-import { useState } from "react";
-import { TravelMode, makeDirectionsURL, Preferences } from "./utils";
+import { useEffect, useState } from "react";
+import { TravelMode, makeDirectionsURL, Preferences } from "./utils/utils";
+import { fetchItemInput } from "./utils/input";
 
 enum orginOption {
   CurLoc = "",
@@ -17,6 +18,17 @@ export default function Command() {
   const [originAddress, setOriginAddress] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [mode, setMode] = useState<string>(preferences.preferredMode);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function _fetchItemInput() {
+      const inputItem = await fetchItemInput();
+      setDestination(inputItem);
+      setIsLoading(false);
+    }
+
+    _fetchItemInput().then();
+  }, []);
 
   const handleOriginChange = (value: string) => {
     if (value === orginOption.CurLoc) {
@@ -33,6 +45,7 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
@@ -57,9 +70,9 @@ export default function Command() {
       />
       <Form.Separator />
       <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
-        <Form.DropdownItem value={orginOption.CurLoc} title="Current Location" icon="📍" />
-        <Form.DropdownItem value={orginOption.Home} title="Home" icon="🏠" />
-        <Form.DropdownItem value={orginOption.Custom} title="Custom Address" icon="✏️" />
+        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon="📍" />
+        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon="🏠" />
+        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon="✏️" />
       </Form.Dropdown>
       {origin === orginOption.Custom && (
         <Form.TextField
@@ -71,10 +84,10 @@ export default function Command() {
         />
       )}
       <Form.Dropdown id="travelmode" title="Travel Mode" value={mode} onChange={setMode}>
-        <Form.DropdownItem value={TravelMode.Driving} title="Car" icon="🚗" />
-        <Form.DropdownItem value={TravelMode.Transit} title="Public Transport" icon="🚆" />
-        <Form.DropdownItem value={TravelMode.Walking} title="Walk" icon="🚶‍♀️" />
-        <Form.DropdownItem value={TravelMode.Bicycling} title="Bike" icon="🚲" />
+        <Form.Dropdown.Item value={TravelMode.Driving} title="Car" icon="🚗" />
+        <Form.Dropdown.Item value={TravelMode.Transit} title="Public Transport" icon="🚆" />
+        <Form.Dropdown.Item value={TravelMode.Walking} title="Walk" icon="🚶‍♀️" />
+        <Form.Dropdown.Item value={TravelMode.Bicycling} title="Bike" icon="🚲" />
       </Form.Dropdown>
     </Form>
   );

@@ -1,12 +1,25 @@
 import { Action, ActionPanel, Form, Icon, popToRoot } from "@raycast/api";
-import { useState } from "react";
-import { makeSearchURL } from "./utils";
+import { useEffect, useState } from "react";
+import { fetchItemInput } from "./utils/input";
+import { makeSearchURL } from "./utils/utils";
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function _fetchItemInput() {
+      const inputItem = await fetchItemInput();
+      setQuery(inputItem);
+      setIsLoading(false);
+    }
+
+    _fetchItemInput().then();
+  }, []);
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={makeSearchURL(query)} icon={Icon.Globe} onOpen={() => popToRoot()} />
