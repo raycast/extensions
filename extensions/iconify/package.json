@@ -52,10 +52,27 @@
           "value": "copy"
         }
       ]
+    },
+    {
+      "title": "Show Name and Set",
+      "name": "showName", 
+      "label": "Show Name", 
+      "description": "Show name of icons in grid view",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showSet", 
+      "label": "Show Set", 
+      "description": "Show set of icons in grid view",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.39.1",
     "axios": "^0.26.1"
   },
   "devDependencies": {

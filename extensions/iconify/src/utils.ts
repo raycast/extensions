@@ -10,4 +10,10 @@ function toURL(setId: string, id: string): string {
   return `https://api.iconify.design/${setId}/${id}.svg`;
 }
 
+export interface Preferences {
+  primaryAction: 'paste' | 'copy';
+  showName: boolean;
+  showSet: boolean;
+}
+
 export { toSvg, toDataURI, toURL };

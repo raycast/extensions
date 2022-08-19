@@ -2,16 +2,15 @@ import {
   Action,
   ActionPanel,
   Color,
-  List,
+  Grid,
   Cache,
   getPreferenceValues,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Service, { Icon, Set } from './service';
-import { toDataURI, toSvg, toURL } from './utils';
+import { toDataURI, toSvg, toURL, Preferences } from './utils';
 
-const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+const { primaryAction, showName }: Preferences = getPreferenceValues();
 
 const service = new Service();
 const cache = new Cache({
@@ -78,18 +77,20 @@ function Command() {
   }, [activeSetId]);
 
   return (
-    <List
+    <Grid
       isLoading={isLoading}
+      itemSize={Grid.ItemSize.Small}
+      inset={Grid.Inset.Large}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip="Select Icon Set"
           storeValue={true}
           onChange={setActiveSetId}
         >
           {sets.map((set) => (
-            <List.Dropdown.Item key={set.id} title={set.name} value={set.id} />
+            <Grid.Dropdown.Item key={set.id} title={set.name} value={set.id} />
           ))}
-        </List.Dropdown>
+        </Grid.Dropdown>
       }
     >
       {icons.map((icon) => {
@@ -102,15 +103,15 @@ function Command() {
           <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
         );
         return (
-          <List.Item
-            icon={{
+          <Grid.Item
+            content={{
               source: dataURIIcon,
               tintColor: body.includes('currentColor')
                 ? Color.PrimaryText // Monochrome icon
                 : null,
             }}
             key={id}
-            title={id}
+            title={showName ? id : undefined}
             actions={
               <ActionPanel>
                 {primaryAction === 'paste' ? (
@@ -137,7 +138,7 @@ function Command() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 

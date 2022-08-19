@@ -2,16 +2,15 @@ import {
   Action,
   ActionPanel,
   Color,
-  List,
+  Grid,
   getPreferenceValues,
 } from '@raycast/api';
 import { useState } from 'react';
 
 import Service, { Icon } from './service';
-import { toDataURI, toSvg, toURL } from './utils';
+import { toDataURI, toSvg, toURL, Preferences } from './utils';
 
-const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+const { primaryAction, showName, showSet }: Preferences = getPreferenceValues();
 
 const service = new Service();
 
@@ -36,8 +35,14 @@ function Command() {
   }
 
   return (
-    <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
-      <List.EmptyView
+    <Grid
+      throttle
+      isLoading={isLoading}
+      onSearchTextChange={queryIcons}
+      itemSize={Grid.ItemSize.Small}
+      inset={Grid.Inset.Large}
+    >
+      <Grid.EmptyView
         title="No results"
         description={getEmptyViewDescription(query, isLoading)}
       />
@@ -52,20 +57,16 @@ function Command() {
           <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
         );
         return (
-          <List.Item
-            icon={{
+          <Grid.Item
+            content={{
               source: dataURIIcon,
               tintColor: body.includes('currentColor')
                 ? Color.PrimaryText // Monochrome icon
                 : null,
             }}
             key={`${setId}:${id}`}
-            title={id}
-            accessories={[
-              {
-                text: setName,
-              },
-            ]}
+            title={showName ? id : undefined}
+            subtitle={showSet ? setName : undefined}
             actions={
               <ActionPanel>
                 {primaryAction === 'paste' ? (
@@ -92,7 +93,7 @@ function Command() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 
