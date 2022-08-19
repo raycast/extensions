@@ -70,7 +70,7 @@ export const MessageListItem = (message: Message): JSX.Element => {
                 await messageScripts.openMessage(message);
                 await closeMainWindow();
               } catch (error) {
-                showToast(Toast.Style.Failure, "Failed To Open In Mail");
+                await showToast(Toast.Style.Failure, "Failed To Open In Mail");
                 console.error(error);
               }
             }}
@@ -81,7 +81,7 @@ export const MessageListItem = (message: Message): JSX.Element => {
               title="Reply"
               icon={Icon.Reply}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              target={<ComposeMessage reply={true} recipient={message.senderAddress} />}
+              target={<ComposeMessage recipient={message.senderAddress} />}
             />
             <Action.Push
               title="Forward"
@@ -111,9 +111,9 @@ export const MessageListItem = (message: Message): JSX.Element => {
               onAction={async () => {
                 try {
                   await messageScripts.toggleMessageRead(message);
-                  showToast(Toast.Style.Success, `Message Marked as ${message.read ? "Unread" : "Read"}`);
+                  await showToast(Toast.Style.Success, `Message Marked as ${message.read ? "Unread" : "Read"}`);
                 } catch (error) {
-                  showToast(Toast.Style.Failure, `Failed To Mark Message as ${message.read ? "Unread" : "Read"}`);
+                  await showToast(Toast.Style.Failure, `Failed To Mark Message as ${message.read ? "Unread" : "Read"}`);
                   console.error(error);
                 }
               }}

@@ -35,10 +35,10 @@ export interface OutgoingMessage {
   account: string;
   subject: string;
   content: string;
-  recipeints: string[];
+  recipients: string[];
   ccs: string[];
   bccs: string[];
-  attachments: string[];
+  attachments?: string[];
 }
 
 export interface Attachment {

@@ -3,34 +3,37 @@ import { runAppleScript } from "run-applescript";
 import { OutgoingMessage } from "../types/types";
 import emailRegex from "email-regex";
 import { homedir } from "os";
-import fs from "fs"; 
+import fs from "fs";
 
 export const newOutgoingMessage = async (message: OutgoingMessage, action = "send"): Promise<void> => {
-  if (message.recipeints.length === 0) {
-    showToast(Toast.Style.Failure, "No Recipients");
-    return; 
+  if (message.recipients.length === 0) {
+    await showToast(Toast.Style.Failure, "No Recipients");
+    return;
   }
-  for (const recipient of message.recipeints) {
+  for (const recipient of message.recipients) {
     if (!emailRegex({ exact: true }).test(recipient)) {
-      showToast(Toast.Style.Failure, "Invalid Email for Recipient");
+      await showToast(Toast.Style.Failure, "Invalid Email for Recipient");
       return;
     }
   }
-  for (let attachment of message.attachments) {
-    attachment = attachment.replace("~", homedir()); 
+  const attachments = message.attachments && message.attachments.length > 0 ? message.attachments : []; 
+  for (let attachment of attachments) {
+    attachment = attachment.replace("~", homedir());
     if (!fs.existsSync(attachment)) {
-      showToast(Toast.Style.Failure, "Attachment Not Found");
+      await showToast(Toast.Style.Failure, "Attachment Not Found");
       return;
     }
   }
   const script = `
     tell application "Mail"
-      set theTos to {"${message.recipeints.join(`", "`)}"}
+      set theTos to {"${message.recipients.join(`", "`)}"}
       set theCcs to {"${message.ccs.join(`", "`)}"}
       set theBccs to {"${message.bccs.join(`", "`)}"}
-      set theAttachments to {"${message.attachments.join(`", "`)}"}
+      set theAttachments to {"${attachments.join(`", "`)}"}
       set attechmentDelay to 1
-      set newMessage to make new outgoing message with properties {sender:${message.account}, subject:${message.subject}, content:${message.content}, visible:false}
+      set newMessage to make new outgoing message with properties {sender:${message.account}, subject:${
+    message.subject
+  }, content:${message.content}, visible:false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}

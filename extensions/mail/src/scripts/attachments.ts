@@ -43,7 +43,7 @@ export const getMessageAttachments = async (message: Message): Promise<Attachmen
     });
     return attachments;
   } catch (error) {
-    showToast(Toast.Style.Failure, "Error Getting Message Attachments");
+    await showToast(Toast.Style.Failure, "Error Getting Message Attachments");
     console.error(error);
     return [];
   }
@@ -89,9 +89,9 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
         },
       },
     };
-    showToast(options);
+    await showToast(options);
   } catch (error) {
-    showToast(Toast.Style.Failure, "Error Saving Attachment");
+    await showToast(Toast.Style.Failure, "Error Saving Attachment");
     console.error(error);
   }
 };
@@ -121,9 +121,9 @@ export const saveAllAttachments = async (message: Message) => {
         },
       },
     };
-    showToast(options);
+    await showToast(options);
   } catch (error) {
-    showToast(Toast.Style.Failure, "Error Saving Attachments");
+    await showToast(Toast.Style.Failure, "Error Saving Attachments");
     console.error(error);
   }
 };

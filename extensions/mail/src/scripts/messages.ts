@@ -4,7 +4,7 @@ import { constructDate } from "../utils/utils";
 import { Attachment, Message } from "../types/types";
 
 export const tellMessage = async (message: Message, script: string): Promise<string> => {
-  if (!script.includes("msg")) throw("Script must include msg");
+  if (!script.includes("msg")) throw "Script must include msg";
   return await runAppleScript(`
     tell application "Mail"
       set acc to (first account whose id is "${message.account}")
@@ -59,10 +59,10 @@ export const getAccountMessages = async (
       set output to ""
       tell application "Mail"
         set mailAccount to first account whose id is "${accountId}"
-        set accMailBox to (first mailbox of mailAccount whose name is "${mailbox}")
+        set box to (first mailbox of mailAccount whose name is "${mailbox}")
           repeat with i from 1 to ${numMessages}
             try 
-              set msg to message i of accMailBox
+              set msg to message i of box
               tell msg 
                 set senderName to extract name from sender
                 set senderAddress to extract address from sender
@@ -102,7 +102,7 @@ export const getMessageContent = async (message: Message): Promise<Message> => {
     const content = await tellMessage(message, "tell msg to return content");
     return { ...message, content };
   } catch (error: any) {
-    showToast(Toast.Style.Failure, "Error Getting Message Content");
+    await showToast(Toast.Style.Failure, "Error Getting Message Content");
     console.error(error);
     return message;
   }

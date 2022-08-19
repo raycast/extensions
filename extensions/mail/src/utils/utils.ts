@@ -36,7 +36,7 @@ export const shortenText = (text: string, maxLength: number): string => {
   return text;
 };
 
-const titleCase = (str: string): string => {
+export const titleCase = (str: string): string => {
   str = str
     .toLowerCase()
     .split(" ")

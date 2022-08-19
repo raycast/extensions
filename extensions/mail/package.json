@@ -23,6 +23,13 @@
   ],
   "commands": [
     {
+      "name": "check-for-mail",
+      "title": "Check For New Mail",
+      "description": "Check for new mail for all accounts. Uses background refresh to cache information.",
+      "mode": "no-view", 
+      "interval": "1d"
+    },
+    {
       "name": "new-message",
       "title": "New Message",
       "description": "Compose a new message.",

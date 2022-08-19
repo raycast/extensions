@@ -1,40 +1,130 @@
-import { Form, Action, ActionPanel, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, LaunchType, LocalStorage, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getMailAccounts } from "../scripts/account";
-import { Account } from "../types/types";
+import { Account, OutgoingMessage } from "../types/types";
+import { ErrorView } from "./error";
+import { getAllRecipients } from "../background/recipients";
 import emailRegex from "email-regex";
+import { randomUUID } from "crypto";
+import { titleCase } from "../utils/utils";
+import { newOutgoingMessage } from "../scripts/outgoing-message";
+import { SelectAttachments } from "./select-attachment";
 
-interface MessageForm {
+interface ComposeMessageProps {
+  forward?: boolean;
+  redirect?: boolean;
+  // set on reply
+  recipient?: string;
+}
+
+interface OutgoingMessageForm {
   account: string;
-  recipient: string;
+  to: string[];
+  cc: string[];
+  bcc: string[];  
   subject: string;
   content: string;
 }
 
-interface MessageDraft {
-  reply?: boolean;
-  forward?: boolean;
-  redirect?: boolean;
-  recipient?: string;
-}
+export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
+  return <ComposeMessageComponent {...props} /> || <ErrorView />;
+};
 
-export const ComposeMessage = (props: MessageDraft) => {
+export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element | null => {
+  const [account, setAccount] = useState<string | undefined>(undefined);
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
+  const [outgoingMessage, setOutgoingMessage] = useState<OutgoingMessage | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const getAccounts = async () => {
+    setAccounts(await getMailAccounts());
+    setIsLoading(false);
+  };
+
+  const [possibleRecipients, setPossibleRecipients] = useState<string[]>([]);
+
+  const getPossibleRecipients = async () => {
+    const response: string | undefined = await LocalStorage.getItem("all-recipients");
+    if (response) {
+      const recipients = JSON.parse(response);
+      setPossibleRecipients(recipients);
+    } else {
+      setPossibleRecipients([]);
+    }
+  };
+
   useEffect(() => {
-    const getAccounts = async () => {
-      setAccounts(await getMailAccounts());
-      setIsLoading(false);
-    };
+    getPossibleRecipients();
     getAccounts();
     return () => {
       setAccounts([]);
     };
   }, []);
 
-  const [error, setError] = useState<string | undefined>();
+  const handleSubmit = async (values: OutgoingMessageForm) => {
+    const message: OutgoingMessage = {
+      account: values.account,
+      recipients: values.to,
+      ccs: values.cc,
+      bccs: values.bcc,
+      subject: values.subject, 
+      content: values.content
+    }
+    await newOutgoingMessage(message); 
+  };
 
+  const recipients = possibleRecipients.filter((recipient: string) => recipient != account);
+
+  return isLoading ? (
+    <Form isLoading={isLoading}></Form>
+  ) : (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title={props.recipient ? "Send Reply" : props.forward ? "Forward Message" : "Send Message"}
+            icon={props.recipient ? Icon.Reply : props.forward ? Icon.ArrowUpCircle : "../assets/icons/send.svg"}
+            onSubmit={handleSubmit}
+          />
+          <Action.Push
+            title="Add Attachments"
+            icon={Icon.Paperclip}
+            target={<SelectAttachments />}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown id="account" title="From" onChange={setAccount}>
+        {accounts?.map((account: Account, index: number) => (
+          <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
+        ))}
+      </Form.Dropdown>
+      <SelectRecipients
+        id="to"
+        recipients={recipients}
+        defaultValue={props.recipient ? props.recipient : undefined}
+        required={true}
+      />
+      <SelectRecipients id="cc" recipients={recipients} />
+      <SelectRecipients id="bcc" recipients={recipients} />
+      <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
+      <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
+      <Form.Description title="Attach" text="To add attachments, press command + enter." />
+    </Form>
+  );
+};
+
+interface SelectRecipientsProps {
+  id: string;
+  recipients: string[];
+  defaultValue?: string;
+  required?: boolean;
+}
+
+const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
+  const requiredError = props.required ? "This field cannot be empty" : undefined;
+  const [error, setError] = useState<string | undefined>(requiredError);
   const checkRecipient = (recipient: string | undefined) => {
     if (recipient) {
       if (emailRegex({ exact: true }).test(recipient)) {
@@ -46,46 +136,23 @@ export const ComposeMessage = (props: MessageDraft) => {
       setError("This field cannot be empty");
     }
   };
-
-  const handleSubmit = (values: MessageForm) => {
-    console.log(values);
-  };
-
-  return isLoading ? (
-    <Form isLoading={isLoading}></Form>
-  ) : (
-    <Form
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title={props.reply ? "Send Reply" : props.forward ? "Forward Message" : "Send Message"}
-            icon={props.reply ? Icon.Reply : props.forward ? Icon.ArrowUpCircle : "../assets/icons/send.svg"}
-            onSubmit={handleSubmit}
-          />
-        </ActionPanel>
-      }
+  return (
+    <Form.TagPicker
+      id={props.id}
+      title={titleCase(props.id)}
+      placeholder="Enter email address..."
+      error={error}
+      onChange={(values: string[]) => {
+        if (values.length > 0) {
+          values.forEach((value: string) => checkRecipient(value));
+        } else {
+          setError(requiredError);
+        }
+      }}
     >
-      <Form.Dropdown id="account" title="Account">
-        {accounts?.map((account: Account, index: number) => (
-          <Form.Dropdown.Item key={index} title={account.email} value={account.id} />
-        ))}
-      </Form.Dropdown>
-      <Form.TextField
-        id="recipient"
-        title="To"
-        placeholder="Enter email address..."
-        defaultValue={props.recipient && props.reply ? props.recipient : ""}
-        error={error}
-        onChange={(value: string) => {
-          if (error !== undefined) {
-            checkRecipient(value);
-          }
-        }}
-        onBlur={(e) => checkRecipient(e.target.value)}
-      />
-      <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
-      <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
-    </Form>
+      {props.recipients.map((account: string, index: number) => (
+        <Form.TagPicker.Item key={index} value={account} title={account} />
+      ))}
+    </Form.TagPicker>
   );
-}
+};
