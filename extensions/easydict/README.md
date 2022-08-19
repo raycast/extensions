@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/eudic-icon.png" height="128">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easily look up words or translate text. </p>
-<p align="center">🇨🇳 🇬🇧 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
+<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
 </p>
 
 <p align="center">
@@ -11,11 +11,11 @@
 </a>
 </p>
 
-## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/wiki)
+## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
 
-`Easydict` is an easy dictionary, for looking up words or easily translating text. Use it out of the box, automatically detect the input text language, and support Youdao dictionary, **MacOS system translate**, DeepL, Google, Baidu, Tencent, Youdao, and Caiyun translation.
+`Easydict` is an easy dictionary, for looking up words or easily translating text. Use it out of the box, automatically detect the input text language, and support **Linguee** and Youdao dictionary, **MacOS system translate**, DeepL, Google, Baidu, Tencent, Youdao, and Caiyun translation.
 
-![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1658309667-1658309686.png)
+![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
 ## Features
 
@@ -28,24 +28,43 @@
 - [x] Support automatic playback of word pronunciation, which can be turned on in Settings. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort translation results manually.
-- [x] Support **macOS system translation**. (_Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F)_)
+- [x] Support system proxy.
+- [x] Support **macOS system translation**. (_Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
 - [x] Support DeepL, Google, Baidu, Tencent, Youdao, and Caiyun translation.
 - [x] Support 23 languages.
 
 Next:
 
-- [ ] Support more dictionary API, such as homonyms, synonyms, antonyms, Iciba, etc.
+- [ ] Support more dictionary API, such as Google Dictionary, Iciba, etc.
 - [ ] Support to view query history.
 
-**_If you like this extension, please give me a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
+**_If you like this extension, please give it a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1658309750.png)
+---
 
-![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1658584128.png)
+### Linguee Dictionary：English <--> Chinese
 
-![easydict-4](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-4-1658584144.png)
+[void](https://www.linguee.com/english-chinese/search?query=void)
 
-![easydict-5](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1658584150.png)
+![void](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/void-1660921305.png)
+
+![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1660919430.png)
+
+### Linguee Dictionary：English <--> French
+
+[good](https://www.linguee.com/english-french/search?query=good)
+
+![good-French](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/good-French-1660921471.png)
+
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
+
+![easydict-4](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-4-1660916341.png)
+
+### Translation
+
+![easydict-5](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1660916386.png)
+
+![easydict-6](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1660916492.png)
 
 ---
 
@@ -53,11 +72,25 @@ Next:
 
 Actually, it works well without you having to do any extra work. The next are advanced documents for those who want to use `Easydict` better or understand how the extension works.
 
-![setting](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2022-07-16_18.57.16.png)
+![setting](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/setting-1660917402.png)
 
 ### Supported Languages
 
-Currently we support 23 languages: Simplified Chinese, Traditional Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+#### Language Detection
+
+- Tencent: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, Russian, German.
+- Baidu: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+- 🍎Apple: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+- Google: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+#### Dictionary
+
+- Youdao: Chinese (Simplified), Chinese (Traditional), English.
+- Linguee: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+#### Translator
+
+Currently we support 23 languages: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 Details of the languages supported by each translation service are as follows:
 
@@ -115,12 +148,6 @@ For example, if you input a sentence arbitrarily, it will be translated into the
 
 </details>
 
-[Youdao translation](https://fanyi.youdao.com/?keyfrom=dict2.top)
-
-![image-20220531223631425](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220531223631425.png)
-
-![heel](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/heel-1658321695.png)
-
 ### Automatic Query Selected Text
 
 <details><summary> Automatic query selected text of the frontmost application, this option is turned on by default. </summary>
@@ -149,7 +176,7 @@ Play audio content: English words are preferred to be pronounced in an online yo
 
 Use `Cmd + S` to play the pronunciation of words manually.
 
-![beauty](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/beauty-1658321887.png)
+![beauty](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/beauty-1660917383.png)
 
 ### Select Target Translation Language
 
@@ -179,7 +206,11 @@ Name case are insensitive, use comma to separate. Example: `deepl,google,apple,b
 
 ### 🍎 Apple Translate
 
-`Easydict` support MacOS system translate, for more information, please see [How to use macOS Apple System Translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/%E5%A6%82%E4%BD%95%E5%9C%A8-Easydict-%E4%B8%AD%E4%BD%BF%E7%94%A8-macOS-%E8%8B%B9%E6%9E%9C%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91%EF%BC%9F)
+`Easydict` support MacOS system translate, for more information, please see [How to use macOS Apple System Translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)
+
+### System Proxy
+
+When this feature is enabled, `Easydict` will try to get the Mac system proxy. If succeeds, all subsequent network requests will be sent using the system proxy. (This feature is to counteract IP blocking, because some services like Linguee have frequency restrictions on IPs)
 
 ### Translation Services
 
@@ -195,6 +226,8 @@ The following application tutorial is from [`Bob`](https://v0.bobtranslate.com/#
 - [Tencent Translate](https://v0.bobtranslate.com/#/service/translate/tencent)
 
 - [Caiyun Translate](https://v0.bobtranslate.com/#/service/translate/caiyun)
+
+- [DeepL](https://www.deepl.com/translator)
 
 ![image-20220620111449687](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620111449687.png)
 

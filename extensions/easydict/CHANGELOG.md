@@ -1,6 +1,29 @@
 # `Easydict` Changelog
 
-## [v1.4.1] - 2022-08-04
+## [v2.0.0] - 2022-08-20
+
+## ✨ New
+
+- Added support for Linguee dictionary, supporting 19 languages.
+- Added support for Google language detection and Baidu language detection.
+- Added system proxy.
+- Added top show open current query web dictionary and translation action.
+- Added query word and show dictionary and translation at the same time.
+- Added show query language from-to, like English🇺🇸 --> Chinese-Simplified🇨🇳.
+
+![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1660919430.png)
+
+## 💎 Improvements
+
+- Refactored the project code structure.
+- Improved the accuracy of automatic language detection.
+- Used the new Youdao dictionary web page.
+
+### 🐞 Fixes
+
+- Fixed many known issues.
+
+## [v1.4.1] - 2022-08-01
 
 ### 💎 Improvements
 
@@ -52,7 +75,7 @@
 
 ### ✨ New
 
-- Added Apple 🍎 system translation. (Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F))
+- Added Apple 🍎 system translation. (Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md))
 - Added Apple 🍎 system language detection.
 - Added view recent version changelog feature.
 
