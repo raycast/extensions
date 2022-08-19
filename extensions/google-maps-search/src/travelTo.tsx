@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Icon,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useState } from "react";
 import { TravelMode, makeDirectionsURL, Preferences } from "./utils";
 
@@ -43,12 +35,12 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             url={makeDirectionsURL(originAddress, destination, mode)}
             icon={Icon.Globe}
             onOpen={() => popToRoot()}
           />
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={makeDirectionsURL(originAddress, destination, mode)}
             icon={Icon.Clipboard}
             onCopy={() => popToRoot()}
