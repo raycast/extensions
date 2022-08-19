@@ -43,7 +43,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               removePinnedIcon(props.icon.id);
               props.refresh();
-              showToast(Toast.Style.Success, "Removed Pinned Icon");
+              await showToast(Toast.Style.Success, "Removed Pinned Icon");
             }}
           />
           <Action
@@ -53,7 +53,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               clearPinnedIcons(props.platform);
               props.refresh();
-              showToast(Toast.Style.Success, "Pinned Icons Cleared");
+              await showToast(Toast.Style.Success, "Pinned Icons Cleared");
             }}
           />
         </React.Fragment>
@@ -65,7 +65,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
           onAction={async () => {
             await appendPinnedIcon(props.icon);
             props.refresh();
-            showToast(Toast.Style.Success, "Icon Pinned");
+            await showToast(Toast.Style.Success, "Icon Pinned");
           }}
         />
       )}
@@ -78,7 +78,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               await removeRecentIcon(props.icon.id);
               props.refresh();
-              showToast(Toast.Style.Success, "Removed Recent Icon");
+              await showToast(Toast.Style.Success, "Removed Recent Icon");
             }}
           />
           <Action
@@ -88,7 +88,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               await clearRecentIcons(props.platform);
               props.refresh();
-              showToast(Toast.Style.Success, "Recent Icons Cleared");
+              await showToast(Toast.Style.Success, "Recent Icons Cleared");
             }}
           />
         </React.Fragment>

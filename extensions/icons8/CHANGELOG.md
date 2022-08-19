@@ -1,5 +1,9 @@
 # Icons8 Changelog
 
+## [Minor Bug Fix] - 2022-08-18
+
+* Fixed bug with main window not closing when opening downloaded icons in desktop. 
+
 ## [Improvements] - 2022-08-12
 
 * Added option to change background color and add padding.
