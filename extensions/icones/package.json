@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "icones",
+  "title": "Icones",
+  "description": "Search icon, power by Iconify.",
+  "icon": "icon.png",
+  "author": "Fatpandac",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Icons",
+      "description": "Search icons via Iconify.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "got": "^12.3.1",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
