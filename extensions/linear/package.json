@@ -123,6 +123,15 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "issueCustomCopyAction",
+      "type": "textfield",
+      "title": "Issue Custom Copy Action",
+      "description": "Add a custom copy action to the issue's actions following the format you want.\nAvailable keys: {ISSUE_TITLE}, {ISSUE_KEY}, {ISSUE_URL}, {ISSUE_BRANCH_NAME}\nExample: '{ISSUE_ID}: {ISSUE_TITLE} ({ISSUE_URL})'",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@linear/sdk": "^1.22.0",
     "@raycast/api": "^1.38.3",
