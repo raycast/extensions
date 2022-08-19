@@ -93,7 +93,7 @@ export default function Command() {
                   icon={Icon.Clipboard}
                   onAction={async () => {
                     try {
-                      const snippte = (await getIconSnippet(icon, copySelect, true)) ?? "";
+                      const snippte = (await getIconSnippet(icon, copySelect)) ?? "";
                       await Clipboard.copy(snippte);
                       await showHUD("Copied to Clipboard 🎉");
                     } catch (err) {
@@ -106,7 +106,7 @@ export default function Command() {
                   icon={Icon.TextCursor}
                   onAction={async () => {
                     try {
-                      const snippte = (await getIconSnippet(icon, copySelect, false)) ?? "";
+                      const snippte = (await getIconSnippet(icon, copySelect)) ?? "";
                       await Clipboard.paste(snippte);
                       await closeMainWindow();
                     } catch (error) {

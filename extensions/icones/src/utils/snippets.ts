@@ -21,7 +21,7 @@ async function getSvg(icon: string) {
 export function ClearSvg(svgCode: string, reactJSX?: boolean) {
   const keep = ["viewBox", "width", "height", "focusable", "xmlns", "xlink"];
   const $ = cheerio.load(svgCode);
-  for (const key of Object.values($("svg").attr() || {})) {
+  for (const key of Object.keys($("svg").attr() || {})) {
     if (keep.includes(key)) continue;
     $("svg").removeAttr(key);
   }
@@ -29,26 +29,26 @@ export function ClearSvg(svgCode: string, reactJSX?: boolean) {
   return HtmlToJSX($.html("svg"), reactJSX);
 }
 
-export function SvgToJSX(svg: string, name: string, snippet: boolean) {
+export function SvgToJSX(svg: string, name: string) {
   const code = `
 export function ${name}(props) {
   return (
     ${ClearSvg(svg, true).replace(/<svg (.*?)>/, "<svg $1 {...props}>")}
   )
 }`;
-  if (snippet) return code;
-  else return `import React from 'react'\n${code}\nexport default ${name}`;
+
+  return `import React from 'react'\n${code}\nexport default ${name}`;
 }
 
-export function SvgToTSX(svg: string, name: string, snippet: boolean) {
+export function SvgToTSX(svg: string, name: string) {
   const code = `
 export function ${name}(props: SVGProps<SVGSVGElement>) {
   return (
     ${ClearSvg(svg, true).replace(/<svg (.*?)>/, "<svg $1 {...props}>")}
   )
 }`;
-  if (snippet) return code;
-  else return `import React, { SVGProps } from 'react'\n${code}\nexport default ${name}`;
+
+  return `import React, { SVGProps } from 'react'\n${code}\nexport default ${name}`;
 }
 
 export function SvgToVue(svg: string, name: string) {
@@ -67,7 +67,7 @@ export function SvgToSvelte(svg: string) {
   return ClearSvg(svg);
 }
 
-export async function getIconSnippet(icon: string, type: string, snippet = true): Promise<string | undefined> {
+export async function getIconSnippet(icon: string, type: string): Promise<string | undefined> {
   if (!icon) return;
 
   const url = `${API_ENTRY}/${icon}.svg`;
@@ -88,9 +88,9 @@ export async function getIconSnippet(icon: string, type: string, snippet = true)
     case "pure-jsx":
       return ClearSvg(await getSvg(icon));
     case "jsx":
-      return SvgToJSX(await getSvg(icon), toComponentName(icon), snippet);
+      return SvgToJSX(await getSvg(icon), toComponentName(icon));
     case "tsx":
-      return SvgToTSX(await getSvg(icon), toComponentName(icon), snippet);
+      return SvgToTSX(await getSvg(icon), toComponentName(icon));
     case "vue":
       return SvgToVue(await getSvg(icon), toComponentName(icon));
     case "svelte":
