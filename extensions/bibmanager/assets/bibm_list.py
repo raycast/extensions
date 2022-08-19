@@ -16,6 +16,7 @@ if __name__ == "__main__":
                        'authors_tag': [u.purify(author.last) for author in bib.authors],
                        'authors_string': u.get_authors(bib.authors),
                        'tags': bib.tags,
+                       'adscode': bib.bibcode,
                        'content': bib.content}
         if bib.pdf is not None:
             dict_of_bib['pdf'] = u.BM_PDF() + bib.pdf
