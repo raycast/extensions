@@ -42,26 +42,22 @@ export const getAllRecipients = async (): Promise<string[]> => {
   `;
   try {
     const response = await runAppleScript(script);
-    const recipients = response
+    const addresses = response
       .split("$break")
       .filter((recipient: string) => emailRegex({ exact: true }).test(recipient));
     const recipientCount: { [key: string]: number } = {};
-    recipients.forEach((recipient: string) => {
+    addresses.forEach((recipient: string) => {
       if (recipient in recipientCount) {
         recipientCount[recipient]++;
       } else {
         recipientCount[recipient] = 1;
       }
     });
-    for (const [recipient, count] of Object.entries(recipientCount).sort(
-      (a: [string, number], b: [string, number]) => b[1] - a[1]
-    )) {
-      console.log(`${recipient} count: ${count}`);
-    }
-    console.log("Fetched Recipients");
-    return Object.entries(recipientCount)
+    const recipients = Object.entries(recipientCount)
       .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
       .map(([recipient, _]: [string, number]) => recipient);
+    console.log(`Fetched ${recipients.length} Recipients`);
+    return recipients;
   } catch (error) {
     console.error(error);
     return [];

@@ -16,7 +16,7 @@
       "name": "attachmentsDirectory",
       "title": "Attachments Directory",
       "description": "Directory to save mail attachments.",
-      "type": "textfield", 
+      "type": "textfield",
       "default": "~/Downloads",
       "required": false
     }
@@ -26,7 +26,7 @@
       "name": "check-for-mail",
       "title": "Check For New Mail",
       "description": "Check for new mail for all accounts. Uses background refresh to cache information.",
-      "mode": "no-view", 
+      "mode": "no-view",
       "interval": "1d"
     },
     {

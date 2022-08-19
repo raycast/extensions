@@ -33,7 +33,6 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
 export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element | null => {
   const [account, setAccount] = useState<string | undefined>(undefined);
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
-  const [outgoingMessage, setOutgoingMessage] = useState<OutgoingMessage | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getAccounts = async () => {
@@ -49,6 +48,7 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       const recipients = JSON.parse(response);
       setPossibleRecipients(recipients);
     } else {
+      console.log("No recipients found in local storage");
       setPossibleRecipients([]);
     }
   };
@@ -61,6 +61,9 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
     };
   }, []);
 
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const setMailAttachments = (attachments: string[]) => setAttachments(attachments);
+
   const handleSubmit = async (values: OutgoingMessageForm) => {
     const message: OutgoingMessage = {
       account: values.account,
@@ -68,9 +71,10 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       ccs: values.cc,
       bccs: values.bcc,
       subject: values.subject, 
-      content: values.content
+      content: values.content,
+      attachments: attachments
     }
-    await newOutgoingMessage(message); 
+    await newOutgoingMessage(message);
   };
 
   const recipients = possibleRecipients.filter((recipient: string) => recipient != account);
@@ -90,7 +94,7 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
           <Action.Push
             title="Add Attachments"
             icon={Icon.Paperclip}
-            target={<SelectAttachments />}
+            target={<SelectAttachments setAttachments={setMailAttachments} />}
           />
         </ActionPanel>
       }
@@ -102,23 +106,26 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       </Form.Dropdown>
       <SelectRecipients
         id="to"
+        title="To"
+        autoFocus={true}
         recipients={recipients}
-        defaultValue={props.recipient ? props.recipient : undefined}
+        defaultValue={props.recipient ? [props.recipient] : undefined}
         required={true}
       />
       <SelectRecipients id="cc" recipients={recipients} />
       <SelectRecipients id="bcc" recipients={recipients} />
       <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
       <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
-      <Form.Description title="Attach" text="To add attachments, press command + enter." />
+      {attachments.length === 0 && <Form.Description title="Attach" text={"To add attachments, press ⌘ + ⇧ + ⏎"} />}
+      {attachments.map((attachment: string, index: number) => (
+        <Form.Description key={index} title={index === 0 ? "Attachments" : ""} text={attachment} />
+      ))}
     </Form>
   );
 };
 
-interface SelectRecipientsProps {
-  id: string;
+type SelectRecipientsProps = Form.TagPicker.Props & {
   recipients: string[];
-  defaultValue?: string;
   required?: boolean;
 }
 
@@ -138,7 +145,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
   };
   return (
     <Form.TagPicker
-      id={props.id}
+      {...props}
       title={titleCase(props.id)}
       placeholder="Enter email address..."
       error={error}

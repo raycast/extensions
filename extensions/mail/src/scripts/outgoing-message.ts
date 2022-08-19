@@ -16,14 +16,10 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action = "sen
       return;
     }
   }
-  const attachments = message.attachments && message.attachments.length > 0 ? message.attachments : []; 
-  for (let attachment of attachments) {
-    attachment = attachment.replace("~", homedir());
-    if (!fs.existsSync(attachment)) {
-      await showToast(Toast.Style.Failure, "Attachment Not Found");
-      return;
-    }
-  }
+  let attachments = message.attachments && message.attachments.length > 0 ? message.attachments : [];
+  attachments = attachments
+    .filter((attachment: string) => attachment.includes(homedir()) && fs.existsSync(attachment))
+    .map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
   const script = `
     tell application "Mail"
       set theTos to {"${message.recipients.join(`", "`)}"}
@@ -31,9 +27,9 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action = "sen
       set theBccs to {"${message.bccs.join(`", "`)}"}
       set theAttachments to {"${attachments.join(`", "`)}"}
       set attechmentDelay to 1
-      set newMessage to make new outgoing message with properties {sender:${message.account}, subject:${
+      set newMessage to make new outgoing message with properties {sender:"${message.account}", subject:"${
     message.subject
-  }, content:${message.content}, visible:false}
+  }", content:"${message.content}", visible:false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}
@@ -45,8 +41,10 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action = "sen
           make new bcc recipient at end of bcc recipients with properties {address:theBcc}
         end repeat
         repeat with theAttachment in theAttachments
-          make new attachment with properties {file name:theAttachment as alias} at after last paragraph
-          delay attechmentDelay
+          try
+            make new attachment with properties {file name:theAttachment as alias} at after last paragraph
+            delay attechmentDelay
+          end try
         end repeat
       end tell
       ${action} newMessage
