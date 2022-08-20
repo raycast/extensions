@@ -1,10 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
 import { WebClient } from "@slack/web-api";
 import { grabFile } from "./utils/grab-file";
 import { useState, useEffect } from "react";
