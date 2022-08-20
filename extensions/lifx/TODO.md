@@ -1,0 +1,4 @@
+- [x] Add check for api key
+- [ ] Add api function for fetching lights
+- [ ] Add checks for lights compatible with multicolor
+- [ ] Add search feature for lights and scenes
