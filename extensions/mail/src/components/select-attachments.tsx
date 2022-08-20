@@ -16,10 +16,10 @@ import { readdir } from "fs/promises";
 import { homedir } from "os";
 import fs from "fs";
 
-interface SelectAttachmentsProps {
+type SelectAttachmentsProps = {
   attachments: string[];
   setAttachments: (attachments: string[]) => void;
-}
+};
 
 const preferences: Preferences = getPreferenceValues();
 const attachmentsDirectory = preferences.selectDirectory.replace("~", homedir());
@@ -80,18 +80,22 @@ export const SelectAttachments = (props: SelectAttachmentsProps): JSX.Element =>
           key={i}
           title=""
           id={i.toString()}
-          val={i < props.attachments.length ? props.attachments[i] : undefined}
-          storeValue={true}
           autoFocus={i === numAttachments - 1}
           info={i === 0 ? "Select a File or Folder" : undefined}
+          attachment={i < props.attachments.length ? props.attachments[i] : undefined}
         />
       ))}
     </Form>
   );
 };
 
-export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefined }): JSX.Element => {
-  const [attachments, setAttachments] = useState<string[]>([]);
+type SelectFileProps = Form.Dropdown.Props & {
+  attachment?: string;
+};
+
+export const SelectFile = (props: SelectFileProps): JSX.Element => {
+  const isFile = props.attachment && fs.statSync(props.attachment).isFile();
+  const [files, setFiles] = useState<string[]>(props.attachment && isFile ? [props.attachment.split("/").pop()!] : []);
   const [subDirectories, setSubDirectories] = useState<string[]>([]);
 
   const isHidden = (item: string) => {
@@ -99,17 +103,25 @@ export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefine
     return /(^|\/)\.[^\/\.]/g.test(item);
   };
 
-  const [currentDirectory, setCurrentDirectory] = useState<string>(attachmentsDirectory);
-  const [attachment, setAttachment] = useState<string>(currentDirectory);
+  const [currentDirectory, setCurrentDirectory] = useState<string>(
+    props.attachment
+      ? isFile
+        ? props.attachment.split("/").slice(0, -1).join("/")
+        : props.attachment
+      : attachmentsDirectory
+  );
+  const [attachment, setAttachment] = useState<string>(
+    props.attachment && isFile ? `attachment-${props.attachment}` : currentDirectory
+  );
 
   const getDirectoryItems = async (dir: string) => {
     if (dir) {
       const directoryItems = await readdir(dir, { withFileTypes: true });
-      const attachments = directoryItems
+      const files = directoryItems
         .filter((dirent) => dirent.isFile())
         .map((dirent) => dirent.name)
         .filter((item) => !isHidden(item));
-      setAttachments(attachments);
+      setFiles(files);
       const subDirectories = directoryItems
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name)
@@ -138,7 +150,6 @@ export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefine
       {...props}
       error={error}
       value={attachment}
-      storeValue={true}
       onChange={(value: string) => {
         if (value.startsWith("attachment-")) {
           setAttachment(value);
@@ -167,7 +178,7 @@ export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefine
         title={currentDirectory.split("/")[currentDirectory.split("/").length - 1]}
       />
       <Form.Dropdown.Section title="Files">
-        {attachments.map((attachment: string, index: number) => (
+        {files.map((attachment: string, index: number) => (
           <Form.Dropdown.Item key={index} value={`attachment-${currentDirectory}/${attachment}`} title={attachment} />
         ))}
       </Form.Dropdown.Section>
