@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { constructDate } from "../utils/utils";
-import { Message } from "../types/types";
+import { Account, Message } from "../types/types";
 import * as cache from "../utils/cache";
 
 export const tellMessage = async (message: Message, script: string): Promise<string> => {
@@ -49,19 +49,52 @@ export const deleteMessage = async (message: Message): Promise<void> => {
   }
 };
 
+export const getRecipients = async (message: Message): Promise<Message | undefined> => {
+  const script = `
+    set output to ""
+    tell application "Mail"
+      set acc to (first account whose id is "${message.account}")
+      tell acc
+        set msg to (first message of (first mailbox whose name is "All Mail") whose id is "${message.id}")
+        repeat with r in recipients of msg
+          tell r to set output to output & name & "$break" & address & "$end"
+        end repeat
+      end tell
+    end tell
+    return output
+  `;
+  try {
+    const response: string[] = (await runAppleScript(script)).split("$end");
+    response.pop();
+    const recipientNames: string[] = [];
+    const recipientAddresses: string[] = [];
+    for (const line of response) {
+      const [name, address] = line.split("$break");
+      if (address !== message.accountAddress) {
+        recipientNames.push(name);
+        recipientAddresses.push(address);
+      }
+    }
+    return { ...message, recipientNames, recipientAddresses };
+  } catch (error) {
+    console.error(error);
+    return message;
+  }
+};
+
 export const getAccountMessages = async (
-  accountId: string,
+  account: Account,
   cacheMailbox: string,
   mailbox: string = "All Mail",
   numMessages: number = 50,
   unreadOnly: boolean = false
 ): Promise<Message[] | undefined> => {
-  let messages = cache.getMessages(accountId, cacheMailbox);
+  let messages = cache.getMessages(account.id, cacheMailbox);
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
     set output to ""
     tell application "Mail"
-      set mailAccount to first account whose id is "${accountId}"
+      set mailAccount to first account whose id is "${account.id}"
       set box to (first mailbox of mailAccount whose name is "${mailbox}")
         repeat with i from 1 to ${numMessages}
           try 
@@ -86,19 +119,20 @@ export const getAccountMessages = async (
         const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
         return {
           id,
-          account: accountId,
+          account: account.id,
+          accountAddress: account.email,
           subject,
           content: "",
-          senderName,
-          senderAddress,
           date: constructDate(date),
           read: read === "true",
           numAttachments: parseInt(numAttachments),
+          senderName,
+          senderAddress,
         };
       })
       .filter((msg: Message) => !unreadOnly || !msg.read);
     messages = newMessages.concat(messages);
-    cache.setMessages(messages, accountId, cacheMailbox);
+    cache.setMessages(messages, account.id, cacheMailbox);
   } catch (error: any) {
     console.error(error);
   }

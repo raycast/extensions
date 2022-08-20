@@ -1,6 +1,7 @@
 import { List, Detail, Icon, Action, ActionPanel, Color, closeMainWindow, showToast, Toast } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import * as messageScripts from "../scripts/messages";
+import { OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
 import { saveAllAttachments } from "../scripts/attachments";
 import { ComposeMessage } from "./compose";
 import { Message, Account } from "../types/types";
@@ -13,7 +14,7 @@ export const Messages = (account: Account): JSX.Element => {
 
   useEffect(() => {
     const getMessages = async () => {
-      setMessages(await messageScripts.getAccountMessages(account.id, "all", "All Mail", 100));
+      setMessages(await messageScripts.getAccountMessages(account, "all", "All Mail", 100));
       setIsLoading(false);
     };
     getMessages();
@@ -25,13 +26,14 @@ export const Messages = (account: Account): JSX.Element => {
   return (
     <List isLoading={isLoading}>
       {messages?.map((message: Message, index: number) => (
-        <MessageListItem key={index} {...message} />
+        <MessageListItem key={index} account={account} message={message} />
       ))}
     </List>
   );
 };
 
-export const MessageListItem = (message: Message): JSX.Element => {
+export const MessageListItem = (props: { account: Account; message: Message }): JSX.Element => {
+  const message = props.message;
   return (
     <List.Item
       title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
@@ -74,22 +76,28 @@ export const MessageListItem = (message: Message): JSX.Element => {
           <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<MailMessage {...message} />} />
           <ActionPanel.Section>
             <Action.Push
-              title="Reply"
-              icon={Icon.Reply}
+              title={OutgoingMessageAction.Reply}
+              icon={OutgoingMessageIcons[OutgoingMessageAction.Reply]}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              target={<ComposeMessage recipient={message.senderAddress} />}
+              target={<ComposeMessage {...props} action={OutgoingMessageAction.Reply} />}
             />
             <Action.Push
-              title="Forward"
-              icon={Icon.ArrowUpCircle}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              target={<ComposeMessage forward={true} />}
-            />
-            <Action.Push
-              title="Redirect"
-              icon={Icon.ArrowRightCircle}
+              title={OutgoingMessageAction.ReplyAll}
+              icon={OutgoingMessageIcons[OutgoingMessageAction.ReplyAll]}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              target={<ComposeMessage redirect={true} />}
+              target={<ComposeMessage {...props} action={OutgoingMessageAction.ReplyAll} />}
+            />
+            <Action.Push
+              title={OutgoingMessageAction.Forward}
+              icon={OutgoingMessageIcons[OutgoingMessageAction.Forward]}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              target={<ComposeMessage {...props} action={OutgoingMessageAction.Forward} />}
+            />
+            <Action.Push
+              title={OutgoingMessageAction.Redirect}
+              icon={OutgoingMessageIcons[OutgoingMessageAction.Redirect]}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+              target={<ComposeMessage {...props} action={OutgoingMessageAction.Redirect} />}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

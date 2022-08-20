@@ -1,51 +1,28 @@
-import { Form, Action, ActionPanel, Icon, LaunchType, LocalStorage, environment } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Account, OutgoingMessage } from "../types/types";
+import { Account, Message, OutgoingMessage, OutgoingMessageForm } from "../types/types";
+import { newOutgoingMessage, OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
 import { SelectAttachments } from "./select-attachments";
-import { ErrorView } from "./error";
 import { getMailAccounts } from "../scripts/account";
 import { titleCase } from "../utils/utils";
-import { newOutgoingMessage } from "../scripts/outgoing-message";
-import * as cache from "../utils/cache";
 import emailRegex from "email-regex";
+import { getRecipients } from "../scripts/messages";
 
 interface ComposeMessageProps {
-  forward?: boolean;
-  redirect?: boolean;
-  // set on reply
-  recipient?: string;
-  // share with mail
+  account?: Account;
+  message?: Message;
   attachments?: string[];
-}
-
-interface OutgoingMessageForm {
-  account: string;
-  to: string[];
-  cc: string[];
-  bcc: string[];
-  subject: string;
-  content: string;
+  action?: OutgoingMessageAction;
 }
 
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
+  const [possibleRecipients, setPossibleRecipients] = useState<string[]>([]);
+  const [recipients, setRecipients] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const getAccounts = async () => {
-    let accounts = cache.getAccounts();
-    if (!accounts) {
-      accounts = await getMailAccounts();
-      if (accounts) {
-        cache.setAccounts(accounts);
-      }
-    }
-    setAccounts(accounts);
-    setIsLoading(false);
-  };
-
-  const [possibleRecipients, setPossibleRecipients] = useState<string[]>([]);
-
-  const getPossibleRecipients = async () => {
+  const getAccountsAndRecipients = async () => {
+    setAccounts(await getMailAccounts());
     const response: string | undefined = await LocalStorage.getItem("all-recipients");
     if (response) {
       const recipients = JSON.parse(response);
@@ -53,13 +30,26 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
     } else {
       setPossibleRecipients([]);
     }
+    if (props.message) {
+      if (props.action === OutgoingMessageAction.Reply) {
+        setRecipients([props.message.senderAddress]);
+      } else if (props.action === OutgoingMessageAction.ReplyAll) {
+        const message = await getRecipients(props.message);
+        if (message) {
+          setRecipients([message.senderAddress, ...message.recipientAddresses!]);
+        } else {
+          showToast(Toast.Style.Failure, "Failed to get all recipients");
+        }
+      }
+    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    getPossibleRecipients();
-    getAccounts();
+    getAccountsAndRecipients();
     return () => {
       setAccounts([]);
+      setPossibleRecipients([]);
     };
   }, []);
 
@@ -69,9 +59,9 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const handleSubmit = async (values: OutgoingMessageForm) => {
     const message: OutgoingMessage = {
       account: values.account,
-      recipients: values.to,
-      ccs: values.cc,
-      bccs: values.bcc,
+      to: values.to,
+      cc: values.cc,
+      bcc: values.bcc,
       subject: values.subject,
       content: values.content,
       attachments: attachments,
@@ -87,8 +77,10 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={props.recipient ? "Send Reply" : props.forward ? "Forward Message" : "Send Message"}
-            icon={props.recipient ? Icon.Reply : props.forward ? Icon.ArrowUpCircle : "../assets/icons/send.svg"}
+            title={props.action ? props.action : OutgoingMessageAction.Compose}
+            icon={
+              props.action ? OutgoingMessageIcons[props.action] : OutgoingMessageIcons[OutgoingMessageAction.Compose]
+            }
             onSubmit={handleSubmit}
           />
           <Action.Push
@@ -107,8 +99,8 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
             : "See attachments at the bottom, press ⌘ + ⇧ + ⏎ to edit"
         }
       />
-      <Form.Dropdown id="account" title="From">
-        {accounts?.map((account: Account, index: number) => (
+      <Form.Dropdown id="account" title="From" value={props.account ? props.account.email : undefined}>
+        {(props.account ? [props.account] : accounts)?.map((account: Account, index: number) => (
           <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
         ))}
       </Form.Dropdown>
@@ -116,12 +108,12 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         id="to"
         title="To"
         autoFocus={true}
-        recipients={possibleRecipients}
-        recipient={props.recipient}
+        recipients={recipients}
+        possibleRecipients={possibleRecipients}
         required={true}
       />
-      <SelectRecipients id="cc" recipients={possibleRecipients} />
-      <SelectRecipients id="bcc" recipients={possibleRecipients} />
+      <SelectRecipients id="cc" possibleRecipients={possibleRecipients} />
+      <SelectRecipients id="bcc" possibleRecipients={possibleRecipients} />
       <Form.TextField id="subject" title="Subject" placeholder="Optional Subject..." />
       <Form.TextArea id="content" title="Content" placeholder="Enter Message Here..." />
       {attachments.map((attachment: string, index: number) => (
@@ -132,14 +124,14 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
 };
 
 type SelectRecipientsProps = any & {
-  recipients: string[];
-  recipient?: string;
+  recipients?: string[];
+  possibleRecipients: string[];
   required?: boolean;
   useTextField?: boolean;
 };
 
 const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
-  const requiredError = props.required ? "This field cannot be empty" : undefined;
+  const requiredError = props.required && !props.recipients ? "This field cannot be empty" : undefined;
   const [error, setError] = useState<string | undefined>(requiredError);
   const checkRecipient = (recipient: string | undefined) => {
     if (recipient) {
@@ -152,12 +144,12 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       setError("Email address cannot be empty");
     }
   };
-  return !(props.recipients.length < 25 || props.useTextField) ? (
+  return !(props.possibleRecipients.length < 25 || props.useTextField) ? (
     <Form.TagPicker
       {...props}
       error={error}
       title={titleCase(props.id)}
-      defaultValue={[props.recipient]}
+      defaultValue={props.recipients}
       placeholder="Enter Email Address..."
       onChange={(values: string[]) => {
         if (values.length > 0) {
@@ -167,7 +159,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
         }
       }}
     >
-      {props.recipients.map((account: string, index: number) => (
+      {props.possibleRecipients.map((account: string, index: number) => (
         <Form.TagPicker.Item key={index} value={account} title={account} />
       ))}
     </Form.TagPicker>
@@ -176,7 +168,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       {...props}
       error={error}
       title={titleCase(props.id)}
-      defaultValue={props.recipient}
+      defaultValue={props.recipients?.join(", ")}
       placeholder="Enter Email Address..."
       info="Enter email addresses separated by commas"
       onChange={(value: string) => {

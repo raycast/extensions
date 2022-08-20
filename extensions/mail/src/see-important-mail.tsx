@@ -14,7 +14,7 @@ export default function SeeImportantMail() {
       let accounts = await getMailAccounts(); 
       if (accounts) {
         const promises = accounts.map((account: Account) => {
-          return getAccountMessages(account.id, "important", "Important", 5);
+          return getAccountMessages(account, "important", "Important", 5);
         })
         const messages = await Promise.all(promises);
         accounts = accounts.map((account: Account, index: number) => {
@@ -35,7 +35,7 @@ export default function SeeImportantMail() {
     {accounts?.map((account: Account, index: number) => (
       <List.Section key={index} title={account.name} subtitle={account.email}>
         {account.messages?.map((message: Message, index: number) => (
-          <MessageListItem key={index} {...message} />
+          <MessageListItem key={index} account={account} message={message} />
         ))}
       </List.Section>
     ))}
