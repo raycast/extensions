@@ -24,9 +24,9 @@
       ]
     },
     {
-      "name": "show-picker",
+      "name": "edit-color",
       "title": "Edit Color",
-      "description": "Shows the specified color in ColorSlurp",
+      "description": "Shows the specified color in ColorSlurp.",
       "mode": "no-view",
       "keywords": [
         "picker"
