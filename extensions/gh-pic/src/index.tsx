@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, getPreferenceValues, Icon } from "@raycast/a
 import { useState, useEffect } from "react";
 import { Octokit } from "@octokit/core";
 import { RequestError } from "@octokit/request-error";
-import * as fs from 'fs';
+import * as fs from "fs";
 import dayjs from "dayjs";
 import { execaSync } from "execa";
 
@@ -29,8 +29,8 @@ type resultDto = {
   errorMsg: string;
   picUrl: string;
   helpUrl: string;
-  icon: Icon
-}
+  icon: Icon;
+};
 
 /**
  * Upload pic to github.
@@ -42,39 +42,39 @@ async function uploadPic() {
     errorMsg: "success",
     picUrl: "",
     icon: Icon.CircleProgress100,
-    helpUrl: REPO_URL
+    helpUrl: REPO_URL,
   };
   try {
     // Paste pic from clipboard to Temp folder.
     execaSync(preferences.pngpastePath, [TEMP_PIC_PATH]);
 
     const pic = fs.readFileSync(TEMP_PIC_PATH);
-    const content = Buffer.from(pic).toString('base64');
-    const path = `${preferences.path}${dayjs().format('YYYY-MM-DDTHH:mm:ss')}.jpg`
+    const content = Buffer.from(pic).toString("base64");
+    const path = `${preferences.path}${dayjs().format("YYYY-MM-DDTHH:mm:ss")}.jpg`;
 
     // Upload pic to github.
-    await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
       owner: preferences.owner,
       repo: preferences.repo,
       path: path,
-      message: 'Upload by GHPic.',
+      message: "Upload by GHPic.",
       committer: {
         name: preferences.committer,
-        email: preferences.email
+        email: preferences.email,
       },
-      content: content
+      content: content,
     });
     res.picUrl = `https://cdn.jsdelivr.net/gh/${preferences.owner}/${preferences.repo}/${path}`;
   } catch (error) {
     res.icon = Icon.Multiply;
     if (error instanceof RequestError) {
       res.errorCode = 1;
-      res.errorMsg = 'Upload image to Github failed, press Enter for help.';
+      res.errorMsg = "Upload image to Github failed, press Enter for help.";
     } else {
       res.errorCode = 2;
-      res.errorMsg = 'Paste image from clipboard failed, press Enter for help.';
+      res.errorMsg = "Paste image from clipboard failed, press Enter for help.";
     }
-    console.log(error)
+    console.log(error);
   }
   return res;
 }
@@ -85,7 +85,7 @@ export default function Command() {
     errorMsg: "Uploading...",
     picUrl: "",
     icon: Icon.CircleProgress50,
-    helpUrl: REPO_URL
+    helpUrl: REPO_URL,
   });
   const [loaded, setLoaded] = useState(false);
   if (preferences.path.length > 0 && !preferences.path.endsWith("/")) {
@@ -97,35 +97,46 @@ export default function Command() {
     preferences.committer = preferences.owner;
   }
   useEffect(() => {
-    uploadPic().then(res => {
+    uploadPic().then((res) => {
       setRes(res);
       setLoaded(true);
-    })
+    });
   }, []);
 
   return (
     <List isLoading={loaded}>
       {res.errorCode == 0 ? (
         <>
-          <List.Item title={'Copy MarkDown Sytle.'} actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={`![](${res.picUrl})`} />
-            </ActionPanel>
-          } />
-          <List.Item title={'Copy simple URL.'} actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={res.picUrl} />
-            </ActionPanel>
-          } />
+          <List.Item
+            title={"Copy MarkDown Sytle."}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={`![](${res.picUrl})`} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title={"Copy simple URL."}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={res.picUrl} />
+              </ActionPanel>
+            }
+          />
         </>
-      ) :
+      ) : (
         <>
-          <List.Item title={res.errorMsg} icon={res.icon} actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={res.helpUrl} />
-            </ActionPanel>
-          } />
-        </>}
+          <List.Item
+            title={res.errorMsg}
+            icon={res.icon}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={res.helpUrl} />
+              </ActionPanel>
+            }
+          />
+        </>
+      )}
     </List>
-  )
+  );
 }
