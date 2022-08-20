@@ -104,7 +104,6 @@ export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefine
 
   const getDirectoryItems = async (dir: string) => {
     if (dir) {
-      await LocalStorage.setItem("current-directory", dir);
       const directoryItems = await readdir(dir, { withFileTypes: true });
       const attachments = directoryItems
         .filter((dirent) => dirent.isFile())
@@ -122,14 +121,6 @@ export const SelectFile = (props: Form.Dropdown.Props & { val: string | undefine
   useEffect(() => {
     getDirectoryItems(currentDirectory);
   }, [currentDirectory]);
-
-  useEffect(() => {
-    const getCurrentDirectory = async () => {
-      const dir: string | undefined = await LocalStorage.getItem("current-directory");
-      if (dir) setCurrentDirectory(dir);
-    };
-    getCurrentDirectory();
-  }, []);
 
   const [error, setError] = useState<string | undefined>(undefined);
 

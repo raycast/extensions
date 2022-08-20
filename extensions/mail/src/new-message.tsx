@@ -1,5 +1,5 @@
-import { ComposeMessageComponent } from "./components/compose";
+import { ComposeMessage } from "./components/compose";
 
 export default function NewMessage() {
-  return <ComposeMessageComponent />;
+  return <ComposeMessage />;
 }

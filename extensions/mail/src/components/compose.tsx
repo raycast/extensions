@@ -1,7 +1,7 @@
 import { Form, Action, ActionPanel, Icon, LaunchType, LocalStorage, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Account, OutgoingMessage } from "../types/types";
-import { SelectAttachments } from "./select-attachment";
+import { SelectAttachments } from "./select-attachments";
 import { ErrorView } from "./error";
 import { getMailAccounts } from "../scripts/account";
 import { titleCase } from "../utils/utils";
@@ -14,6 +14,8 @@ interface ComposeMessageProps {
   redirect?: boolean;
   // set on reply
   recipient?: string;
+  // share with mail
+  attachments?: string[];
 }
 
 interface OutgoingMessageForm {
@@ -26,15 +28,11 @@ interface OutgoingMessageForm {
 }
 
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
-  return <ComposeMessageComponent {...props} /> || <ErrorView />;
-};
-
-export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element | null => {
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getAccounts = async () => {
-    let accounts = cache.getAccounts(); 
+    let accounts = cache.getAccounts();
     if (!accounts) {
       accounts = await getMailAccounts();
       if (accounts) {
@@ -65,7 +63,7 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
     };
   }, []);
 
-  const [attachments, setAttachments] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<string[]>(props.attachments ? props.attachments : []);
   const setMailAttachments = (attachments: string[]) => setAttachments(attachments);
 
   const handleSubmit = async (values: OutgoingMessageForm) => {
@@ -124,10 +122,10 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       />
       <SelectRecipients id="cc" recipients={possibleRecipients} />
       <SelectRecipients id="bcc" recipients={possibleRecipients} />
-      <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
-      <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
+      <Form.TextField id="subject" title="Subject" placeholder="Optional Subject..." />
+      <Form.TextArea id="content" title="Content" placeholder="Enter Message Here..." />
       {attachments.map((attachment: string, index: number) => (
-        <Form.Description key={index} title={index === 0 ? "Attachments" : ""} text={attachment} />
+        <Form.Description key={index} title={index === 0 ? "Attached" : " "} text={attachment} />
       ))}
     </Form>
   );
@@ -160,7 +158,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       error={error}
       title={titleCase(props.id)}
       defaultValue={[props.recipient]}
-      placeholder="Enter email address..."
+      placeholder="Enter Email Address..."
       onChange={(values: string[]) => {
         if (values.length > 0) {
           values.forEach((value: string) => checkRecipient(value));
@@ -179,7 +177,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       error={error}
       title={titleCase(props.id)}
       defaultValue={props.recipient}
-      placeholder="Enter email address..."
+      placeholder="Enter Email Address..."
       info="Enter email addresses separated by commas"
       onChange={(value: string) => {
         value.split(",").forEach((recipient: string) => checkRecipient(recipient.trim()));
