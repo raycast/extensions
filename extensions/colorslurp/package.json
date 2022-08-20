@@ -19,7 +19,6 @@
       "mode": "no-view",
       "keywords": [
         "dropper",
-        "pick color",
         "magnifier"
       ]
     },
@@ -28,9 +27,6 @@
       "title": "Edit Color",
       "description": "Shows the specified color in ColorSlurp.",
       "mode": "no-view",
-      "keywords": [
-        "picker"
-      ],
       "arguments": [
         {
           "name": "color",
