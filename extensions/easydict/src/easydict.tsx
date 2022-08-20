@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-19 17:18
+ * @lastEditTime: 2022-08-20 11:10
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -17,7 +17,7 @@ import { QueryWordInfo } from "./dict/youdao/types";
 import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
-import { checkIfInstalledEudic, trimTextLength } from "./utils";
+import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
 const dataManager = new DataManager();
 
@@ -30,6 +30,12 @@ export default function () {
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
+  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
+
+  // check if need show release prompt, every time the list is rendered.
+  checkIfNeedShowReleasePrompt((isShowing) => {
+    setIsShowingReleasePrompt(isShowing);
+  });
 
   /**
    * use to display input text
@@ -84,10 +90,12 @@ export default function () {
     if (myPreferences.enableAutomaticQuerySelectedText) {
       tryQuerySelecedtText();
     }
+
+    configAxiosProxy();
+
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
     });
-    configAxiosProxy();
   }
 
   /**
@@ -188,6 +196,7 @@ export default function () {
                   actions={
                     <ListActionPanel
                       displayItem={item}
+                      isShowingReleasePrompt={isShowingReleasePrompt}
                       isInstalledEudic={isInstalledEudic && myPreferences.enableOpenInEudic}
                       onLanguageUpdate={updateSelectedTargetLanguageItem}
                     />

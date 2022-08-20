@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 00:03
+ * @lastEditTime: 2022-08-20 00:42
  * @fileName: releaseNote.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -46,13 +46,11 @@ export const releaseNote = `
 ---
 
 
-## [v2.0.0] - 2022-08-20
-
 ## ✨ New
 
 - Added support for Linguee dictionary, supporting 19 languages.
 - Added support for Google language detection and Baidu language detection.
-- Added system proxy.
+- Added support system proxy.
 - Added top show open current query web dictionary and translation action.
 - Added query word and show dictionary and translation at the same time.
 - Added show query language from-to, like English🇺🇸 --> Chinese-Simplified🇨🇳.

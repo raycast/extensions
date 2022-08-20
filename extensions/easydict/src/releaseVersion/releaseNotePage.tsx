@@ -33,7 +33,7 @@ export default function ReleaseNotesPage(props: { fallbackMarkdown?: string }) {
       markdown={releaseMarkdown || props.fallbackMarkdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon={Icon.Eye} title="View on GitHub" url={easydict.chineseREADMEUrl} />
+          <Action.OpenInBrowser icon={Icon.Eye} title="View on GitHub" url={easydict.getCurrentReleaseTagUrl()} />
         </ActionPanel>
       }
     />

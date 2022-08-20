@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-19 10:48
+ * @lastEditTime: 2022-08-20 11:11
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -13,8 +13,8 @@ import { useState } from "react";
 import { sayTruncateCommand } from "./audio";
 import { getLingueeWebDictionaryUrl as getLingueeWebDictionaryURL } from "./dict/linguee/parse";
 import { LingueeListItemType } from "./dict/linguee/types";
-import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/youdao";
 import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dict/youdao/types";
+import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/youdao";
 import { languageItemList } from "./language/consts";
 import {
   getBaiduWebTranslateURL,
@@ -36,17 +36,16 @@ import {
   TranslationType,
   WebQueryItem,
 } from "./types";
-import { checkIfNeedShowReleasePrompt } from "./utils";
 
 /**
  * Get the list action panel item with ListItemActionPanelItem
  */
 export function ListActionPanel(props: ActionListPanelProps) {
-  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
+  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(props.isShowingReleasePrompt);
 
   const displayItem = props.displayItem;
   const queryWordInfo = displayItem.queryWordInfo;
-  console.log(`---> current list type: ${displayItem.queryType}, title: ${displayItem.title}`);
+  console.log(`---> current list type: ${displayItem.queryType}, copyText: ${displayItem.copyText}`);
   const googleWebItem = getWebQueryItem(TranslationType.Google, queryWordInfo);
   const isShowingGoogleTop = displayItem.queryType === TranslationType.Google;
 
@@ -63,10 +62,6 @@ export function ListActionPanel(props: ActionListPanelProps) {
   const isShowingYoudaoDictioanryTop = displayItem.queryType === DicionaryType.Youdao;
 
   const eudicWebItem = getWebQueryItem(DicionaryType.Eudic, queryWordInfo);
-
-  checkIfNeedShowReleasePrompt((isShowing) => {
-    setIsShowingReleasePrompt(isShowing);
-  });
 
   function onNewReleasePromptClick() {
     const easydict = new Easydict();

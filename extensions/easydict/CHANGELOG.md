@@ -6,7 +6,7 @@
 
 - Added support for Linguee dictionary, supporting 19 languages.
 - Added support for Google language detection and Baidu language detection.
-- Added system proxy.
+- Added support system proxy.
 - Added top show open current query web dictionary and translation action.
 - Added query word and show dictionary and translation at the same time.
 - Added show query language from-to, like English🇺🇸 --> Chinese-Simplified🇨🇳.

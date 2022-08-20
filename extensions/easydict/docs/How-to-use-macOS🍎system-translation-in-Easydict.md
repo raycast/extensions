@@ -26,7 +26,7 @@ https://www.icloud.com/shortcuts/776f8a1d8e43471885e8a505eb9a9deb
 
 If there is `Easydict-Translate-V1.2.0' in the Shortcuts app, the shortcut will be installed successfully.
 
-> Attention⚠️: After installation, **Do not modify the name of the shortcut**, and do not modify any operation in it, otherwise it is likely that the service call will fail!
+> Warning⚠️: After installation, **Do not modify the name of the shortcut**, and do not modify any operation in it, otherwise it is likely that the service call will fail!
 
 ## Turn on the Feature
 

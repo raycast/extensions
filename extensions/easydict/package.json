@@ -86,7 +86,7 @@
       "name": "language1",
       "type": "dropdown",
       "required": true,
-      "default": "English",
+      "default": "en",
       "description": "Your first language",
       "data": [
         {
@@ -188,7 +188,7 @@
       "name": "language2",
       "type": "dropdown",
       "required": true,
-      "default": "Chinese-Simplified",
+      "default": "zh-CHS",
       "description": "Your second language",
       "data": [
         {
@@ -308,7 +308,7 @@
       "label": "Automatic Play Word Audio",
       "required": false,
       "description": "Automatic play audio after looking up a word",
-      "default": false
+      "default": true
     },
     {
       "name": "enableSystemProxy",
@@ -324,7 +324,7 @@
       "label": "Select Target Language",
       "required": false,
       "description": "Select target language in action panel manually",
-      "default": false
+      "default": true
     },
     {
       "title": "Dictionary Services",
@@ -383,7 +383,7 @@
       "label": "Baidu Translate",
       "required": false,
       "description": "Turn on/off Baidu Translate",
-      "default": true
+      "default": false
     },
     {
       "name": "enableTencentTranslate",
@@ -391,7 +391,7 @@
       "label": "Tencent Translate",
       "required": false,
       "description": "Turn on/off Tencent Translate",
-      "default": false
+      "default": true
     },
     {
       "name": "enableYoudaoTranslate",
@@ -407,7 +407,7 @@
       "label": "Caiyun Translate",
       "required": false,
       "description": "Turn on/off Caiyun Translate",
-      "default": true
+      "default": false
     },
     {
       "title": "Translation Order",

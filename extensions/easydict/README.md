@@ -25,7 +25,7 @@
 - [x] Support automatic query selected text, enabled by default.
 - [x] Support to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 - [x] Quick search query text online, supports Eudic, Youdao dictionary, and Google translation.
-- [x] Support automatic playback of word pronunciation, which can be turned on in Settings. Use `Cmd + S` to play the pronunciation of words manually.
+- [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort translation results manually.
 - [x] Support system proxy.
@@ -44,7 +44,7 @@ Next:
 
 ### Linguee Dictionary：English <--> Chinese
 
-[void](https://www.linguee.com/english-chinese/search?query=void)
+#### [void](https://www.linguee.com/english-chinese/search?query=void)
 
 ![void](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/void-1660921305.png)
 
@@ -52,7 +52,7 @@ Next:
 
 ### Linguee Dictionary：English <--> French
 
-[good](https://www.linguee.com/english-french/search?query=good)
+#### [good](https://www.linguee.com/english-french/search?query=good)
 
 ![good-French](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/good-French-1660921471.png)
 
@@ -162,7 +162,7 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 ### Automatic Play Query Word Pronunciation
 
-<details><summary> Automatically play the word audio after querying the word, turned off by default. </summary>
+<details><summary> Automatically play the word audio after querying the word, turned on by default. </summary>
 
 <p>
 
@@ -178,19 +178,19 @@ Use `Cmd + S` to play the pronunciation of words manually.
 
 ![beauty](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/beauty-1660917383.png)
 
-### Select Target Translation Language
+### Select Target Language
 
-<details><summary> Specify the target translation language. This option is turned off by default. </summary>
+<details><summary> Specify the target language. This option is turned on by default. </summary>
 
 <p>
 
-By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can turn on the option `Select Target Translation Language` on the preference page, and then you can temporarily select another target language in the action panel.
+By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can temporarily select another target language in the action panel.
 
 </p>
 
 </details>
 
-### Sort Translation Results Manually
+### Sort Translation Manually
 
 <details> <summary> You can sort the translation results by your preference, default is DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
 
@@ -210,7 +210,7 @@ Name case are insensitive, use comma to separate. Example: `deepl,google,apple,b
 
 ### System Proxy
 
-When this feature is enabled, `Easydict` will try to get the Mac system proxy. If succeeds, all subsequent network requests will be sent using the system proxy. (This feature is to counteract IP blocking, because some services like Linguee have frequency restrictions on IPs)
+When this feature is enabled, `Easydict` will try to get the Mac system proxy. If succeeds, all subsequent network requests will be sent using the system proxy. This option is turned off by default. (This feature is to counteract IP blocking, because some services like Linguee have frequency restrictions on IPs)
 
 ### Translation Services
 

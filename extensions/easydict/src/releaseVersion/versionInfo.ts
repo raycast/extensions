@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-19 23:42
+ * @lastEditTime: 2022-08-20 11:36
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -62,6 +62,8 @@ export class Easydict {
 
   /**
    *  Release tag url: /repos/{owner}/{repo}/releases/tags/{tag}
+   *
+   * * call this url will return a JSON object.
    *
    *  https://api.github.com/repos/tisfeng/Raycast-Easydict/releases/tags/1.2.0
    */

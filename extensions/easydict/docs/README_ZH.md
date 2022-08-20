@@ -14,7 +14,9 @@
 
 ## Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入的文本语言，目前支持 **Linguee** 和有道词典查询，支持**苹果 🍎 系统翻译**，DeepL，Google，百度，腾讯，有道和彩云翻译。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 **Linguee** 和有道词典查询，支持**苹果 🍎 系统翻译**，DeepL，Google，百度，腾讯，有道和彩云翻译。
+
+### 有道词典
 
 ![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
@@ -25,12 +27,12 @@
 - [x] 提供丰富的单词查询信息，包括基本翻译，包含该单词的考试类型，发音，多种词性和释义，形式和时态，网络翻译和网络短语。
 - [x] 支持划词查询，默认启用。
 - [x] 支持打开 [欧路词典](https://www.eudic.net/v4/en/app/eudic) 快速查词（若电脑上有安装）。
-- [x] 支持自动播放单词发音，可在设置中开启。使用 `Cmd + S` 手动播放单词发音。
+- [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
 - [x] 支持手动排序翻译结果显示。
 - [x] 支持使系统代理。
 - [x] 支持 Linguee 和有道词典查询。
-- [x] 支持 **MacOS 系统翻译**。详情请看 [如何在 Easydict 中使用 macOS 🍎 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8%20Easydict%20%E4%B8%AD%E4%BD%BF%E7%94%A8%20macOS%20%F0%9F%8D%8E%20%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91%EF%BC%9F.md)
+- [x] 支持 **MacOS 系统翻译**。详情请看 [如何在 Easydict 中使用 macOS 🍎 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 - [x] 支持 DeepL，谷歌，百度，腾讯，有道和彩云翻译。
 - [x] 支持 23 种语言。
 
@@ -45,7 +47,7 @@
 
 ### Linguee 词典：英语 <--> 中文
 
-[void](https://www.linguee.com/english-chinese/search?query=void)
+#### [void](https://www.linguee.com/english-chinese/search?query=void)
 
 ![void](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/void-1660921305.png)
 
@@ -53,7 +55,7 @@
 
 ### Linguee 词典：英语 <--> 法语
 
-[good](https://www.linguee.com/english-french/search?query=good)
+#### [good](https://www.linguee.com/english-french/search?query=good)
 
 ![good-French](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/good-French-1660921471.png)
 
@@ -82,7 +84,7 @@
 - 腾讯语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，俄语，德语。
 - 百度语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 - 苹果 🍎 语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
-- 谷歌语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+- 谷歌语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 
 #### 词典
 
@@ -163,7 +165,7 @@
 
 ### 自动播放单词发音
 
-<details> <summary> 查询单词后自动播放单词发音，默认关闭。 </summary>
+<details> <summary> 查询单词后自动播放单词发音，默认开启。 </summary>
 
 <p>
 注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 时才会自动播放语音，例如 `good`, `look for`, `查询` 等。 其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
@@ -179,11 +181,11 @@
 
 ### 选择目标语言
 
-<details> <summary> 指定目标语言功能。默认关闭。 </summary>
+<details> <summary> 指定目标语言功能。默认开启。 </summary>
 
 <p>
 
-默认情况下，扩展将自动选择偏好语言作为目标翻译语言，但有时如果您想手动指定某一种语言作为目标语言，您可以在偏好设置页打开 `选择目标翻译语言` 选项，然后您就可以在操作面板中临时选择另一种目标语言。
+默认情况下，扩展将自动选择偏好语言作为目标翻译语言，但有时如果您想手动指定某一种语言作为目标语言，您就可以在操作面板中临时选择另一种目标语言。
 
 </p>
 
@@ -209,7 +211,7 @@
 
 ### 支持系统代理
 
-开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会使用系统代理发送。（此功能是为了对抗 IP 封锁，因为某些服务如 Linguee 对 IP 有频率限制）
+开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会使用系统代理发送。默认关闭。（此功能是为了对抗 IP 封锁，因为某些服务如 Linguee 对 IP 有频率限制）
 
 ### 翻译服务
 

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-19 16:29
+ * @lastEditTime: 2022-08-20 10:47
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -206,9 +206,7 @@ export class DataManager {
     for (const queryResult of this.queryResults) {
       const shouldDisplay = !queryResult.disableDisplay;
       if (shouldDisplay && queryResult.displaySections) {
-        console.log(
-          `---> update display sections: ${queryResult.type}, section title: ${queryResult.displaySections[0].sectionTitle},  length: ${queryResult.displaySections.length}`
-        );
+        // console.log(`---> update display sections: ${queryResult.type}, length: ${queryResult.displaySections.length}`);
         updateTranslationMarkdown(queryResult, this.queryResults);
         displaySections.push(queryResult.displaySections);
       }
