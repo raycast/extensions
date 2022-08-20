@@ -112,7 +112,7 @@ export async function baiduLanguageDetect(text: string): Promise<LanguageDetectT
      * Baidu language recognition is inaccurate in very few cases, such as "ragazza", it should be Italian, but Baidu auto detect is en.
      * In this case, trans_result's src === dst.
      */
-    let confirmed = true;
+    let confirmed = false;
     const transResult = baiduResult.trans_result;
     if (transResult?.length) {
       const firstTransResult = transResult[0];

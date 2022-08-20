@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 09:54
+ * @lastEditTime: 2022-08-20 16:38
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -169,10 +169,22 @@ function handleDetectedLanguageTypeResult(
     return;
   }
 
-  // 2. Iterate API detected language List, check if has detected two identical language id, if true, use it.
+  // 2. Try to use Baidu language detect, if it is confirmed and preferred language, use it.
+  if (apiDetectedLanguage.type === LanguageDetectType.Baidu) {
+    if (apiDetectedLanguage.confirmed && isPreferredLanguage(apiDetectedLanguage.youdaoLanguageId)) {
+      console.log(`use Baidu detect, confirmed and preferred language`);
+      callback(apiDetectedLanguage);
+      return;
+    }
+  }
+
+  // 3. Iterate API detected language List, check if has detected two identical language id, if true and is preferred language, use it.
   for (const language of apiDetectedLanguageList) {
     const detectedYoudaoLanguageId = apiDetectedLanguage.youdaoLanguageId;
-    if (language.youdaoLanguageId === detectedYoudaoLanguageId && isValidLanguageId(detectedYoudaoLanguageId)) {
+    if (
+      language.youdaoLanguageId === detectedYoudaoLanguageId &&
+      isPreferredLanguage(apiDetectedLanguage.youdaoLanguageId)
+    ) {
       language.confirmed = true;
       console.warn(`---> API: ${apiDetectedLanguage.type} && ${language.type}, detected identical language`);
       console.warn(`detected language: ${JSON.stringify(language, null, 4)}`);
@@ -185,7 +197,7 @@ function handleDetectedLanguageTypeResult(
   apiDetectedLanguageList.push(apiDetectedLanguage);
 
   /**
-   * 3. If this is the last one, and it's not confirmed, iterate API Detected Language List to compare with the Local Detect Language List.
+   * 4. If this is the last one, and it's not confirmed, iterate API Detected Language List to compare with the Local Detect Language List.
    * If matched, and the language is preferred, mark it as confirmed. else use it directly, but not confirmed.
    */
   if (detectLanguageActionMap.size === 1) {
@@ -219,7 +231,7 @@ function handleDetectedLanguageTypeResult(
     return;
   }
 
-  // 4. If this API detected language is not confirmed, remove it from the detectActionMap, and try next detect API.
+  // 5. If this API detected language is not confirmed, remove it from the detectActionMap, and try next detect API.
   detectLanguageActionMap.delete(apiDetectedLanguage.type);
   console.log(`---> remove unconfirmed detect action: ${apiDetectedLanguage.type}`);
   console.log(`---> continue to detect next action`);
