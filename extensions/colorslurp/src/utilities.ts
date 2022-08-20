@@ -13,7 +13,12 @@ export async function openColorSlurpUrl(url: string) {
     await showToast({
       style: Toast.Style.Failure,
       title: "ColorSlurp isn't installed",
-      message: "Install it from: https://colorslurp.com",
+      message: "You can download it from the website or the app store",
+      primaryAction: { title: "Open Website", onAction: () => open("https://colorslurp.com?utm_source=raycast") },
+      secondaryAction: {
+        title: "Open App Store",
+        onAction: () => open("https://apps.apple.com/us/app/colorslurp/id1287239339#?platform=mac"),
+      },
     });
 
     return;
