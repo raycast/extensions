@@ -14,7 +14,7 @@ export default function SeeImportantMail() {
       let accounts = await getMailAccounts(); 
       if (accounts) {
         const promises = accounts.map((account: Account) => {
-          return getAccountMessages(account.id, 5, "Important");
+          return getAccountMessages(account.id, "important", "Important", 5);
         })
         const messages = await Promise.all(promises);
         accounts = accounts.map((account: Account, index: number) => {

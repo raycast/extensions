@@ -15,7 +15,7 @@ export default function SeeRecentMail() {
       let accounts = await getMailAccounts();
       if (accounts) {
         const promises = accounts.map((account: Account) => {
-          return getAccountMessages(account.id, 25, "All Mail", true);
+          return getAccountMessages(account.id, "recent", "All Mail", 25, true);
         });
         const messages = await Promise.all(promises);
         accounts = accounts.map((account: Account, index: number) => {

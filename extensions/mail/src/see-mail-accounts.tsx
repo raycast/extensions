@@ -8,11 +8,12 @@ export default function MailAccounts() {
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const getAccounts = async () => {
+    setAccounts(await getMailAccounts());
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const getAccounts = async () => {
-      setAccounts(await getMailAccounts());
-      setIsLoading(false);
-    };
     getAccounts();
     return () => {
       setAccounts([]);

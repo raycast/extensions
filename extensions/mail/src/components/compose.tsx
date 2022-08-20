@@ -1,14 +1,13 @@
 import { Form, Action, ActionPanel, Icon, LaunchType, LocalStorage, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getMailAccounts } from "../scripts/account";
 import { Account, OutgoingMessage } from "../types/types";
+import { SelectAttachments } from "./select-attachment";
 import { ErrorView } from "./error";
-import { getAllRecipients } from "../background/recipients";
-import emailRegex from "email-regex";
-import { randomUUID } from "crypto";
+import { getMailAccounts } from "../scripts/account";
 import { titleCase } from "../utils/utils";
 import { newOutgoingMessage } from "../scripts/outgoing-message";
-import { SelectAttachments } from "./select-attachment";
+import * as cache from "../utils/cache";
+import emailRegex from "email-regex";
 
 interface ComposeMessageProps {
   forward?: boolean;
@@ -31,12 +30,18 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
 };
 
 export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element | null => {
-  const [account, setAccount] = useState<string | undefined>(undefined);
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getAccounts = async () => {
-    setAccounts(await getMailAccounts());
+    let accounts = cache.getAccounts(); 
+    if (!accounts) {
+      accounts = await getMailAccounts();
+      if (accounts) {
+        cache.setAccounts(accounts);
+      }
+    }
+    setAccounts(accounts);
     setIsLoading(false);
   };
 
@@ -48,7 +53,6 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
       const recipients = JSON.parse(response);
       setPossibleRecipients(recipients);
     } else {
-      console.log("No recipients found in local storage");
       setPossibleRecipients([]);
     }
   };
@@ -76,8 +80,6 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
     };
     await newOutgoingMessage(message);
   };
-
-  const recipients = possibleRecipients.filter((recipient: string) => recipient != account);
 
   return isLoading ? (
     <Form isLoading={isLoading}></Form>
@@ -107,7 +109,7 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
             : "See attachments at the bottom, press ⌘ + ⇧ + ⏎ to edit"
         }
       />
-      <Form.Dropdown id="account" title="From" onChange={setAccount}>
+      <Form.Dropdown id="account" title="From">
         {accounts?.map((account: Account, index: number) => (
           <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
         ))}
@@ -116,12 +118,12 @@ export const ComposeMessageComponent = (props: ComposeMessageProps): JSX.Element
         id="to"
         title="To"
         autoFocus={true}
-        recipients={recipients}
+        recipients={possibleRecipients}
         recipient={props.recipient}
         required={true}
       />
-      <SelectRecipients id="cc" recipients={recipients} />
-      <SelectRecipients id="bcc" recipients={recipients} />
+      <SelectRecipients id="cc" recipients={possibleRecipients} />
+      <SelectRecipients id="bcc" recipients={possibleRecipients} />
       <Form.TextField id="subject" title="Subject" placeholder="Optional Subect..." />
       <Form.TextArea id="content" title="Content" placeholder="Enter message here..." />
       {attachments.map((attachment: string, index: number) => (

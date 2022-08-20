@@ -13,11 +13,7 @@ export const Messages = (account: Account): JSX.Element => {
 
   useEffect(() => {
     const getMessages = async () => {
-      const start = new Date().getTime();
-      const messages = await messageScripts.getAccountMessages(account.id, 100);
-      setMessages(messages);
-      const time_elapsed = new Date().getTime() - start;
-      console.log(`Time elapsed: ${time_elapsed / 1000}s`);
+      setMessages(await messageScripts.getAccountMessages(account.id, "all", "All Mail", 100));
       setIsLoading(false);
     };
     getMessages();
@@ -161,8 +157,6 @@ export const MailMessage = (message: Message): JSX.Element => {
 
   useEffect(() => {
     const getContent = async () => {
-      console.log(message.account);
-      console.log(message.id);
       message = await messageScripts.getMessageContent(message);
       setContent(message.content);
       setIsLoading(false);

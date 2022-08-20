@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Preferences } from "../types/types";
-import { getSize, validateSize, maximumFileSize } from "../utils/utils";
+import { getSize, validateSize, maximumFileSize } from "../utils/file-utils";
 import { readdir } from "fs/promises";
 import { homedir } from "os";
 import fs from "fs";

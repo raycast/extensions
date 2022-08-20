@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { constructDate } from "../utils/utils";
-import { Attachment, Message } from "../types/types";
+import { Message } from "../types/types";
+import * as cache from "../utils/cache";
 
 export const tellMessage = async (message: Message, script: string): Promise<string> => {
   if (!script.includes("msg")) throw "Script must include msg";
@@ -50,51 +51,58 @@ export const deleteMessage = async (message: Message): Promise<void> => {
 
 export const getAccountMessages = async (
   accountId: string,
-  numMessages: number = 50,
+  cacheMailbox: string,
   mailbox: string = "All Mail",
+  numMessages: number = 50,
   unreadOnly: boolean = false
 ): Promise<Message[] | undefined> => {
+  let messages = cache.getMessages(accountId, cacheMailbox);
+  const first = messages.length > 0 ? messages[0].id : undefined;
+  const script = `
+    set output to ""
+    tell application "Mail"
+      set mailAccount to first account whose id is "${accountId}"
+      set box to (first mailbox of mailAccount whose name is "${mailbox}")
+        repeat with i from 1 to ${numMessages}
+          try 
+            set msg to message i of box
+            ${first ? `if id of msg is ${first} then exit repeat` : ""}
+            tell msg 
+              set senderName to extract name from sender
+              set senderAddress to extract address from sender
+              set numAttachments to count of mail attachments
+              set output to output & id & "$break" & subject & "$break" & senderName & "$break" & senderAddress & "$break" & date sent & "$break" & read status & "$break" & numAttachments & "$end"
+            end tell
+          end try
+        end repeat
+    end tell
+    return output
+  `;
   try {
-    const script = `
-      set output to ""
-      tell application "Mail"
-        set mailAccount to first account whose id is "${accountId}"
-        set box to (first mailbox of mailAccount whose name is "${mailbox}")
-          repeat with i from 1 to ${numMessages}
-            try 
-              set msg to message i of box
-              tell msg 
-                set senderName to extract name from sender
-                set senderAddress to extract address from sender
-                set numAttachments to count of mail attachments
-                set output to output & id & "$break" & subject & "$break" & senderName & "$break" & senderAddress & "$break" & date sent & "$break" & read status & "$break" & numAttachments & "$end"
-              end tell
-            end try
-          end repeat
-      end tell
-      return output
-    `;
     const response: string[] = (await runAppleScript(script)).split("$end");
     response.pop();
-    const messages: Message[] = response.map((line: string) => {
-      const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
-      return {
-        id,
-        account: accountId,
-        subject,
-        content: "",
-        senderName,
-        senderAddress,
-        date: constructDate(date),
-        read: read === "true",
-        numAttachments: parseInt(numAttachments),
-      };
-    });
-    return unreadOnly ? messages.filter((msg: Message) => !msg.read) : messages;
+    const newMessages: Message[] = response
+      .map((line: string) => {
+        const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
+        return {
+          id,
+          account: accountId,
+          subject,
+          content: "",
+          senderName,
+          senderAddress,
+          date: constructDate(date),
+          read: read === "true",
+          numAttachments: parseInt(numAttachments),
+        };
+      })
+      .filter((msg: Message) => !unreadOnly || !msg.read);
+    messages = newMessages.concat(messages);
+    cache.setMessages(messages, accountId, cacheMailbox);
   } catch (error: any) {
     console.error(error);
-    return undefined;
   }
+  return messages;
 };
 
 export const getMessageContent = async (message: Message): Promise<Message> => {
