@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, getPreferenceValues, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Octokit } from "@octokit/core";
 import { RequestError } from "@octokit/request-error";
@@ -98,6 +98,17 @@ export default function Command() {
   }
   useEffect(() => {
     uploadPic().then((res) => {
+      if (res.errorCode == 0) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Uploaded successfully.",
+        });
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Upload failed.",
+        });
+      }
       setRes(res);
       setLoaded(true);
     });
