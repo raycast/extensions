@@ -60,6 +60,12 @@
       "title": "See Mail Accounts",
       "description": "See all inboxes for all your Mail accounts.",
       "mode": "view"
+    },
+    {
+      "name": "share-with-mail",
+      "title": "Share With Mail",
+      "description": "Share selected finder items with Mail.",
+      "mode": "view"
     }
   ],
   "dependencies": {

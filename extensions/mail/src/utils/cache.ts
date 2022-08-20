@@ -2,7 +2,8 @@ import { Cache } from "@raycast/api";
 import { Account, Message } from "../types/types"; 
 
 export enum ExpirationTime {
-  Hour = 60 * 60 * 1000,
+  Minute = 60 * 1000,
+  Hour = 60 * Minute,
   Day = 24 * Hour,
   Week = 7 * Day,
 }
@@ -33,7 +34,7 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
   const key = `${account}-${mailbox}`;
   if (messages.has(key)) {
     const { time, data } = JSON.parse(messages.get(key)!);
-    if (!isCacheExpired(time, ExpirationTime.Week)) {
+    if (!isCacheExpired(time, ExpirationTime.Hour)) {
       return data;
     }
   }
