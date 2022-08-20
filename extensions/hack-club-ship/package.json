@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hack-club-ship",
+  "title": "Hack Club Ship",
+  "description": "Ship your projects to the Hack Club Slack directly from Raycast!",
+  "icon": "hackclub.png",
+  "author": "NebuDev14",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ship",
+      "description": "Ship a project to the Hack Club slack",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "token",
+      "description": "Your Slack Access Token (Check the README for instructions on how to get this!)",
+      "placeholder": "Enter your Slack Access Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "@slack/web-api": "^6.7.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
