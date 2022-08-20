@@ -1,58 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geist-ui-components",
-  "title": "Geist UI Components",
-  "description": "Links to the components documentation in Geist UI",
+  "title": "Geist UI Components ",
+  "description": "This extension provides links to components in Geist UI Documentation ",
   "icon": "command-icon.png",
   "author": "RahulatRaycast",
+  "categories": [
+    "Design Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "general",
-      "title": "General",
-      "description": "General components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "layout",
-      "title": "Layout",
-      "description": "Layout components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "surfaces",
-      "title": "Surfaces",
-      "description": "Components that fall under surfaces",
-      "mode": "view"
-    },
-    {
-      "name": "data-entry",
-      "title": "Data Entry",
-      "description": "Data Entry components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "data-display",
-      "title": "Data Display",
-      "description": "Data display components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "feedback",
-      "title": "Feedback",
-      "description": "Feedback components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "navigation",
-      "title": "Navigation",
-      "description": "Navigation components in Geist UI",
-      "mode": "view"
-    },
-    {
-      "name": "others",
-      "title": "Others",
-      "description": "Random components in Geist UI",
+      "name": "geist-ui",
+      "title": "Geist Ui",
+      "description": "Finds components in Geist UI Documentation",
       "mode": "view"
     }
   ],

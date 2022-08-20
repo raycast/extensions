@@ -1,3 +1,3 @@
-# Geist UI Docs
+# Geist UI Components
 
-Links to the components documentation in Geist UI
+This extension provides links to components in Geist UI Documentation 
