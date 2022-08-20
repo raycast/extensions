@@ -61,18 +61,66 @@ export default function Command() {
             setIsLoading(false);
           }}
         >
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/id.svg"} title="ID" value={"id"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/url.svg"} title="URL" value={"url"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/html.svg"} title="HTML" value={"html"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/css.svg"} title="CSS" value={"css"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/svg.svg"} title="SVG" value={"svg"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/data_url.svg"} title="Data URL" value={"data_url"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/react.svg"} title="JSX" value={"pure-jsx"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/react.svg"} title="React" value={"jsx"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/react.svg"} title="React TS" value={"tsx"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/vue.svg"} title="Vue" value={"vue"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/svelte.svg"} title="Svelte" value={"svelte"} />
-          <Grid.Dropdown.Item icon={"../assets/dropdownIcon/unplugin.svg"} title="Unplugin Icons" value={"unplugin"} />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/id.svg", tintColor: Color.PrimaryText }}
+            title="ID"
+            value={"id"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/url.svg", tintColor: Color.PrimaryText }}
+            title="URL"
+            value={"url"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/html.svg", tintColor: Color.PrimaryText }}
+            title="HTML"
+            value={"html"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/css.svg", tintColor: Color.PrimaryText }}
+            title="CSS"
+            value={"css"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/svg.svg", tintColor: Color.PrimaryText }}
+            title="SVG"
+            value={"svg"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/data_url.svg", tintColor: Color.PrimaryText }}
+            title="Data URL"
+            value={"data_url"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/react.svg", tintColor: Color.PrimaryText }}
+            title="JSX"
+            value={"pure-jsx"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/react.svg", tintColor: Color.PrimaryText }}
+            title="React"
+            value={"jsx"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/react.svg", tintColor: Color.PrimaryText }}
+            title="React TS"
+            value={"tsx"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/vue.svg", tintColor: Color.PrimaryText }}
+            title="Vue"
+            value={"vue"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/svelte.svg", tintColor: Color.PrimaryText }}
+            title="Svelte"
+            value={"svelte"}
+          />
+          <Grid.Dropdown.Item
+            icon={{ source: "../assets/dropdownIcon/unplugin.svg", tintColor: Color.PrimaryText }}
+            title="Unplugin Icons"
+            value={"unplugin"}
+          />
         </Grid.Dropdown>
       }
     >
