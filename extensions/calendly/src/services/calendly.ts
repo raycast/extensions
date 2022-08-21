@@ -1,7 +1,8 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import _ from "lodash";
 
+const CLIENT_ID = "KCCVj5CuqdSvGsCQFqzj1KpnWap4c17W1PAaIpeFbgE";
 export interface Preferences {
   token: string;
   defaultAction: "meeting" | "one-time";
@@ -53,6 +54,35 @@ interface CalendlyEventTypeResponse extends AxiosResponse {
 }
 
 const { token }: Preferences = getPreferenceValues();
+
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "Calendly",
+  providerIcon: "logo.png",
+  description: "Connect your Calendly account...",
+});
+export async function authorize() {
+  const authRequest = await client.authorizationRequest({
+    clientId: CLIENT_ID,
+    endpoint: "https://auth.calendly.com/oauth/authorize",
+    scope: "default",
+  });
+  return await client.authorize(authRequest);
+}
+export async function getToken({ authorizationCode }: OAuth.AuthorizationResponse) {
+  const resp = await api.request({
+    baseURL: "https://auth.calendly.com/oauth/token",
+    method: "POST",
+    data: {
+      grant_type: "authorization_code",
+      client_id: CLIENT_ID,
+      client_secret: "KAv1FfPf-ykkBEM-WEcjOLi1bzW3BhbjdEk7wtqq7Zg",
+      code: authorizationCode,
+      redirect_uri: "https://raycast.com/redirect?packageName=calendly",
+    },
+  });
+  console.log(resp.data);
+}
 
 const api = axios.create({
   baseURL: "https://api.calendly.com/",

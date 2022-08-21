@@ -9,6 +9,7 @@ import {
   getPreferenceValues,
   Action,
   Clipboard,
+  OAuth,
   Image,
   LocalStorage,
 } from "@raycast/api";
