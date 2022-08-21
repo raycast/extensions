@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claris-snippets",
+  "title": "Claris Snippets",
+  "description": "Create and use snippets for Claris (FileMaker) Pro",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-snippets",
+      "title": "View Snippets",
+      "subtitle": "Claris Snippets",
+      "description": "View and use your saved snippets",
+      "mode": "view"
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "subtitle": "Claris Snippets",
+      "description": "Create a new snippet",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
