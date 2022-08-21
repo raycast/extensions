@@ -27,7 +27,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3"
+    "@raycast/api": "^1.38.3",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
