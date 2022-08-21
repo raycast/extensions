@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Clipboard, Detail, Form } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Form, Icon } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
-import { FMObjectsToXML } from "./utils/FmClipTools";
+import { detectType, FMObjectsToXML, snippetTypesMap } from "./utils/FmClipTools";
 import CreateError from "./components/create-snippet-error";
 
 // const script = FMObjectsToXML();
@@ -26,11 +26,44 @@ export default function Command() {
   }, []);
 
   if (createState === "clipboardError") return <CreateError actionProps={{ onAction: createSnippet }} />;
-  if (createState === "clipboardSuccess") return <Detail markdown={snippet} />;
+  if (createState === "form")
+    return (
+      <Form>
+        <Form.TextField id="name" title="Name" />
+      </Form>
+    );
 
   return (
-    <Form isLoading={createState === "init"}>
-      <Form.TextField id="name" title="Name" />
-    </Form>
+    <Detail
+      isLoading={createState === "init"}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Save Snippet"
+            icon={Icon.NewDocument}
+            onAction={() => {
+              setCreateState("form");
+            }}
+          />
+          <Action
+            title="Reload"
+            icon={Icon.RotateClockwise}
+            shortcut={{ key: "r", modifiers: ["cmd"] }}
+            onAction={createSnippet}
+          />
+          <Action.CopyToClipboard content={snippet} icon={Icon.Clipboard} shortcut={{ key: "c", modifiers: ["cmd"] }} />
+        </ActionPanel>
+      }
+      markdown={snippet}
+      metadata={
+        createState === "clipboardSuccess" ? (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Snippet Type" text={snippetTypesMap[detectType(snippet)]} />
+            <Detail.Metadata.Label title="Does this Look right?" text={`Continue to save this snippet`} />
+            <Detail.Metadata.Label title="Something off?" text={`⌘+R to reload from clipboard`} />
+          </Detail.Metadata>
+        ) : undefined
+      }
+    />
   );
 }

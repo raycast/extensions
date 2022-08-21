@@ -316,13 +316,13 @@ on fmObjectTranslator_Instantiate(prefs)
 				if debugMode then logConsole(ScriptName, "clipboardConvertToXML : FileMaker 10 BUG ASCII-10 check: Char:" & testChar & return & "currentCode:" & currentCode & return & "ASCII:" & (ASCII number of testChar))
 			end if
 			
-			set newClip to {string:xmlTranslation} & fmClipboard
+			set newClip to {string:xmlTranslation}
 			
-			set the clipboard to newClip
+			-- set the clipboard to newClip
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToXML: added XML to clipboard")
 			
-			return true
+			return newClip
 			
 		end clipboardConvertToXML
 		

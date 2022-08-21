@@ -37,9 +37,9 @@ on run
 		error "The clipboard did not contain any FileMaker objects."
 	end if
 	
-	clipboardConvertToXML({}) of objTrans
+	return clipboardConvertToXML({}) of objTrans
 	
-	return true
+	-- return true
 	
 end run
 
