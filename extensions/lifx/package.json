@@ -28,6 +28,13 @@
       "mode": "view"
     },
     {
+      "name": "viewEffects",
+      "title": "Set Effect",
+      "subtitle": "LIFX",
+      "description": "Set the chosen effect",
+      "mode": "view"
+    },
+    {
       "name": "turnOnAllLights",
       "title": "Turn On All Lights",
       "subtitle": "LIFX",

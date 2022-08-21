@@ -1,4 +1,4 @@
-import { CssColor } from "./interfaces";
+import { Api, CssColor } from "./interfaces";
 const constants = {
   kelvins: [2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 9000],
   brightness: [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0],
@@ -139,5 +139,28 @@ export const COLORS: CssColor[] = [
   { name: "Yellow", value: "#ffff00" },
   { name: "Yellow Green", value: "#9acd32" },
 ];
+
+export const effects = [
+  { name: "Breathe",
+    icon: "",
+    value: Api.effectType.breathe 
+  }, 
+  { name: "Move",
+    icon: "",
+    value: Api.effectType.move 
+  },
+  { name: "Morph",
+    icon: "",
+    value: Api.effectType.morph
+  },
+  { name: "Flame",
+    icon: "",
+    value: Api.effectType.flame
+  },
+  { name: "Pulse",
+    icon: "",
+    value: Api.effectType.pulse
+  },
+]
 
 export default constants;

@@ -121,6 +121,33 @@ export namespace Api {
     overides?: lightStateParam;
     fast?: boolean;
   }
+
+  export enum effectType {
+    breathe = "breathe",
+    move = "move",
+    pulse = "pulse",
+    morph = "morph",
+    flame = "flame",
+    off = "off",
+  }
+
+  export interface effectParams {
+    color: string;
+    from_color?: string;
+    period?: number;
+    cycles?: number;
+    persist?: boolean;
+    power_on?: boolean;
+    peak?: number;
+    
+    //Move
+    direction?: string;
+    
+    //Morph
+    duration?: number;
+    pallate?: string[];
+  
+  }
 }
 
 export interface CssColor {
