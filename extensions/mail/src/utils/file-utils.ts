@@ -3,11 +3,22 @@ import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import mime from "mime-types";
 
-export const getMIMEtype = (extension: string | undefined): string | undefined => {
-  if (!extension) return undefined;
-  const mimeType: string | false = mime.lookup(extension);
-  if (mimeType) return mimeType.split("/")[0];
-  else return undefined;
+const isHidden = (item: string) => {
+  if (item === "Icon\r") return true;
+  return /(^|\/)\.[^\/\.]/g.test(item);
+};
+
+export const getDirectoryItems = async (dir: string): Promise<{ files: string[]; subDirectories: string[] }> => {
+  const directoryItems = await readdir(dir, { withFileTypes: true });
+  const files = directoryItems
+    .filter((dirent) => dirent.isFile())
+    .map((dirent) => dirent.name)
+    .filter((item) => !isHidden(item));
+  const subDirectories = directoryItems
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter((item) => !isHidden(item));
+  return { files, subDirectories };
 };
 
 export const formatFileSize = (size: string): string => {
@@ -67,4 +78,11 @@ export const getDirectorySize = async (dir: string, depth: number) => {
     return 0;
   });
   return (await Promise.all(paths)).flat(Infinity).reduce((i, size) => i + size, 0);
+};
+
+export const getMIMEtype = (extension: string | undefined): string | undefined => {
+  if (!extension) return undefined;
+  const mimeType: string | false = mime.lookup(extension);
+  if (mimeType) return mimeType.split("/")[0];
+  else return undefined;
 };

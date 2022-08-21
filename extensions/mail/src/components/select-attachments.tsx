@@ -1,28 +1,17 @@
-import {
-  Form,
-  Action,
-  ActionPanel,
-  Icon,
-  LocalStorage,
-  useNavigation,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, useNavigation, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Preferences } from "../types/types";
-import { getSize, validateSize, maximumFileSize } from "../utils/file-utils";
-import { readdir } from "fs/promises";
+import { getDirectoryItems, getSize, validateSize, maximumFileSize } from "../utils/file-utils";
 import { homedir } from "os";
 import fs from "fs";
+
+const preferences: Preferences = getPreferenceValues();
+const attachmentsDirectory = preferences.selectDirectory.replace("~", homedir());
 
 type SelectAttachmentsProps = {
   attachments: string[];
   setAttachments: (attachments: string[]) => void;
 };
-
-const preferences: Preferences = getPreferenceValues();
-const attachmentsDirectory = preferences.selectDirectory.replace("~", homedir());
 
 export const SelectAttachments = (props: SelectAttachmentsProps): JSX.Element => {
   const [numAttachments, setNumAttachments] = useState(props.attachments.length === 0 ? 1 : props.attachments.length);
@@ -74,7 +63,7 @@ export const SelectAttachments = (props: SelectAttachmentsProps): JSX.Element =>
         </ActionPanel>
       }
     >
-      <Form.Description title="" text="Add more items with ⌘ + A and remove them with ⌘ + R." />
+      <Form.Description title="" text="Add more items with ⌘ + A and remove them with ⌘ + R" />
       {attachmentsArray.map((i: number) => (
         <SelectFile
           key={i}
@@ -97,12 +86,6 @@ export const SelectFile = (props: SelectFileProps): JSX.Element => {
   const isFile = props.attachment && fs.statSync(props.attachment).isFile();
   const [files, setFiles] = useState<string[]>(props.attachment && isFile ? [props.attachment.split("/").pop()!] : []);
   const [subDirectories, setSubDirectories] = useState<string[]>([]);
-
-  const isHidden = (item: string) => {
-    if (item === "Icon\r") return true;
-    return /(^|\/)\.[^\/\.]/g.test(item);
-  };
-
   const [currentDirectory, setCurrentDirectory] = useState<string>(
     props.attachment
       ? isFile
@@ -113,25 +96,16 @@ export const SelectFile = (props: SelectFileProps): JSX.Element => {
   const [attachment, setAttachment] = useState<string>(
     props.attachment && isFile ? `attachment-${props.attachment}` : currentDirectory
   );
-
-  const getDirectoryItems = async (dir: string) => {
-    if (dir) {
-      const directoryItems = await readdir(dir, { withFileTypes: true });
-      const files = directoryItems
-        .filter((dirent) => dirent.isFile())
-        .map((dirent) => dirent.name)
-        .filter((item) => !isHidden(item));
-      setFiles(files);
-      const subDirectories = directoryItems
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name)
-        .filter((item) => !isHidden(item));
-      setSubDirectories(subDirectories);
-    }
-  };
-
+  
   useEffect(() => {
-    getDirectoryItems(currentDirectory);
+    const onDirectoryChange = async () => {
+      if (currentDirectory) {
+        const { files, subDirectories } = await getDirectoryItems(currentDirectory); 
+        setFiles(files); 
+        setSubDirectories(subDirectories); 
+      }
+    } 
+    onDirectoryChange(); 
   }, [currentDirectory]);
 
   const [error, setError] = useState<string | undefined>(undefined);
