@@ -18,7 +18,7 @@ export default function Command() {
     headers: {
       Authorization: "Bearer " + preferences.lifx_token,
     },
-    timeout: 7000
+    timeout: 7000,
   };
 
   async function fetchLights() {
@@ -32,7 +32,7 @@ export default function Command() {
       setIsLoading(false);
       return;
     }
-    
+
     axios
       .get("https://api.lifx.com/v1/lights/all", config)
       .then((res) => {
@@ -168,16 +168,19 @@ export default function Command() {
       title: "Setting Effect",
     });
     try {
-      await SetEffect(uuid, effect, {color: "blue"}, config);
+      await SetEffect(uuid, effect, { color: "blue" }, config);
       toast.style = Toast.Style.Success;
       toast.title = "Effect Set";
     } catch (error) {
       console.log(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
-      toast.primaryAction = {title: "Retry", onAction(toast) {
-        setEffect(uuid, effect);
-      },};
+      toast.primaryAction = {
+        title: "Retry",
+        onAction(toast) {
+          setEffect(uuid, effect);
+        },
+      };
       if (error instanceof Error) {
         toast.message = error.message;
       }

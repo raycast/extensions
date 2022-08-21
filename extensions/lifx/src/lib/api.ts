@@ -97,24 +97,29 @@ export async function cleanLights(selector: string, params: Api.cleanParams, con
   }
 }
 
-export async function SetEffect(selector: string, effect: Api.effectType, params: Api.effectParams, config: AxiosRequestConfig) {
-    try {
-      const result = await axios.post(
-        `https://api.lifx.com/v1/lights/${selector ? selector : "all"}/effects/${effect}`,
-        params,
-        config
-      );
-      const data: Api.lightStateResult = result.data;
-      if (data.results[0].status === "ok") {
-        const returnData: Api.lightStateResult = result.data;
-        return returnData;
-      } else {
-        throw new Error("Light " + data.results[0].status || "Error");
-      }
-    } catch (err) {
-      handleCommonError(err);
+export async function SetEffect(
+  selector: string,
+  effect: Api.effectType,
+  params: Api.effectParams,
+  config: AxiosRequestConfig
+) {
+  try {
+    const result = await axios.post(
+      `https://api.lifx.com/v1/lights/${selector ? selector : "all"}/effects/${effect}`,
+      params,
+      config
+    );
+    const data: Api.lightStateResult = result.data;
+    if (data.results[0].status === "ok") {
+      const returnData: Api.lightStateResult = result.data;
+      return returnData;
+    } else {
+      throw new Error("Light " + data.results[0].status || "Error");
     }
+  } catch (err) {
+    handleCommonError(err);
   }
+}
 
 export async function checkApiKey() {
   const prefernces = getPreferenceValues();

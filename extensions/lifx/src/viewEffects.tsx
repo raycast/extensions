@@ -17,8 +17,8 @@ export default function viewScenes() {
   };
 
   const param: Api.effectParams = {
-    color: "#ff0000"
-  }
+    color: "#ff0000",
+  };
 
   async function setEffect(uuid: string, effect: Api.effectType) {
     const toast = await showToast({

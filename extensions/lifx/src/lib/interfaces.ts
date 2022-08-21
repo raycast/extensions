@@ -139,14 +139,13 @@ export namespace Api {
     persist?: boolean;
     power_on?: boolean;
     peak?: number;
-    
+
     //Move
     direction?: string;
-    
+
     //Morph
     duration?: number;
     pallate?: string[];
-  
   }
 }
 
