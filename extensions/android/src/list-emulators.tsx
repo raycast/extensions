@@ -1,10 +1,11 @@
 import {
   Action,
-  ActionPanel, Icon,
+  ActionPanel,
+  Icon,
   List,
   popToRoot,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 const { exec } = require("child_process");
