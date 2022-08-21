@@ -23,10 +23,10 @@ export const Messages = (account: Account): JSX.Element => {
   const [messages, setMessages] = useState<Message[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const setMessage = (message: Message) => {
+  const setMessage = (account: Account, message: Message) => {
     setMessages(messages?.map((msg: Message) => (msg.id === message.id ? message : msg)));
   };
-  const deleteMessage = (message: Message) => {
+  const deleteMessage = (account: Account, message: Message) => {
     setMessages(messages?.filter((msg: Message) => msg.id !== message.id));
   };
 
@@ -59,8 +59,8 @@ export const Messages = (account: Account): JSX.Element => {
 type MessageProps = {
   account: Account;
   message: Message;
-  setMessage?: (message: Message) => void;
-  deleteMessage?: (message: Message) => void;
+  setMessage?: (account: Account, message: Message) => void;
+  deleteMessage?: (account: Account, message: Message) => void;
 };
 
 export const MessageListItem = (props: MessageProps): JSX.Element => {
@@ -190,7 +190,7 @@ const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.
           }
           onAction={async () => {
             try {
-              if (props.setMessage) props.setMessage({ ...message, read: !message.read });
+              if (props.setMessage) props.setMessage(props.account, { ...message, read: !message.read });
               await messageScripts.toggleMessageRead(message);
               await showToast(Toast.Style.Success, `Message Marked as ${message.read ? "Unread" : "Read"}`);
             } catch (error) {
@@ -222,7 +222,7 @@ const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.
           shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
           icon={{ source: "../assets/icons/junk.svg", tintColor: Color.PrimaryText }}
           onAction={async () => {
-            if (props.deleteMessage) props.deleteMessage(message);
+            if (props.deleteMessage) props.deleteMessage(props.account, message);
             await messageScripts.moveToJunk(message);
             pop();
           }}
@@ -232,7 +232,7 @@ const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           icon={{ source: Icon.Trash, tintColor: Color.Red }}
           onAction={async () => {
-            if (props.deleteMessage) props.deleteMessage(message);
+            if (props.deleteMessage) props.deleteMessage(props.account, message);
             await messageScripts.deleteMessage(message);
             pop();
           }}

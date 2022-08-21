@@ -10,25 +10,43 @@ export default function SeeRecentMail() {
   const [numUnread, setNumUnread] = useState<number | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const getAccounts = async () => {
+    let accounts = await getMailAccounts();
+    if (accounts) {
+      const promises = accounts.map((account: Account) => {
+        return getAccountMessages(account, "recent", "All Mail", 25, true);
+      });
+      const messages = await Promise.all(promises);
+      accounts = accounts.map((account: Account, index: number) => {
+        account.messages = messages[index];
+        return account;
+      });
+      setNumUnread(
+        accounts.reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0)
+      );
+      setAccounts(accounts);
+    }
+    setIsLoading(false);
+  };
+
+  const setMessage = (account: Account, message: Message) => {
+    setAccounts(
+      accounts?.map((a: Account) =>
+        a.id === account.id
+          ? { ...a, messages: account.messages?.map((m: Message) => (m.id === message.id ? message : m)) }
+          : a
+      )
+    );
+  };
+  const deleteMessage = (account: Account, message: Message) => {
+    setAccounts(
+      accounts?.map((a: Account) =>
+        a.id === account.id ? { ...a, messages: account.messages?.filter((m: Message) => m.id !== message.id) } : a
+      )
+    );
+  };
+
   useEffect(() => {
-    const getAccounts = async () => {
-      let accounts = await getMailAccounts();
-      if (accounts) {
-        const promises = accounts.map((account: Account) => {
-          return getAccountMessages(account, "recent", "All Mail", 25, true);
-        });
-        const messages = await Promise.all(promises);
-        accounts = accounts.map((account: Account, index: number) => {
-          account.messages = messages[index];
-          return account;
-        });
-        setNumUnread(
-          accounts.reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0)
-        );
-        setAccounts(accounts);
-      }
-      setIsLoading(false);
-    };
     getAccounts();
     return () => {
       setAccounts([]);
@@ -41,7 +59,13 @@ export default function SeeRecentMail() {
         accounts?.map((account: Account, index: number) => (
           <List.Section key={index} title={account.name} subtitle={account.email}>
             {account.messages?.map((message: Message, index: number) => (
-              <MessageListItem key={index} account={account} message={message} />
+              <MessageListItem
+                key={index}
+                account={account}
+                message={message}
+                setMessage={setMessage}
+                deleteMessage={deleteMessage}
+              />
             ))}
           </List.Section>
         ))

@@ -35,6 +35,12 @@ export default function ShareWithMail() {
         style: Toast.Style.Failure,
       };
       showToast(options);
+    } else if (validSelections.length === 0) {
+      const options: Toast.Options = {
+        title: "No Attachments Selected in Finder",
+        style: Toast.Style.Failure,
+      };
+      showToast(options);
     }
   };
 
