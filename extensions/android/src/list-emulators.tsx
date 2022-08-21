@@ -9,9 +9,6 @@ export default function Command() {
   const [items, setItems] = useState<string[]>(() => [])
   const [loading, setLoading] = useState(true)
 
-  const preferences: PreferenceValues = getPreferenceValues();
-  const projectsDirectory = preferences.ANDROID_DIRECTORY;
-
   useEffect(() => {
 
     async function listDir() {

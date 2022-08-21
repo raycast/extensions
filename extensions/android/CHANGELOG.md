@@ -1,3 +1,3 @@
-# List Android Projects Changelog
+# Android Changelog
 
 ## [Initial Version] - 2022-08-19
