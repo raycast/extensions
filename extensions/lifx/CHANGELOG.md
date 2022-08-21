@@ -13,3 +13,8 @@
 - Added huge improvements to `Manage Lights` command
 - Fixed some bugs
 - Rewrote the api handling and error handling
+
+## [Version 1.2.2] - 2022-08-21
+- Added `Set Effect` command
+- Added `Set Effect` action in manage lights
+- Added SF-Symbols to manage lights action
