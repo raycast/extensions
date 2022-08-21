@@ -26,7 +26,7 @@ export default class OdinHelper {
     }
 
     parseOdinAlarms = async (html: string): Promise<[OdinAlarm[], string]> => {
-        var alarms: OdinAlarm[] = [];
+        const alarms: OdinAlarm[] = [];
 
         const $ = Cheerio.load(html);
 
