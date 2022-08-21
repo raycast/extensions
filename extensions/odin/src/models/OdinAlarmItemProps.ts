@@ -1,5 +1,5 @@
-import {OdinAlarm} from "./OdinAlarm";
+import { OdinAlarm } from "./OdinAlarm";
 
 export interface OdinAlarmItemProps {
-    odinAlarmModel: OdinAlarm;
+  odinAlarmModel: OdinAlarm;
 }
