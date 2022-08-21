@@ -21,6 +21,14 @@ export default <IAPIData[]>[
     },
   },
   {
+    name: "Dubbo",
+    icon: "../assets/logo/dubbo.png",
+    apiKey: "364ae307e1da9d02b2335675e9db1eb1",
+    appId: "L5F4T9F0I1",
+    indexName: "apache_dubbo",
+    homepage: "https://dubbo.apache.org/",
+  },
+  {
     name: "Echarts",
     icon: "../assets/logo/echarts.png",
     apiKey: "6ade5f1ff34e94690f9ea38cddcc2f55",
@@ -73,6 +81,28 @@ export default <IAPIData[]>[
     },
   },
   {
+    name: "Nuxt",
+    icon: "../assets/logo/nuxt.png",
+    apiKey: "60a01900a4b726d667eab75b6f337592",
+    appId: "1V8G7N9GF0",
+    indexName: "nuxtjs",
+    homepage: "https://nuxtjs.org/",
+    searchParameters: {
+      facetFilters: ["language:en-US", "tags:main"],
+    },
+  },
+  {
+    name: "Nuxt3",
+    icon: "../assets/logo/nuxt.png",
+    apiKey: "60a01900a4b726d667eab75b6f337592",
+    appId: "1V8G7N9GF0",
+    indexName: "nuxtjs",
+    homepage: "https://v3.nuxtjs.org/",
+    searchParameters: {
+      facetFilters: ["language:en-US", "tags:v3"],
+    },
+  },
+  {
     name: "Prettier",
     icon: "../assets/logo/prettier.png",
     apiKey: "9fcdb2a62af4c47cc5eecf3d5a747818",
@@ -104,6 +134,22 @@ export default <IAPIData[]>[
     indexName: "reactjs_zh-hans",
     homepage: "https://zh-hans.reactjs.org/",
     lang: "zh-Hans",
+  },
+  {
+    name: "React Bootstrap",
+    icon: "../assets/logo/react_bootstrap.png",
+    apiKey: "33985ee571397d832ef243988ff4c891",
+    appId: "C38ZI55F9H",
+    homepage: "https://react-bootstrap.github.io/",
+    indexName: "react_bootstrap_v4",
+  },
+  {
+    name: "Remix",
+    icon: "../assets/logo/remix.png",
+    apiKey: "dff56670dbec8494409989d6ec9c8ac2",
+    appId: "6OHWJSR8G4",
+    homepage: "https://remix.run/",
+    indexName: "remix",
   },
   {
     name: "Slidev",
@@ -218,5 +264,28 @@ export default <IAPIData[]>[
     appId: "34YFD9IUQ2",
     indexName: "vuepress",
     homepage: "https://v2.vuepress.vuejs.org/",
+  },
+  {
+    name: "pnpm",
+    icon: "../assets/logo/pnpm.png",
+    apiKey: "a337998a623aa8f80d2a97a79d565086",
+    appId: "RAHRBBK2WL",
+    indexName: "pnpm",
+    homepage: "https://pnpm.io/zh",
+    searchParameters: {
+      facetFilters: ["language:en"],
+    },
+  },
+  {
+    name: "pnpm",
+    icon: "../assets/logo/pnpm.png",
+    apiKey: "a337998a623aa8f80d2a97a79d565086",
+    appId: "RAHRBBK2WL",
+    indexName: "pnpm",
+    homepage: "https://pnpm.io/zh",
+    lang: "zh-Hans",
+    searchParameters: {
+      facetFilters: ["language:zh"],
+    },
   },
 ];

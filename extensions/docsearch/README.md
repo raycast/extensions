@@ -6,16 +6,18 @@ Link **all DocSearch** into Raycast.
 
 ### Supported Documentations
 
-|                   Documentations                    |                                               |                                                              |
-| :-------------------------------------------------: | :-------------------------------------------: | :----------------------------------------------------------: |
-|        [Arthas](https://arthas.aliyun.com/)         |    [Bootstrap](https://getbootstrap.com/)     | [Echarts(zh-Hans)](https://echarts.apache.org/zh/index.html) |
-| [Echarts](https://echarts.apache.org/en/index.html) |         [Homebrew](https://brew.sh/)          |               [IPFS](https://docs.ipfs.tech/)                |
-|         [Laravel 9.x](https://laravel.com/)         |       [Prettier](https://prettier.io/)        |              [RSSHub](https://docs.rsshub.app/)              |
-|   [React(zh-Hans)](https://zh-hans.reactjs.org/)    |         [React](https://reactjs.org/)         |            [Slidev(zh-Hans)](https://cn.sli.dev/)            |
-|     [TailwindCSS v3](https://tailwindcss.com/)      |        [Unidata](https://unidata.app/)        |           [Vite(zh-Hans)](https://cn.vitejs.dev/)            |
-|             [Vite](https://vitejs.dev/)             |         [Vitest](https://vitest.dev/)         |           [Vue Router4](https://router.vuejs.org/)           |
-|         [Vue3(zh-Hans)](https://vuejs.org/)         |          [Vue3](https://vuejs.org/)           |                [VueUse](https://vueuse.org/)                 |
-|     [Vuepress v1](https://vuepress.vuejs.org/)      | [Vuepress v2](https://v2.vuepress.vuejs.org/) |
+|                        Documentations                        |                                                     |                                            |
+| :----------------------------------------------------------: | :-------------------------------------------------: | :----------------------------------------: |
+|             [Arthas](https://arthas.aliyun.com/)             |       [Bootstrap](https://getbootstrap.com/)        |     [Dubbo](https://dubbo.apache.org/)     |
+| [Echarts(zh-Hans)](https://echarts.apache.org/zh/index.html) | [Echarts](https://echarts.apache.org/en/index.html) |        [Homebrew](https://brew.sh/)        |
+|               [IPFS](https://docs.ipfs.tech/)                |         [Laravel 9.x](https://laravel.com/)         |             [Nuxt](undefined)              |
+|                      [Nuxt3](undefined)                      |          [Prettier](https://prettier.io/)           |     [RSSHub](https://docs.rsshub.app/)     |
+|        [React(zh-Hans)](https://zh-hans.reactjs.org/)        |            [React](https://reactjs.org/)            |        [React Bootstrap](undefined)        |
+|                      [Remix](undefined)                      |       [Slidev(zh-Hans)](https://cn.sli.dev/)        | [TailwindCSS v3](https://tailwindcss.com/) |
+|               [Unidata](https://unidata.app/)                |       [Vite(zh-Hans)](https://cn.vitejs.dev/)       |        [Vite](https://vitejs.dev/)         |
+|                [Vitest](https://vitest.dev/)                 |      [Vue Router4](https://router.vuejs.org/)       |    [Vue3(zh-Hans)](https://vuejs.org/)     |
+|                  [Vue3](https://vuejs.org/)                  |            [VueUse](https://vueuse.org/)            | [Vuepress v1](https://vuepress.vuejs.org/) |
+|        [Vuepress v2](https://v2.vuepress.vuejs.org/)         |         [pnpm(zh-Hans)](https://pnpm.io/zh)         |         [pnpm](https://pnpm.io/zh)         |
 
 ### Add Other Documentation
 
