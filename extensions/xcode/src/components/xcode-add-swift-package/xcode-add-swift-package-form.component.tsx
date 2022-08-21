@@ -7,15 +7,17 @@ import {
   Clipboard,
   closeMainWindow,
   Form,
+  Icon,
   Navigation,
   showHUD,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { XcodeAddSwiftPackageSelectXcodeProjectList } from "./xcode-add-swift-package-select-xcode-project-list.component";
 import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
 import { XcodeService } from "../../services/xcode.service";
+import { XcodeProjectList } from "../xcode-project-list/xcode-project-list.component";
+import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
 
 /**
  * Xcode add Swift Package Form
@@ -68,26 +70,7 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Add Swift Package"
-            onSubmit={() => {
-              if (XcodeSwiftPackageService.isSwiftPackageUrlValid(swiftPackageUrl)) {
-                navigation.push(
-                  <XcodeAddSwiftPackageSelectXcodeProjectList
-                    onSelect={(xcodeProject) => {
-                      navigation.pop();
-                      return addSwiftPackage(swiftPackageUrl, xcodeProject, navigation);
-                    }}
-                  />
-                );
-              } else {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Please enter a valid url to a Swift Package",
-                });
-              }
-            }}
-          />
+          <Action.SubmitForm title="Add Swift Package" onSubmit={() => submitForm(swiftPackageUrl, navigation)} />
         </ActionPanel>
       }
     >
@@ -101,6 +84,41 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
       ) : null}
       {swiftPackageMetadata?.license ? <Form.Description title="Name" text={swiftPackageMetadata.license} /> : null}
     </Form>
+  );
+}
+
+/**
+ * Submit Form
+ * @param swiftPackageUrl The Swift Package URL
+ * @param navigation The Navigation
+ */
+function submitForm(swiftPackageUrl: string, navigation: Navigation) {
+  if (!XcodeSwiftPackageService.isSwiftPackageUrlValid(swiftPackageUrl)) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: "Please enter a valid url to a Swift Package",
+    });
+  }
+  navigation.push(
+    <XcodeProjectList
+      key="select-xcode-project"
+      navigationTitle="Select Xcode Project"
+      searchBarPlaceholder="Select Xcode Project"
+      projectTypeFilter={(projectType) =>
+        projectType === XcodeProjectType.project || projectType === XcodeProjectType.workspace
+      }
+      actions={(xcodeProject) => [
+        <Action
+          key="add-swift-package"
+          title="Add Swift Package"
+          icon={Icon.Plus}
+          onAction={() => {
+            navigation.pop();
+            return addSwiftPackage(swiftPackageUrl, xcodeProject, navigation);
+          }}
+        />,
+      ]}
+    />
   );
 }
 

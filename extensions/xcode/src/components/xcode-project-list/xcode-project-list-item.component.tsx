@@ -11,6 +11,7 @@ import { XcodeService } from "../../services/xcode.service";
 export function XcodeProjectListItem(props: {
   project: XcodeProject;
   isFavorite: boolean;
+  actions?: [JSX.Element];
   onToggleFavoriteAction: () => void;
 }): JSX.Element {
   const navigation = useNavigation();
@@ -24,15 +25,18 @@ export function XcodeProjectListItem(props: {
       icon={XcodeProjectIcon(props.project.type)}
       actions={
         <ActionPanel>
-          <Action.Open
-            application={XcodeService.bundleIdentifier}
-            key="open-with-xcode"
-            title="Open with Xcode"
-            target={props.project.filePath}
-            icon={Icon.Hammer}
-            onOpen={navigation.pop}
-          />
-          <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} />
+          {props.actions ? props.actions : undefined}
+          {!props.actions ? (
+            <Action.Open
+              application={XcodeService.bundleIdentifier}
+              key="open-with-xcode"
+              title="Open with Xcode"
+              target={props.project.filePath}
+              icon={Icon.Hammer}
+              onOpen={navigation.pop}
+            />
+          ) : undefined}
+          {!props.actions ? <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} /> : undefined}
           <Action
             key="favorite"
             title={props.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
