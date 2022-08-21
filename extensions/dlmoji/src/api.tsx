@@ -119,11 +119,6 @@ export async function fetchEmojiTrans(queryText: string, fromLanguage: string, k
 
 export async function fetchEmojiAll(queryText: string, fromLanguage: string): Promise<any> {
     const lang = fromLanguage === "zh" ? "zh-hans" : fromLanguage
-
-    // let data = new FormData();
-    // data.append('keywords', queryText)
-    // data.append('lang', lang)
-
     return axios
         .post(
             "https://www.emojiall.com/elasticsearch/getData.php",
@@ -133,7 +128,6 @@ export async function fetchEmojiAll(queryText: string, fromLanguage: string): Pr
             }),
             {
                 headers: {
-                    // 'Content-Type': 'multipart/form-data',
                     referer: "https://www.emojiall.com/",
                 },
             }

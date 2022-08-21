@@ -18,7 +18,6 @@ function reformatCopyTextArray(data: string[], limitResultAmount = 10): IReforma
 
     return finalData.map((text, idx) => {
         return {
-            // title: finalData.length - 1 === idx && idx > 0 ? "All" : truncate(text),
             title: idx === dataLength && dataLength > 1 ? "All" : truncate(text, 40),
             value: text,
         }
@@ -88,7 +87,7 @@ class ListActionPanel extends Component<IListItemActionPanelItem> {
                     <ActionPanel.Section title="EmojiAll">
                         <Action.Push
                             icon={Icon.Document}
-                            title="Description"
+                            title="View Description"
                             shortcut={{ modifiers: ["cmd"], key: "enter" }}
                             target={
                                 <EmojiAllDescription

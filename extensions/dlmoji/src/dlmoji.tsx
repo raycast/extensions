@@ -42,8 +42,8 @@ export default function () {
 
         // String Filter
         const queryGlobal: string = inputState
-        const queryText: string = queryGlobal //.replace(/陈炤伶|伶仔|伶伶/g, "公主").replace(/邓港大/g, "猪")
-        const queryEmoji: string = queryGlobal //.replace(/陈炤伶|伶仔|伶伶/g, "🐰").replace(/邓港大/g, "🦊")
+        const queryText: string = queryGlobal //.replace(/Jolin|Ling/g, "princess").replace(/Danny/g, "prince")
+        const queryEmoji: string = queryGlobal //.replace(/Jolin|Ling/g, "🐰").replace(/Danny/g, "🦊")
 
         const hasChinese = /[\u4E00-\u9FA5]+/g.test(queryText)
         const lang = hasChinese ? "zh" : "en"
@@ -53,9 +53,6 @@ export default function () {
         async function getDeepmoji(): Promise<ITranslateReformatResultItem | undefined> {
             let enText: string = queryText
             if (hasChinese) {
-                // const res = await fetchDeepl(queryText)
-                // enText = res.data.data
-
                 const res = await fetchBaiduTrans(queryText)
                 enText = formatBaiduTrans(res.data)
                 if (!enText) return
