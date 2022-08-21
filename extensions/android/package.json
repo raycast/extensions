@@ -20,7 +20,7 @@
     },
     {
       "name": "list-emulators",
-      "title": "List Android emulators",
+      "title": "List Android Emulators",
       "subtitle": "Android",
       "description": "show android emulators",
       "icon": "list-android.png",
