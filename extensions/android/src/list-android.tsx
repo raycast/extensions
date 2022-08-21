@@ -8,7 +8,7 @@ import {
   popToRoot,
   PreferenceValues,
   showToast,
-  Toast,
+  Toast
 } from "@raycast/api";
 import fs from "fs";
 import { useEffect, useState } from "react";
