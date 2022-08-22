@@ -17,11 +17,23 @@
       "name": "index",
       "title": "iHosts",
       "description": "Mange system hosts",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "exportLoc",
+          "type": "textfield",
+          "required": false,
+          "title": "Host Export Location",
+          "description": "Please enter host export location, default is Desktop",
+          "placeholder": "Enter Host Export Location"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
+    "raycast-toolkit": "^1.0.6",
+    "run-applescript": "^6.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

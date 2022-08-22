@@ -1,62 +1,34 @@
-import { ActionPanel, Detail, List, Action, Icon, Color, LocalStorage, confirmAlert } from "@raycast/api";
-import fs from "node:fs";
+import { List, Icon, Color, LocalStorage, confirmAlert, showToast, Toast, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { HostFolderMode, State, SystemHostBackupKey, SystemHostFilePath, SystemHostHashKey } from "./const";
+import {
+  FolderFilterDropDown,
+  getItemAccessories,
+  getItemActions,
+  getItemIcon,
+  SysHostPermRequest,
+  SystemHostsActions,
+} from "./component";
+import {
+  HostFolderMode,
+  HostsCommonKey,
+  State,
+  SystemHostBackupKey,
+  SystemHostFilePath,
+  SystemHostHashKey,
+} from "./const";
+import { backupHostFile, isFirstTime, removeBackup, saveHostCommons } from "./utils/common";
+import { checkSysHostAccess, getShowHost, getSysHostFile, getSysHostFileHash, writeSysHostFile } from "./utils/file";
 import { v4 as uuidv4 } from "uuid";
-import { convertFolders2Common, getSysHostFile, getSysHostFileHash } from "./utils";
-
-const hostFolders: IHostFolder[] = [
-  {
-    id: uuidv4(),
-    name: "Default",
-    state: State.Disable,
-    mode: HostFolderMode.Multiple,
-    hosts: [
-      {
-        id: uuidv4(),
-        name: "Uat",
-        state: State.Disable,
-        content: "Uat hosts",
-      },
-      {
-        id: uuidv4(),
-        name: "Pre",
-        state: State.Enable,
-        content: "Pre hosts",
-      },
-      {
-        id: uuidv4(),
-        name: "Prod",
-        state: State.Enable,
-        content: "Prod hosts",
-      },
-    ],
-  },
-  {
-    id: uuidv4(),
-    name: "Test",
-    state: State.Enable,
-    mode: HostFolderMode.Single,
-    hosts: [
-      {
-        id: uuidv4(),
-        name: "Test1",
-        state: State.Disable,
-        content: "Test1 hosts",
-      },
-      {
-        id: uuidv4(),
-        name: "Test2",
-        state: State.Enable,
-        content: "Test2 hosts",
-      },
-    ],
-  },
-];
 
 export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
-  const [hostFoldersState, updateHostFoldersStateState] = useState<IHostFolder[]>([]);
+  const [hostCommonsState, updateHostCommonsState] = useState<IHostCommon[]>([]);
+  const [foldersState, updateFoldersState] = useState<IHostCommon[]>([]);
+  const [filterIdState, updateFilterIdState] = useState<string>("-1");
+  const [hostBackupState, updateHostBackupState] = useState<IHostCommon | undefined>();
+  if (!checkSysHostAccess()) {
+    return <SysHostPermRequest />;
+  }
 
   useEffect(() => {
     init();
@@ -73,7 +45,7 @@ export default function Command() {
         dismissAction: {
           title: "Overwrite",
           onAction: async () => {
-            await refresh();
+            await refresh(true);
             updateLoadingState(false);
           },
         },
@@ -81,106 +53,290 @@ export default function Command() {
           title: "Backup",
           onAction: async () => {
             await backupHostFile();
-            await refresh();
+            await refresh(true);
             updateLoadingState(false);
           },
         },
       });
       return;
     }
-    await refresh();
+    await refresh(false);
     updateLoadingState(false);
   }
 
-  async function refresh() {
-    console.log("加载所有host");
-    console.log("计算写入host文件");
-    console.log("渲染UI");
+  async function refresh(writeHost: boolean) {
+    const backup = await LocalStorage.getItem(SystemHostBackupKey);
+    if (backup) {
+      updateHostBackupState(JSON.parse(backup as string));
+    } else {
+      updateHostBackupState(undefined);
+    }
+    let commonHosts: IHostCommon[] = [];
+    const hosts = await LocalStorage.getItem(HostsCommonKey);
+    if (hosts) {
+      commonHosts = JSON.parse(hosts as string);
+      if (writeHost) {
+        let hostContents = "# iHost\n";
+        commonHosts.forEach((item) => {
+          if (!item.isFolder && item.state === State.Enable) {
+            hostContents += `# ${item.name}\n ${item.content}\n\n`;
+          }
+          if (item.isFolder && item.state === State.Enable && item.hosts) {
+            item.hosts.forEach((host) => {
+              if (host.state === State.Enable) {
+                hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
+              }
+            });
+          }
+        });
+        await writeSysHostFile(hostContents);
+        await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
+      }
+    }
+    updateHostCommonsState(commonHosts);
+    updateFoldersState(commonHosts.filter((c) => c.isFolder));
+  }
+
+  function onFolderChange(selected: string) {
+    updateFilterIdState(selected);
+  }
+
+  async function onNewFolder(folder: INewFolder) {
+    updateLoadingState(true);
+    try {
+      const folderItem: IHostCommon = {
+        id: uuidv4(),
+        name: folder.name,
+        state: State.Enable,
+        mode: folder.mode,
+        isFolder: true,
+        folderState: State.Enable,
+        hosts: [],
+        ctime: new Date().getTime(),
+      };
+      hostCommonsState.push(folderItem);
+      await saveHostCommons(hostCommonsState);
+      await refresh(false);
+      showToast({
+        title: "Folder created",
+        style: Toast.Style.Success,
+      });
+    } catch (error) {
+      showToast({
+        title: "Failed to create folder",
+        style: Toast.Style.Failure,
+      });
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function onUpsertHost(host: IUpsertHost) {
+    updateLoadingState(true);
+    try {
+      if (host.id) {
+        let target = hostCommonsState.find((item) => !item.isFolder && item.id === host.id);
+        if (!target) {
+          for (const item of hostCommonsState) {
+            if (!item.isFolder) continue;
+            target = item.hosts?.find((h) => h.id === host.id);
+            if (target) break;
+          }
+        }
+        if (!target) return;
+        target.name = host.name;
+        target.content = host.content;
+      } else {
+        let folder: IHostCommon | undefined;
+        if (host.folder !== "-1") {
+          folder = hostCommonsState.find((f) => f.id === host.folder);
+          if (!folder) return;
+        }
+        const hostItem: IHostCommon = {
+          id: uuidv4(),
+          name: host.name,
+          isFolder: false,
+          state: State.Enable,
+          content: host.content,
+          ctime: new Date().getTime(),
+        };
+
+        if (folder && folder.mode === HostFolderMode.Single && folder.hosts?.find((h) => h.state === State.Enable)) {
+          hostItem.state = State.Disable;
+        }
+        if (folder) {
+          hostItem.folderState = folder.state;
+          folder.hosts?.push(hostItem);
+        } else {
+          hostCommonsState.push(hostItem);
+        }
+      }
+      await saveHostCommons(hostCommonsState);
+      await refresh(true);
+      showToast({
+        title: "Host created",
+        style: Toast.Style.Success,
+      });
+    } catch (error) {
+      showToast({
+        title: "Failed to create host",
+        style: Toast.Style.Failure,
+      });
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function onToggleItemState(id: string) {
+    if (isLoadingState) {
+      showHUD("Please calm down⏳");
+      return;
+    }
+    updateLoadingState(true);
+    try {
+      let target = hostCommonsState.find((item) => item.id === id);
+      if (!target) {
+        for (const item of hostCommonsState) {
+          if (!item.isFolder) continue;
+          target = item.hosts?.find((h) => h.id === id);
+          if (target) {
+            if (item && item.mode === HostFolderMode.Single && target.state === State.Disable) {
+              item.hosts?.forEach((h) => (h.state = State.Disable));
+            }
+            break;
+          }
+        }
+      }
+      if (!target) return;
+      const state = target.state === State.Enable ? State.Disable : State.Enable;
+      target.state = state;
+      if (target.isFolder) {
+        target.folderState = state;
+        target.hosts?.forEach((h) => (h.folderState = state));
+      }
+      await saveHostCommons(hostCommonsState);
+      await refresh(!(target.isFolder && target.hosts?.length === 0));
+      showToast({
+        title: "State toggled",
+        style: Toast.Style.Success,
+      });
+    } catch (error) {
+      showToast({
+        title: "Failed to toggle state",
+        style: Toast.Style.Failure,
+      });
+    } finally {
+      updateLoadingState(false);
+    }
+  }
+
+  async function onDeleteItem(id: string) {
+    updateLoadingState(true);
+    try {
+      if (hostBackupState && hostBackupState.id === id) {
+        await removeBackup();
+        await refresh(false);
+      } else {
+        const filtered = hostCommonsState.filter((item) => item.id !== id);
+        for (const item of filtered) {
+          if (!item.isFolder) continue;
+          item.hosts = item.hosts?.filter((h) => h.id !== id);
+        }
+        await saveHostCommons(filtered);
+        await refresh(true);
+      }
+      showToast({
+        title: "Host deleted",
+        style: Toast.Style.Success,
+      });
+    } catch (error) {
+      showToast({
+        title: "Failed to delete host",
+        style: Toast.Style.Failure,
+      });
+    } finally {
+      updateLoadingState(false);
+    }
   }
 
   return (
-    <List isLoading={isLoadingState}>
+    <List
+      isLoading={isLoadingState}
+      isShowingDetail={true}
+      searchBarAccessory={<FolderFilterDropDown folders={foldersState} onFolderChange={onFolderChange} />}
+    >
       <List.Item
         title={"System Hosts"}
         icon={{ source: Icon.ComputerChip, tintColor: Color.Blue }}
-        actions={systemHostsActions(false)}
+        detail={<List.Item.Detail markdown={getShowHost(getSysHostFile())} />}
+        actions={SystemHostsActions(onNewFolder, foldersState, onUpsertHost, onToggleItemState, onDeleteItem)}
       />
-      {convertFolders2Common(hostFolders).map((item) => {
-        return (
-          <List.Item title={item.name} icon={getItemIcon(item)} accessories={getItemAccessories(item)}></List.Item>
-        );
-      })}
+      {hostBackupState && (
+        <List.Item
+          title={hostBackupState.name}
+          icon={{ source: Icon.ArrowCounterClockwise, tintColor: Color.SecondaryText }}
+          accessories={[{ date: new Date(hostBackupState.ctime) }]}
+          detail={<List.Item.Detail markdown={getShowHost(hostBackupState.content || "")} />}
+          actions={getItemActions(
+            hostBackupState,
+            onNewFolder,
+            foldersState,
+            onUpsertHost,
+            onToggleItemState,
+            onDeleteItem
+          )}
+        ></List.Item>
+      )}
+      {filterIdState === "-1" &&
+        hostCommonsState
+          .filter((item) => !item.isFolder)
+          .sort((a, b) => b.ctime - a.ctime)
+          .map((item) => {
+            return (
+              <List.Item
+                key={item.id}
+                title={item.name}
+                icon={getItemIcon(item)}
+                accessories={getItemAccessories(item)}
+                detail={<List.Item.Detail markdown={getShowHost(item.content || "")} />}
+                actions={getItemActions(item, onNewFolder, foldersState, onUpsertHost, onToggleItemState, onDeleteItem)}
+              ></List.Item>
+            );
+          })}
+      {hostCommonsState
+        .filter(
+          (item) =>
+            (filterIdState === "-1" && item.isFolder) ||
+            (filterIdState !== "-1" && item.isFolder && item.id === filterIdState)
+        )
+        .sort((a, b) => b.ctime - a.ctime)
+        .map((folder) => {
+          return (
+            <List.Section key={folder.id} title={folder.name} subtitle={`Folder | ${folder.mode}`}>
+              {folder.hosts
+                ?.sort((a, b) => b.ctime - a.ctime)
+                .map((host) => {
+                  return (
+                    <List.Item
+                      key={host.id}
+                      title={host.name}
+                      icon={getItemIcon(host)}
+                      accessories={getItemAccessories(host)}
+                      detail={<List.Item.Detail markdown={getShowHost(host.content || "")} />}
+                      actions={getItemActions(
+                        host,
+                        onNewFolder,
+                        foldersState,
+                        onUpsertHost,
+                        onToggleItemState,
+                        onDeleteItem
+                      )}
+                    ></List.Item>
+                  );
+                })}
+            </List.Section>
+          );
+        })}
     </List>
-  );
-}
-
-function getItemIcon(item: IHostCommon) {
-  if (!item.isFolder) {
-    if (item.state == State.Disable) {
-      return {
-        source: Icon.Circle,
-        tintColor: item.folderState === State.Disable ? Color.SecondaryText : Color.Green,
-      };
-    } else {
-      return {
-        source: Icon.CheckCircle,
-        tintColor: item.folderState === State.Disable ? Color.SecondaryText : Color.Green,
-      };
-    }
-  }
-}
-
-function getItemAccessories(item: IHostCommon) {
-  const accessories = [];
-  if (item.isFolder) {
-    if (item.state == State.Enable) {
-      accessories.push({ icon: { source: Icon.CheckCircle, tintColor: Color.Green } });
-    } else {
-      accessories.push({ icon: { source: Icon.Circle, tintColor: Color.Green } });
-    }
-    accessories.push({ text: `Folder` });
-  } else {
-    if (item.folderState == State.Disable) {
-      accessories.push({
-        icon: { source: Icon.Info, tintColor: Color.SecondaryText },
-        tooltip: "This item is not active because the current folder is disabled",
-      });
-    }
-  }
-  return accessories;
-}
-
-async function isFirstTime(): Promise<string> {
-  const id = uuidv4();
-  await LocalStorage.setItem(
-    id,
-    JSON.stringify({
-      id: uuidv4(),
-      name: "Default",
-      state: State.Disable,
-      mode: HostFolderMode.Multiple,
-      hosts: [],
-    })
-  );
-  const sysHostFileHash = getSysHostFileHash();
-  await LocalStorage.setItem(SystemHostHashKey, sysHostFileHash);
-  return sysHostFileHash;
-}
-
-async function backupHostFile() {
-  await LocalStorage.setItem(SystemHostBackupKey, getSysHostFile());
-}
-
-function systemHostsDetail() {
-  const systemHostsMd = fs.readFileSync("/etc/hosts", "utf8");
-  return <Detail markdown={systemHostsMd} actions={systemHostsActions(true)} />;
-}
-
-function systemHostsActions(isDetail: boolean) {
-  return (
-    <ActionPanel>
-      {!isDetail && <Action.Push title="Show Detail" target={systemHostsDetail()} />}
-      <Action.OpenWith path={"/etc/hosts"} />
-    </ActionPanel>
   );
 }

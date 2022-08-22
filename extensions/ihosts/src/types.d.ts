@@ -1,24 +1,27 @@
-interface IHostFolder {
-  id: string;
-  name: string;
-  state: State;
-  mode: HostFolderMode;
-  hosts?: IHost[];
-}
-
-interface IHost {
-  id: string;
-  name: string;
-  state: State;
-  content: string;
+interface IPreferences {
+  exportLoc?: string;
 }
 
 interface IHostCommon {
   id: string;
   name: string;
   state: State;
-  folderState: State;
-  content?: string;
   isFolder: boolean;
+  folderState?: State;
+  content?: string;
   mode?: HostFolderMode;
+  hosts?: IHostCommon[];
+  ctime: number;
+}
+
+interface INewFolder {
+  name: string;
+  mode: HostFolderMode;
+}
+
+interface IUpsertHost {
+  id?: string;
+  name: string;
+  folder: string;
+  content: string;
 }
