@@ -1,6 +1,6 @@
 # Changelog
 
-## [Change auth to API tokens] - {PR_MERGE_DATE}
+## [Change auth to API tokens] - 2022-08-22
 
 - Change the authentication method to use API tokens instead of legacy API keys. This will require you to create and use a new token for this extension.
 
