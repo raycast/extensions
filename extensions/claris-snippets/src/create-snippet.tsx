@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Clipboard, Detail, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
-import { detectType, FMObjectsToXML, snippetTypesMap } from "./utils/FmClipTools";
-import CreateError from "./components/create-snippet-error";
+import { writeFileSync } from "fs";
+import { join } from "path";
 
+import { v4 as uuidv4 } from "uuid";
+import { detectType, FMObjectsToXML } from "./utils/FmClipTools";
+import CreateError from "./components/create-snippet-error";
+import { SnippetType, snippetTypesMap } from "./utils/types";
+
+type MyFormValues = {
+  name: string;
+  type: SnippetType;
+};
 // const script = FMObjectsToXML();
 export default function Command() {
   const [createState, setCreateState] = useState<"init" | "clipboardError" | "clipboardSuccess" | "form">("init");
   const [snippet, setSnippet] = useState("");
-  const createSnippet = async () => {
+  const [nameError, setNameError] = useState<string>();
+  const getSnippetFromClipboard = async () => {
     setCreateState("init");
 
     try {
       const res = await FMObjectsToXML();
-      console.log({ res });
+      //   console.log({ res });
       setCreateState("clipboardSuccess");
       setSnippet(res ?? "");
     } catch (e) {
@@ -21,15 +31,56 @@ export default function Command() {
       console.error("Could not create snippet");
     }
   };
+  function dropNameErrorIfNeeded() {
+    if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+  async function saveSnippet(values: MyFormValues) {
+    await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
+    const mySnippet = {
+      id: uuidv4(),
+      name: values.name,
+      type: values.type,
+      snippet,
+    };
+    writeFileSync(join(environment.supportPath, `${mySnippet.id}.json`), JSON.stringify(mySnippet));
+    await showToast({ title: "Snippet saved", style: Toast.Style.Success });
+    popToRoot();
+  }
   useEffect(() => {
-    createSnippet();
+    getSnippetFromClipboard();
+    console.log(environment.supportPath);
   }, []);
 
-  if (createState === "clipboardError") return <CreateError actionProps={{ onAction: createSnippet }} />;
+  if (createState === "clipboardError") return <CreateError actionProps={{ onAction: getSnippetFromClipboard }} />;
   if (createState === "form")
     return (
-      <Form>
-        <Form.TextField id="name" title="Name" />
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm<MyFormValues> title="Save Snippet" onSubmit={saveSnippet} />
+          </ActionPanel>
+        }
+      >
+        <Form.TextField
+          id="name"
+          title="Name"
+          error={nameError}
+          onChange={dropNameErrorIfNeeded}
+          onBlur={(event) => {
+            if (event.target.value?.length == 0) {
+              setNameError("This field is required!");
+            } else {
+              dropNameErrorIfNeeded();
+            }
+          }}
+        />
+        <Form.Dropdown id="type" title="Type" defaultValue={detectType(snippet)}>
+          {(Object.keys(snippetTypesMap) as SnippetType[]).map((type) => (
+            <Form.Dropdown.Item title={snippetTypesMap[type]} value={type} />
+          ))}
+        </Form.Dropdown>
       </Form>
     );
 
@@ -49,7 +100,7 @@ export default function Command() {
             title="Reload"
             icon={Icon.RotateClockwise}
             shortcut={{ key: "r", modifiers: ["cmd"] }}
-            onAction={createSnippet}
+            onAction={getSnippetFromClipboard}
           />
           <Action.CopyToClipboard content={snippet} icon={Icon.Clipboard} shortcut={{ key: "c", modifiers: ["cmd"] }} />
         </ActionPanel>
