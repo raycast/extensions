@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "downloads-manager",
+  "title": "Downloads Manager",
+  "description": "Search and organize your downloads",
+  "icon": "downloads.png",
+  "author": "thomas",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-downloads",
+      "title": "Manage Downloads",
+      "description": "Search and organize your downloaded files",
+      "mode": "view"
+    },
+    {
+      "name": "open-last-command",
+      "title": "Open Last Command",
+      "description": "Opens the last downloaded file or folder",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.9",
+    "@types/react": "^18.0.17",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
