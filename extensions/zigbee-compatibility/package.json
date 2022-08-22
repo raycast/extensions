@@ -15,8 +15,7 @@
       "title": "Search Device",
       "description": "Search Zigbee Devices",
       "mode": "view",
-      "subtitle": "Zigbee",
-      "icon": "zigbee.png"
+      "subtitle": "Zigbee"
     }
   ],
   "dependencies": {
