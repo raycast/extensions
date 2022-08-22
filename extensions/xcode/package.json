@@ -121,6 +121,13 @@
       ]
     },
     {
+      "name": "show-swift-package-dependencies.command",
+      "title": "Show Swift Package Dependencies",
+      "subtitle": "Xcode",
+      "description": "Show Swift Package Dependencies of a Xcode Project.",
+      "mode": "view"
+    },
+    {
       "name": "installed-simulator-apps.command",
       "title": "Installed Simulator Apps",
       "subtitle": "Xcode",
@@ -203,7 +210,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.39.1",
     "@raycast/utils": "^1.0.7",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.9",
