@@ -10,7 +10,7 @@ import { XcodeSwiftPackageResolved } from "../../models/swift-package-resolved/x
  */
 export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeProject }): JSX.Element {
   const packageResolved = usePromise(
-    () => XcodeSwiftPackageResolvedService.packageResolved(props.xcodeProject),
+    () => XcodeSwiftPackageResolvedService.getPackageResolved(props.xcodeProject),
     [],
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     { onError: () => {} }

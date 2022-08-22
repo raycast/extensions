@@ -11,11 +11,11 @@ export class XcodeSwiftPackageResolvedService {
    * Retrieve Xcode Swift Package Resolved (Package.resolved) for a given Xcode Project
    * @param xcodeProject The Xcode Project
    */
-  static async packageResolved(xcodeProject: XcodeProject): Promise<XcodeSwiftPackageResolved> {
+  static async getPackageResolved(xcodeProject: XcodeProject): Promise<XcodeSwiftPackageResolved> {
     // Initialize the parent directory path
     const parentDirectoryPath = xcodeProject.filePath.substring(0, xcodeProject.filePath.lastIndexOf("/"));
-    // Retrieve the package resolved path
-    const packageResolvedPath = await XcodeSwiftPackageResolvedService.packageResolvedPath(parentDirectoryPath);
+    // Find the path to a package resolved file
+    const packageResolvedPath = await XcodeSwiftPackageResolvedService.findPackageResolvedPath(parentDirectoryPath);
     // Retrieve the contents of the package resolved and parse it as JSON
     const packageResolved = JSON.parse(await readFileAsync(packageResolvedPath, "utf-8"));
     // Initialize the package resolved pins
@@ -41,10 +41,10 @@ export class XcodeSwiftPackageResolvedService {
   }
 
   /**
-   * Retrieve the path to a "Package.resolved" at a given directory
+   * Find the path to a "Package.resolved" at a given directory
    * @param directoryPath The directory path
    */
-  private static async packageResolvedPath(directoryPath: string): Promise<string> {
+  private static async findPackageResolvedPath(directoryPath: string): Promise<string> {
     // Check if a "Package.resolved" file is available
     if (await existsAsync(Path.join(directoryPath, "Package.resolved"))) {
       // Return "Package.resolved" file path
