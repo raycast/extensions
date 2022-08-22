@@ -20,11 +20,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "@types/cheerio": "^0.22.31",
     "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
     "moment": "^2.29.4"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.31",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
