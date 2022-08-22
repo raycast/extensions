@@ -2,7 +2,6 @@ import {
   ActionPanel,
   Action,
   Icon,
-  getSelectedFinderItems,
   showToast,
   Toast,
   Form,
@@ -14,6 +13,7 @@ import {
 import { useState } from "react";
 import { createFolder, uploadObject } from "../utils";
 import { Folder } from "./folder";
+import { Action$ } from "raycast-toolkit";
 
 export function CommonActions(props: { currentFolder: string; file?: IObject; refresh: () => void; marks: string[] }) {
   return (
@@ -24,14 +24,17 @@ export function CommonActions(props: { currentFolder: string; file?: IObject; re
         icon={Icon.NewFolder}
         target={<NewFolder path={props.currentFolder} refresh={props.refresh}></NewFolder>}
       ></Action.Push>
-      <Action
+      <Action$.SelectFile
         title="Upload to Current Folder"
         icon={Icon.Upload}
         shortcut={{ modifiers: ["cmd"], key: "u" }}
-        onAction={() => {
-          uploadFiles(props.currentFolder, props.refresh);
+        onSelect={(filePath) => {
+          if (!filePath) {
+            return;
+          }
+          uploadFile(props.currentFolder, filePath, props.refresh);
         }}
-      ></Action>
+      />
       <BookMarks marks={props.marks} />
       <Action
         icon={Icon.ComputerChip}
@@ -113,37 +116,13 @@ function NewFolder(props: { path: string; refresh: () => void }) {
   );
 }
 
-export async function uploadFiles(folder: string, refresh: () => void) {
-  let selectedFiles = [];
-  try {
-    selectedFiles = await getSelectedFinderItems();
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Please activate the Finder window",
-    });
-    return;
-  }
-  if (!selectedFiles.length) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Please select some files in Finder",
-    });
-    return;
-  }
+export async function uploadFile(folder: string, filePath: string, refresh: () => void) {
   await showToast({
     style: Toast.Style.Animated,
-    title: "Uploading the Files...",
+    title: "Uploading the File...",
   });
   try {
-    const uploadPromises = selectedFiles.map(async (fileItem) => {
-      try {
-        await uploadObject(fileItem.path, folder);
-      } catch (error) {
-        return;
-      }
-    });
-    await Promise.all(uploadPromises);
+    await uploadObject(filePath, folder);
     await showToast({
       style: Toast.Style.Success,
       title: "Files uploaded",

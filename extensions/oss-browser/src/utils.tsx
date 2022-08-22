@@ -99,10 +99,6 @@ export async function renameObject(source: string, newName: string) {
 }
 
 export async function uploadObject(filePath: string, targetFolder: string) {
-  const stat = await fsSync.stat(filePath);
-  if (stat.isDirectory()) {
-    return;
-  }
   if (!targetFolder.endsWith("/")) {
     targetFolder += "/";
   }

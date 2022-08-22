@@ -24,8 +24,9 @@ import {
   getAllBuckets,
   newOssClient,
 } from "../utils";
-import { CommonActions, ErrView, uploadFiles } from "./common";
+import { CommonActions, ErrView, uploadFile } from "./common";
 import { FileItem } from "./file";
+import { Action$ } from "raycast-toolkit";
 
 function BucketDropdown(props: { buckets: IBucket[]; onBucketChange: (bucket: string) => void }) {
   const preferences: IPreferences = getPreferenceValues();
@@ -313,14 +314,17 @@ function FolderAction(props: {
           icon={Icon.ArrowRight}
           target={<Folder path={props.folder}></Folder>}
         ></Action.Push>
-        <Action
+        <Action$.SelectFile
           title="Upload to Selected Folder"
           icon={Icon.Upload}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => {
-            uploadFiles(props.folder, () => props.refresh(props.folder));
+          onSelect={(filePath) => {
+            if (!filePath) {
+              return;
+            }
+            uploadFile(props.folder, filePath, () => props.refresh(props.folder));
           }}
-        ></Action>
+        />
         <Action
           title="Delete Folder"
           icon={Icon.Trash}
