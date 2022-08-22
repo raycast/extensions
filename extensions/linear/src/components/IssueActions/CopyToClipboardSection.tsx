@@ -3,6 +3,8 @@ import { IssueResult } from "../../api/getIssues";
 
 type ISSUE_KEY = "title" | "identifier" | "url" | "branchName";
 
+type IssuePreferences = { issueCustomCopyAction?: string };
+
 const variables: Record<string, ISSUE_KEY> = {
   ISSUE_TITLE: "title",
   ISSUE_ID: "identifier",
@@ -11,7 +13,7 @@ const variables: Record<string, ISSUE_KEY> = {
 };
 
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
-  const { issueCustomCopyAction } = getPreferenceValues<{ issueCustomCopyAction: string }>();
+  const { issueCustomCopyAction } = getPreferenceValues<IssuePreferences>();
 
   return (
     <ActionPanel.Section>
@@ -43,10 +45,10 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
       />
 
-      {issueCustomCopyAction !== "" ? (
+      {issueCustomCopyAction && issueCustomCopyAction !== "" ? (
         <Action.CopyToClipboard
           icon={Icon.Clipboard}
-          content={issueCustomCopyAction.replace(/\{(.*?)\}/g, (substring, variable) => {
+          content={issueCustomCopyAction?.replace(/\{(.*?)\}/g, (substring, variable) => {
             const value = issue[variables[variable]];
             return value ? value : substring;
           })}
