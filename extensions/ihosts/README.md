@@ -1,3 +1,10 @@
-# iHosts
+<h1 align="center">
+  <strong>iHost</strong>
+</h1>
+<p align="center">Make hosts management more efficient and easier~</p>
 
-Mange system hosts
+## What can you do with this extension?
+
+1. Quickly enable or disable hosts
+2. Support preview, create, edit, delete, import, export host items
+3. Organize hosts by folder

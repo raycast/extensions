@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ihosts",
   "title": "iHosts",
-  "description": "Mange system hosts",
-  "icon": "command-icon.png",
+  "description": "Manage your system hosts",
+  "icon": "ihosts.png",
   "author": "JinShi",
   "categories": [
     "Applications",
+    "Data",
     "Developer Tools",
     "Productivity",
     "System"
@@ -14,9 +15,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "ihosts",
       "title": "iHosts",
-      "description": "Mange system hosts",
+      "description": "Manage your system hosts",
       "mode": "view",
       "preferences": [
         {

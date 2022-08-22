@@ -1,3 +1,5 @@
 # iHosts Changelog
 
-## [Initial Version] - 2022-08-15
+## [Added iHosts] - 2022-08-22
+
+Initial version code
