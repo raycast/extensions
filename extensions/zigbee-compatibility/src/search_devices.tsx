@@ -70,10 +70,27 @@ function DeviceListItem(props: { device: Device }): JSX.Element {
 
 export default function SearchDevicesCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, devices } = useDevices(searchText);
+  const [systemFilterText, setSystemFilterText] = useState("");
+  const { isLoading, devices } = useDevices(searchText, systemFilterText);
 
   return (
-    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by Name, Vendor or Model">
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search by Name, Vendor or Model"
+      throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="System Filter" onChange={setSystemFilterText}>
+          <List.Dropdown.Section title="Systems">
+            <List.Dropdown.Item title="All" value="" />
+            {Object.keys(compatibleIcons).map((k) => (
+              <List.Dropdown.Item key={k} title={compatibleAliases[k]} value={k} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
       {devices?.map((d, i) => (
         <DeviceListItem key={i.toString()} device={d} />
       ))}
@@ -81,7 +98,10 @@ export default function SearchDevicesCommand(): JSX.Element {
   );
 }
 
-export function useDevices(query: string | undefined): {
+export function useDevices(
+  query: string | undefined,
+  systemFilterText: string
+): {
   devices: Device[] | undefined;
   error?: Error | undefined;
   isLoading: boolean;
@@ -100,7 +120,23 @@ export function useDevices(query: string | undefined): {
     let didUnmount = false;
 
     if (data) {
-      if (query === undefined || query.length <= 0) {
+      let fdevices = data.devices;
+      if (systemFilterText.length > 0) {
+        fdevices = fdevices.filter((d) => d.compatible?.includes(systemFilterText));
+      }
+      if (query !== undefined && query.length > 0) {
+        const lquery = query.toLocaleLowerCase();
+        fdevices = fdevices.filter((d) => {
+          const lname = d.name?.toLocaleLowerCase() || "";
+          const lvendor = d.vendor?.toString().toLocaleLowerCase() || "";
+          const lmodel = d.model?.toString().toLocaleLowerCase() || "";
+          return lname.includes(lquery) || lvendor.includes(lquery) || lmodel.includes(lquery);
+        });
+      }
+      if (!didUnmount) {
+        setDevices(fdevices);
+      }
+      /*if (query === undefined || query.length <= 0) {
         if (!didUnmount) {
           setDevices(data.devices || []);
         }
@@ -115,13 +151,13 @@ export function useDevices(query: string | undefined): {
         if (!didUnmount) {
           setDevices(fdevices);
         }
-      }
+      }*/
     }
 
     return () => {
       didUnmount = true;
     };
-  }, [query, data]);
+  }, [query, data, systemFilterText]);
 
   return { devices, error, isLoading };
 }
