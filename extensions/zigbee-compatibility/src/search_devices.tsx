@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { Color, List } from "@raycast/api";
+import { Color, List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+
+const baseURL = "https://zigbee.blakadder.com";
 
 interface Device {
   model: string;
@@ -8,6 +10,7 @@ interface Device {
   vendor: string;
   category: string;
   image?: string;
+  link: string;
   zigbeemodel?: string[];
   compatible?: string[];
 }
@@ -64,6 +67,11 @@ function DeviceListItem(props: { device: Device }): JSX.Element {
       title={d.name || "?"}
       icon={{ source: d.image || "", fallback: "zigbee.png" }}
       accessories={getAccessories(d)}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={d.link} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -111,7 +119,7 @@ export function useDevices(
     isLoading,
     data: rawData,
     error,
-  } = useFetch<Zigbee>(`https://zigbee.blakadder.com/devices.json`, {
+  } = useFetch<Zigbee>(`${baseURL}/devices.json`, {
     keepPreviousData: true,
   });
   const data = fixData(rawData);
@@ -136,22 +144,6 @@ export function useDevices(
       if (!didUnmount) {
         setDevices(fdevices);
       }
-      /*if (query === undefined || query.length <= 0) {
-        if (!didUnmount) {
-          setDevices(data.devices || []);
-        }
-      } else {
-        const lquery = query.toLocaleLowerCase();
-        const fdevices = data.devices.filter((d) => {
-          const lname = d.name?.toLocaleLowerCase() || "";
-          const lvendor = d.vendor?.toString().toLocaleLowerCase() || "";
-          const lmodel = d.model?.toString().toLocaleLowerCase() || "";
-          return lname.includes(lquery) || lvendor.includes(lquery) || lmodel.includes(lquery);
-        });
-        if (!didUnmount) {
-          setDevices(fdevices);
-        }
-      }*/
     }
 
     return () => {
@@ -175,6 +167,9 @@ function fixData(data: Zigbee | undefined): Zigbee | undefined {
       compatible = d.compatible;
     }
     d.compatible = compatible;
+    if (d.link.startsWith("/")) {
+      d.link = `${baseURL}${d.link}`;
+    }
   }
   return data;
 }
