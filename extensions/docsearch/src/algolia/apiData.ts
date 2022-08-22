@@ -144,6 +144,25 @@ export default <IAPIData[]>[
     indexName: "react_bootstrap_v4",
   },
   {
+    name: "React Native",
+    icon: "../assets/logo/react.ico",
+    apiKey: "83cd239c72f9f8b0ed270a04b1185288",
+    appId: "8TDSE0OHGQ",
+    indexName: "react-native-v2",
+    homepage: "https://reactnative.dev/",
+    searchParameters: {
+      facetFilters: [
+        "language:en",
+        [
+          "docusaurus_tag:default",
+          "docusaurus_tag:docs-default-0.69",
+          "docusaurus_tag:docs-contributing-current",
+          "docusaurus_tag:docs-architecture-current",
+        ],
+      ],
+    },
+  },
+  {
     name: "Remix",
     icon: "../assets/logo/remix.png",
     apiKey: "dff56670dbec8494409989d6ec9c8ac2",

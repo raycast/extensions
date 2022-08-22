@@ -153,6 +153,21 @@
       "mode": "view"
     },
     {
+      "name": "reactnative",
+      "icon": "logo/react.ico",
+      "title": "React Native",
+      "subtitle": "DocSearch",
+      "description": "Search React Native documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "rsshub",
       "icon": "logo/rsshub.png",
       "title": "RSSHub",

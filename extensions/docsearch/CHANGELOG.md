@@ -1,6 +1,6 @@
 # DocSearch Changelog
 
-## [Support for the new documentation] - 2022-08-21
+## [Support for the new documentation] - 2022-08-22
 
 - 🌟 Add quick search argument for documentation.
 - 📄 Support [Dubbo](https://dubbo.apache.org/)
@@ -8,6 +8,7 @@
 - 📄 Support [Nuxt3](https://v3.nuxtjs.org/)
 - 📄 Support [React Bootstrap](https://react-bootstrap.github.io/)
 - 📄 Support [Remix](https://remix.run/)
+- 📄 Support [React Native](https://reactnative.dev/)
 
 ## [New feature and support for the new documentation] - 2022-08-10
 
