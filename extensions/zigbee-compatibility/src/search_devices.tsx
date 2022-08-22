@@ -9,7 +9,7 @@ interface Device {
   category: string;
   image?: string;
   zigbeemodel?: string[];
-  compatible?: string[] | string;
+  compatible?: string[];
 }
 
 interface Zigbee {
@@ -33,14 +33,8 @@ export default function SearchDevicesCommand(): JSX.Element {
     if (d.compatible === undefined) {
       return undefined;
     }
-    let compatible: string[] = [];
-    if (typeof d.compatible === "string") {
-      compatible = [d.compatible];
-    } else {
-      compatible = d.compatible;
-    }
 
-    const result: List.Item.Accessory[] | undefined = compatible.map((c) => {
+    const result: List.Item.Accessory[] | undefined = d.compatible?.map((c) => {
       const icon = compatibleIcons[c];
       if (icon === undefined) {
         return { text: c };
@@ -70,17 +64,19 @@ export function useDevices(query: string | undefined): {
   isLoading: boolean;
 } {
   const [devices, setDevices] = useState<Device[]>();
-  const { isLoading, data, error } = useFetch<Zigbee>(`https://zigbee.blakadder.com/devices.json`, {
+  const {
+    isLoading,
+    data: rawData,
+    error,
+  } = useFetch<Zigbee>(`https://zigbee.blakadder.com/devices.json`, {
     keepPreviousData: true,
   });
+  const data = fixData(rawData);
 
   useEffect(() => {
     let didUnmount = false;
 
     if (data) {
-      for (const d of data.devices) {
-        d.image = d.image?.replaceAll("zigbee/blakadder.com", "zigbee.blakadder.com"); // fix API bug
-      }
       if (query === undefined || query.length <= 0) {
         if (!didUnmount) {
           setDevices(data.devices || []);
@@ -103,4 +99,21 @@ export function useDevices(query: string | undefined): {
   }, [query, data]);
 
   return { devices, error, isLoading };
+}
+
+function fixData(data: Zigbee | undefined): Zigbee | undefined {
+  if (data === undefined) {
+    return undefined;
+  }
+  for (const d of data.devices) {
+    d.image = d.image?.replaceAll("zigbee/blakadder.com", "zigbee.blakadder.com"); // fix API bug
+    let compatible: string[] | undefined;
+    if (typeof d.compatible === "string") {
+      compatible = [d.compatible];
+    } else {
+      compatible = d.compatible;
+    }
+    d.compatible = compatible;
+  }
+  return data;
 }

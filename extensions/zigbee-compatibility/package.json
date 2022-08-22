@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search_devices",
-      "title": "Search Devices",
+      "title": "Search Device",
       "description": "Search Zigbee Devices",
       "mode": "view",
       "subtitle": "Zigbee",
