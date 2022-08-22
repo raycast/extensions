@@ -25,10 +25,17 @@ const compatibleIcons: { [key: string]: string } = {
   tasmota: "tasmota-icon.png",
 };
 
-export default function SearchDevicesCommand(): JSX.Element {
-  const [searchText, setSearchText] = useState("");
-  const { isLoading, devices } = useDevices(searchText);
+const compatibleAliases: { [key: string]: string } = {
+  z2m: "Zigbee2MQTT",
+  zha: "ZHA",
+  z4d: "Zigbee for Domoticz",
+  deconz: "deCONZ",
+  iob: "ioBroker.zigbee",
+  tasmota: "Tasmota",
+};
 
+function DeviceListItem(props: { device: Device }): JSX.Element {
+  const d = props.device;
   const getAccessories = (d: Device) => {
     if (d.compatible === undefined) {
       return undefined;
@@ -43,16 +50,32 @@ export default function SearchDevicesCommand(): JSX.Element {
         if (c === "tasmota") {
           tintColor = Color.PrimaryText;
         }
-        return { icon: { source: icon, tintColor: tintColor }, tooltip: c };
+        let tooltip = compatibleAliases[c];
+        if (tooltip === undefined) {
+          tooltip = c;
+        }
+        return { icon: { source: icon, tintColor: tintColor }, tooltip: tooltip };
       }
     });
     return result;
   };
+  return (
+    <List.Item
+      title={d.name || "?"}
+      icon={{ source: d.image || "", fallback: "zigbee.png" }}
+      accessories={getAccessories(d)}
+    />
+  );
+}
+
+export default function SearchDevicesCommand(): JSX.Element {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, devices } = useDevices(searchText);
 
   return (
-    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText}>
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by Name, Vendor or Model">
       {devices?.map((d, i) => (
-        <List.Item key={i.toString()} title={d.name || "?"} icon={d.image} accessories={getAccessories(d)} />
+        <DeviceListItem key={i.toString()} device={d} />
       ))}
     </List>
   );
@@ -85,7 +108,9 @@ export function useDevices(query: string | undefined): {
         const lquery = query.toLocaleLowerCase();
         const fdevices = data.devices.filter((d) => {
           const lname = d.name?.toLocaleLowerCase() || "";
-          return lname.includes(lquery);
+          const lvendor = d.vendor?.toString().toLocaleLowerCase() || "";
+          const lmodel = d.model?.toString().toLocaleLowerCase() || "";
+          return lname.includes(lquery) || lvendor.includes(lquery) || lmodel.includes(lquery);
         });
         if (!didUnmount) {
           setDevices(fdevices);
