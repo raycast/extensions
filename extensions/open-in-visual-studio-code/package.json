@@ -5,6 +5,9 @@
   "description": "Open current Finder directory, selected folder or file in Visual Studio Code.",
   "icon": "icon.png",
   "author": "shubzkothekar",
+  "contributors": [
+    "thomas"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -16,12 +19,10 @@
       "title": "Open in Visual Studio Code",
       "description": "Open current Finder directory, selected folder or file in Visual Studio Code.",
       "mode": "no-view"
-      
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.39.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

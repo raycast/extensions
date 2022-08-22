@@ -1,39 +1,24 @@
-import { runAppleScript } from "run-applescript";
-import { showHUD } from "@raycast/api";
+import { getApplications, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 
 export default async () => {
-  const appleScript = `
-    try
-      tell application "Finder" to get application file id "com.microsoft.VSCode"
-      set visualStudioCodeInstalled to true
-    on error
-        set visualStudioCodeInstalled to false
-    end try
-    
-    if visualStudioCodeInstalled
-      tell application "Finder" to set finderItemsList to (selection as alias list)   
-      if ((count of finderItemsList) = 0 ) then
-        tell application "Finder"
-          if exists Finder window 1 then
-              set currentFinderPath to target of Finder window 1 as alias
-          else
-              return "No Finder Window Opened"
-          end if
-        end tell
-      else
-        set currentFinderPath to item 1 of finderItemsList
-      end if
-      tell application "Visual Studio Code" to open currentFinderPath
-      return "Opening Visual Studio Code"
-    else 
-      return "Visual Studio Code Not Installed"
-    end if   
-  `;
+  const applications = await getApplications();
 
-  try {
-    const result = await runAppleScript(appleScript);
-    await showHUD(result);
-  } catch (err) {
-    await showHUD("Error");
+  const visualStudioCode = applications.find((app) => app.bundleId === "com.microsoft.VSCode");
+  if (!visualStudioCode) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Visual Studio Code is not installed",
+      primaryAction: {
+        title: "Install Visual Studio Code",
+        onAction: () => open("https://code.visualstudio.com/download"),
+      },
+    });
+    return;
+  }
+
+  const selectedFinderItems = await getSelectedFinderItems();
+
+  for (const finderItem of selectedFinderItems) {
+    await open(finderItem.path, visualStudioCode);
   }
 };
