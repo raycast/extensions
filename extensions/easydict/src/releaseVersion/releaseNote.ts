@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 00:42
+ * @lastEditTime: 2022-08-20 21:24
  * @fileName: releaseNote.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -13,7 +13,7 @@ export const releaseNote = `
 
 ## ✨ New
 
-- 添加支持 Linguee 词典，支持 19 种查询语言。
+- 添加支持 [Linguee 词典](https://www.linguee.com)，支持 19 种查询语言。
 - 添加谷歌语种识别和百度语种识别。
 - 支持系统代理。
 - 新增置顶显示打开当前查询网络词典、翻译 action。
@@ -48,7 +48,7 @@ export const releaseNote = `
 
 ## ✨ New
 
-- Added support for Linguee dictionary, supporting 19 languages.
+- Added support for [Linguee dictionary](https://www.linguee.com), supporting 19 languages.
 - Added support for Google language detection and Baidu language detection.
 - Added support system proxy.
 - Added top show open current query web dictionary and translation action.

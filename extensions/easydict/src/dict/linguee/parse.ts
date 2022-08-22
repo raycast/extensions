@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-01 10:44
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 09:58
+ * @lastEditTime: 2022-08-20 19:50
  * @fileName: parse.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -385,48 +385,6 @@ function getYoudaoLanguageId(language: string, rootElement: HTMLElement): string
 }
 
 /**
- * Get linguee associative word phrases
- */
-export const parseGuessWord = (dom: ReturnType<typeof parse>) => {
-  const list = dom.querySelectorAll(".autocompletion_item");
-
-  return Array.from(list).map((item) => {
-    const $mainItem = item.querySelector(".main_row .main_item");
-    const word = $mainItem?.textContent;
-    const href = $mainItem?.attributes.href;
-    const lid = $mainItem?.attributes.lid;
-    const wordType = item.querySelector(".main_row .main_wordtype")?.textContent;
-    const translationDOMList = item.querySelectorAll(".translation_item");
-    const translations = Array.from(translationDOMList).map((item) => {
-      const lid = item.attributes.lid;
-      const wordType = item.querySelector(".wordtype")?.textContent;
-      item.querySelector(".sep")?.replaceWith("");
-      item.querySelector(".wordtype")?.replaceWith("");
-
-      const word = item.textContent?.trim();
-
-      if (!word || !wordType || !href || !lid) return;
-
-      return {
-        word,
-        wordType,
-        lid,
-      };
-    });
-
-    if (!word || !wordType || !lid || !href) return;
-
-    return {
-      word: word,
-      wordType: wordType,
-      lid,
-      href,
-      translations: translations,
-    };
-  });
-};
-
-/**
  * Get linguee web url.
  */
 export function getLingueeWebDictionaryUrl(queryWordInfo: QueryWordInfo): string | undefined {
@@ -665,3 +623,47 @@ export function formatLingueeDisplaySections(lingueeTypeResult: QueryTypeResult)
 
   return displayResults;
 }
+
+/**
+ * Get linguee search suggestion word phrases.
+ *
+ * https://www.linguee.com/search?source=english&qe=good
+ */
+export const parseGuessWord = (dom: ReturnType<typeof parse>) => {
+  const list = dom.querySelectorAll(".autocompletion_item");
+
+  return Array.from(list).map((item) => {
+    const $mainItem = item.querySelector(".main_row .main_item");
+    const word = $mainItem?.textContent;
+    const href = $mainItem?.attributes.href;
+    const lid = $mainItem?.attributes.lid;
+    const wordType = item.querySelector(".main_row .main_wordtype")?.textContent;
+    const translationDOMList = item.querySelectorAll(".translation_item");
+    const translations = Array.from(translationDOMList).map((item) => {
+      const lid = item.attributes.lid;
+      const wordType = item.querySelector(".wordtype")?.textContent;
+      item.querySelector(".sep")?.replaceWith("");
+      item.querySelector(".wordtype")?.replaceWith("");
+
+      const word = item.textContent?.trim();
+
+      if (!word || !wordType || !href || !lid) return;
+
+      return {
+        word,
+        wordType,
+        lid,
+      };
+    });
+
+    if (!word || !wordType || !lid || !href) return;
+
+    return {
+      word: word,
+      wordType: wordType,
+      lid,
+      href,
+      translations: translations,
+    };
+  });
+};

@@ -11,12 +11,9 @@
     <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
 </a>
 </p>
-
 ## Easydict（易词典）
 
 `Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 **Linguee** 和有道词典查询，支持**苹果 🍎 系统翻译**，DeepL，Google，百度，腾讯，有道和彩云翻译。
-
-### 有道词典
 
 ![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
@@ -29,10 +26,10 @@
 - [x] 支持打开 [欧路词典](https://www.eudic.net/v4/en/app/eudic) 快速查词（若电脑上有安装）。
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
-- [x] 支持手动排序翻译结果显示。
+- [x] 支持手动排序翻译结果。
 - [x] 支持使系统代理。
 - [x] 支持 Linguee 和有道词典查询。
-- [x] 支持 **MacOS 系统翻译**。详情请看 [如何在 Easydict 中使用 macOS 🍎 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
+- [x] 支持 MacOS 系统翻译。详情请看 [如何在 Easydict 中使用 macOS 🍎 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 - [x] 支持 DeepL，谷歌，百度，腾讯，有道和彩云翻译。
 - [x] 支持 23 种语言。
 
@@ -47,27 +44,46 @@
 
 ### Linguee 词典：英语 <--> 中文
 
-#### [void](https://www.linguee.com/english-chinese/search?query=void)
+![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
 
-![void](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/void-1660921305.png)
+#### [float](https://www.linguee.com/english-chinese/search?query=float)
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1660919430.png)
+![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
 ### Linguee 词典：英语 <--> 法语
-
-#### [good](https://www.linguee.com/english-french/search?query=good)
-
-![good-French](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/good-French-1660921471.png)
 
 ![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
 
 ![easydict-4](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-4-1660916341.png)
+
+#### [good](https://www.linguee.com/english-french/search?query=good)
+
+![image-20220822163332948](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822163332948-1661157213.png)
 
 ### 文本翻译
 
 ![easydict-5](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1660916386.png)
 
 ![easydict-6](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1660916492.png)
+
+## 安装
+
+`Easydict` 是一个 Raycast extension，因此需要先安装 [Raycast](https://www.raycast.com/)。
+
+### Raycast 商店安装
+
+<a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
+          <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+</a>
+
+### 手动安装
+
+```bash
+git clone https://github.com/tisfeng/Raycast-Easydict.git && cd Raycast-Easydict
+
+npm install && npm run dev
+
+```
 
 ---
 
@@ -191,7 +207,7 @@
 
 </details>
 
-### 手动排序翻译结果显示
+### 手动排序翻译结果
 
 <details> <summary> 你可以按照自己的偏好对翻译结果显示进行排序，默认是 DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun。 </summary>
 
@@ -211,7 +227,7 @@
 
 ### 支持系统代理
 
-开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会使用系统代理发送。默认关闭。（此功能是为了对抗 IP 封锁，因为某些服务如 Linguee 对 IP 有频率限制）
+开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。（此功能是为了对抗 IP 封锁，因为某些服务如 Linguee 对 IP 有频率限制）
 
 ### 翻译服务
 
