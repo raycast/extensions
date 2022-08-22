@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "igbee-compatibility",
+  "name": "zigbee-compatibility",
   "title": "Zigbee Compatibility",
-  "description": "",
+  "description": "Search Zigbee devices via https://zigbee.blakadder.com",
   "icon": "zigbee.png",
   "author": "tonka3000",
   "categories": [
