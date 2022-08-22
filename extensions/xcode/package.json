@@ -70,7 +70,7 @@
           "type": "checkbox",
           "required": false,
           "title": "Filter",
-          "description": "Show Xcode Projects",
+          "description": "Show Xcode Projects.",
           "default": true,
           "label": "Show Xcode Projects"
         },
@@ -79,7 +79,7 @@
           "type": "checkbox",
           "required": false,
           "title": "",
-          "description": "Show Xcode Workspaces",
+          "description": "Show Xcode Workspaces.",
           "default": true,
           "label": "Show Xcode Workspaces"
         },
@@ -88,7 +88,7 @@
           "type": "checkbox",
           "required": false,
           "title": "",
-          "description": "Show Swift Package",
+          "description": "Show Swift Packages.",
           "default": true,
           "label": "Show Swift Package"
         },
@@ -99,7 +99,7 @@
           "title": "",
           "description": "Show Swift Playgrounds",
           "default": true,
-          "label": "Show Swift Playgrounds"
+          "label": "Show Swift Playgrounds."
         }
       ]
     },
@@ -131,7 +131,7 @@
       "name": "installed-simulator-apps.command",
       "title": "Installed Simulator Apps",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
       "mode": "view"
     },
     {
@@ -159,21 +159,21 @@
       "name": "add-swift-package.command",
       "title": "Add Swift Package",
       "subtitle": "Xcode",
-      "description": "Add a Swift Package from an URL to an opened Xcode project",
+      "description": "Add a Swift Package from an URL to a Xcode Project.",
       "mode": "view"
     },
     {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Package and open it directly in Xcode",
+      "description": "Create a new Swift Package and open it directly in Xcode.",
       "mode": "view"
     },
     {
       "name": "create-swift-playground.command",
       "title": "Create Swift Playground",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Playground and open it directly in Xcode",
+      "description": "Create a new Swift Playground and open it directly in Xcode.",
       "mode": "view",
       "preferences": [
         {
