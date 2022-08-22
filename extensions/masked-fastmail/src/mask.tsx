@@ -1,43 +1,124 @@
-import { getPreferenceValues, LocalStorage, Form } from "@raycast/api";
+import { popToRoot, getPreferenceValues, Form, ActionPanel, Action, showHUD, Clipboard } from "@raycast/api";
+import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import Authenticate, { Session } from "./auth";
-import MaskedEmailForm from "./masked_email_form";
+
+type Capabilities = "urn:ietf:params:jmap:core" | "https://www.fastmail.com/dev/maskedemail";
+
+interface SessionResponse {
+  primaryAccounts: { [key in Capabilities]: string };
+  apiUrl: string;
+}
+
+interface Session {
+  accountID: string;
+  apiToken: string;
+  apiURL: string;
+}
+
+const getSession = async (apiToken: string): Promise<Session> => {
+  const response = await fetch(
+    "https://api.fastmail.com/jmap/session",
+
+    {
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiToken}`,
+      },
+    }
+  );
+
+  const json = (await response.json()) as SessionResponse;
+  console.log(json.apiUrl);
+  return {
+    apiToken: apiToken,
+    accountID: json.primaryAccounts["https://www.fastmail.com/dev/maskedemail"],
+    apiURL: json.apiUrl,
+  };
+};
+
+interface CreatedMaskedEmailResponse {
+  methodResponses: [
+    [name: "MaskedEmail/set", arguments: { created: { "masked-fastmail": { email: string } } }, methodCallId?: string]
+  ];
+}
+
+const createMaskedEmail = async ({
+  session,
+  description,
+}: {
+  session: Session;
+  description: string;
+}): Promise<string> => {
+  const response = await fetch("https://api.fastmail.com/jmap/api", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${session.apiToken}`,
+    },
+    body: JSON.stringify({
+      using: ["urn:ietf:params:jmap:core", "https://www.fastmail.com/dev/maskedemail"],
+      methodCalls: [
+        [
+          "MaskedEmail/set",
+          {
+            accountId: session.accountID,
+            create: {
+              "masked-fastmail": {
+                state: "enabled",
+                description,
+              },
+            },
+          },
+          0,
+        ],
+      ],
+    }),
+  });
+
+  const json = (await response.json()) as CreatedMaskedEmailResponse;
+  return json.methodResponses[0]?.[1]?.created?.["masked-fastmail"]?.email;
+};
 
 export default function Command() {
-  const [isLoading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | undefined>();
+  const [isLoading, setLoading] = useState(false);
+  const [description, setDescription] = useState<string | undefined>(undefined);
 
-  const saveSession = (session: Session) => {
-    LocalStorage.setItem("session", JSON.stringify(session));
-    setSession(session);
-  };
-
-  const { username, password } = getPreferenceValues();
+  const { apiToken } = getPreferenceValues();
 
   useEffect(() => {
-    if (session) {
-      return;
-    }
-
-    (async () => {
-      const rawSession = await LocalStorage.getItem("session");
-
-      if (typeof rawSession === "string") {
-        const session = JSON.parse(rawSession);
-        setSession(session);
+    const create = async () => {
+      if (!isLoading || !description) {
+        return;
       }
 
+      setLoading(true);
+
+      const session = await getSession(apiToken);
+
+      const email = await createMaskedEmail({ session, description });
+
+      Clipboard.copy(email);
+      showHUD(`"${email}" has been copied to your clipboard`);
+
+      popToRoot();
       setLoading(false);
-    })();
-  }, [session]);
+    };
 
-  if (isLoading) {
-    return <Form isLoading={isLoading} />;
-  }
+    create();
+  }, [isLoading]);
 
-  if (!session) {
-    return <Authenticate username={username} password={password} didAuthenticate={saveSession} />;
-  }
-
-  return <MaskedEmailForm session={session} />;
+  return (
+    <Form
+      navigationTitle="New masked email"
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm shortcut={{ modifiers: [], key: "enter" }} onSubmit={() => setLoading(true)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Remind yourself what this email is for" />
+      <Form.TextField autoFocus={true} id="label" title="Description" onChange={setDescription} />
+    </Form>
+  );
 }

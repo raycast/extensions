@@ -19,18 +19,11 @@
   ],
   "preferences": [
     {
-      "name": "username",
-      "type": "textfield",
-      "required": true,
-      "title": "Username",
-      "description": "Your Fastmail username"
-    },
-    {
-      "name": "password",
+      "name": "apiToken",
       "type": "password",
       "required": true,
-      "title": "Password",
-      "description": "Your Fastmail password"
+      "title": "API Token",
+      "description": "A FastMail API token with at least “Masked Email” scope"
     }
   ],
   "dependencies": {
