@@ -12,15 +12,14 @@ import { useEffect, useState } from 'react';
 
 import Service, { Account, DnsRecord, Zone } from './service';
 import {
-  getEmail,
-  getKey,
+  getToken,
   getSiteStatusIcon,
   getSiteUrl,
   handleNetworkError,
 } from './utils';
 import { CachePurgeView, purgeEverything } from './view-cache-purge';
 
-const service = new Service(getEmail(), getKey());
+const service = new Service(getToken());
 
 function Command() {
   const [accounts, setAccounts] = useState<Account[]>([]);
