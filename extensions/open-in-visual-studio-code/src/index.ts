@@ -16,9 +16,15 @@ export default async () => {
     return;
   }
 
-  const selectedFinderItems = await getSelectedFinderItems();
-
-  for (const finderItem of selectedFinderItems) {
-    await open(finderItem.path, visualStudioCode);
+  try {
+    const selectedFinderItems = await getSelectedFinderItems();
+    for (const finderItem of selectedFinderItems) {
+      await open(finderItem.path, visualStudioCode);
+    }
+  } catch (error: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No folder selected",
+    });
   }
 };
