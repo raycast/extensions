@@ -3,7 +3,7 @@
   "name": "oss-browser",
   "title": "OSS Browser",
   "description": "Browse and manage Aliyun Object Storage Service",
-  "icon": "oss-browser-icon.png",
+  "icon": "oss-browser.png",
   "author": "JinShi",
   "categories": [
     "Data",
