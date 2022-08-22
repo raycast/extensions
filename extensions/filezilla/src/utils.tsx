@@ -10,6 +10,9 @@ import { ContentToCheck, Server, Folder, XMLFileContent } from "./types";
  * @returns True if FileZilla is installed, false if it isn't;
  */
 export async function isFileZillaInstalled(): Promise<boolean> {
+  // I wanted to make custom hook out of it, but for some reason I get
+  // TypeError: Cannot read properties of null (reading 'useState') error
+  // Hence, I just use this function in every Command component
   try {
     const applications = await getApplications();
     return applications.some(({ bundleId }) => bundleId === "org.filezilla-project.filezilla");
