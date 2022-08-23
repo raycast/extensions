@@ -29,11 +29,125 @@
   "preferences": [
     {
       "name": "region",
-      "type": "textfield",
+      "type": "dropdown",
       "required": true,
       "title": "Region",
       "description": "Please enter region",
-      "placeholder": "Enter Region"
+      "placeholder": "Enter Region",
+      "data": [
+        {
+          "title": "oss-cn-hangzhou",
+          "value": "oss-cn-hangzhou"
+        },
+        {
+          "title": "oss-cn-shanghai",
+          "value": "oss-cn-shanghai"
+        },
+        {
+          "title": "oss-cn-nanjing",
+          "value": "oss-cn-nanjing"
+        },
+        {
+          "title": "oss-cn-fuzhou",
+          "value": "oss-cn-fuzhou"
+        },
+        {
+          "title": "oss-cn-qingdao",
+          "value": "oss-cn-qingdao"
+        },
+        {
+          "title": "oss-cn-beijing",
+          "value": "oss-cn-beijing"
+        },
+        {
+          "title": "oss-cn-zhangjiakou",
+          "value": "oss-cn-zhangjiakou"
+        },
+        {
+          "title": "oss-cn-huhehaote",
+          "value": "oss-cn-huhehaote"
+        },
+        {
+          "title": "oss-cn-wulanchabu",
+          "value": "oss-cn-wulanchabu"
+        },
+        {
+          "title": "oss-cn-shenzhen",
+          "value": "oss-cn-shenzhen"
+        },
+        {
+          "title": "oss-cn-heyuan",
+          "value": "oss-cn-heyuan"
+        },
+        {
+          "title": "oss-cn-guangzhou",
+          "value": "oss-cn-guangzhou"
+        },
+        {
+          "title": "oss-cn-chengdu",
+          "value": "oss-cn-chengdu"
+        },
+        {
+          "title": "oss-cn-hongkong",
+          "value": "oss-cn-hongkong"
+        },
+        {
+          "title": "oss-us-west-1",
+          "value": "oss-us-west-1"
+        },
+        {
+          "title": "oss-us-east-1",
+          "value": "oss-us-east-1"
+        },
+        {
+          "title": "oss-ap-northeast-1",
+          "value": "oss-ap-northeast-1"
+        },
+        {
+          "title": "oss-ap-northeast-2",
+          "value": "oss-ap-northeast-2"
+        },
+        {
+          "title": "oss-ap-southeast-1",
+          "value": "oss-ap-southeast-1"
+        },
+        {
+          "title": "oss-ap-southeast-2",
+          "value": "oss-ap-southeast-2"
+        },
+        {
+          "title": "oss-ap-southeast-3",
+          "value": "oss-ap-southeast-3"
+        },
+        {
+          "title": "oss-ap-southeast-5",
+          "value": "oss-ap-southeast-5"
+        },
+        {
+          "title": "oss-ap-southeast-6",
+          "value": "oss-ap-southeast-6"
+        },
+        {
+          "title": "oss-ap-southeast-7",
+          "value": "oss-ap-southeast-7"
+        },
+        {
+          "title": "oss-ap-south-1",
+          "value": "oss-ap-south-1"
+        },
+        {
+          "title": "oss-eu-central-1",
+          "value": "oss-eu-central-1"
+        },
+        {
+          "title": "oss-eu-west-1",
+          "value": "oss-eu-west-1"
+        },
+        {
+          "title": "oss-me-east-1",
+          "value": "oss-me-east-1"
+        }
+      ]
     },
     {
       "name": "accessKeyId",

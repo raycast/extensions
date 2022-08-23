@@ -206,7 +206,7 @@ export function Folder(props: { path: string }) {
         </ActionPanel>
       }
     >
-      <List.EmptyView title="No data" />
+      <List.EmptyView title="No Data" />
       {foldersState.length > 0 && (
         <List.Section title="Folders" subtitle={`Count: ${foldersState.length}`}>
           {foldersState.map((folder) =>
