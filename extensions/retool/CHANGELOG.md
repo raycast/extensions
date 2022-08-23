@@ -1,3 +1,3 @@
 # Retool Documentation Changelog
 
-## [Initial Version] - 2022-07-18
+## [Initial Version] - {PR_MERGE_DATE}
