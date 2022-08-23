@@ -1,12 +1,9 @@
 import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel } from "@raycast/api";
 import { Api } from "./lib/interfaces";
-import { useState, useEffect } from "react";
-import { FetchScenes, SetEffect, SetScenes } from "./lib/api";
+import { SetEffect } from "./lib/api";
 import { effects } from "./lib/constants";
 
 export default function viewScenes() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<Api.Scene[] | undefined>([]);
   const preferences = getPreferenceValues();
 
   const config = {
@@ -17,9 +14,11 @@ export default function viewScenes() {
   };
 
   const param: Api.effectParams = {
-    color: "#ff0000",
+    color: "red",
+    persist: true,
+    period: 5,
+    direction: "forward",
   };
-
   async function setEffect(uuid: string, effect: Api.effectType) {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -40,8 +39,8 @@ export default function viewScenes() {
   }
 
   return (
-    <List isLoading={isLoading}>
-      {data &&
+    <List>
+      {effects &&
         effects.map((effect) => (
           <List.Item
             key={effect.value}
@@ -49,6 +48,11 @@ export default function viewScenes() {
             actions={
               <ActionPanel>
                 <Action icon={Icon.Image} title="Set Effect" onAction={() => setEffect("all", effect.value)} />
+                <Action
+                  icon={Icon.Power}
+                  title="Turn Off Effect"
+                  onAction={() => setEffect("all", Api.effectType.off)}
+                />
               </ActionPanel>
             }
           />

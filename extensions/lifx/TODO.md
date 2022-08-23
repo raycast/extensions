@@ -1,4 +1,8 @@
 - [x] Add check for api key
-- [ ] Add api function for fetching lights
-- [ ] Add checks for lights compatible with multicolor
-- [ ] Add search feature for lights and scenes
+- [x] Add search feature for lights and scenes
+- [x] Add api function for fetching lights
+- [x] Add color icon for hue param in sidebar
+- [x] Remove some effects
+- [x] Add checks for lights compatible with multicolor
+- [ ] Clean up the interfaces
+- [ ] Add prefrences for config

@@ -39,7 +39,7 @@ export default function viewScenes() {
       title: "Setting Scene",
     });
     try {
-      await SetScenes(uuid, {}, config);
+      await SetScenes(uuid, { duration: 3 }, config);
       toast.style = Toast.Style.Success;
       toast.title = "Scene Set";
     } catch (error) {

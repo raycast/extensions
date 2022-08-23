@@ -3,9 +3,10 @@ import { getProgressIcon } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Api, Lights } from "./lib/interfaces";
-import { getKelvinIcon, getLightIcon } from "./lib/colorAlgos";
+import { getHueIcon, getKelvinIcon, getLightIcon, parseDate } from "./lib/colorAlgos";
 import constants, { COLORS, effects } from "./lib/constants";
-import { cleanLights, SetEffect, SetLightState, toggleLight } from "./lib/api";
+import { cleanLights, SetEffect, SetLightState, toggleLight, FetchLights, checkApiKey } from "./lib/api";
+const hexToHsl = require("hex-to-hsl");
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,35 +23,33 @@ export default function Command() {
   };
 
   async function fetchLights() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Fetching lights",
-    });
-    if (!preferences.lifx_token) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "No token found";
-      setIsLoading(false);
-      return;
-    }
+    try {
+      if (!cache.has("lights")) {
+        const isTokenValid = await checkApiKey();
+        if (!isTokenValid) {
+          cache.set("lifx_token", JSON.stringify({ valid: true }));
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Token",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
 
-    axios
-      .get("https://api.lifx.com/v1/lights/all", config)
-      .then((res) => {
-        const items: [Lights.Light] = res.data;
-        const filtered: Lights.Light[] = items.filter((item) => item.product.capabilities.has_color === true);
-        setData(filtered);
-        setIsLoading(false);
-        cache.set("lights", JSON.stringify(res.data));
-        toast.style = Toast.Style.Success;
-        toast.title = "Lights fetched";
-      })
-      .catch((err) => {
-        console.log(err.response);
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error";
-        toast.message = err?.response?.data || err;
-        setIsLoading(false);
+      const results = await FetchLights(config);
+      setData(results || []);
+      setIsLoading(false);
+    } catch (error) {
+      const toast = await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
       });
+      if (error instanceof Error) {
+        toast.message = error.message;
+      }
+      setIsLoading(false);
+    }
   }
 
   async function togglePowerLight(id: string) {
@@ -71,13 +70,38 @@ export default function Command() {
     }
   }
 
+  const updateState = (id: string, brig?: number, color?: string) => {
+    const newState = data.map((obj) => {
+      // 👇️ if id equals 2 replace object
+      if (obj.id === id) {
+        if (brig !== undefined) {
+          obj.brightness = brig;
+        }
+        if (color !== undefined) {
+          const hsl = hexToHsl(color);
+          console.log(hsl);
+          obj.color.hue = hsl[0];
+          console.log(obj.color.hue);
+        }
+
+        return obj;
+      }
+
+      // 👇️ otherwise return object as is
+      return obj;
+    });
+
+    setData(newState);
+  };
+
   async function setBrightness(id: string, brightness: number) {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Setting brightness",
+      title: "Setting brightness ",
     });
     try {
       await SetLightState(id, { brightness: brightness / 100 }, config);
+      updateState(id, brightness / 100);
       toast.style = Toast.Style.Success;
       toast.title = "Brightness set";
     } catch (error) {
@@ -96,6 +120,7 @@ export default function Command() {
     });
     try {
       await SetLightState(id, { color: color }, config);
+      updateState(id, undefined, color);
       toast.style = Toast.Style.Success;
       toast.title = "Color set";
     } catch (error) {
@@ -110,7 +135,7 @@ export default function Command() {
   async function cleanLight(id: string) {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Cleaning L.ight",
+      title: "Cleaning Light",
     });
     try {
       await cleanLights(id, {}, config);
@@ -148,11 +173,11 @@ export default function Command() {
       style: Toast.Style.Animated,
       title: plus ? "Increasing Temperature" : "Decreasing Temperature",
     });
-    const temp = plus ? currentKelvin + 1000 : currentKelvin - 1000;
+    const temp = plus === true ? currentKelvin + 1000 : currentKelvin - 1000;
     try {
       await SetLightState(id, { color: `kelvin:${temp}` }, config);
       toast.style = Toast.Style.Success;
-      toast.title = "Temperature added";
+      toast.title = "Temperature Set";
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
@@ -215,19 +240,23 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Hue"
-                        icon={light.power === "off" ? getProgressIcon(0.0) : getProgressIcon(1.0)}
+                        icon={getHueIcon(light.color.hue)}
                         text={light.color.hue.toString()}
                       />
-                      <List.Item.Detail.Metadata.Label title="Kelvin" text={light.color.kelvin.toString()} />
+                      <List.Item.Detail.Metadata.Label
+                        icon={getKelvinIcon(light.color.kelvin)}
+                        title="Kelvin"
+                        text={light.color.kelvin.toString()}
+                      />
                       <List.Item.Detail.Metadata.Label
                         title="Brightness"
-                        icon={getProgressIcon(light.brightness)}
+                        icon={getProgressIcon(light.brightness, Color.SecondaryText)}
                         text={light.brightness.toString()}
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Group" text={light.group.name} />
                       <List.Item.Detail.Metadata.Label title="Location" text={light.location.name} />
-                      <List.Item.Detail.Metadata.Label title="Last Seen" text={light.last_seen.toString()} />
+                      <List.Item.Detail.Metadata.Label title="Last Seen" text={parseDate(light.last_seen)} />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Connected"
@@ -241,7 +270,11 @@ export default function Command() {
               }
               actions={
                 <ActionPanel title="Manage Light">
-                  <Action icon={Icon.Power} title="Toggle Power" onAction={() => togglePowerLight(light.id)} />
+                  <Action
+                    icon={Icon.Power}
+                    title={light.power === "on" ? "Toggle Off" : "Toggle On"}
+                    onAction={() => togglePowerLight(light.id)}
+                  />
                   <ActionPanel.Submenu title="􀆭   Set Brightness">
                     {constants.brightness.map((brightness) => (
                       <Action
@@ -254,28 +287,34 @@ export default function Command() {
                       />
                     ))}
                   </ActionPanel.Submenu>
-                  <Action
-                    icon={Icon.Plus}
-                    title="Increase Brightness"
-                    onAction={() => setBrightness(light.id, light.brightness + 0.1)}
-                  />
-                  <Action
-                    icon={Icon.Minus}
-                    title="Decrease Brightness"
-                    onAction={() => setBrightness(light.id, light.brightness - 0.1)}
-                  />
+                  {light.brightness < 0.9 && (
+                    <Action
+                      icon={Icon.Plus}
+                      title="Increase Brightness"
+                      onAction={() => setBrightness(light.id, light.brightness * 100 + 10)}
+                    />
+                  )}
+                  {light.brightness > 0.1 && (
+                    <Action
+                      icon={Icon.Minus}
+                      title="Decrease Brightness"
+                      onAction={() => setBrightness(light.id, light.brightness * 100 - 10)}
+                    />
+                  )}
                   <ActionPanel.Section />
-                  <ActionPanel.Submenu title="􀎑   Set Color">
-                    {COLORS.map((color) => (
-                      <Action
-                        icon={{ source: Icon.CircleFilled, tintColor: color.value }}
-                        title={color.name}
-                        onAction={() => {
-                          setLightColor(color.value, light.id);
-                        }}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
+                  {light.product.capabilities.has_color === true && (
+                    <ActionPanel.Submenu title="􀎑   Set Color">
+                      {COLORS.map((color) => (
+                        <Action
+                          icon={{ source: Icon.CircleFilled, tintColor: color.value }}
+                          title={color.name}
+                          onAction={() => {
+                            setLightColor(color.value, light.id);
+                          }}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
+                  )}
                   <ActionPanel.Submenu title="􀆿   Set Effect">
                     {effects.map((effect) => (
                       <Action
@@ -286,8 +325,14 @@ export default function Command() {
                       />
                     ))}
                   </ActionPanel.Submenu>
+                  <Action
+                    key="ToggleEffect"
+                    icon={Icon.Power}
+                    title="Turn off effect"
+                    onAction={() => setEffect(light.id, Api.effectType.off)}
+                  />
                   <ActionPanel.Section />
-                  <ActionPanel.Submenu title="􀇬   Set Color Temprature">
+                  <ActionPanel.Submenu title="􀇬   Set Kelvin">
                     {constants.kelvins.map((kelvin) => (
                       <Action
                         key={kelvin}
@@ -300,13 +345,13 @@ export default function Command() {
                     ))}
                   </ActionPanel.Submenu>
                   <Action
-                    key="Increase Temp"
+                    key="Increase Kelvin"
                     icon={Icon.Plus}
                     title="Increase Color Temprature"
                     onAction={() => addlightTemp(true, light.color.kelvin, light.id)}
                   />
                   <Action
-                    key="Decrease Temp"
+                    key="Decrease Kelvin"
                     icon={Icon.Plus}
                     title="Decrease Color Temprature"
                     onAction={() => addlightTemp(false, light.color.kelvin, light.id)}

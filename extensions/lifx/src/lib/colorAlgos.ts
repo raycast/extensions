@@ -1,14 +1,26 @@
 import { Lights } from "./interfaces";
 import { getProgressIcon } from "@raycast/utils";
-import { Icon } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
+const hsl = require("hsl-to-hex");
 const kelvinToRgb = require("kelvin-to-rgb");
 
 export function getLightIcon(lightState: Lights.Light) {
-  const progress = lightState.brightness / 100;
-  const rgb = kelvinToRgb(lightState.color.kelvin);
-  const formattedColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+  const progress = lightState.brightness;
+  if (lightState.color !== undefined) {
+    const hex = hsl(lightState.color.hue, 100, 60);
+    return getProgressIcon(progress, hex);
+  } else {
+    return getProgressIcon(progress, "white");
+  }
+}
 
-  return getProgressIcon(progress, formattedColor);
+export function getHueIcon(hue: number) {
+  if (hue !== undefined) {
+    const hex = hsl(hue, 100, 60);
+    return { source: Icon.CircleFilled, tintColor: hex };
+  } else {
+    return { source: Icon.CircleFilled, tintColor: Color.SecondaryText };
+  }
 }
 
 export function getKelvinIcon(kelvin: number) {
@@ -16,4 +28,9 @@ export function getKelvinIcon(kelvin: number) {
   const formattedColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 
   return { source: Icon.CircleFilled, tintColor: formattedColor };
+}
+
+export function parseDate(date: Date) {
+  const mut = new Date(date);
+  return mut.toLocaleString();
 }

@@ -3,6 +3,7 @@ export namespace Lights {
     hue: number;
     saturation: number;
     kelvin: number;
+    hex?: string;
   }
 
   export interface Group {
@@ -55,6 +56,7 @@ export interface Color {
   hue: number;
   saturation: number;
   kelvin: number;
+  hex?: string;
 }
 
 export namespace Api {
@@ -152,4 +154,10 @@ export namespace Api {
 export interface CssColor {
   name: string;
   value: string;
+}
+
+export interface prefernces {
+  lifx_token: string;
+  breathe_effect_period: number;
+  breathe_effect_direction: string;
 }

@@ -1,6 +1,24 @@
 import { getPreferenceValues } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { Api } from "./interfaces";
+import { Api, Lights } from "./interfaces";
+
+export async function FetchLights(config: AxiosRequestConfig) {
+  try {
+    const result = await axios.get("https://api.lifx.com/v1/lights/all", config);
+    const data: Lights.Light[] = result.data;
+    if (data.length === 0) {
+      throw new Error("No lights found");
+    }
+    if (data[0].connected === true) {
+      return data;
+    } else {
+      const potentialErrorData: Api.Error = result.data;
+      throw new Error(potentialErrorData.error || "Unknown error" + result.status);
+    }
+  } catch (err) {
+    handleCommonError(err);
+  }
+}
 
 export async function SetLightState(selector: string, params: Api.lightStateParam, config: AxiosRequestConfig) {
   try {

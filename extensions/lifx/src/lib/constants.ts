@@ -141,11 +141,11 @@ export const COLORS: CssColor[] = [
 ];
 
 export const effects = [
-  { name: "Breathe", icon: "", value: Api.effectType.breathe },
+  //{ name: "Breathe", icon: "", value: Api.effectType.breathe },
   { name: "Move", icon: "", value: Api.effectType.move },
-  { name: "Morph", icon: "", value: Api.effectType.morph },
-  { name: "Flame", icon: "", value: Api.effectType.flame },
-  { name: "Pulse", icon: "", value: Api.effectType.pulse },
+  //{ name: "Morph", icon: "", value: Api.effectType.morph },
+  //{ name: "Flame", icon: "", value: Api.effectType.flame },
+  //{ name: "Pulse", icon: "", value: Api.effectType.pulse },
 ];
 
 export default constants;

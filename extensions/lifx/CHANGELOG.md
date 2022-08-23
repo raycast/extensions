@@ -14,7 +14,7 @@
 - Fixed some bugs
 - Rewrote the api handling and error handling
 
-## [Version 1.2.2] - 2022-08-21
-- Added `Set Effect` command
-- Added `Set Effect` action in manage lights
-- Added SF-Symbols to manage lights action
+## [Version 1.2.3] - 2022-08-23
+- Removed some effects
+- Fixed some bugs
+- Added a color icon for lights

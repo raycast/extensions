@@ -57,12 +57,22 @@
       "type": "textfield",
       "default": "Token",
       "required": true
+    },
+    {
+      "name": "move_effect_period",
+      "title": "Move Effect Period",
+      "description": "The time in seconds for one cycle of the effect",
+      "type": "textfield",
+      "default": "3",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
     "@raycast/utils": "^1.1.0",
     "axios": "^0.27.2",
+    "hex-to-hsl": "^1.0.2",
+    "hsl-to-hex": "^1.0.0",
     "kelvin-to-rgb": "^1.0.2"
   },
   "devDependencies": {
