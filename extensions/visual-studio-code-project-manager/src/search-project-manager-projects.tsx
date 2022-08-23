@@ -27,7 +27,7 @@ const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
 
-const remotePrefix = "vscode-remote://"
+const remotePrefix = "vscode-remote://";
 
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
@@ -193,7 +193,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {isRemotePreject(path) ?
+            {isRemotePreject(path) ? (
               <Action
                 title={`Open in ${build} (Remote)`}
                 icon="command-icon.png"
@@ -201,14 +201,10 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                   exec("code --remote " + parseRemoteURL(path));
                   closeMainWindow();
                 }}
-              /> :
-              <Action.Open
-                title={`Open in ${build}`}
-                icon="command-icon.png"
-                target={path}
-                application={appKey}
               />
-            }
+            ) : (
+              <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
+            )}
             {terminalInstalled && (
               <Action
                 title="Open in Terminal"
