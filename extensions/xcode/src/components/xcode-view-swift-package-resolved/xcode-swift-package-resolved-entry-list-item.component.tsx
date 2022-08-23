@@ -16,7 +16,7 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
     <List.Item
       key={props.entry.location}
       title={props.entry.name}
-      subtitle={props.entry.version ?? props.entry.branch}
+      subtitle={props.entry.version ?? props.entry.branch ?? props.entry.revision}
       actions={
         <ActionPanel>
           {props.entry.location.startsWith("http") ? <Action.OpenInBrowser url={props.entry.location} /> : undefined}
