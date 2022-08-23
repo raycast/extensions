@@ -1,11 +1,27 @@
 import { ActionPanel, Action, List } from "@raycast/api";
-import { getDownloads } from "./utils";
+import { PathLike } from "fs";
+import { useState } from "react";
+import { downloadsDir, getDownloads } from "./utils";
 
 export default function Command() {
-  const downloads = getDownloads();
+  const [downloads, setDownloads] = useState(getDownloads());
+
+  function handleTrash(paths: PathLike | PathLike[]) {
+    setDownloads((downloads) =>
+      downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path))
+    );
+  }
 
   return (
     <List>
+      {downloads.length === 0 && (
+        <List.EmptyView
+          icon={{ fileIcon: downloadsDir }}
+          title="No downloads found"
+          description="Well, first download some files ¯\_(ツ)_/¯"
+        />
+      )}
+
       {downloads.map((download) => (
         <List.Item
           key={download.path}
@@ -25,11 +41,17 @@ export default function Command() {
                 <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <Action.Trash paths={download.path} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+                <Action.Trash
+                  title="Delete Download"
+                  paths={download.path}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onTrash={handleTrash}
+                />
                 <Action.Trash
                   title="Delete All Downloads"
                   paths={downloads.map((d) => d.path)}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                  onTrash={handleTrash}
                 />
               </ActionPanel.Section>
             </ActionPanel>

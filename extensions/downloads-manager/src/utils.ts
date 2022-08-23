@@ -2,8 +2,9 @@ import { readdirSync, statSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
+export const downloadsDir = join(homedir(), "Downloads");
+
 export function getDownloads() {
-  const downloadsDir = join(homedir(), "Downloads");
   const files = readdirSync(downloadsDir);
   return files
     .filter((file) => !file.startsWith("."))
