@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search-ansible-documentation",
-      "title": "Search Ansible Documentation",
+      "title": "Search Documentation",
       "subtitle": "Ansible",
       "description": "Search Ansible Offical Documentation",
       "mode": "view"
