@@ -22,7 +22,7 @@ export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeP
       isLoading={packageResolved.isLoading}
       searchBarPlaceholder="Search Swift Package Dependencies"
     >
-      {packageResolved.data ? (
+      {packageResolved.data && packageResolved.data.entries.length ? (
         <XcodeSwiftPackageResolvedEntryListSection
           packageResolved={packageResolved.data}
           xcodeProject={props.xcodeProject}
