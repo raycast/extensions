@@ -1,4 +1,4 @@
 # DLmoji Changelog
-## [Added DLmoji] - 2022-07-09
+## [Added DLmoji] - 2022-08-22
 
 - Initial version code
