@@ -19,9 +19,10 @@ interface ITranslateReformatResult {
 interface ITranslateReformatResultItem {
     key: string
     title: string
-    fullTitle?: string
-    subtitle?: string
+    subtitle: string
     copyText: string
+    fullTitle?: string
+    description?: string
     url?: string
     codeUrl?: string
 }

@@ -39,17 +39,17 @@ export function formatDeepmoji(preds: EmojiScore[]): ITranslateReformatResultIte
 export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateReformatResult[] | undefined {
     if (!data) return
 
-    function extract(item: EmojiDataItem, url: string, codeUrl: string) {
+    function extract(item: EmojiDataItem, url: string, codeUrl: string): ITranslateReformatResultItem {
         const title = decode(item.value)
-        const description = decode(item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "")) // 去掉换行,空格,html标签
+        const description = decode(item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "")) // remove space, line break and html label
         const emoji = item.emoji_symbol
-        // const copyText = description ? emoji + COPY_SEPARATOR + description : emoji
         return {
-            title: truncate(title, 26) + "  " + emoji,
-            fullTitle: title + "  " + emoji,
-            subtitle: description,
             key: emoji,
+            title: truncate(title, 26),
+            subtitle: emoji,
             copyText: emoji,
+            fullTitle: title + "  " + emoji,
+            description: description,
             url: url,
             codeUrl: codeUrl,
         }
@@ -99,9 +99,9 @@ export function formatChineseEmojiTrans(doc: string): ITranslateReformatResultIt
 
 function constructResultItem(title: string, emojiText: string) {
     return {
+        key: emojiText,
         title: title,
         subtitle: emojiText,
-        key: emojiText,
         copyText: emojiText,
     }
 }

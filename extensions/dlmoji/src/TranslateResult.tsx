@@ -12,13 +12,12 @@ function reformatCopyTextArray(data: string[], limitResultAmount = 10): IReforma
     const dataLength = data?.length - 1
     let finalData: string[] = data
     if (limitResultAmount > 0 && dataLength >= limitResultAmount) {
-        finalData = data.slice(0, limitResultAmount - 1)
-        finalData.push(data[dataLength])
+        finalData = data.slice(0, limitResultAmount)
     }
 
-    return finalData.map((text, idx) => {
+    return finalData.map((text) => {
         return {
-            title: idx === dataLength && dataLength > 1 ? "All" : truncate(text, 40),
+            title: truncate(text, 40),
             value: text,
         }
     })
@@ -33,7 +32,7 @@ function ActionCopyListSection(props: IActionCopyListSection) {
 
     const copyTextArray = props.copyText.split(COPY_SEPARATOR)
     const newCopyText = copyTextArray.join(" ")
-    copyTextArray.length > 1 && copyTextArray.push(newCopyText)
+    copyTextArray.length > 1 && copyTextArray.unshift(newCopyText)
     const finalTextArray = reformatCopyTextArray(copyTextArray, 6)
 
     return (
@@ -41,11 +40,11 @@ function ActionCopyListSection(props: IActionCopyListSection) {
             {finalTextArray.map((textItem, key) => {
                 const title = textItem.title
                 const value = textItem.value
-                const shortcutKey = clamp(key + 1).toString() as Keyboard.KeyEquivalent
+                const shortcutKey = clamp(key).toString() as Keyboard.KeyEquivalent
                 return (
                     <Action.CopyToClipboard
                         onCopy={() => preferences.isAutomaticPaste && Clipboard.paste(textItem.value)}
-                        shortcut={{ modifiers: ["cmd"], key: shortcutKey }}
+                        shortcut={{ modifiers: ["ctrl"], key: shortcutKey }}
                         title={`Copy ${title}`}
                         content={value}
                         key={key}
@@ -140,12 +139,12 @@ export default function TranslateResult(props: ITranslateResult) {
                                     key={item.key}
                                     icon={iconMaps[result.type!]}
                                     title={item.title}
-                                    subtitle={item?.subtitle}
+                                    subtitle={item.subtitle}
                                     detail={<List.Item.Detail markdown={item.title} />}
                                     actions={
                                         <ListActionPanel
                                             title={item.fullTitle || item.title}
-                                            details={item.subtitle}
+                                            details={item.description}
                                             copyText={item.copyText}
                                             url={item.url}
                                             codeUrl={item.codeUrl}

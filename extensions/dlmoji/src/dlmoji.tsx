@@ -136,11 +136,9 @@ export default function () {
     useEffect(() => {
         if (!inputState) return // Prevent when first mounted run
 
-        // othersLoaded = false
         updateLoadingState(true)
         clearTimeout(delayUpdateTargetLanguageTimer)
         getEmojiData()
-        // translate("auto", translateTargetLanguage.languageId)
     }, [inputState])
 
     function onInputChangeEvt(queryText: string) {
