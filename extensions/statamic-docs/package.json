@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "statamic-docs",
-  "title": "Statamic Docs",
+  "title": "Statamic Documentation Search",
   "description": "This extension allows you to search through the Statamic docs directly from Raycast.",
   "icon": "command-icon.png",
   "author": "andrebreia",
@@ -14,8 +14,8 @@
     {
       "name": "statamic",
       "title": "Search Documentation",
-      "subtitle": "Statamic Docs",
-      "description": "Search through the Statamic docs directly from Raycast.",
+      "subtitle": "Statamic",
+      "description": "Search through the Statamic documentation directly from Raycast.",
       "mode": "view"
     }
   ],
