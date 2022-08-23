@@ -14,7 +14,7 @@ const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
   );
 
 export default function MultiDocsetSearch(props: { arguments: DashArgumentes }) {
-  const [searchText, setSearchText] = useState(props.arguments.searchstring);
+  const [searchText, setSearchText] = useState(props?.arguments?.searchstring || "");
   const [dashApp, isDashAppLoading] = useDashApp();
   const [docsets, isLoadingDocsets] = useDocsets();
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);

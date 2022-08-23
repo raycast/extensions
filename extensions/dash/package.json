@@ -24,6 +24,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "direct",
+      "title": "Direct Find in Dash",
+      "subtitle": "Dash",
+      "description": "Filter a Dash docset and search for the provided string in it.",
+      "mode": "view"
     }
   ],
   "dependencies": {
