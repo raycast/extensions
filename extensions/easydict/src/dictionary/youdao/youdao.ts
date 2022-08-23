@@ -1,15 +1,14 @@
-import { AxiosError } from "axios";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 16:59
- * @fileName: request.ts
+ * @lastEditTime: 2022-08-23 10:51
+ * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
 import util from "util";
@@ -17,9 +16,8 @@ import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudi
 import { requestCostTime } from "../../axiosConfig";
 import { YoudaoErrorCode } from "../../consts";
 import { KeyStore } from "../../preferences";
-import { QueryTypeResult, TranslationType } from "../../types";
+import { DicionaryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { DicionaryType, RequestErrorInfo } from "../../types";
 import { formatYoudaoDictionaryResult } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult } from "./types";
 
@@ -29,7 +27,9 @@ import { QueryWordInfo, YoudaoDictionaryResult } from "./types";
 export const maxTextLengthOfDownloadYoudaoTTSAudio = 40;
 
 /**
- * Youdao translate, use ofical API. Cost time: 0.2s
+ * Youdao translate, use official API. Cost time: 0.2s
+ *
+ * * Note: max length of text to translate must <= 1000, otherwise, will get error: "103	翻译文本过长"
  *
  * 有道翻译 https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html
  */
@@ -45,7 +45,7 @@ export function requestYoudaoDictionary(queryWordInfo: QueryWordInfo): Promise<Q
   const youdaoAppId = KeyStore.youdaoAppId;
   const sha256Content = youdaoAppId + truncate(word) + salt + timestamp + KeyStore.youdaoAppSecret;
   const sign = CryptoJS.SHA256(sha256Content).toString();
-  const url = "https://openapi.youdao.com/api";
+  const url = youdaoAppId ? "https://openapi.youdao.com/api" : "https://aidemo.youdao.com/trans";
   const params = querystring.stringify({
     sign,
     salt,
@@ -66,23 +66,22 @@ export function requestYoudaoDictionary(queryWordInfo: QueryWordInfo): Promise<Q
         // console.log(`---> youdao res: ${util.inspect(youdaoResult, { depth: null })}`);
 
         const errorInfo = getYoudaoErrorInfo(youdaoResult.errorCode);
-        const youdaoErrorInfo: RequestErrorInfo = {
-          ...errorInfo,
-          type: DicionaryType.Youdao,
-        };
         const youdaoFormatResult = formatYoudaoDictionaryResult(youdaoResult);
 
         if (!youdaoFormatResult) {
           console.error(`---> youdao error: ${util.inspect(youdaoResult, { depth: null })}`);
-          reject(youdaoErrorInfo);
+          reject(errorInfo);
           return;
         }
+
+        // use Youdao dictionary check if query text is a word.
+        queryWordInfo.isWord = youdaoResult.isWord;
 
         const youdaoTypeResult: QueryTypeResult = {
           type: TranslationType.Youdao,
           result: youdaoFormatResult,
           wordInfo: youdaoFormatResult.queryWordInfo,
-          errorInfo: youdaoErrorInfo,
+          errorInfo: errorInfo,
           translations: youdaoFormatResult.translations,
         };
         console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
@@ -114,6 +113,10 @@ function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
     }
     case YoudaoErrorCode.TargetLanguageNotSupported: {
       errorMessage = "Target language not supported";
+      break;
+    }
+    case YoudaoErrorCode.TranslatedTextTooLong: {
+      errorMessage = "Translated text too long";
       break;
     }
     case YoudaoErrorCode.InvalidApplicationID: {

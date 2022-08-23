@@ -13,7 +13,7 @@ import crypto, { BinaryToTextEncoding } from "crypto";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
 import { requestCostTime } from "../axiosConfig";
 import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getTencentLanguageId, getYoudaoLanguageIdFromTencentId } from "../language/languages";
 import { KeyStore } from "../preferences";
 import { QueryTypeResult, RequestErrorInfo, TencentTranslateResult, TranslationType } from "../types";

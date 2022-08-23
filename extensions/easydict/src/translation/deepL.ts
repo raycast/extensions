@@ -12,7 +12,7 @@ import { LocalStorage } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getDeepLLanguageId } from "../language/languages";
 import { KeyStore, myDecrypt, myEncrypt } from "../preferences";
 import { DeepLTranslateResult, QueryTypeResult, TranslationType } from "../types";

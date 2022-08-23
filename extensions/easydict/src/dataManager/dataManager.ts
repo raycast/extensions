@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 10:47
+ * @lastEditTime: 2022-08-23 11:28
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,11 +12,11 @@ import { environment } from "@raycast/api";
 import axios from "axios";
 import { detectLanguage } from "../detectLanauge/detect";
 import { LanguageDetectTypeResult } from "../detectLanauge/types";
-import { rquestLingueeDictionary } from "../dict/linguee/linguee";
-import { formatLingueeDisplaySections } from "../dict/linguee/parse";
-import { hasYoudaoDictionaryEntries, updateYoudaoDictionaryDisplay } from "../dict/youdao/formatData";
-import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dict/youdao/types";
-import { playYoudaoWordAudioAfterDownloading, requestYoudaoDictionary } from "../dict/youdao/youdao";
+import { rquestLingueeDictionary } from "../dictionary/linguee/linguee";
+import { formatLingueeDisplaySections } from "../dictionary/linguee/parse";
+import { hasYoudaoDictionaryEntries, updateYoudaoDictionaryDisplay } from "../dictionary/youdao/formatData";
+import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { playYoudaoWordAudioAfterDownloading, requestYoudaoDictionary } from "../dictionary/youdao/youdao";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoId } from "../language/languages";
 import { LanguageItem } from "../language/type";
 import { myPreferences } from "../preferences";
@@ -36,7 +36,7 @@ import {
   QueryTypeResult,
   TranslationType,
 } from "../types";
-import { showErrorToast } from "../utils";
+import { checkIsWord, showErrorToast } from "../utils";
 import {
   checkIfShowTranslationDetail,
   getFromToLanguageTitle,
@@ -83,7 +83,7 @@ export class DataManager {
    * Show detail of translation. Only dictionary is empty, and translation is too long, then show detail.
    */
   isShowDetail = false;
-  hasPlayAudio = false;
+  hasPlayedAudio = false;
 
   abortObject: AbortObject = {};
 
@@ -271,7 +271,7 @@ export class DataManager {
    * Rest properyies before each query.
    */
   private resetProperties() {
-    this.hasPlayAudio = false;
+    this.hasPlayedAudio = false;
     this.isLastQuery = true;
     this.shouldClearQuery = false;
     this.queryRecordList = [];
@@ -355,9 +355,11 @@ export class DataManager {
   private queryYoudaoDictionary(queryWordInfo: QueryWordInfo) {
     // * Youdao dictionary only support chinese <--> english.
     const youdaoDictionarySet = new Set(["zh-CHS", "zh-CHT", "en"]);
-    const isValidYoudaoDictionaryQuery =
+    const isValidYoudaoDictionaryLanguageQuery =
       youdaoDictionarySet.has(queryWordInfo.fromLanguage) && youdaoDictionarySet.has(queryWordInfo.toLanguage);
-    const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryQuery;
+    const isWord = checkIsWord(queryWordInfo);
+    const enableYoudaoDictionary =
+      myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
     const enableYoudaoTranslate = myPreferences.enableYoudaoTranslate;
     console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}, Translate: ${enableYoudaoTranslate}`);
     if (enableYoudaoDictionary || enableYoudaoTranslate) {
@@ -686,10 +688,11 @@ export class DataManager {
    * if is dictionary, and enable automatic play audio and query is word, then download audio and play it.
    */
   private downloadAndPlayWordAudio(wordInfo: QueryWordInfo) {
-    const enableAutomaticDownloadAudio = myPreferences.enableAutomaticPlayWordAudio && wordInfo?.isWord;
-    if (enableAutomaticDownloadAudio && this.isLastQuery && !this.hasPlayAudio) {
+    const isWord = checkIsWord(wordInfo);
+    const enableAutomaticDownloadAudio = myPreferences.enableAutomaticPlayWordAudio && isWord;
+    if (enableAutomaticDownloadAudio && this.isLastQuery && !this.hasPlayedAudio) {
       playYoudaoWordAudioAfterDownloading(wordInfo);
-      this.hasPlayAudio = true;
+      this.hasPlayedAudio = true;
     }
   }
 

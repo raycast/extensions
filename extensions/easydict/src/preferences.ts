@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-16 21:49
+ * @lastEditTime: 2022-08-23 10:14
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -62,12 +62,6 @@ export interface MyPreferences {
  * * NOTE: Please apply for your own keys as much as possible. Please do not abuse them, otherwise I have to revoke them 😑。
  */
 export class KeyStore {
-  private static defaultEncrytedYoudaoAppId = "U2FsdGVkX19SpBCGxMeYKP0iS1PWKmvPeqIYNaZjAZC142Y5pLrOskw0gqHGpVS1";
-  private static defaultEncrytedYoudaoAppKey =
-    "U2FsdGVkX1/JF2ZMngmTw8Vm+P0pHWmHKLQhGpUtYiDc0kLZl6FKw1Vn3hMyl7iL7owwReGJCLsovDxztZKb9g==";
-  private static defaultYoudaoAppId = myDecrypt(this.defaultEncrytedYoudaoAppId);
-  private static defaultYoudaoAppSecret = myDecrypt(this.defaultEncrytedYoudaoAppKey);
-
   private static defaultEncryptedBaiduAppId = "U2FsdGVkX1/QHkSw+8qxr99vLkSasBfBRmA6Kb5nMyjP8IJazM9DcOpd3cOY6/il";
   private static defaultEncryptedBaiduAppSecret = "U2FsdGVkX1+a2LbZ0+jntJTQjpPKUNWGrlr4NSBOwmlah7iP+w2gefq1UpCan39J";
   private static defaultBaiduAppId = myDecrypt(this.defaultEncryptedBaiduAppId);
@@ -88,12 +82,9 @@ export class KeyStore {
   private static defaultCaiyunToken = myDecrypt(this.defaultEncryptedCaiyunToken);
 
   // youdao app id and appsecret
-  static youdaoAppId =
-    myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : this.defaultYoudaoAppId;
+  static youdaoAppId = myPreferences.youdaoAppId.trim().length > 0 ? myPreferences.youdaoAppId.trim() : undefined;
   static youdaoAppSecret =
-    myPreferences.youdaoAppSecret.trim().length > 0
-      ? myPreferences.youdaoAppSecret.trim()
-      : this.defaultYoudaoAppSecret;
+    myPreferences.youdaoAppSecret.trim().length > 0 ? myPreferences.youdaoAppSecret.trim() : undefined;
 
   // baidu app id and secret
   static baiduAppId =

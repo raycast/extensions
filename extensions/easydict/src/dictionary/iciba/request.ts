@@ -1,4 +1,4 @@
-import { RequestErrorInfo } from "./../../types";
+import { RequestErrorInfo } from "../../types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-27 10:26

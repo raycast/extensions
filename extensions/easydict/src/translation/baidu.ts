@@ -13,7 +13,7 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 import { requestCostTime } from "../axiosConfig";
 import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getBaiduLanguageId, getYoudaoLanguageIdFromBaiduId } from "../language/languages";
 import { KeyStore } from "../preferences";
 import { BaiduTranslateResult, QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";

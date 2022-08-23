@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 22:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-13 22:39
+ * @lastEditTime: 2022-08-23 10:50
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -16,6 +16,7 @@ export const clipboardQueryTextKey = "clipboardQueryTextKey";
 export enum YoudaoErrorCode {
   Success = "0",
   TargetLanguageNotSupported = "102",
+  TranslatedTextTooLong = "103",
   InvalidApplicationID = "108", // 应用ID无效
   InvalidSignature = "202", // 签名无效，AppSecret不正确
   AccessFrequencyLimited = "207",

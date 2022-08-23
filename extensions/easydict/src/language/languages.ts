@@ -2,14 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-17 11:08
+ * @lastEditTime: 2022-08-23 11:24
  * @fileName: languages.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { francLangaugeDetect } from "../detectLanauge/franc";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { preferredLanguages } from "./../preferences";
 import { languageItemList } from "./consts";
 import { LanguageItem } from "./type";
@@ -223,7 +223,7 @@ export function getEudicWebDictionaryURL(queryTextInfo: QueryWordInfo): string |
 /**
  * Get youdao web dictionary URL.
  *
- * new: https://dict.youdao.com/result?word=good&lang=en
+ * new: https://youdao.com/result?word=good&lang=en
  * old: https://www.youdao.com/w/eng/good
  *
  * crawler parser: https://github.com/keenwon/eazydict-youdao/blob/master/lib/parser.js
@@ -237,12 +237,12 @@ export function getYoudaoWebDictionaryURL(queryTextInfo: QueryWordInfo): string 
   const youdaoDictionaryLanguages = ["en", "fr", "ja", "ko"]; // 英语，法语，日语，韩语
   if (youdaoDictionaryLanguages.includes(languageId)) {
     const word = encodeURIComponent(queryTextInfo.word);
-    return `https://dict.youdao.com/result?word=${word}&lang=${languageId}`;
+    return `https://youdao.com/result?word=${word}&lang=${languageId}`;
   }
 }
 
 /**
- * Get another language item expcept chinese from language item array
+ * Get another language item expcept chinese from language item array.
  */
 export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string | undefined {
   if (youdaoLanguageIds.includes("zh-CHS")) {

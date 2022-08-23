@@ -13,9 +13,9 @@ import googleTranslateApi from "@vitalets/google-translate-api";
 import { ChildProcess } from "child_process";
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
 import { LanguageDetectType } from "./detectLanauge/types";
-import { IcibaDictionaryResult } from "./dict/iciba/interface";
-import { LingueeDictionaryResult, LingueeListItemType } from "./dict/linguee/types";
-import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "./dict/youdao/types";
+import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
+import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
 
 export interface ActionListPanelProps {

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 17:09
+ * @lastEditTime: 2022-08-23 12:33
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,9 +11,15 @@
 import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
 import { AxiosError } from "axios";
 import { clipboardQueryTextKey } from "./consts";
+import { QueryWordInfo } from "./dictionary/youdao/types";
 import { myPreferences } from "./preferences";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { DicionaryType, QueryRecoredItem, QueryType, RequestErrorInfo } from "./types";
+
+/**
+ * Max length for word to query dictionary.
+ */
+const maxWordLength = 20;
 
 /**
  * Eudic bundleIds.
@@ -93,11 +99,13 @@ export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => v
 }
 
 /**
- * Trim the text to the max length, default 2000.
+ * Trim the text to the max length, default 1830.
+ *
+ * * Note: google web translate max length is 1830.
  *
  * 例如，百度翻译 query 长度限制：为保证翻译质量，请将单次请求长度控制在 6000 bytes 以内（汉字约为输入参数 2000 个）
  */
-export function trimTextLength(text: string, length = 2000) {
+export function trimTextLength(text: string, length = 1830) {
   text = text.trim();
   if (text.length > length) {
     return text.substring(0, length) + "...";
@@ -142,4 +150,22 @@ export function getTypeErrorInfo(type: QueryType, error: AxiosError) {
     message: errorMessage,
   };
   return errorInfo;
+}
+
+/**
+ * Check is word, only word.length < 20 is valid.
+ */
+export function checkIsWordLength(word: string) {
+  return word.trim().length < maxWordLength;
+}
+
+/**
+ * Check queryWordInfo is word.
+ */
+export function checkIsWord(queryWordInfo: QueryWordInfo) {
+  // If there is no dictionary to check if it is a word, then use word length to check.
+  if (queryWordInfo.isWord === undefined) {
+    return checkIsWordLength(queryWordInfo.word);
+  }
+  return queryWordInfo.isWord;
 }

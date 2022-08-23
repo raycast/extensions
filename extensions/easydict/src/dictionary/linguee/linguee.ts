@@ -16,7 +16,7 @@ import { userAgent } from "../../consts";
 import { DicionaryType, QueryTypeResult } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
 import { QueryWordInfo } from "../youdao/types";
-import { getLingueeWebDictionaryUrl, parseLingueeHTML } from "./parse";
+import { getLingueeWebDictionaryURL, parseLingueeHTML } from "./parse";
 import { LingueeDictionaryResult } from "./types";
 
 export const lingueeRequestTimeKey = "lingueeRequestTimeKey";
@@ -29,7 +29,7 @@ export const lingueeRequestTimeKey = "lingueeRequestTimeKey";
 export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start request Linguee`);
 
-  const lingueeUrl = getLingueeWebDictionaryUrl(queryWordInfo);
+  const lingueeUrl = getLingueeWebDictionaryURL(queryWordInfo);
   console.log(`---> linguee url: ${lingueeUrl}`);
   if (!lingueeUrl) {
     const result: QueryTypeResult = {

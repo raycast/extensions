@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 16:09
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 10:32
+ * @lastEditTime: 2022-08-23 10:29
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -16,7 +16,7 @@ import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
 import { userAgent } from "../consts";
 import { checkIfPreferredLanguagesContainedChinese } from "../detectLanauge/utils";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getGoogleLanguageId, getYoudaoLanguageIdFromGoogleId } from "../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
 import { getTypeErrorInfo } from "../utils";
@@ -136,9 +136,11 @@ export async function googleLanguageDetect(
 /**
  * Use crawler to get google web translate. Only simple translate result.
  *
- * From https://github.com/roojay520/bobplugin-google-translate/blob/master/src/google-translate-mobile.ts
+ * * Note: max translated text length should <= 1830
+ * * Otherwise will throw error: "400. That’s an error. Your client has issued a malformed or illegal request. That’s all we know."
  *
- * Another wild google translate api: http://translate.google.cn/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl=zh_TW&q=good
+ * From https://github.com/roojay520/bobplugin-google-translate/blob/master/src/google-translate-mobile.ts
+ * Another wild google translate api: http://translate.google.com/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl=zh_TW&q=good
  */
 export async function googleWebTranslate(
   queryWordInfo: QueryWordInfo,

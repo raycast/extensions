@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { configAxiosProxy } from "./axiosConfig";
 import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { DataManager } from "./dataManager/dataManager";
-import { QueryWordInfo } from "./dict/youdao/types";
+import { QueryWordInfo } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";

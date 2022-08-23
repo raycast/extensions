@@ -11,9 +11,10 @@
     <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
 </a>
 </p>
+
 ## Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 **Linguee** 和有道词典查询，支持**苹果 🍎 系统翻译**，DeepL，Google，百度，腾讯，有道和彩云翻译。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.cn)，[百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
 
 ![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
@@ -29,7 +30,7 @@
 - [x] 支持手动排序翻译结果。
 - [x] 支持使系统代理。
 - [x] 支持 Linguee 和有道词典查询。
-- [x] 支持 MacOS 系统翻译。详情请看 [如何在 Easydict 中使用 macOS 🍎 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
+- [x] 支持 MacOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 - [x] 支持 DeepL，谷歌，百度，腾讯，有道和彩云翻译。
 - [x] 支持 23 种语言。
 
@@ -42,7 +43,7 @@
 
 ---
 
-### Linguee 词典：英语 <--> 中文
+### [Linguee 词典](https://www.linguee.com/)：英语 <--> 中文
 
 ![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
 
@@ -50,7 +51,7 @@
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
-### Linguee 词典：英语 <--> 法语
+### [Linguee 词典](https://www.linguee.com/)：英语 <--> 法语
 
 ![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
 

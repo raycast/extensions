@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-01 10:44
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 19:50
+ * @lastEditTime: 2022-08-23 11:15
  * @fileName: parse.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,6 +11,7 @@
 import { parse } from "node-html-parser";
 import { getLanguageItemFromDeepLSourceId, getLanguageTitle } from "../../language/languages";
 import { DicionaryType, DisplaySection, ListDisplayItem, QueryTypeResult } from "../../types";
+import { checkIsWord } from "../../utils";
 import { QueryWordInfo } from "../youdao/types";
 import { getValidLingueeLanguagePair } from "./languages";
 import {
@@ -387,11 +388,12 @@ function getYoudaoLanguageId(language: string, rootElement: HTMLElement): string
 /**
  * Get linguee web url.
  */
-export function getLingueeWebDictionaryUrl(queryWordInfo: QueryWordInfo): string | undefined {
-  const { fromLanguage, toLanguage } = queryWordInfo;
+export function getLingueeWebDictionaryURL(queryWordInfo: QueryWordInfo): string | undefined {
+  const { fromLanguage, toLanguage, word } = queryWordInfo;
   const validLanguagePair = getValidLingueeLanguagePair(fromLanguage, toLanguage);
-  if (!validLanguagePair) {
-    console.log(`----> lingueeis not a valid language pair: ${validLanguagePair}`);
+  const isWord = checkIsWord(queryWordInfo); // Linguee is only used for `word` looking dictionary.
+  if (!validLanguagePair || !isWord) {
+    console.log(`check linguee, not a valid language pair: ${validLanguagePair}, or not word: ${word}`);
     return;
   }
 

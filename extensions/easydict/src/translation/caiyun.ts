@@ -10,7 +10,7 @@
 
 import axios, { AxiosError } from "axios";
 import { requestCostTime } from "../axiosConfig";
-import { QueryWordInfo } from "../dict/youdao/types";
+import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getCaiyunLanguageId } from "../language/languages";
 import { KeyStore } from "../preferences";
 import { CaiyunTranslateResult, QueryTypeResult, TranslationType } from "../types";
