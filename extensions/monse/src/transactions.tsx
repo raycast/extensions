@@ -63,6 +63,7 @@ function getActions(transaction: Transaction) {
     <ActionPanel>
       <Action.Push
         title="Show Details"
+        icon={Icon.Sidebar}
         shortcut={{ key: "enter", modifiers: [] }}
         target={
           <Detail
