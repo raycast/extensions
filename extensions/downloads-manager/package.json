@@ -18,8 +18,8 @@
       "mode": "view"
     },
     {
-      "name": "open-last-command",
-      "title": "Open Last Command",
+      "name": "open-lastest-download",
+      "title": "Open Lastest Download",
       "description": "Opens the last downloaded file or folder",
       "mode": "no-view"
     }

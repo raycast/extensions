@@ -5,7 +5,7 @@ export default async function main() {
   const downloads = getDownloads();
 
   if (downloads.length < 1) {
-    await showHUD("❌ Failed getting latest download");
+    await showHUD("No downloads found");
     return;
   }
 
