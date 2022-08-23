@@ -42,7 +42,7 @@ const TokenCopyValueActions = (props: TokenCopyValueActionsProps): JSX.Element =
       title={`Copy CSS variable`}
       content={new TokenTransform().tokenToCSSVariableDeclaration(props.token as any, processTokenName(props.token.name))}
     />,
-    <Action.CopyToClipboard key="action-copy-name" title={`Copy name`} content={props.token.name} />
+    <Action.CopyToClipboard key="action-copy-name" title={`Copy Name`} content={props.token.name} />
   ]
 
   if (props.token instanceof ColorToken) {
@@ -64,7 +64,7 @@ const TokenCopyCustomPropertyActions = (props: TokenCopyCustomPropertyActionsPro
       {(props.token as any).properties.map(function (property: TokenProperty) {
         const value = property.value.toString()
         if (value !== "") {
-          return <Action.CopyToClipboard title={`Copy ${property.name} value (${value})`} key={"cp-" + property.codeName} content={value} />
+          return <Action.CopyToClipboard title={`Copy ${property.name} Value (${value})`} key={"cp-" + property.codeName} content={value} />
         }
       })}
     </>

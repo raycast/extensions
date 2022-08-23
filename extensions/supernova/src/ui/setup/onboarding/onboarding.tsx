@@ -8,7 +8,7 @@
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports
 
-import { Detail, environment } from "@raycast/api"
+import { Detail, environment, Icon } from "@raycast/api"
 import { Action, ActionPanel } from "@raycast/api"
 import { useState } from "react"
 import { OnboardingProps } from "../../../definitions/props"
@@ -46,7 +46,7 @@ export const Onboarding = (props: OnboardingProps): JSX.Element => {
       navigationTitle="Welcome to Supernova!"
       actions={
         <ActionPanel>
-          <Action title="Let's get started 👉" onAction={proceedToKeyStage} />
+          <Action title="Let's Get Started 👉" onAction={proceedToKeyStage} icon={Icon.Check} />
           <Action.OpenInBrowser title="Open Cloud App" url={`https://cloud.supernova.io`} />
           <Action.OpenInBrowser title="Learn About Supernova" url={`https://learn.supernova.io`} />
         </ActionPanel>
@@ -55,10 +55,10 @@ export const Onboarding = (props: OnboardingProps): JSX.Element => {
   ) : onboardingStage === 2 ? (
     <Detail
       markdown={getKeyMarkdown}
-      navigationTitle="Let's get started!"
+      navigationTitle="Let's Get Started!"
       actions={
         <ActionPanel>
-          <Action title="I have generated my key 🎉" onAction={proceedToAuthForm} />
+          <Action title="I Got My Key 🎉" onAction={proceedToAuthForm} icon={Icon.Check} />
           <Action.OpenInBrowser title="Open Cloud App" url={`https://cloud.supernova.io`} />
           <Action.OpenInBrowser title="Learn About Supernova" url={`https://learn.supernova.io`} />
         </ActionPanel>

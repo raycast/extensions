@@ -8,7 +8,7 @@
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports
 
-import { Action, ActionPanel, Form, List } from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, List } from "@raycast/api"
 import { DesignSystem, Supernova, Workspace } from "@supernovaio/supernova-sdk"
 import { useState, useEffect } from "react"
 import { useReducer } from "react"
@@ -322,7 +322,7 @@ export const SelectDesignSystem = (props: SelectDesignSystemProps) => {
         navigationTitle="Select design system to use "
         actions={
           <ActionPanel>
-            <Action title="Use selected design system" onAction={saveAndClose} />
+            <Action title="Use Selected Design System" onAction={saveAndClose} icon={Icon.Check} />
             <Action.OpenInBrowser title="Open Cloud App" url={`https://cloud.supernova.io`} />
             <Action.OpenInBrowser title="Learn About Supernova" url={`https://learn.supernova.io`} />
           </ActionPanel>

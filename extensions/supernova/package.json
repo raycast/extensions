@@ -12,8 +12,7 @@
         "Productivity"
     ],
     "license": "MIT",
-    "commands": [
-        {
+    "commands": [{
             "name": "search-tokens",
             "title": "Search Tokens",
             "subtitle": "Supernova",
@@ -56,14 +55,12 @@
             "mode": "no-view"
         }
     ],
-    "preferences": [
-        {
+    "preferences": [{
             "name": "tokenNameTransformer",
             "title": "Preferred token name style",
             "description": "When copying CSS variables from tokens, name will be transformed using the selected method.",
             "type": "dropdown",
-            "data": [
-                {
+            "data": [{
                     "title": "camelCase",
                     "value": "camel"
                 },
@@ -96,8 +93,7 @@
             "title": "Primary documentation action",
             "description": "What should be the primary action when selecting a docs page?",
             "type": "dropdown",
-            "data": [
-                {
+            "data": [{
                     "title": "Open Documentation Site",
                     "value": "docsSite"
                 },

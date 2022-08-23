@@ -54,12 +54,12 @@ const ComponentCopyLinkActions = (props: ComponentCopyLinkActionProps): JSX.Elem
       // URL to the documentation site, if deployed
       const deployedUrl = (props.component.propertySiteUrls as any)[property.codeName]
       if (deployedUrl) {
-        actions.push(<Action.OpenInBrowser key={`action-open-property-d-${property.codeName}`} title={`Open component docs on site`} url={deployedUrl} />)
+        actions.push(<Action.OpenInBrowser key={`action-open-property-d-${property.codeName}`} title={`Open Component Docs on Site`} url={deployedUrl} />)
       }
       // URL to editor, if available
       const editorUrl = (props.component.propertyEditorUrls as any)[property.codeName]
       if (editorUrl) {
-        actions.push(<Action.OpenInBrowser key={`action-open-property-e-${property.codeName}`} title={`Open component docs in editor`} url={editorUrl} />)
+        actions.push(<Action.OpenInBrowser key={`action-open-property-e-${property.codeName}`} title={`Open Component Docs in Editor`} url={editorUrl} />)
       }
     }
   }
