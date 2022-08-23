@@ -1,4 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import { exec } from "child_process";
 import { existsSync, lstatSync, readFileSync } from "fs";
 import open from "open";
 import { homedir } from "os";
@@ -25,6 +26,8 @@ const appKeyMapping = {
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
+
+const remotePrefix = "vscode-remote://"
 
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
@@ -190,7 +193,22 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
+            {isRemotePreject(path) ?
+              <Action
+                title={`Open in ${build} (Remote)`}
+                icon="command-icon.png"
+                onAction={() => {
+                  exec("code --remote " + parseRemoteURL(path));
+                  closeMainWindow();
+                }}
+              /> :
+              <Action.Open
+                title={`Open in ${build}`}
+                icon="command-icon.png"
+                target={path}
+                application={appKey}
+              />
+            }
             {terminalInstalled && (
               <Action
                 title="Open in Terminal"
@@ -254,4 +272,14 @@ function DevelopmentActionSection() {
 function isGitRepo(path: string): boolean {
   const gitConfig = config.sync({ cwd: path, path: ".git/config", expandKeys: true });
   return !!gitConfig.core;
+}
+
+function isRemotePreject(path: string): boolean {
+  return path.startsWith(remotePrefix);
+}
+
+function parseRemoteURL(path: string): string {
+  path = path.slice(remotePrefix.length);
+  const index = path.indexOf("/");
+  return path.slice(0, index) + " " + path.slice(index);
 }
