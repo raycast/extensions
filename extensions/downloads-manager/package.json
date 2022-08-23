@@ -18,8 +18,8 @@
       "mode": "view"
     },
     {
-      "name": "open-lastest-download",
-      "title": "Open Lastest Download",
+      "name": "open-latest-download",
+      "title": "Open Latest Download",
       "description": "Opens the last downloaded file or folder",
       "mode": "no-view"
     }
