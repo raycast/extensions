@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "esa-search",
-  "title": "esa search",
+  "title": "esa Search",
   "description": "Search for posts by your team's esa. No official esa.io product.",
   "icon": "icon.png",
   "author": "kawamataryo",
@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "searchPost",
-      "title": "Search esa Post",
+      "title": "Search Post",
+      "subtitle": "esa",
       "description": "Search for esa post.",
       "mode": "view",
       "arguments": [
@@ -27,14 +28,15 @@
     },
     {
       "name": "createPost",
-      "title": "Create esa Post",
+      "title": "Create Post",
+      "subtitle": "esa",
       "description": "Create post for esa.",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "title": "default show detail",
+      "title": "Detail Screen",
       "name": "isShowDetail",
       "description": "Show detail screen in initial view",
       "type": "dropdown",
@@ -42,17 +44,17 @@
       "data": [
         {
           "value": "true",
-          "title": "true"
+          "title": "Yes"
         },
         {
           "value": "false",
-          "title": "false"
+          "title": "No"
         }
       ],
       "required": false
     },
     {
-      "title": "team name",
+      "title": "Team Name",
       "name": "primaryTeamName",
       "description": "Your esa team name",
       "type": "textfield",
@@ -60,15 +62,15 @@
       "required": true
     },
     {
-      "title": "token",
+      "title": "Token",
       "name": "primaryToken",
       "description": "Your esa access token",
-      "type": "textfield",
+      "type": "password",
       "placeholder": "xxx",
       "required": true
     },
     {
-      "title": "secondary team name",
+      "title": "Secondary Team Name",
       "name": "secondaryTeamName",
       "description": "Your esa team name",
       "type": "textfield",
@@ -76,10 +78,10 @@
       "required": false
     },
     {
-      "title": "secondary token",
+      "title": "Secondary Token",
       "name": "secondaryToken",
       "description": "Your esa access token",
-      "type": "textfield",
+      "type": "password",
       "placeholder": "xxx",
       "required": false
     }
