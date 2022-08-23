@@ -9,6 +9,6 @@ export default async function main() {
     return;
   }
 
-  const lastDownload = downloads[0];
-  await open(lastDownload.path);
+  const latestDownload = downloads[0];
+  await open(latestDownload.path);
 }
