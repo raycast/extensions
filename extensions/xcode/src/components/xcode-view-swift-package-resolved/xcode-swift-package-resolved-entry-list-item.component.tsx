@@ -24,7 +24,7 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
           <Action.Open
             application={XcodeService.bundleIdentifier}
             key="open-with-xcode"
-            title="Open with Xcode"
+            title={`Open ${props.xcodeProject.name} with Xcode`}
             target={props.xcodeProject.filePath}
             icon={Icon.Hammer}
           />
