@@ -40,7 +40,7 @@
       "required": false,
       "title": "Socket path",
       "description": "Path to Docker socket",
-      "placeholder": "e.g. /var/run/docker.sock"
+      "placeholder": "/var/run/docker.sock"
     }
   ],
   "scripts": {
