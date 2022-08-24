@@ -20,7 +20,7 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
       actions={
         <ActionPanel>
           {props.entry.location.startsWith("http") ? <Action.OpenInBrowser url={props.entry.location} /> : undefined}
-          <Action.ShowInFinder title="Open Package.resolved" path={props.packageResolvedPath} />
+          <Action.ShowInFinder title="Show Package.resolved" path={props.packageResolvedPath} />
           <Action.Open
             application={XcodeService.bundleIdentifier}
             key="open-with-xcode"
