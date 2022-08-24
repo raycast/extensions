@@ -20,11 +20,7 @@ export function XcodeInstallationVerifier<Content>(props: { children: Content })
         description="Please install Xcode to continue using this command."
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser
-              icon={Icon.Download}
-              title="Download Xcode"
-              url="https://apps.apple.com/app/id497799835"
-            />
+            <Action.OpenInBrowser icon={Icon.Download} title="Download Xcode" url={XcodeService.downloadUrl} />
           </ActionPanel>
         }
       />
