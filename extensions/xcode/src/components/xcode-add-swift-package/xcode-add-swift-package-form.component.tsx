@@ -70,7 +70,12 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Swift Package" onSubmit={() => submitForm(swiftPackageUrl, navigation)} />
+          <Action.SubmitForm
+            title="Add Swift Package"
+            onSubmit={async () => {
+              await submitForm(swiftPackageUrl, navigation);
+            }}
+          />
         </ActionPanel>
       }
     >
