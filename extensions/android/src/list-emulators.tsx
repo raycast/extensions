@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Icon,
   List,
+  getPreferenceValues,
   popToRoot,
   showToast,
   Toast,
@@ -17,7 +18,7 @@ export default function Command() {
   useEffect(() => {
     async function listDir() {
       exec(
-        `emulator -list-avds`,
+        `${emulatorCommand()} -list-avds`,
         (err: string, stdout: string, stderr: string) => {
           console.log(err);
           console.log(stdout);
@@ -27,7 +28,8 @@ export default function Command() {
           if (err != null) {
             showToast(
               Toast.Style.Failure,
-              "Make sure you have `emulator` command available globally"
+              "Make sure you have the right Android SDK location",
+              err
             );
           }
 
@@ -69,7 +71,7 @@ export default function Command() {
 
 function openEmultror(emulator: string): void {
   exec(
-    `emulator -avd ${emulator}`,
+    `${emulatorCommand()} @${emulator}`,
     (err: string, stdout: string, stderr: string) => {
       console.log(err);
       console.log(stdout);
@@ -81,4 +83,12 @@ function openEmultror(emulator: string): void {
       popToRoot;
     }
   );
+}
+
+function emulatorCommand(): string {
+  return `${androidSDK()}/emulator/emulator`;
+}
+
+function androidSDK() {
+  return getPreferenceValues().androidSDK;
 }

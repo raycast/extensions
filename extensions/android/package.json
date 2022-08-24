@@ -42,12 +42,19 @@
   "preferences": [
     {
       "title": "Android Projects Directory",
-      "label": "projectsDirectory",
-      "name": "ANDROID_DIRECTORY",
-      "description": "copy path of your Android Projects, without '/'",
+      "name": "androidProjectsDirectory",
+      "description": "Locate your Android Projects, without '/'",
       "type": "textfield",
       "required": true,
       "default": ""
+    },
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "/Users/{user-name}/Library/Android/sdk/"
     }
   ],
   "scripts": {

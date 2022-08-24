@@ -6,7 +6,6 @@ import {
   Icon,
   List,
   popToRoot,
-  PreferenceValues,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -18,8 +17,7 @@ export default function Command() {
   const [items, setItems] = useState<string[]>(() => []);
   const [loading, setLoading] = useState(true);
 
-  const preferences: PreferenceValues = getPreferenceValues();
-  const projectsDirectory = preferences.ANDROID_DIRECTORY;
+  const projectsDirectory = getPreferenceValues().androidProjectsDirectory;
 
   useEffect(() => {
     async function listDir() {
