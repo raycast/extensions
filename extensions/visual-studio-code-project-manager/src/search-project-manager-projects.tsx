@@ -193,7 +193,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {isRemotePreject(path) ? (
+            {isRemoteProject(path) ? (
               <Action
                 title={`Open in ${build} (Remote)`}
                 icon="command-icon.png"
@@ -270,7 +270,7 @@ function isGitRepo(path: string): boolean {
   return !!gitConfig.core;
 }
 
-function isRemotePreject(path: string): boolean {
+function isRemoteProject(path: string): boolean {
   return path.startsWith(remotePrefix);
 }
 
