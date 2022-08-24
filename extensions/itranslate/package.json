@@ -150,8 +150,12 @@
       "description": "Select default translation service provider",
       "data": [
         {
-          "title": "Google",
+          "title": "Google(Free)",
           "value": "google"
+        },
+        {
+          "title": "Google(Could Translation)",
+          "value": "google could translation"
         },
         {
           "title": "DeepL",
@@ -170,6 +174,22 @@
           "value": "tencent"
         }
       ]
+    },
+    {
+      "name": "googleApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Google Could Translation API Key",
+      "description": "Google Could Translation API Key",
+      "placeholder": "Enter Google Could Translation API Key"
+    },
+    {
+      "name": "disableGoogleCould",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Google Could Translation",
+      "description": "Disable Google Could translation service provider",
+      "default": false
     },
     {
       "name": "deeplAuthKey",

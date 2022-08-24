@@ -2,6 +2,8 @@ interface IPreferences {
   langFirst: string;
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
+  googleApiKey: string;
+  disableGoogleCould: boolean;
   deeplAuthKey: string;
   deeplApiPro: boolean;
   disableDeepL: boolean;

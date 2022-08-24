@@ -11,6 +11,7 @@ const apiFetchMap = new Map<
   (queryText: string, targetLang: ILangItem, serviceProvider: ITransServiceProvider) => Promise<ITranslateRes>
 >([
   [TransServiceProviderTp.Google, fetchGoogleTransAPI],
+  [TransServiceProviderTp.GoogleCouldTrans, fetchGoogleCouldTransAPI],
   [TransServiceProviderTp.DeepL, fetchDeepLTransAPI],
   [TransServiceProviderTp.Youdao, fetchYoudaoTransAPI],
   [TransServiceProviderTp.Baidu, fetchBaiduTransAPI],
@@ -28,6 +29,9 @@ export function checkPreferences() {
   switch (preferences.defaultServiceProvider) {
     case TransServiceProviderTp.Google:
       checkService = true;
+      break;
+    case TransServiceProviderTp.GoogleCouldTrans:
+      if (!preferences.googleApiKey) checkService = false;
       break;
     case TransServiceProviderTp.DeepL:
       if (!preferences.deeplAuthKey) checkService = false;
@@ -71,6 +75,14 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
         appKey: "",
       });
       break;
+    case TransServiceProviderTp.GoogleCouldTrans:
+      if (preferences.disableGoogleCould) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: "",
+        appKey: preferences.googleApiKey,
+      });
+      break;
     case TransServiceProviderTp.DeepL:
       if (preferences.disableDeepL) break;
       serviceProviderMap.set(preferences.defaultServiceProvider, {
@@ -109,6 +121,17 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       serviceProvider: TransServiceProviderTp.Google,
       appId: "",
       appKey: "",
+    });
+  }
+  if (
+    preferences.googleApiKey &&
+    !preferences.disableGoogleCould &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.GoogleCouldTrans
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.GoogleCouldTrans, {
+      serviceProvider: TransServiceProviderTp.GoogleCouldTrans,
+      appId: "",
+      appKey: preferences.googleApiKey,
     });
   }
   if (
@@ -257,6 +280,40 @@ function fetchDeepLTransAPI(
 }
 
 function fetchGoogleTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  return new Promise<ITranslateRes>((resolve) => {
+    const fromLang = "auto";
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: "cn" })
+      .then((res) => {
+        const resDate: IGoogleTranslateResult = res;
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Success,
+          from: getLang(resDate.from.language.iso),
+          to: targetLang,
+          origin: queryText,
+          res: resDate.text,
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
+function fetchGoogleCouldTransAPI(
   queryText: string,
   targetLang: ILangItem,
   provider: ITransServiceProvider
