@@ -84,7 +84,7 @@ const CopyAsset = (props: AssetActionItemProps): JSX.Element => {
           }
           showToast(options)
         } catch (error) {
-          showErrorToast(`Unable to copy ${props.asset.name} from your library. Check your internet connection and try again.`)
+          showErrorToast(`Unable to copy ${props.asset.name} from your library. ${(error as any).message}`)
         }
       }}
     />
@@ -127,7 +127,7 @@ const DownloadAsset = (props: AssetActionItemProps): JSX.Element => {
           }
           showToast(options)
         } catch (error) {
-          showErrorToast(`Unable to download ${props.asset.name} from your library. Check your internet connection and try again.`)
+          showErrorToast(`Unable to download ${props.asset.name} from your library. ${(error as any).message}.`)
         }
       }}
     />
