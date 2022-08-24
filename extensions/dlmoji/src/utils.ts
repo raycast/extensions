@@ -33,6 +33,11 @@ export function checkURL(str: string) {
     return !!urlPattern.test(str)
 }
 
+export function checkEmojiOnly(str: string) {
+    str = str.replace(/\s/g, "")
+    return str.replace(/\p{Extended_Pictographic}/gu, "").length == 0
+}
+
 export function truncate(string: string, length = 16, separator = "..") {
     if (string.length <= length) return string
 

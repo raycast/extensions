@@ -19,17 +19,13 @@ if (deepmojiURL.length > 0 && !checkURL(deepmojiURL)) {
 export async function preConnect() {
     const connects = []
     if (preferences.useEmojiTranslate) {
-        connects.push(
-            getEmojiTransKey(false).then((key) => {
-                fetchEmojiTrans("", "en", key)
-            })
-        )
+        connects.push(fetchEmojiTrans("_", "en", false))
     }
-    if (preferences.useVerbatimTranslate) {
-        connects.push(fetchChineseEmojiTrans(""))
+    if (preferences.useBidirectTranslate) {
+        connects.push(fetchBidirectTrans("_", "en", true), fetchBidirectTrans("_", "en", false))
     }
     if (preferences.useEmojiAll) {
-        connects.push(fetchEmojiAll("", "en"))
+        connects.push(fetchEmojiAll("_", "en"))
     }
     return axios.all(connects)
 }
@@ -42,7 +38,7 @@ export function setAxiosTimeout(seconds = 6) {
 }
 
 /**
- * 百度翻译API
+ * Baidu Translate API
  * Docs: https://fanyi-api.baidu.com/doc/21
  */
 export async function fetchBaiduTrans(queryText: string): Promise<any> {
@@ -91,15 +87,30 @@ export async function fetchEmojiTransHtml(): Promise<any> {
     return axios.get("https://emojitranslate.com/")
 }
 
-export async function fetchChineseEmojiTrans(queryText: string): Promise<any> {
-    const text = encodeURIComponent(queryText)
-    return axios.get("https://zhongwenzidian.18dao.cn/to-emoji/" + text).catch((err) => {
-        showErrorToast("18dao Verbatim Chinese Translate", err.message)
-        return
-    })
+export async function fetchBidirectTrans(queryText: string, fromLanguage: string, isEmoji: boolean): Promise<any> {
+    const lang = fromLanguage === "zh" ? "zh-hans" : fromLanguage
+    const endpoint = isEmoji ? "emoji-to-text" : "text-to-Emoji"
+    return axios
+        .post(
+            `https://www.emojiall.com/${lang}/${endpoint}`,
+            querystring.stringify({
+                language_code: lang,
+                text: queryText,
+            }),
+            {
+                headers: {
+                    referer: "https://www.emojiall.com/",
+                },
+            }
+        )
+        .catch((err) => {
+            showErrorToast("Bidirect Translation", err.message)
+            return
+        })
 }
 
-export async function fetchEmojiTrans(queryText: string, fromLanguage: string, key: string): Promise<any> {
+export async function fetchEmojiTrans(queryText: string, fromLanguage: string, updateKey: boolean): Promise<any> {
+    const key = await getEmojiTransKey(updateKey)
     return axios
         .post(
             "https://api.emojitranslate.com/",

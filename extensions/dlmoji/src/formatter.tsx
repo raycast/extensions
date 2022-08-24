@@ -1,5 +1,4 @@
 import { COPY_SEPARATOR, SECTION_TYPE } from "./consts"
-import { load } from "cheerio"
 import { truncate } from "./utils"
 import { decode } from "html-entities"
 
@@ -44,7 +43,7 @@ export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateRe
         const description = decode(item.description.replace(/<[^>]+>|\r|\n|\\s/gi, "")) // remove space, line break and html label
         const emoji = item.emoji_symbol
         return {
-            key: emoji,
+            key: emoji + Math.random(),
             title: truncate(title, 26),
             subtitle: emoji,
             copyText: emoji,
@@ -90,16 +89,9 @@ export function formatEmojiAll(data: EmojiDataItem[], lang = "en"): ITranslateRe
     return reformatData
 }
 
-export function formatChineseEmojiTrans(doc: string): ITranslateReformatResultItem {
-    const $ = load(doc)
-    const text: string = $("meta[name=keywords]").attr("content")!
-    const emojis: string = text.split(", ").slice(1).join(" ")
-    return constructResultItem("Verbatim Translate", emojis)
-}
-
 function constructResultItem(title: string, emojiText: string) {
     return {
-        key: emojiText,
+        key: emojiText + Math.random(),
         title: title,
         subtitle: emojiText,
         copyText: emojiText,

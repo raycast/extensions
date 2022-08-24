@@ -40,7 +40,7 @@ interface ITranslateResultBasicItem {
 }
 
 interface IPreferences {
-    useVerbatimTranslate: boolean
+    useBidirectTranslate: boolean
     useEmojiTranslate: boolean
     useEmojiAll: boolean
     isAutomaticPaste: boolean

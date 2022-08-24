@@ -28,15 +28,15 @@
             "label": "Emoji Translate",
             "required": false,
             "default": true,
-            "description": "Translate human language to emoji"
+            "description": "Translate Human Language to Emoji"
         },
         {
-            "name": "useVerbatimTranslate",
+            "name": "useBidirectTranslate",
             "type": "checkbox",
-            "label": "18dao Verbatim Chinese Translate",
+            "label": "EMOJIALL Bidirectional Translate",
             "required": false,
-            "default": false,
-            "description": "Translate every chinese character to emoji"
+            "default": true,
+            "description": "Translate Emoji to Human Language"
         },
         {
             "name": "useEmojiAll",

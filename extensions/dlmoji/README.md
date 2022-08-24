@@ -16,9 +16,8 @@
 
 ![Main Panel](./assets/Main-Panel.png)
 
-1. `Emoji Translate` performs better when handling English query text.
+1. `Emoji Translate` can handle both Human Languages and Emojis! Powered by [EmojiTranslate](https://emojitranslate.com/) API & [EMOJIALL](https://www.emojiall.com/en/text-translator-page) Translator API.
 2. `Emotion Analysis` is powered by [deepmoji](https://github.com/bfelbo/DeepMoji), trained on tweets with emojis to understand how language is used to express emotions. Note that deepmoji only used [63 kinds of emojis](https://github.com/bfelbo/DeepMoji/blob/master/emoji_overview.png) to express emotions.
-3. `Verbatim Translate` only supports Chinese query text and needs a relatively long response time. To gain a better experience, this API is turned off by default.
 
 ## Configuration
 
@@ -56,4 +55,4 @@ Here we recommend users register App-ID and App-Secret in [Baidu Translate](htt
 
 ## Thanks
 
-Inspired and based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot), `DLmoji` offers an easy-to-use Emoji Dictionary by integrating APIs from [EmojiTranslate](https://emojitranslate.com/), [i18dao](https://zhongwenzidian.18dao.cn/to-emoji), and [EMOJIALL](https://www.emojiall.com/). To be more intelligent, `DLmoji` also supports [deepmoji](https://github.com/bfelbo/DeepMoji) sentiment analysis API, which can find the most matching emojis of your query words.
+Inspired and based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot), `DLmoji` offers an easy-to-use Emoji Dictionary by integrating APIs from [EmojiTranslate](https://emojitranslate.com/) and [EMOJIALL](https://www.emojiall.com/). To be more intelligent, `DLmoji` also supports [deepmoji](https://github.com/bfelbo/DeepMoji) sentiment analysis API, which can find the most matching emojis of your query words.

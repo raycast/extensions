@@ -1,4 +1,4 @@
-import { preferences } from "./utils"
+import { checkEmojiOnly, preferences } from "./utils"
 import { useEffect, useState } from "react"
 import TranslateResult from "./TranslateResult"
 import { Icon, List } from "@raycast/api"
@@ -6,21 +6,15 @@ import axios from "axios"
 import { cloneDeep } from "lodash"
 import {
     fetchBaiduTrans,
-    fetchChineseEmojiTrans,
+    fetchBidirectTrans,
     fetchDeepmoji,
     fetchEmojiAll,
     fetchEmojiTrans,
     preConnect,
     setAxiosTimeout,
 } from "./api"
-import {
-    formatBaiduTrans,
-    formatChineseEmojiTrans,
-    formatDeepmoji,
-    formatEmojiAll,
-    formatEmojiTrans,
-} from "./formatter"
-import { getEmojiTransKey } from "./storage"
+import { formatBaiduTrans, formatDeepmoji, formatEmojiAll, formatEmojiTrans } from "./formatter"
+import { getRecentLanguage } from "./storage"
 import { SECTION_TYPE } from "./consts"
 
 // use preConnect to reduce API response time
@@ -37,19 +31,14 @@ export default function () {
     const [isLoadingState, updateLoadingState] = useState<boolean>(false)
     const [translateResultState, updateTranslateResultState] = useState<ITranslateReformatResult[]>()
 
-    function getEmojiData() {
+    async function getEmojiData() {
         if (!inputState) return
 
-        // String Filter
-        const queryGlobal: string = inputState
-        const queryText: string = queryGlobal //.replace(/Jolin|Ling/g, "princess").replace(/Danny/g, "prince")
-        const queryEmoji: string = queryGlobal //.replace(/Jolin|Ling/g, "🐰").replace(/Danny/g, "🦊")
-
+        const queryText: string = inputState
         const hasChinese = /[\u4E00-\u9FA5]+/g.test(queryText)
-        const lang = hasChinese ? "zh" : "en"
+        const lang = await getRecentLanguage(queryText)
         const dataList: ITranslateReformatResult[] = []
 
-        // 接口速度较慢
         async function getDeepmoji(): Promise<ITranslateReformatResultItem | undefined> {
             let enText: string = queryText
             if (hasChinese) {
@@ -62,24 +51,28 @@ export default function () {
             console.log("Deepmoji Data Received")
             return formatDeepmoji(res.data.emoji[0])
         }
-        async function getEmojiTrans(updateKey = false): Promise<ITranslateReformatResultItem | undefined> {
+        async function doEmojiTrans(): Promise<ITranslateReformatResultItem | undefined> {
+            let res
+            // fetch EmojiALL-Translator API
+            const isEmojiText = checkEmojiOnly(queryText)
+            if (preferences.useBidirectTranslate && (isEmojiText || hasChinese)) {
+                res = await fetchBidirectTrans(queryText, lang, isEmojiText)
+                if (!res?.data?.data) return
+                console.log("BiTrans Data Received")
+                return formatEmojiTrans(res.data.data)
+            }
+            // fetch EmojiTranslate API
             if (!preferences.useEmojiTranslate) return
-            const key = await getEmojiTransKey(updateKey)
-            const res = await fetchEmojiTrans(queryEmoji, lang, key)
+            let forceUpdateKey = false
+            res = await fetchEmojiTrans(queryText, lang, forceUpdateKey)
             if (!res) return
             if (!res.data) {
+                forceUpdateKey = true
                 console.log("Emoji Translation Key Update")
-                return getEmojiTrans(true)
+                res = await fetchEmojiTrans(queryText, lang, forceUpdateKey)
             }
             console.log("EmojiTrans Data Received")
             return formatEmojiTrans(res.data)
-        }
-        async function getChineseEmojiTrans(): Promise<ITranslateReformatResultItem | undefined> {
-            if (!preferences.useVerbatimTranslate || !hasChinese) return
-            const res = await fetchChineseEmojiTrans(queryEmoji)
-            if (!res?.data) return
-            console.log("ChineseEmojiTrans Data Received")
-            return formatChineseEmojiTrans(res.data)
         }
         async function getEmojiAll(): Promise<any> {
             if (!preferences.useEmojiAll) return
@@ -89,7 +82,7 @@ export default function () {
             return formatEmojiAll(res.data, lang)
         }
 
-        getEmojiTrans().then((emojiTrans) => {
+        doEmojiTrans().then((emojiTrans) => {
             if (!emojiTrans) return
             if (dataList[0]?.type === SECTION_TYPE.Translate) {
                 dataList[0].children.unshift(emojiTrans)
@@ -103,14 +96,11 @@ export default function () {
             updateTranslateResultState(cloneDeep(dataList))
         })
 
-        axios.all([getDeepmoji(), getChineseEmojiTrans(), getEmojiAll()]).then(
-            axios.spread((deepmoji, verbatimTrans, emojiAll) => {
+        axios.all([getDeepmoji(), getEmojiAll()]).then(
+            axios.spread((deepmoji, emojiAll) => {
                 const transArray: ITranslateReformatResultItem[] = []
                 if (deepmoji) {
                     transArray.push(deepmoji)
-                }
-                if (verbatimTrans) {
-                    transArray.push(verbatimTrans)
                 }
 
                 if (dataList[0]?.type === SECTION_TYPE.Translate) {
