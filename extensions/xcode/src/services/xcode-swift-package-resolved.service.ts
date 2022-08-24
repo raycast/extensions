@@ -2,6 +2,8 @@ import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 import { existsAsync, readDirectoryAsync, readFileAsync } from "../shared/fs-async";
 import Path from "path";
 import { XcodeSwiftPackageResolved } from "../models/swift-package-resolved/xcode-swift-package-resolved.model";
+import { XcodeSwiftPackageResolvedEntry } from "../models/swift-package-resolved/xcode-swift-package-resolved-entry.model";
+import { execAsync } from "../shared/exec-async";
 
 /**
  * XcodeSwiftPackageResolvedService
@@ -38,6 +40,16 @@ export class XcodeSwiftPackageResolvedService {
         };
       }),
     };
+  }
+
+  /**
+   * Retrieve the latest version / tag for a given Xcode Swift Package Resolved Entry
+   * @param entry The Xcode Swift Package Resolved Entry to retrieve the latest version
+   */
+  static getLatestVersion(entry: XcodeSwiftPackageResolvedEntry): Promise<string> {
+    return execAsync(
+      [`git ls-remote --tags --refs --sort="v:refname" ${entry.location}`, "tail -n1", "sed 's/.*\\///'"].join(" | ")
+    ).then((output) => output.stdout.trim());
   }
 
   /**
