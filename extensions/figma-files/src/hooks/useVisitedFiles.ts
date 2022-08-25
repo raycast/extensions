@@ -31,13 +31,13 @@ export function useVisitedFiles() {
     loadVisitedFiles().then(setFiles);
   }, []);
 
-  function visitFile(file: File) {
+  async function visitFile(file: File) {
     const nextFiles = [file, ...(files?.filter((item) => item.name !== file.name) ?? [])].slice(
       0,
       VISITED_FIGMA_FILES_LENGTH
     );
     setFiles(nextFiles);
-    saveVisitedFiles(nextFiles);
+    await saveVisitedFiles(nextFiles);
   }
 
   return { files, visitFile, isLoading: !files };

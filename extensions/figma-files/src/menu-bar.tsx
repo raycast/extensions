@@ -28,17 +28,18 @@ export default function Command() {
       {hasError && <MenuBarExtra.Item title="Error" />}
       {visitedFiles && (
         <>
-          <MenuBarExtra.Submenu
-            key="recent-files"
-            title="Recent"
-            children={visitedFiles?.map((file) => (
+          <MenuBarExtra.Submenu key="recent-files" title="Recent">
+            {visitedFiles?.map((file) => (
               <MenuBarExtra.Item
                 key={file.key + "-recent-file"}
                 title={file.name}
-                onAction={() => (open(url + file.key), visitFile(file))}
+                onAction={async () => {
+                  open(url + file.key);
+                  await visitFile(file);
+                }}
               />
             ))}
-          />
+          </MenuBarExtra.Submenu>
           <MenuBarExtra.Separator />
         </>
       )}
@@ -52,7 +53,10 @@ export default function Command() {
               <MenuBarExtra.Item
                 key={file.key}
                 title={file.name}
-                onAction={() => (open(url + file.key), visitFile(file))}
+                onAction={async () => {
+                  open(url + file.key);
+                  await visitFile(file);
+                }}
               />
             ))}
           />
