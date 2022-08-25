@@ -11,7 +11,7 @@ import trim from "lodash.trim";
 
 type TrasformAction = {
   title: string;
-  fn: (k :string) => string;
+  fn: (k: string) => string;
 };
 
 const actions: TrasformAction[] = [
@@ -54,12 +54,12 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isClipboardTarget, setIsClipboardTarget] = useState<boolean>(false);
 
-  useEffect(()=> {
+  useEffect(() => {
     const fn = async () => {
-      const text = await Clipboard.readText() || "";
+      const text = (await Clipboard.readText()) || "";
       setClipboardText(text);
-      setIsClipboardTarget(!!text)
-    }
+      setIsClipboardTarget(!!text);
+    };
     fn();
     return () => setClipboardText("");
   }, []);
@@ -83,10 +83,9 @@ export default function Command() {
 
   const targetText = isClipboardTarget ? clipboardText : searchText;
 
-  const filterdActions =
-    isClipboardTarget
-      ? actions.filter((action) => action.title.toUpperCase().includes(searchText.toUpperCase()))
-      : actions;
+  const filterdActions = isClipboardTarget
+    ? actions.filter((action) => action.title.toUpperCase().includes(searchText.toUpperCase()))
+    : actions;
 
   return (
     <List searchText={searchText} onSearchTextChange={setSearchText}>
