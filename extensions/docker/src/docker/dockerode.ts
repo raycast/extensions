@@ -3,15 +3,7 @@ import Dockerode from '@priithaamer/dockerode';
 import { useMemo } from 'react';
 
 export const useDockerode = () => {
-  const preferences = getPreferenceValues();
+  const { socketPath } = getPreferenceValues();
 
-  const docker = useMemo(
-    () =>
-      new Dockerode({
-        socketPath: preferences.socketPath ?? undefined,
-      }),
-    [preferences.socketPath],
-  );
-
-  return docker;
+  return useMemo(() => new Dockerode(socketPath ? { socketPath } : undefined), [socketPath]);
 };
