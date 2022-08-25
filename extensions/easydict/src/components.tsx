@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-31 23:20
+ * @lastEditTime: 2022-08-23 11:02
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,45 +11,57 @@
 import { Action, ActionPanel, Color, Icon, Image, List, openCommandPreferences } from "@raycast/api";
 import { useState } from "react";
 import { sayTruncateCommand } from "./audio";
-import { languageItemList } from "./consts";
-import { playYoudaoWordAudioAfterDownloading } from "./dict/youdao/request";
-import ReleaseLogDetail from "./releaseVersion/releaseLog";
+import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
+import { LingueeListItemType } from "./dictionary/linguee/types";
+import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
+import { playYoudaoWordAudioAfterDownloading } from "./dictionary/youdao/youdao";
+import { languageItemList } from "./language/consts";
+import {
+  getBaiduWebTranslateURL,
+  getDeepLWebTranslateURL,
+  getEudicWebDictionaryURL,
+  getGoogleWebTranslateURL,
+  getYoudaoWebDictionaryURL,
+} from "./language/languages";
+import { myPreferences, preferredLanguage1, preferredLanguage2 } from "./preferences";
+import ReleaseNotesPage from "./releaseVersion/releaseNotePage";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { openInEudic } from "./scripts";
 import {
   ActionListPanelProps,
   DicionaryType,
+  ListDisplayItem,
+  ListItemDisplayType,
   QueryType,
-  QueryWordInfo,
-  SectionType,
   TranslationType,
-  WebTranslationItem,
-  YoudaoTranslateReformatResultItem,
+  WebQueryItem,
 } from "./types";
-import {
-  checkIfNeedShowReleasePrompt,
-  getDeepLWebTranslateURL,
-  getEudicWebTranslateURL,
-  getGoogleWebTranslateURL,
-  getYoudaoWebTranslateURL,
-  myPreferences,
-} from "./utils";
 
 /**
  * Get the list action panel item with ListItemActionPanelItem
  */
 export function ListActionPanel(props: ActionListPanelProps) {
-  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
+  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(props.isShowingReleasePrompt);
 
-  const queryWordInfo = props.displayItem.queryWordInfo;
-  const googleWebItem = getWebTranslationItem(TranslationType.Google, queryWordInfo);
-  const deepLWebItem = getWebTranslationItem(TranslationType.DeepL, queryWordInfo);
-  const youdaoWebItem = getWebTranslationItem(DicionaryType.Youdao, queryWordInfo);
-  const eudicWebItem = getWebTranslationItem(DicionaryType.Eudic, queryWordInfo);
+  const displayItem = props.displayItem;
+  const queryWordInfo = displayItem.queryWordInfo;
+  console.log(`---> current list type: ${displayItem.queryType}, copyText: ${displayItem.copyText}`);
+  const googleWebItem = getWebQueryItem(TranslationType.Google, queryWordInfo);
+  const isShowingGoogleTop = displayItem.queryType === TranslationType.Google;
 
-  checkIfNeedShowReleasePrompt((isShowing) => {
-    setIsShowingReleasePrompt(isShowing);
-  });
+  const deepLWebItem = getWebQueryItem(TranslationType.DeepL, queryWordInfo);
+  const isShowingDeepLTop = displayItem.queryType === TranslationType.DeepL;
+
+  const baiduWebItem = getWebQueryItem(TranslationType.Baidu, queryWordInfo);
+  const isShowingBaiduTop = displayItem.queryType === TranslationType.Baidu;
+
+  const lingueeWebItem = getWebQueryItem(DicionaryType.Linguee, queryWordInfo);
+  const isShowingLingueeTop = displayItem.queryType === DicionaryType.Linguee;
+
+  const youdaoWebItem = getWebQueryItem(DicionaryType.Youdao, queryWordInfo);
+  const isShowingYoudaoDictioanryTop = displayItem.queryType === DicionaryType.Youdao;
+
+  const eudicWebItem = getWebQueryItem(DicionaryType.Eudic, queryWordInfo);
 
   function onNewReleasePromptClick() {
     const easydict = new Easydict();
@@ -62,25 +74,40 @@ export function ListActionPanel(props: ActionListPanelProps) {
     <ActionPanel>
       <ActionPanel.Section>
         {isShowingReleasePrompt && (
-          <ActionRecentUpdate title="✨ New Version Released" onPush={onNewReleasePromptClick} />
+          <ReleaseNotesAction title="✨ New Version Released" onPush={onNewReleasePromptClick} />
         )}
+
+        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
+        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
+        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
+        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
+        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
+
         {props.isInstalledEudic && (
-          <Action icon={Icon.MagnifyingGlass} title="Open In Eudic" onAction={() => openInEudic(queryWordInfo.word)} />
+          <Action
+            icon={Icon.MagnifyingGlass}
+            title="Open In Eudic App"
+            onAction={() => openInEudic(queryWordInfo.word)}
+          />
         )}
+
         <Action.CopyToClipboard
           onCopy={() => {
-            console.log("copy: ", props.displayItem.copyText);
+            console.log("copy: ", displayItem.copyText);
           }}
           title={`Copy Text`}
-          content={props.displayItem.copyText || ""}
+          content={displayItem.copyText || ""}
         />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Search Query Text Online">
-        <WebTranslationAction webTranslationItem={deepLWebItem} />
-        <WebTranslationAction webTranslationItem={googleWebItem} />
-        {queryWordInfo.isWord && <WebTranslationAction webTranslationItem={youdaoWebItem} />}
-        {queryWordInfo.isWord && <WebTranslationAction webTranslationItem={eudicWebItem} />}
+        {!isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
+        {!isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
+        {<WebQueryAction webQueryItem={eudicWebItem} />}
+
+        {!isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
+        {!isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
+        {!isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Play Text Audio">
@@ -104,29 +131,29 @@ export function ListActionPanel(props: ActionListPanelProps) {
              *
              *  Todo: add a shortcut to stop playing audio.
              */
-            sayTruncateCommand(props.displayItem.copyText, queryWordInfo.toLanguage);
+            sayTruncateCommand(displayItem.copyText, queryWordInfo.toLanguage);
           }}
         />
       </ActionPanel.Section>
 
-      {myPreferences.enableDisplayTargetTranslationLanguage && (
+      {myPreferences.enableSelectTargetLanguage && (
         <ActionPanel.Section title="Target Language">
           {languageItemList.map((selectedLanguageItem) => {
             // hide auto language
-            const isAutoLanguage = selectedLanguageItem.youdaoLanguageId === "auto";
+            const isAutoLanguage = selectedLanguageItem.youdaoId === "auto";
             // hide current detected language
-            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoLanguageId === queryWordInfo.fromLanguage;
-            const isSameWithTargetLanguage = selectedLanguageItem.youdaoLanguageId === queryWordInfo.toLanguage;
+            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoId === queryWordInfo.fromLanguage;
+            const isSameWithTargetLanguage = selectedLanguageItem.youdaoId === queryWordInfo.toLanguage;
             if (isAutoLanguage || isSameWithDetectedLanguage) {
               return null;
             }
 
             return (
               <Action
-                key={selectedLanguageItem.youdaoLanguageId}
-                title={selectedLanguageItem.languageTitle}
+                key={selectedLanguageItem.youdaoId}
+                title={selectedLanguageItem.englishName}
                 onAction={() => props.onLanguageUpdate(selectedLanguageItem)}
-                icon={isSameWithTargetLanguage ? Icon.ArrowRight : Icon.Globe}
+                icon={isSameWithTargetLanguage ? Icon.ArrowRight : { source: selectedLanguageItem.emoji }}
               />
             );
           })}
@@ -134,8 +161,8 @@ export function ListActionPanel(props: ActionListPanelProps) {
       )}
 
       <ActionPanel.Section>
-        {!isShowingReleasePrompt && <ActionRecentUpdate />}
-        <ActionCurrentVersion />
+        {!isShowingReleasePrompt && <ReleaseNotesAction />}
+        <CurrentVersionAction />
         <ActionOpenCommandPreferences />
         <ActionFeedback />
       </ActionPanel.Section>
@@ -152,18 +179,18 @@ function ActionOpenCommandPreferences() {
   return <Action icon={Icon.Gear} title="Preferences" onAction={openCommandPreferences} />;
 }
 
-function ActionRecentUpdate(props: { title?: string; onPush?: () => void }) {
+function ReleaseNotesAction(props: { title?: string; onPush?: () => void }) {
   return (
     <Action.Push
       icon={Icon.Stars}
       title={props.title || "Recent Updates"}
-      target={<ReleaseLogDetail />}
+      target={<ReleaseNotesPage />}
       onPush={props.onPush}
     />
   );
 }
 
-function ActionCurrentVersion() {
+function CurrentVersionAction() {
   const easydict = new Easydict();
   return (
     <Action.OpenInBrowser
@@ -182,46 +209,129 @@ function playSoundIcon(lightTintColor: string) {
 }
 
 /**
-  Return the corresponding ImageLike based on the SectionType type
-*/
-export function getListItemIcon(sectionType: SectionType | TranslationType): Image.ImageLike {
+ * Return the corresponding ImageLike based on the ListDisplayType
+ */
+export function getListItemIcon(listDisplayType: ListItemDisplayType): Image.ImageLike {
+  // console.log(`---> list type: ${listDisplayType}, typeof: ${typeof listDisplayType}`);
+
+  let itemIcon: Image.ImageLike = {
+    source: Icon.Dot,
+    tintColor: Color.PrimaryText,
+  };
+
+  if (Object.values(YoudaoDictionaryListItemType).includes(listDisplayType as YoudaoDictionaryListItemType)) {
+    itemIcon = getYoudaoListItemIcon(listDisplayType as YoudaoDictionaryListItemType);
+  }
+
+  if (Object.values(TranslationType).includes(listDisplayType as TranslationType)) {
+    // console.log(`---> TranslationType: ${listDisplayType}`);
+    itemIcon = getQueryTypeIcon(listDisplayType as TranslationType);
+  }
+
+  // LingueeDisplayType is string enum, so we need to check if it is in the enum
+  if (Object.values(LingueeListItemType).includes(listDisplayType as LingueeListItemType)) {
+    itemIcon = getLingueeListItemIcon(listDisplayType as LingueeListItemType);
+  }
+
+  // console.log(`---> end list type: ${listDisplayType}`);
+
+  return itemIcon;
+}
+
+/**
+ * Get ImageLike based on LingueeDisplayType
+ */
+export function getLingueeListItemIcon(lingueeDisplayType: LingueeListItemType): Image.ImageLike {
+  // console.log(`---> linguee type: ${lingueeDisplayType}`);
   let dotColor: Color.ColorLike = Color.PrimaryText;
-  switch (sectionType) {
-    case SectionType.Translation: {
+  switch (lingueeDisplayType) {
+    case LingueeListItemType.Translation: {
       dotColor = Color.Red;
       break;
     }
-    case SectionType.Explanations: {
+    case LingueeListItemType.AlmostAlwaysUsed:
+    case LingueeListItemType.OftenUsed: {
+      dotColor = "#FF5151";
+      break;
+    }
+    case LingueeListItemType.SpecialForms: {
+      // French forms
+      dotColor = "#00BB00";
+      break;
+    }
+    case LingueeListItemType.Common: {
       dotColor = Color.Blue;
       break;
     }
-    case SectionType.WebTranslation: {
+    case LingueeListItemType.LessCommon: {
       dotColor = Color.Yellow;
       break;
     }
-    case SectionType.WebPhrase: {
+    case LingueeListItemType.Unfeatured: {
+      dotColor = "#CA8EC2";
+      break;
+    }
+    case LingueeListItemType.Example: {
+      dotColor = "teal";
+      break;
+    }
+    case LingueeListItemType.RelatedWord: {
+      dotColor = "gray";
+      break;
+    }
+    case LingueeListItemType.Wikipedia: {
+      dotColor = "#8080C0";
+      break;
+    }
+  }
+  // console.log(`---> dot color: ${dotColor}`);
+  const itemIcon: Image.ImageLike = {
+    source: Icon.Dot,
+    tintColor: dotColor,
+  };
+  return itemIcon;
+}
+
+/**
+ * Get ImageLike based on YoudaoDisplayType
+ */
+export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemType): Image.ImageLike {
+  // console.log(`---> getYoudaoListItemIcon type: ${queryType}`);
+  let dotColor: Color.ColorLike = Color.PrimaryText;
+  switch (youdaoListType) {
+    case YoudaoDictionaryListItemType.Translation: {
+      dotColor = Color.Red;
+      break;
+    }
+    case YoudaoDictionaryListItemType.Explanation: {
+      dotColor = Color.Blue;
+      break;
+    }
+    case YoudaoDictionaryListItemType.WebTranslation: {
+      dotColor = Color.Yellow;
+      break;
+    }
+    case YoudaoDictionaryListItemType.WebPhrase: {
       dotColor = "teal";
       break;
     }
   }
 
+  // console.log(`---> dot color: ${dotColor}`);
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
     tintColor: dotColor,
   };
-  if (sectionType === SectionType.Forms) {
-    itemIcon = Icon.Receipt;
-  }
 
-  if (sectionType in TranslationType) {
-    itemIcon = getQueryTypeIcon(sectionType as TranslationType);
+  if (youdaoListType === YoudaoDictionaryListItemType.Forms) {
+    itemIcon = Icon.Receipt;
   }
 
   return itemIcon;
 }
 
 /**
- * Get query type icon based on the section type.
+ * Get query type icon based on the query type, translation or dictionary type.
  */
 function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
   return {
@@ -231,33 +341,31 @@ function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
 }
 
 /**
-  return List.Item.Accessory[] based on the SectionType type
-*/
-export function getWordAccessories(
-  sectionType: SectionType | TranslationType,
-  item: YoudaoTranslateReformatResultItem
-): List.Item.Accessory[] {
+ *  Get List.Item.Accessory[] based on the ListDisplayItem.
+ */
+export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[] {
   let wordExamTypeAccessory = [];
   let pronunciationAccessory = [];
   let wordAccessories: List.Item.Accessory[] = [];
-  if (sectionType === SectionType.Translation) {
-    if (item.examTypes) {
+  const accessoryItem = item.accessoryItem;
+  if (accessoryItem) {
+    if (accessoryItem.examTypes) {
       wordExamTypeAccessory = [
         {
           icon: { source: Icon.Star, tintColor: Color.SecondaryText },
           tooltip: "Word included in the types of exam",
         },
-        { text: item.examTypes?.join("  ") },
+        { text: accessoryItem.examTypes?.join("  ") },
       ];
       wordAccessories = [...wordExamTypeAccessory];
     }
-    if (item.phonetic) {
+    if (accessoryItem.phonetic) {
       pronunciationAccessory = [
         {
           icon: playSoundIcon("gray"),
           tooltip: "Pronunciation",
         },
-        { text: item.phonetic },
+        { text: accessoryItem.phonetic },
       ];
       wordAccessories = [...wordAccessories, { text: " " }, ...pronunciationAccessory];
     }
@@ -266,43 +374,65 @@ export function getWordAccessories(
 }
 
 /**
- * Return WebTranslationItem according to the query type and info
+ * Get WebQueryItem according to the query type and info
  */
-function getWebTranslationItem(queryType: QueryType, queryTextInfo: QueryWordInfo): WebTranslationItem | undefined {
-  let webUrl;
-  let title = `${queryType} Translate`;
-  if (queryType in DicionaryType) {
-    title = `${queryType} Dictionary`;
-  }
+function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQueryItem | undefined {
+  const title = `Open In ${queryType}`;
   const icon = getQueryTypeIcon(queryType);
-  switch (queryType.toString()) {
-    case TranslationType.Google.toString(): {
-      webUrl = getGoogleWebTranslateURL(queryTextInfo);
+
+  let webUrl;
+  switch (queryType) {
+    case TranslationType.Google: {
+      webUrl = getGoogleWebTranslateURL(wordInfo);
       break;
     }
-    case TranslationType.DeepL.toString(): {
-      webUrl = getDeepLWebTranslateURL(queryTextInfo);
+    case TranslationType.DeepL: {
+      webUrl = getDeepLWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Youdao.toString(): {
-      webUrl = getYoudaoWebTranslateURL(queryTextInfo);
+    case TranslationType.Baidu: {
+      webUrl = getBaiduWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Eudic.toString(): {
-      webUrl = getEudicWebTranslateURL(queryTextInfo);
+    case DicionaryType.Linguee: {
+      webUrl = getLingueeWebDictionaryURL(wordInfo);
+      break;
+    }
+    case DicionaryType.Youdao: {
+      webUrl = getYoudaoWebDictionaryURL(wordInfo);
+      break;
+    }
+    case DicionaryType.Eudic: {
+      webUrl = getEudicWebDictionaryURL(wordInfo);
       break;
     }
   }
-  // console.log(`---> type: ${queryType}, webUrl: ${webUrl}`);
+  // console.log(`---> type: ${queryResult.type}, webUrl: ${webUrl}`);
   return webUrl ? { type: queryType, webUrl, icon, title } : undefined;
 }
 
-function WebTranslationAction(props: { webTranslationItem?: WebTranslationItem }) {
-  return props.webTranslationItem?.webUrl ? (
+function WebQueryAction(props: { webQueryItem?: WebQueryItem }) {
+  return props.webQueryItem?.webUrl ? (
     <Action.OpenInBrowser
-      icon={props.webTranslationItem.icon}
-      title={props.webTranslationItem.title}
-      url={props.webTranslationItem.webUrl}
+      icon={props.webQueryItem.icon}
+      title={props.webQueryItem.title}
+      url={props.webQueryItem.webUrl}
     />
   ) : null;
+}
+
+export function checkIfPreferredLanguagesConflict() {
+  if (preferredLanguage1.youdaoId === preferredLanguage2.youdaoId) {
+    console.log("referredLanguage1 and referredLanguage2 are the same language");
+    return (
+      <List searchBarPlaceholder="Error">
+        <List.Item
+          title={"Preferred Languages Conflict"}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          subtitle={"Your First Language and Second Language must be different!"}
+        />
+      </List>
+    );
+  }
+  return null;
 }

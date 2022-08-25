@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-20 16:01
+ * @lastEditTime: 2022-08-18 10:00
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,7 +12,7 @@ import { environment } from "@raycast/api";
 import axios from "axios";
 import { exec, execFile } from "child_process";
 import fs from "fs";
-import { languageItemList } from "./consts";
+import { languageItemList } from "./language/consts";
 import { trimTextLength } from "./utils";
 import playerImport = require("play-sound");
 const player = playerImport({});
@@ -31,7 +31,7 @@ export function playWordAudio(word: string, fromLanguage: string, useSayCommand 
       return sayTruncateCommand(word, fromLanguage);
     }
   }
-  console.log(`play word: ${word}`);
+  console.log(`play audio: ${word}`);
 
   return player.play(audioPath, (err) => {
     if (err) {
@@ -74,7 +74,7 @@ export function sayTruncateCommand(text: string, youdaoLanguageId: string) {
 */
 function sayCommand(text: string, youdaoLanguageId: string) {
   if (youdaoLanguageId && text) {
-    const languageItem = languageItemList.find((languageItem) => languageItem.youdaoLanguageId === youdaoLanguageId);
+    const languageItem = languageItemList.find((languageItem) => languageItem.youdaoId === youdaoLanguageId);
     if (!languageItem || !languageItem.voiceList) {
       console.warn(`say command language not supported: ${youdaoLanguageId}`);
       return;

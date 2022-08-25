@@ -1,8 +1,9 @@
+import { RequestErrorInfo } from "../../types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-27 10:26
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-17 00:20
+ * @lastEditTime: 2022-08-16 15:50
  * @fileName: request.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,38 +11,40 @@
 
 import axios from "axios";
 import { downloadAudio, getWordAudioPath } from "../../audio";
-import { DicionaryType, RequestTypeResult } from "../../types";
+import { DicionaryType, QueryTypeResult } from "../../types";
+import { QueryWordInfo } from "../youdao/types";
 import { IcibaDictionaryResult } from "./interface";
 
 /**
  * request iciba dictionary
  */
-export function icibaDictionary(word: string): Promise<RequestTypeResult> {
+export function icibaDictionary(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   const url = "http://dict-co.iciba.com/api/dictionary.php";
   const params = {
     key: "0EAE08A016D6688F64AB3EBB2337BFB0",
     type: "json",
-    w: word,
+    w: queryWordInfo.word,
   };
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     axios
       .get(url, { params })
       .then((response) => {
-        resolve({
+        const result: QueryTypeResult = {
           type: DicionaryType.Iciba,
           result: response.data,
-        });
+          translations: [],
+          wordInfo: queryWordInfo,
+        };
+        resolve(result);
       })
       .catch((error) => {
-        resolve({
+        const errorInfo: RequestErrorInfo = {
           type: DicionaryType.Iciba,
-          result: null,
-          errorInfo: {
-            code: error.response.status,
-            message: error.response.statusText,
-          },
-        });
+          code: error.response?.status,
+          message: error.response?.statusText,
+        };
+        reject(errorInfo);
       });
   });
 }
@@ -49,9 +52,9 @@ export function icibaDictionary(word: string): Promise<RequestTypeResult> {
 /**
  * download icicba word audio file
  */
-export async function downloadIcibaWordAudio(word: string, callback?: () => void) {
+export async function downloadIcibaWordAudio(queryWordInfo: QueryWordInfo, callback?: () => void) {
   try {
-    const icibaResult = await icibaDictionary(word);
+    const icibaResult = await icibaDictionary(queryWordInfo);
     const icibaDictionaryResult = icibaResult.result as IcibaDictionaryResult;
     const symbol = icibaDictionaryResult.symbols[0];
     const phoneticUrl = symbol.ph_am_mp3.length
@@ -60,7 +63,7 @@ export async function downloadIcibaWordAudio(word: string, callback?: () => void
       ? symbol.ph_tts_mp3
       : symbol.ph_en_mp3;
     if (phoneticUrl.length) {
-      const audioPath = getWordAudioPath(word);
+      const audioPath = getWordAudioPath(queryWordInfo.word);
       downloadAudio(phoneticUrl, audioPath, callback);
     }
     console.log(`iciba dictionary result: ${JSON.stringify(icibaDictionaryResult, null, 4)}`);
