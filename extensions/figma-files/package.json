@@ -41,7 +41,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
-    "javascript-time-ago": "^2.3.9",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {

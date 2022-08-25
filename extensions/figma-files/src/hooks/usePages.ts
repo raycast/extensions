@@ -10,8 +10,6 @@ export function usePages(file: File) {
   const abort = useRef<AbortController>();
 
   useEffect(() => {
-    console.debug("Fetch pages...");
-
     async function fetch() {
       abort.current?.abort();
       abort.current = new AbortController();

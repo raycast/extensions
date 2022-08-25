@@ -1,8 +1,8 @@
 # Figma Files Changelog
 
-## [Large thumbnails and menubar app] - 2022-08-03
+## [Grid thumbnails and menubar app] - 2022-08-24
 
-- Added new detail view to see larger thumbnails.
+- Replaces List with Grid to see larger thumbnails.
 - New menubar app to access your files even quicker!
 - removed deprecated Raycast functions and updated dependencies.
 

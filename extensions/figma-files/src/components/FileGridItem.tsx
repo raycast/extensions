@@ -1,31 +1,23 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en.json";
+import { Action, ActionPanel, Grid } from "@raycast/api";
 
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 
-TimeAgo.addDefaultLocale(en);
-const timeAgo = new TimeAgo("en-US");
-
-export default function FileListItem(props: {
+export default function FileGridItem(props: {
   file: File;
   extraKey?: string;
   onVisit: (file: File) => void;
-  showingDetail: boolean;
 }) {
-  const { file, extraKey, onVisit, showingDetail } = props;
-
-  const dateUpdated = String(timeAgo.format(new Date(file.last_modified)));
+  const { file, extraKey, onVisit } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
+  
   return (
-    <List.Item
+    <Grid.Item
       id={fileIdentifier}
       title={file.name}
-      icon={file.thumbnail_url}
-      accessories={[{ text: showingDetail ? "" : dateUpdated }]}
+      content={file.thumbnail_url}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -38,7 +30,6 @@ export default function FileListItem(props: {
           <DevelopmentActionSection />
         </ActionPanel>
       }
-      detail={<List.Item.Detail markdown={`![Thumbnail](${file.thumbnail_url}) \n Last updated: ${dateUpdated}`} />}
     />
   );
 }
