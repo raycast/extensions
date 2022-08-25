@@ -20,7 +20,8 @@
       "title": "Quicklook",
       "subtitle": "Figma",
       "description": "See your Figma most recent files at a glance",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "2h"
     }
   ],
   "preferences": [
