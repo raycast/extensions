@@ -18,7 +18,7 @@ export default function Command() {
 
   useEffect(() => {
     setFilteredFiles(projectFiles);
-  }, [projectFiles])
+  }, [projectFiles]);
 
   if (hasError) {
     return <ErrorView />;
@@ -29,7 +29,7 @@ export default function Command() {
       if (value === "All") {
         setFilteredFiles(projectFiles);
         setIsFiltered(false);
-      } else{
+      } else {
         setFilteredFiles(projectFiles.filter((file) => file.name === value));
         setIsFiltered(true);
       }
@@ -39,13 +39,15 @@ export default function Command() {
   const filterDropdown = () => (
     <Grid.Dropdown tooltip="Projects" defaultValue="All" onChange={handleDropdownChange} storeValue>
       <Grid.Dropdown.Item key="all" title="All" value="All" />
-      {projectFiles?.map((project) => <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} />)}
+      {projectFiles?.map((project) => (
+        <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} />
+      ))}
     </Grid.Dropdown>
   );
 
   return (
     <Grid isLoading={isLoading} searchBarPlaceholder="Filter files by name..." searchBarAccessory={filterDropdown()}>
-      {!isFiltered &&
+      {!isFiltered && (
         <Grid.Section key="recent-files" title="Recent Files">
           {visitedFiles?.map((file) => (
             <FileGridItem
@@ -56,18 +58,15 @@ export default function Command() {
             />
           ))}
         </Grid.Section>
-      }
+      )}
 
-      {!isLoadingVisitedFiles &&
-        filteredFiles?.map((project) => (
-          <Grid.Section key={project.name + "-project"} title={project.name}>
-            {project.files
-              .filter((file) => visitedFiles?.find((visitedFile) => file.key === visitedFile.key) === undefined)
-              .map((file) => (
-                <FileGridItem key={file.key + "-file"} file={file} onVisit={visitFile} />
-              ))}
-          </Grid.Section>
-        ))}
+      {filteredFiles?.map((project) => (
+        <Grid.Section key={project.name + "-project"} title={project.name}>
+          {project.files.map((file) => (
+            <FileGridItem key={file.key + "-file"} file={file} onVisit={visitFile} />
+          ))}
+        </Grid.Section>
+      ))}
     </Grid>
   );
 }

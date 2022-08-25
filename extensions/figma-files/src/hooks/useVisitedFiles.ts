@@ -32,7 +32,7 @@ export function useVisitedFiles() {
   }, []);
 
   function visitFile(file: File) {
-    const nextFiles = [file, ...(files?.filter((item) => item !== file) ?? [])].slice(0, VISITED_FIGMA_FILES_LENGTH);
+    const nextFiles = [file, ...(files?.filter((item) => item.name !== file.name) ?? [])].slice(0, VISITED_FIGMA_FILES_LENGTH);
     setFiles(nextFiles);
     saveVisitedFiles(nextFiles);
   }

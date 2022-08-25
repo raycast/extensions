@@ -5,14 +5,10 @@ import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 
-export default function FileGridItem(props: {
-  file: File;
-  extraKey?: string;
-  onVisit: (file: File) => void;
-}) {
+export default function FileGridItem(props: { file: File; extraKey?: string; onVisit: (file: File) => void }) {
   const { file, extraKey, onVisit } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
-  
+
   return (
     <Grid.Item
       id={fileIdentifier}
