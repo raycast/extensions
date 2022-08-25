@@ -19,7 +19,7 @@ type TrasformAction = {
 
 const actions: TrasformAction[] = [
   {
-    title: "CapitalCase",
+    title: "capitalize",
     fn: (t) => capitalize(t),
   },
   {
@@ -29,6 +29,10 @@ const actions: TrasformAction[] = [
   {
     title: "toLower",
     fn: (t) => tolower(t),
+  },
+  {
+    title: "upperFirst",
+    fn: (t) => upperfirst(t),
   },
   {
     title: "Trim",
@@ -43,16 +47,16 @@ const actions: TrasformAction[] = [
     fn: (t) => lowercase(t),
   },
   {
+    title: "StartCase",
+    fn: (t) => startcase(t),
+  },
+  {
     title: "CamelCase",
     fn: (t) => camelCase(t),
   },
   {
     title: "UpperCamelCase",
     fn: (t) => upperfirst(camelCase(t)),
-  },
-  {
-    title: "StartCase",
-    fn: (t) => startcase(t),
   },
   {
     title: "KebabCase",
