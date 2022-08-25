@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Fix] - 2022-08-25
+
+- Fixed issue where default empty setting caused docker client to connect to incorrect address
+
 ## [Improcement] - 2022-08-24
 
 - Added option to configure the Docker socket path
