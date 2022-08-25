@@ -86,7 +86,3 @@ export async function isAndroidStudioInstalled() {
     (app.name === "Android studio") != undefined ? true : false;
   });
 }
-
-function delay1(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
