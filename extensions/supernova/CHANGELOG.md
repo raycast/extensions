@@ -1,6 +1,6 @@
 # Supernova.io Changelog
 
-## [Initial Release] - 2022-08-10
+## [Initial Release] - 2022-08-25
 
 - Added option to login with specific design system
 - Added option to logout from design system
