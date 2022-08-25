@@ -8,9 +8,7 @@ export default function DowntimeCommand({ item }: { item: Site }): JSX.Element {
 
   return (
     <List navigationTitle={`Downtime for ${item.label}`} isLoading={isLoading}>
-      <EmptyView
-        title={Array.isArray(data) && data?.length ? "No Results Found" : "No Downtime Logs Available"}
-      />
+      <EmptyView title={Array.isArray(data) && data?.length ? "No Results Found" : "No Downtime Logs Available"} />
       <List.Section title="Showing Last 30 Days">
         {Array.isArray(data) &&
           data?.map((item: any, index: number) => (

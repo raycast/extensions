@@ -9,9 +9,7 @@ export default function CertificateHealthCommand({ item }: { item: Site }): JSX.
 
   return (
     <List navigationTitle={`Certificate Health for ${item.label}`} isLoading={isLoading} isShowingDetail>
-      <EmptyView
-        title={!data?.certificate_details ? "No Results Found" : "No Certificate Health Available"}
-      />
+      <EmptyView title={!data?.certificate_details ? "No Results Found" : "No Certificate Health Available"} />
       <List.Item
         key="certificate_details"
         title="Certificate Details"
@@ -20,14 +18,8 @@ export default function CertificateHealthCommand({ item }: { item: Site }): JSX.
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Issuer" text={data?.certificate_details.issuer} />
-                <List.Item.Detail.Metadata.Label
-                  title="Valid from"
-                  text={data?.certificate_details.valid_from}
-                />
-                <List.Item.Detail.Metadata.Label
-                  title="Valid until"
-                  text={data?.certificate_details.valid_until}
-                />
+                <List.Item.Detail.Metadata.Label title="Valid from" text={data?.certificate_details.valid_from} />
+                <List.Item.Detail.Metadata.Label title="Valid until" text={data?.certificate_details.valid_until} />
               </List.Item.Detail.Metadata>
             }
           />
