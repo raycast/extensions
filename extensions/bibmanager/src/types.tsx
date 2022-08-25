@@ -14,7 +14,7 @@ export interface Item {
 
 export interface State {
   isLoading: boolean;
-  items: [];
+  items: Item[];
   error?: Error;
   searchText: string;
 }
