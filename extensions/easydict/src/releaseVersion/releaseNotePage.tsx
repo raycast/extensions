@@ -2,15 +2,15 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 21:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-24 00:46
- * @fileName: releaseLog.tsx
+ * @lastEditTime: 2022-08-19 23:14
+ * @fileName: releaseNotePage.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useState } from "react";
-import { changelog } from "./changelog";
+import { releaseNote } from "./releaseNote";
 import { Easydict } from "./versionInfo";
 
 /**
@@ -18,8 +18,8 @@ import { Easydict } from "./versionInfo";
  *
  * @fallbackMarkdown The placeholder markdown content before fetching from GitHub.
  */
-export default function ReleaseLogDetail(props: { fallbackMarkdown?: string }) {
-  const [releaseMarkdown, setReleaseMarkdown] = useState<string>(changelog);
+export default function ReleaseNotesPage(props: { fallbackMarkdown?: string }) {
+  const [releaseMarkdown, setReleaseMarkdown] = useState<string>(releaseNote);
 
   console.log(`call ReleaseDetail function`);
   const easydict = new Easydict();
@@ -29,10 +29,11 @@ export default function ReleaseLogDetail(props: { fallbackMarkdown?: string }) {
 
   return (
     <Detail
+      navigationTitle="Release Notes"
       markdown={releaseMarkdown || props.fallbackMarkdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon={Icon.Eye} title="View on GitHub" url={easydict.getChineseWikiUrl()} />
+          <Action.OpenInBrowser icon={Icon.Eye} title="View on GitHub" url={easydict.getCurrentReleaseTagUrl()} />
         </ActionPanel>
       }
     />
