@@ -5,6 +5,8 @@ import kebabcase from "lodash.kebabcase";
 import capitalize from "lodash.capitalize";
 import lowercase from "lodash.lowercase";
 import uppercase from "lodash.uppercase";
+import toupper from "lodash.toupper";
+import tolower from "lodash.tolower";
 import startcase from "lodash.startcase";
 import snakecase from "lodash.snakecase";
 import trim from "lodash.trim";
@@ -42,6 +44,14 @@ const actions: TrasformAction[] = [
   {
     title: "SnakeCase",
     fn: (t) => snakecase(t),
+  },
+  {
+    title: "toUpper",
+    fn: (t) => toupper(t),
+  },
+  {
+    title: "toLower",
+    fn: (t) => tolower(t),
   },
   {
     title: "Trim",
