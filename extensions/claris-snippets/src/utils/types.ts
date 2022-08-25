@@ -1,4 +1,4 @@
-import { string, z } from "zod";
+import { z } from "zod";
 
 export const ZSnippetType = z.enum(["unknown", "script", "scriptSteps", "layoutObjectList"]);
 export type SnippetType = z.infer<typeof ZSnippetType>;
@@ -14,5 +14,7 @@ export const ZSnippet = z.object({
   name: z.string(),
   type: ZSnippetType,
   snippet: z.string(),
+  tags: z.string().array().default([]),
+  description: z.string().default(""),
 });
 export type Snippet = z.infer<typeof ZSnippet>;

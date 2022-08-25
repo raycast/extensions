@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { Alert, environment, showHUD } from "@raycast/api";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
@@ -10,10 +10,10 @@ export async function FMObjectsToXML() {
   return res.toString().replace("string:", "");
 }
 export function XMLToFMObjects() {
-  return readFileSync(
-    join(environment.assetsPath, "FmClipTools/fmClip - Clipboard XML to FM Objects.applescript"),
-    "utf8"
-  );
+  const script = join(environment.assetsPath, "FmClipTools/FMToClipboard.applescript");
+  const res = execSync("osascript " + script).toString();
+  if (res.trim() === "No Error") return res;
+  throw new Error(res);
 }
 
 export function detectType(snippet: string): SnippetType {

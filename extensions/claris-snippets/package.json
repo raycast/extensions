@@ -28,7 +28,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "run-applescript": "^6.0.0",
+    "@raycast/utils": "^1.1.0",
     "uuid": "^8.3.2",
     "zod": "^3.18.0"
   },

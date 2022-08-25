@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, environment, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { runAppleScriptSync } from "run-applescript";
-import { writeFileSync } from "fs";
-import { join } from "path";
-
+import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { detectType, FMObjectsToXML } from "./utils/FmClipTools";
 import CreateError from "./components/create-snippet-error";
-import { SnippetType, snippetTypesMap } from "./utils/types";
+import { Snippet, SnippetType, snippetTypesMap } from "./utils/types";
+import { saveSnippetFile } from "./utils/snippets";
 
-type MyFormValues = {
-  name: string;
-  type: SnippetType;
+type MyFormValues = Snippet;
+type PropsType = {
+  onPop?: () => void;
 };
 // const script = FMObjectsToXML();
-export default function Command() {
+export default function Command(props: PropsType) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const { onPop = () => {} } = props;
   const [createState, setCreateState] = useState<"init" | "clipboardError" | "clipboardSuccess" | "form">("init");
   const [snippet, setSnippet] = useState("");
+  const { pop } = useNavigation();
+
   const [nameError, setNameError] = useState<string>();
   const getSnippetFromClipboard = async () => {
     setCreateState("init");
 
     try {
       const res = await FMObjectsToXML();
-      //   console.log({ res });
       setCreateState("clipboardSuccess");
       setSnippet(res ?? "");
     } catch (e) {
@@ -38,15 +38,15 @@ export default function Command() {
   }
   async function saveSnippet(values: MyFormValues) {
     await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
-    const mySnippet = {
-      id: uuidv4(),
-      name: values.name,
-      type: values.type,
+    const mySnippet: Snippet = {
+      ...values,
       snippet,
+      id: uuidv4(),
     };
-    writeFileSync(join(environment.supportPath, `${mySnippet.id}.json`), JSON.stringify(mySnippet));
+    saveSnippetFile(mySnippet);
     await showToast({ title: "Snippet saved", style: Toast.Style.Success });
-    popToRoot();
+    onPop();
+    pop();
   }
   useEffect(() => {
     getSnippetFromClipboard();
@@ -76,6 +76,7 @@ export default function Command() {
             }
           }}
         />
+        <Form.TextArea id="description" title="Description" />
         <Form.Dropdown id="type" title="Type" defaultValue={detectType(snippet)}>
           {(Object.keys(snippetTypesMap) as SnippetType[]).map((type) => (
             <Form.Dropdown.Item title={snippetTypesMap[type]} value={type} />
