@@ -35,7 +35,7 @@ const actions: TrasformAction[] = [
     fn: (t) => upperfirst(t),
   },
   {
-    title: "Trim",
+    title: "trim",
     fn: (t) => trim(t),
   },
   {
