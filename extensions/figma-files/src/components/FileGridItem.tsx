@@ -13,7 +13,7 @@ export default function FileGridItem(props: { file: File; extraKey?: string; onV
     <Grid.Item
       id={fileIdentifier}
       title={file.name}
-      content={file.thumbnail_url}
+      content={file.thumbnail_url ?? "Missing thumbnail"}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
