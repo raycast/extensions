@@ -7,10 +7,10 @@ import { XcodeReleaseListItem } from "./xcode-release-list-item.component";
  * Xcode Release List
  */
 export function XcodeReleaseList(): JSX.Element {
-  const { isLoading, data } = useCachedPromise(XcodeReleaseService.xcodeReleases);
+  const xcodeReleases = useCachedPromise(XcodeReleaseService.xcodeReleases);
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for Xcode Releases">
-      {data?.map((xcodeRelease, index) => {
+    <List isLoading={xcodeReleases.isLoading} searchBarPlaceholder="Search for Xcode Releases">
+      {xcodeReleases.data?.map((xcodeRelease, index) => {
         return <XcodeReleaseListItem key={index} release={xcodeRelease} index={index} />;
       })}
     </List>
