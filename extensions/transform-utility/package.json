@@ -29,7 +29,8 @@
     "lodash.tolower": "^4.1.2",
     "lodash.toupper": "^4.1.2",
     "lodash.trim": "^4.5.1",
-    "lodash.uppercase": "^4.3.0"
+    "lodash.uppercase": "^4.3.0",
+    "lodash.upperfirst": "^4.3.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",
@@ -43,6 +44,7 @@
     "@types/lodash.toupper": "^4.1.7",
     "@types/lodash.trim": "^4.5.7",
     "@types/lodash.uppercase": "^4.3.7",
+    "@types/lodash.upperfirst": "^4.3.7",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

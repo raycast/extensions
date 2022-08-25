@@ -9,6 +9,7 @@ import toupper from "lodash.toupper";
 import tolower from "lodash.tolower";
 import startcase from "lodash.startcase";
 import snakecase from "lodash.snakecase";
+import upperfirst from "lodash.upperfirst";
 import trim from "lodash.trim";
 
 type TrasformAction = {
@@ -18,32 +19,8 @@ type TrasformAction = {
 
 const actions: TrasformAction[] = [
   {
-    title: "UpperCase",
-    fn: (t) => uppercase(t),
-  },
-  {
-    title: "LowerCase",
-    fn: (t) => lowercase(t),
-  },
-  {
     title: "CapitalCase",
     fn: (t) => capitalize(t),
-  },
-  {
-    title: "StartCase",
-    fn: (t) => startcase(t),
-  },
-  {
-    title: "CamelCase",
-    fn: (t) => camelCase(t),
-  },
-  {
-    title: "KebabCase",
-    fn: (t) => kebabcase(t),
-  },
-  {
-    title: "SnakeCase",
-    fn: (t) => snakecase(t),
   },
   {
     title: "toUpper",
@@ -56,6 +33,38 @@ const actions: TrasformAction[] = [
   {
     title: "Trim",
     fn: (t) => trim(t),
+  },
+  {
+    title: "UpperCase",
+    fn: (t) => uppercase(t),
+  },
+  {
+    title: "LowerCase",
+    fn: (t) => lowercase(t),
+  },
+  {
+    title: "CamelCase",
+    fn: (t) => camelCase(t),
+  },
+  {
+    title: "UpperCamelCase",
+    fn: (t) => upperfirst(camelCase(t)),
+  },
+  {
+    title: "StartCase",
+    fn: (t) => startcase(t),
+  },
+  {
+    title: "KebabCase",
+    fn: (t) => kebabcase(t),
+  },
+  {
+    title: "SnakeCase",
+    fn: (t) => snakecase(t),
+  },
+  {
+    title: "UpperSnakeCase",
+    fn: (t) => toupper(snakecase(t)),
   },
 ];
 
