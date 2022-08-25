@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/command-icon.png" height="128" />
+<img src="./metadata/command-icon.png" height="128" />
 
 <h1 align="center">Heroicons</h1>
 
