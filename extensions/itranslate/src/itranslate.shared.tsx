@@ -5,6 +5,7 @@ import crypto from "crypto";
 import querystring from "node:querystring";
 import { LanguageConflict, ServiceProviderMiss } from "./TranslateError";
 import translate from "@vitalets/google-translate-api";
+import Core from "@alicloud/pop-core";
 
 const apiFetchMap = new Map<
   TransServiceProviderTp,
@@ -16,6 +17,7 @@ const apiFetchMap = new Map<
   [TransServiceProviderTp.Youdao, fetchYoudaoTransAPI],
   [TransServiceProviderTp.Baidu, fetchBaiduTransAPI],
   [TransServiceProviderTp.Tencent, fetchTencentTransAPI],
+  [TransServiceProviderTp.Aliyun, fetchAliyunTransAPI],
 ]);
 
 export function checkPreferences() {
@@ -45,6 +47,9 @@ export function checkPreferences() {
     case TransServiceProviderTp.Tencent:
       if (!preferences.tencentAppId || !preferences.tencentAppKey) checkService = false;
       break;
+    case TransServiceProviderTp.Aliyun:
+      if (!preferences.aliyunAccessKeyId || !preferences.aliyunAccessKeySecret) checkService = false;
+      break;
   }
   if (!checkService) {
     return <ServiceProviderMiss />;
@@ -56,7 +61,14 @@ export function checkPreferences() {
 export function getLang(value: string): ILangItem {
   return (
     LANG_LIST.find((lang) =>
-      [lang.langId, lang.deeplLangId, lang.baiduLangId, lang.tencentLangId, lang.youdaoLangId].includes(value)
+      [
+        lang.langId,
+        lang.deeplLangId,
+        lang.baiduLangId,
+        lang.tencentLangId,
+        lang.youdaoLangId,
+        lang.aliyunLangId,
+      ].includes(value)
     ) || {
       langId: "unknown",
       langTitle: "unknown",
@@ -113,6 +125,14 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
         serviceProvider: preferences.defaultServiceProvider,
         appId: preferences.tencentAppId,
         appKey: preferences.tencentAppKey,
+      });
+      break;
+    case TransServiceProviderTp.Aliyun:
+      if (preferences.disableAliyun) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: preferences.aliyunAccessKeyId,
+        appKey: preferences.aliyunAccessKeySecret,
       });
       break;
   }
@@ -179,6 +199,18 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       serviceProvider: TransServiceProviderTp.Tencent,
       appId: preferences.tencentAppId,
       appKey: preferences.tencentAppKey,
+    });
+  }
+  if (
+    preferences.aliyunAccessKeyId &&
+    preferences.aliyunAccessKeySecret &&
+    !preferences.disableAliyun &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.Aliyun
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.Aliyun, {
+      serviceProvider: TransServiceProviderTp.Aliyun,
+      appId: preferences.aliyunAccessKeyId,
+      appKey: preferences.aliyunAccessKeySecret,
     });
   }
   return serviceProviderMap;
@@ -618,6 +650,77 @@ function fetchTencentTransAPI(
           from: getLang(fromLang),
           origin: queryText,
           to: targetLang,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
+async function fetchAliyunTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  let fromLang = "auto";
+  const APP_ID = provider.appId;
+  const APP_KEY = provider.appKey;
+  const client = new Core({
+    accessKeyId: APP_ID,
+    accessKeySecret: APP_KEY,
+    endpoint: "https://mt.cn-hangzhou.aliyuncs.com",
+    apiVersion: "2018-10-12",
+  });
+
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  if (provider.serviceProvider === preferences.defaultServiceProvider) {
+    try {
+      const from = await client.request<IAliyunDetectLangResponse>(
+        "GetDetectLanguage",
+        { SourceText: queryText },
+        { method: "POST" }
+      );
+      fromLang = from.DetectedLanguage;
+    } catch {
+      console.log("GetDetectLanguage err");
+    }
+  }
+  return new Promise<ITranslateRes>((resolve) => {
+    const params = {
+      RegionId: "cn-hangzhou",
+      FormatType: "text",
+      SourceLanguage: fromLang,
+      TargetLanguage: targetLang.aliyunLangId || targetLang.langId,
+      SourceText: queryText,
+    };
+
+    client
+      .request<IAliyunTransResponse>("TranslateGeneral", params, { method: "POST" })
+      .then((resDate) => {
+        let code = TransAPIErrCode.Fail;
+        if (resDate.Code === "10001") {
+          code = TransAPIErrCode.Retry;
+        }
+        if (resDate.Code === "200") {
+          code = TransAPIErrCode.Success;
+        }
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: code,
+          from: code === TransAPIErrCode.Success ? getLang(fromLang) : getLang(""),
+          to: targetLang,
+          origin: queryText,
+          res: code === TransAPIErrCode.Success ? resDate.Data.Translated : "",
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
           res: "",
         };
         resolve(transRes);

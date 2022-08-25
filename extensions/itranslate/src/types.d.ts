@@ -16,6 +16,9 @@ interface IPreferences {
   tencentAppId: string;
   tencentAppKey: string;
   disableTencent: boolean;
+  aliyunAccessKeyId: string;
+  aliyunAccessKeySecret: string;
+  disableAliyun: boolean;
   selectedDefault: boolean;
   quickSwitchLang: boolean;
   delayTransInterval: number;
@@ -27,6 +30,7 @@ interface ILangItem {
   baiduLangId?: string;
   tencentLangId?: string;
   youdaoLangId?: string;
+  aliyunLangId?: string;
   langTitle: string;
 }
 
@@ -124,4 +128,16 @@ interface ITencentTranslateResponse {
   Error: {
     Code: string;
   };
+}
+
+interface IAliyunTransResponse {
+  Data: {
+    WordCount: string;
+    Translated: string;
+  };
+  Code: string;
+}
+
+interface IAliyunDetectLangResponse {
+  DetectedLanguage: string;
 }
