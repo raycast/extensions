@@ -1,5 +1,8 @@
 # bibmanager Changelog
 
+## [1.2.2] - 2022-08-25
+Improved downloading pdf which could lead to an outdated state
+
 ## [1.2.1] - 2022-08-19
 Migrate to API version 1.39.0 with TagList and Links in Metadata 
 
