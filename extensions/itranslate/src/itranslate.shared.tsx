@@ -279,23 +279,38 @@ function fetchDeepLTransAPI(
   });
 }
 
-function fetchGoogleTransAPI(
+function fetchGoogleCouldTransAPI(
   queryText: string,
   targetLang: ILangItem,
   provider: ITransServiceProvider
 ): Promise<ITranslateRes> {
   return new Promise<ITranslateRes>((resolve) => {
     const fromLang = "auto";
-    translate(queryText, { to: targetLang.langId, from: fromLang, tld: "cn" })
+    const APP_KEY = provider.appKey;
+    axios
+      .post(
+        `https://translation.googleapis.com/language/translate/v2?` +
+          querystring.stringify({
+            key: APP_KEY,
+            q: queryText,
+            format: "text",
+            target: targetLang.langId,
+          })
+      )
       .then((res) => {
-        const resDate: IGoogleTranslateResult = res;
+        const resDate: IGoogleCloudTranslateResult = res.data.data;
+        let code = TransAPIErrCode.Success;
+        if (resDate.translations.length == 0) {
+          code = TransAPIErrCode.Fail;
+        }
         const transRes: ITranslateRes = {
           serviceProvider: provider.serviceProvider,
-          code: TransAPIErrCode.Success,
-          from: getLang(resDate.from.language.iso),
+          code: code,
+          from:
+            code === TransAPIErrCode.Success ? getLang(resDate.translations[0].detectedSourceLanguage) : getLang(""),
           to: targetLang,
           origin: queryText,
-          res: resDate.text,
+          res: code === TransAPIErrCode.Success ? resDate.translations[0].translatedText : "",
         };
         resolve(transRes);
       })
@@ -313,7 +328,7 @@ function fetchGoogleTransAPI(
   });
 }
 
-function fetchGoogleCouldTransAPI(
+function fetchGoogleTransAPI(
   queryText: string,
   targetLang: ILangItem,
   provider: ITransServiceProvider

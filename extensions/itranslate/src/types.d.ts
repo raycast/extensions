@@ -66,6 +66,15 @@ interface IGoogleTranslateResult {
   };
 }
 
+interface IGoogleCloudTranslateResult {
+  translations: IGoogleCloudTranslateItem[];
+}
+
+interface IGoogleCloudTranslateItem {
+  translatedText: string;
+  detectedSourceLanguage: string;
+}
+
 interface IDeepLTranslateResult {
   translations: IDeepLTranslateItem[];
 }

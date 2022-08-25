@@ -73,7 +73,7 @@ export enum TransAPIErrCode {
 
 export enum TransServiceProviderTp {
   Google = "google",
-  GoogleCouldTrans = "google could translation",
+  GoogleCouldTrans = "googleCouldTranslation",
   DeepL = "deepl",
   Youdao = "youdao",
   Baidu = "baidu",
