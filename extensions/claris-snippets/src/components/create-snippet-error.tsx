@@ -5,12 +5,11 @@ type CreateSnippetErrorProps = {
 };
 export default function CreateError(props: CreateSnippetErrorProps) {
   const { actionProps = { title: "Try Again" } } = props;
-  if (!actionProps.title) actionProps.title = "Try Again";
   return (
     <Detail
       actions={
         <ActionPanel>
-          <Action {...actionProps} />
+          <Action {...actionProps} title={actionProps.title ?? "Try Again"} />
         </ActionPanel>
       }
       markdown={`# ⚠️ Error Creating Snippet

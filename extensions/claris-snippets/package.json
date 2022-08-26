@@ -24,11 +24,19 @@
       "subtitle": "Claris Snippets",
       "description": "Create a new snippet",
       "mode": "view"
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Snippet Locations",
+      "subtitle": "Claris Snippets",
+      "description": "Manage where your snippets are stored",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/utils": "^1.2.0",
+    "run-applescript": "^6.0.0",
     "uuid": "^8.3.2",
     "zod": "^3.18.0"
   },
