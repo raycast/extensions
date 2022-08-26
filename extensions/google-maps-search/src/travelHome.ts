@@ -1,5 +1,5 @@
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { Preferences, makeDirectionsURL } from "./utils/utils";
+import { Preferences, makeDirectionsURL } from "./utils";
 import { exec } from "child_process";
 
 export default async () => {
