@@ -1,0 +1,3 @@
+[submodule "extensions/extensions/stopwatch"]
+	path = extensions/extensions/stopwatch
+	url = https://github.com/ungarmichael/stopwatch
