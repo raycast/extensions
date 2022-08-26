@@ -290,7 +290,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/zh",
+    homepage: "https://pnpm.io/",
     searchParameters: {
       facetFilters: ["language:en"],
     },
@@ -301,7 +301,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/zh",
+    homepage: "https://pnpm.io/zh/",
     lang: "zh-Hans",
     searchParameters: {
       facetFilters: ["language:zh"],

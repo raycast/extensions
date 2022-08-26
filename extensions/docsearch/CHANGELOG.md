@@ -6,6 +6,8 @@
 - 📄 Support [Dubbo](https://dubbo.apache.org/)
 - 📄 Support [Nuxt](https://nuxtjs.org/)
 - 📄 Support [Nuxt3](https://v3.nuxtjs.org/)
+- 📄 Support [pnpm](https://pnpm.io/)
+- 📄 Support [pnpm(zh-Hans)](https://pnpm.io/zh/)
 - 📄 Support [React Bootstrap](https://react-bootstrap.github.io/)
 - 📄 Support [Remix](https://remix.run/)
 - 📄 Support [React Native](https://reactnative.dev/)
