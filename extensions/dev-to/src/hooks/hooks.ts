@@ -17,6 +17,7 @@ export const getArticles = (refresh: number, endpoint: string) => {
     try {
       setLoading(true);
       const headers = new Headers({
+        accept: "application/vnd.forem.api-v1+json",
         "api-key": preference.accessToken,
       });
 
@@ -51,6 +52,7 @@ export const getReadingList = (endpoint: string) => {
     try {
       setLoading(true);
       const headers = new Headers({
+        accept: "application/vnd.forem.api-v1+json",
         "api-key": preference.accessToken,
       });
 

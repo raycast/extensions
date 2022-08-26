@@ -1,5 +1,9 @@
 # dev-to Changelog
 
+## [ Doc ] - 2022-08-26
+
+- Fix draft open URL
+
 ## [ Doc ] - 2022-08-18
 
 - Update README

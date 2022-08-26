@@ -4,7 +4,7 @@ import { Article } from "../types/articles";
 import { preference } from "../utils/functions";
 
 export function ArticleAction({ article }: { article: Article }) {
-  const { body_markdown, url } = article;
+  const { body_markdown, url, published } = article;
   return (
     <>
       <ActionPanel.Section title={"Article Actions"}>
@@ -12,13 +12,13 @@ export function ArticleAction({ article }: { article: Article }) {
           title={"Open in Browser"}
           icon={Icon.Globe}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
-          url={url}
+          url={published ? url : `${url}/edit`}
         />
         <Action.CopyToClipboard
           title={"Copy Link"}
           icon={Icon.Link}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
-          content={url}
+          content={published ? url : `${url}/edit`}
         />
         <Action.Push
           title={"Create Article"}

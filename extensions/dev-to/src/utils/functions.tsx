@@ -31,6 +31,7 @@ export const createArticle = async (
     }
 
     const headers = new Headers({
+      accept: "application/vnd.forem.api-v1+json",
       "Content-Type": "application/json",
       "api-key": preference.accessToken,
     });
@@ -83,6 +84,7 @@ export const createArticle = async (
 export const getArticleMarkdown = async (id: number) => {
   try {
     const headers = new Headers({
+      accept: "application/vnd.forem.api-v1+json",
       "api-key": preference.accessToken,
     });
 
