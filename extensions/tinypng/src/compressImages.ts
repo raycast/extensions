@@ -12,7 +12,18 @@ type Preferences = {
 const preferences = getPreferenceValues<Preferences>();
 
 export default async function main() {
-  const filePaths = (await getSelectedFinderItems()).map((f) => f.path);
+  let filePaths: string[];
+
+  try {
+    filePaths = (await getSelectedFinderItems()).map((f) => f.path);
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: e instanceof Error ? e.message : "Could not get the selected Finder items",
+    });
+    return;
+  }
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -48,7 +59,7 @@ export default async function main() {
       // Validate
       if ("error" in resJson) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to compress images";
+        toast.title = "Error";
         toast.message = resJson.message;
         return;
       }
@@ -78,7 +89,7 @@ export default async function main() {
     );
   } catch (e) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Failed to compress images";
-    console.error(e);
+    toast.title = "Error";
+    toast.message = e instanceof Error ? e.message : "failed to compress images";
   }
 }
