@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { File, ProjectFiles, TeamProjects } from "../types";
