@@ -35,7 +35,7 @@ export function useTodos() {
       const localDatabase = await loadDatabase()
       if (localDatabase.databaseUrl) {
         setNotionDbUrl(formatNotionUrl(localDatabase.databaseUrl))
-      }
+       }
       const localTodos = await loadTodos()
       setData(localTodos)
       const localTags = await loadTags()
