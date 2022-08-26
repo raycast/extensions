@@ -167,12 +167,11 @@ class Service {
   client: AxiosInstance;
   cache: Cache = new Cache();
 
-  constructor(email: string, key: string) {
+  constructor(token: string) {
     this.client = axios.create({
       baseURL: 'https://api.cloudflare.com/client/v4/',
       headers: {
-        'X-Auth-Email': email,
-        'X-Auth-Key': key,
+        Authorization: 'Bearer ' + token,
         'Content-Type': 'application/json',
       },
     });
@@ -230,7 +229,7 @@ class Service {
       result = result.concat(next.data.result);
     }
 
-    this.cache.set(`zones-${id}`, JSON.stringify(response.data));
+    this.cache.set(`zones-${id}`, JSON.stringify(result));
     return result.map((item) => formatZone(item));
   }
 

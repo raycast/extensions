@@ -1,15 +1,15 @@
-import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
+import { ContainerInfo } from '@priithaamer/dockerode';
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
-import { useMemo } from 'react';
 import ContainerDetail from './container_detail';
 import { useDocker } from './docker';
 import { containerName, isContainerRunning } from './docker/container';
+import { useDockerode } from './docker/dockerode';
 import { formatContainerError } from './docker/error';
 import ErrorDetail from './error_detail';
 import { withToast } from './ui/toast';
 
 export default function ContainerList(props: { projectFilter?: string }) {
-  const docker = useMemo(() => new Dockerode(), []);
+  const docker = useDockerode();
   const dockerState = useDocker(docker);
   const { useContainers } = dockerState;
 

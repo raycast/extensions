@@ -1,3 +1,3 @@
 # Headlines
 
-Super breif news extension.
+Super brief news extension.
