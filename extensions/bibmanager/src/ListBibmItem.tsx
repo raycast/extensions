@@ -8,8 +8,11 @@ import { Item, State } from "./types";
 
 const openADSShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "enter" };
 const copyLinkShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
+const pasteLinkShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "l" };
 const copyBibkeyShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "b" };
+const pasteBibkeyShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyBibtexShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "t" };
+const pasteBibtexShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "t" };
 
 export function ListBibmItem(props: { item: Item; items: Item[]; setState: Dispatch<SetStateAction<State>> }) {
   return (
@@ -40,11 +43,20 @@ function Actions(props: { item: Item; items: Item[]; setState: Dispatch<SetState
         {props.item.uid && (
           <Action.CopyToClipboard content={props.item.uid} title="Copy bibkey" shortcut={copyBibkeyShortcut} />
         )}
+        {props.item.uid && (
+          <Action.Paste content={props.item.uid} title="Paste bibkey" shortcut={pasteBibkeyShortcut} />
+        )}
         {props.item.content && (
           <Action.CopyToClipboard content={props.item.content} title="Copy bibtex" shortcut={copyBibtexShortcut} />
         )}
+        {props.item.content && (
+          <Action.Paste content={props.item.content} title="Paste bibtex" shortcut={pasteBibtexShortcut} />
+        )}
         {props.item.link && (
           <Action.CopyToClipboard content={props.item.link} title="Copy ADS Link" shortcut={copyLinkShortcut} />
+        )}
+        {props.item.link && (
+          <Action.Paste content={props.item.link} title="Paste ADS Link" shortcut={pasteLinkShortcut} />
         )}
       </ActionPanel.Section>
     </ActionPanel>
