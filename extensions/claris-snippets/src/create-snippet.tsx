@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { detectType, FMObjectsToXML } from "./utils/FmClipTools";
 import CreateError from "./components/create-snippet-error";
@@ -50,7 +50,6 @@ export default function Command(props: PropsType) {
   }
   useEffect(() => {
     getSnippetFromClipboard();
-    console.log(environment.supportPath);
   }, []);
 
   if (createState === "clipboardError") return <CreateError actionProps={{ onAction: getSnippetFromClipboard }} />;

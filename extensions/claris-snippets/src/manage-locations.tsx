@@ -1,14 +1,10 @@
-import { Action, ActionPanel, Alert, confirmAlert, environment, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
-import { join } from "path";
-
-type Location = {
-  id: string;
-  path: string;
-  name: string;
-};
+import { existsSync } from "fs";
+import type { Location } from "./utils/types";
+import { getDefaultPath, loadSnippets } from "./utils/snippets";
 
 export default function Command() {
   const [locations, setLocations] = useCachedState<Location[]>("locations", []);
@@ -55,12 +51,12 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+            <Action.SubmitForm title="Save Snippet Location" onSubmit={handleSubmit} />
             {location.id && <DeleteLocationAction id={location.id} onDelete={pop} />}
           </ActionPanel>
         }
       >
-        <Form.TextField {...itemProps.name} title="Name" />
+        <Form.TextField {...itemProps.name} title="Name" info="A friendly reference to this folder" />
         <Form.TextField {...itemProps.path} title="Path" />
       </Form>
     );
@@ -95,40 +91,44 @@ export default function Command() {
       }
     >
       <List.Section>
-        {locations.map((location) => (
-          <List.Item
-            title={location.name}
-            icon={Icon.Folder}
-            subtitle={location.path}
-            actions={
-              <ActionPanel>
-                <RevealInFinderAction path={location.path} />
-                <Action.Push
-                  title="Edit"
-                  icon={Icon.Pencil}
-                  target={<EditLocationForm location={location} />}
-                  shortcut={{ key: "e", modifiers: ["cmd"] }}
-                />
-                <DeleteLocationAction id={location.id} />
-                <AddLocationAction />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Actions">
         <List.Item
           title="My Computer"
           subtitle="default, cannot be changed"
           icon={Icon.StarCircle}
+          accessories={[countSnippets()]}
           actions={
             <ActionPanel>
-              <RevealInFinderAction path={join(environment.supportPath, "snippets")} />
+              <RevealInFinderAction path={getDefaultPath()} />
               <AddLocationAction />
             </ActionPanel>
           }
         />
 
+        {locations.map((location) => {
+          return (
+            <List.Item
+              title={location.name}
+              icon={Icon.Folder}
+              subtitle={location.path}
+              accessories={[countSnippets(location)]}
+              actions={
+                <ActionPanel>
+                  <RevealInFinderAction path={location.path} />
+                  <Action.Push
+                    title="Edit"
+                    icon={Icon.Pencil}
+                    target={<EditLocationForm location={location} />}
+                    shortcut={{ key: "e", modifiers: ["cmd"] }}
+                  />
+                  <DeleteLocationAction id={location.id} />
+                  <AddLocationAction />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+      <List.Section title="———">
         <List.Item
           title="Add Location"
           icon={Icon.NewFolder}
@@ -141,4 +141,15 @@ export default function Command() {
       </List.Section>
     </List>
   );
+}
+
+function countSnippets(location?: Location): List.Item.Accessory {
+  const path = location?.path ?? getDefaultPath();
+  const folderExists = existsSync(path);
+  if (!folderExists) {
+    return { icon: Icon.Warning, text: "Not Found" };
+  }
+
+  const count = loadSnippets(location).length;
+  return { text: `${count}`, icon: Icon.CheckCircle };
 }

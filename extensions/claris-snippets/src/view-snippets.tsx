@@ -18,7 +18,11 @@ import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
 
 export default function Command() {
-  const { data: snippets, isLoading, revalidate } = useCachedPromise(loadSnippets, [], { initialData: [] });
+  const {
+    data: snippets,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(async () => loadSnippets(), [], { initialData: [] });
 
   function CreateSnippetAction() {
     return (
