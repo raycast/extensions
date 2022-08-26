@@ -19,7 +19,7 @@ const getSelectedFinderWindow = (): Promise<string> => {
   end if
  `;
   return new Promise((resolve, reject) => {
-    let child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
+    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
       if (error || stderr) reject(Error("Could not get the selected Finder window"));
       resolve(stdout.trim());
     });
