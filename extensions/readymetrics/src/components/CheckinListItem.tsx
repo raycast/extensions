@@ -24,7 +24,7 @@ export default function CheckinListItem({ checkin }: CheckinListItemProps) {
     <List.Item
       key={checkin.id}
       title={checkin.checkinEmployeeName}
-      icon={{ source: checkin.employee.picture, mask: Image.Mask.Circle }}
+      icon={{ source: checkin.checkinEmployeePicture, mask: Image.Mask.Circle }}
       subtitle={new Date(checkin.scheduledFor * 1000).toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",

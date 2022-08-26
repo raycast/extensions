@@ -5,10 +5,10 @@ export interface Checkin {
   id: string;
   checkinType: string;
   checkinEmployeeName: string;
+  checkinEmployeePicture: string;
   scheduledFor: number;
   color: string;
   icon: string;
-  employee: { picture: string };
 }
 
 const { token } = getPreferenceValues();
