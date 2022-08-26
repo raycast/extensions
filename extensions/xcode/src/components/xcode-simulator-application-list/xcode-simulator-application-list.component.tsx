@@ -7,10 +7,10 @@ import { XcodeSimulatorApplicationListItem } from "./xcode-simulator-application
  * Xcode Simulator Application List
  */
 export function XcodeSimulatorApplicationList(): JSX.Element {
-  const { isLoading, data } = useCachedPromise(XcodeSimulatorApplicationService.xcodeSimulatorApplications);
+  const xcodeSimulatorApplications = useCachedPromise(XcodeSimulatorApplicationService.xcodeSimulatorApplications);
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for Apps">
-      {data?.map((application) => {
+    <List isLoading={xcodeSimulatorApplications.isLoading} searchBarPlaceholder="Search for Apps">
+      {xcodeSimulatorApplications.data?.map((application) => {
         return <XcodeSimulatorApplicationListItem key={application.id} application={application} />;
       })}
     </List>
