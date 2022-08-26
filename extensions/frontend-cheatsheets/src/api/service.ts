@@ -1,16 +1,15 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BRANCH = 'master';
-const OWNER = 'harryheman';
-const REPO = 'my-js';
-
+const BRANCH = "master";
+const OWNER = "harryheman";
+const REPO = "my-js";
 
 const listClient = axios.create({
   baseURL: `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/eb6d6bc77e660b5641c9e2bc9ab1fc4f213e7014`,
 });
 
 const fileClient = axios.create({
-    baseURL: `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}`,
+  baseURL: `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}`,
 });
 
 interface ListResponse {
@@ -22,7 +21,7 @@ interface ListResponse {
 export interface File {
   path: string;
   mode: string;
-  type: 'tree' | 'blob';
+  type: "tree" | "blob";
   sha: string;
   size: number;
   url: string;
