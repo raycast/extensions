@@ -1,3 +1,3 @@
 # Playwright Changelog
 
-## [Initial Version] - 2022-08-21
+## [Initial Version] - 2022-08-26
