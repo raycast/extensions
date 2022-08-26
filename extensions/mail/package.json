@@ -18,6 +18,7 @@
       "description": "The primary action to be performed on the selected message.",
       "type": "dropdown",
       "default": "seeMessage",
+      "required": false,
       "data": [
         {
           "title": "See Message", 
