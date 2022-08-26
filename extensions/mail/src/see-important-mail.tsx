@@ -56,6 +56,7 @@ export default function SeeImportantMail() {
           {account.messages?.map((message: Message, index: number) => (
             <MessageListItem
               key={index}
+              id="important"
               account={account}
               message={message}
               setMessage={setMessage}

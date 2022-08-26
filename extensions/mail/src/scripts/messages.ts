@@ -4,34 +4,34 @@ import { constructDate } from "../utils/utils";
 import { Account, Message } from "../types/types";
 import * as cache from "../utils/cache";
 
-export const tellMessage = async (message: Message, script: string): Promise<string> => {
+export const tellMessage = async (message: Message, mailbox: string, script: string): Promise<string> => {
   if (!script.includes("msg")) throw "Script must include msg";
   return await runAppleScript(`
     tell application "Mail"
       set acc to (first account whose id is "${message.account}")
       tell acc
-        set msg to (first message of (first mailbox whose name is "All Mail") whose id is "${message.id}")
+        set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
         ${script.trim()}
       end tell
     end tell
   `);
 };
 
-export const openMessage = async (message: Message): Promise<void> => {
-  await tellMessage(message, "open msg\nactivate");
+export const openMessage = async (message: Message, mailbox: string): Promise<void> => {
+  await tellMessage(message, mailbox, "open msg\nactivate");
 };
 
-export const toggleMessageRead = async (message: Message): Promise<void> => {
-  await tellMessage(message, "tell msg to set read status to not read status");
+export const toggleMessageRead = async (message: Message, mailbox: string): Promise<void> => {
+  await tellMessage(message, mailbox, "tell msg to set read status to not read status");
 };
 
-export const moveMessage = async (message: Message, mailbox: string): Promise<void> => {
-  await tellMessage(message, `set mailbox of msg to (first mailbox whose name is "${mailbox}")`);
+export const moveMessage = async (message: Message, mailbox: string, target: string): Promise<void> => {
+  await tellMessage(message, mailbox, `set mailbox of msg to (first mailbox whose name is "${target}")`);
 };
 
-export const moveToJunk = async (message: Message): Promise<void> => {
+export const moveToJunk = async (message: Message, mailbox: string): Promise<void> => {
   try {
-    await moveMessage(message, "Spam");
+    await moveMessage(message, mailbox, "Spam");
     await showToast(Toast.Style.Success, "Moved Message to Junk");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Moving Message To Junk");
@@ -39,9 +39,9 @@ export const moveToJunk = async (message: Message): Promise<void> => {
   }
 };
 
-export const deleteMessage = async (message: Message): Promise<void> => {
+export const deleteMessage = async (message: Message, mailbox: string): Promise<void> => {
   try {
-    await moveMessage(message, "Trash");
+    await moveMessage(message, mailbox, "Trash");
     await showToast(Toast.Style.Success, "Message Deleted");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Deleting Message");
@@ -139,9 +139,9 @@ export const getAccountMessages = async (
   return messages;
 };
 
-export const getMessageContent = async (message: Message): Promise<Message> => {
+export const getMessageContent = async (message: Message, mailbox: string): Promise<Message> => {
   try {
-    const content = await tellMessage(message, "tell msg to return content");
+    const content = await tellMessage(message, mailbox, "tell msg to return content");
     return { ...message, content };
   } catch (error: any) {
     await showToast(Toast.Style.Failure, "Error Getting Message Content");

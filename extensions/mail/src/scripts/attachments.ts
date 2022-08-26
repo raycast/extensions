@@ -14,14 +14,14 @@ if (!existsSync(downloadDirectory)) {
 }
 downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
 
-export const getMessageAttachments = async (message: Message): Promise<Attachment[]> => {
+export const getMessageAttachments = async (message: Message, mailbox: string): Promise<Attachment[]> => {
   try {
     const script = `
       set output to ""
       tell application "Mail"
         set acc to (first account whose id is "${message.account}")
         tell acc
-          set msg to (first message of (first mailbox whose name is "All Mail") whose id is "${message.id}")
+          set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
           tell msg 
             repeat with a in mail attachments
               tell a 
@@ -48,7 +48,7 @@ export const getMessageAttachments = async (message: Message): Promise<Attachmen
   }
 };
 
-export const saveAttachment = async (message: Message, attachment: Attachment, name?: string) => {
+export const saveAttachment = async (message: Message, mailbox: string, attachment: Attachment, name?: string) => {
   if (name) {
     const extension = attachment.name.split(".").pop();
     if (extension && !name.endsWith(extension)) {
@@ -67,7 +67,7 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
     end tell
   `;
   try {
-    await tellMessage(message, script);
+    await tellMessage(message, mailbox, script);
     const options: Toast.Options = {
       title: `Saved Attachment ${name}`,
       style: Toast.Style.Success,
@@ -95,7 +95,7 @@ export const saveAttachment = async (message: Message, attachment: Attachment, n
   }
 };
 
-export const saveAllAttachments = async (message: Message) => {
+export const saveAllAttachments = async (message: Message, mailbox: string) => {
   const script = `
     set attachmentsFolder to "${downloadDirectory}"
     tell msg 
@@ -107,7 +107,7 @@ export const saveAllAttachments = async (message: Message) => {
     end tell
   `;
   try {
-    await tellMessage(message, script);
+    await tellMessage(message, mailbox, script);
     const options: Toast.Options = {
       title: "Saved Attachments",
       style: Toast.Style.Success,

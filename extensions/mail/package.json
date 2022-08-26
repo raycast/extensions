@@ -13,6 +13,23 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The primary action to be performed on the selected message.",
+      "type": "dropdown",
+      "default": "seeMessage",
+      "data": [
+        {
+          "title": "See Message", 
+          "value": "seeMessage"
+        },
+        {
+          "title": "Open in Mail",
+          "value": "openMessage"
+        }
+      ]
+    },
+    {
       "name": "saveDirectory",
       "title": "Save Attachments To",
       "description": "Directory to save mail attachments.",

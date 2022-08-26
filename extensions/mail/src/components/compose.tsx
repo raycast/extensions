@@ -131,7 +131,7 @@ type SelectRecipientsProps = any & {
 };
 
 const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
-  const requiredError = props.required && !props.recipients ? "This field cannot be empty" : undefined;
+  const requiredError = props.required && props.recipients.length === 0 ? "This field is required" : undefined;
   const [error, setError] = useState<string | undefined>(requiredError);
   const checkRecipient = (recipient: string | undefined) => {
     if (recipient) {
@@ -141,7 +141,7 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
         setError("Invalid email address");
       }
     } else {
-      setError("Email address cannot be empty");
+      setError(requiredError);
     }
   };
   return !(props.possibleRecipients.length < 25 || props.useTextField) ? (

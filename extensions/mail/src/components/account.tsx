@@ -1,5 +1,5 @@
-import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { Account } from "../types/types";
+import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { Account, Mailboxes } from "../types/types";
 import { Messages } from "./messages";
 
 export const MailAccount = (account: Account): JSX.Element => {
@@ -30,7 +30,14 @@ export const MailAccount = (account: Account): JSX.Element => {
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="See Mail" icon={"../assets/mail-icon.png"} target={<Messages {...account} />} />
+          {Object.entries(Mailboxes).map(([id, mailbox], index) => (
+            <Action.Push
+              key={index}
+              title={`See ${mailbox.title}`}
+              icon={mailbox.icon}
+              target={<Messages id={id} account={account} />}
+            />
+          ))}
         </ActionPanel>
       }
     />

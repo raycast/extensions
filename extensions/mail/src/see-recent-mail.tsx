@@ -61,6 +61,7 @@ export default function SeeRecentMail() {
             {account.messages?.map((message: Message, index: number) => (
               <MessageListItem
                 key={index}
+                id="recent"
                 account={account}
                 message={message}
                 setMessage={setMessage}

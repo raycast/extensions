@@ -1,4 +1,4 @@
-import { Icon, showToast, Toast } from "@raycast/api";
+import { Color, Icon, Image, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { OutgoingMessage } from "../types/types";
 import emailRegex from "email-regex";
@@ -6,22 +6,22 @@ import { homedir } from "os";
 import fs from "fs";
 
 export enum OutgoingMessageAction {
-  Compose = "Send Message", 
+  Compose = "Send Message",
   Reply = "Reply",
   ReplyAll = "Reply All",
   Forward = "Forward",
   Redirect = "Redirect",
-};
+}
 
-export const OutgoingMessageIcons: { [key: string]: Icon | string } = {
-  [OutgoingMessageAction.Compose]: "../assets/icons/send.svg",
+export const OutgoingMessageIcons: { [key: string]: Image.ImageLike } = {
+  [OutgoingMessageAction.Compose]: { source: "../assets/icons/sent.svg", tintColor: Color.PrimaryText },
   [OutgoingMessageAction.Reply]: Icon.Reply,
   [OutgoingMessageAction.ReplyAll]: Icon.Reply,
   [OutgoingMessageAction.Forward]: Icon.ArrowUpCircle,
   [OutgoingMessageAction.Redirect]: Icon.ArrowRightCircle,
 };
 
-export const newOutgoingMessage = async (message: OutgoingMessage, action?: OutgoingMessageAction ): Promise<void> => {
+export const newOutgoingMessage = async (message: OutgoingMessage, action?: OutgoingMessageAction): Promise<void> => {
   if (message.to.length === 0) {
     await showToast(Toast.Style.Failure, "No Recipients");
     return;
