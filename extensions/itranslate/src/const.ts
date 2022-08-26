@@ -5,6 +5,7 @@ export const LANG_LIST: ILangItem[] = [
     youdaoLangId: "zh-CHS",
     baiduLangId: "zh",
     tencentLangId: "zh",
+    aliyunLangId: "zh",
     langTitle: "Chinese-Simplified",
   },
   {
@@ -73,15 +74,19 @@ export enum TransAPIErrCode {
 
 export enum TransServiceProviderTp {
   Google = "google",
+  GoogleCouldTrans = "googleCouldTranslation",
   DeepL = "deepl",
   Youdao = "youdao",
   Baidu = "baidu",
   Tencent = "tencent",
+  Aliyun = "aliyun",
 }
 
 export const TRANS_SERVICES_AUTH_NAMES = new Map<TransServiceProviderTp, string[]>([
+  [TransServiceProviderTp.GoogleCouldTrans, ["Google Could Translation API Key"]],
   [TransServiceProviderTp.DeepL, ["Deepl Auth Key"]],
   [TransServiceProviderTp.Youdao, ["Youdao App ID", "Youdao App Secret"]],
   [TransServiceProviderTp.Baidu, ["Baidu App ID", "Baidu App Secret"]],
   [TransServiceProviderTp.Tencent, ["Tencent Secret ID", "Tencent Secret Key"]],
+  [TransServiceProviderTp.Aliyun, ["Aliyun Access Key ID", "Aliyun Access Key Secret"]],
 ]);

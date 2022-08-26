@@ -2,6 +2,8 @@ interface IPreferences {
   langFirst: string;
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
+  googleApiKey: string;
+  disableGoogleCould: boolean;
   deeplAuthKey: string;
   deeplApiPro: boolean;
   disableDeepL: boolean;
@@ -14,6 +16,9 @@ interface IPreferences {
   tencentAppId: string;
   tencentAppKey: string;
   disableTencent: boolean;
+  aliyunAccessKeyId: string;
+  aliyunAccessKeySecret: string;
+  disableAliyun: boolean;
   selectedDefault: boolean;
   quickSwitchLang: boolean;
   delayTransInterval: number;
@@ -25,6 +30,7 @@ interface ILangItem {
   baiduLangId?: string;
   tencentLangId?: string;
   youdaoLangId?: string;
+  aliyunLangId?: string;
   langTitle: string;
 }
 
@@ -62,6 +68,15 @@ interface IGoogleTranslateResult {
       iso: string;
     };
   };
+}
+
+interface IGoogleCloudTranslateResult {
+  translations: IGoogleCloudTranslateItem[];
+}
+
+interface IGoogleCloudTranslateItem {
+  translatedText: string;
+  detectedSourceLanguage: string;
 }
 
 interface IDeepLTranslateResult {
@@ -113,4 +128,16 @@ interface ITencentTranslateResponse {
   Error: {
     Code: string;
   };
+}
+
+interface IAliyunTransResponse {
+  Data: {
+    WordCount: string;
+    Translated: string;
+  };
+  Code: string;
+}
+
+interface IAliyunDetectLangResponse {
+  DetectedLanguage: string;
 }

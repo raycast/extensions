@@ -150,8 +150,12 @@
       "description": "Select default translation service provider",
       "data": [
         {
-          "title": "Google",
+          "title": "Google(Free)",
           "value": "google"
+        },
+        {
+          "title": "Google(Could Translation)",
+          "value": "googleCouldTranslation"
         },
         {
           "title": "DeepL",
@@ -168,8 +172,28 @@
         {
           "title": "Tencent",
           "value": "tencent"
+        },
+        {
+          "title": "Aliyun",
+          "value": "aliyun"
         }
       ]
+    },
+    {
+      "name": "googleApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Google Could Translation API Key",
+      "description": "Google Could Translation API Key",
+      "placeholder": "Enter Google Could Translation API Key"
+    },
+    {
+      "name": "disableGoogleCould",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Google Could Translation",
+      "description": "Disable Google Could translation service provider",
+      "default": false
     },
     {
       "name": "deeplAuthKey",
@@ -268,6 +292,30 @@
       "default": false
     },
     {
+      "name": "aliyunAccessKeyId",
+      "type": "password",
+      "required": false,
+      "title": "Aliyun Access Key ID",
+      "description": "Aliyun Access Key ID",
+      "placeholder": "Enter Aliyun Access Key ID"
+    },
+    {
+      "name": "aliyunAccessKeySecret",
+      "type": "password",
+      "required": false,
+      "title": "Aliyun Access Key Secret",
+      "description": "Aliyun Access Key Secret",
+      "placeholder": "Enter Aliyun Access Key Secret"
+    },
+    {
+      "name": "disableAliyun",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Aliyun",
+      "description": "Disable Aliyun translation service provider",
+      "default": false
+    },
+    {
       "name": "selectedDefault",
       "type": "checkbox",
       "required": false,
@@ -313,6 +361,7 @@
     }
   ],
   "dependencies": {
+    "@alicloud/pop-core": "^1.7.12",
     "@raycast/api": "^1.38.2",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0"
