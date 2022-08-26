@@ -2,7 +2,7 @@ import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceVal
 import { runAppleScript } from "run-applescript";
 import { Preferences, Attachment, Message } from "../types/types";
 import { tellMessage } from "./messages";
-import { formatFileSize, getMIMEtype } from "../utils/file-utils";
+import { formatFileSize, getMIMEtype } from "../utils/finder";
 import { existsSync } from "fs";
 import { homedir } from "os";
 

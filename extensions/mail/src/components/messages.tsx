@@ -17,9 +17,10 @@ import * as messageScripts from "../scripts/messages";
 import { OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
 import { saveAllAttachments } from "../scripts/attachments";
 import { ComposeMessage } from "./compose";
-import { Message, Account, Mailboxes } from "../types/types";
-import { shortenText, formatDate, formatMarkdown } from "../utils/utils";
 import { Attachments } from "./attachments";
+import { shortenText, formatDate, formatMarkdown } from "../utils/utils";
+import { Mailboxes, MailIcons } from "../utils/presets";
+import { Message, Account } from "../types/types";
 
 const { primaryAction } = getPreferenceValues();
 
@@ -74,17 +75,7 @@ export const MessageListItem = (props: MessageProps): JSX.Element => {
   return (
     <List.Item
       title={message.subject ? shortenText(message.subject, 60) : "No Subject"}
-      icon={
-        message.read
-          ? {
-              source: Icon.CheckCircle,
-              tintColor: "#a7a7a7",
-            }
-          : {
-              source: Icon.CircleProgress100,
-              tintColor: "#0984ff",
-            }
-      }
+      icon={message.read ? MailIcons.Read : MailIcons.Unread}
       accessories={[
         { text: formatDate(message.date), icon: Icon.Calendar },
         { text: shortenText(message.senderName, 20), icon: Icon.Person },
@@ -215,14 +206,7 @@ const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.
         <Action
           title={message.read ? "Mark as Unread" : "Mark as Read"}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
-          icon={
-            message.read
-              ? {
-                  source: Icon.CircleProgress100,
-                  tintColor: "#0984ff",
-                }
-              : Icon.CheckCircle
-          }
+          icon={message.read ? MailIcons.Unread : Icon.CheckCircle}
           onAction={async () => {
             try {
               props.setMessage(props.account, { ...message, read: !message.read });

@@ -1,8 +1,9 @@
 import { List, Action, ActionPanel, Form, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Message, Attachment, Mailboxes } from "../types/types";
 import * as attachmentUtils from "../scripts/attachments";
 import { getAttachmentIcon } from "../utils/utils";
+import { Message, Attachment } from "../types/types";
+import { Mailboxes } from "../utils/presets";
 
 interface AttachmentProps {
   id: string;

@@ -1,5 +1,5 @@
 import { Cache } from "@raycast/api";
-import { Account, Message } from "../types/types"; 
+import { Account, Message } from "../types/types";
 
 export enum ExpirationTime {
   Minute = 60 * 1000,

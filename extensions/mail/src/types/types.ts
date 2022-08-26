@@ -1,4 +1,4 @@
-import { Color, Icon, Image } from "@raycast/api";
+import { Image } from "@raycast/api";
 
 export type Account = {
   id: string;
@@ -49,52 +49,15 @@ export type Attachment = {
   type?: string;
 };
 
-export type Preferences = {
-  saveDirectory: string;
-  selectDirectory: string;
+export type Mailbox = {
+  title: string;
+  mailbox: string;
+  icon: Image.ImageLike;
 };
 
-type Mailbox = { title: string; mailbox: string; icon: Image.ImageLike };
-
-export const Mailboxes: { [key: string]: Mailbox } = {
-  all: {
-    title: "All Mail",
-    mailbox: "All Mail",
-    icon: { source: "../assets/icons/envelope.svg", tintColor: Color.PrimaryText },
-  },
-  recent: {
-    title: "Recent Mail",
-    mailbox: "All Mail",
-    icon: { source: "../assets/icons/recent.svg", tintColor: Color.PrimaryText },
-  },
-  important: {
-    title: "Important Mail",
-    mailbox: "Important",
-    icon: { source: "../assets/icons/important.svg", tintColor: Color.PrimaryText },
-  },
-  starred: {
-    title: "Starred Mail",
-    mailbox: "Starred",
-    icon: Icon.Star,
-  },
-  inbox: {
-    title: "Inbox",
-    mailbox: "Inbox",
-    icon: { source: "../assets/icons/inbox.svg", tintColor: Color.PrimaryText },
-  },
-  sent: {
-    title: "Sent Mail",
-    mailbox: "Sent Mail",
-    icon: { source: "../assets/icons/sent.svg", tintColor: Color.PrimaryText },
-  },
-  junk: {
-    title: "Junk Mail",
-    mailbox: "Spam",
-    icon: { source: "../assets/icons/junk.svg", tintColor: Color.PrimaryText },
-  },
-  trash: {
-    title: "Trash",
-    mailbox: "Trash",
-    icon: { source: "../assets/icons/trash.svg", tintColor: Color.PrimaryText },
-  },
+export type Preferences = {
+  primaryAction: string;
+  primaryMailbox: string;
+  saveDirectory: string;
+  selectDirectory: string;
 };

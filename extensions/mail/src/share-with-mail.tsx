@@ -1,7 +1,7 @@
-import { Form, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { Form, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ComposeMessage } from "./components/compose";
-import { maximumFileSize, getSize } from "./utils/file-utils";
+import { maximumFileSize, getSize } from "./utils/finder";
 import { getFinderSelection } from "./utils/finder";
 
 export default function ShareWithMail() {
@@ -34,13 +34,13 @@ export default function ShareWithMail() {
             : `The selections ${invalidSelections.join(", ")} are too large.`,
         style: Toast.Style.Failure,
       };
-      showToast(options);
+      await showToast(options);
     } else if (validSelections.length === 0) {
       const options: Toast.Options = {
         title: "No Attachments Selected in Finder",
         style: Toast.Style.Failure,
       };
-      showToast(options);
+      await showToast(options);
     }
   };
 

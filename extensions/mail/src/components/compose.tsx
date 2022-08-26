@@ -1,12 +1,12 @@
 import { Form, Action, ActionPanel, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Account, Message, OutgoingMessage, OutgoingMessageForm } from "../types/types";
 import { newOutgoingMessage, OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
-import { SelectAttachments } from "./select-attachments";
+import { getRecipients } from "../scripts/messages";
 import { getMailAccounts } from "../scripts/account";
+import { SelectAttachments } from "./select-attachments";
+import { Account, Message, OutgoingMessage, OutgoingMessageForm } from "../types/types";
 import { titleCase } from "../utils/utils";
 import emailRegex from "email-regex";
-import { getRecipients } from "../scripts/messages";
 
 interface ComposeMessageProps {
   account?: Account;

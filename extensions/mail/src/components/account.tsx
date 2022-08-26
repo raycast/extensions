@@ -1,6 +1,9 @@
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
-import { Account, Mailboxes } from "../types/types";
+import { List, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { Messages } from "./messages";
+import { Mailboxes, MailIcons } from "../utils/presets";
+import { Account, Mailbox } from "../types/types";
+
+const { primaryMailbox } = getPreferenceValues();
 
 export const MailAccount = (account: Account): JSX.Element => {
   return (
@@ -8,17 +11,7 @@ export const MailAccount = (account: Account): JSX.Element => {
       id={account.id}
       title={account.name}
       subtitle={account.email}
-      icon={
-        account.numUnread > 0
-          ? {
-              source: Icon.CircleProgress100,
-              tintColor: "#0984ff",
-            }
-          : {
-              source: Icon.CheckCircle,
-              tintColor: "#a7a7a7",
-            }
-      }
+      icon={account.numUnread > 0 ? MailIcons.Unread : MailIcons.Read}
       accessories={[
         { text: account.fullName, icon: Icon.Person },
         {
@@ -30,16 +23,20 @@ export const MailAccount = (account: Account): JSX.Element => {
       ]}
       actions={
         <ActionPanel>
-          {Object.entries(Mailboxes).map(([id, mailbox], index) => (
-            <Action.Push
-              key={index}
-              title={`See ${mailbox.title}`}
-              icon={mailbox.icon}
-              target={<Messages id={id} account={account} />}
-            />
-          ))}
+          <MailboxAction id={primaryMailbox} account={account} mailbox={Mailboxes[primaryMailbox]} />
+          {Object.entries(Mailboxes)
+            .filter(([id, _]) => id !== primaryMailbox)
+            .map(([id, mailbox], index) => (
+              <MailboxAction key={index} id={id} account={account} mailbox={mailbox} />
+            ))}
         </ActionPanel>
       }
     />
+  );
+};
+
+const MailboxAction = (props: { id: string; account: Account; mailbox: Mailbox }) => {
+  return (
+    <Action.Push title={`See ${props.mailbox.title}`} icon={props.mailbox.icon} target={<Messages {...props} />} />
   );
 };

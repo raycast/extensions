@@ -31,6 +31,48 @@
       ]
     },
     {
+      "name": "primaryMailbox",
+      "title": "Primary Mailbox",
+      "description": "The primary mailbox to view for accounts.",
+      "type": "dropdown",
+      "default": "all",
+      "required": false,
+      "data": [
+        {
+          "title": "All Mail",
+          "value": "all"
+        },
+        {
+          "title": "Recent Mail",
+          "value": "recent"
+        },
+        {
+          "title": "Inbox",
+          "value": "inbox"
+        },
+        {
+          "title": "Important Mail",
+          "value": "important"
+        },
+        {
+          "title": "Starred Mail",
+          "value": "starred"
+        },
+        {
+          "title": "Sent Mail",
+          "value": "sent"
+        },
+        {
+          "title": "Junk Mail", 
+          "value": "junk"
+        },
+        {
+          "title": "Trash",
+          "value": "trash"
+        }
+      ]
+    },
+    {
       "name": "saveDirectory",
       "title": "Save Attachments To",
       "description": "Directory to save mail attachments.",

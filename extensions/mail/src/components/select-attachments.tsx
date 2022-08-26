@@ -1,7 +1,7 @@
 import { Form, Action, ActionPanel, Icon, useNavigation, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Preferences } from "../types/types";
-import { getDirectoryItems, getSize, validateSize, maximumFileSize } from "../utils/file-utils";
+import { getDirectoryItems, getSize, validateSize, maximumFileSize } from "../utils/finder";
 import { homedir } from "os";
 import fs from "fs";
 
@@ -96,16 +96,16 @@ export const SelectFile = (props: SelectFileProps): JSX.Element => {
   const [attachment, setAttachment] = useState<string>(
     props.attachment && isFile ? `attachment-${props.attachment}` : currentDirectory
   );
-  
+
   useEffect(() => {
     const onDirectoryChange = async () => {
       if (currentDirectory) {
-        const { files, subDirectories } = await getDirectoryItems(currentDirectory); 
-        setFiles(files); 
-        setSubDirectories(subDirectories); 
+        const { files, subDirectories } = await getDirectoryItems(currentDirectory);
+        setFiles(files);
+        setSubDirectories(subDirectories);
       }
-    } 
-    onDirectoryChange(); 
+    };
+    onDirectoryChange();
   }, [currentDirectory]);
 
   const [error, setError] = useState<string | undefined>(undefined);
