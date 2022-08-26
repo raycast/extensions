@@ -200,7 +200,7 @@
     {
       "name": "tailwindcss3",
       "icon": "logo/tailwindcss.png",
-      "title": "TailwindCSS v3",
+      "title": "TailwindCSS V3",
       "subtitle": "DocSearch",
       "description": "Search TailwindCss documentation",
       "arguments": [
