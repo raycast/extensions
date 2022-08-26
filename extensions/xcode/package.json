@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -70,7 +70,7 @@
           "type": "checkbox",
           "required": false,
           "title": "Filter",
-          "description": "Show Xcode Projects",
+          "description": "Show Xcode Projects.",
           "default": true,
           "label": "Show Xcode Projects"
         },
@@ -79,7 +79,7 @@
           "type": "checkbox",
           "required": false,
           "title": "",
-          "description": "Show Xcode Workspaces",
+          "description": "Show Xcode Workspaces.",
           "default": true,
           "label": "Show Xcode Workspaces"
         },
@@ -88,7 +88,7 @@
           "type": "checkbox",
           "required": false,
           "title": "",
-          "description": "Show Swift Package",
+          "description": "Show Swift Packages.",
           "default": true,
           "label": "Show Swift Package"
         },
@@ -99,7 +99,7 @@
           "title": "",
           "description": "Show Swift Playgrounds",
           "default": true,
-          "label": "Show Swift Playgrounds"
+          "label": "Show Swift Playgrounds."
         }
       ]
     },
@@ -121,10 +121,17 @@
       ]
     },
     {
+      "name": "show-swift-package-dependencies.command",
+      "title": "Show Swift Package Dependencies",
+      "subtitle": "Xcode",
+      "description": "Show Swift Package Dependencies of a Xcode Project.",
+      "mode": "view"
+    },
+    {
       "name": "installed-simulator-apps.command",
       "title": "Installed Simulator Apps",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
       "mode": "view"
     },
     {
@@ -152,21 +159,21 @@
       "name": "add-swift-package.command",
       "title": "Add Swift Package",
       "subtitle": "Xcode",
-      "description": "Add a Swift Package from an URL to an opened Xcode project",
+      "description": "Add a Swift Package from an URL to a Xcode Project.",
       "mode": "view"
     },
     {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Package and open it directly in Xcode",
+      "description": "Create a new Swift Package and open it directly in Xcode.",
       "mode": "view"
     },
     {
       "name": "create-swift-playground.command",
       "title": "Create Swift Playground",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Playground and open it directly in Xcode",
+      "description": "Create a new Swift Playground and open it directly in Xcode.",
       "mode": "view",
       "preferences": [
         {
@@ -203,22 +210,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.1.0",
     "dedent": "^0.7.0",
-    "node-fetch": "^3.2.9",
+    "node-fetch": "^3.2.10",
     "tildify": "^3.0.0",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/dedent": "^0.7.0",
     "@types/node-fetch": "^2.6.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",
