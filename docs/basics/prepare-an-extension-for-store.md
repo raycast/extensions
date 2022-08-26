@@ -267,6 +267,10 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 - For a better visual experience, add placeholders in text field and text area components. This includes preferences.
 - Don't leave the search bar without a placeholder
 
+### Analytics
+
+- It’s not allowed to include external analytics in extensions. Later on, we will add support to give developers more insights into how their extension is being used.
+
 ### Localization / Language
 
 - At the moment, Raycast doesn't support localization and only supports US English. Therefore, please avoid introducing your custom way to localize your extension. If the locale might affect functionality (e.g. using the correct unit of measurement), please use the preferences API.
