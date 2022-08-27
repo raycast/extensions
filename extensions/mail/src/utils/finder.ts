@@ -5,7 +5,7 @@ import { join } from "path";
 import mime from "mime-types";
 
 const isHidden = (item: string) => {
-  return item === "Icon\r" || /(^|\/)\.[^\/\.]/g.test(item);
+  return item === "Icon\r" || /(^|[/])[.][^\/\.]/g.test(item);
 };
 
 export const getDirectoryItems = async (dir: string): Promise<{ files: string[]; subDirectories: string[] }> => {
@@ -13,11 +13,13 @@ export const getDirectoryItems = async (dir: string): Promise<{ files: string[];
   const files = directoryItems
     .filter((dirent) => dirent.isFile())
     .map((dirent) => dirent.name)
-    .filter((item) => !isHidden(item));
+    .filter((item) => !isHidden(item))
+    .sort((a, b) => a.localeCompare(b));
   const subDirectories = directoryItems
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
-    .filter((item) => !isHidden(item));
+    .filter((item) => !isHidden(item))
+    .sort((a, b) => a.localeCompare(b));
   return { files, subDirectories };
 };
 
