@@ -31,7 +31,7 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
       if (accounts) {
         cache.setAccounts(accounts);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       return undefined;
     }

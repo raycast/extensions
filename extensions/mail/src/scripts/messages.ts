@@ -133,7 +133,7 @@ export const getAccountMessages = async (
       .filter((msg: Message) => !unreadOnly || !msg.read);
     messages = newMessages.concat(messages);
     cache.setMessages(messages, account.id, cacheMailbox);
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
   }
   return messages;
@@ -143,7 +143,7 @@ export const getMessageContent = async (message: Message, mailbox: string): Prom
   try {
     const content = await tellMessage(message, mailbox, "tell msg to return content");
     return { ...message, content };
-  } catch (error: any) {
+  } catch (error) {
     await showToast(Toast.Style.Failure, "Error Getting Message Content");
     console.error(error);
     return message;

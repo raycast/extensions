@@ -16,9 +16,12 @@ const accounts = new Cache();
 
 export const getAccounts = (): Account[] | undefined => {
   if (accounts.has("accounts")) {
-    const { time, data } = JSON.parse(accounts.get("accounts")!);
-    if (!isCacheExpired(time)) {
-      return data;
+    const response = accounts.get("accounts");
+    if (response) {
+      const { time, data } = JSON.parse(response);
+      if (!isCacheExpired(time)) {
+        return data;
+      }
     }
   }
   return undefined;
@@ -33,9 +36,12 @@ const messages = new Cache();
 export const getMessages = (account: string, mailbox: string): Message[] => {
   const key = `${account}-${mailbox}`;
   if (messages.has(key)) {
-    const { time, data } = JSON.parse(messages.get(key)!);
-    if (!isCacheExpired(time, ExpirationTime.Hour)) {
-      return data;
+    const response = messages.get(key);
+    if (response) {
+      const { time, data } = JSON.parse(response);
+      if (!isCacheExpired(time, ExpirationTime.Hour)) {
+        return data;
+      }
     }
   }
   return [];

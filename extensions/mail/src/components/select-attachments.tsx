@@ -82,19 +82,17 @@ type SelectFileProps = Form.Dropdown.Props & {
 };
 
 export const SelectFile = (props: SelectFileProps): JSX.Element => {
-  const isFile = props.attachment && fs.statSync(props.attachment).isFile();
-  const [files, setFiles] = useState<string[]>(props.attachment && isFile ? [props.attachment.split("/").pop()!] : []);
+  const path = props.attachment;
+  const isFile = path && fs.statSync(path).isFile();
+  const fileName = path && path.split("/").pop();
+  const filePath = path && path.split("/").slice(0, -1).join("/");
+
+  const [files, setFiles] = useState<string[]>(isFile && fileName ? [fileName] : []);
   const [subDirectories, setSubDirectories] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>(
-    props.attachment
-      ? isFile
-        ? props.attachment.split("/").slice(0, -1).join("/")
-        : props.attachment
-      : attachmentsDirectory
+    path ? (isFile && filePath ? filePath : path) : attachmentsDirectory
   );
-  const [attachment, setAttachment] = useState<string>(
-    props.attachment && isFile ? `attachment-${props.attachment}` : currentDirectory
-  );
+  const [attachment, setAttachment] = useState<string>(path && isFile ? `attachment-${path}` : currentDirectory);
 
   useEffect(() => {
     const onDirectoryChange = async () => {

@@ -1,4 +1,4 @@
-import { Form, Action, ActionPanel, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { newOutgoingMessage, OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
 import { getRecipients } from "../scripts/messages";
