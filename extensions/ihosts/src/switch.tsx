@@ -3,8 +3,11 @@ import { getItemIcon } from "./component";
 import { HostFolderMode, HostInactiveByFolderTip, State, SystemHostHashKey } from "./const";
 import { getHostCommonsCache, saveHostCommons } from "./utils/common";
 import { checkSysHostAccess, getSysHostAccess, getSysHostFileHash, writeSysHostFile } from "./utils/file";
+import { useState } from "react";
 
 export default function Command() {
+  const [isLoadingState, updateLoadingState] = useState<boolean>(false);
+
   if (!checkSysHostAccess()) {
     return (
       <MenuBarExtra
@@ -31,6 +34,7 @@ export default function Command() {
   const hostCommonsState = getHostCommonsCache();
 
   async function onToggleItemState(id: string) {
+    updateLoadingState(true);
     try {
       let target = hostCommonsState.find((item) => item.id === id && !item.isFolder);
       if (!target) {
@@ -66,6 +70,8 @@ export default function Command() {
       await showHUD("Host state toggled");
     } catch (error) {
       await showHUD("opps! Something was wrong");
+    } finally {
+      updateLoadingState(false);
     }
   }
 
@@ -75,6 +81,7 @@ export default function Command() {
         source: "switch.png",
         tintColor: Color.PrimaryText,
       }}
+      isLoading={isLoadingState}
     >
       {hostCommonsState
         .filter((item) => !item.isFolder)
