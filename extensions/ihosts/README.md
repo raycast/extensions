@@ -1,5 +1,5 @@
 <h1 align="center">
-  <strong>iHost</strong>
+  <strong>iHosts</strong>
 </h1>
 <p align="center">Make hosts management more efficient and easier~</p>
 

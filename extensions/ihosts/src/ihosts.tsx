@@ -76,7 +76,7 @@ export default function Command() {
     if (hosts) {
       commonHosts = JSON.parse(hosts as string);
       if (writeHost) {
-        let hostContents = "# iHost\n";
+        let hostContents = "# iHosts\n";
         commonHosts.forEach((item) => {
           if (!item.isFolder && item.state === State.Enable) {
             hostContents += `# ${item.name}\n ${item.content}\n\n`;
