@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Icon, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Octokit } from "@octokit/core";
 import { RequestError } from "@octokit/request-error";
@@ -45,26 +45,33 @@ async function uploadPic() {
     helpUrl: REPO_URL,
   };
   try {
-    // Paste pic from clipboard to Temp folder.
-    execaSync(preferences.pngpastePath, [TEMP_PIC_PATH]);
+    const text = await Clipboard.readText();
+    if (!text) {
+      // Paste pic from clipboard to Temp folder.
+      execaSync(preferences.pngpastePath, [TEMP_PIC_PATH]);
 
-    const pic = fs.readFileSync(TEMP_PIC_PATH);
-    const content = Buffer.from(pic).toString("base64");
-    const path = `${preferences.path}${dayjs().format("YYYY-MM-DDTHH:mm:ss")}.jpg`;
+      const pic = fs.readFileSync(TEMP_PIC_PATH);
+      const content = Buffer.from(pic).toString("base64");
+      const path = `${preferences.path}${dayjs().format("YYYY-MM-DDTHH:mm:ss")}.jpg`;
 
-    // Upload pic to github.
-    await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-      owner: preferences.owner,
-      repo: preferences.repo,
-      path: path,
-      message: "Upload by GHPic.",
-      committer: {
-        name: preferences.committer,
-        email: preferences.email,
-      },
-      content: content,
-    });
-    res.picUrl = `https://cdn.jsdelivr.net/gh/${preferences.owner}/${preferences.repo}/${path}`;
+      // Upload pic to github.
+      await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: preferences.owner,
+        repo: preferences.repo,
+        path: path,
+        message: "Upload by GHPic.",
+        committer: {
+          name: preferences.committer,
+          email: preferences.email,
+        },
+        content: content,
+      });
+      res.picUrl = `https://cdn.jsdelivr.net/gh/${preferences.owner}/${preferences.repo}/${path}`;
+    } else {
+      res.errorCode = 3;
+      res.errorMsg = "Check whether the clipboard contains a picture, press Enter for help.";
+      res.helpUrl = `${REPO_URL}#usage`;
+    }
   } catch (error) {
     res.icon = Icon.Multiply;
     if (error instanceof RequestError) {
@@ -115,11 +122,12 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={loaded}>
+    <List isLoading={!loaded}>
       {res.errorCode == 0 ? (
         <>
           <List.Item
-            title={"Copy MarkDown Sytle."}
+            icon={Icon.CopyClipboard}
+            title={"Copy as markdown"}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={`![](${res.picUrl})`} />
@@ -127,7 +135,8 @@ export default function Command() {
             }
           />
           <List.Item
-            title={"Copy simple URL."}
+            icon={Icon.CopyClipboard}
+            title={"Copy URL"}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={res.picUrl} />

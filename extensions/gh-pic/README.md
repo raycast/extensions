@@ -39,15 +39,21 @@ brew install pngpaste
 
 ## Usage
 
-1. Copy a Picture to the clipboard (both screenshot or file is OK).
+1. Copy a Picture to the clipboard.
 2. Upload to GitHub by this extension.
 3. Paste the URL to your article.
 
+> **Note: Due to API restrictions, if you want to upload from a picture file, you need to open the file first and then copy it, instead of copying the file directly in `Finder`.** see [Upload from file](#upload-from-file)
+
 ## Demo
 
+### Upload from screenshot
 
 https://user-images.githubusercontent.com/19505695/186912886-ca5c45cf-fec6-4545-a162-86f025a37030.mov
 
+### Upload from file
+
+https://user-images.githubusercontent.com/19505695/187009128-9fdabc42-11e4-4ab0-a646-3e69c6f5c037.mov
 
 
 ## Thanks
