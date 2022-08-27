@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antd-open-browser",
   "title": "antd-open-browser",
-  "description": "快速打开 antd 组件",
+  "description": "antd-open-browser",
   "icon": "command-icon.png",
   "author": "crazyair",
   "license": "MIT",
