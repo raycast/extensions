@@ -21,7 +21,11 @@ function ShowDetailsPage(props: { title: string; extract: string | undefined; de
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`} />
-          <CopyToClipboardAction title="Copy URL" content={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`} />
+          <CopyToClipboardAction
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            title="Copy URL"
+            content={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`}
+          />
         </ActionPanel>
       }
     />

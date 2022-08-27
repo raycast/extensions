@@ -33,15 +33,15 @@ function PageItem({ title }: { title: string }) {
       subtitle={data?.description}
       actions={
         <ActionPanel>
+          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${encodeTitle(title)}`} />
           <PushAction
             icon={Icon.Window}
             title={"Show Details"}
             target={<ShowDetailsPage title={title} extract={data?.extract} description={data?.description} />}
           />
-          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${encodeTitle(title)}`} />
           <CopyToClipboardAction
-            title="Copy URL"
             shortcut={{ modifiers: ["cmd"], key: "." }}
+            title="Copy URL"
             content={`https://wikipedia.org/wiki/${encodeTitle(title)}`}
           />
         </ActionPanel>
