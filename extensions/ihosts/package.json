@@ -29,6 +29,12 @@
           "placeholder": "Enter Host Export Location"
         }
       ]
+    },
+    {
+      "name": "switch",
+      "title": "Switch Hosts Quickly",
+      "description": "Switch hosts by menu bar",
+      "mode": "menu-bar"
     }
   ],
   "keywords": [
