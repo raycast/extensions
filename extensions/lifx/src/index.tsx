@@ -31,6 +31,7 @@ export default function Command() {
           await showToast({
             style: Toast.Style.Failure,
             title: "Invalid Token",
+            message: "Please check your token and try again",
           });
           setIsLoading(false);
           return;
