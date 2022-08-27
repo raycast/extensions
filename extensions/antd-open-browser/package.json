@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "antd-open-browser",
+  "title": "antd-open-browser",
+  "description": "快速打开 antd 组件",
+  "icon": "command-icon.png",
+  "author": "645381995@qq.com",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "antd",
+      "subtitle": "快速打开 antd 组件",
+      "description": "快速打开 antd 组件",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
