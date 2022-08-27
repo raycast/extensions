@@ -12,10 +12,10 @@ import {
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Service, { Zone } from './service';
-import { getEmail, getKey } from './utils';
+import { getToken } from './utils';
 import { SiteProps } from './view-sites';
 
-const service = new Service(getEmail(), getKey());
+const service = new Service(getToken());
 
 interface CachePurgeHistoryItem {
   url: string;

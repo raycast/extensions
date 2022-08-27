@@ -1,15 +1,13 @@
-import Dockerode from '@priithaamer/dockerode';
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
-import { useMemo } from 'react';
 import { useDocker } from './docker';
+import { useDockerode } from './docker/dockerode';
 import { formatBytes, imageTitle } from './docker/image';
 import ErrorDetail from './error_detail';
 import ImageDetail from './image_detail';
 import { withToast } from './ui/toast';
 
 export default function ImageList() {
-  const docker = useMemo(() => new Dockerode(), []);
-
+  const docker = useDockerode();
   const { useImages } = useDocker(docker);
   const { images, isLoading, error, removeImage } = useImages();
 
