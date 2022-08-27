@@ -59,27 +59,4 @@ export function runCommand(
     console.log("stderr: " + data);
     error(data.toString());
   });
-
-  // childProcess.on('close', function (code: string) {
-  //     //Here you can get the exit code of the script
-  //     console.log('closing code: ' + code);
-
-  // });
-
-  // } catch (error) {
-  //     error(error)
-  //     console.log(error)
-  // }
-
-  // exec(cmd,
-  //     (err: any, stdout: any, stderr: any) => {
-  //         console.log(err);
-  //         console.log(stdout);
-  //         console.log(stderr);
-  //     }
-  // );
-
-  // console.log(childProcess.stdout)
-  // console.log(childProcess.stderr)
-  // console.log(childProcess.std)
 }
