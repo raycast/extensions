@@ -21,9 +21,9 @@ import path from "node:path";
 
 export function SysHostPermRequest() {
   const md = `
-  # Hey!👋 Welcome to use iHost 🎉🎉🎉 \n
+  # Hey!👋 Welcome to use iHosts 🎉🎉🎉 \n
   You're one step away from using it!\n
-  All you need to do is type ↩️ and allow iHost to write to the **${SystemHostFilePath}** file~\n
+  All you need to do is type ↩️ and allow iHosts to write to the **${SystemHostFilePath}** file~\n
   ![](https://i.ibb.co/0VtWSFz/sys-host-prem.png)
   `;
   return (

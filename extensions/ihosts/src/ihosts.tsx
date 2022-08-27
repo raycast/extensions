@@ -66,7 +66,7 @@ export default function Command() {
     }
     const commonHosts = await getHostCommons();
     if (writeHost) {
-      let hostContents = "# iHost\n";
+      let hostContents = "# iHosts\n";
       commonHosts.forEach((item) => {
         if (!item.isFolder && item.state === State.Enable) {
           hostContents += `# ${item.name}\n ${item.content}\n\n`;
