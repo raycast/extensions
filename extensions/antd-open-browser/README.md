@@ -1,3 +1,3 @@
 # antd-open-browser
 
-描述
+快速打开 antd 组件
