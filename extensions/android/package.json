@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "list-android",
-      "title": "List Android Projects",
+      "title": "List Projects",
       "subtitle": "Android",
       "description": "show android projects in directory",
       "icon": "list-android.png",
@@ -20,7 +20,7 @@
     },
     {
       "name": "list-emulators",
-      "title": "List Android Emulators",
+      "title": "List Emulators",
       "subtitle": "Android",
       "description": "show android emulators",
       "icon": "list-android.png",
