@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scrapbox",
+  "title": "Scrapbox(β)",
+  "description": "Search Scrapbox pages",
+  "icon": "command-icon.png",
+  "author": "zakuni",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Pages",
+      "subtitle": "Scrapbox",
+      "description": "Search Scrapbox pages by keyword",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "project",
+          "placeholder": "Project",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "searchquery",
+          "placeholder": "Search by keyword",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
