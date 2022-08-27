@@ -10,49 +10,35 @@ import {
   Icon,
   Color,
   getPreferenceValues,
-  updateCommandMetadata,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
-import { isSpotifyInstalled } from "./utils";
 import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
-import { isAuthorized } from "./spotify/oauth";
+import { SpotifyProvider, useSpotify } from "./utils/context";
 
-export default function NowPlayingMenuBar() {
-  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | null>();
-  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>();
-  const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>();
-  const [authorized, setAuthorized] = useState(false);
+function NowPlayingMenuBar() {
+  const { installed, authorized } = useSpotify();
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>(null);
+  const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchPlayerAndTrackState = async () => {
     let result: [SpotifyState | null, TrackInfo | null] = [null, null];
 
-    // Check if Spotify is installed (only try this once)
-    let isInstalled = spotifyInstalled;
-    if (isInstalled == null) {
-      isInstalled = await isSpotifyInstalled();
-      setSpotifyInstalled(await isSpotifyInstalled());
-    }
-
-    setAuthorized(await isAuthorized());
+    // Return early if we have not yet checked if Spotify is installed
+    if (installed == null) result;
 
     // If Spotify is installed then fetch the player and track state
-    if (isInstalled) {
+    if (installed) {
       try {
         const [state, track] = await Promise.all([getState(), getTrack()]);
+
         setCurrentSpotifyState(state);
         setCurrentlyPlayingTrack(track);
-        result = [state, track];
 
-        let newSubtitle: string | undefined;
-        if (track && track.id) {
-          newSubtitle = `${track.artist} – ${track.name}`;
-        }
-        await updateCommandMetadata({ subtitle: newSubtitle });
+        result = [state, track];
       } catch (err) {
-        await updateCommandMetadata({ subtitle: undefined });
         if (environment.launchType != LaunchType.Background) {
           showToast(Toast.Style.Failure, String(err));
         }
@@ -65,7 +51,7 @@ export default function NowPlayingMenuBar() {
 
   useEffect(() => {
     fetchPlayerAndTrackState();
-  }, []);
+  }, [installed]);
 
   const handlePlay = async () => {
     await setCurrentSpotifyState((oldState) => {
@@ -95,7 +81,7 @@ export default function NowPlayingMenuBar() {
     return <MenuBarExtra isLoading={isLoading}></MenuBarExtra>;
   }
 
-  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped || !spotifyInstalled || !currentlyPlayingTrack) {
+  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped || !installed || !currentlyPlayingTrack) {
     return null;
   }
 
@@ -118,7 +104,7 @@ export default function NowPlayingMenuBar() {
 
   return (
     <MenuBarExtra
-      icon={spotifyInstalled && currentlyPlayingTrack ? "icon.png" : undefined}
+      icon={installed && currentlyPlayingTrack ? "icon.png" : undefined}
       title={optimizeTitle(trackTitle)}
       tooltip={trackTitle}
       isLoading={isLoading}
@@ -208,3 +194,9 @@ export default function NowPlayingMenuBar() {
     </MenuBarExtra>
   );
 }
+
+export default () => (
+  <SpotifyProvider>
+    <NowPlayingMenuBar />
+  </SpotifyProvider>
+);

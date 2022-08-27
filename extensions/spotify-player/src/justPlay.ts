@@ -4,7 +4,9 @@ import { searchTracks, play } from "./spotify/client";
 import { trackTitle } from "./utils";
 import { isAuthorized } from "./spotify/oauth";
 
-export default async function Main(props: { arguments: { query: string } }) {
+type Props = { arguments: { query: string } };
+
+export default async (props: Props) => {
   const authorized = await isAuthorized();
   if (!authorized) {
     showToast(
@@ -22,4 +24,4 @@ export default async function Main(props: { arguments: { query: string } }) {
   } else {
     await showToast(Toast.Style.Failure, `Track is not found!`);
   }
-}
+};

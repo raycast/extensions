@@ -3,12 +3,8 @@ import _ from "lodash";
 import { getAlbumTracks } from "../spotify/client";
 import { AlbumsActionPanel } from "./AlbumsActionPanel";
 
-export default function AlbumListItem(props: {
-  album: SpotifyApi.AlbumObjectSimplified;
-  spotifyInstalled: boolean;
-  showDetails: boolean;
-}) {
-  const { album, spotifyInstalled, showDetails } = props;
+export default function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified; showDetails: boolean }) {
+  const { album, showDetails } = props;
   const icon: Image.ImageLike = {
     source: album.images[album.images.length - 1]?.url,
     mask: Image.Mask.Circle,
@@ -26,7 +22,7 @@ export default function AlbumListItem(props: {
         showDetails ? { text: `${album.total_tracks.toString()} songs`, tooltip: "Number of Tracks" } : {},
       ]}
       icon={icon}
-      actions={<AlbumsActionPanel album={album} spotifyInstalled={spotifyInstalled} />}
+      actions={<AlbumsActionPanel album={album} />}
     />
   );
 }
