@@ -1,6 +1,8 @@
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
 import { join } from "path";
+import { date } from "zod";
+import { FMObjectsToXML } from "./FmClipTools";
 import { Location, Snippet, ZSnippet } from "./types";
 
 function ensureDirSync(path: PathLike) {
@@ -13,6 +15,28 @@ export function getDefaultPath(): string {
   return path;
 }
 
+export async function getFromClipboard(): Promise<string | null> {
+  const toast = await showToast({ title: "Getting snippet...", style: Toast.Style.Animated });
+  try {
+    const data = await FMObjectsToXML();
+    toast.hide();
+    return data;
+  } catch (e) {
+    toast.message = "Error getting snippet";
+    toast.style = Toast.Style.Failure;
+  }
+  return null;
+}
+
+export function loadAllSnippets(locations?: Location[]): Snippet[] {
+  const allSnippets: Snippet[] = [];
+  locations?.forEach((location) => {
+    allSnippets.push(...loadSnippets(location));
+  });
+  // plus default location
+  allSnippets.push(...loadSnippets());
+  return allSnippets;
+}
 export function loadSnippets(location?: Location): Snippet[] {
   const snippets: Snippet[] = [];
   const path = location?.path ?? getDefaultPath();
@@ -36,9 +60,17 @@ export function loadSnippets(location?: Location): Snippet[] {
   return snippets;
 }
 
-export async function saveSnippetFile(snippet: Snippet) {
-  const path = getDefaultPath();
-  writeFileSync(join(path, `${snippet.id}.json`), JSON.stringify(snippet));
+export async function saveSnippetFile(data: Snippet, location?: Location): Promise<boolean> {
+  const parseResult = ZSnippet.safeParse(data);
+  if (parseResult.success) {
+    const snippet = parseResult.data;
+    const path = location?.path ?? getDefaultPath();
+    snippet.locId = location?.id ?? "default"; //ensure locId is set and matches the location passed in
+    writeFileSync(join(path, `${snippet.id}.json`), JSON.stringify(snippet));
+    return true;
+  }
+  console.error(parseResult.error);
+  return false;
 }
 
 export async function deleteSnippetFile(snippet: Snippet) {
