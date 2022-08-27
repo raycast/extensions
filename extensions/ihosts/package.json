@@ -37,6 +37,15 @@
       "mode": "menu-bar"
     }
   ],
+  "keywords": [
+    "ihosts",
+    "hosts",
+    "host",
+    "system hosts",
+    "manage hosts",
+    "host file",
+    "etc/hosts"
+  ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
     "raycast-toolkit": "^1.0.6",
