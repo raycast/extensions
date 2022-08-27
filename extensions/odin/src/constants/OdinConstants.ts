@@ -13,3 +13,4 @@ export const ODIN_STRINGS_STATION = "station";
 export const ODIN_STRINGS_ALARM_RECEIVED = "alarm received";
 export const ODIN_STRINGS_EMERGENCY = "emergency";
 export const ODIN_STRINGS_SEARCH_PLACEHOLDER = `Search by ${ODIN_STRINGS_PREPAREDNESS}, ${ODIN_STRINGS_STATION}, ${ODIN_STRINGS_EMERGENCY} or ${ODIN_STRINGS_ALARM_RECEIVED}`;
+export const ODIN_STRINGS_LASTUPDATED = (lastUpdated: string | null) => `Updated at ${lastUpdated}`;

@@ -45,17 +45,15 @@ export default function OdinAlarmsView() {
 
   return (
     <>
-      <List
-        isLoading={state.isLoading}
-        searchBarPlaceholder={ODIN_STRINGS_SEARCH_PLACEHOLDER}
-        navigationTitle={`${ODIN_SOURCE_INDICATION} ${state.lastUpdated}`}
-      >
+      <List isLoading={state.isLoading} searchBarPlaceholder={ODIN_STRINGS_SEARCH_PLACEHOLDER}>
         {!odinHelper.didFindAlarms(state.odinAlarmsModel) ? (
           <List.EmptyView title={ODIN_STRINGS_NO_ALARMS_FOUND} />
         ) : (
-          state.odinAlarmsModel?.map((odinAlarm) => (
-            <OdinAlarmListItem key={odinHelper.generateRandomUUID()} odinAlarmModel={odinAlarm} />
-          ))
+          <List.Section title={ODIN_SOURCE_INDICATION}>
+            {state.odinAlarmsModel?.map((odinAlarm) => (
+              <OdinAlarmListItem key={odinHelper.generateRandomUUID()} odinAlarmModel={odinAlarm} />
+            ))}
+          </List.Section>
         )}
       </List>
     </>

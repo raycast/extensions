@@ -25,13 +25,13 @@ export default class OdinHelper {
     }
   };
 
-  parseOdinAlarms = async (html: string): Promise<[OdinAlarm[], string]> => {
+  parseOdinAlarms = async (html: string): Promise<[OdinAlarm[], string | undefined]> => {
     const alarms: OdinAlarm[] = [];
 
     const $ = Cheerio.load(html);
 
     const lastUpdated = $("#CurrentTime").last().text();
-    const matchedRegexLastUpdated = "- " + lastUpdated.match(ODIN_HTML_ALARM_UPDATED_AT_REGEX);
+    const matchedRegexLastUpdated = lastUpdated.match(ODIN_HTML_ALARM_UPDATED_AT_REGEX)?.toString();
 
     const alarmsTable = $(`#${ODIN_HTML_ALARMS_TABLE_ID}`).first();
     const alarmsTableBody = alarmsTable.find(ODIN_HTML_ALARMS_TABLE_BODY_CLASS);

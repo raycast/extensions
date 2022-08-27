@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "odin",
   "title": "ODIN",
-  "description": "Retrieves emergency alarms from Online Dataregistrerings- og INdberetningssystem (ODIN), a system by The Danish Emergency Management Agency (DEMA), through 'www.odin.dk/112puls'.",
+  "description": "Retrieves emergency alarms from Online Dataregistrerings- og Indberetningssystem (ODIN), a system by The Danish Emergency Management Agency (DEMA), through 'www.odin.dk/112puls'.",
   "icon": "command-icon.png",
   "author": "aamoussa97",
   "categories": [
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "odin-alarms",
-      "title": "Latest ODIN alarms",
+      "title": "Latest Alarms",
       "subtitle": "ODIN",
       "description": "Retrieves the latest 20 emergency alarms from ODIN, sorted based on time received.",
       "mode": "view"

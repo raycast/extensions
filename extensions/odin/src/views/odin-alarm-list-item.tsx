@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { OdinAlarmItemProps } from "../models/OdinAlarmItemProps";
 import { ODIN_HTML_ALARM_DATE_FORMAT } from "../constants/OdinConstants";
 import moment from "moment";
@@ -19,7 +19,10 @@ export function OdinAlarmListItem({ odinAlarmModel }: OdinAlarmItemProps) {
         odinAlarmModel.foersteMeldingsOrdlyd,
       ]}
       key={odinAlarmModel.station}
-      accessories={[{ text: odinAlarmModel.foersteMeldingsOrdlyd }, { text: alarmReceivedFormatted }]}
+      accessories={[
+        { icon: Icon.QuoteBlock, text: odinAlarmModel.foersteMeldingsOrdlyd },
+        { icon: Icon.Clock, text: alarmReceivedFormatted },
+      ]}
     />
   );
 }
