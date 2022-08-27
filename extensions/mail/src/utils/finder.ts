@@ -33,12 +33,7 @@ export const formatFileSize = (size: string): string => {
   return i.toFixed(1) + " " + sizes[j];
 };
 
-type FileSize = {
-  label: string;
-  value: number;
-};
-
-export const maximumFileSize: FileSize = {
+export const maximumFileSize = {
   label: "36 MB",
   value: 35.9 * 10 ** 6,
 };
