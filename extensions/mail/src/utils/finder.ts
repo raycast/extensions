@@ -5,7 +5,7 @@ import { join } from "path";
 import mime from "mime-types";
 
 const isHidden = (item: string) => {
-  return item === "Icon\r" || /(^|[/])[.][^\/\.]/g.test(item);
+  return item === "Icon\r" || /(^|\/)\.[^/.]/g.test(item);
 };
 
 export const getDirectoryItems = async (dir: string): Promise<{ files: string[]; subDirectories: string[] }> => {
