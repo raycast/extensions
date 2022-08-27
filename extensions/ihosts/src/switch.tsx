@@ -1,29 +1,65 @@
-import { Color, LocalStorage, MenuBarExtra } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Color, Icon, LocalStorage, MenuBarExtra, showHUD } from "@raycast/api";
 import { getItemIcon } from "./component";
-import { HostsCommonKey } from "./const";
+import { HostFolderMode, State, SystemHostHashKey } from "./const";
+import { getHostCommonsCache, saveHostCommons } from "./utils/common";
+import { checkSysHostAccess, getSysHostAccess, getSysHostFileHash, writeSysHostFile } from "./utils/file";
 
 export default function Command() {
-  const [isLoadingState, updateLoadingState] = useState<boolean>(false);
-  const [hostCommonsState, updateHostCommonsState] = useState<IHostCommon[]>([]);
-  useEffect(() => {
-    refresh();
-  }, []);
+  if (!checkSysHostAccess()) {
+    return (
+      <MenuBarExtra
+        icon={{
+          source: "switch.png",
+          tintColor: Color.PrimaryText,
+        }}
+      >
+        <MenuBarExtra.Item
+          title="Get write system hosts permission"
+          icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
+          onAction={() => getSysHostAccess()}
+        />
+      </MenuBarExtra>
+    );
+  }
+  const hostCommonsState = getHostCommonsCache();
 
-  async function refresh() {
+  async function onToggleItemState(id: string) {
     try {
-      updateLoadingState(true);
-      let commonHosts: IHostCommon[] = [];
-      // TODO Cache
-      const hosts = await LocalStorage.getItem(HostsCommonKey);
-      if (hosts) {
-        commonHosts = JSON.parse(hosts as string);
+      let target = hostCommonsState.find((item) => item.id === id && !item.isFolder);
+      if (!target) {
+        for (const folder of hostCommonsState) {
+          if (!folder.isFolder) continue;
+          target = folder.hosts?.find((h) => h.id === id);
+          if (target) {
+            if (folder && folder.mode === HostFolderMode.Single && target.state === State.Disable) {
+              folder.hosts?.forEach((h) => (h.state = State.Disable));
+            }
+            break;
+          }
+        }
       }
-      updateHostCommonsState(commonHosts);
+      if (!target) return;
+      target.state = target.state === State.Enable ? State.Disable : State.Enable;
+      await saveHostCommons(hostCommonsState);
+      let hostContents = "# iHost\n";
+      hostCommonsState.forEach((item) => {
+        if (!item.isFolder && item.state === State.Enable) {
+          hostContents += `# ${item.name}\n ${item.content}\n\n`;
+        }
+        if (item.isFolder && item.state === State.Enable && item.hosts) {
+          item.hosts.forEach((host) => {
+            if (host.state === State.Enable) {
+              hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
+            }
+          });
+        }
+      });
+      await writeSysHostFile(hostContents);
+      await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
+      await showHUD("Host state toggled");
     } catch (error) {
-      console.log(error);
+      await showHUD("opps! Something was wrong");
     }
-    updateLoadingState(false);
   }
 
   return (
@@ -32,7 +68,6 @@ export default function Command() {
         source: "switch.png",
         tintColor: Color.PrimaryText,
       }}
-      isLoading={isLoadingState}
     >
       {hostCommonsState
         .filter((item) => !item.isFolder)
@@ -43,9 +78,7 @@ export default function Command() {
               key={host.id}
               title={host.name}
               icon={getItemIcon(host)}
-              onAction={() => {
-                console.log("seen pull request clicked");
-              }}
+              onAction={() => onToggleItemState(host.id)}
             />
           );
         })}
@@ -55,7 +88,7 @@ export default function Command() {
         .sort((a, b) => b.ctime - a.ctime)
         .map((folder) => {
           return (
-            <MenuBarExtra.Submenu key={folder.id} title={folder.name} icon={getItemIcon(folder, true)}>
+            <MenuBarExtra.Submenu key={folder.id} title={`${folder.name} - ${folder.mode}`} icon={getItemIcon(folder)}>
               {folder.hosts
                 ?.sort((a, b) => b.ctime - a.ctime)
                 .map((host) => {
@@ -63,10 +96,13 @@ export default function Command() {
                     <MenuBarExtra.Item
                       key={host.id}
                       title={host.name}
+                      tooltip={
+                        host.state === State.Enable && host.folderState === State.Disable
+                          ? "This item is not active because the current folder is disabled"
+                          : ""
+                      }
                       icon={getItemIcon(host)}
-                      onAction={() => {
-                        console.log("seen pull request clicked");
-                      }}
+                      onAction={() => onToggleItemState(host.id)}
                     />
                   );
                 })}

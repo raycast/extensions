@@ -8,15 +8,8 @@ import {
   SysHostPermRequest,
   SystemHostsActions,
 } from "./component";
-import {
-  HostFolderMode,
-  HostsCommonKey,
-  State,
-  SystemHostBackupKey,
-  SystemHostFilePath,
-  SystemHostHashKey,
-} from "./const";
-import { backupHostFile, isFirstTime, removeBackup, saveHostCommons } from "./utils/common";
+import { HostFolderMode, State, SystemHostBackupKey, SystemHostFilePath, SystemHostHashKey } from "./const";
+import { backupHostFile, getHostCommons, isFirstTime, removeBackup, saveHostCommons } from "./utils/common";
 import { checkSysHostAccess, getShowHost, getSysHostFile, getSysHostFileHash, writeSysHostFile } from "./utils/file";
 import { v4 as uuidv4 } from "uuid";
 
@@ -71,27 +64,23 @@ export default function Command() {
     } else {
       updateHostBackupState(undefined);
     }
-    let commonHosts: IHostCommon[] = [];
-    const hosts = await LocalStorage.getItem(HostsCommonKey);
-    if (hosts) {
-      commonHosts = JSON.parse(hosts as string);
-      if (writeHost) {
-        let hostContents = "# iHost\n";
-        commonHosts.forEach((item) => {
-          if (!item.isFolder && item.state === State.Enable) {
-            hostContents += `# ${item.name}\n ${item.content}\n\n`;
-          }
-          if (item.isFolder && item.state === State.Enable && item.hosts) {
-            item.hosts.forEach((host) => {
-              if (host.state === State.Enable) {
-                hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
-              }
-            });
-          }
-        });
-        await writeSysHostFile(hostContents);
-        await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
-      }
+    const commonHosts = await getHostCommons();
+    if (writeHost) {
+      let hostContents = "# iHost\n";
+      commonHosts.forEach((item) => {
+        if (!item.isFolder && item.state === State.Enable) {
+          hostContents += `# ${item.name}\n ${item.content}\n\n`;
+        }
+        if (item.isFolder && item.state === State.Enable && item.hosts) {
+          item.hosts.forEach((host) => {
+            if (host.state === State.Enable) {
+              hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
+            }
+          });
+        }
+      });
+      await writeSysHostFile(hostContents);
+      await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
     }
     updateHostCommonsState(commonHosts);
     updateFoldersState(commonHosts.filter((c) => c.isFolder));

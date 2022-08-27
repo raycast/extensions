@@ -14,3 +14,4 @@ export const HostsCommonKey = "$HostsCommonKey$";
 export const SystemHostFilePath = "/etc/hosts";
 export const TempSystemHostFileName = "temp_hosts";
 export const BackupSystemHostName = "BackedUp Hosts";
+export const DefaultCacheCapacity = 10 * 1024 * 1024;
