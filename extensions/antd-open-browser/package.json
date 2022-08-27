@@ -4,7 +4,7 @@
   "title": "antd-open-browser",
   "description": "快速打开 antd 组件",
   "icon": "command-icon.png",
-  "author": "645381995@qq.com",
+  "author": "crazyair",
   "license": "MIT",
   "commands": [
     {
