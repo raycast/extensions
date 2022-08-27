@@ -1,8 +1,6 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 
-export function Pages (props: {
-  pages: [];
-}) {
+export function Pages(props: { pages: [] }) {
   return (
     <List>
       {props.pages?.map((page: any) => (
@@ -18,5 +16,5 @@ export function Pages (props: {
         />
       ))}
     </List>
-  )
+  );
 }

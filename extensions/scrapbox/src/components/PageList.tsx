@@ -1,10 +1,7 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import { Page } from "../types";
 
-export function PageList (props: {
-  project: string,
-  pages?: Page[] | null;
-}) {
+export function PageList(props: { project: string; pages?: Page[] | null }) {
   const { project, pages } = props;
 
   return (
@@ -16,11 +13,13 @@ export function PageList (props: {
           title={page.title}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={encodeURI(`https://scrapbox.io/${project}/${page.title}`)}></Action.OpenInBrowser>
+              <Action.OpenInBrowser
+                url={encodeURI(`https://scrapbox.io/${project}/${page.title}`)}
+              ></Action.OpenInBrowser>
             </ActionPanel>
           }
         />
       ))}
     </List>
-  )
+  );
 }
