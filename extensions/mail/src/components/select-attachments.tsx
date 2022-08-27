@@ -28,10 +28,9 @@ export const SelectAttachments = (props: SelectAttachmentsProps): JSX.Element =>
       props.setAttachments(attachments);
       pop();
     } else {
-      const Size: string = `${(size / 10 ** 6).toFixed(1)} MB`;
       const options: Toast.Options = {
         title: `Attachments Size Exceeds ${maximumFileSize.label}`,
-        message: `Total Size of Attachments is ${Size}`,
+        message: `Total Size of Attachments is ${(size / 10 ** 6).toFixed(1)} MB`,
         style: Toast.Style.Failure,
       };
       showToast(options);

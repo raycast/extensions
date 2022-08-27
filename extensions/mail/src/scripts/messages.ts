@@ -49,7 +49,7 @@ export const deleteMessage = async (message: Message, mailbox: string): Promise<
   }
 };
 
-export const getRecipients = async (message: Message): Promise<Message | undefined> => {
+export const getRecipients = async (message: Message): Promise<Message> => {
   const script = `
     set output to ""
     tell application "Mail"
@@ -85,9 +85,9 @@ export const getRecipients = async (message: Message): Promise<Message | undefin
 export const getAccountMessages = async (
   account: Account,
   cacheMailbox: string,
-  mailbox: string = "All Mail",
-  numMessages: number = 50,
-  unreadOnly: boolean = false
+  mailbox: string,
+  numMessages: number,
+  unreadOnly = false
 ): Promise<Message[] | undefined> => {
   let messages = cache.getMessages(account.id, cacheMailbox);
   const first = messages.length > 0 ? messages[0].id : undefined;

@@ -35,10 +35,10 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         setRecipients([props.message.senderAddress]);
       } else if (props.action === OutgoingMessageAction.ReplyAll) {
         const message = await getRecipients(props.message);
-        if (message) {
-          setRecipients([message.senderAddress, ...message.recipientAddresses!]);
+        if (message.recipientAddresses) {
+          setRecipients([message.senderAddress, ...message.recipientAddresses]);
         } else {
-          showToast(Toast.Style.Failure, "Failed to get all recipients");
+          setRecipients([message.senderAddress]);
         }
       }
     }
@@ -123,15 +123,17 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   );
 };
 
-type SelectRecipientsProps = any & {
-  recipients?: string[];
-  possibleRecipients: string[];
-  required?: boolean;
-  useTextField?: boolean;
-};
+type SelectRecipientsProps = Form.TagPicker.Props &
+  Form.TextField.Props & {
+    possibleRecipients: string[];
+    recipients?: string[];
+    required?: boolean;
+    useTextField?: boolean;
+  };
 
 const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
-  const requiredError = props.required && props.recipients.length === 0 ? "This field is required" : undefined;
+  const requiredError =
+    props.required && (!props.recipients || props.recipients.length === 0) ? "This field is required" : undefined;
   const [error, setError] = useState<string | undefined>(requiredError);
   const checkRecipient = (recipient: string | undefined) => {
     if (recipient) {

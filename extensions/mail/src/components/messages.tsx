@@ -129,7 +129,11 @@ export const MailMessage = (props: MessageProps): JSX.Element => {
 const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.Element => {
   const message = props.message;
   const navigation = useNavigation();
-  const pop = props.inMessageView ? navigation.pop : () => {};
+  const pop = props.inMessageView
+    ? navigation.pop
+    : () => {
+        return;
+      };
 
   const PrimaryActions = (): JSX.Element => {
     return primaryAction === "openMessage" ? (
