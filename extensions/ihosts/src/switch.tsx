@@ -1,6 +1,6 @@
 import { Color, Icon, LocalStorage, MenuBarExtra, showHUD } from "@raycast/api";
 import { getItemIcon } from "./component";
-import { HostFolderMode, State, SystemHostHashKey } from "./const";
+import { HostFolderMode, HostInactiveByFolderTip, State, SystemHostHashKey } from "./const";
 import { getHostCommonsCache, saveHostCommons } from "./utils/common";
 import { checkSysHostAccess, getSysHostAccess, getSysHostFileHash, writeSysHostFile } from "./utils/file";
 
@@ -16,7 +16,14 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Get write system hosts permission"
           icon={{ source: Icon.Fingerprint, tintColor: Color.Red }}
-          onAction={() => getSysHostAccess()}
+          onAction={async () => {
+            try {
+              await getSysHostAccess();
+              await showHUD("Write Permission got");
+            } catch (error) {
+              await showHUD("Failed to get Write Permission");
+            }
+          }}
         />
       </MenuBarExtra>
     );
@@ -97,9 +104,7 @@ export default function Command() {
                       key={host.id}
                       title={host.name}
                       tooltip={
-                        host.state === State.Enable && host.folderState === State.Disable
-                          ? "This item is not active because the current folder is disabled"
-                          : ""
+                        host.state === State.Enable && host.folderState === State.Disable ? HostInactiveByFolderTip : ""
                       }
                       icon={getItemIcon(host)}
                       onAction={() => onToggleItemState(host.id)}

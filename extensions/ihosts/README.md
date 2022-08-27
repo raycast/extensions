@@ -8,3 +8,4 @@
 1. Quickly enable or disable hosts
 2. Support preview, create, edit, delete, import, export host items
 3. Organize hosts by folder
+4. Support to quickly switch hosts by menu bar

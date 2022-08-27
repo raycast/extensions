@@ -13,7 +13,7 @@ import {
   showHUD,
   Alert,
 } from "@raycast/api";
-import { BackupSystemHostName, HostFolderMode, State, SystemHostFilePath } from "./const";
+import { BackupSystemHostName, HostFolderMode, HostInactiveByFolderTip, State, SystemHostFilePath } from "./const";
 import { exportHost, getContentFromFile, getSysHostAccess } from "./utils/file";
 import { useState } from "react";
 import { Action$ } from "raycast-toolkit";
@@ -120,7 +120,7 @@ export function getItemAccessories(item: IHostCommon) {
     if (item.folderState == State.Disable && item.state == State.Enable) {
       accessories.push({
         icon: { source: Icon.Info, tintColor: Color.SecondaryText },
-        tooltip: "This item is not active because the current folder is disabled",
+        tooltip: HostInactiveByFolderTip,
       });
     }
   }
