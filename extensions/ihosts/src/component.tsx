@@ -422,6 +422,7 @@ function UpsertHost(props: {
             {props.folders.map((folder) => {
               return (
                 <Form.Dropdown.Item
+                  key={folder.id}
                   value={folder.id}
                   title={folder.name}
                   icon={getItemIcon(folder)}
