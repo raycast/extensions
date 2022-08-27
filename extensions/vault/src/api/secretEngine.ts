@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 
 import { preferences } from "../helpers/preferences";
@@ -31,7 +31,7 @@ export const getSecretEngines = async (): Promise<SecretEngine[]> => {
       }
     }
   } catch (err) {
-    showToast(ToastStyle.Failure, `Could not load secret engines: ${err.message}`);
+    showToast(Toast.Style.Failure, `Could not load secret engines: ${err.message}`);
     return Promise.resolve([]);
   }
 };
