@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import fs from "fs";
+import { existsSync, statSync } from "fs";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import mime from "mime-types";
@@ -45,9 +45,9 @@ export const maximumFileSize: FileSize = {
 
 export const getSize = async (paths: string[]): Promise<number> => {
   const promises = paths
-    .filter((path: string) => fs.existsSync(path))
+    .filter((path: string) => existsSync(path))
     .map(async (path: string) => {
-      const item = fs.statSync(path);
+      const item = statSync(path);
       if (item.isFile()) {
         return item.size;
       } else {

@@ -59,7 +59,7 @@ export const getAllRecipients = async (): Promise<string[]> => {
     });
     const recipients = Object.entries(recipientCount)
       .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
-      .map(([recipient, _]: [string, number]) => recipient);
+      .map(([recipient, count]: [string, number]) => recipient);
     console.log(`Time Elapsed: ${(new Date().getTime() - start) / 1000}s`);
     console.log(`Fetched ${recipients.length} Recipients`);
     return recipients;

@@ -21,7 +21,7 @@
       "required": false,
       "data": [
         {
-          "title": "See Message", 
+          "title": "See Message",
           "value": "seeMessage"
         },
         {
@@ -63,7 +63,7 @@
           "value": "sent"
         },
         {
-          "title": "Junk Mail", 
+          "title": "Junk Mail",
           "value": "junk"
         },
         {
@@ -81,7 +81,7 @@
       "required": false
     },
     {
-      "name": "selectDirectory", 
+      "name": "selectDirectory",
       "title": "Select Attachments From",
       "description": "Directory to select mail attachments.",
       "type": "textfield",

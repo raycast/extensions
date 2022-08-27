@@ -25,7 +25,7 @@ export const MailAccount = (account: Account): JSX.Element => {
         <ActionPanel>
           <MailboxAction id={primaryMailbox} account={account} mailbox={Mailboxes[primaryMailbox]} />
           {Object.entries(Mailboxes)
-            .filter(([id, _]) => id !== primaryMailbox)
+            .filter(([id, mailbox]) => id !== primaryMailbox)
             .map(([id, mailbox], index) => (
               <MailboxAction key={index} id={id} account={account} mailbox={mailbox} />
             ))}
