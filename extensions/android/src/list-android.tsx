@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  getApplications,
   getPreferenceValues,
   Icon,
   List,
@@ -9,8 +8,13 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import fs from "fs";
 import { useEffect, useState } from "react";
+import {
+  isAndroidStudioInstalled,
+  isValidDirectory,
+  listDirectories,
+  runCommand,
+} from "./Utils";
 const { exec } = require("child_process");
 
 export default function Command() {
@@ -21,6 +25,18 @@ export default function Command() {
 
   useEffect(() => {
     async function listDir() {
+      if (await !isAndroidStudioInstalled()) {
+        showToast(Toast.Style.Failure, "Android studio is not installed!!");
+        setLoading(false);
+        return;
+      }
+
+      if (!isValidDirectory(projectsDirectory)) {
+        showToast(Toast.Style.Failure, "Invalid Projects directory!!");
+        setLoading(false);
+        return;
+      }
+
       await listDirectories(projectsDirectory)
         .then((value) => {
           const items = value
@@ -31,8 +47,12 @@ export default function Command() {
           showToast(Toast.Style.Success, "Loaded!");
         })
         .catch((err) => {
-          showToast(Toast.Style.Failure, "Something wrong happend!", err);
-          console.error("Error occured while reading directory!", err);
+          showToast(
+            Toast.Style.Failure,
+            "Error occured while reading directory!",
+            err
+          );
+          console.error(err);
         })
         .finally(() => {
           setLoading(false);
@@ -64,25 +84,16 @@ export default function Command() {
 }
 
 function openProject(projectsDirectory: any, project: string): void {
-  return exec(
-    `open -na Android\\ Studio.app --args ${projectsDirectory}/${project}`,
-    (err: any, stdout: any, stderr: any) => {
-      console.log(`opening ${projectsDirectory}/${project}`);
-      console.log(err);
-      console.log(stdout);
-      console.log(stderr);
+  const command = `open -na Android\\ Studio.app --args ${projectsDirectory}/${project}`;
+
+  runCommand(
+    command,
+    (out) => {
+      console.log(out);
       popToRoot;
+    },
+    (err) => {
+      console.log(err);
     }
   );
-}
-
-async function listDirectories(folder: string) {
-  return fs.promises.readdir(folder, { withFileTypes: true });
-}
-
-export async function isAndroidStudioInstalled() {
-  return (await getApplications()).find((app) => {
-    console.log(app);
-    (app.name === "Android studio") != undefined ? true : false;
-  });
 }

@@ -28,7 +28,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0"
+    "@raycast/api": "^1.39.0",
+    "expand-tilde": "^2.0.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.33.1",
@@ -43,7 +44,8 @@
     {
       "title": "Android Projects Directory",
       "name": "androidProjectsDirectory",
-      "description": "Locate your Android Projects, without '/'",
+      "description": "Locate your Android Projects",
+      "placeholder": "/Users/{user-name}/AndroidStudioProjects",
       "type": "textfield",
       "required": true,
       "default": ""
@@ -54,7 +56,7 @@
       "description": "Locate Android SDK path",
       "type": "textfield",
       "required": true,
-      "default": "/Users/{user-name}/Library/Android/sdk/"
+      "default": "~/Library/Android/sdk"
     }
   ],
   "scripts": {

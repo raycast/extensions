@@ -3,48 +3,59 @@ import {
   ActionPanel,
   Icon,
   List,
-  getPreferenceValues,
   popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-const { exec } = require("child_process");
+import {
+  androidSDK,
+  emulatorPath,
+  isAndroidStudioInstalled,
+  isValidDirectory,
+  runCommand,
+} from "./Utils";
 
 export default function Command() {
   const [items, setItems] = useState<string[]>(() => []);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function listDir() {
-      exec(
-        `${emulatorCommand()} -list-avds`,
-        (err: string, stdout: string, stderr: string) => {
-          console.log(err);
-          console.log(stdout);
-          console.log(stderr);
+    async function listEmulators() {
+      if (!isAndroidStudioInstalled()) {
+        showToast(Toast.Style.Failure, "Android studio is not installed");
+        setLoading(false);
+        return;
+      }
 
-          //error
-          if (err != null) {
-            showToast(
-              Toast.Style.Failure,
-              "Make sure you have the right Android SDK location",
-              err
-            );
-          }
+      if (!isValidDirectory(androidSDK())) {
+        showToast(Toast.Style.Failure, "Invalid Android SDK directory!!");
+        setLoading(false);
+        return;
+      }
 
-          //Success
-          if (stdout != null) {
-            const avds = stdout.split("\n").filter((p: string) => p.trim());
+      const command = `${emulatorPath()} -list-avds`;
+      console.log(command);
+      runCommand(
+        command,
+        (data) => {
+          if (data != null) {
+            const avds = (data + "")
+              .split("\n")
+              .filter((p: string) => p.trim());
             setItems(avds);
           }
 
+          setLoading(false);
+        },
+        (err) => {
+          showToast(Toast.Style.Failure, err);
           setLoading(false);
         }
       );
     }
 
-    listDir();
+    listEmulators();
   }, []);
 
   return (
@@ -70,25 +81,13 @@ export default function Command() {
 }
 
 function openEmultror(emulator: string): void {
-  exec(
-    `${emulatorCommand()} @${emulator}`,
-    (err: string, stdout: string, stderr: string) => {
-      console.log(err);
-      console.log(stdout);
-      console.log(stderr);
-
-      if (stderr != null) {
-        showToast(Toast.Style.Failure, stderr);
-      }
+  runCommand(
+    `${emulatorPath()} @${emulator}`,
+    (data) => {
       popToRoot;
+    },
+    (error) => {
+      showToast(Toast.Style.Failure, error);
     }
   );
-}
-
-function emulatorCommand(): string {
-  return `${androidSDK()}/emulator/emulator`;
-}
-
-function androidSDK() {
-  return getPreferenceValues().androidSDK;
 }
