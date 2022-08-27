@@ -1,11 +1,11 @@
 # raycast-android
 
-## List Android Projects
+## List Projects
 
 - Make sure to add your android projects directory.
 - Make sure Android studio and Raycast has access permission to this directory.
 
-## List Android Emulators
+## List Emulators
 
 - Make sure to export Android environment variables by adding them to `.zshrc` or using terminal.
 

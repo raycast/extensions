@@ -14,7 +14,7 @@ export async function listDirectories(folder: string) {
 }
 
 export function emulatorPath(): string {
-  return `${androidSDK()}emulator/emulator`;
+  return `${androidSDK()}/emulator/emulator`;
 }
 
 export function androidSDK() {
