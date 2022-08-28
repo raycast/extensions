@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stopwatch",
+  "title": "stopwatch",
+  "description": "Lets you start and stop a timer.",
+  "icon": "command-icon.png",
+  "author": "ungarmichael",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "startStopwatch",
+      "title": "Start Stopwatch",
+      "subtitle": "Starts the Stopwatch.",
+      "description": "Starts a stopwatch in the background.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stopStopwatch",
+      "title": "Stop Stopwatch",
+      "subtitle": "Stops the Stopwatch.",
+      "description": "Stops the stopwatch and copies the time to the clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "moment": "^2.29.4",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
