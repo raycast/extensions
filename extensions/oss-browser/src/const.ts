@@ -6,13 +6,13 @@ export enum ACL {
 }
 
 export enum FileType {
-  Img,
-  Code,
-  Text,
-  MarkDown,
-  Video,
-  Audio,
-  Unknown,
+  Img = "img",
+  Code = "code",
+  Text = "text",
+  MarkDown = "md",
+  Video = "video",
+  Audio = "audio",
+  Unknown = "doc",
 }
 
 export const ImgExts = [".png", ".jpeg", ".jpg", ".svg", ".webp", ".gif"];

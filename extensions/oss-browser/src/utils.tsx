@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import OSS from "ali-oss";
 import path from "node:path";
 import fsSync from "node:fs/promises";
@@ -162,34 +162,6 @@ export function getFileType(name: string): FileType {
     return FileType.Video;
   }
   return FileType.Unknown;
-}
-
-export function getFileIcon(name: string): Icon {
-  let icon: Icon;
-  switch (getFileType(name)) {
-    case FileType.Img:
-      icon = Icon.Image;
-      break;
-    case FileType.Code:
-      icon = Icon.CodeBlock;
-      break;
-    case FileType.Text:
-      icon = Icon.Text;
-      break;
-    case FileType.MarkDown:
-      icon = Icon.QuoteBlock;
-      break;
-    case FileType.Video:
-      icon = Icon.FilmStrip;
-      break;
-    case FileType.Audio:
-      icon = Icon.SpeakerOn;
-      break;
-    default:
-      icon = Icon.Document;
-      break;
-  }
-  return icon;
 }
 
 async function getFileDownloadLocation(): Promise<string> {

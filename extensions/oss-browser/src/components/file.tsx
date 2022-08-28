@@ -27,7 +27,6 @@ import {
   deleteObject,
   copyObject,
   getObjUrl,
-  getFileIcon,
 } from "../utils";
 
 function RenameFile(props: { file: IObject; refresh: () => void }) {
@@ -107,7 +106,7 @@ export function FileItem(props: { file: IObject; refresh: () => void; marks: str
       key={props.file.name}
       id={props.file.name}
       title={path.basename(props.file.name)}
-      icon={{ source: getFileIcon(props.file.name), tintColor: Color.PrimaryText }}
+      icon={{ source: "file.svg", tintColor: Color.SecondaryText }}
       accessories={[
         { text: formatFileSize(props.file.size) },
         {
