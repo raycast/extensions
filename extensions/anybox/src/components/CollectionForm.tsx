@@ -9,8 +9,8 @@ interface CollectionProp {
 }
 
 interface Props {
-	command: string
-	title: string
+  command: string;
+  title: string;
 }
 
 interface CollectionProp {
@@ -23,8 +23,8 @@ export default function CollectionsForm(props: Props) {
   const [starred] = useState<boolean>(false);
   const [collections, setCollections] = useState<CollectionProp[]>([]);
   const { pop } = useNavigation();
-	const command = props.command;
-	const title = props.title
+  const command = props.command;
+  const title = props.title;
 
   useEffect(() => {
     fetchCollections().then((tags) => {
@@ -54,7 +54,7 @@ export default function CollectionsForm(props: Props) {
                 starred: !!values.starred,
               };
               pop();
-              postAndCloseMainWindow(command, data)
+              postAndCloseMainWindow(command, data);
             }}
           />
         </ActionPanel>

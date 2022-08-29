@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import "dayjs/locale/en";
 import { Link } from "../utilities/searchRequest";
-import { Preferences } from "../utilities/searchRequest"
+import { Preferences } from "../utilities/searchRequest";
 
 const preferences: Preferences = getPreferenceValues();
 

@@ -53,9 +53,12 @@ export default function SearchResult() {
         let filteredCollections: CollectionProp[];
 
         if (preferences.searchCollections) {
-          filteredCollections = collectionsResult.filter((val) => {
-            return looseMatch(searchText,val.heading + ' ' + val.name);
-          }).filter(val => val.count > 0).slice(0, 5)
+          filteredCollections = collectionsResult
+            .filter((val) => {
+              return looseMatch(searchText, val.heading + " " + val.name);
+            })
+            .filter((val) => val.count > 0)
+            .slice(0, 5);
         } else {
           filteredCollections = [];
         }
