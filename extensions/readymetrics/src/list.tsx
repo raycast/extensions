@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Toast } from "@raycast/api";
 import { Checkin, requestUpcomingCheckins, requestPastCheckins } from "./client/readymetrics";
 import { useEffect, useLayoutEffect, useState } from "react";
 import CheckinListItem from "./components/CheckinListItem";
@@ -17,7 +17,13 @@ export default function Command() {
   };
 
   useEffect(() => {
-    fetchCheckins();
+    fetchCheckins()
+      .catch(async ()=>{
+        const toast = new Toast({ style: Toast.Style.Failure, title: "An error occurred when calling the Readymetrics API. " +
+            "Please verify your API key and try again." });
+        await toast.show();
+        return [];
+      });
   }, []);
 
   return (
