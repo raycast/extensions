@@ -5,12 +5,7 @@ import fetch, { AbortError, Headers } from "node-fetch";
 export default function Command() {
   const { state, search } = useSearch();
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Type @trending to see trending NFT collections or type NFT name..."
-      throttle
-    >
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Ttype NFT name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />
@@ -132,7 +127,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const searchName = searchText.trim() == "@trending" ? "" : searchText.trim();
+  const searchName = searchText.trim();
   const raw =
     '{"filters":{"$or":[{"name":{"$regex":"' +
     searchName +
