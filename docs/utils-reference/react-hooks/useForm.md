@@ -13,14 +13,16 @@ function useForm<T extends Form.Values>(props: {
   };
 }): {
   handleSubmit: (values: T) => void | boolean | Promise<void | boolean>;
-  setValidationError: (id: keyof T, error: ValidationError) => void;
-  setValue: <K extends keyof T>(id: K, value: T[K]) => void;
-  values: T;
   itemProps: {
     [id in keyof T]: Partial<Form.ItemProps<T[id]>> & {
       id: string;
     };
   };
+  setValidationError: (id: keyof T, error: ValidationError) => void;
+  setValue: <K extends keyof T>(id: K, value: T[K]) => void;
+  values: T;
+  focus: (id: keyof T) => void;
+  reset: (initialValues?: Partial<T>) => void;
 };
 ```
 
@@ -45,6 +47,8 @@ It also contains some additions for easy manipulation of the Form's data.
 - `values` is the current values of the Form.
 - `setValue` is a function that can be used to programmatically set the value of a specific field.
 - `setValidationError` is a function that can be used to programmatically set the validation of a specific field.
+- `focus` is a function that can be used to programmatically focus a specific field.
+- `reset` is a function that can be used to reset the values of the Form. Optionally, you can specify the values to set when the Form is reset.
 
 ## Example
 

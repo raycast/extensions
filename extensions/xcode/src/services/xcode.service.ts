@@ -12,6 +12,13 @@ export class XcodeService {
   }
 
   /**
+   * Xcode download url (Mac App Store)
+   */
+  static get downloadUrl(): string {
+    return "https://apps.apple.com/app/id497799835";
+  }
+
+  /**
    * Retrieve boolean if Xcode is currently running
    */
   static async isXcodeRunning(): Promise<boolean> {

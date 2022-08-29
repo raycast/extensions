@@ -1,5 +1,11 @@
 # bibmanager Changelog
 
+## [1.3.2] - 2022-08-29
+Updated logo
+
+## [1.3.1] - 2022-08-26
+Add option to paste stuff 
+
 ## [1.2.2] - 2022-08-25
 Improved downloading pdf which could lead to an outdated state
 
