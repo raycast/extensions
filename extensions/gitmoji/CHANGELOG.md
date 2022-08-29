@@ -1,6 +1,6 @@
 # Gitmoji Changelog
 
-## [Upgrade gitmoji] - 2022-0408-26
+## [Upgrade gitmoji] - 2022-08-29
 
 - Upgrade `gitmoji` to v3.12
 - Add changelog, readme and screenshot
