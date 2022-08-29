@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 
 import { preferences } from "../helpers/preferences";
@@ -27,7 +27,7 @@ export const getPaths = async (secretEngine: string, path: string): Promise<stri
       }
     }
   } catch (err) {
-    showToast(ToastStyle.Failure, `Could not load paths: ${err.message}`);
+    showToast(Toast.Style.Failure, `Could not load paths: ${err.message}`);
     return Promise.resolve([]);
   }
 };

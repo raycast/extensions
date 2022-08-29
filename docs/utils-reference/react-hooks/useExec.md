@@ -18,6 +18,7 @@ function useExec<T, U>(
     cwd?: string;
     env?: NodeJS.ProcessEnv;
     encoding?: BufferEncoding | "buffer";
+    input?: string | Buffer;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
     initialData?: U;
@@ -48,6 +49,7 @@ function useExec<T, U>(
     cwd?: string;
     env?: NodeJS.ProcessEnv;
     encoding?: BufferEncoding | "buffer";
+    input?: string | Buffer;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
     initialData?: U;
@@ -86,6 +88,7 @@ With a few options:
 - `options.cwd` is a string to specify the current working directory of the child process. By default, it will be `process.cwd()`.
 - `options.env` is a key-value pairs to set as the environment of the child process. It will extend automatically from `process.env`.
 - `options.encoding` is a string to specify the character encoding used to decode the `stdout` and `stderr` output. If set to `"buffer"`, then `stdout` and `stderr` will be a `Buffer` instead of a string.
+- `options.input` is a string or a Buffer to write to the `stdin` of the file.
 - `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds.
 - `options.parseOutput` is a function that accepts the output of the child process as an argument and returns the data the hooks will return - see [ParseExecOutputHandler](#parseexecoutputhandler). By default, the hook will return `stdout`.
 

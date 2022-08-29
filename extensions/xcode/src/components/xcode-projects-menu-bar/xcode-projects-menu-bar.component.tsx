@@ -7,14 +7,24 @@ import { XcodeProjectMenuBarService } from "../../services/xcode-project-menu-ba
  * Xcode Projects Menu Bar
  */
 export function XcodeProjectsMenuBar(): JSX.Element {
-  const { isLoading, data } = usePromise(XcodeProjectMenuBarService.xcodeProjects);
+  const xcodeProjects = usePromise(XcodeProjectMenuBarService.xcodeProjects);
   return (
-    <MenuBarExtra isLoading={isLoading} icon="xcode-menu-bar-icon.png" tooltip="Show Recent Xcode Projects">
+    <MenuBarExtra
+      isLoading={xcodeProjects.isLoading}
+      icon="xcode-menu-bar-icon.png"
+      tooltip="Show Recent Xcode Projects"
+    >
       <MenuBarExtra.Item
-        title={isLoading ? "Loading..." : data?.length ? "Recent Xcode Projects" : "No Recent Xcode Projects"}
+        title={
+          xcodeProjects.isLoading
+            ? "Loading..."
+            : xcodeProjects.data?.length
+            ? "Recent Xcode Projects"
+            : "No Recent Xcode Projects"
+        }
       />
-      {data?.length ? <MenuBarExtra.Separator /> : null}
-      {data?.map((xcodeProject) => {
+      {xcodeProjects.data?.length ? <MenuBarExtra.Separator /> : null}
+      {xcodeProjects.data?.map((xcodeProject) => {
         return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
       })}
     </MenuBarExtra>

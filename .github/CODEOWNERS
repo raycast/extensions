@@ -13,6 +13,7 @@
 /extensions/alpinejs-doc-search                      @aurawindsurfing
 /extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it
 /extensions/amphetamine                              @gstvds
+/extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/ansible-documentation                    @Kcih4518
 /extensions/anybox                                   @francisfeng
@@ -178,6 +179,7 @@
 /extensions/frankerfacez                             @davidchalifoux
 /extensions/gather                                   @yannglt
 /extensions/geohash-encode-decode                    @alrico88
+/extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
@@ -326,15 +328,18 @@
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @marcjulianschwarz
 /extensions/obsidian-bookmarks                       @Dru89
+/extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/ones                                     @k8scat
 /extensions/open-in-json-hero                        @ericallam @ivanovart
+/extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
 /extensions/open-link-in-specific-browser            @koinzhang
 /extensions/open-path                                @koinzhang
 /extensions/open-with-app                            @fturcheti
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openweathermap                           @tonka3000
 /extensions/opsgenie                                 @ricoberger
+/extensions/oss-browser                              @404J
 /extensions/parabol                                  @BartoszJarocki @BartoszJarocki
 /extensions/parcel-tracker                           @jjhok
 /extensions/parrot-translate                         @Haojen
@@ -352,6 +357,7 @@
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
 /extensions/placeholder                              @koinzhang
+/extensions/playwright-docs                          @AndrewUsher
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pocket                                   @vimtor
 /extensions/podcasts                                 @ron-myers
@@ -517,7 +523,7 @@
 /extensions/weather                                  @tonka3000
 /extensions/whatsapp                                 @vimtor
 /extensions/wi-fi                                    @koinzhang
-/extensions/wikipedia                                @vimtor
+/extensions/wikipedia                                @vimtor @shubzkothekar
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
 /extensions/word-count                               @itsmingjie
