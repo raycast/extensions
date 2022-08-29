@@ -13,8 +13,10 @@ interface FilterProp extends SidebarItemProp {
   type: "filter";
 }
 
-interface CollectionProp extends SidebarItemProp {
+export interface CollectionProp extends SidebarItemProp {
   type: "collection";
+  count: number; // Number of links in the collection.
+  heading?: string;
 }
 
 export interface AnydockProfile {
@@ -23,7 +25,6 @@ export interface AnydockProfile {
   documentCount: number; // Number of documents in the profile
   name: string;
 }
-
 async function isAnyboxInstalled() {
   const applications = await getApplications();
   return applications.some(({ bundleId }) => bundleId === "cc.anybox.Anybox");
@@ -34,9 +35,9 @@ export async function checkForAnyboxInstallation() {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Anybox is not installed.",
-      message: "You can install it from here!",
+      message: "Install it from here.",
       primaryAction: {
-        title: "Anybox on AppStore",
+        title: "Anybox on Mac App Store",
         onAction: (toast) => {
           open("https://apps.apple.com/app/anybox-the-bookmark-manager/id1593408455");
           toast.hide();
@@ -73,7 +74,7 @@ function request(path: string, method: string, body?: any, closeWindow = false) 
     });
 }
 
-function handleError(error: FetchError) {
+export function handleError(error: FetchError) {
   checkForAnyboxInstallation();
 
   if (error.code === "ECONNREFUSED") {
@@ -102,7 +103,9 @@ function handleError(error: FetchError) {
 
 const GET = (path: string, closeWindow = false) => request(path, "GET", undefined, closeWindow);
 
-const POST = (path: string, data: object, closeWindow = false) => request(path, "POST", data, closeWindow);
+const POST = (path: string, data: object, closeWindow = false) => {
+  return request(path, "POST", data, closeWindow);
+};
 
 export async function postAndCloseMainWindow(command: string, data: object = {}) {
   return POST(`${command}`, data, true);
@@ -120,9 +123,17 @@ export async function fetchProfiles() {
   return GET("anydock-profiles") as Promise<[AnydockProfile]>;
 }
 
+export async function getCollections() {
+  return GET("collections") as Promise<[CollectionProp]>;
+}
+
+export async function getFilters() {
+  return GET("filters") as Promise<[FilterProp]>;
+}
+
 export async function fetchSidebar() {
-  const filters = GET("filters") as Promise<[FilterProp]>;
-  const collections = GET("collections") as Promise<[CollectionProp]>;
+  const filters = getFilters();
+  const collections = getCollections();
   return Promise.all([filters, collections]).then(([filters, collections]) => {
     const result = [...filters, ...collections];
     return result;

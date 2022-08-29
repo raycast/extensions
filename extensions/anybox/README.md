@@ -6,25 +6,35 @@ Show Quick Save, toggle Anydock, save note or do other things right in Raycast.
 
 ## Supported Commands
 
-1. Show Quick Save
+1.  Search Links
 
-2. Save Current Tab
+2.  Show Quick Save
 
-3. Save Clipboard
+3.  Save Current Tab
 
-4. Save Note
+4.  Save Current Tab with Collections
 
-5. Toggle Anydock
+5.  Save Clipboard
 
-6. Toggle Stash Box
+6.  Save Clipboard with Collections
 
-7. Empty Stash Box
+7.  Save Note
 
-8. Switch Anydock Profile
+8.  Toggle Anydock
 
-9. Open All in Anydock Profile
+9.  Toggle Stash Box
 
-10. Show List
+10. Toggle Link Detection
+
+11. Switch Anydock Profile
+
+12. Open All in Anydock Profile
+
+13. Show List
+
+## Getting API Key for Seach Links Command
+
+Go to Anybox › Preferences › General to copy API key.
 
 ## Development
 

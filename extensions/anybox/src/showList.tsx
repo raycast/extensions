@@ -7,6 +7,8 @@ interface SidebarItemProps {
   name: string;
   heading?: string;
   type?: string;
+  icon?: string;
+  color?: string;
 }
 
 function itemTitle(item: SidebarItemProps) {
@@ -96,7 +98,11 @@ export default function Sidebar() {
           <List.Item
             title={itemTitle(item)}
             subtitle={itemSubtitle(item)}
-            icon={{ source: Icon.List, tintColor: Color.Purple }}
+            icon={{
+              source: `http://localhost:6391/sf-symbols/${item.icon}`,
+              fallback: Icon.List,
+              tintColor: item.color || Color.Purple,
+            }}
             accessoryTitle="Command"
             key={item.id}
             actions={
