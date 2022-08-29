@@ -1,9 +1,13 @@
 import useSWR from "swr";
 import got from "got";
 
-interface WikipediaPageExtractResponse {
+interface WikipediaPageDataResponse {
   title: string;
   extract: string;
+  description: string;
+  thumbnail: {
+    source: string;
+  };
 }
 
 interface WikipediaFeaturedSearchResponse {
@@ -26,7 +30,7 @@ const client = got.extend({
 });
 
 export async function getRandomPageTitle() {
-  const response = await client.get("api/rest_v1/page/random/summary").json<WikipediaPageExtractResponse>();
+  const response = await client.get("api/rest_v1/page/random/summary").json<WikipediaPageDataResponse>();
   return response.title;
 }
 
@@ -59,9 +63,9 @@ async function findPagesByTitle(search: string) {
   return response.query.prefixsearch.map((result) => result.title);
 }
 
-async function getPageExtract(title: string) {
-  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<WikipediaPageExtractResponse>();
-  return response.extract;
+async function getPageData(title: string) {
+  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<WikipediaPageDataResponse>();
+  return response;
 }
 
 export function encodeTitle(title: string) {
@@ -74,10 +78,10 @@ export function useWikipediaSearch(search: string) {
   return useSWR(["pages", search], () => findPagesByTitle(search));
 }
 
-export function useWikipediaPageSummary(title?: string) {
+export function useWikipediaPageData(title?: string) {
   return useSWR(title ? ["page/summary", title] : null, () => {
     if (title) {
-      return getPageExtract(title);
+      return getPageData(title);
     }
   });
 }
