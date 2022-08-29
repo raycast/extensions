@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android",
   "title": "Android",
-  "description": "Useful Android commands",
+  "description": "Useful Android commands to list projects and emulators",
   "icon": "command-icon.png",
   "author": "mibrahimdev",
   "categories": [
