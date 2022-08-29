@@ -26,13 +26,13 @@ export default function Command() {
   useEffect(() => {
     async function listDir() {
       if (await !isAndroidStudioInstalled()) {
-        showToast(Toast.Style.Failure, "Android studio is not installed!!");
+        showToast(Toast.Style.Failure, "Android studio is not installed");
         setLoading(false);
         return;
       }
 
       if (!isValidDirectory(projectsDirectory)) {
-        showToast(Toast.Style.Failure, "Invalid Projects directory!!");
+        showToast(Toast.Style.Failure, "Invalid Projects directory");
         setLoading(false);
         return;
       }
@@ -44,7 +44,7 @@ export default function Command() {
             .map((dirent) => dirent.name);
 
           setItems(items);
-          showToast(Toast.Style.Success, "Loaded!");
+          showToast(Toast.Style.Success, "Loaded");
         })
         .catch((err) => {
           showToast(
