@@ -21,7 +21,7 @@ export default function Command() {
       const toast = new Toast({
         style: Toast.Style.Failure,
         title: "An error occurred",
-        title: "Please verify your API key and try again.",
+        message: "Please verify your API key and try again.",
       });
       await toast.show();
       return [];
