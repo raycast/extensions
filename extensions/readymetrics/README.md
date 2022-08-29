@@ -37,7 +37,7 @@ A Raycast extension to list upcoming and past check-ins in Readymetrics.
 - Log into Readymetrics at https://www.readymetrics.com
 - Click your avatar image in the upper left-hand section of the sidebar
 - Click on `Settings`
-- Click on `API` on the left sidebar
+- Click on `Integrations` on the left sidebar
 - Give your personal access token a name like `Raycast`
 - Click `Save` 
 - Click the API key and your personal access token will be copied to your clipboard
