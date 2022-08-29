@@ -16,6 +16,11 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.2.1
+
+- Added the `focus` and `reset` methods to `useForm`.
+- Added the `input` option to `useExec`.
+
 ### v1.2.0
 
 Added [`useExec`](./react-hooks/useExec.md) and [`useForm`](./react-hooks/useForm.md) hooks.
