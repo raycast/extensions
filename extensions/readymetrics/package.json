@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "list",
-      "title": "List check-ins",
+      "title": "List Check-ins",
       "subtitle": "Readymetrics",
       "description": "Show upcoming and past check-ins in Readymetrics.",
       "mode": "view"
