@@ -17,13 +17,14 @@ export default function Command() {
   };
 
   useEffect(() => {
-    fetchCheckins()
-      .catch(async ()=>{
-        const toast = new Toast({ style: Toast.Style.Failure, title: "An error occurred when calling the Readymetrics API. " +
-            "Please verify your API key and try again." });
-        await toast.show();
-        return [];
+    fetchCheckins().catch(async () => {
+      const toast = new Toast({
+        style: Toast.Style.Failure,
+        title: "An error occurred when calling the Readymetrics API. " + "Please verify your API key and try again.",
       });
+      await toast.show();
+      return [];
+    });
   }, []);
 
   return (
