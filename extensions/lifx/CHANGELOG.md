@@ -18,3 +18,7 @@
 - Removed some effects
 - Fixed some bugs
 - Added a color icon for lights
+
+## [Version 1.2.4] - 2022-08-30
+- Added empty screen for effects and scenes
+- Added toast message for Invalid Token

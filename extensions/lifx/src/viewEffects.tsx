@@ -40,7 +40,14 @@ export default function viewScenes() {
 
   return (
     <List>
-      {effects &&
+      {effects.length === 0 ? (
+         <List.EmptyView
+         key="empty"
+         icon="lifx-extension-icon.png"
+         title="No effects found"
+         description="Check if you have any effects for your lights"
+       />
+      ) : (
         effects.map((effect) => (
           <List.Item
             key={effect.value}
@@ -56,7 +63,9 @@ export default function viewScenes() {
               </ActionPanel>
             }
           />
-        ))}
+        ))
+      )
+      }
     </List>
   );
 }

@@ -58,7 +58,15 @@ export default function viewScenes() {
 
   return (
     <List isLoading={isLoading}>
-      {data &&
+      {data?.length === 0 ? (
+         <List.EmptyView
+         key="empty"
+         icon="lifx-extension-icon.png"
+         title="No scenes found"
+         description="Check if you have any scenes for your lights"
+       />
+      ):
+      ( data && 
         data.map((scene) => (
           <List.Item
             key={scene.uuid}
@@ -69,7 +77,9 @@ export default function viewScenes() {
               </ActionPanel>
             }
           />
-        ))}
+        ))
+      )
+      }
     </List>
   );
 }

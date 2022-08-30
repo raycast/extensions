@@ -6,3 +6,4 @@
 - [x] Add checks for lights compatible with multicolor
 - [ ] Clean up the interfaces
 - [ ] Add prefrences for config
+- [ ] Add timeout to api request

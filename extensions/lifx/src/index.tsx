@@ -222,7 +222,7 @@ export default function Command() {
       {data.length === 0 ? (
         <List.EmptyView
           key="empty"
-          icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/144/apple/325/thinking-face_1f914.png"
+          icon="lifx-extension-icon.png"
           title="No lights found"
           description="Check if you have lights compatible with color"
         />
