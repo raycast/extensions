@@ -1,15 +1,20 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Cache } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { Api, Lights } from "./interfaces";
 
 export async function FetchLights(config: AxiosRequestConfig) {
+  const cache = new Cache();
   try {
+    if (cache.has("lights")) {
+      return JSON.parse(cache.get("lights") || "");
+    }
     const result = await axios.get("https://api.lifx.com/v1/lights/all", config);
     const data: Lights.Light[] = result.data;
     if (data.length === 0) {
       throw new Error("No lights found");
     }
     if (data[0].connected === true) {
+      cache.set("lights", JSON.stringify(data));
       return data;
     } else {
       const potentialErrorData: Api.Error = result.data;
