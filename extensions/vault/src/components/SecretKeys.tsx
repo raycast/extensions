@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { getSecret, Secret } from "../api/secret";
@@ -35,11 +35,11 @@ const SecretKeyItem = (props: { secretKey: string; secretValue: string }) => {
       icon={Icon.Eye}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction title="Copy" icon={Icon.List} content={props.secretValue} />
-          <ActionPanel.Item
+          <Action.CopyToClipboard title="Copy" icon={Icon.List} content={props.secretValue} />
+          <Action
             title="Show"
             icon={Icon.Eye}
-            onAction={() => showToast(ToastStyle.Success, props.secretKey, props.secretValue)}
+            onAction={() => showToast(Toast.Style.Success, props.secretKey, props.secretValue)}
           />
         </ActionPanel>
       }

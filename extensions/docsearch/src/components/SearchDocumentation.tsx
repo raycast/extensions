@@ -6,7 +6,7 @@ import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 
-export function SearchDocumentation(props: { docsName: string; lang?: string }) {
+export function SearchDocumentation(props: { docsName: string; lang?: string; quickSearch?: string }) {
   const currentAPI = APIData.find((api) =>
     props.lang ? api.name === props.docsName && api.lang === props.lang : api.name === props.docsName
   ) as IAPIData;
@@ -36,7 +36,7 @@ export function SearchDocumentation(props: { docsName: string; lang?: string }) 
   };
 
   useEffect(() => {
-    (async () => setSearchResults(await search()))();
+    (async () => setSearchResults(await search(props.quickSearch)))();
   }, []);
 
   return (
@@ -45,6 +45,7 @@ export function SearchDocumentation(props: { docsName: string; lang?: string }) 
       navigationTitle={currentAPI.name}
       isLoading={isLoading || searchResults === undefined}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      searchText={props.quickSearch}
     >
       {searchResults?.map((result) => (
         <List.Item
