@@ -6,7 +6,12 @@ interface SidebarItemProp {
   name: string;
   color: string; // HEX color
   icon: string; // SF Symbol Name
-  type: "filter" | "collection";
+  count: number; // Number of links in the list.
+  type: "filter" | "collection" | "preset";
+}
+
+interface PresetProp extends SidebarItemProp {
+  type: "preset";
 }
 
 interface FilterProp extends SidebarItemProp {
@@ -15,7 +20,6 @@ interface FilterProp extends SidebarItemProp {
 
 export interface CollectionProp extends SidebarItemProp {
   type: "collection";
-  count: number; // Number of links in the collection.
   heading?: string;
 }
 
@@ -131,11 +135,16 @@ export async function getFilters() {
   return GET("filters") as Promise<[FilterProp]>;
 }
 
+export async function getPresetSidebarItems() {
+  return GET("presets") as Promise<[PresetProp]>;
+}
+
 export async function fetchSidebar() {
+  const presets = getPresetSidebarItems();
   const filters = getFilters();
   const collections = getCollections();
-  return Promise.all([filters, collections]).then(([filters, collections]) => {
-    const result = [...filters, ...collections];
+  return Promise.all([presets, filters, collections]).then(([presets, filters, collections]) => {
+    const result = [...presets, ...filters, ...collections];
     return result;
   });
 }

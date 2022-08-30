@@ -1,28 +1,28 @@
 <h1 align="center">Anybox Extension for Raycast</h1>
 
-Show Quick Save, toggle Anydock, save note or do other things right in Raycast.
+Search links, save links, show Quick Save, toggle Anydock or do other things right in Raycast.
 
 [View in Raycast Store](https://www.raycast.com/francisfeng/anybox)
 
 ## Supported Commands
 
-1.  Search Links
+1. Search Links
 
-2.  Show Quick Save
+2. Show Quick Save
 
-3.  Save Current Tab
+3. Save Current Tab
 
-4.  Save Current Tab with Collections
+4. Save Current Tab with Collections
 
-5.  Save Clipboard
+5. Save Clipboard
 
-6.  Save Clipboard with Collections
+6. Save Clipboard with Collections
 
-7.  Save Note
+7. Save Note
 
-8.  Toggle Anydock
+8. Toggle Anydock
 
-9.  Toggle Stash Box
+9. Toggle Stash Box
 
 10. Toggle Link Detection
 
