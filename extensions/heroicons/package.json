@@ -18,7 +18,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "icons",
       "title": "Heroicons Search",
       "description": "Search and preview Heroicons",
       "mode": "view"
@@ -26,8 +26,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
-    "@types/title": "^3.4.1",
-    "title": "^3.5.3"
+    "got": "^12.3.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
