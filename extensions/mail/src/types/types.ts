@@ -31,14 +31,20 @@ export type Message = {
 
 export type OutgoingMessageForm = {
   account: string;
+  to: string[] | string;
+  cc: string[] | string;
+  bcc: string[] | string;
+  subject: string;
+  content: string;
+};
+
+export type OutgoingMessage = {
+  account: string;
   to: string[];
   cc: string[];
   bcc: string[];
   subject: string;
   content: string;
-};
-
-export type OutgoingMessage = OutgoingMessageForm & {
   attachments?: string[];
 };
 

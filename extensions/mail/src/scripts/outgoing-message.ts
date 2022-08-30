@@ -2,8 +2,6 @@ import { Color, Icon, Image, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { OutgoingMessage } from "../types/types";
 import emailRegex from "email-regex";
-import { homedir } from "os";
-import fs from "fs";
 
 export enum OutgoingMessageAction {
   Compose = "Send Message",
@@ -21,11 +19,15 @@ export const OutgoingMessageIcons: { [key: string]: Image.ImageLike } = {
   [OutgoingMessageAction.Redirect]: Icon.ArrowRightCircle,
 };
 
-export const newOutgoingMessage = async (message: OutgoingMessage, action?: OutgoingMessageAction): Promise<void> => {
+export const newOutgoingMessage = async (
+  message: OutgoingMessage,
+  action = OutgoingMessageAction.Compose
+): Promise<void> => {
   if (message.to.length === 0) {
-    await showToast(Toast.Style.Failure, "No Recipients");
+    await showToast(Toast.Style.Failure, "No Recipients Specified");
     return;
   }
+  console.log(message);
   for (const recipient of message.to) {
     if (!emailRegex({ exact: true }).test(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid Email for Recipient");
@@ -33,9 +35,23 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action?: Outg
     }
   }
   let attachments = message.attachments && message.attachments.length > 0 ? message.attachments : [];
-  attachments = attachments
-    .filter((attachment: string) => attachment.includes(homedir()) && fs.existsSync(attachment))
-    .map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+  attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+  let actionScript = (() => {
+    switch (action) {
+      case OutgoingMessageAction.Compose:
+        return "send";
+      case OutgoingMessageAction.Reply:
+        return "reply";
+      case OutgoingMessageAction.ReplyAll:
+        return "reply all";
+      case OutgoingMessageAction.Forward:
+        return "forward";
+      case OutgoingMessageAction.Redirect:
+        return "redirect";
+      default:
+        return "send";
+    }
+  })();
   const script = `
     tell application "Mail"
       set theTos to {"${message.to.join(`", "`)}"}
@@ -43,9 +59,10 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action?: Outg
       set theBccs to {"${message.bcc.join(`", "`)}"}
       set theAttachments to {"${attachments.join(`", "`)}"}
       set attechmentDelay to 1
-      set newMessage to make new outgoing message with properties {sender:"${message.account}", subject:"${
+      $
+      set newMessage to make new outgoing message with properties {sender: "${message.account}", subject: "${
     message.subject
-  }", content:"${message.content}", visible:false}
+  }", content: "${message.content}", visible: false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}
@@ -63,7 +80,7 @@ export const newOutgoingMessage = async (message: OutgoingMessage, action?: Outg
           end try
         end repeat
       end tell
-      ${action} newMessage
+      ${actionScript} newMessage
     end tell  
   `;
   await runAppleScript(script);

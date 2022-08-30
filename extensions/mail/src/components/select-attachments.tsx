@@ -33,7 +33,7 @@ export const SelectAttachments = (props: SelectAttachmentsProps): JSX.Element =>
         message: `Total Size of Attachments is ${(size / 10 ** 6).toFixed(1)} MB`,
         style: Toast.Style.Failure,
       };
-      showToast(options);
+      await showToast(options);
     }
   };
 

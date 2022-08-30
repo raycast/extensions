@@ -92,7 +92,7 @@ export const MessageListItem = (props: MessageProps): JSX.Element => {
 };
 
 export const MailMessage = (props: MessageProps): JSX.Element => {
-  const [content, setContent] = useState<string | null>(null);
+  const [content, setContent] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   let message = props.message;
@@ -107,14 +107,14 @@ export const MailMessage = (props: MessageProps): JSX.Element => {
     };
     getContent();
     return () => {
-      setContent(null);
+      setContent(undefined);
     };
   }, []);
 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={!isLoading && content ? formatMarkdown(message.subject, content) : undefined}
+      markdown={!isLoading ? formatMarkdown(message.subject, content) : undefined}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="From" text={message.senderName} icon={Icon.Person} />

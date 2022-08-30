@@ -25,8 +25,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
     setAccounts(await getMailAccounts());
     const response: string | undefined = await LocalStorage.getItem("all-recipients");
     if (response) {
-      const recipients = JSON.parse(response);
-      setPossibleRecipients(recipients);
+      setPossibleRecipients(JSON.parse(response));
     } else {
       setPossibleRecipients([]);
     }
@@ -57,6 +56,15 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const setMailAttachments = (attachments: string[]) => setAttachments(attachments);
 
   const handleSubmit = async (values: OutgoingMessageForm) => {
+    if (typeof values.to === "string") {
+      values.to = values.to.split(",").map((recipient: string) => recipient.trim());
+    }
+    if (typeof values.cc === "string") {
+      values.cc = values.cc.split(",").map((recipient: string) => recipient.trim());
+    }
+    if (typeof values.bcc === "string") {
+      values.bcc = values.bcc.split(",").map((recipient: string) => recipient.trim());
+    }
     const message: OutgoingMessage = {
       account: values.account,
       to: values.to,
@@ -133,7 +141,7 @@ type SelectRecipientsProps = Form.TagPicker.Props &
 
 const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
   const requiredError =
-    props.required && (!props.recipients || props.recipients.length === 0) ? "This field is required" : undefined;
+    props.required && (!props.recipients || props.recipients.length === 0) ? "Email address is required" : undefined;
   const [error, setError] = useState<string | undefined>(requiredError);
   const checkRecipient = (recipient: string | undefined) => {
     if (recipient) {
@@ -146,6 +154,21 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       setError(requiredError);
     }
   };
+  return (
+    <Form.TextField
+      {...props}
+      error={error}
+      title={titleCase(props.id)}
+      defaultValue={props.recipients?.join(", ")}
+      placeholder="Enter Email Address..."
+      info="Enter email addresses separated by commas"
+      onChange={(values: string) => {
+        values.split(",").forEach((recipient: string) => checkRecipient(recipient.trim()));
+      }}
+    />
+  );
+
+  /*
   return !(props.possibleRecipients.length < 25 || props.useTextField) ? (
     <Form.TagPicker
       {...props}
@@ -173,9 +196,10 @@ const SelectRecipients = (props: SelectRecipientsProps): JSX.Element => {
       defaultValue={props.recipients?.join(", ")}
       placeholder="Enter Email Address..."
       info="Enter email addresses separated by commas"
-      onChange={(value: string) => {
-        value.split(",").forEach((recipient: string) => checkRecipient(recipient.trim()));
+      onChange={(values: string) => {
+        values.split(",").forEach((recipient: string) => checkRecipient(recipient.trim()));
       }}
     />
   );
+  */
 };

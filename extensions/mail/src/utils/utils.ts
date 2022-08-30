@@ -43,13 +43,15 @@ export const titleCase = (str: string): string => {
   return str.trim();
 };
 
-export const formatMarkdown = (title: string, text: string): string => {
+export const formatMarkdown = (title: string, text: string | undefined): string => {
   title = titleCase(title);
-  text = cleanTextUtils.strip.nonASCII(text);
-  text = cleanTextUtils.replace.diacritics(text);
-  text = cleanTextUtils.replace.exoticChars(text);
-  text = cleanTextUtils.replace.smartChars(text);
-  text = text.trim().replaceAll(/[ ][ ]+/g, " ");
+  if (text) {
+    text = cleanTextUtils.strip.nonASCII(text);
+    text = cleanTextUtils.replace.diacritics(text);
+    text = cleanTextUtils.replace.exoticChars(text);
+    text = cleanTextUtils.replace.smartChars(text);
+    text = text.trim().replaceAll(/[ ][ ]+/g, " ");
+  }
   return json2md([{ h1: title }, { p: text }]);
 };
 
