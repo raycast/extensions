@@ -4,7 +4,6 @@ This project is developed by Glaze from un.Block. **We are trying to improve the
 
 For crypto community, check out our [guide](raycast.unblock256.com) for crypto kit including necessary crypto plugin for raycast users.
 ![nft_search_1](media/nft_search_1.png)
-![nft_search_2](media/nft_search_2.png)
 
 # Tech
 
