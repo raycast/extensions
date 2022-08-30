@@ -5,7 +5,7 @@ import fetch, { AbortError, Headers } from "node-fetch";
 export default function Command() {
   const { state, search } = useSearch();
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Ttype NFT name..." throttle>
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Type NFT name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />
