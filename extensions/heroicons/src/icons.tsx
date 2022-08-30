@@ -1,12 +1,10 @@
 import { environment, Cache, showHUD, Grid, ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
-
 import { writeFileSync } from "fs";
 import { join } from "path";
-
 import Heroicons from "./heroicons";
-
 import got from "got";
+import title from "title";
 
 const cache = new Cache();
 
@@ -65,7 +63,9 @@ export default function IconsCommand() {
             return (
               <Grid.Item
                 key={name}
-                keywords={[name, ...keywords]}
+                keywords={keywords}
+                title={title(name)}
+                subtitle={title(variant)}
                 content={{
                   source: Heroicons[variant](name),
                 }}
