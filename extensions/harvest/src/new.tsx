@@ -98,16 +98,18 @@ export default function Command({
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Project Selected",
       });
+      return;
     }
     if (values.task_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Task Selected",
       });
+      return;
     }
 
     setTimeFormat(hours);
@@ -219,7 +221,7 @@ export default function Command({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={handleSubmit}
+            onSubmit={() => handleSubmit()}
             title={entry?.id ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
           />
         </ActionPanel>
