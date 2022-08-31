@@ -95,6 +95,7 @@
 /extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @Rawnly
 /extensions/conventional-comments                    @krzysztofzuraw
+/extensions/convert                                  @nielsvanrijn
 /extensions/converter                                @koinzhang
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
@@ -318,6 +319,7 @@
 /extensions/netlify                                  @Destiner @jonohewitt
 /extensions/nextcloud                                @uetchy
 /extensions/nextjs-docs                              @PrasadChinwal
+/extensions/nft-search                               @glazec
 /extensions/night-light                              @devmoath
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
@@ -538,6 +540,7 @@
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/xqc                                      @Aayush9029
 /extensions/yandex-music                             @AlexStrNik
+/extensions/yopass                                   @ricoberger
 /extensions/youdao-translate                         @tiancheng92
 /extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
