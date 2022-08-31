@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "web-converter",
   "title": "Web Converter",
-  "description": "Converts everything web related:\n- rem\n- px\n- pt\n- hex\n- hex (with opacity)\n- rgb\n- rgba\n- hsl\n- hsla",
+  "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla",
   "icon": "icon.png",
   "author": "nielsvanrijn",
   "categories": [
@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Convert",
-      "description": "Converts everything web related:\n- rem\n- px\n- pt\n- hex\n- hex (with opacity)\n- rgb\n- rgba\n- hsl\n- hsla",
+      "title": "Convert Unit",
+      "description": "Converts everything web related: rem, px, pt, hex, hex (with opacity), rgb, rgba, hsl and hsla",
       "mode": "view",
       "preferences": [
         {
