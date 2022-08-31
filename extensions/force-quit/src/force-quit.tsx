@@ -1,5 +1,6 @@
 import { runAppleScriptSync } from "run-applescript";
 import { List, Action, ActionPanel, closeMainWindow } from "@raycast/api";
+import { exec } from "child_process";
 
 function getOpenApps() {
     const apps = runAppleScriptSync(`
@@ -13,7 +14,6 @@ function getOpenApps() {
 }
 
 function forceQuit(app: string) {
-  const { exec } = require("child_process");
   exec(`killall '${app}'`);
 }
 
