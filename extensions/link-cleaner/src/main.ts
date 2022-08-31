@@ -74,5 +74,5 @@ export default async function main() {
 
   // finishing touches
   await Clipboard.copy(newText);
-  await showHUD("Remove tracking parameters");
+  await showHUD("Removed tracking parameters");
 }
