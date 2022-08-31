@@ -184,9 +184,7 @@ export default function IconsCommand() {
                   {Object.entries(actions).map((action) => {
                     const [name, fn] = action;
                     if (name == preferences.primaryAction || name == preferences.secondaryAction) return;
-                    {
-                      return fn(variant, icon);
-                    }
+                    return fn(variant, icon);
                   })}
                 </ActionPanel>
               }
