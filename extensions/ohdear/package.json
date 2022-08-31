@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ohdear",
   "title": "Oh Dear",
-  "description": "Can be used to check up on Oh Dear",
+  "description": "Manage your Oh Dear sites easy directly from Raycast",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [
@@ -18,13 +18,13 @@
       "name": "index",
       "title": "Show Sites",
       "subtitle": "Oh Dear",
-      "description": "Template for showing a static list and a detail view",
+      "description": "Shows sites added in Oh Dear and allowing you to control it directly",
       "mode": "view"
     },
     {
       "name": "add",
       "title": "Add Site",
-      "description": "Adds a new site to monitor",
+      "description": "Adds a new site to the Oh Dear monitor",
       "mode": "view",
       "subtitle": "Oh Dear",
       "icon": "command-icon.png"
