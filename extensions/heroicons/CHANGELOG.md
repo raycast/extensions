@@ -1,8 +1,11 @@
-# heroicons Changelog
+# Heroicons Changelog
 
-## [UI Update] - 2022-08-31
+## [v1.0.0] - 2022-08-31
 
-Moved logo to the correct path
+- Improved search
+- Fixed missing icons
+- Fixed bad visibilty of icons in dark mode
+- Moved logo to the correct path
 
 ## [Initial Version] - 2022-08-25
 
