@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search NFT",
+      "title": "NFT Search",
       "description": "Show the real-time price and info of NFT",
       "mode": "view"
     }
