@@ -221,8 +221,7 @@ export default function Command() {
             icon={{ source: Icon.CircleFilled, tintColor: `hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})` }}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
-                />
+                <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`} />
               </ActionPanel>
             }
           />
