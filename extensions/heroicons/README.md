@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./metadata/hero-image.png" height="128" />
+<img src="./media/hero-image.png" height="128" />
 
 <h1 align="center">Heroicons</h1>
 
