@@ -24,6 +24,68 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "description": "Select the primary action that will be performed [↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Action",
+      "default": "pasteJSX",
+      "data": [
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "description": "Select the secondary action that will be performed [⌘ + ↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Secondary Action",
+      "default": "pasteSVG",
+      "data": [
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
     "got": "^12.3.1",
