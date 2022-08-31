@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "thesaurus",
+  "title": "Thesaurus",
+  "description": "Search words from Thesaurus in Raycast",
+  "icon": "command-icon.png",
+  "author": "szalaybalazs",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "thesaurus",
+    "saurus",
+    "dictionary",
+    "synonym",
+    "antonym",
+    "word"
+  ],
+  "commands": [
+    {
+      "name": "saurus",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "word",
+          "title": "Word",
+          "placeholder": "Expression"
+        }
+      ],
+      "title": "Search for Word",
+      "subtitle": "Thesaurus",
+      "description": "Search for any word in the Thesaurus database",
+      "mode": "view",
+      "keywords": [
+        "saurus",
+        "search",
+        "word",
+        "synonym",
+        "antonym",
+        "sentence",
+        "example"
+      ]
+    },
+    {
+      "name": "synonym",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "word",
+          "title": "Word",
+          "placeholder": "Expression"
+        }
+      ],
+      "title": "Search for Synonym",
+      "subtitle": "Thesaurus",
+      "description": "Search for synonyms",
+      "mode": "view",
+      "keywords": [
+        "saurus",
+        "search",
+        "word",
+        "synonym"
+      ]
+    },
+    {
+      "name": "antonym",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "word",
+          "title": "Word",
+          "placeholder": "Expression"
+        }
+      ],
+      "title": "Search for Antonym",
+      "subtitle": "Thesaurus",
+      "description": "Search for antonyms",
+      "mode": "view",
+      "keywords": [
+        "saurus",
+        "search",
+        "word",
+        "antonym"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.3.1",
+    "canvas": "^2.9.3",
+    "jsdom": "^20.0.0",
+    "node-html-parser": "^5.4.2",
+    "undici": "^5.10.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "version": "0.0.1",
+  "owner": "szalaybalazs"
+}

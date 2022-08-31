@@ -1,0 +1,2168 @@
+{
+  "categoryListData": {
+    "data": {
+      "menu": [
+        {
+          "id": 150105,
+          "name": "Meanings",
+          "url": "#",
+          "linkId": "",
+          "subMenu": [
+            {
+              "id": 175294,
+              "name": "Emoji",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Femoji\u002F",
+              "linkId": "ara0xx",
+              "subMenu": []
+            },
+            {
+              "id": 175295,
+              "name": "Slang",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fslang\u002F",
+              "linkId": "w8wacm",
+              "subMenu": []
+            },
+            {
+              "id": 175296,
+              "name": "Acronyms",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Facronyms\u002F",
+              "linkId": "m9bwhr",
+              "subMenu": []
+            },
+            {
+              "id": 175297,
+              "name": "Pop Culture",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fpop-culture\u002F",
+              "linkId": "218cn7",
+              "subMenu": []
+            },
+            {
+              "id": 175298,
+              "name": "Memes",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fmemes\u002F",
+              "linkId": "84a6xv",
+              "subMenu": []
+            },
+            {
+              "id": 175299,
+              "name": "Gender and Sexuality",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fgender-sexuality\u002F",
+              "linkId": "2cdl7l",
+              "subMenu": []
+            },
+            {
+              "id": 175301,
+              "name": "Mixed-up Meanings",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fc\u002Fmixed-up-meanings\u002F",
+              "linkId": "dm0esa",
+              "subMenu": []
+            }
+          ]
+        },
+        {
+          "id": 136071,
+          "name": "Games",
+          "url": "#",
+          "linkId": "",
+          "subMenu": [
+            {
+              "id": 209040,
+              "name": "Crossword Puzzle",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fcrossword\u002F",
+              "linkId": "vq0mwv",
+              "subMenu": []
+            },
+            {
+              "id": 124826,
+              "name": "Crossword Solver",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fcrosswordsolver\u002F",
+              "linkId": "1iv7y6",
+              "subMenu": []
+            },
+            {
+              "id": 136073,
+              "name": "Scrabble Word Finder",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fword-finder\u002F",
+              "linkId": "6pswpn",
+              "subMenu": []
+            },
+            {
+              "id": 136072,
+              "name": "Words With Friends Cheat",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fwords-with-friends-cheat\u002F",
+              "linkId": "up44w6",
+              "subMenu": []
+            },
+            {
+              "id": 190601,
+              "name": "Word Puzzle",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fgames\u002Fword-puzzle",
+              "linkId": "lfht4t",
+              "subMenu": []
+            },
+            {
+              "id": 143844,
+              "name": "Quizzes",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Flearn\u002Fquizzes",
+              "linkId": "ff6yyi",
+              "subMenu": []
+            },
+            {
+              "id": 209553,
+              "name": "See More Games & Solvers",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fgames\u002F",
+              "linkId": "gd3ubd",
+              "subMenu": []
+            }
+          ]
+        },
+        {
+          "id": 21033,
+          "name": "Learn",
+          "url": "#",
+          "linkId": "89gi58",
+          "subMenu": [
+            {
+              "id": 188107,
+              "name": "Word Lists",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Flearn\u002Fword-lists",
+              "linkId": "s7qclf",
+              "subMenu": []
+            },
+            {
+              "id": 175631,
+              "name": "New Words",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fc\u002Fnew-words\u002F",
+              "linkId": "t7m09d",
+              "subMenu": []
+            },
+            {
+              "id": 175303,
+              "name": "Trending Words",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fc\u002Fword-trends\u002F",
+              "linkId": "b5puvn",
+              "subMenu": []
+            },
+            {
+              "id": 154869,
+              "name": "All About English",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002F",
+              "linkId": "mi0ukb",
+              "subMenu": []
+            },
+            {
+              "id": 175309,
+              "name": "Science and Technology",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fc\u002Fscience\u002F",
+              "linkId": "mwulwu",
+              "subMenu": []
+            },
+            {
+              "id": 175308,
+              "name": "Literature and Arts",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fc\u002Farts-entertainment\u002F",
+              "linkId": "kahjot",
+              "subMenu": []
+            }
+          ]
+        },
+        {
+          "id": 154868,
+          "name": "Writing",
+          "url": "#",
+          "linkId": "",
+          "subMenu": [
+            {
+              "id": 154870,
+              "name": "Grammar Coach",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fgrammarcoach",
+              "linkId": "vi1f6p",
+              "subMenu": []
+            },
+            {
+              "id": 154871,
+              "name": "Writing Prompts",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fwritingprompts",
+              "linkId": "iae4fl",
+              "subMenu": []
+            },
+            {
+              "id": 175315,
+              "name": "Grammar 101",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fe\u002Fgrammar\u002F",
+              "linkId": "6nbuwe",
+              "subMenu": []
+            },
+            {
+              "id": 175312,
+              "name": "Writing Tips",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fe\u002Fwriting\u002F",
+              "linkId": "nd549u",
+              "subMenu": []
+            },
+            {
+              "id": 175313,
+              "name": "Ways to Say It Better",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fe\u002Fways-to-say\u002F",
+              "linkId": "f1xg6n",
+              "subMenu": []
+            }
+          ]
+        },
+        {
+          "id": 154877,
+          "name": "Word of the Day",
+          "url": "#",
+          "linkId": "",
+          "subMenu": [
+            {
+              "id": 154878,
+              "name": "Word of the Day",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fword-of-the-day\u002F",
+              "linkId": "igc4oe",
+              "subMenu": []
+            },
+            {
+              "id": 159834,
+              "name": "Synonym of the Day",
+              "url": "https:\u002F\u002Fwww.thesaurus.com\u002Fe\u002Fsynonym-of-the-day\u002F",
+              "linkId": "asi7yf",
+              "subMenu": []
+            },
+            {
+              "id": 174017,
+              "name": "Word of the Year",
+              "url": "https:\u002F\u002Fwww.dictionary.com\u002Fe\u002Fword-of-the-year\u002F",
+              "linkId": "4wpdfh",
+              "subMenu": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "editorsNotes": { "notesData": [], "faqData": { "entries": [] } },
+  "router": {
+    "location": {
+      "pathname": "\u002Fbrowse\u002Fglobal",
+      "search": "",
+      "hash": "",
+      "state": undefined,
+      "key": "qh0bsm",
+      "query": {}
+    },
+    "action": "POP"
+  },
+  "marketingBanner": {
+    "data": {
+      "url": null,
+      "text": null,
+      "backgroundColor": null,
+      "secondaryColor": null,
+      "textColor": null,
+      "beginDate": null,
+      "endDate": null
+    }
+  },
+  "posTabs": { "activeIndex": 0, "lastActivePOS": "adj.", "lastPosArray": ["adj."] },
+  "searchData": {
+    "isFetchingTunaApi": false,
+    "isFetchingSpellSuggestion": false,
+    "isFetchingRelatedWordsApi": false,
+    "searchTerm": "global",
+    "tunaApiData": {
+      "entry": "global",
+      "type": "normal",
+      "slugLuna": "global",
+      "slug": "global",
+      "categoryId": null,
+      "note": null,
+      "pronunciation": {
+        "ipa": "ˈgloʊ bəl ",
+        "spell": "\u003Cspan class=\"bold\"\u003Egloh\u003C\u002Fspan\u003E-b\u003Cspan class=\"italic\"\u003Euh\u003C\u002Fspan\u003El ",
+        "audio": {
+          "audio\u002Fogg": "https:\u002F\u002Fstatic.sfdict.com\u002Faudio\u002Flunawav\u002FG01\u002FG0192100.ogg",
+          "audio\u002Fmpeg": "https:\u002F\u002Fstatic.sfdict.com\u002Faudio\u002FG01\u002FG0192100.mp3"
+        }
+      },
+      "posTabs": [
+        {
+          "isInformal": "0",
+          "isVulgar": "0",
+          "definition": "worldwide, all-encompassing",
+          "thesRid": "u27e59bea365df506.-410fe1c2.17951b01e1f.45e9",
+          "pos": "adj.",
+          "synonyms": [
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprehensive",
+              "targetTerm": "comprehensive",
+              "targetSlug": "comprehensive"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "international",
+              "targetTerm": "international",
+              "targetSlug": "international"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "overall",
+              "targetTerm": "overall",
+              "targetSlug": "overall"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "universal",
+              "targetTerm": "universal",
+              "targetSlug": "universal"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-around",
+              "targetTerm": "all-around",
+              "targetSlug": "all-around"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-inclusive",
+              "targetTerm": "all-inclusive",
+              "targetSlug": "all-inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-out",
+              "targetTerm": "all-out",
+              "targetSlug": "all-out"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "blanket",
+              "targetTerm": "blanket",
+              "targetSlug": "blanket"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "catholic",
+              "targetTerm": "catholic",
+              "targetSlug": "catholic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmic",
+              "targetTerm": "cosmic",
+              "targetSlug": "cosmic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmopolitan",
+              "targetTerm": "cosmopolitan",
+              "targetSlug": "cosmopolitan"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "earthly",
+              "targetTerm": "earthly",
+              "targetSlug": "earthly"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "ecumenical",
+              "targetTerm": "ecumenical",
+              "targetSlug": "ecumenical"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "encyclopedic",
+              "targetTerm": "encyclopedic",
+              "targetSlug": "encyclopedic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "exhaustive",
+              "targetTerm": "exhaustive",
+              "targetSlug": "exhaustive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "general",
+              "targetTerm": "general",
+              "targetSlug": "general"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "grand",
+              "targetTerm": "grand",
+              "targetSlug": "grand"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "mundane",
+              "targetTerm": "mundane",
+              "targetSlug": "mundane"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "pandemic",
+              "targetTerm": "pandemic",
+              "targetSlug": "pandemic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "planetary",
+              "targetTerm": "planetary",
+              "targetSlug": "planetary"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "spherical",
+              "targetTerm": "spherical",
+              "targetSlug": "spherical"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "sweeping",
+              "targetTerm": "sweeping",
+              "targetSlug": "sweeping"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "thorough",
+              "targetTerm": "thorough",
+              "targetSlug": "thorough"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "total",
+              "targetTerm": "total",
+              "targetSlug": "total"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unbounded",
+              "targetTerm": "unbounded",
+              "targetSlug": "unbounded"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unlimited",
+              "targetTerm": "unlimited",
+              "targetSlug": "unlimited"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "world",
+              "targetTerm": "world",
+              "targetSlug": "world"
+            }
+          ],
+          "antonyms": [
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "local",
+              "targetTerm": "local",
+              "targetSlug": "local"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "particular",
+              "targetTerm": "particular",
+              "targetSlug": "particular"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "specific",
+              "targetTerm": "specific",
+              "targetSlug": "specific"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "individual",
+              "targetTerm": "individual",
+              "targetSlug": "individual"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "limited",
+              "targetTerm": "limited",
+              "targetSlug": "limited"
+            }
+          ],
+          "note": null
+        }
+      ],
+      "synonyms": [],
+      "antonyms": [],
+      "exampleSentences": [
+        {
+          "source": {
+            "source_name": "Vox",
+            "author": "Jen Kirby",
+            "url": "https:\u002F\u002Fwww.vox.com\u002F22262653\u002Fvaccine-tourism-covid-19",
+            "title": "Don’t hate the vaccine tourists, hate the vaccine game",
+            "sourceName": "Vox",
+            "publicationDate": "2021-02-12T15:00:00Z",
+            "publication_date": "2021-02-12T15:00:00Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36710255,
+          "sentence": "Vaccine tourism, in some ways, is a manifestation of these global inequalities."
+        },
+        {
+          "source": {
+            "source_name": "Washington Blade",
+            "author": "Michael K. Lavers",
+            "url": "https:\u002F\u002Fwww.washingtonblade.com\u002F2021\u002F02\u002F11\u002Fruby-corado-backs-transgender-central-american-parliament-candidate\u002F",
+            "title": "Ruby Corado backs transgender Central American Parliament candidate",
+            "sourceName": "Washington Blade",
+            "publicationDate": "2021-02-11T23:31:53Z",
+            "publication_date": "2021-02-11T23:31:53Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36714183,
+          "sentence": "I can participate in this historic global moment, despite the fact that I left the country 31 years ago."
+        },
+        {
+          "source": {
+            "source_name": "Search Engine Watch",
+            "author": "Evan Kent and Kimberly Dutcher",
+            "url": "https:\u002F\u002Fwww.searchenginewatch.com\u002F2021\u002F02\u002F11\u002Fcase-study-schneider-electrics-digital-transformation-through-centralized-search\u002F",
+            "title": "Case study: Schneider Electric’s digital transformation through centralized search",
+            "sourceName": "Search Engine Watch",
+            "publicationDate": "2021-02-11T13:58:14Z",
+            "publication_date": "2021-02-11T13:58:14Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36718102,
+          "sentence": "As the global specialist in energy management and automation, it is the business’s mission to be a digital partner for sustainability and efficiency."
+        },
+        {
+          "source": {
+            "source_name": "Quartz",
+            "author": "Ananya Bhattacharya",
+            "url": "https:\u002F\u002Fqz.com\u002Findia\u002F1968727\u002Ffounder-karan-bajaj-on-whitehat-jr-ads-toxic-work-culture-claims\u002F",
+            "title": "What India’s most controversial ed-tech entrepreneur would do differently next time",
+            "sourceName": "Quartz",
+            "publicationDate": "2021-02-10T05:53:22Z",
+            "publication_date": "2021-02-10T05:53:22Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36718468,
+          "sentence": "It was hard to miss the commercials, some of which claimed the company’s students—some as young as six—were being chased by global investors and bagging jobs at Google because of the skills they’d acquired through WhiteHat Jr classes."
+        },
+        {
+          "source": {
+            "source_name": "TechCrunch",
+            "author": "Walter Thompson",
+            "url": "http:\u002F\u002Ffeedproxy.google.com\u002F~r\u002FTechcrunch\u002F~3\u002FOgInjKTUpbA\u002F",
+            "title": "The rise of the activist developer",
+            "sourceName": "TechCrunch",
+            "publicationDate": "2021-02-09T16:04:17Z",
+            "publication_date": "2021-02-09T16:04:17Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36710796,
+          "sentence": "They stepped up like never before to tackle numerous global issues, demonstrating they not only love solving incredibly hard problems, but can do it well and at scale."
+        },
+        {
+          "source": {
+            "source_name": "Eater",
+            "author": "Jenny G. Zhang",
+            "url": "https:\u002F\u002Fwww.eater.com\u002F22274412\u002Fmichelle-obama-culinary-kids-show-waffles-and-mochi-netflix-debut",
+            "title": "Michelle Obama’s ‘Waffles + Mochi,’ a Culinary Kids Show, Will Premiere March 16 on Netflix",
+            "sourceName": "Eater",
+            "publicationDate": "2021-02-09T15:33:05Z",
+            "publication_date": "2021-02-09T15:33:05Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36714630,
+          "sentence": "The characters will “blast off on global ingredient missions, traveling to kitchens, restaurants, farms and homes all over the world,” as well as cooking alongside renowned chefs, home cooks, celebrities, and kids."
+        },
+        {
+          "source": {
+            "source_name": "Washington Post",
+            "author": "Gerry Shih",
+            "url": "https:\u002F\u002Fwww.washingtonpost.com\u002Fworld\u002Fasia_pacific\u002Fcoronavirus-who-china-investigation-wuhan\u002F2021\u002F02\u002F09\u002F2af3c44c-6a79-11eb-a66e-e27046e9e898_story.html",
+            "title": "WHO team in Wuhan dismisses lab leak theory, continues hunt for intermediary coronavirus host",
+            "sourceName": "Washington Post",
+            "publicationDate": "2021-02-09T13:56:00Z",
+            "publication_date": "2021-02-09T13:56:00Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36716869,
+          "sentence": "There are “indications of missed circulation in other regions and gaps of reporting,” Liang said as he called for a global review."
+        },
+        {
+          "source": {
+            "source_name": "Washington Post",
+            "author": "Rick Maese",
+            "url": "https:\u002F\u002Fwww.washingtonpost.com\u002Fsports\u002F2021\u002F02\u002F09\u002Fbreak-dancing-olympic-sport-paris-2024\u002F",
+            "title": "How break dancing made the leap from ’80s pop culture to the Olympic stage",
+            "sourceName": "Washington Post",
+            "publicationDate": "2021-02-09T12:34:04Z",
+            "publication_date": "2021-02-09T12:34:04Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36715593,
+          "sentence": "The global governing body was called International DanceSport, an umbrella organization for all dance disciplines, from Boogie Woogie to salsa."
+        },
+        {
+          "source": {
+            "source_name": "Outside Online",
+            "author": "Erin Berger",
+            "url": "https:\u002F\u002Fwww.outsideonline.com\u002F2420660\u002Funsolaced-gretel-ehrlich-book-review?utm_campaign=rss&utm_source=rss&utm_medium=xmlfeed",
+            "title": "What Gretel Ehrlich Gets Wrong About Climate Change",
+            "sourceName": "Outside Online",
+            "publicationDate": "2021-02-08T21:02:00Z",
+            "publication_date": "2021-02-08T21:02:00Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36712589,
+          "sentence": "Just as it seems increasingly difficult to write nature books that don’t address global warming, it seems half-baked to write about climate change in the purely aesthetic terms of nature writing."
+        },
+        {
+          "source": {
+            "source_name": "Fortune",
+            "author": "Rachel King",
+            "url": "https:\u002F\u002Ffortune.com\u002F2021\u002F02\u002F07\u002Fvegan-plant-based-diet-food-startup-worthy-company\u002F",
+            "title": "Changing the plant-based food industry one spoon at a time",
+            "sourceName": "Fortune",
+            "publicationDate": "2021-02-07T12:00:00Z",
+            "publication_date": "2021-02-07T12:00:00Z",
+            "type": "const",
+            "abbreviation": "nlp"
+          },
+          "profanity": 0,
+          "id": 36710314,
+          "sentence": "We want to continue to inspire a global wave of self-worth with nonprofit organizations like the amazing One Simple Wish and Graham Windham."
+        }
+      ],
+      "inflections": [{ "displayForm": "globally", "slug": "globally" }]
+    },
+    "relatedWordsApiData": {
+      "data": [
+        {
+          "entry": "global",
+          "targetTerm": "across-the-board",
+          "targetSlug": "across-the-board",
+          "pos": "adjective",
+          "definition": "broad in scope",
+          "synonyms": [
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all",
+              "targetTerm": "all",
+              "targetSlug": "all"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-embracing",
+              "targetTerm": "all-embracing",
+              "targetSlug": "all-embracing"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-encompassing",
+              "targetTerm": "all-encompassing",
+              "targetSlug": "all-encompassing"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-inclusive",
+              "targetTerm": "all-inclusive",
+              "targetSlug": "all-inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "blanket",
+              "targetTerm": "blanket",
+              "targetSlug": "blanket"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad",
+              "targetTerm": "broad",
+              "targetSlug": "broad"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad in content",
+              "targetTerm": "broad in content",
+              "targetSlug": "broad%20in%20content"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "complete",
+              "targetTerm": "complete",
+              "targetSlug": "complete"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprehensive",
+              "targetTerm": "comprehensive",
+              "targetSlug": "comprehensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "encompassing",
+              "targetTerm": "encompassing",
+              "targetSlug": "encompassing"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "everything",
+              "targetTerm": "everything",
+              "targetSlug": "everything"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extensive",
+              "targetTerm": "extensive",
+              "targetSlug": "extensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "including all categories",
+              "targetTerm": "including all categories",
+              "targetSlug": "including%20all%20categories"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "including all members",
+              "targetTerm": "including all members",
+              "targetSlug": "including%20all%20members"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "panoptic",
+              "targetTerm": "panoptic",
+              "targetSlug": "panoptic"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "sweeping",
+              "targetTerm": "sweeping",
+              "targetSlug": "sweeping"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "total",
+              "targetTerm": "total",
+              "targetSlug": "total"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide",
+              "targetTerm": "wide",
+              "targetSlug": "wide"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "widespread",
+              "targetTerm": "widespread",
+              "targetSlug": "widespread"
+            }
+          ],
+          "antonyms": [],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        },
+        {
+          "entry": "global",
+          "targetTerm": "all-round",
+          "targetSlug": "all-round",
+          "pos": "adjective",
+          "definition": "general",
+          "synonyms": [
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-around",
+              "targetTerm": "all-around",
+              "targetSlug": "all-around"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-inclusive",
+              "targetTerm": "all-inclusive",
+              "targetSlug": "all-inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad",
+              "targetTerm": "broad",
+              "targetSlug": "broad"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad-spectrum",
+              "targetTerm": "broad-spectrum",
+              "targetSlug": "broad-spectrum"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprehensive",
+              "targetTerm": "comprehensive",
+              "targetSlug": "comprehensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "expansive",
+              "targetTerm": "expansive",
+              "targetSlug": "expansive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extended",
+              "targetTerm": "extended",
+              "targetSlug": "extended"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extensive",
+              "targetTerm": "extensive",
+              "targetSlug": "extensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "far-reaching",
+              "targetTerm": "far-reaching",
+              "targetSlug": "far-reaching"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "inclusive",
+              "targetTerm": "inclusive",
+              "targetSlug": "inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "overall",
+              "targetTerm": "overall",
+              "targetSlug": "overall"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "sweeping",
+              "targetTerm": "sweeping",
+              "targetSlug": "sweeping"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide-ranging",
+              "targetTerm": "wide-ranging",
+              "targetSlug": "wide-ranging"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide-reaching",
+              "targetTerm": "wide-reaching",
+              "targetSlug": "wide-reaching"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "widespread",
+              "targetTerm": "widespread",
+              "targetSlug": "widespread"
+            }
+          ],
+          "antonyms": [
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "limited",
+              "targetTerm": "limited",
+              "targetSlug": "limited"
+            }
+          ],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        },
+        {
+          "entry": "global",
+          "targetTerm": "broad-spectrum",
+          "targetSlug": "broad-spectrum",
+          "pos": "adjective",
+          "definition": "general",
+          "synonyms": [
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-around",
+              "targetTerm": "all-around",
+              "targetSlug": "all-around"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-round",
+              "targetTerm": "all-round",
+              "targetSlug": "all-round"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad",
+              "targetTerm": "broad",
+              "targetSlug": "broad"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprehensive",
+              "targetTerm": "comprehensive",
+              "targetSlug": "comprehensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extended",
+              "targetTerm": "extended",
+              "targetSlug": "extended"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extensive",
+              "targetTerm": "extensive",
+              "targetSlug": "extensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "far-ranging",
+              "targetTerm": "far-ranging",
+              "targetSlug": "far-ranging"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "far-reaching",
+              "targetTerm": "far-reaching",
+              "targetSlug": "far-reaching"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "inclusive",
+              "targetTerm": "inclusive",
+              "targetSlug": "inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "large",
+              "targetTerm": "large",
+              "targetSlug": "large"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "overall",
+              "targetTerm": "overall",
+              "targetSlug": "overall"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "sweeping",
+              "targetTerm": "sweeping",
+              "targetSlug": "sweeping"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide-ranging",
+              "targetTerm": "wide-ranging",
+              "targetSlug": "wide-ranging"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "widespread",
+              "targetTerm": "widespread",
+              "targetSlug": "widespread"
+            }
+          ],
+          "antonyms": [],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        },
+        {
+          "entry": "global",
+          "targetTerm": "catholic",
+          "targetSlug": "catholic",
+          "pos": "adjective",
+          "definition": "all-embracing, general",
+          "synonyms": [
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-inclusive",
+              "targetTerm": "all-inclusive",
+              "targetSlug": "all-inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad-minded",
+              "targetTerm": "broad-minded",
+              "targetSlug": "broad-minded"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "charitable",
+              "targetTerm": "charitable",
+              "targetSlug": "charitable"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprehensive",
+              "targetTerm": "comprehensive",
+              "targetSlug": "comprehensive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmic",
+              "targetTerm": "cosmic",
+              "targetSlug": "cosmic"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmopolitan",
+              "targetTerm": "cosmopolitan",
+              "targetSlug": "cosmopolitan"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "diffuse",
+              "targetTerm": "diffuse",
+              "targetSlug": "diffuse"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "eclectic",
+              "targetTerm": "eclectic",
+              "targetSlug": "eclectic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "ecumenical",
+              "targetTerm": "ecumenical",
+              "targetSlug": "ecumenical"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extensive",
+              "targetTerm": "extensive",
+              "targetSlug": "extensive"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "generic",
+              "targetTerm": "generic",
+              "targetSlug": "generic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "inclusive",
+              "targetTerm": "inclusive",
+              "targetSlug": "inclusive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "indeterminate",
+              "targetTerm": "indeterminate",
+              "targetSlug": "indeterminate"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "large-scale",
+              "targetTerm": "large-scale",
+              "targetSlug": "large-scale"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "liberal",
+              "targetTerm": "liberal",
+              "targetSlug": "liberal"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "open-minded",
+              "targetTerm": "open-minded",
+              "targetSlug": "open-minded"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "receptive",
+              "targetTerm": "receptive",
+              "targetSlug": "receptive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "tolerant",
+              "targetTerm": "tolerant",
+              "targetSlug": "tolerant"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unbigoted",
+              "targetTerm": "unbigoted",
+              "targetSlug": "unbigoted"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "universal",
+              "targetTerm": "universal",
+              "targetSlug": "universal"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unprejudiced",
+              "targetTerm": "unprejudiced",
+              "targetSlug": "unprejudiced"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unsectarian",
+              "targetTerm": "unsectarian",
+              "targetSlug": "unsectarian"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "whole",
+              "targetTerm": "whole",
+              "targetSlug": "whole"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide",
+              "targetTerm": "wide",
+              "targetSlug": "wide"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "world-wide",
+              "targetTerm": "world-wide",
+              "targetSlug": "world-wide"
+            }
+          ],
+          "antonyms": [
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "exclusive",
+              "targetTerm": "exclusive",
+              "targetSlug": "exclusive"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "incomprehensive",
+              "targetTerm": null,
+              "targetSlug": null
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "narrow",
+              "targetTerm": "narrow",
+              "targetSlug": "narrow"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "partial",
+              "targetTerm": "partial",
+              "targetSlug": "partial"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "particular",
+              "targetTerm": "particular",
+              "targetSlug": "particular"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "specific",
+              "targetTerm": "specific",
+              "targetSlug": "specific"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "narrow-minded",
+              "targetTerm": "narrow-minded",
+              "targetSlug": "narrow-minded"
+            }
+          ],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        },
+        {
+          "entry": "global",
+          "targetTerm": "comprehensive",
+          "targetSlug": "comprehensive",
+          "pos": "adjective",
+          "definition": "inclusive",
+          "synonyms": [
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "absolute",
+              "targetTerm": "absolute",
+              "targetSlug": "absolute"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "across the board",
+              "targetTerm": "across the board",
+              "targetSlug": "across-the-board"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-embracing",
+              "targetTerm": "all-embracing",
+              "targetSlug": "all-embracing"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "all-inclusive",
+              "targetTerm": "all-inclusive",
+              "targetSlug": "all-inclusive"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "blanket",
+              "targetTerm": "blanket",
+              "targetSlug": "blanket"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "broad",
+              "targetTerm": "broad",
+              "targetSlug": "broad"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "catholic",
+              "targetTerm": "catholic",
+              "targetSlug": "catholic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "compendious",
+              "targetTerm": "compendious",
+              "targetSlug": "compendious"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "complete",
+              "targetTerm": "complete",
+              "targetSlug": "complete"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "comprising",
+              "targetTerm": "comprising",
+              "targetSlug": "comprising"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "containing",
+              "targetTerm": "containing",
+              "targetSlug": "containing"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "discursive",
+              "targetTerm": "discursive",
+              "targetSlug": "discursive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "encircling",
+              "targetTerm": "encircling",
+              "targetSlug": "encircling"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "encyclopedic",
+              "targetTerm": "encyclopedic",
+              "targetSlug": "encyclopedic"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "exhaustive",
+              "targetTerm": "exhaustive",
+              "targetSlug": "exhaustive"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "expansive",
+              "targetTerm": "expansive",
+              "targetSlug": "expansive"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "extensive",
+              "targetTerm": "extensive",
+              "targetSlug": "extensive"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "far-reaching",
+              "targetTerm": "far-reaching",
+              "targetSlug": "far-reaching"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "full",
+              "targetTerm": "full",
+              "targetSlug": "full"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "general",
+              "targetTerm": "general",
+              "targetSlug": "general"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "in depth",
+              "targetTerm": "in depth",
+              "targetSlug": "in-depth"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "infinite",
+              "targetTerm": "infinite",
+              "targetSlug": "infinite"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "lock stock and barrel",
+              "targetTerm": "lock stock and barrel",
+              "targetSlug": "lock%20stock%20and%20barrel"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "of great scope",
+              "targetTerm": "of great scope",
+              "targetSlug": "of%20great%20scope"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "overall",
+              "targetTerm": "overall",
+              "targetSlug": "overall"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "sweeping",
+              "targetTerm": "sweeping",
+              "targetSlug": "sweeping"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "synoptic",
+              "targetTerm": "synoptic",
+              "targetSlug": "synoptic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "the big picture",
+              "targetTerm": "the big picture",
+              "targetSlug": "the%20big%20picture"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "the whole shebang",
+              "targetTerm": "the whole shebang",
+              "targetSlug": "the%20whole%20shebang"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "the works",
+              "targetTerm": "the works",
+              "targetSlug": "the%20works"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "thorough",
+              "targetTerm": "thorough",
+              "targetSlug": "thorough"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "umbrella",
+              "targetTerm": "umbrella",
+              "targetSlug": "umbrella"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wall-to-wall",
+              "targetTerm": "wall-to-wall",
+              "targetSlug": "wall-to-wall"
+            },
+            {
+              "similarity": "50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "whole",
+              "targetTerm": "whole",
+              "targetSlug": "whole"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "wide",
+              "targetTerm": "wide",
+              "targetSlug": "wide"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "widespread",
+              "targetTerm": "widespread",
+              "targetSlug": "widespread"
+            }
+          ],
+          "antonyms": [
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "empty",
+              "targetTerm": "empty",
+              "targetSlug": "empty"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "incomplete",
+              "targetTerm": "incomplete",
+              "targetSlug": "incomplete"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "limited",
+              "targetTerm": "limited",
+              "targetSlug": "limited"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "narrow",
+              "targetTerm": "narrow",
+              "targetSlug": "narrow"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "needy",
+              "targetTerm": "needy",
+              "targetSlug": "needy"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "restricted",
+              "targetTerm": "restricted",
+              "targetSlug": "restricted"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "short",
+              "targetTerm": "short",
+              "targetSlug": "short"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "uncomprehensive",
+              "targetTerm": null,
+              "targetSlug": null
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "unfinished",
+              "targetTerm": "unfinished",
+              "targetSlug": "unfinished"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "circumscribed",
+              "targetTerm": "circumscribed",
+              "targetSlug": "circumscribed"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "definite",
+              "targetTerm": "definite",
+              "targetSlug": "definite"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "imperfect",
+              "targetTerm": "imperfect",
+              "targetSlug": "imperfect"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "partial",
+              "targetTerm": "partial",
+              "targetSlug": "partial"
+            },
+            {
+              "similarity": "-50",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "specific",
+              "targetTerm": "specific",
+              "targetSlug": "specific"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "exclusive",
+              "targetTerm": "exclusive",
+              "targetSlug": "exclusive"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "incomprehensive",
+              "targetTerm": null,
+              "targetSlug": null
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "particular",
+              "targetTerm": "particular",
+              "targetSlug": "particular"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "selective",
+              "targetTerm": "selective",
+              "targetSlug": "selective"
+            }
+          ],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        },
+        {
+          "entry": "global",
+          "targetTerm": "cosmic",
+          "targetSlug": "cosmic",
+          "pos": "adjective",
+          "definition": "limitless; universal",
+          "synonyms": [
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "catholic",
+              "targetTerm": "catholic",
+              "targetSlug": "catholic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmogonal",
+              "targetTerm": "cosmogonal",
+              "targetSlug": "cosmogonal"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmogonic",
+              "targetTerm": "cosmogonic",
+              "targetSlug": "cosmogonic"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "cosmopolitan",
+              "targetTerm": "cosmopolitan",
+              "targetSlug": "cosmopolitan"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "ecumenical",
+              "targetTerm": "ecumenical",
+              "targetSlug": "ecumenical"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "empyrean",
+              "targetTerm": "empyrean",
+              "targetSlug": "empyrean"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "global",
+              "targetTerm": "global",
+              "targetSlug": "global"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "grandiose",
+              "targetTerm": "grandiose",
+              "targetSlug": "grandiose"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "huge",
+              "targetTerm": "huge",
+              "targetSlug": "huge"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "immense",
+              "targetTerm": "immense",
+              "targetSlug": "immense"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "infinite",
+              "targetTerm": "infinite",
+              "targetSlug": "infinite"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "measureless",
+              "targetTerm": "measureless",
+              "targetSlug": "measureless"
+            },
+            {
+              "similarity": "100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "planetary",
+              "targetTerm": "planetary",
+              "targetSlug": "planetary"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "vast",
+              "targetTerm": "vast",
+              "targetSlug": "vast"
+            },
+            {
+              "similarity": "10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "worldwide",
+              "targetTerm": "worldwide",
+              "targetSlug": "worldwide"
+            }
+          ],
+          "antonyms": [
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "limited",
+              "targetTerm": "limited",
+              "targetSlug": "limited"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "little",
+              "targetTerm": "little",
+              "targetSlug": "little"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "miniature",
+              "targetTerm": "miniature",
+              "targetSlug": "miniature"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "minute",
+              "targetTerm": "minute",
+              "targetSlug": "minute"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "small",
+              "targetTerm": "small",
+              "targetSlug": "small"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "teeny",
+              "targetTerm": "teeny",
+              "targetSlug": "teeny"
+            },
+            {
+              "similarity": "-100",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "tiny",
+              "targetTerm": "tiny",
+              "targetSlug": "tiny"
+            },
+            {
+              "similarity": "-10",
+              "isInformal": "0",
+              "isVulgar": "0",
+              "term": "bounded",
+              "targetTerm": "bounded",
+              "targetSlug": "bounded"
+            }
+          ],
+          "searchQueries": [
+            "global",
+            "more global",
+            "most global",
+            "more-global",
+            "moreglobal",
+            "most-global",
+            "mostglobal"
+          ]
+        }
+      ],
+      "meta": { "page": 1, "count": 30 }
+    },
+    "spellSuggestionsData": [],
+    "queryParams": undefined,
+    "url": "\u002Fbrowse\u002Fglobal",
+    "pushToHistory": true,
+    "pageTransitionCounter": 1,
+    "pageName": "browse",
+    "error": false
+  },
+  "sotdData": { "data": null, "isLoading": true },
+  "wotdData": { "data": {}, "isLoading": true },
+  "authState": { "hasFetched": false, "isSignedIn": false, "userInfo": null },
+  "quizList": {
+    "data": {
+      "name": "Roll With It! Take This Sushi Facts Challenge",
+      "url": "https:\u002F\u002Fwww.dictionary.com\u002Fgames\u002Fquizzes\u002Fsushi-quiz"
+    }
+  }
+}
