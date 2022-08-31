@@ -2,11 +2,11 @@ import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel 
 import { Api } from "./lib/interfaces";
 import { checkApiKey, SetEffect } from "./lib/api";
 import { effects } from "./lib/constants";
-import { useState } from 'react'
+import { useState } from "react";
 
 export default function viewScenes() {
   const preferences = getPreferenceValues();
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const config = {
     headers: {
@@ -27,9 +27,9 @@ export default function viewScenes() {
       title: "Setting Effect",
     });
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       if (!preferences.has("lights")) {
-        const isTokenValid = await checkApiKey()
+        const isTokenValid = await checkApiKey();
         if (!isTokenValid) {
           preferences.set("lifx_token", JSON.stringify({ valid: true }));
           await showToast({

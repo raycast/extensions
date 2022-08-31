@@ -23,7 +23,7 @@ export default function viewScenes() {
 
     try {
       if (!preferences.has("lights")) {
-        const isTokenValid = await checkApiKey()
+        const isTokenValid = await checkApiKey();
         if (!isTokenValid) {
           preferences.set("lifx_token", JSON.stringify({ valid: true }));
           await showToast({
