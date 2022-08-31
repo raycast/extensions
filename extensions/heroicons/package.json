@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heroicons",
+  "title": "Heroicons",
+  "description": "Search and preview Heroicons",
+  "icon": "command-icon.png",
+  "author": "torben030",
+  "categories": [
+    "Developer Tools",
+    "Documentation",
+    "Web"
+  ],
+  "keywords": [
+    "heroicons",
+    "icons",
+    "tailwind"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "icons",
+      "title": "Heroicons Search",
+      "description": "Search and preview Heroicons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "description": "Select the primary action that will be performed [↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Action",
+      "default": "pasteJSX",
+      "data": [
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "description": "Select the secondary action that will be performed [⌘ + ↵]",
+      "type": "dropdown",
+      "required": true,
+      "title": "Secondary Action",
+      "default": "pasteSVG",
+      "data": [
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "got": "^12.3.1",
+    "title": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/title": "^3.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

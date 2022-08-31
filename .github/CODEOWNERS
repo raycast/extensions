@@ -95,6 +95,7 @@
 /extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @Rawnly
 /extensions/conventional-comments                    @krzysztofzuraw
+/extensions/convert                                  @nielsvanrijn
 /extensions/converter                                @koinzhang
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
@@ -221,6 +222,7 @@
 /extensions/hellonext-changelogs                     @heertheeswaran
 /extensions/hellonext-wallpapers                     @imkarthikk
 /extensions/helm-docs                                @tiagomichaelsousa
+/extensions/heroicons                                @haackt
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
 /extensions/hidden-icons                             @koinzhang
@@ -282,6 +284,7 @@
 /extensions/life-progress                            @koinzhang
 /extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann
 /extensions/linguee                                  @geekdada
+/extensions/link-cleaner                             @MisakiCoca
 /extensions/linux-command                            @jaywcjlove
 /extensions/liveblocks                               @andreaselia
 /extensions/lobsters                                 @dev99problems
@@ -317,6 +320,7 @@
 /extensions/netlify                                  @Destiner @jonohewitt
 /extensions/nextcloud                                @uetchy
 /extensions/nextjs-docs                              @PrasadChinwal
+/extensions/nft-search                               @glazec
 /extensions/night-light                              @devmoath
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
@@ -330,6 +334,7 @@
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
+/extensions/ohdear                                   @andreaselia @pernielsentikaer
 /extensions/ones                                     @k8scat
 /extensions/open-in-json-hero                        @ericallam @ivanovart
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
@@ -479,6 +484,7 @@
 /extensions/ticktick                                 @viduycheung
 /extensions/timers                                   @ThatNerdSquared @GastroGeek
 /extensions/timeular                                 @kudrykv
+/extensions/tinypng                                  @kawamataryo
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029
 /extensions/todo-list                                @maggie-j-liu
@@ -536,6 +542,7 @@
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/xqc                                      @Aayush9029
 /extensions/yandex-music                             @AlexStrNik
+/extensions/yopass                                   @ricoberger
 /extensions/youdao-translate                         @tiancheng92
 /extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
