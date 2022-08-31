@@ -2,6 +2,7 @@ interface IPreferences {
   langFirst: string;
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
+  googleFreeTLD: GoogleFreeAPITLD;
   googleApiKey: string;
   disableGoogleCould: boolean;
   deeplAuthKey: string;
@@ -22,6 +23,8 @@ interface IPreferences {
   selectedDefault: boolean;
   quickSwitchLang: boolean;
   delayTransInterval: number;
+  enableHistory: boolean;
+  historyLimit: number;
 }
 
 interface ILangItem {
@@ -140,4 +143,15 @@ interface IAliyunTransResponse {
 
 interface IAliyunDetectLangResponse {
   DetectedLanguage: string;
+}
+
+interface TransHistory {
+  time: number;
+  from: string;
+  to: string;
+  text: string;
+  transList: {
+    serviceProvider: TransServiceProviderTp;
+    res: string;
+  }[];
 }

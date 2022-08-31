@@ -10,6 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { LANG_LIST, TransAPIErrCode } from "./const";
+import { TranslateHistory } from "./TranslateHistory";
 
 const preferences: IPreferences = getPreferenceValues();
 
@@ -93,12 +94,6 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
               }}
             />
           )}
-          <Action
-            icon={Icon.ComputerChip}
-            title="Open iTranslate Preferences"
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
-          />
           <ActionPanel.Submenu
             title="Select Target Language"
             icon={Icon.Repeat}
@@ -125,6 +120,20 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
                 );
               })}
           </ActionPanel.Submenu>
+          {preferences.enableHistory && (
+            <Action.Push
+              icon={Icon.BulletPoints}
+              title="Open Translation Histories"
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              target={<TranslateHistory />}
+            />
+          )}
+          <Action
+            icon={Icon.ComputerChip}
+            title="Open iTranslate Preferences"
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            onAction={openCommandPreferences}
+          />
         </ActionPanel>
       }
     />

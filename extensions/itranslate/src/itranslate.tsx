@@ -14,9 +14,11 @@ import {
   fetchTransAPIs,
   getLang,
   getServiceProviderMap,
+  saveHistory,
   translateWithRefineLang,
 } from "./itranslate.shared";
 import { TranslateError } from "./TranslateError";
+import { TranslateHistory } from "./TranslateHistory";
 import { TranslateResult } from "./TranslateResult";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
@@ -120,6 +122,21 @@ export default function Command() {
         });
         if (!hasLoading) {
           updateLoadingState(false);
+          if (preferences.enableHistory) {
+            const history: TransHistory = {
+              time: new Date().getTime(),
+              from: transResultsNew[0].from.langTitle,
+              to: transResultsNew[0].to.langTitle,
+              text: inputTempState,
+              transList: transResultsNew.map((tran) => {
+                return {
+                  serviceProvider: tran.serviceProvider,
+                  res: tran.res,
+                };
+              }),
+            };
+            saveHistory(history, preferences.historyLimit);
+          }
         }
         return transResultsNew;
       });
@@ -131,13 +148,39 @@ export default function Command() {
       return (
         <ActionPanel>
           <Action icon={Icon.Text} title="Translate Selected Content" onAction={transSelected} />
-          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+          {preferences.enableHistory && (
+            <Action.Push
+              icon={Icon.BulletPoints}
+              title="Open Translation Histories"
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              target={<TranslateHistory />}
+            />
+          )}
+          <Action
+            icon={Icon.ComputerChip}
+            title="Open iTranslate Preferences"
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            onAction={openCommandPreferences}
+          />
         </ActionPanel>
       );
     }
     return (
       <ActionPanel>
-        <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+        {preferences.enableHistory && (
+          <Action.Push
+            icon={Icon.BulletPoints}
+            title="Open Translation Histories"
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            target={<TranslateHistory />}
+          />
+        )}
+        <Action
+          icon={Icon.ComputerChip}
+          title="Open iTranslate Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          onAction={openCommandPreferences}
+        />
       </ActionPanel>
     );
   }

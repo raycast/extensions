@@ -90,3 +90,20 @@ export const TRANS_SERVICES_AUTH_NAMES = new Map<TransServiceProviderTp, string[
   [TransServiceProviderTp.Tencent, ["Tencent Secret ID", "Tencent Secret Key"]],
   [TransServiceProviderTp.Aliyun, ["Aliyun Access Key ID", "Aliyun Access Key Secret"]],
 ]);
+
+export enum GoogleFreeAPITLD {
+  Com = "com",
+  Cn = "cn",
+}
+
+export const HistoriesCacheKey = "$HistoriesCacheKey$";
+
+export const TRANS_SERVICES_NAMES = new Map<TransServiceProviderTp, string>([
+  [TransServiceProviderTp.Google, "Google(Free)"],
+  [TransServiceProviderTp.GoogleCouldTrans, "Google Could Translation"],
+  [TransServiceProviderTp.DeepL, "Deepl"],
+  [TransServiceProviderTp.Youdao, "Youdao"],
+  [TransServiceProviderTp.Baidu, "Baidu"],
+  [TransServiceProviderTp.Tencent, "Tencent"],
+  [TransServiceProviderTp.Aliyun, "Aliyun"],
+]);
