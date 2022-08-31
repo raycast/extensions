@@ -1,5 +1,10 @@
 # Heroicons Changelog
 
+## [v1.1.0] - 2022-08-31
+
+- Added option to customize primary and secondary action
+- Fixed useEffect dependecy array
+
 ## [v1.0.0] - 2022-08-31
 
 - Improved search

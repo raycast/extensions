@@ -1,10 +1,28 @@
-import { environment, Cache, showHUD, Grid, ActionPanel, Action, Icon, Clipboard, Color } from "@raycast/api";
+import {
+  environment,
+  Cache,
+  showHUD,
+  Grid,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  Color,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { writeFileSync } from "fs";
 import { join } from "path";
 import Heroicons from "./heroicons";
 import got from "got";
 import title from "title";
+
+interface Preferences {
+  primaryAction: string;
+  secondaryAction: string;
+}
 
 const cache = new Cache();
 
@@ -15,6 +33,7 @@ export default function IconsCommand() {
   );
   const [iconNames, setIconNames] = useState<string[]>(cache.get("heroicons-icons")?.split(",") || []);
   const [variant, setVariant] = useState<string>("all");
+  const [preferences, _] = useState(getPreferenceValues<Preferences>());
 
   const variantDescriptions = {
     outline: "[24x24, 1.5px stroke] For primary navigation and marketing sections, with an outlined appearance.",
@@ -22,7 +41,88 @@ export default function IconsCommand() {
     mini: "[20x20, Solid fill] For smaller elements like buttons, form elements, and to support text.",
   };
 
+  const actions: { [key: string]: (variant: "outline" | "solid" | "mini", icon: string) => JSX.Element } = {
+    pasteJSX: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Paste JSX"
+        key={`pastejsx-${icon}`}
+        onAction={() => {
+          got(Heroicons[variant](icon))
+            .then((res) => {
+              Clipboard.paste(transformToJsx(res.body));
+              showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
+            })
+            .catch(() => {
+              showHUD("❌ You need an internet connection to use this extension.");
+            });
+        }}
+        icon={Icon.CodeBlock}
+      />
+    ),
+    pasteSVG: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Paste SVG"
+        key={`pastesvg-${icon}`}
+        onAction={() => {
+          got(Heroicons[variant](icon))
+            .then((res) => {
+              Clipboard.paste(res.body);
+              showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
+            })
+            .catch(() => {
+              showHUD("❌ You need an internet connection to use this extension.");
+            });
+        }}
+        icon={Icon.NewDocument}
+      />
+    ),
+    copyJSX: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Copy JSX"
+        key={`copyjsx-${icon}`}
+        onAction={() => {
+          got(Heroicons[variant](icon))
+            .then((res) => {
+              Clipboard.copy(transformToJsx(res.body));
+              showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
+            })
+            .catch(() => {
+              showHUD("❌ You need an internet connection to use this extension.");
+            });
+        }}
+        icon={Icon.Code}
+      />
+    ),
+    copySVG: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Copy SVG"
+        key={`copysvg-${icon}`}
+        onAction={() => {
+          got(Heroicons[variant](icon))
+            .then((res) => {
+              Clipboard.copy(res.body);
+              showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
+            })
+            .catch(() => {
+              showHUD("❌ You need an internet connection to use this Extension.");
+            });
+        }}
+        icon={Icon.EditShape}
+      />
+    ),
+    copyName: (_: "outline" | "solid" | "mini", icon: string) => (
+      <Action.CopyToClipboard key={`copyname-${icon}`} title="Copy Name" content={icon} icon={Icon.Tag} />
+    ),
+  };
+
   useEffect(() => {
+    if (preferences.primaryAction == preferences.secondaryAction) {
+      showToast({
+        title: "⚠️ Warning",
+        message: "You have set the same action as primary and secondary. This may cause conflicts.",
+        style: Toast.Style.Failure,
+      });
+    }
     if (tags || iconNames) {
       Promise.all([got(Heroicons.tags()), got(Heroicons.icons())])
         .then(([tagsRes, iconsRes]) => {
@@ -47,7 +147,7 @@ export default function IconsCommand() {
     } else {
       setLoading(false);
     }
-  }, [tags, iconNames]);
+  }, []);
 
   function transformToJsx(svg: string) {
     return svg
@@ -73,63 +173,21 @@ export default function IconsCommand() {
               }}
               actions={
                 <ActionPanel title="Heroicons">
-                  <Action
-                    title="Paste JSX"
-                    onAction={() => {
-                      got(Heroicons[variant](icon))
-                        .then((res) => {
-                          Clipboard.paste(transformToJsx(res.body));
-                          showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
-                        })
-                        .catch(() => {
-                          showHUD("❌ You need an internet connection to use this extension.");
-                        });
-                    }}
-                    icon={Icon.CodeBlock}
-                  />
-                  <Action
-                    title="Paste SVG"
-                    onAction={() => {
-                      got(Heroicons[variant](icon))
-                        .then((res) => {
-                          Clipboard.paste(res.body);
-                          showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
-                        })
-                        .catch(() => {
-                          showHUD("❌ You need an internet connection to use this extension.");
-                        });
-                    }}
-                    icon={Icon.NewDocument}
-                  />
-                  <Action
-                    title="Copy JSX"
-                    onAction={() => {
-                      got(Heroicons[variant](icon))
-                        .then((res) => {
-                          Clipboard.copy(transformToJsx(res.body));
-                          showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
-                        })
-                        .catch(() => {
-                          showHUD("❌ You need an internet connection to use this extension.");
-                        });
-                    }}
-                    icon={Icon.Code}
-                  />
-                  <Action
-                    title="Copy SVG"
-                    onAction={() => {
-                      got(Heroicons[variant](icon))
-                        .then((res) => {
-                          Clipboard.copy(res.body);
-                          showHUD(`📋 Copied "${icon}" (${variant}) to your clipboard.`);
-                        })
-                        .catch(() => {
-                          showHUD("❌ You need an internet connection to use this Extension.");
-                        });
-                    }}
-                    icon={Icon.EditShape}
-                  />
-                  <Action.CopyToClipboard title="Copy Name" content={icon} icon={Icon.Tag} />
+                  {preferences.primaryAction == preferences.secondaryAction ? (
+                    <>{actions[preferences.primaryAction](variant, icon)}</>
+                  ) : (
+                    <>
+                      {actions[preferences.primaryAction](variant, icon)}
+                      {actions[preferences.secondaryAction](variant, icon)}
+                    </>
+                  )}
+                  {Object.entries(actions).map((action) => {
+                    const [name, fn] = action;
+                    if (name == preferences.primaryAction || name == preferences.secondaryAction) return;
+                    {
+                      return fn(variant, icon);
+                    }
+                  })}
                 </ActionPanel>
               }
             />
