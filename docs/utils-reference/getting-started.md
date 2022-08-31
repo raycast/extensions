@@ -16,9 +16,13 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.3.1
+
+- Added the `reset` method to `useForm`.
+
 ### v1.3.0
 
-- Added the `focus` and `reset` methods to `useForm`.
+- Added the `focus` method to `useForm`.
 - Added the `input` option to `useExec`.
 
 ### v1.2.0
