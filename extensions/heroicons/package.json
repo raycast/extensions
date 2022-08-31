@@ -64,12 +64,12 @@
       "default": "pasteSVG",
       "data": [
         {
-          "title": "Paste JSX",
-          "value": "pasteJSX"
-        },
-        {
           "title": "Paste SVG",
           "value": "pasteSVG"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
         },
         {
           "title": "Copy JSX",
