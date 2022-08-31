@@ -1,10 +1,12 @@
 import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel } from "@raycast/api";
 import { Api } from "./lib/interfaces";
-import { SetEffect } from "./lib/api";
+import { checkApiKey, SetEffect } from "./lib/api";
 import { effects } from "./lib/constants";
+import { useState } from 'react'
 
 export default function viewScenes() {
   const preferences = getPreferenceValues();
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const config = {
     headers: {
@@ -25,6 +27,20 @@ export default function viewScenes() {
       title: "Setting Effect",
     });
     try {
+      setIsLoading(true)
+      if (!preferences.has("lights")) {
+        const isTokenValid = await checkApiKey()
+        if (!isTokenValid) {
+          preferences.set("lifx_token", JSON.stringify({ valid: true }));
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Token",
+            message: "Please check your token and try again",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
       await SetEffect(uuid, effect, param, config);
       toast.style = Toast.Style.Success;
       toast.title = "Effect Set";
@@ -39,7 +55,7 @@ export default function viewScenes() {
   }
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {effects.length === 0 ? (
         <List.EmptyView
           key="empty"

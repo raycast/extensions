@@ -30,6 +30,7 @@ export default function Command() {
           await showToast({
             style: Toast.Style.Failure,
             title: "Invalid Token",
+            message: "Please check your token and try again",
           });
           setIsLoading(false);
           return;
@@ -262,7 +263,8 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Connected" text={light.connected ? "Online" : "Offline"} />
                     <List.Item.Detail.Metadata.Label title="ID" text={light.id} />
                     <List.Item.Detail.Metadata.Label title="UUID" text={light.uuid} />
-                    <List.Item.Detail.Metadata.TagList title="Capabilities">
+                    
+                    {/* <List.Item.Detail.Metadata.TagList title="Capabilities">
                       {light.product.capabilities.has_color && (
                         <List.Item.Detail.Metadata.TagList.Item text="Color" color={Color.Blue} />
                       )}
@@ -278,7 +280,7 @@ export default function Command() {
                       {light.product.capabilities.has_chain && (
                         <List.Item.Detail.Metadata.TagList.Item text="Chain" color={Color.Blue} />
                       )}
-                    </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata.TagList> */}
                   </List.Item.Detail.Metadata>
                 }
               />

@@ -1,7 +1,7 @@
 import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel } from "@raycast/api";
 import { Api } from "./lib/interfaces";
 import { useState, useEffect } from "react";
-import { FetchScenes, SetScenes } from "./lib/api";
+import { checkApiKey, FetchScenes, SetScenes } from "./lib/api";
 
 export default function viewScenes() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,21 @@ export default function viewScenes() {
       style: Toast.Style.Animated,
       title: "Fetching scenes",
     });
+
     try {
+      if (!preferences.has("lights")) {
+        const isTokenValid = await checkApiKey()
+        if (!isTokenValid) {
+          preferences.set("lifx_token", JSON.stringify({ valid: true }));
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Token",
+            message: "Please check your token and try again",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
       const response = await FetchScenes(config);
       setData(response);
       toast.style = Toast.Style.Success;
