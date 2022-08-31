@@ -26,7 +26,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
-      subtitle={"Stars " + project.star_count}
+      subtitle={(project.archived ? "Archived; " : "") + "Stars: " + project.star_count}
       icon={projectIcon(project)}
       actions={
         <ActionPanel>

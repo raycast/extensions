@@ -82,6 +82,7 @@ export function dataToProject(project: any): Project {
     ssh_url_to_repo: project.ssh_url_to_repo,
     http_url_to_repo: project.http_url_to_repo,
     default_branch: project.default_branch,
+    archived: project.archived,
   };
 }
 
@@ -281,6 +282,7 @@ export class Project {
   public ssh_url_to_repo?: string = undefined;
   public http_url_to_repo?: string = undefined;
   public default_branch = "";
+  public archived = false;
 }
 
 export class User {
