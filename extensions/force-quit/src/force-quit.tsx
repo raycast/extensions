@@ -12,17 +12,17 @@ function getOpenApps() {
     return apps.split(', ')
 }
 
-function forceQuit(app: String) {
+function forceQuit(app: string) {
   const { exec } = require("child_process");
   exec(`killall '${app}'`);
 }
 
-let apps = getOpenApps()
+const apps = getOpenApps()
 
 export default function Command() {
   return (
     <List searchBarPlaceholder="Search open apps...">
-      {apps.map((item, index) => (
+      {apps.map((item) => (
         <List.Item
           key={item}
           title={item}
