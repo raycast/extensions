@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dou-tu",
   "title": "斗图",
-  "description": "上班时间斗个图🌟",
+  "description": "An extension for easy retrieval of web emoji images while chatting.(上班时间斗个图🌟)",
   "icon": "icon.png",
   "author": "gaoyang",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "斗图",
-      "description": "上班时间斗个图🌟",
+      "description": "An extension for easy retrieval of web emoji images while chatting.(上班时间斗个图🌟)",
       "mode": "view"
     }
   ],
