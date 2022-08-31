@@ -1,3 +1,3 @@
-# antd-open-browser Changelog
+# Antd Changelog
 
 ## [Initial Version] - 2022-08-26
