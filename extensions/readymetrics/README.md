@@ -1,8 +1,4 @@
-<div style="text-align: center;">
-  <img
-    src="https://www.readymetrics.com/style/readymetrics-logo-66.png"
-    width="100"
-  />
+<div style="text-align: left;">
   <h1>
     Readymetrics
   </h1>
@@ -34,7 +30,7 @@ A Raycast extension to list upcoming and past check-ins in Readymetrics.
 
 ## Generating your personal access key for the Readymetrics API
 
-- Log into Readymetrics at https://www.readymetrics.com
+- Sign up to Readymetrics at https://www.readymetrics.com
 - Click your avatar image in the upper left-hand section of the sidebar
 - Click on `Settings`
 - Click on `Integrations` on the left sidebar
