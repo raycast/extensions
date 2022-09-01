@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2022-09-01
+
+🇹🇭 → 🇹🇷
+
 ## [Add action to open in browser] - 2022-07-15
 
 Add a quick action to open the translation in Google Translate
