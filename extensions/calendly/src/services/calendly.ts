@@ -1,6 +1,6 @@
-import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
+import { getPreferenceValues, OAuth } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import _ from "lodash";
 
 const CLIENT_ID = "KCCVj5CuqdSvGsCQFqzj1KpnWap4c17W1PAaIpeFbgE";
 export interface Preferences {
@@ -94,37 +94,27 @@ async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) 
   return resp;
 }
 
-async function getCurrentUser(): Promise<CalendlyUser> {
-  const data = await calendlyAPI<CalendlyUserResource>({ url: "/users/me" });
-  const resource = data.data.resource;
-  return resource;
+export function useCurrentUser(): { user?: CalendlyUser; isLoading: boolean; error?: Error } {
+  const { data, isLoading, error } = useCachedPromise(async () => {
+    return (await calendlyAPI<CalendlyUserResource>({ url: "/users/me" })).data.resource;
+  });
+  return { user: data, isLoading, error };
 }
 
-async function getEventTypes() {
-  const user = await getUserFromCache();
-  const data = await calendlyAPI<CalendlyEventTypeResponse>({ url: "/event_types", params: { user: user.uri } });
-  const collection = _.filter(data.data.collection, "active");
-  return collection;
-}
-
-export async function refreshData() {
-  const user = await getCurrentUser();
-  LocalStorage.setItem("user", JSON.stringify(user));
-  const eventTypes = await getEventTypes();
-  LocalStorage.setItem("eventTypes", JSON.stringify(eventTypes));
-  LocalStorage.setItem("updated_ts", new Date().toISOString());
-}
-
-export async function getUserFromCache(): Promise<CalendlyUser> {
-  const cache = await LocalStorage.getItem("user");
-  if (!cache) throw new Error("User not found in Cache");
-  return JSON.parse(cache.toString());
-}
-
-export async function getEventTypesFromCache(): Promise<CalendlyEventType[]> {
-  const cache = await LocalStorage.getItem("eventTypes");
-  if (!cache) throw new Error("Event Types not found in Cache");
-  return JSON.parse(cache.toString());
+export function useEventTypes(): { eventTypes: CalendlyEventType[]; isLoading: boolean; revalidate: () => void } {
+  const { user } = useCurrentUser();
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const data = await calendlyAPI<CalendlyEventTypeResponse>({
+        url: `https://api.calendly.com/event_types`,
+        params: { user: user?.uri },
+      });
+      return data.data.collection.filter((e) => e.active);
+    },
+    [],
+    { initialData: [], execute: !!user }
+  );
+  return { eventTypes: data, isLoading, revalidate };
 }
 
 export async function createSingleUseLink(event: CalendlyEventType) {

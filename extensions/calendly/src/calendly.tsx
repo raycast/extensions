@@ -11,23 +11,18 @@ import {
   Clipboard,
   OAuth,
   Image,
-  LocalStorage,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import {
   Preferences,
   CalendlyEventType,
-  CalendlyUser,
   createSingleUseLink,
-  getUserFromCache as getUser,
-  getEventTypesFromCache as getEventTypes,
-  refreshData,
+  useEventTypes,
+  useCurrentUser,
 } from "./services/calendly";
-import moment from "moment";
 
 const tokenURL = "https://calendly.com/integrations/api_webhooks";
 
-const error = `
+const errorMd = `
   # ⚠️ Calendly Access Token Error ⚠️
 
   Your Calendly Personal Access Token is not valid. Go into Raycast preferences to change it.
@@ -38,27 +33,10 @@ const error = `
 `;
 
 export default function Calendly() {
-  const [items, setItems] = useState<CalendlyEventType[] | undefined>(undefined);
-  const [showError, setShowError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
+  // const [showError, setShowError] = useState(false);
+  const { user, error } = useCurrentUser();
   const { defaultAction }: Preferences = getPreferenceValues();
-
-  async function init() {
-    const updated_ts = await LocalStorage.getItem("updated_ts");
-    console.log("init running...", { updated_ts });
-    if (updated_ts === undefined || moment(updated_ts.toString()).isBefore(moment().subtract(24, "hours"))) {
-      // either no cache, or cache is 24+ hours old
-      console.log("refreshing data");
-      await refreshData();
-    }
-    const user = await getUser();
-    setUser(user);
-    const eventTypes = await getEventTypes();
-    setItems(eventTypes);
-
-    setIsLoading(false);
-  }
+  const { eventTypes: items, isLoading, revalidate } = useEventTypes();
 
   function RefreshAction() {
     return (
@@ -68,35 +46,17 @@ export default function Calendly() {
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={async () => {
           const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
-          await toast.show();
-          setIsLoading(true);
-          await refreshData();
-          await init();
+          revalidate();
           await toast.hide();
         }}
       />
     );
   }
 
-  useEffect(() => {
-    init()
-      .then()
-      .catch((error) => {
-        if (error.response.status === 401) {
-          setShowError(true);
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Sorry, something went wrong",
-          });
-        }
-      });
-  }, []);
-
-  if (showError)
+  if (error)
     return (
       <Detail
-        markdown={error}
+        markdown={errorMd}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={tokenURL} title="Open Calendly Integrations Page" />
