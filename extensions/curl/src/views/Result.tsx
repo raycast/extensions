@@ -48,7 +48,6 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
             content={JSON.stringify(result.response.data, null, 2)}
             shortcut={{ modifiers: ["cmd"], key: "h" }}
           />
-          <Action title="Back" onAction={pop} shortcut={{ modifiers: [], key: "escape" }} />
         </ActionPanel>
       }
     />

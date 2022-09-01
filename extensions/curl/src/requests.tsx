@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import axios from "axios";
 import ResultView from "./views/Result";
 
@@ -70,8 +81,18 @@ export default function Requests() {
   };
 
   const handleDeleteAll = async () => {
-    await LocalStorage.clear();
-    setRequests([]);
+    const options: Alert.Options = {
+      title: "Delete All History",
+      message: "Are you sure you want to delete all history?",
+      primaryAction: {
+        title: "Yes",
+        onAction: async () => {
+          await LocalStorage.clear();
+          setRequests([]);
+        },
+      },
+    };
+    await confirmAlert(options);
   };
 
   const generateCurl = (request: RequestArg) => {
@@ -95,7 +116,6 @@ export default function Requests() {
       isLoading={isLoading}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search requests"
       searchBarPlaceholder="Search URL"
     >
       {requests?.map((req: Values) => {
@@ -111,14 +131,20 @@ export default function Requests() {
                   title="Copy cURL"
                   content={generateCurl({ url: req.key, payload: req.value })}
                 />
-                <Action title="Run" onAction={() => handleRunRequest({ url: req.key, payload: req.value })} />
+                <Action
+                  title="Run"
+                  icon={Icon.Rocket}
+                  onAction={() => handleRunRequest({ url: req.key, payload: req.value })}
+                />
                 <Action
                   title="Delete From History"
+                  icon={Icon.Trash}
                   onAction={() => handleDeleteItem(req.key)}
                   shortcut={{ modifiers: ["cmd"], key: "delete" }}
                 />
                 <Action
                   title="Delete All History"
+                  icon={Icon.Trash}
                   onAction={handleDeleteAll}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
                 />

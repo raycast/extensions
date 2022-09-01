@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, Icon } from "@raycast/api";
 import { headerKeys, methods, makeObject } from "../../utils";
 import ResultView from "./Result";
 import axios from "axios";
@@ -88,9 +88,10 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Make request" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Make request" icon={Icon.Rocket} onSubmit={handleSubmit} />
           <Action
             title="Add Headers"
+            icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "h" }}
             onAction={() => {
               handleAddHeader();
@@ -98,6 +99,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
           />
           <Action
             title="Remove Last Header"
+            icon={Icon.Minus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
             onAction={() => {
               handleRemoveHeader();
