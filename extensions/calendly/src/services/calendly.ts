@@ -62,26 +62,47 @@ const client = new OAuth.PKCEClient({
   description: "Connect your Calendly account...",
 });
 export async function authorize() {
+  const tokenSet = await client.getTokens();
+  if (tokenSet?.accessToken) {
+    if (tokenSet.refreshToken && tokenSet.isExpired()) {
+      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+    }
+    return;
+  }
+
   const authRequest = await client.authorizationRequest({
     clientId: CLIENT_ID,
     endpoint: "https://auth.calendly.com/oauth/authorize",
     scope: "default",
   });
-  return await client.authorize(authRequest);
+  const { authorizationCode } = await client.authorize(authRequest);
+
+  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
-export async function getToken({ authorizationCode }: OAuth.AuthorizationResponse) {
-  const resp = await api.request({
+export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string) {
+  const resp = await api.request<OAuth.TokenResponse>({
     baseURL: "https://auth.calendly.com/oauth/token",
     method: "POST",
     data: {
       grant_type: "authorization_code",
       client_id: CLIENT_ID,
-      client_secret: "KAv1FfPf-ykkBEM-WEcjOLi1bzW3BhbjdEk7wtqq7Zg",
-      code: authorizationCode,
+      code,
       redirect_uri: "https://raycast.com/redirect?packageName=calendly",
     },
   });
-  console.log(resp.data);
+  return resp.data;
+}
+
+async function refreshTokens(refresh_token: string) {
+  const resp = await api.request<OAuth.TokenResponse>({
+    baseURL: "https://auth.calendly.com/oauth/token",
+    method: "POST",
+    data: {
+      grant_type: "refresh_token",
+      refresh_token,
+    },
+  });
+  return resp.data;
 }
 
 const api = axios.create({
@@ -90,7 +111,12 @@ const api = axios.create({
 });
 
 async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = api.request<unknown, T>({ method, ...props });
+  await authorize(); // make sure we have a token before the request
+  const resp = api.request<unknown, T>({
+    method,
+    ...props,
+    headers: { Authorization: `Bearer ${(await client.getTokens())?.accessToken}` },
+  });
   return resp;
 }
 
