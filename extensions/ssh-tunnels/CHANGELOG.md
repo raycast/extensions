@@ -1,5 +1,5 @@
 # SSH Tunnels Changelog
 
-## [08/28/22] Initial Release
+## [Initial Release] - 2022-09-01
 
 - First release of SSH Tunnels.
