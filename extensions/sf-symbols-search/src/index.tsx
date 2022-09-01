@@ -45,7 +45,7 @@ export default function Command() {
         >
           <Grid.Dropdown.Item
             value={data.categories[0].name}
-            title={data.categories[0].title}
+            title="All Categories"
             icon={{ source: `symbols/images/${data.categories[0].symbol}.png`, tintColor: Color.PrimaryText }}
           />
           <Grid.Dropdown.Section>
