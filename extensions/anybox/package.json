@@ -64,7 +64,7 @@
     },
     {
       "name": "saveCurrentTabWithCollections",
-      "title": "Save Current Tab with Collections",
+      "title": "Save Current Tab With Collections",
       "subtitle": "Anybox",
       "description": "Save URL of current tab to Anybox with optional collections.",
       "mode": "view"
@@ -78,7 +78,7 @@
     },
     {
       "name": "pasteWithCollections",
-      "title": "Save Clipboard with Collections",
+      "title": "Save Clipboard With Collections",
       "subtitle": "Anybox",
       "description": "Save clipboard Anybox with optional collections.",
       "mode": "view"
