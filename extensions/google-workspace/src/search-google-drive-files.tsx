@@ -44,7 +44,7 @@ function SearchGoogleDriveFiles() {
           />
           <List.Dropdown.Item title="In full text in My Drive" value={`${QueryTypes.fullText}-${ScopeTypes.user}`} />
           <List.Dropdown.Item
-            title="in full text in All Drives"
+            title="In full text in All Drives"
             value={`${QueryTypes.fullText}-${ScopeTypes.allDrives}`}
           />
         </List.Dropdown>
