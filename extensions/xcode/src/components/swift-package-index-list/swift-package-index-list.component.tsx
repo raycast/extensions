@@ -5,11 +5,14 @@ import { useRef, useState } from "react";
 import { SwiftPackageIndexListItem } from "./swift-package-index-list-item.component";
 import { SwiftPackageIndexSearchResult } from "../../models/swift-package-index/swift-package-index-search-result.model";
 import { SwiftPackageIndexSearchResults } from "../../models/swift-package-index/swift-package-index-search-results.model";
+import { XcodeService } from "../../services/xcode.service";
 
 /**
  * Swift Package Index List
  */
 export function SwiftPackageIndexList(): JSX.Element {
+  // Use is Xcode installed Promise
+  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled);
   // Use search text state
   const [searchText, setSearchText] = useState<string>("");
   // Use page state. Default value `1`
@@ -81,7 +84,8 @@ export function SwiftPackageIndexList(): JSX.Element {
           title="Search failed"
           description="An error occurred while searching the Swift Package Index."
         />
-      ) : (swiftPackageIndexSearchResults.isLoading && !swiftPackageIndexSearchResults.data) || !searchText.length ? (
+      ) : (swiftPackageIndexSearchResults.isLoading && !swiftPackageIndexSearchResults.data?.results.length) ||
+        !searchText.length ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Search Swift Package Index"
@@ -91,7 +95,13 @@ export function SwiftPackageIndexList(): JSX.Element {
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
       ) : (
         swiftPackageIndexSearchResults.data?.results.map((searchResult) => {
-          return <SwiftPackageIndexListItem key={searchResult.id} searchResult={searchResult} />;
+          return (
+            <SwiftPackageIndexListItem
+              key={searchResult.id}
+              searchResult={searchResult}
+              isXcodeInstalled={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
+            />
+          );
         })
       )}
     </List>

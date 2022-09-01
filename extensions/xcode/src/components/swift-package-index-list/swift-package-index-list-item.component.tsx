@@ -6,7 +6,10 @@ import { XcodeAddSwiftPackage } from "../xcode-add-swift-package/xcode-add-swift
 /**
  * Swift Package Index List Item
  */
-export function SwiftPackageIndexListItem(props: { searchResult: SwiftPackageIndexSearchResult }): JSX.Element {
+export function SwiftPackageIndexListItem(props: {
+  searchResult: SwiftPackageIndexSearchResult;
+  isXcodeInstalled: boolean;
+}): JSX.Element {
   const navigation = useNavigation();
   return (
     <List.Item
@@ -17,12 +20,14 @@ export function SwiftPackageIndexListItem(props: { searchResult: SwiftPackageInd
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={props.searchResult.url} />
-          <Action
-            key="add-to-xcode-project"
-            title="Add to Xcode Project"
-            icon={Icon.Plus}
-            onAction={() => navigation.push(<XcodeAddSwiftPackage url={props.searchResult.url} />)}
-          />
+          {props.isXcodeInstalled ? (
+            <Action
+              key="add-to-xcode-project"
+              title="Add to Xcode Project"
+              icon={Icon.Plus}
+              onAction={() => navigation.push(<XcodeAddSwiftPackage url={props.searchResult.url} />)}
+            />
+          ) : undefined}
           <Action.CopyToClipboard content={props.searchResult.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
         </ActionPanel>
       }
