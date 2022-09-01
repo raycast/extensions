@@ -1,8 +1,8 @@
 # Google Workspace Changelog
 
-## [Search on all Drives] - 2022-08-12
+## [Search on all Drives] - 2022-09-01
 
-Added support as dropdown to search not only on My Drive but also on Shared Drives.
+Added support to search not only on My Drive but also on Shared Drives.
 
 ## [Open source the Extension] - 2022-08-04
 
