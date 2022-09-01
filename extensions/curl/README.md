@@ -1,4 +1,4 @@
-# Curl Changelog
+# cURL Changelog
 
  ## [Initial Release] - 2022-09-01
 

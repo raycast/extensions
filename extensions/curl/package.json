@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "curl",
-  "title": "Curl",
+  "title": "cURL",
   "description": "Keyboard-first HTTP client",
   "icon": "app-icon.png",
   "author": "jonathangiardino",
@@ -14,14 +14,14 @@
     {
       "name": "index",
       "title": "Make HTTP Request",
-      "subtitle": "Curl",
+      "subtitle": "cURL",
       "description": "Shortcut to make an HTTP request",
       "mode": "view"
     },
     {
       "name": "requests",
       "title": "Requests History",
-      "subtitle": "Curl",
+      "subtitle": "cURL",
       "description": "HTTP requests history",
       "mode": "view"
     }
