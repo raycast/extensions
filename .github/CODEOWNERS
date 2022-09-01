@@ -213,6 +213,7 @@
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
+/extensions/guitar-chords                            @GastroGeek
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn
 /extensions/hackmd                                   @Yukaii
 /extensions/harvest                                  @eluce2
