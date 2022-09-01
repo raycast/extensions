@@ -8,7 +8,7 @@ import { useDebounce } from "./useDebounce";
 const preferences: Preferences = getPreferenceValues();
 
 const IncidentList = () => {
-  const [query, setQuery] = useState(preferences.alertsQuery);
+  const [query, setQuery] = useState(preferences.incidentsQuery);
   const debouncedQuery = useDebounce<string>(query, 1000);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
