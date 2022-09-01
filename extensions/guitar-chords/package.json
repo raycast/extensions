@@ -6,6 +6,18 @@
   "icon": "guitar-chords.png",
   "author": "GastroGeek",
   "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Media",
+    "Other"
+  ],
+  "keywords": [
+    "chords",
+    "diagrams",
+    "fretboard",
+    "guitar",
+    "music"
+  ],
   "commands": [
     {
       "name": "chords-quickfind",
