@@ -1,0 +1,99 @@
+import { Icon, List } from "@raycast/api";
+import { SwiftPackageIndexService } from "../../services/swift-package-index.service";
+import { usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
+import { SwiftPackageIndexListItem } from "./swift-package-index-list-item.component";
+import { SwiftPackageIndexSearchResult } from "../../models/swift-package-index/swift-package-index-search-result.model";
+import { SwiftPackageIndexSearchResults } from "../../models/swift-package-index/swift-package-index-search-results.model";
+
+/**
+ * Swift Package Index List
+ */
+export function SwiftPackageIndexList(): JSX.Element {
+  // Use search text state
+  const [searchText, setSearchText] = useState<string>("");
+  // Use page state. Default value `1`
+  const [page, setPage] = useState<number | undefined>(1);
+  // Set Swift Package Index Search Results state to concat results on a page update
+  const [searchResults, setSearchResults] = useState<SwiftPackageIndexSearchResult[]>([]);
+  // Use AbortController reference
+  const abortable = useRef<AbortController>();
+  // Use Promise to load Swift Package Index Search Results
+  const swiftPackageIndexSearchResults = usePromise(
+    async (searchText, page) => {
+      // Declare Swift Package Index Search Results
+      let results: SwiftPackageIndexSearchResults;
+      try {
+        // Try to search for Swift Packages
+        results = await SwiftPackageIndexService.search(searchText, page, abortable.current?.signal);
+      } catch (error) {
+        // Check if current search results are available
+        if (searchResults.length) {
+          // Use current search results to prevent clearing
+          // existing search results on a page update
+          return {
+            results: searchResults,
+            nextPage: page,
+          };
+        } else {
+          // Otherwise rethrow error
+          throw error;
+        }
+      }
+      // Return search results
+      return {
+        results: searchResults.concat(results.results),
+        nextPage: results.nextPage,
+      };
+    },
+    [searchText, page],
+    {
+      abortable,
+      onData: (searchResults) => {
+        // Set search results
+        setSearchResults(searchResults.results);
+      },
+    }
+  );
+  return (
+    <List
+      isLoading={swiftPackageIndexSearchResults.isLoading}
+      onSelectionChange={(id) => {
+        if (
+          swiftPackageIndexSearchResults.data?.nextPage &&
+          swiftPackageIndexSearchResults.data?.results.at(-1)?.id === id
+        ) {
+          setPage(swiftPackageIndexSearchResults.data.nextPage);
+        }
+      }}
+      searchBarPlaceholder="Search Swift Package Index"
+      throttle={true}
+      onSearchTextChange={(searchText) => {
+        setPage(1);
+        setSearchResults([]);
+        setSearchText(searchText);
+      }}
+      isShowingDetail={!!swiftPackageIndexSearchResults.data?.results.length}
+    >
+      {swiftPackageIndexSearchResults.error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Search failed"
+          description="An error occurred while searching the Swift Package Index."
+        />
+      ) : (swiftPackageIndexSearchResults.isLoading && !swiftPackageIndexSearchResults.data) || !searchText.length ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Search Swift Package Index"
+          description="Type something to search the Swift Package Index."
+        />
+      ) : !swiftPackageIndexSearchResults.data?.results.length ? (
+        <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
+      ) : (
+        swiftPackageIndexSearchResults.data?.results.map((searchResult) => {
+          return <SwiftPackageIndexListItem key={searchResult.id} searchResult={searchResult} />;
+        })
+      )}
+    </List>
+  );
+}

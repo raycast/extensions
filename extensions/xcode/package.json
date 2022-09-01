@@ -156,6 +156,13 @@
       "mode": "view"
     },
     {
+      "name": "search-swift-package-index.command",
+      "title": "Search Swift Package Index",
+      "subtitle": "Xcode",
+      "description": "Search Swift Package Index.",
+      "mode": "view"
+    },
+    {
       "name": "add-swift-package.command",
       "title": "Add Swift Package",
       "subtitle": "Xcode",
