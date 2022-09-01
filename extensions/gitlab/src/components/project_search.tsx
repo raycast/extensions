@@ -26,7 +26,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
   if (project.archived) {
     accessories.push({ text: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } });
   }
-  accessories.push({ text: project.star_count + " stars", icon: Icon.Star });
+  accessories.push({ text: project.star_count.toString(), icon: Icon.Star });
   return (
     <List.Item
       id={project.id.toString()}
