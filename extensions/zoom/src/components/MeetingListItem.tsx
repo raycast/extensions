@@ -18,7 +18,13 @@ type MeetingListItemProps = {
 
 export function MeetingListItem({ meeting, mutate }: MeetingListItemProps) {
   if (isRecurringMeetingWithNoFixedTime(meeting)) {
-    return <List.Item title={meeting.topic} actions={<MeetingActionPanel meeting={meeting} mutate={mutate} />} />;
+    return (
+      <List.Item
+        title={meeting.topic}
+        accessories={[{ icon: Icon.ArrowClockwise }]}
+        actions={<MeetingActionPanel meeting={meeting} mutate={mutate} />}
+      />
+    );
   }
 
   const startTime = new Date(meeting.start_time);
