@@ -12,7 +12,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -44,7 +44,7 @@ export default function Command({
 
   useEffect(() => {
     if (error) {
-      if (error.isAxiosError && error.response?.status === 401) {
+      if (isAxiosError(error) && error.response?.status === 401) {
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Token",
@@ -98,16 +98,18 @@ export default function Command({
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Project Selected",
       });
+      return;
     }
     if (values.task_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Task Selected",
       });
+      return;
     }
 
     setTimeFormat(hours);
