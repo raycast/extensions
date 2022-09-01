@@ -22,7 +22,7 @@ import { ClearLocalCacheAction } from "./cache_actions";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
-  let accessories = [];
+  const accessories = [];
   if (project.archived) {
     accessories.push({ text: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } });
   }
