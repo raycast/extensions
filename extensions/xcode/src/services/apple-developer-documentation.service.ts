@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import * as Path from "path";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
+import { URL } from "url";
 
 /**
  * AppleDeveloperDocumentationService
@@ -21,21 +22,21 @@ export class AppleDeveloperDocumentationService {
       // Return empty results
       return [];
     }
+    // Initialize URL
+    const url = new URL(AppleDeveloperDocumentationService.hostUrl);
+    url.pathname = "search/search_data.php";
+    url.searchParams.append("q", query);
+    url.searchParams.append("results", "500");
+    url.searchParams.append("group", "documentation");
     // Fetch Documentation Response
-    const response = await fetch(
-      Path.join(
-        AppleDeveloperDocumentationService.hostUrl,
-        `/search/search_data.php?q=${encodeURIComponent(query)}&results=500&group=documentation`
-      ),
-      {
-        method: "GET",
-        headers: {
-          // Important search_data endpoint requires a refer HTTP header
-          Referer: AppleDeveloperDocumentationService.hostUrl,
-        },
-        signal: abortSignal as any,
-      }
-    );
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        // Important search_data endpoint requires a refer HTTP header
+        Referer: AppleDeveloperDocumentationService.hostUrl,
+      },
+      signal: abortSignal as any,
+    });
     // Retrieve search response as JSON
     const searchResponse = (await response.json()) as AppleDeveloperDocumentationSearchResponse;
     // Initialize Documentation Entries
