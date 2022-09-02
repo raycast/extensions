@@ -41,8 +41,8 @@ export default function SearchLinks() {
               icon={Icon.Link}
               title={"Original Link: " + value.originalURL}
               onAction={async () => {
-                await showHUD("Copy " + value.shortURL);
-                await Clipboard.copy(value.shortURL);
+                await showHUD("Copy " + value.originalURL);
+                await Clipboard.copy(value.originalURL);
               }}
             />
             <MenuBarExtra.Item icon={Icon.Store} title={"Source: " + value.source} />
