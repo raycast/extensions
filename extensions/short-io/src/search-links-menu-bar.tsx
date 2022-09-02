@@ -1,4 +1,4 @@
-import { Clipboard, MenuBarExtra, showHUD } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, showHUD } from "@raycast/api";
 import React from "react";
 import { getShortLinks } from "./hooks/hooks";
 
@@ -27,8 +27,9 @@ export default function SearchLinks() {
             }}
             title={value.shortURL}
           >
-            {value.title !== null && <MenuBarExtra.Item title={"Title: " + value.title + ""} />}
+            {value.title !== null && <MenuBarExtra.Item icon={Icon.Text} title={"Title: " + value.title + ""} />}
             <MenuBarExtra.Item
+              icon={Icon.Link}
               title={"Short Link: " + value.shortURL}
               tooltip={"Short Link"}
               onAction={async () => {
@@ -37,15 +38,16 @@ export default function SearchLinks() {
               }}
             />
             <MenuBarExtra.Item
+              icon={Icon.Link}
               title={"Original Link: " + value.originalURL}
               onAction={async () => {
                 await showHUD("Copy " + value.shortURL);
                 await Clipboard.copy(value.shortURL);
               }}
             />
-            <MenuBarExtra.Item title={"Source: " + value.source} />
-            <MenuBarExtra.Item title={"Created At: " + value.createdAt} />
-            <MenuBarExtra.Item title={"Updated At: " + value.updatedAt} />
+            <MenuBarExtra.Item icon={Icon.Store} title={"Source: " + value.source} />
+            <MenuBarExtra.Item icon={Icon.Clock} title={"Created At: " + value.createdAt} />
+            <MenuBarExtra.Item icon={Icon.Clock} title={"Updated At: " + value.updatedAt} />
           </MenuBarExtra.Submenu>
         );
       })}
