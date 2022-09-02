@@ -1,14 +1,17 @@
-assets/symbols/data.json: SFSymbolsSearch.playground/Resources/symbol_glyphs.txt
-	@swift SFSymbolsSearch.playground/Contents.swift > assets/symbols/data.json
+assets/symbols/data.json:
+	sh generate.sh
+	
+assets/symbols/data_beta.json:
+	sh generate.sh
 
 .PHONY: build
-build: node_modules assets/symbols/data.json prettierify
+build: node_modules assets/symbols/data.json assets/symbols/data_beta.json prettierify
 	@npm run build
 	
 .PHONY: clean
 clean:
-	@rm -rf node_modules && rm -rf assets/symbols/data.json && rm -rf assets/symbols/images/* && rm -rf SFSymbolsSearch.playground/Resources/*
-
+	@rm -rf node_modules && rm -rf assets/symbols/*.json && rm -rf assets/symbols/images/* && rm -rf SFSymbolsSearch.playground/Resources/*
+	
 node_modules:
 	@npm install
 
@@ -17,8 +20,5 @@ prettierify: node_modules
 	@npx prettier -w src/index.tsx
 
 .PHONY: run
-run: node_modules assets/symbols/data.json prettierify
+run: node_modules assets/symbols/data.json assets/symbols/data_beta.json prettierify
 	@npm run dev
-	
-SFSymbolsSearch.playground/Resources/symbol_glyphs.txt:
-	@sh generate.sh

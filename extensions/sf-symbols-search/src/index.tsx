@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import fs from "node:fs";
+import { readFileSync } from "node:fs";
+import { execSync } from "child_process";
 
 export interface Preferences {
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
@@ -23,11 +24,31 @@ export interface Category {
 
 const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
 
+try {
+  execSync("ls /Applications | grep 'SF Symbols beta.app'");
+} catch (err) {
+  console.log(err);
+}
+
+function getDataPath() {
+  var fileName = "data";
+
+  try {
+    if (execSync("ls /Applications | grep 'SF Symbols beta.app'").length > 0) {
+      fileName += "_beta";
+    }
+  } catch {}
+
+  return `${environment.assetsPath}/symbols/${fileName}.json`;
+}
+
+getDataPath();
+
 export default function Command() {
   const data: {
     symbols: Symbol[];
     categories: Category[];
-  } = JSON.parse(fs.readFileSync(`${environment.assetsPath}/symbols/data.json`, { encoding: "utf8" }));
+  } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
   const [category, setCategory] = useState<string | undefined>();
 
