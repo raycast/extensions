@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { SwiftPackageIndexSearchResults } from "../models/swift-package-index/swift-package-index-search-results.model";
 import Path from "path";
+import { URL } from "url";
 
 /**
  * SwiftPackageIndexService
@@ -30,15 +31,13 @@ export class SwiftPackageIndexService {
         results: [],
       };
     }
+    // Initialize URL
+    const url = new URL(SwiftPackageIndexService.hostUrl);
+    url.pathname = "api/search";
+    url.searchParams.append("query", query);
+    url.searchParams.append("page", String(page));
     // Search Swift Package Index
-    const response = await fetch(
-      [
-        Path.join(SwiftPackageIndexService.hostUrl, "api", "search"),
-        "?",
-        [["query", query].join("="), ["page", page].join("=")].join("&"),
-      ].join(""),
-      { method: "GET", signal: abortSignal as any }
-    );
+    const response = await fetch(url.toString(), { method: "GET", signal: abortSignal as any });
     // Check if response is not ok
     if (!response.ok) {
       // Throw error
