@@ -12,7 +12,8 @@ import { XcodeService } from "../../services/xcode.service";
  */
 export function SwiftPackageIndexList(): JSX.Element {
   // Use is Xcode installed Promise
-  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], { onError: () => {} });
   // Use search text state
   const [searchText, setSearchText] = useState<string>("");
   // Use page state. Default value `1`
