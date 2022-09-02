@@ -18,6 +18,6 @@ export default {
     const filePath = `${tempDir}/${fileName}`;
     await fs.writeFileSync(filePath, new Uint8Array(data), "binary");
     proc.exec(`osascript -e 'set the clipboard to (read (POSIX file "${filePath}") as JPEG picture)'`);
-    showHUD("已复制到剪切板");
+    showHUD("Already copied to clipboard.(Command + V)");
   },
 };

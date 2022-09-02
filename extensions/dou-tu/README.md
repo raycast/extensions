@@ -1,9 +1,16 @@
-# Dou Tu Extension for Raycast
+<p align="center">
+  <img src="assets/icon.png" height="128">
+  <h1 align="center">Dou Tu Extension for Raycast</h1>
+</p>
 
-上班时间斗个图 😄
+🌟 A picture fight during working hours
+
+## Features
+- Support for quick search of emoji packs
+- Support click to copy to clipboard
 
 ## Author
 
-**Leo** (gaoyang)
+[ 🇨🇳 ] **Leo** (gaoyang) 
 
 - [GitHub](https://www.github.com/gaoyang)
