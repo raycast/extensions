@@ -14,6 +14,7 @@
 /extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it
 /extensions/amphetamine                              @gstvds
 /extensions/android-adb-input                        @STAR-ZERO
+/extensions/ansible-documentation                    @Kcih4518
 /extensions/anybox                                   @francisfeng
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-developer-docs                     @CaliCastle
@@ -86,6 +87,7 @@
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/coinpaprika                              @gumbleliks
 /extensions/color-casket                             @slavarazum
+/extensions/colorslurp                               @Jordan-Ellis
 /extensions/commitlint                               @lardissone
 /extensions/common-directory                         @koinzhang
 /extensions/confluence-search                        @daviddkkim
@@ -127,6 +129,7 @@
 /extensions/discord                                  @Aayush9029
 /extensions/discordjs-documentation                  @mah51
 /extensions/displayplacer                            @eluce2
+/extensions/dlmoji                                   @Hydrapse
 /extensions/dock                                     @pradeepb28
 /extensions/dock-tinker                              @koinzhang
 /extensions/docker                                   @priithaamer @gebeto
@@ -136,6 +139,7 @@
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
 /extensions/dotween-eases                            @metakirby5
+/extensions/downloads-manager                        @thomaspaulmann
 /extensions/drafts                                   @FlohGro-dev
 /extensions/dribbble                                 @gebeto
 /extensions/dropbox                                  @chyroc
@@ -151,6 +155,7 @@
 /extensions/ensk-is                                  @jokull
 /extensions/envato                                   @Slllava
 /extensions/envoyer                                  @thijsdewitt
+/extensions/esa-search                               @kawamataryo
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
 /extensions/f1-standings                             @csigritz @sxn @qeude
@@ -161,6 +166,7 @@
 /extensions/figma-files                              @michaelwschultz
 /extensions/filamentphp-doc-seach                    @aurawindsurfing
 /extensions/file-manager                             @es183923
+/extensions/filezilla                                @naqet
 /extensions/finnish-dictionary                       @albertoxamin
 /extensions/fip                                      @louison
 /extensions/flow                                     @vimtor
@@ -295,6 +301,7 @@
 /extensions/mldocs                                   @sadanand-singh
 /extensions/moji                                     @Kasper4649
 /extensions/monday                                   @freak4pc
+/extensions/monse                                    @victor-falcon
 /extensions/multilinks                               @abhisheksatre
 /extensions/music                                    @Rawnly
 /extensions/must                                     @eggsy
@@ -322,6 +329,7 @@
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/ones                                     @k8scat
 /extensions/open-in-json-hero                        @ericallam @ivanovart
+/extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
 /extensions/open-link-in-specific-browser            @koinzhang
 /extensions/open-path                                @koinzhang
 /extensions/open-with-app                            @fturcheti
@@ -345,6 +353,7 @@
 /extensions/pipe-commands                            @pomdtr @gasolin
 /extensions/pipedrive                                @stephendolan
 /extensions/placeholder                              @koinzhang
+/extensions/playwright-docs                          @AndrewUsher
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pocket                                   @vimtor
 /extensions/podcasts                                 @ron-myers
@@ -437,11 +446,13 @@
 /extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
+/extensions/statamic-docs                            @andrebreia
 /extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
 /extensions/stripe                                   @pradeepb28 @farisaziz12
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/supernotes                               @acnebs
+/extensions/supernova                                @JiriTrecak
 /extensions/surge                                    @ysj151215
 /extensions/svgo                                     @kaichii
 /extensions/svgr                                     @rickMcGavin
@@ -500,7 +511,7 @@
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @gleich @gleich @dgrcode
 /extensions/vim-bro                                  @ajaypremshankar
-/extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very
+/extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @TobiasYin
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @macbookandrew @immint023 @pernielsentikaer
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak

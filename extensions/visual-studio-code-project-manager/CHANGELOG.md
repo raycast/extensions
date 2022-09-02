@@ -1,5 +1,7 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Support ssh remote projects] - 2022-08-24
+
 ## [Add VSCodium option] - 2022-07-28
 
 ## [Add filtering by tag functionality] - 2022-07-27
