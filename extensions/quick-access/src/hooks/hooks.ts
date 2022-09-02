@@ -10,7 +10,7 @@ import {
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
 import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
-import { copyFileByPath } from "../utils/applescript-utils";
+import { copyFileByPath, getOpenFinderWindowPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
 import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
 import { Preferences } from "../types/preferences";
@@ -39,7 +39,7 @@ export const getIsShowDetail = (refreshDetail: number) => {
 };
 
 //get local directory with files
-export const localDirectoryWithFiles = (refresh: number) => {
+export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolean) => {
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,6 +76,28 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
       _allFilesNumber = _allFilesNumber + files.length;
     });
+
+    //get file in open folder
+    if (showOpenFolders) {
+      const openFolders = await getOpenFinderWindowPath();
+
+      openFolders.forEach((openFolder) => {
+        const isExist = validDirectory.some((localFolder) => {
+          return localFolder.path == openFolder.path;
+        });
+        if (isExist) return;
+        const files =
+          _fileShowNumber === -1
+            ? getDirectoryFiles(openFolder.path + "/")
+            : getDirectoryFiles(openFolder.path + "/").slice(0, _fileShowNumber);
+        _pinnedDirectoryContent.push({
+          directory: openFolder,
+          files: files,
+        });
+        _allFilesNumber = _allFilesNumber + files.length;
+      });
+    }
+
     setAllFilesNumber(_allFilesNumber);
     setDirectoryWithFiles(_pinnedDirectoryContent);
     setLoading(false);

@@ -1,5 +1,11 @@
 # Quick Access Changelog
 
+## [Add Menu Bar command] - {PR_MERGE_DATE}
+
+- Add Menu Bar command
+- Modify Directory to Folder
+- Add the ability to show open folders
+
 ## [Add file preview] - 2022-06-30
 
 - Add file preview (CMD+Y)
