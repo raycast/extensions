@@ -125,8 +125,8 @@ export default function Command() {
           if (preferences.enableHistory) {
             const history: TransHistory = {
               time: new Date().getTime(),
-              from: transResultsNew[0].from.langTitle,
-              to: transResultsNew[0].to.langTitle,
+              from: transResultsNew[0].from.langId,
+              to: transResultsNew[0].to.langId,
               text: inputTempState,
               transList: transResultsNew.map((tran) => {
                 return {

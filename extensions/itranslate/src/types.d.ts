@@ -35,6 +35,7 @@ interface ILangItem {
   youdaoLangId?: string;
   aliyunLangId?: string;
   langTitle: string;
+  voice?: string;
 }
 
 interface ITranslateRes {

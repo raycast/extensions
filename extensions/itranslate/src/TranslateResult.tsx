@@ -10,6 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { LANG_LIST, TransAPIErrCode } from "./const";
+import { say } from "./itranslate.shared";
 import { TranslateHistory } from "./TranslateHistory";
 
 const preferences: IPreferences = getPreferenceValues();
@@ -120,6 +121,22 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
                 );
               })}
           </ActionPanel.Submenu>
+          {props.transRes.from.voice && (
+            <Action
+              title="Play Source Sound"
+              icon={Icon.SpeakerOn}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => say(props.transRes.origin, props.transRes.from)}
+            />
+          )}
+          {props.transRes.to.voice && (
+            <Action
+              title="Play Result Sound"
+              icon={Icon.SpeakerOn}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={() => say(props.transRes.res, props.transRes.to)}
+            />
+          )}
           {preferences.enableHistory && (
             <Action.Push
               icon={Icon.BulletPoints}

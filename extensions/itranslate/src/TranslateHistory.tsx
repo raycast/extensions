@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { TRANS_SERVICES_NAMES } from "./const";
-import { clearAllHistory, getHistories } from "./itranslate.shared";
+import { clearAllHistory, getHistories, getLang, say } from "./itranslate.shared";
 import { useEffect, useState } from "react";
 
 export function TranslateHistory() {
@@ -26,7 +26,10 @@ export function TranslateHistory() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="" text={`${history.from} -> ${history.to}`} />
+                    <List.Item.Detail.Metadata.Label
+                      title=""
+                      text={`${getLang(history.from).langTitle} -> ${getLang(history.to).langTitle}`}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                     {history.transList.map((tran) => {
                       return (
@@ -56,6 +59,12 @@ export function TranslateHistory() {
                   })}
                 </ActionPanel.Submenu>
                 <Action.CopyToClipboard title="Copy Source to Clipboard" content={history.text} />
+                <Action
+                  title="Play Source Sound"
+                  icon={Icon.SpeakerOn}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  onAction={() => say(history.text, getLang(history.from))}
+                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Clear All Histories"
