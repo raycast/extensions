@@ -51,6 +51,13 @@
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
       "mode": "view"
+    },
+    {
+      "name": "today-frog",
+      "title": "Today's Frog",
+      "subtitle": "Eat the frog first",
+      "description": "What's the most important task you should do today? (based on the 'Eat the frog' method). A task with the 'frog' label will appear in the Menu Bar. Label can be configured in Extension Preferences",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -61,6 +68,15 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "frogLabelName",
+      "type": "textfield",
+      "required": false,
+      "title": "Frog Label's Name",
+      "description": "Label used for Menu Bar Command. Default is 'frog'.",
+      "placeholder": "Enter a label name you have in Todoist",
+      "default": "frog"
     },
     {
       "name": "todayGroupBy",
