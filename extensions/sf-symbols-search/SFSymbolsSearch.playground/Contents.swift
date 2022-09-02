@@ -37,7 +37,7 @@ if isPlayground {
 	   let symbolGlyphsPath = bundle.path(forResource: "symbol_glyphs", ofType: "txt"),
 	   let symbolSearchTermsPath = bundle.path(forResource: "symbol_search", ofType: "plist"),
 	   let symbolCategoriesPath = bundle.path(forResource: "symbol_categories", ofType: "plist"),
-	   let categoryTitlesPath = bundle.path(forResource: "Localizable", ofType: "plist"),
+	   let categoryTitlesPath = bundle.path(forResource: "CategoryTitles", ofType: "plist"),
 	   let categoriesPath = bundle.path(forResource: "categories", ofType: "plist") {
 		symbolNames = try? String(contentsOfFile: symbolNamesPath)
 		symbolGlyphs = try? String(contentsOfFile: symbolGlyphsPath)
@@ -55,7 +55,7 @@ if isPlayground {
 	let symbolGlyphsURL = resourcesURL.appendingPathComponent("symbol_glyphs.txt")
 	let symbolSearchTermsURL = resourcesURL.appendingPathComponent("symbol_search.plist")
 	let symbolCategoriesURL = resourcesURL.appendingPathComponent("symbol_categories.plist")
-	let categoryTitlesURL = resourcesURL.appendingPathComponent("Localizable.plist")
+	let categoryTitlesURL = resourcesURL.appendingPathComponent("CategoryTitles.plist")
 	let categoriesURL = resourcesURL.appendingPathComponent("categories.plist")
 	
 	symbolNames = try? String(contentsOf: symbolNamesURL)

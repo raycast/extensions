@@ -1,7 +1,23 @@
 #!/bin/sh
 
-RESOURCE_DIR=SFSymbolsSearch.playground/Resources
-APP_NAME="SF Symbols"
+# Set variables
+PLAYGROUND_RESOURCES_PATH=SFSymbolsSearch.playground/Resources
+APP_NAME=
+RESOURCES_PATH=
+CATEGORY_TITLES_PATH=
+
+if [[ $(ls /Applications | grep 'SF Symbols.app') ]]; then
+	APP_NAME="SF Symbols"
+	RESOURCES_PATH="/Applications/$APP_NAME.app/Contents/Resources"
+	CATEGORY_TITLES_PATH="$RESOURCES_PATH/en.lproj/Localizable.strings"
+elif [[ $(ls /Applications | grep 'SF Symbols beta.app') ]]; then
+	APP_NAME="SF Symbols beta"
+	RESOURCES_PATH="/System/Library/CoreServices/CoreGlyphs.bundle/Contents/Resources"
+	CATEGORY_TITLES_PATH="/Applications/$APP_NAME.app/Contents/Frameworks/SFSymbolsKit.framework/Versions/Current/Frameworks/SFSymbolsShared.framework/Resources/CategoryTitles.strings"
+else
+	echo "Aborting: SF Symbols.app is not installed..."
+	exit 1
+fi
 
 # Generate files containing glyphs and their corresponding names from SF Symbols.app
 osascript <<END
@@ -13,7 +29,7 @@ osascript <<END
 		delay 1
 	end tell
 END
-pbpaste > "$RESOURCE_DIR/symbol_names.txt"
+pbpaste > "$PLAYGROUND_RESOURCES_PATH/symbol_names.txt"
 
 osascript <<END
 	tell application "$APP_NAME" to activate
@@ -23,11 +39,26 @@ osascript <<END
 	end tell
 	tell application "SF Symbols beta" to quit
 END
-pbpaste | fold -w1 | tail -n +2 > "$RESOURCE_DIR/symbol_glyphs.txt"
+pbpaste | fold -w1 | tail -n +2 > "$PLAYGROUND_RESOURCES_PATH/symbol_glyphs.txt"
 
-# Copy search term metadata from CoreGlyphs.bundle and SF Symbols app
-cp "/Applications/$APP_NAME.app/Contents/Resources/en.lproj/Localizable.strings" "$RESOURCE_DIR"
-mv "$RESOURCE_DIR/Localizable.strings" "$RESOURCE_DIR/Localizable.plist"
-cp "/System/Library/CoreServices/CoreGlyphs.bundle/Contents/Resources/categories.plist" "$RESOURCE_DIR/"
-cp "/System/Library/CoreServices/CoreGlyphs.bundle/Contents/Resources/symbol_categories.plist" "$RESOURCE_DIR/"
-cp "/System/Library/CoreServices/CoreGlyphs.bundle/Contents/Resources/symbol_search.plist" "$RESOURCE_DIR/"
+# Copy category and search term metadata
+cp "$CATEGORY_TITLES_PATH" "$PLAYGROUND_RESOURCES_PATH"
+find $PLAYGROUND_RESOURCES_PATH -name "*.strings" -exec mv '{}' "$PLAYGROUND_RESOURCES_PATH/CategoryTitles.plist" \;
+cp "$RESOURCES_PATH/categories.plist" "$PLAYGROUND_RESOURCES_PATH/"
+cp "$RESOURCES_PATH/symbol_categories.plist" "$PLAYGROUND_RESOURCES_PATH/"
+cp "$RESOURCES_PATH/symbol_search.plist" "$PLAYGROUND_RESOURCES_PATH/"
+
+# Generate JSON data for extension
+if [ "$APP_NAME" = "SF Symbols" ]; then
+	swift SFSymbolsSearch.playground/Contents.swift > assets/symbols/data.json
+	if [ ! -f assets/symbols/data_beta.json ]; then
+		echo "Beta data needed. Please download and install SF Symbols beta.app from https://developer.apple.com/design/resources/ and re-run this script."
+		exit 1
+	fi
+else
+	swift SFSymbolsSearch.playground/Contents.swift > assets/symbols/data_beta.json
+	if [ ! -f assets/symbols/data.json ]; then
+		echo "Stable data needed. Please download and install SF Symbols.app from https://developer.apple.com/design/resources/ and re-run this script."
+		exit 1
+	fi
+fi
