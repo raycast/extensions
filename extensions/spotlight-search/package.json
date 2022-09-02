@@ -3,7 +3,7 @@
   "name": "spotlight-search",
   "title": "Spotlight Search",
   "description": "A simple wrapper around macOS Spotlight search",
-  "icon": "spotlight-search.svg",
+  "icon": "spotlight-search.png",
   "author": "GastroGeek",
   "license": "MIT",
   "categories": [
