@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
