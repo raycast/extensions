@@ -8,7 +8,7 @@ import { XcodeAddSwiftPackage } from "../xcode-add-swift-package/xcode-add-swift
  */
 export function SwiftPackageIndexListItem(props: {
   searchResult: SwiftPackageIndexSearchResult;
-  isXcodeInstalled: boolean;
+  isAddToXcodeActionVisible: boolean;
 }): JSX.Element {
   const navigation = useNavigation();
   return (
@@ -20,7 +20,7 @@ export function SwiftPackageIndexListItem(props: {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={props.searchResult.url} />
-          {props.isXcodeInstalled ? (
+          {props.isAddToXcodeActionVisible ? (
             <Action
               key="add-to-xcode-project"
               title="Add to Xcode Project"

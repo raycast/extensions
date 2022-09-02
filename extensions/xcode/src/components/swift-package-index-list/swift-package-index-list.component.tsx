@@ -99,7 +99,7 @@ export function SwiftPackageIndexList(): JSX.Element {
             <SwiftPackageIndexListItem
               key={searchResult.id}
               searchResult={searchResult}
-              isXcodeInstalled={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
+              isAddToXcodeActionVisible={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
             />
           );
         })
