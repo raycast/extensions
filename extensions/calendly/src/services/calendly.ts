@@ -1,8 +1,8 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
-const CLIENT_ID = "KCCVj5CuqdSvGsCQFqzj1KpnWap4c17W1PAaIpeFbgE";
+const CLIENT_ID = "gNDd7abqwsU1vqG9d0JA2c-zUlbhyNT2o7QACkwlDEc";
 export interface Preferences {
   token: string;
   defaultAction: "meeting" | "one-time";
@@ -45,6 +45,11 @@ export interface CalendlyEventType {
   uri: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isAxiosError(error: any): error is AxiosError {
+  return Object.keys(error).includes("isAxiosError");
+}
+
 export interface CalendlySingleUseLinkResponse extends AxiosResponse {
   data: { resource: { booking_url: string; owner?: string; owner_type?: string } };
 }
@@ -57,6 +62,7 @@ const { token }: Preferences = getPreferenceValues();
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
+  providerId: "calendly",
   providerName: "Calendly",
   providerIcon: "logo.png",
   description: "Connect your Calendly account...",
@@ -80,16 +86,27 @@ export async function authorize() {
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string) {
-  const resp = await api.request<OAuth.TokenResponse>({
-    baseURL: "https://auth.calendly.com/oauth/token",
-    method: "POST",
-    data: {
-      grant_type: "authorization_code",
-      client_id: CLIENT_ID,
-      code,
-      redirect_uri: "https://raycast.com/redirect?packageName=calendly",
-    },
-  });
+  console.log("trying to exchange for token");
+
+  const resp = await axios
+    .request<OAuth.TokenResponse>({
+      url: "https://auth.calendly.com/oauth/token?",
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      params: {
+        grant_type: "authorization_code",
+        code,
+        code_verifier: authRequest.codeVerifier,
+        redirect_uri: authRequest.redirectURI,
+      },
+    })
+    .catch((e) => {
+      if (isAxiosError(e)) {
+        console.log(e.response?.data);
+      }
+      throw e;
+    });
+
   return resp.data;
 }
 
