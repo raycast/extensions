@@ -11,15 +11,21 @@ export class AppleDeveloperDocumentationService {
    */
   private static hostUrl = "https://developer.apple.com";
   /**
-   * Search Developer Documentation by search text
-   * @param searchText The search text
+   * Search Developer Documentation
+   * @param query The search query
+   * @param abortSignal The optional AbortSignal
    */
-  static async search(searchText: string): Promise<AppleDeveloperDocumentationEntry[]> {
+  static async search(query: string, abortSignal?: AbortSignal): Promise<AppleDeveloperDocumentationEntry[]> {
+    // Check if query is falsely
+    if (!query) {
+      // Return empty results
+      return [];
+    }
     // Fetch Documentation Response
     const response = await fetch(
       Path.join(
         AppleDeveloperDocumentationService.hostUrl,
-        `/search/search_data.php?q=${encodeURIComponent(searchText)}&results=500&group=documentation`
+        `/search/search_data.php?q=${encodeURIComponent(query)}&results=500&group=documentation`
       ),
       {
         method: "GET",
@@ -27,6 +33,7 @@ export class AppleDeveloperDocumentationService {
           // Important search_data endpoint requires a refer HTTP header
           Referer: AppleDeveloperDocumentationService.hostUrl,
         },
+        signal: abortSignal as any,
       }
     );
     // Retrieve search response as JSON
