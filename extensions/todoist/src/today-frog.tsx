@@ -18,6 +18,7 @@ export default function TodayFrog() {
   const getTitle = () => {
     if (frogTask) return "🐸 " + frogTask.content;
     if (tasks && tasks.length > 0) return tasks[0].content.substring(0, MAX_TASK_LENGTH);
+    if (tasks && tasks.length === 0) return "🎉 No tasks left for today";
 
     return "Loading...";
   };
