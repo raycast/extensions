@@ -180,7 +180,7 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 ### Automatic Play Query Word Pronunciation
 
-<details><summary> Automatically play the word audio after querying the word, turned off by default. </summary>
+<details><summary> Automatically play the word audio after querying the word, turned on by default. </summary>
 
 <p>
 

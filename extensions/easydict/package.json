@@ -310,7 +310,7 @@
       "label": "Automatic Play Word Audio",
       "required": false,
       "description": "Automatic play audio after looking up a word",
-      "default": false
+      "default": true
     },
     {
       "name": "enableSystemProxy",
@@ -385,7 +385,7 @@
       "label": "Baidu Translate",
       "required": false,
       "description": "Turn on/off Baidu Translate",
-      "default": false
+      "default": true
     },
     {
       "name": "enableTencentTranslate",

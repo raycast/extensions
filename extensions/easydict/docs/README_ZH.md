@@ -182,7 +182,7 @@ npm install && npm run dev
 
 ### 自动播放单词发音
 
-<details> <summary> 查询单词后自动播放单词发音，默认关闭。 </summary>
+<details> <summary> 查询单词后自动播放单词发音，默认开启。 </summary>
 
 <p>
 注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 时才会自动播放语音，例如 `good`, `look for`, `查询` 等。 其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
