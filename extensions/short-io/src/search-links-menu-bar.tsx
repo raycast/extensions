@@ -1,4 +1,4 @@
-import { Clipboard, Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
 import React from "react";
 import { getShortLinks } from "./hooks/hooks";
 
@@ -52,6 +52,15 @@ export default function SearchLinks() {
           </MenuBarExtra.Submenu>
         );
       })}
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        title={"Preferences"}
+        icon={Icon.Gear}
+        onAction={() => {
+          openCommandPreferences().then();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+      />
     </MenuBarExtra>
   );
 }
