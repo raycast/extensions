@@ -1,5 +1,8 @@
 # Cleanshot X Changelog
 
+## [Remove Dependency on Open Package] - 2022-09-02
+- Use raycast builtin open command
+
 ## [Implement Open History feature] - 2022-09-01
 - Implementing Cleanshot X 4.4+ history feature
 
