@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "searchcaster",
   "title": "Searchcaster",
-  "description": "3rd party search tool for the Farcaster protocol",
+  "description": "Search for content on Farcaster, a sufficiently decentralized social network.",
   "categories": [
     "Applications"
   ],
@@ -16,7 +16,8 @@
     {
       "name": "search",
       "title": "Search Casts",
-      "description": "Search casts on the Farcaster protocol",
+      "subtitle": "Farcaster",
+      "description": "Search for casts by matching text",
       "mode": "view"
     }
   ],
