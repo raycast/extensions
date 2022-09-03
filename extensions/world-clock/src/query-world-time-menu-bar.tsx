@@ -1,4 +1,4 @@
-import { Clipboard, Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
 import { getStarTimezones } from "./hooks/hooks";
 import { buildDayAndNightIcon, calculateTimeInfoByOffset, isEmpty } from "./utils/common-utils";
 
@@ -78,6 +78,16 @@ export default function QueryWorldTime() {
           </MenuBarExtra.Submenu>
         );
       })}
+
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        title={"Preferences"}
+        icon={Icon.Gear}
+        onAction={() => {
+          openCommandPreferences().then();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+      />
     </MenuBarExtra>
   );
 }

@@ -81,7 +81,7 @@
       "name": "query-world-time-menu-bar",
       "title": "Query World Time",
       "icon": "query-world-time-menu-bar.png",
-      "description": "Query the current time for a timezone with region.",
+      "description": "Query the current time of starred timezones.",
       "mode": "menu-bar"
     },
     {
