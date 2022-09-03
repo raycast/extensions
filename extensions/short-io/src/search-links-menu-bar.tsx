@@ -15,6 +15,7 @@ export default function SearchLinks() {
       }}
       isLoading={loading}
     >
+      {shortLinks.length === 0 && <MenuBarExtra.Item title={"No Link"} icon={Icon.Link} />}
       {shortLinks.map((value, index) => {
         return (
           <MenuBarExtra.Submenu
