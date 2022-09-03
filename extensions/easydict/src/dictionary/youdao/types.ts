@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-01 12:22
+ * @lastEditTime: 2022-09-04 00:06
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -17,6 +17,7 @@ export interface YoudaoDictionaryFormatResult {
   forms?: WordForms[];
   webTranslation?: KeyValueItem;
   webPhrases?: KeyValueItem[];
+  baike?: BaikeSummary;
 }
 
 export enum YoudaoDictionaryListItemType {
@@ -25,6 +26,7 @@ export enum YoudaoDictionaryListItemType {
   Forms = "Forms and Tenses",
   WebTranslation = "Web Translation",
   WebPhrase = "Web Phrase",
+  Baike = "Baike",
 }
 
 export interface YoudaoDictionaryResult {
@@ -187,7 +189,7 @@ export interface AuthSentsPartSent {
 }
 
 export interface Baike {
-  summarys?: SummaryElement[];
+  summarys?: BaikeSummary[];
   source?: BaikeSource;
 }
 
@@ -196,7 +198,7 @@ export interface BaikeSource {
   url?: string;
 }
 
-export interface SummaryElement {
+export interface BaikeSummary {
   summary?: string;
   key?: string;
 }
@@ -822,21 +824,6 @@ export interface Video {
 }
 
 // Chinese --> English
-
-export interface Baike {
-  summarys?: SummaryElement[];
-  source?: BaikeSource;
-}
-
-export interface BaikeSource {
-  name?: string;
-  url?: string;
-}
-
-export interface SummaryElement {
-  summary?: string;
-  key?: string;
-}
 
 export interface BlngSentsPart {
   "sentence-count"?: number;

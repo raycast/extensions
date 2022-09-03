@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:37
+ * @lastEditTime: 2022-09-04 00:16
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,6 +11,7 @@
 import { chineseLanguageItem } from "../../language/consts";
 import { DicionaryType, DisplaySection, ListDisplayItem } from "../../types";
 import {
+  BaikeSummary,
   ExplanationItem,
   KeyValueItem,
   QueryWordInfo,
@@ -201,10 +202,10 @@ export function updateYoudaoDictionaryDisplay(
     const webPhraseItem: ListDisplayItem = {
       displayType: YoudaoDictionaryListItemType.WebPhrase,
       queryType: youdaoDictionaryType,
-      key: copyText + i,
-      title: phraseKey,
       queryWordInfo: queryWordInfo,
       tooltip: YoudaoDictionaryListItemType.WebPhrase,
+      key: copyText + i,
+      title: phraseKey,
       subtitle: phraseValue,
       copyText: copyText,
     };
@@ -214,6 +215,28 @@ export function updateYoudaoDictionaryDisplay(
     displaySections.push({
       type: YoudaoDictionaryListItemType.WebPhrase,
       items: webPhraseItems,
+    });
+  }
+
+  // 6. Baike.
+  const baikeType = YoudaoDictionaryListItemType.Baike;
+  const baikeKey = formatResult.baike?.key || "";
+  const summary = formatResult.baike?.summary || "";
+  const baikeText = `${baikeKey} ${summary}`;
+  const baikeItem: ListDisplayItem = {
+    displayType: baikeType,
+    queryType: youdaoDictionaryType,
+    queryWordInfo: queryWordInfo,
+    tooltip: baikeType,
+    key: baikeText,
+    title: baikeKey,
+    subtitle: summary,
+    copyText: baikeText,
+  };
+  if (summary) {
+    displaySections.push({
+      type: baikeType,
+      items: [baikeItem],
     });
   }
 
@@ -271,6 +294,13 @@ export function formateYoudaoWebDictionaryModel(
   let translation = "";
   let examTypes: string[] | undefined;
   let forms: WordForms[] | undefined;
+
+  // get baike info.
+  let baike: BaikeSummary | undefined;
+  const baikeSummarys = model.baike?.summarys;
+  if (baikeSummarys?.length) {
+    baike = baikeSummarys[0];
+  }
 
   // format web translation.
   const webTransList: KeyValueItem[] = [];
@@ -388,6 +418,7 @@ export function formateYoudaoWebDictionaryModel(
     forms: forms,
     webTranslation: webTranslation,
     webPhrases: webPhrases,
+    baike: baike,
   };
   queryWordInfo.hasDictionaryEntries = hasYoudaoDictionaryEntries(formateResult);
   // console.log(`Youdao format result: ${JSON.stringify(formateResult, null, 2)}`);

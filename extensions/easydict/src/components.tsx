@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-01 17:11
+ * @lastEditTime: 2022-09-04 00:36
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -314,6 +314,10 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
     }
     case YoudaoDictionaryListItemType.WebPhrase: {
       dotColor = "teal";
+      break;
+    }
+    case YoudaoDictionaryListItemType.Baike: {
+      dotColor = "#B15BFF";
       break;
     }
   }
