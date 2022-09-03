@@ -1,4 +1,4 @@
-import { MenuBarExtra, open } from "@raycast/api";
+import { Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { listIcon, listIconDark } from "./utils/common-utils";
 import { getTrends } from "./hooks/hooks";
 import { douyinSearchUrl } from "./utils/trend-utils";
@@ -47,7 +47,7 @@ export default function TrendOfWeibo() {
                 dark: `${listIconDark[index]}`,
               },
             }}
-            title={value.query + `    ${value.name}`}
+            title={value.query}
             onAction={async () => {
               await open(value.url);
             }}
@@ -78,6 +78,15 @@ export default function TrendOfWeibo() {
           )
         );
       })}
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        title={"Preferences"}
+        icon={Icon.Gear}
+        onAction={() => {
+          openCommandPreferences().then();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+      />
     </MenuBarExtra>
   );
 }
