@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
 import { checkDirectoryValid, checkIsFolder } from "../utils/common-utils";
@@ -38,12 +38,22 @@ export const getCommonDirectory = (
   const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
 
   const fetchData = useCallback(async () => {
-    if (showOpenDirectory) {
-      setOpenDirectory(await getOpenFinderWindowPath());
-    }
     const _localDirectory = await getDirectory(localDirectoryKey, sortBy);
     const validDirectory = checkDirectoryValid(_localDirectory);
     setCommonDirectory(validDirectory);
+
+    if (showOpenDirectory) {
+      const openDirectory = await getOpenFinderWindowPath();
+      const _openDirectory: DirectoryInfo[] = [];
+      openDirectory.forEach((openFolder) => {
+        const isExist = validDirectory.some((localFolder) => {
+          return localFolder.path == openFolder.path;
+        });
+        if (isExist) return;
+        _openDirectory.push(openFolder);
+      });
+      setOpenDirectory(_openDirectory);
+    }
 
     setLoading(false);
 

@@ -4,21 +4,6 @@
 
 Quick access to frequently used folder directories.
 
----
-
-**Preferences:**
-
-- **Open Common Directory**:
-
-  - More Directory:
-    - [ ] Show Open Directories From Finder: Populate list of open directories within Finder to the list. There will be some delay.
-  - Sort By: Commonly used directory sorting methods
-    - Rank: Sorted by usage frequency
-    - Name Up: According to the name ascending order
-    - Name Down: According to the name descending order
-
----
-
 🌟**Extra Tips**:
 
 - When you use the **Add Directory** command, the extension will automatically detect the path to the Finder folder.

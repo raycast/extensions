@@ -1,5 +1,9 @@
 # Common Directory Changelog
 
+## [Add Menu Bar command] - {PR_MERGE_DATE}
+
+- Add Menu Bar command: Open Command Directory
+
 ## [Add text field validation] - 2022-06-30
 
 - Add text field validation
