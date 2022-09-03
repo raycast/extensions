@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { LocalDirectoryKey } from "./types/directory-info";
 import React from "react";
 import { addDirectoryMenuBar } from "./utils/common-utils";
@@ -30,6 +30,7 @@ export default function OpenCommonDirectory() {
         commonDirectory.map((directory) => {
           return (
             <MenuBarExtra.Item
+              key={directory.id}
               icon={{ fileIcon: directory.path }}
               title={directory.name}
               tooltip={directory.path}
@@ -39,10 +40,12 @@ export default function OpenCommonDirectory() {
             />
           );
         })}
+      <MenuBarExtra.Separator />
       {openDirectory.length !== 0 && <MenuBarExtra.Item title={"Open Directory"} />}
       {openDirectory.map((directory) => {
         return (
           <MenuBarExtra.Item
+            key={directory.path}
             icon={{ fileIcon: directory.path }}
             title={directory.name}
             tooltip={directory.path}
@@ -52,12 +55,23 @@ export default function OpenCommonDirectory() {
           />
         );
       })}
+      <MenuBarExtra.Separator />
       <MenuBarExtra.Item
         title={"Add Directory"}
         icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={async () => {
           await addDirectoryMenuBar();
         }}
+      />
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        title={"Preferences"}
+        icon={Icon.Gear}
+        onAction={() => {
+          openCommandPreferences().then();
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
       />
     </MenuBarExtra>
   );
