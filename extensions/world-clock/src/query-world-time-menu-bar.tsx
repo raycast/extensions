@@ -14,6 +14,7 @@ export default function QueryWorldTime() {
         const timeInfo = calculateTimeInfoByOffset(Date.now(), value.utc_offset);
         return (
           <MenuBarExtra.Submenu
+            key={value.timezone}
             icon={{
               source: {
                 light: buildDayAndNightIcon(value.unixtime, true),
