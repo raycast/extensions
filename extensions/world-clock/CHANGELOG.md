@@ -1,8 +1,8 @@
 # World Clock Changelog
 
-## [Update List layout] - 2022-06-27
+## [Add Menu Bar command] - {PR_MERGE_DATE}
 
-- Update List layout: Add clock image in List Detail
+- Add Menu Bar command: Query World Time
 
 ## [Add Grid layout] - 2022-06-22
 
