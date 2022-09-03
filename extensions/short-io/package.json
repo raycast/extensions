@@ -29,7 +29,7 @@
     },
     {
       "name": "search-links-menu-bar",
-      "icon": "search-link-icon.png",
+      "icon": "search-link-icon-menu-bar.png",
       "title": "Search Links",
       "subtitle": "Short.io",
       "description": "Search short links with your own domain.",

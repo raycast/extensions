@@ -9,8 +9,8 @@ export default function SearchLinks() {
     <MenuBarExtra
       icon={{
         source: {
-          light: "search-link-icon-menu-bar.png",
-          dark: "search-link-icon-menu-bar@dark.png",
+          light: "my-link-icon-menu-bar.png",
+          dark: "my-link-icon-menu-bar@dark.png",
         },
       }}
       isLoading={loading}
