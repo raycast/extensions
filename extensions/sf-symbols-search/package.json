@@ -68,6 +68,15 @@
       "description": "Show SF Symbols name in grid view",
       "required": false, 
       "default": true
+    }, 
+    {
+      "name": "showRecent", 
+      "type": "checkbox", 
+      "title": "Show Recent Symbols",
+      "label": "Show Recent", 
+      "description": "Show recently used SF Symbols",
+      "required": false, 
+      "default": true
     }
   ],
   "dependencies": {

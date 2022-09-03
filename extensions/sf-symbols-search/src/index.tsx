@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { readFileSync } from "node:fs";
 import { execSync } from "child_process";
+import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from "./storage";
 
 export interface Preferences {
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
@@ -20,6 +21,13 @@ export interface Category {
   name: string;
   title: string;
   symbol: string;
+}
+
+export interface SymbolProps {
+  symbol: Symbol;
+  refresh: () => void;
+  pinned?: boolean;
+  recent?: boolean;
 }
 
 const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
@@ -42,15 +50,24 @@ function getDataPath() {
   return `${environment.assetsPath}/symbols/${fileName}.json`;
 }
 
-getDataPath();
-
 export default function Command() {
   const data: {
     symbols: Symbol[];
     categories: Category[];
   } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
+  const [pinned, setPinned] = useState(getPinnedSymbols());
+  const [recent, setRecent] = useState(getRecentSymbols());
+
   const [category, setCategory] = useState<string | undefined>();
+
+  const [refreshState, setRefreshState] = useState(false);
+  const refresh = () => setRefreshState(!refreshState);
+
+  useEffect(() => {
+    setPinned(getPinnedSymbols());
+    setRecent(getRecentSymbols());
+  }, [refreshState]);
 
   return (
     <Grid
@@ -82,24 +99,49 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {category &&
-        data.symbols
-          .filter((s) => category === "all" || s.categories.includes(category))
-          .map((symbol: Symbol, index: number) => (
-            <Grid.Item
-              key={index}
-              title={showName ? symbol.name : undefined}
-              content={{ source: `symbols/images/${symbol.name}.png`, tintColor: Color.PrimaryText }}
-              keywords={symbol.searchTerms.concat([symbol.name])}
-              actions={<SymbolActions name={symbol.name} symbol={symbol.symbol} />}
-            />
-          ))}
+      {category && (
+        <React.Fragment>
+          <Grid.Section title="Pinned Symbols">
+            {pinned
+              .filter((s) => category === "all" || s.categories.includes(category))
+              .map((symbol: Symbol, index: number) => (
+                <Symbol key={index} symbol={symbol} refresh={refresh} pinned />
+              ))}
+          </Grid.Section>
+          <Grid.Section title="Recent Symbols">
+            {recent
+              .filter((s) => category === "all" || s.categories.includes(category))
+              .map((symbol: Symbol, index: number) => (
+                <Symbol key={index} symbol={symbol} refresh={refresh} recent />
+              ))}
+          </Grid.Section>
+          <Grid.Section title={recent.length + pinned.length > 0 ? "All Symbols" : undefined}>
+            {data.symbols
+              .filter((s) => category === "all" || s.categories.includes(category))
+              .map((symbol: Symbol, index: number) => (
+                <Symbol key={index} symbol={symbol} refresh={refresh} />
+              ))}
+          </Grid.Section>
+        </React.Fragment>
+      )}
     </Grid>
   );
 }
 
-const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => {
-  const { name, symbol } = props;
+const Symbol = (props: SymbolProps) => {
+  const { symbol } = props;
+  return (
+    <Grid.Item
+      title={showName ? symbol.name : undefined}
+      content={{ source: `symbols/images/${symbol.name}.png`, tintColor: Color.PrimaryText }}
+      keywords={symbol.searchTerms.concat([symbol.name])}
+      actions={<SymbolActions {...props} />}
+    />
+  );
+};
+
+const SymbolActions = (props: SymbolProps): JSX.Element => {
+  const { name, symbol } = props.symbol;
 
   const actions: { [key: string]: JSX.Element } = {
     paste: (
@@ -108,6 +150,10 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         title="Paste Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+        onPaste={() => {
+          addRecentSymbol(props.symbol);
+          props.refresh();
+        }}
       />
     ),
     copy: (
@@ -116,6 +162,10 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         title="Copy Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+        onCopy={() => {
+          addRecentSymbol(props.symbol);
+          props.refresh();
+        }}
       />
     ),
     pasteName: (
@@ -124,6 +174,10 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         title="Paste Name"
         content={name}
         shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+        onPaste={() => {
+          addRecentSymbol(props.symbol);
+          props.refresh();
+        }}
       />
     ),
     copyName: (
@@ -132,6 +186,10 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
         title="Copy Name"
         content={name}
         shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+        onCopy={() => {
+          addRecentSymbol(props.symbol);
+          props.refresh();
+        }}
       />
     ),
   };
@@ -148,5 +206,10 @@ const SymbolActions = (props: { name: string; symbol: string }): JSX.Element => 
     order = [actions["copyName"], actions["pasteName"], actions["copy"], actions["paste"]];
   }
 
-  return <ActionPanel title={name}>{...order}</ActionPanel>;
+  return (
+    <ActionPanel title={name}>
+      {...order}
+      <SaveActions {...props} />
+    </ActionPanel>
+  );
 };
