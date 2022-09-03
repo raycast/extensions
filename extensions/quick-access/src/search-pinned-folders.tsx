@@ -120,7 +120,7 @@ export default function SearchPinnedFolders() {
                               }}
                             />
                             <Action
-                              icon={Icon.Trash}
+                              icon={Icon.PinDisabled}
                               title={`Unpin Folder`}
                               shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                               onAction={async () => {

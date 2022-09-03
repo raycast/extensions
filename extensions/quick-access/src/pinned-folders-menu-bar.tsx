@@ -35,8 +35,9 @@ import { copyFileByPath } from "./utils/applescript-utils";
 
 export default function SearchPinnedFolders() {
   const { showOpenFolders, primaryAction } = getPreferenceValues<Preferences>();
+  const [refresh, setRefresh] = useState<number>(0);
 
-  const { directoryWithFiles, loading } = localDirectoryWithFiles(0, showOpenFolders);
+  const { directoryWithFiles, loading } = localDirectoryWithFiles(refresh, showOpenFolders);
 
   return (
     <MenuBarExtra
@@ -54,6 +55,7 @@ export default function SearchPinnedFolders() {
               key={fileValue.path}
               icon={isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }}
               title={fileValue.name}
+              tooltip={fileValue.path}
               onAction={async () => {
                 switch (primaryAction) {
                   case "Copy": {
@@ -75,6 +77,15 @@ export default function SearchPinnedFolders() {
           ))}
         </MenuBarExtra.Submenu>
       ))}
+
+      <MenuBarExtra.Item
+        title={"Pin Folder"}
+        icon={Icon.Pin}
+        onAction={async () => {
+          await pinFolder(false);
+          setRefresh(refreshNumber());
+        }}
+      />
     </MenuBarExtra>
   );
 }
