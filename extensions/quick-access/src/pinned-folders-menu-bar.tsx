@@ -8,6 +8,7 @@ import {
   MenuBarExtra,
   open,
   showHUD,
+  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -54,11 +55,20 @@ export default function SearchPinnedFolders() {
               icon={isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }}
               title={fileValue.name}
               onAction={async () => {
-                if (primaryAction == "Copy") {
-                  await showHUD(`${fileValue.name} is copied to clipboard`);
-                  await copyFileByPath(fileValue.path);
-                } else {
-                  await open(fileValue.path);
+                switch (primaryAction) {
+                  case "Copy": {
+                    await showHUD(`${fileValue.name} is copied to clipboard`);
+                    await copyFileByPath(fileValue.path);
+                    break;
+                  }
+                  case "Show": {
+                    await showInFinder(fileValue.path);
+                    break;
+                  }
+                  case "Open": {
+                    await open(fileValue.path);
+                    break;
+                  }
                 }
               }}
             />
