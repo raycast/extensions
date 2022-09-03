@@ -2,11 +2,11 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
-import { Meeting, updateMeeting } from "../api/meetings";
+import { Meeting, ScheduledMeeting, updateMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
 
 type EditMeetingFormProps = {
-  meeting: Meeting;
+  meeting: ScheduledMeeting;
   mutate: MutatePromise<
     | {
         meetings: Meeting[];
