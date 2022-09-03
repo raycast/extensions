@@ -132,8 +132,7 @@
         "Applications"
     ],
     "dependencies": {
-        "@raycast/api": "^1.26.3",
-        "open": "^8.4.0"
+        "@raycast/api": "^1.39.2"
     },
     "devDependencies": {
         "@types/node": "~16.10.0",
