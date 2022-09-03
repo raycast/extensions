@@ -141,7 +141,7 @@ export default function SearchPinnedFolders() {
                                     await showToast(
                                       Toast.Style.Success,
                                       "Success!",
-                                      `${directory.directory.name} folder is removed.`
+                                      `${directory.directory.name} folder is unpinned.`
                                     );
                                   }
                                 );

@@ -40,7 +40,8 @@ export const getIsShowDetail = (refreshDetail: number) => {
 
 //get local directory with files
 export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolean) => {
-  const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
+  const [pinnedDirectoryWithFiles, setPinnedDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
+  const [openDirectoryWithFiles, setOpenDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = getPreferenceValues<Preferences>();
@@ -78,6 +79,8 @@ export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolea
     });
 
     //get file in open folder
+
+    const _openDirectoryContent: DirectoryWithFileInfo[] = [];
     if (showOpenFolders) {
       const openFolders = await getOpenFinderWindowPath();
 
@@ -90,7 +93,7 @@ export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolea
           _fileShowNumber === -1
             ? getDirectoryFiles(openFolder.path + "/")
             : getDirectoryFiles(openFolder.path + "/").slice(0, _fileShowNumber);
-        _pinnedDirectoryContent.push({
+        _openDirectoryContent.push({
           directory: openFolder,
           files: files,
         });
@@ -99,7 +102,8 @@ export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolea
     }
 
     setAllFilesNumber(_allFilesNumber);
-    setDirectoryWithFiles(_pinnedDirectoryContent);
+    setPinnedDirectoryWithFiles(_pinnedDirectoryContent);
+    setOpenDirectoryWithFiles(_openDirectoryContent);
     setLoading(false);
 
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
@@ -110,7 +114,9 @@ export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolea
   }, [fetchData]);
 
   return {
-    directoryWithFiles: directoryWithFiles,
+    directoryWithFiles: [...pinnedDirectoryWithFiles, ...openDirectoryWithFiles],
+    pinnedDirectoryWithFiles: pinnedDirectoryWithFiles,
+    openDirectoryWithFiles: openDirectoryWithFiles,
     allFilesNumber: allFilesNumber,
     loading: loading,
   };
