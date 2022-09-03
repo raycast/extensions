@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchItemInput } from "./utils/input";
-import { makeSearchURL } from "./utils/utils";
+import { makeSearchURL } from "./utils/url";
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");

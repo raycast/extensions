@@ -1,13 +1,8 @@
-import { Form, ActionPanel, Action, Icon, getPreferenceValues, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TravelMode, makeDirectionsURL, Preferences } from "./utils/utils";
 import { fetchItemInput } from "./utils/input";
-
-enum orginOption {
-  CurLoc = "",
-  Home = "home",
-  Custom = "custom",
-}
+import { orginOption, Preferences, TravelMode } from "./utils/types";
+import { makeDirectionsURL } from "./utils/url";
 
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
