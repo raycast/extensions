@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "searchcaster",
+  "title": "Searchcaster",
+  "description": "3rd party search tool for the Farcaster protocol",
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "Farcaster"
+  ],
+  "icon": "icon.png",
+  "author": "gregskril",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Casts",
+      "description": "Search casts on the Farcaster protocol",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.3.1",
+    "@types/node": "^18.7.14",
+    "@types/react": "^18.0.18"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
