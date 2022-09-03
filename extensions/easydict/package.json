@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Apple Baidu, Tencent, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Apple, Baidu, Tencent, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -23,8 +23,8 @@
   ],
   "keywords": [
     "dictionary",
-    "linguee",
     "translate",
+    "linguee",
     "deepl",
     "google",
     "apple",
@@ -36,7 +36,7 @@
     "shortcuts"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0",
+    "@raycast/api": "^1.39.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
@@ -46,6 +46,7 @@
     "mac-system-proxy": "^1.0.4",
     "node-html-parser": "^5.3.3",
     "play-sound": "^1.1.5",
+    "qs": "^6.11.0",
     "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "@types/crypto-js": "^4.1.1",
     "@types/node": "~16.10.0",
     "@types/play-sound": "^1.1.0",
+    "@types/qs": "^6.9.7",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
@@ -308,14 +310,14 @@
       "label": "Automatic Play Word Audio",
       "required": false,
       "description": "Automatic play audio after looking up a word",
-      "default": true
+      "default": false
     },
     {
       "name": "enableSystemProxy",
       "type": "checkbox",
       "label": "Use System Proxy",
       "required": false,
-      "description": "Use system proxy settings",
+      "description": "Request through system proxy",
       "default": false
     },
     {
@@ -324,23 +326,23 @@
       "label": "Select Target Language",
       "required": false,
       "description": "Select target language in action panel manually",
-      "default": true
+      "default": false
     },
     {
       "title": "Dictionary Services",
       "type": "checkbox",
-      "name": "enableLingueeDictionary",
-      "label": "Linguee Dictionary",
+      "name": "enableYoudaoDictionary",
+      "label": "Youdao Dictionary",
       "required": false,
-      "description": "Turn on/off Linguee Dictionary",
+      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
       "default": true
     },
     {
       "type": "checkbox",
-      "name": "enableYoudaoDictionary",
-      "label": "Youdao Dictionary",
+      "name": "enableLingueeDictionary",
+      "label": "Linguee Dictionary",
       "required": false,
-      "description": "Turn on/off Youdao Dictionary",
+      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
       "default": true
     },
     {
@@ -349,7 +351,7 @@
       "type": "checkbox",
       "label": "Apple Translate",
       "required": false,
-      "description": "Need to install an apple translate shortcut, please see README for more details",
+      "description": "An `Apple Translate` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -357,7 +359,7 @@
       "type": "checkbox",
       "label": "Apple Language Detect",
       "required": false,
-      "description": "Need to install an apple language detect shortcut, please see README for more details",
+      "description": "An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -410,13 +412,13 @@
       "default": false
     },
     {
-      "title": "Translation Order",
-      "name": "translationOrder",
+      "title": "Services Order",
+      "name": "servicesOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is DeepL,Google,Apple,Baidu,Tencent,Youdao,Caiyun",
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun",
       "default": "",
-      "placeholder": "deepl,google,apple,baidu,tencent,youdao,caiyun"
+      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, apple, baidu, tencent, youdao, caiyun"
     },
     {
       "title": "Youdao App ID",

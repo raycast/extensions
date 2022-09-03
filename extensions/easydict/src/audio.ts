@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 10:00
+ * @lastEditTime: 2022-09-02 23:30
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -15,7 +15,7 @@ import fs from "fs";
 import { languageItemList } from "./language/consts";
 import { trimTextLength } from "./utils";
 import playerImport = require("play-sound");
-const player = playerImport({});
+const audioPlayer = playerImport({});
 
 const audioDirPath = `${environment.supportPath}/audio`;
 // console.log(`audio path: ${audioDirPath}`);
@@ -31,9 +31,9 @@ export function playWordAudio(word: string, fromLanguage: string, useSayCommand 
       return sayTruncateCommand(word, fromLanguage);
     }
   }
-  console.log(`play audio: ${word}`);
+  console.log(`play local file audio: ${word}`);
 
-  return player.play(audioPath, (err) => {
+  return audioPlayer.play(audioPath, (err) => {
     if (err) {
       // afplay play the word 'set' throw error: Fail: AudioFileOpenURL failed ???
       console.error(`play word audio error: ${err}`);
