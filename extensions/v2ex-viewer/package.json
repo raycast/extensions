@@ -25,7 +25,8 @@
       "description": "Whether to display topic details by default",
       "type": "checkbox",
       "title": "Show Topic Detail By Default",
-      "default": false
+      "default": false,
+      "label": "Show"
     },
     {
       "required": true,
