@@ -36,11 +36,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             {searchResult.homepage[0] ? (
               <Action.OpenInBrowser title="Open Package Homepage" url={searchResult.homepage[0]} />
             ) : null}
-            <Action.OpenInBrowser
-              title="Open Package Source Code"
-              url={searchResult.source}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
-            />
+            {searchResult.source && (
+              <Action.OpenInBrowser
+                title="Open Package Source Code"
+                url={searchResult.source!}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -54,11 +56,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               {searchResult.homepage.map((url) => (
                 <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />
               ))}
-              <List.Item.Detail.Metadata.Link
-                title="Source"
-                target={searchResult.source}
-                text={new URL(searchResult.source).host}
-              />
+              {searchResult.source && (
+                <List.Item.Detail.Metadata.Link
+                  title="Source"
+                  target={searchResult.source!}
+                  text={new URL(searchResult.source!).host}
+                />
+              )}
               {searchResult.licenses.map((license) =>
                 license.url ? (
                   <List.Item.Detail.Metadata.Link
@@ -270,10 +274,9 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       description: result.package_description,
       version: result.package_pversion,
       homepage: result.package_homepage,
-      source: `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(
-        /:([0-9]+)$/,
-        ""
-      )}`,
+      source:
+        result.package_position &&
+        `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(/:([0-9]+)$/, "")}`,
       outputs: result.package_outputs,
       defaultOutput: result.package_default_output,
       platforms: result.package_platforms.filter((platform) =>
@@ -304,7 +307,7 @@ interface SearchResult {
   description: string | null;
   version: string;
   homepage: string[];
-  source: string;
+  source: string | null;
   outputs: string[];
   defaultOutput: string | null;
   platforms: string[];
