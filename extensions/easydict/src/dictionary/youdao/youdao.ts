@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 23:55
+ * @lastEditTime: 2022-09-04 10:01
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -374,21 +374,16 @@ export function playYoudaoWordAudioAfterDownloading(queryWordInfo: QueryWordInfo
 }
 
 /**
- * Download word audio file. 
-*  If query text is a word (only English word?), download audio file from youdao web api, otherwise downloaded from youdao tts.
-
+ * Download word audio file.
+ *  If query text is a word (only English word?), download audio file from youdao web api, otherwise downloaded from youdao tts.
+ *
  * * NOTE: If query text is too long(>40), don't download audio file, later derectly use say command to play.
  */
 export function tryDownloadYoudaoAudio(queryWordInfo: QueryWordInfo, callback?: () => void, forceDownload = false) {
-  if (queryWordInfo.isWord && queryWordInfo.fromLanguage === "en") {
+  if (queryWordInfo.speechUrl) {
+    downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
+  } else if (queryWordInfo.isWord && queryWordInfo.fromLanguage === "en") {
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
-  } else if (queryWordInfo.word.length < maxTextLengthOfDownloadYoudaoTTSAudio) {
-    if (queryWordInfo.speechUrl) {
-      downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
-    } else {
-      console.warn(`youdao tts url not found: ${queryWordInfo.word}`);
-      callback && callback();
-    }
   } else {
     console.log(`text is too long, use say command to play derectly`);
     callback && callback();
@@ -403,7 +398,7 @@ export function tryDownloadYoudaoAudio(queryWordInfo: QueryWordInfo, callback?: 
  * Example: https://dict.youdao.com/dictvoice?type=0&audio=good
  */
 export function downloadYoudaoEnglishWordAudio(word: string, callback?: () => void, forceDownload = false) {
-  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(word)}`;
+  const url = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(word)}`;
   console.log(`download youdao English word audio: ${word}`);
   const audioPath = getWordAudioPath(word);
   downloadAudio(url, audioPath, callback, forceDownload);

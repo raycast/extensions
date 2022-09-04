@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-02 23:30
+ * @lastEditTime: 2022-09-04 10:17
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -107,6 +107,7 @@ export function downloadWordAudioWithURL(
   callback?: () => void,
   forceDownload = false
 ): void {
+  console.log(`down load word: ${word}, audio url: ${url}`);
   const audioPath = getWordAudioPath(word);
   downloadAudio(url, audioPath, callback, forceDownload);
 }

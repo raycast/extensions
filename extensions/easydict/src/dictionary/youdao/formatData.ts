@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-04 00:16
+ * @lastEditTime: 2022-09-04 10:16
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -345,9 +345,11 @@ export function formateYoudaoWebDictionaryModel(
   if (model.ec) {
     const wordItem = model.ec.word?.length ? model.ec.word[0] : undefined;
 
-    // word audio url:  https://dict.youdao.com/dictvoice?audio=good?type=2
-    const usspeech = wordItem?.usspeech;
-    const audioUrl = usspeech ? `https://dict.youdao.com/dictvoice?audio=${usspeech}` : undefined;
+    // word audio: https://dict.youdao.com/dictvoice?audio=good?type=0
+    const usspeech = wordItem?.usspeech; // "good&type=2"
+    // type=2 audio seems not accurate, eg: neon, so we use type=0.
+    const queryString = `${input}&type=0`;
+    const audioUrl = usspeech ? `https://dict.youdao.com/dictvoice?audio=${queryString}` : undefined;
 
     explanations.length = 0;
     const trs = wordItem?.trs;
