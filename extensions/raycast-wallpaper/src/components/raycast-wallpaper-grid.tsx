@@ -4,6 +4,7 @@ import { RaycastWallpaper } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
+import { fixImage500Error } from "../utils/common-utils";
 
 export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpaper[] }) {
   const preferences = getPreferenceValues<Preferences>();
@@ -21,7 +22,7 @@ export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpape
           <Grid.Item
             id={index + ""}
             key={index + value.title}
-            content={value.url.replace(".png", "-preview.png")}
+            content={fixImage500Error(value)}
             title={value.title}
             actions={<ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} />}
           />

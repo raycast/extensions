@@ -98,7 +98,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.39.2",
     "axios": "^0.27.2",
     "file-url": "^4.0.0",
     "fs-extra": "^10.0.1",

@@ -26,7 +26,14 @@ export const getRaycastWallpaperList = () => {
         },
       })
         .then((axiosRes) => {
-          const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
+          const __raycastWallpaper = axiosRes.data as RaycastWallpaper[];
+          //fix AxiosError: Request failed with status code 500
+          const _raycastWallpaper = __raycastWallpaper.map((value) => {
+            if (value.title === "Blossom") {
+              value.url = "https://www.raycast.com/uploads/wallpapers/blossom-2.png";
+            }
+            return value;
+          });
           setRaycastWallpapers(_raycastWallpaper);
 
           //cache list

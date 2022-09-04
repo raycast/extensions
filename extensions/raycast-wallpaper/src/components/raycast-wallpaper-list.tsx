@@ -4,6 +4,7 @@ import { RaycastWallpaper } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
+import { fixImage500Error } from "../utils/common-utils";
 
 export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpaper[] }) {
   const preferences = getPreferenceValues<Preferences>();
@@ -21,11 +22,9 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
           <List.Item
             id={index + ""}
             key={index + value.title}
-            icon={{ source: value.url.replace(".png", "-preview.png") }}
+            icon={{ source: fixImage500Error(value) }}
             title={value.title}
-            detail={
-              <List.Item.Detail isLoading={false} markdown={`![](${value.url.replace(".png", "-preview.png")})`} />
-            }
+            detail={<List.Item.Detail isLoading={false} markdown={`![](${fixImage500Error(value)})`} />}
             actions={<ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} />}
           />
         );

@@ -189,3 +189,10 @@ export function deleteCache() {
     });
   }
 }
+
+export function fixImage500Error(raycastWallpaper: RaycastWallpaper) {
+  if (raycastWallpaper.title === "Blossom") {
+    return "https://www.raycast.com/uploads/wallpapers/blossom-preview.png";
+  }
+  return raycastWallpaper.url.replace(".png", "-preview.png");
+}

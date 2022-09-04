@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { downloadPicture, setWallpaper } from "./utils/common-utils";
+import { downloadPicture, fixImage500Error, setWallpaper } from "./utils/common-utils";
 import { RaycastWallpaper } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 
@@ -11,7 +11,7 @@ export default function PreviewRaycastWallpaper(props: { index: number; raycastW
   return (
     <Detail
       navigationTitle={raycastWallpapers[pageIndex].title}
-      markdown={`<img src="${raycastWallpapers[pageIndex].url.replace(".png", "-preview.png")}" alt="" height="400" />`}
+      markdown={`<img src="${fixImage500Error(raycastWallpapers[pageIndex])}" alt="" height="400" />`}
       actions={
         <ActionPanel>
           <Action
