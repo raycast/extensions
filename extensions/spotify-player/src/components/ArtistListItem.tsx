@@ -87,11 +87,47 @@ const getArtistDetailMarkdownContent = (
     header += `![](${artistCover})\n\n`;
   }
 
-  const albumsString = albums
-    ?.map((a) => {
-      return `• ${a.name}\n`;
-    })
-    .join(" \n");
-  const content = `## Albums: \n ${albumsString}`;
+  // Album list organised by type
+  // eg. albumListByType.album = [album1, album2, album3, ...]
+  // "Albums" without a known type (album, single, appears_on, compilation) will be added to unknown
+  const albumListByType: { [key: string]: SpotifyApi.AlbumObjectSimplified[] } = {};
+  albumListByType["album"] = [];
+  albumListByType["single"] = [];
+  albumListByType["appears_on"] = [];
+  albumListByType["compilation"] = [];
+  albumListByType["unknown"] = [];
+
+  // Album type display names
+  const albumTypeDisplayNames: { [key: string]: string } = {
+    "album": "Albums",
+    "single": "Singles",
+    "appears_on": "Appears On",
+    "compilation": "Compilations",
+    "unknown": "Other"
+  };
+
+  // Split into types
+  albums?.forEach((album) => {
+    if (albumListByType[album.album_type] === undefined) {
+      albumListByType.unknown.push(album);
+      return;
+    }
+
+    albumListByType[album.album_type].push(album);
+  });
+
+  let content = "";
+  for (const type in albumListByType) {
+    const albumList = albumListByType[type];
+    const albumTypeDisplayName = albumTypeDisplayNames[type];
+
+    if (albumList.length == 0)
+      continue;
+
+    content += `## ${albumTypeDisplayName}: \n`;
+    content += albumList.map(album => `• ${album.name}\n`).join(" \n");
+    content += "\n";
+  }
+
   return `${header}\n\n${content}`;
 };
