@@ -81,18 +81,17 @@ export const getAnnouncements = async (courses: course[]): Promise<announcement[
 
 export const getModules = async (course_id: number): Promise<modulesection[]> => {
   const json = await api.courses[course_id].modules["?include=items"].get();
-  const modules = json.map((module: any): modulesection => {
-    const items = module.items
-      .filter((item: any) => item.type !== "SubHeader")
-      .map(
-        (item: any): moduleitem => ({
-          id: item.content_id,
-          name: formatModuleItemTitle(item.title),
-          type: item.type,
-          url: item.html_url,
-          passcode: formatModuleItemPasscode(item.title),
-        })
-      );
+  const modules: modulesection[] = json.map((module) => {
+    const items: moduleitem[] = module.items
+      .filter((i) => i.type !== "SubHeader")
+      .map((i) => ({
+        id: i.id,
+        name: formatModuleItemTitle(i.title),
+        type: i.type,
+        url: i.html_url,
+        passcode: formatModuleItemPasscode(i.title),
+        content_id: i.content_id,
+      }));
     return {
       name: module.name,
       items: items,
@@ -101,10 +100,10 @@ export const getModules = async (course_id: number): Promise<modulesection[]> =>
   const promises = [];
   modules.map((module: modulesection) => {
     module.items
-      .filter((item: moduleitem) => item.type === "File")
+      .filter((item: moduleitem) => item.type === "File" && item.content_id)
       .map((item: moduleitem) => {
         promises.push(
-          api.courses[course_id].files[item.id].get().then((json: any) => {
+          api.courses[course_id].files[item.content_id].get().then((json) => {
             return json.url;
           })
         );
@@ -114,7 +113,7 @@ export const getModules = async (course_id: number): Promise<modulesection[]> =>
   let i = 0;
   modules.map((module: modulesection) => {
     module.items.map((item: moduleitem) => {
-      if (item.type === "File") {
+      if (item.type === "File" && item.content_id) {
         item.download = urls[i++];
       }
     });

@@ -39,6 +39,7 @@ export const ModuleItem = (props: {
 
   return (
     <List.Item
+      id={`${props.pinned ? "pin" : props.recent ? "recent" : ""}${props.item.id}`}
       title={props.item.name}
       icon={{
         source: getIsCodeFile(props.item.name)
@@ -91,14 +92,6 @@ export const ModuleItem = (props: {
               />
             </ActionPanel.Section>
           )}
-          <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Open Home Page"
-              icon={{ source: Icons["Home"], tintColor: Color.PrimaryText }}
-              url={props.url}
-              shortcut={{ modifiers: ["cmd"], key: "h" }}
-            />
-          </ActionPanel.Section>
           <ActionPanel.Section>
             {props.pinned ? (
               <React.Fragment>
@@ -181,6 +174,14 @@ export const ModuleItem = (props: {
                 />
               </React.Fragment>
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open Home Page"
+              icon={{ source: Icons["Home"], tintColor: Color.PrimaryText }}
+              url={props.url}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

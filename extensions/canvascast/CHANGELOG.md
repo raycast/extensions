@@ -1,5 +1,11 @@
 # Canvascast Changelog
 
+## [Fix] - 2022-09-04
+
+- Fixed a bug with loading the download urls of the module items
+- Updated the icons to be higher resolution and svg format. 
+- Fixed movement of pinned items. 
+
 ## [Update] - 2022-07-27
 
 - Added pinned module items
