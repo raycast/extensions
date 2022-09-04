@@ -99,11 +99,11 @@ const getArtistDetailMarkdownContent = (
 
   // Album type display names
   const albumTypeDisplayNames: { [key: string]: string } = {
-    "album": "Albums",
-    "single": "Singles",
-    "appears_on": "Appears On",
-    "compilation": "Compilations",
-    "unknown": "Other"
+    album: "Albums",
+    single: "Singles",
+    appears_on: "Appears On",
+    compilation: "Compilations",
+    unknown: "Other",
   };
 
   // Split into types
@@ -121,11 +121,10 @@ const getArtistDetailMarkdownContent = (
     const albumList = albumListByType[type];
     const albumTypeDisplayName = albumTypeDisplayNames[type];
 
-    if (albumList.length == 0)
-      continue;
+    if (albumList.length == 0) continue;
 
     content += `## ${albumTypeDisplayName}: \n`;
-    content += albumList.map(album => `• ${album.name}\n`).join(" \n");
+    content += albumList.map((album) => `• ${album.name}\n`).join(" \n");
     content += "\n";
   }
 
