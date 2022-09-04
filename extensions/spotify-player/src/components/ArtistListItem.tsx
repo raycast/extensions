@@ -91,41 +91,85 @@ const getArtistDetailMarkdownContent = (
   // eg. albumListByType.album = [album1, album2, album3, ...]
   // "Albums" without a known type (album, single, appears_on, compilation) will be added to unknown
   const albumListByType: { [key: string]: SpotifyApi.AlbumObjectSimplified[] } = {
-    album: [],
-    single: [],
-    appears_on: [],
-    compilation: [],
-    unknown: [],
+    // album: [], // spotifyapi:"album"
+    // single: [], // spotifyapi:"single"
+    // appears_on: [], // spotifyapi:"appears_on"
+    main_albums: [], // ours:"main_albums", albums from this artist
+    main_singles: [], // ours:"main_singles", singles / eps from this artist
+    featured_albums: [], // ours:"featured_albums", albums this artist featured on
+    featured_singles: [], // ours:"featured_singles", singles / eps this artist featured on
+    compilation: [], // spotifyapi:"compilation"
+    unknown: [], // ours:"unknown", albums that don't fit into other categories
   };
 
   // Album type display names
+  // To enable showing albums with a specific album type, they need a display name
   const albumTypeDisplayNames: { [key: string]: string } = {
-    album: "Albums",
-    single: "Singles",
-    appears_on: "Appears On",
-    compilation: "Compilations",
+    // album: "Albums",
+    // single: "Singles",
+    // appears_on: "Appears On",
+    main_albums: "Albums",
+    main_singles: "Singles and EPs",
+    // featured_albums: "Featured albums",
+    // featured_singles: "Featured singles"
+    compilation: "Appears on",
     unknown: "Other",
   };
 
   // Split into types
+  // For each album this artist is on, figure out where it should go:
   albums?.forEach((album) => {
-    if (albumListByType[album.album_type] === undefined) {
-      albumListByType.unknown.push(album);
+    // Album that's their own:
+    if (album.artists[0].id == artist.id) {
+      if (album.album_type == "album") albumListByType.main_albums.push(album); // main album
+      else if (album.album_type == "single") albumListByType.main_singles.push(album); // main single
       return;
     }
 
-    albumListByType[album.album_type].push(album);
+    // Album that's not their own: featured album
+    if (album.album_type == "album") {
+      albumListByType.featured_albums.push(album);
+      return;
+    }
+
+    // Single that's not their own: featured single
+    if (album.album_type == "single") {
+      albumListByType.featured_singles.push(album);
+      return;
+    }
+
+    // Handle types from the Spotify API
+    if (albumListByType[album.album_type] !== undefined) {
+      albumListByType[album.album_type].push(album);
+      return;
+    }
+
+    // Handle unknown types
+    albumListByType.unknown.push(album);
   });
 
+  // Create markdown for content
   let content = "";
   for (const type in albumListByType) {
     const albumList = albumListByType[type];
     const albumTypeDisplayName = albumTypeDisplayNames[type];
+    const shownAlbumNames: { [key: string]: boolean } = {};
 
+    // Don't show album types without a display name
+    if (albumTypeDisplayName === undefined) continue;
+
+    // Don't show empty album types
     if (albumList.length == 0) continue;
 
     content += `## ${albumTypeDisplayName}: \n`;
-    content += albumList.map((album) => `• ${album.name}\n`).join(" \n");
+    content += albumList
+      .map((album) => {
+        if (!shownAlbumNames[album.name]) { 
+          shownAlbumNames[album.name] = true;
+          return `• ${album.name}\n`;
+        }
+      })
+      .join(" \n");
     content += "\n";
   }
 
