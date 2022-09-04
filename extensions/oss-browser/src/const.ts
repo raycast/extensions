@@ -45,3 +45,9 @@ export const PlainTextExts = [".txt"];
 export const AudioExts = [".mp3", ".flac", ".wav"];
 
 export const VideoExts = [".mp4", ".avi", ".mov", ".flv"];
+
+export enum RenameType {
+  Original = "originalName",
+  MD5 = "md5OfContent",
+  WithDate = "namedWithDate",
+}
