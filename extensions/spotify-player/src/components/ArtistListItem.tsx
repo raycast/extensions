@@ -80,7 +80,7 @@ const getArtistDetailMarkdownContent = (
   artist: SpotifyApi.ArtistObjectFull,
   albums: SpotifyApi.AlbumObjectSimplified[] | undefined
 ) => {
-  let header = `# ${artist.name}\n_${artist.genres}_\n \n`;
+  let header = `# ${artist.name}\n_${artist.genres.join(", ")}_\n \n`;
 
   const artistCover = artist.images[1]?.url ?? _(artist.images).first()?.url;
   if (artistCover) {
