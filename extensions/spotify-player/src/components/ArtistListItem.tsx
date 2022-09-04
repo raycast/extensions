@@ -90,12 +90,13 @@ const getArtistDetailMarkdownContent = (
   // Album list organised by type
   // eg. albumListByType.album = [album1, album2, album3, ...]
   // "Albums" without a known type (album, single, appears_on, compilation) will be added to unknown
-  const albumListByType: { [key: string]: SpotifyApi.AlbumObjectSimplified[] } = {};
-  albumListByType["album"] = [];
-  albumListByType["single"] = [];
-  albumListByType["appears_on"] = [];
-  albumListByType["compilation"] = [];
-  albumListByType["unknown"] = [];
+  const albumListByType: { [key: string]: SpotifyApi.AlbumObjectSimplified[] } = {
+    album: [],
+    single: [],
+    appears_on: [],
+    compilation: [],
+    unknown: [],
+  };
 
   // Album type display names
   const albumTypeDisplayNames: { [key: string]: string } = {
