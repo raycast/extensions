@@ -1,11 +1,10 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
-import { isEmpty } from "lodash";
+import { useCachedPromise } from "@raycast/utils";
 
 export interface Preferences {
   token: string;
-  baseUrl?: string;
-  defaultAction: "meeting" | "one-time";
+  username: string;
 }
 
 export interface CalUser {
@@ -76,10 +75,10 @@ interface CalEventTypeResp {
 }
 
 const defaultBaseUrl = "https://api.cal.com/v1/";
-const { token, baseUrl }: Preferences = getPreferenceValues();
+const { token }: Preferences = getPreferenceValues();
 
 const api = axios.create({
-  baseURL: isEmpty(baseUrl) ? defaultBaseUrl : baseUrl,
+  baseURL: defaultBaseUrl,
   params: { apiKey: token },
 });
 
@@ -88,43 +87,16 @@ async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
   return resp.data;
 }
 
-async function getCurrentUser(): Promise<unknown> {
-  const data = await calAPI<CalUserResp>({ url: "/users" });
-  return data.users[0];
-}
-
-async function getEventTypes() {
-  // const user = await getUserFromCache();
-  const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
-  console.log(data.event_types);
-  return data.event_types;
-}
-
-export async function refreshData() {
-  const user = await getCurrentUser();
-  LocalStorage.setItem("user", JSON.stringify(user));
-  const eventTypes = await getEventTypes();
-  LocalStorage.setItem("eventTypes", JSON.stringify(eventTypes));
-  LocalStorage.setItem("updated_ts", new Date().toISOString());
-}
-
-export async function getUserFromCache(): Promise<CalUser> {
-  const cache = await LocalStorage.getItem("user");
-  if (!cache) throw new Error("User not found in Cache");
-  return JSON.parse(cache.toString());
-}
-
-export async function getEventTypesFromCache(): Promise<CalEventType[]> {
-  const cache = await LocalStorage.getItem("eventTypes");
-  if (!cache) throw new Error("Event Types not found in Cache");
-  return JSON.parse(cache.toString());
-}
-
-// export async function createSingleUseLink(event: CalendlyEventType) {
-//   const data = await calAPI<CalendlySingleUseLinkResponse>({
-//     url: "/scheduling_links",
-//     method: "POST",
-//     data: { max_event_count: 1, owner: event.uri, owner_type: "EventType" },
+// export function useCurrentUser() {
+//   return useCachedPromise(async () => {
+//     const data = await calAPI<CalUserResp>({ url: "/users" });
+//     return data.users[0];
 //   });
-//   return data.data.resource;
 // }
+
+export function useEventTypes() {
+  return useCachedPromise(async () => {
+    const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
+    return data.event_types;
+  }, []);
+}
