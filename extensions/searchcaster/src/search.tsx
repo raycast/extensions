@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { Cast } from "./types";
+import { ActionsProps, Cast, CastDetailsProps } from "./types";
 import { useCastSearch, useFarcasterInstalled } from "./utils";
 import { useState } from "react";
 
@@ -41,7 +41,7 @@ export default function Command() {
   );
 }
 
-function Actions({ cast, farcasterInstalled }: { cast: Cast; farcasterInstalled: boolean }) {
+function Actions({ cast, farcasterInstalled }: ActionsProps) {
   return (
     <ActionPanel>
       {farcasterInstalled && (
@@ -55,8 +55,9 @@ function Actions({ cast, farcasterInstalled }: { cast: Cast; farcasterInstalled:
   );
 }
 
-function CastDetails({ cast }: { cast: Cast }) {
-  const text = cast.body.data.text
+function CastDetails({ cast }: CastDetailsProps) {
+  const text = cast.body.data.text;
+
   const image = cast.body.data.image;
   const imageMarkdown = image ? `![](${image})` : "";
   const markdown =

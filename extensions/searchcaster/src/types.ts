@@ -44,3 +44,12 @@ export type CastMention = {
   address: string;
   username: string;
 };
+
+export type ActionsProps = {
+  cast: Cast;
+  farcasterInstalled: boolean;
+};
+
+export type CastDetailsProps = {
+  cast: Cast;
+};
