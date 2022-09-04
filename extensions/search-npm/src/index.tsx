@@ -1,11 +1,11 @@
 import { List } from '@raycast/api'
 import { useState, useRef } from 'react'
 import { fetchPackages } from './utils/fetchPackages'
-import { NpmsFetchResponse } from './npmsResponse.model'
 import { PackageListItem } from './PackagListItem'
+import { NpmObject } from './npmResponse.model'
 
 export default function PackageList() {
-  const [results, setResults] = useState<NpmsFetchResponse>([])
+  const [results, setResults] = useState<NpmObject[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const cancelRef = useRef<AbortController | null>(null)
