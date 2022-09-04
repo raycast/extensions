@@ -164,7 +164,7 @@ const getArtistDetailMarkdownContent = (
     content += `## ${albumTypeDisplayName}: \n`;
     content += albumList
       .map((album) => {
-        if (!shownAlbumNames[album.name]) { 
+        if (!shownAlbumNames[album.name]) {
           shownAlbumNames[album.name] = true;
           return `• ${album.name}\n`;
         }
