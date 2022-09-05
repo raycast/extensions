@@ -25,6 +25,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="ENS search" onSearchTextChange={setSearchTerm} throttle>
       <List.EmptyView
+        title={searchTerm.length ? "No Results" : "Search For ENS Name"}
         icon={{
           source: { light: "icon-light.png", dark: "icon-dark.png" },
         }}
