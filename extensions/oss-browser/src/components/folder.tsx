@@ -56,6 +56,7 @@ function BucketDropdown(props: { buckets: IBucket[]; onBucketChange: (bucket: st
 }
 
 export function Folder(props: { path: string }) {
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
   const [errState, updateErrState] = useState<boolean>(false);
   const [objectsState, updateObjectsState] = useState<IObject[]>([]);
@@ -96,7 +97,7 @@ export function Folder(props: { path: string }) {
     }
   }
 
-  async function refresh(targetPath?: string, bookmark?: boolean) {
+  async function refresh(targetPath?: string, bookmark?: boolean, onlyBookMark?: boolean) {
     if (targetPath) {
       push(<Folder path={targetPath} />);
       return;
@@ -105,10 +106,12 @@ export function Folder(props: { path: string }) {
       if (bookmark) {
         const bookmarks = await LocalStorage.allItems();
         updateBookmarksState(Object.keys(bookmarks).filter(filterBookmark).map(getFolderByLocalKey));
-        return;
+        if (onlyBookMark) {
+          return;
+        }
       }
       updateLoadingState(true);
-      await searchByMark(props.path, "");
+      await searchByMark(queryState, "");
     } catch (error) {
       updateErrState(true);
     } finally {
@@ -207,6 +210,18 @@ export function Folder(props: { path: string }) {
       }
     >
       <List.EmptyView title="No Data" />
+      {bookmarksState.length > 0 && preferences.stickBookmark && !props.path && (
+        <List.Section title="Bookmarks">
+          {bookmarksState.map((bookmark) =>
+            FolderItem({
+              folder: bookmark,
+              refresh: refresh,
+              marks: bookmarksState,
+              isMarkView: true,
+            })
+          )}
+        </List.Section>
+      )}
       {foldersState.length > 0 && (
         <List.Section title="Folders" subtitle={`Count: ${foldersState.length}`}>
           {foldersState.map((folder) =>
@@ -246,26 +261,35 @@ export function Folder(props: { path: string }) {
   );
 }
 
-function FolderItem(props: { folder: string; refresh: () => void; marks: string[] }) {
+function FolderItem(props: { folder: string; refresh: () => void; marks: string[]; isMarkView?: boolean }) {
+  const accessories = [];
+  if (!props.isMarkView && props.marks.includes(props.folder)) {
+    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Bookmark added" });
+  }
+  accessories.push({ text: "Folder" });
   return (
     <List.Item
-      key={props.folder}
-      id={props.folder}
+      key={props.isMarkView ? `${props.folder}_mark` : props.folder}
+      id={props.isMarkView ? `${props.folder}_mark` : props.folder}
       title={path.basename(props.folder)}
-      icon={{ source: Icon.Folder, tintColor: Color.Blue }}
-      accessories={
-        props.marks.includes(props.folder)
-          ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Bookmark added" }, { text: "Folder" }]
-          : [{ text: "Folder" }]
+      icon={
+        props.isMarkView
+          ? { source: Icon.Folder, tintColor: Color.Yellow }
+          : { source: Icon.Folder, tintColor: Color.Blue }
       }
-      actions={FolderAction({ folder: props.folder, refresh: props.refresh, marks: props.marks })}
+      accessories={accessories}
+      actions={FolderAction({
+        folder: props.folder,
+        refresh: props.refresh,
+        marks: props.marks,
+      })}
     />
   );
 }
 
 function FolderAction(props: {
   folder: string;
-  refresh: (targetPath?: string, bookmark?: boolean) => void;
+  refresh: (targetPath?: string, bookmark?: boolean, onlyBookMark?: boolean) => void;
   marks: string[];
 }) {
   async function deleteFolder() {
@@ -300,7 +324,7 @@ function FolderAction(props: {
               title: "Failed to delete Folder",
             });
           }
-          props.refresh();
+          props.refresh("", props.marks.includes(props.folder));
         },
       },
     });
@@ -345,7 +369,7 @@ function FolderAction(props: {
                   ctime: new Date(),
                 })
               );
-              props.refresh("", true);
+              props.refresh("", true, true);
               await showToast({
                 title: "Bookmark added",
                 style: Toast.Style.Success,
@@ -360,7 +384,7 @@ function FolderAction(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
             onAction={async () => {
               await LocalStorage.removeItem(getLocalKeyByFolder(props.folder));
-              props.refresh("", true);
+              props.refresh("", true, true);
               await showToast({
                 title: "Bookmark removed",
                 style: Toast.Style.Success,

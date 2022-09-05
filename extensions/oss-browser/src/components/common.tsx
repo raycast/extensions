@@ -9,9 +9,11 @@ import {
   Color,
   Detail,
   openCommandPreferences,
+  Clipboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState } from "react";
-import { createFolder, uploadObject } from "../utils";
+import { createFolder, getObjUrl, uploadObject } from "../utils";
 import { Folder } from "./folder";
 import { Action$ } from "raycast-toolkit";
 
@@ -121,8 +123,9 @@ export async function uploadFile(folder: string, filePath: string, refresh: () =
     style: Toast.Style.Animated,
     title: "Uploading the File...",
   });
+  let ossKey = "";
   try {
-    await uploadObject(filePath, folder);
+    ossKey = await uploadObject(filePath, folder);
     await showToast({
       style: Toast.Style.Success,
       title: "Files uploaded",
@@ -133,6 +136,10 @@ export async function uploadFile(folder: string, filePath: string, refresh: () =
       style: Toast.Style.Failure,
       title: "Failed to upload the Files",
     });
+  }
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  if (preferences.copyUrlAfterUpload) {
+    await Clipboard.copy((await getObjUrl(ossKey)).url);
   }
 }
 
