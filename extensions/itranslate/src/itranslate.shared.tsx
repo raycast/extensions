@@ -1,11 +1,12 @@
-import { getPreferenceValues } from "@raycast/api";
-import { LANG_LIST, TransAPIErrCode, TransServiceProviderTp } from "./const";
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { HistoriesCacheKey, LANG_LIST, TransAPIErrCode, TransServiceProviderTp } from "./const";
 import axios from "axios";
 import crypto from "crypto";
 import querystring from "node:querystring";
 import { LanguageConflict, ServiceProviderMiss } from "./TranslateError";
 import translate from "@vitalets/google-translate-api";
 import Core from "@alicloud/pop-core";
+import { execSync } from "child_process";
 
 const apiFetchMap = new Map<
   TransServiceProviderTp,
@@ -367,7 +368,8 @@ function fetchGoogleTransAPI(
 ): Promise<ITranslateRes> {
   return new Promise<ITranslateRes>((resolve) => {
     const fromLang = "auto";
-    translate(queryText, { to: targetLang.langId, from: fromLang, tld: "cn" })
+    const preferences: IPreferences = getPreferenceValues<IPreferences>();
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD })
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {
@@ -726,4 +728,30 @@ async function fetchAliyunTransAPI(
         resolve(transRes);
       });
   });
+}
+
+const cache = new Cache();
+
+export function getHistories(): TransHistory[] {
+  return JSON.parse(cache.get(HistoriesCacheKey) || "[]");
+}
+
+export function saveHistory(history: TransHistory, limit: number) {
+  const historiesCache: TransHistory[] = JSON.parse(cache.get(HistoriesCacheKey) || "[]");
+  if (historiesCache.unshift(history) > limit) historiesCache.pop();
+  cache.set(HistoriesCacheKey, JSON.stringify(historiesCache));
+}
+
+export function clearAllHistory() {
+  cache.remove(HistoriesCacheKey);
+}
+
+export function say(text: string, lang: ILangItem) {
+  if (!lang.voice) return;
+  try {
+    const command = `say -v ${lang.voice} "${text.replace(/"/g, " ")}"`;
+    execSync(command);
+  } catch (error) {
+    console.log(error);
+  }
 }

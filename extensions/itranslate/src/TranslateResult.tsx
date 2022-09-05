@@ -10,6 +10,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { LANG_LIST, TransAPIErrCode } from "./const";
+import { say } from "./itranslate.shared";
+import { TranslateHistory } from "./TranslateHistory";
 
 const preferences: IPreferences = getPreferenceValues();
 
@@ -93,12 +95,6 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
               }}
             />
           )}
-          <Action
-            icon={Icon.ComputerChip}
-            title="Open iTranslate Preferences"
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
-          />
           <ActionPanel.Submenu
             title="Select Target Language"
             icon={Icon.Repeat}
@@ -125,6 +121,36 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
                 );
               })}
           </ActionPanel.Submenu>
+          {props.transRes.from.voice && (
+            <Action
+              title="Play Source Sound"
+              icon={Icon.SpeakerOn}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => say(props.transRes.origin, props.transRes.from)}
+            />
+          )}
+          {props.transRes.to.voice && (
+            <Action
+              title="Play Result Sound"
+              icon={Icon.SpeakerOn}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={() => say(props.transRes.res, props.transRes.to)}
+            />
+          )}
+          {preferences.enableHistory && (
+            <Action.Push
+              icon={Icon.BulletPoints}
+              title="Open Translation Histories"
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              target={<TranslateHistory />}
+            />
+          )}
+          <Action
+            icon={Icon.ComputerChip}
+            title="Open iTranslate Preferences"
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            onAction={openCommandPreferences}
+          />
         </ActionPanel>
       }
     />
