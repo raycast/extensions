@@ -10,14 +10,7 @@ export default function Command() {
   const hasFarcaster: boolean = useFarcasterInstalled();
 
   return (
-    <List
-      enableFiltering={false}
-      navigationTitle="Search casts"
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      isShowingDetail
-      throttle
-    >
+    <List enableFiltering={false} onSearchTextChange={setSearchText} isLoading={isLoading} isShowingDetail throttle>
       {isLoading ? (
         <List.EmptyView title="Reticulating splines..." />
       ) : (
