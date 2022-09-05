@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, openCommandPreferences } from "@raycast/api";
 import { Preferences, useEventTypes } from "./services/cal.com";
 import { URL } from "url";
 
@@ -8,7 +8,12 @@ export default function Command() {
   const { data: items, isLoading, error } = useEventTypes();
 
   if (error) {
-    console.log(error);
+    showToast({
+      title: "Unable to load your events",
+      message: "Check your API key",
+      style: Toast.Style.Failure,
+      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
+    });
   }
 
   return (
