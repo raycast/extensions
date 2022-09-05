@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, FileInfo, FileType } from "./types/types";
 import { parse } from "path";
-import { pinDirectory } from "./pin-directory";
+import { pinFolder } from "./pin-folder";
 import { LocalStorageKey, tagDirectoryTypes } from "./utils/constants";
 import {
   alertDialog,
@@ -19,8 +19,8 @@ import { ActionOpenCommandPreferences } from "./components/action-open-command-p
 import { QuickAccessEmptyView } from "./components/quick-access-empty-view";
 import { ItemDetail } from "./components/item-detail";
 
-export default function SearchPinnedDirectories() {
-  const { primaryAction, rememberTag, autoCopyLatestFile } = getPreferenceValues<Preferences>();
+export default function SearchPinnedFolders() {
+  const { primaryAction, rememberTag, autoCopyLatestFile, showOpenFolders } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
   const [filePath, setFilePath] = useState<FileInfo>({
@@ -33,7 +33,7 @@ export default function SearchPinnedDirectories() {
   const [refreshDetail, setRefreshDetail] = useState<number>(0);
 
   const showDetail = getIsShowDetail(refreshDetail);
-  const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh);
+  const { directoryWithFiles, allFilesNumber, loading } = localDirectoryWithFiles(refresh, showOpenFolders);
   const { fileContentInfo, isDetailLoading } = getFileInfoAndPreview(filePath);
 
   //preference: copy the latest file
@@ -51,7 +51,7 @@ export default function SearchPinnedDirectories() {
       }}
       searchBarAccessory={
         directoryWithFiles.length !== 0 ? (
-          <List.Dropdown onChange={setTag} tooltip={"Directory type"} storeValue={rememberTag}>
+          <List.Dropdown onChange={setTag} tooltip={"Folder type"} storeValue={rememberTag}>
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             <List.Dropdown.Section title={"Location"}>
               {directoryWithFiles.map((value, index) => {
@@ -74,8 +74,8 @@ export default function SearchPinnedDirectories() {
       }
     >
       <QuickAccessEmptyView
-        title={directoryWithFiles.length === 0 ? "No directory. Please pin first" : "No files"}
-        description={directoryWithFiles.length === 0 ? "You can pin directory from the Action Panel" : ""}
+        title={directoryWithFiles.length === 0 ? "No folder. Please pin first" : "No files"}
+        description={directoryWithFiles.length === 0 ? "You can pin folder from the Action Panel" : ""}
         setRefresh={setRefresh}
         directoryWithFiles={directoryWithFiles}
       />
@@ -112,23 +112,23 @@ export default function SearchPinnedDirectories() {
                           <ActionPanel.Section>
                             <Action
                               icon={Icon.Pin}
-                              title={`Pin Directory`}
+                              title={`Pin Folder`}
                               shortcut={{ modifiers: ["cmd"], key: "d" }}
                               onAction={async () => {
-                                await pinDirectory(false);
+                                await pinFolder(false);
                                 setRefresh(refreshNumber());
                               }}
                             />
                             <Action
-                              icon={Icon.Trash}
-                              title={`Remove Directory`}
+                              icon={Icon.PinDisabled}
+                              title={`Unpin Folder`}
                               shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                               onAction={async () => {
                                 await alertDialog(
-                                  Icon.XmarkCircle,
-                                  "Remove Directory",
-                                  `Are you sure you want to remove the ${directory.directory.name} directory?`,
-                                  "Remove",
+                                  Icon.XMarkCircle,
+                                  "Unpin Folder",
+                                  `Are you sure you want to remove the ${directory.directory.name} folder?`,
+                                  "Unpin",
                                   async () => {
                                     const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
                                     const _localDirectory = isEmpty(localstorage) ? [] : JSON.parse(localstorage);
@@ -141,7 +141,7 @@ export default function SearchPinnedDirectories() {
                                     await showToast(
                                       Toast.Style.Success,
                                       "Success!",
-                                      `${directory.directory.name} directory is removed.`
+                                      `${directory.directory.name} folder is unpinned.`
                                     );
                                   }
                                 );
@@ -149,14 +149,14 @@ export default function SearchPinnedDirectories() {
                             />
                             <ActionRemoveAllDirectories setRefresh={setRefresh} />
                             <Action
-                              icon={Icon.TwoArrowsClockwise}
-                              title={`Reset Directory Rank`}
+                              icon={Icon.ArrowClockwise}
+                              title={`Reset Folder Rank`}
                               shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
                               onAction={async () => {
                                 await alertDialog(
                                   Icon.ExclamationMark,
                                   "Reset All Rank",
-                                  "Are you sure you want to reset the ranking of all directories??",
+                                  "Are you sure you want to reset the ranking of all folders?",
                                   "Reset All",
                                   async () => {
                                     const localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
