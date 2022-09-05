@@ -6,6 +6,10 @@
   "icon": "logo.png",
   "author": "eluce2",
   "license": "MIT",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "index",

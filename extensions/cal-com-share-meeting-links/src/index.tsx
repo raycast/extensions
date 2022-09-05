@@ -1,4 +1,13 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, openCommandPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  openCommandPreferences,
+  Icon,
+} from "@raycast/api";
 import { Preferences, useEventTypes } from "./services/cal.com";
 import { URL } from "url";
 
@@ -25,7 +34,10 @@ export default function Command() {
           subtitle={item.description}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={new URL(`${username}/${item.slug}`, "https://cal.com").toString()} />
+              <Action.CopyToClipboard
+                content={new URL(`${username}/${item.slug}`, "https://cal.com").toString()}
+                icon={Icon.Link}
+              />
             </ActionPanel>
           }
         />
