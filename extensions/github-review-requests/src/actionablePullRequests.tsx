@@ -15,10 +15,11 @@ const actionablePullRequests = () => {
   return (
     <MenuBarExtra isLoading={isLoading} icon={icon} title={title}>
       {updatedPulls.length > 0 &&
-        updatedPulls.map(pull => (
+        updatedPulls.map((pull, index) => (
           <PullRequestItem
             key={pull.id}
             pull={pull}
+            index={index}
             showMyIcon
             onAction={() => open(pull.url).then(() => visitPull(login, pull))}
           />
