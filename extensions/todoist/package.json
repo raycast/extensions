@@ -53,10 +53,10 @@
       "mode": "view"
     },
     {
-      "name": "today-frog",
-      "title": "Today's Frog",
-      "subtitle": "Eat the frog first",
-      "description": "What's the most important task you should do today? (based on the 'Eat the frog' method). A task with the 'frog' label will appear in the Menu Bar. Label can be configured in Extension Preferences",
+      "name": "today-focus",
+      "title": "Today's Focus",
+      "subtitle": "Focus on your most important task.",
+      "description": "What's the most important task you should do today? (based on the 'Eat the frog' method). A task with the 'focus' label will appear in the Menu Bar. Label can be configured in Extension Preferences",
       "mode": "menu-bar"
     }
   ],
@@ -70,13 +70,13 @@
       "placeholder": "Enter your Todoist token"
     },
     {
-      "name": "frogLabelName",
+      "name": "focusLabelName",
       "type": "textfield",
       "required": false,
-      "title": "Frog Label's Name",
-      "description": "Label used for Menu Bar Command. Default is 'frog'.",
+      "title": "Focus Label's Name",
+      "description": "Label used for Menu Bar Command. Default is 'focus'.",
       "placeholder": "Enter a label name you have in Todoist",
-      "default": "frog"
+      "default": "focus"
     },
     {
       "name": "todayGroupBy",
