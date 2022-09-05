@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 11:02
+ * @lastEditTime: 2022-09-04 00:36
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,6 +14,7 @@ import { sayTruncateCommand } from "./audio";
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
 import { LingueeListItemType } from "./dictionary/linguee/types";
 import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
+import { getYoudaoWebDictionaryURL } from "./dictionary/youdao/utils";
 import { playYoudaoWordAudioAfterDownloading } from "./dictionary/youdao/youdao";
 import { languageItemList } from "./language/consts";
 import {
@@ -21,7 +22,6 @@ import {
   getDeepLWebTranslateURL,
   getEudicWebDictionaryURL,
   getGoogleWebTranslateURL,
-  getYoudaoWebDictionaryURL,
 } from "./language/languages";
 import { myPreferences, preferredLanguage1, preferredLanguage2 } from "./preferences";
 import ReleaseNotesPage from "./releaseVersion/releaseNotePage";
@@ -36,6 +36,7 @@ import {
   TranslationType,
   WebQueryItem,
 } from "./types";
+import { checkIsLingueeListItemType, checkIsTranslationType, checkIsYoudaoDictionaryListItemType } from "./utils";
 
 /**
  * Get the list action panel item with ListItemActionPanelItem
@@ -77,12 +78,6 @@ export function ListActionPanel(props: ActionListPanelProps) {
           <ReleaseNotesAction title="✨ New Version Released" onPush={onNewReleasePromptClick} />
         )}
 
-        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
-        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
-        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
-        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
-        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
-
         {props.isInstalledEudic && (
           <Action
             icon={Icon.MagnifyingGlass}
@@ -90,6 +85,12 @@ export function ListActionPanel(props: ActionListPanelProps) {
             onAction={() => openInEudic(queryWordInfo.word)}
           />
         )}
+
+        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
+        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
+        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
+        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
+        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
 
         <Action.CopyToClipboard
           onCopy={() => {
@@ -219,17 +220,17 @@ export function getListItemIcon(listDisplayType: ListItemDisplayType): Image.Ima
     tintColor: Color.PrimaryText,
   };
 
-  if (Object.values(YoudaoDictionaryListItemType).includes(listDisplayType as YoudaoDictionaryListItemType)) {
+  if (checkIsYoudaoDictionaryListItemType(listDisplayType)) {
     itemIcon = getYoudaoListItemIcon(listDisplayType as YoudaoDictionaryListItemType);
   }
 
-  if (Object.values(TranslationType).includes(listDisplayType as TranslationType)) {
+  if (checkIsTranslationType(listDisplayType as TranslationType)) {
     // console.log(`---> TranslationType: ${listDisplayType}`);
     itemIcon = getQueryTypeIcon(listDisplayType as TranslationType);
   }
 
   // LingueeDisplayType is string enum, so we need to check if it is in the enum
-  if (Object.values(LingueeListItemType).includes(listDisplayType as LingueeListItemType)) {
+  if (checkIsLingueeListItemType(listDisplayType)) {
     itemIcon = getLingueeListItemIcon(listDisplayType as LingueeListItemType);
   }
 
@@ -313,6 +314,10 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
     }
     case YoudaoDictionaryListItemType.WebPhrase: {
       dotColor = "teal";
+      break;
+    }
+    case YoudaoDictionaryListItemType.Baike: {
+      dotColor = "#B15BFF";
       break;
     }
   }

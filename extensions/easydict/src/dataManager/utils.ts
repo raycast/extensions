@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 00:08
+ * @lastEditTime: 2022-09-01 00:12
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,8 @@
 import { hasLingueeDictionaryEntries } from "../dictionary/linguee/parse";
 import { LingueeDictionaryResult } from "../dictionary/linguee/types";
 import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
-import { YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
 import {
   getLanguageItemFromYoudaoId,
   maxLineLengthOfChineseTextDisplay,
@@ -19,17 +20,39 @@ import {
 } from "../language/languages";
 import { myPreferences } from "../preferences";
 import { DicionaryType, QueryResult, QueryTypeResult, TranslationItem, TranslationType } from "../types";
+import { checkIsDictionaryType, checkIsTranslationType, checkIsWord } from "../utils";
+
+/**
+ * Sort query results by designated order.
+ *
+ * * NOTE: this function will be called many times, because request results are async, so we need to sort every time.
+ */
+export function sortedQueryResults(queryResults: QueryResult[]) {
+  const sortedQueryResults: QueryResult[] = [];
+  for (const queryResult of queryResults) {
+    const typeString = queryResult.type.toString().toLowerCase();
+    const index = getSortOrder().indexOf(typeString);
+    sortedQueryResults[index] = queryResult;
+    // console.log(`---> sort results: index: ${index}, ${queryResult.type}`);
+  }
+  // filter undefined, or result is undefined.
+  return sortedQueryResults.filter((queryResult) => {
+    if (queryResult?.sourceResult.result) {
+      return true;
+    }
+  });
+}
 
 /**
  * Get services sort order. If user set the order manually, prioritize the order.
  *
- * * Note: currently only can manually sort transaltion order.
- *
  * @return [linguee dictionary, youdao dictionary, deepl...], all lowercase.
  */
 export function getSortOrder(): string[] {
-  const defaultDictionaryOrder = [DicionaryType.Linguee, DicionaryType.Youdao];
-  const defaultTranslationOrder = [
+  const defaultOrderList = [
+    DicionaryType.Youdao,
+    DicionaryType.Linguee,
+
     TranslationType.DeepL,
     TranslationType.Google,
     TranslationType.Apple,
@@ -39,27 +62,35 @@ export function getSortOrder(): string[] {
     TranslationType.Caiyun,
   ];
 
-  const defaultTranslations = defaultTranslationOrder.map((type) => type.toString().toLowerCase());
-
   const userOrder: string[] = [];
+  const defaultOrders = defaultOrderList.map((type) => type.toString().toLowerCase());
+
   // * NOTE: user manually set the sort order may not be complete, or even tpye wrong name.
-  const manualOrder = myPreferences.translationOrder.split(","); // "Baidu,DeepL,Tencent"
+  const manualOrder = myPreferences.servicesOrder.split(",");
   // console.log("---> manualOrder:", manualOrder);
-  if (manualOrder.length > 0) {
-    for (let translationName of manualOrder) {
-      translationName = `${translationName.trim()} Translate`.toLowerCase();
-      // if the type name is in the default order, add it to user order, and remove it from defaultNameOrder.
-      if (defaultTranslations.includes(translationName)) {
+  const formatManualOrder = manualOrder.map((order) => order.trim().toLowerCase());
+
+  // eg: [Youdao dictionary, DeepL, Tencent, linguee dictionary, Baidu, Google, Apple, Youdao]
+  for (const order of formatManualOrder) {
+    // 1. handle dictionary type.
+    const dictionaryName = order;
+    if (dictionaryName.endsWith("dictionary")) {
+      if (defaultOrders.includes(dictionaryName)) {
+        userOrder.push(dictionaryName);
+        defaultOrders.splice(defaultOrders.indexOf(dictionaryName), 1);
+      }
+    } else {
+      // 2. handle translation type.
+      const translationName = `${order} translate`;
+      // if the type name is in the default order, add it to user order, and remove it from defaultOrders.
+      if (defaultOrders.includes(translationName)) {
         userOrder.push(translationName);
-        defaultTranslations.splice(defaultTranslations.indexOf(translationName), 1);
+        defaultOrders.splice(defaultOrders.indexOf(translationName), 1);
       }
     }
   }
 
-  const finalOrder = [...defaultDictionaryOrder, ...userOrder, ...defaultTranslations].map((title) =>
-    title.toLowerCase()
-  );
-  // console.log("defaultNameOrder:", defaultTranslations);
+  const finalOrder = [...userOrder, ...defaultOrders].map((title) => title.toLowerCase());
   // console.log("userOrder:", userOrder);
   // console.log("finalOrder:", finalOrder);
   return finalOrder;
@@ -98,8 +129,9 @@ export function isTranslationTooLong(translation: string, toLanguage: string): b
 export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boolean {
   let isShowDetail = false;
   for (const queryResult of queryResults) {
-    const wordInfo = queryResult.sourceResult.wordInfo;
-    const isDictionaryType = Object.values(DicionaryType).includes(queryResult.type as DicionaryType);
+    const sourceResult = queryResult.sourceResult;
+    const wordInfo = sourceResult.wordInfo;
+    const isDictionaryType = checkIsDictionaryType(queryResult.type);
     if (isDictionaryType) {
       if (wordInfo.hasDictionaryEntries) {
         isShowDetail = false;
@@ -107,7 +139,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
       }
     } else {
       // check if translation is too long
-      const oneLineTranslation = queryResult.sourceResult?.oneLineTranslation || "";
+      const oneLineTranslation = sourceResult?.oneLineTranslation || "";
       const isTooLong = isTranslationTooLong(oneLineTranslation, wordInfo.toLanguage);
       if (isTooLong) {
         isShowDetail = true;
@@ -124,7 +156,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
  */
 export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): boolean {
   const { type: dictionaryType } = dictionaryResult;
-  const isDictionaryType = Object.values(DicionaryType).includes(dictionaryType as DicionaryType);
+  const isDictionaryType = checkIsDictionaryType(dictionaryType);
   if (!isDictionaryType) {
     return false;
   }
@@ -191,7 +223,7 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
   const translations = [] as TranslationItem[];
   for (const queryResult of queryResults) {
     const { type, sourceResult } = queryResult;
-    const isTranslationType = Object.values(TranslationType).includes(type as TranslationType);
+    const isTranslationType = checkIsTranslationType(type);
     if (sourceResult && isTranslationType) {
       const type = sourceResult.type as TranslationType;
       const markdownTranslation = formatTranslationToMarkdown(sourceResult);
@@ -217,22 +249,12 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
 }
 
 /**
- * Sort query results by designated order.
- *
- * * NOTE: this function will be called many times, because request results are async, so we need to sort every time.
+ * Check if enable Youdao dictionary.
  */
-export function sortedQueryResults(queryResults: QueryResult[]) {
-  const sortedQueryResults: QueryResult[] = [];
-  for (const queryResult of queryResults) {
-    const typeString = queryResult.type.toString().toLowerCase();
-    const index = getSortOrder().indexOf(typeString);
-    sortedQueryResults[index] = queryResult;
-    // console.log(`---> sort results: index: ${index}, ${queryResult.type}`);
-  }
-  // filter undefined, or result is undefined.
-  return sortedQueryResults.filter((queryResult) => {
-    if (queryResult?.sourceResult.result) {
-      return true;
-    }
-  });
+export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
+  const isValidYoudaoDictionaryLanguageQuery = getYoudaoWebDictionaryURL(queryWordInfo) !== undefined;
+  const isWord = checkIsWord(queryWordInfo);
+  const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
+  console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}`);
+  return enableYoudaoDictionary;
 }

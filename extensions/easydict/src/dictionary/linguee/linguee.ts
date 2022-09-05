@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-24 17:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 17:08
+ * @lastEditTime: 2022-09-02 23:19
  * @fileName: linguee.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -86,7 +86,7 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
           console.log(`---> linguee canceled`);
-          return;
+          return reject(undefined);
         }
         console.error(`---> linguee error: ${error}`);
         console.error(`---> error response: ${util.inspect(error.response, { depth: null })}`);

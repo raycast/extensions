@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 12:33
+ * @lastEditTime: 2022-09-02 23:11
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,10 +11,20 @@
 import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
 import { AxiosError } from "axios";
 import { clipboardQueryTextKey } from "./consts";
-import { QueryWordInfo } from "./dictionary/youdao/types";
+import { LanguageDetectType } from "./detectLanauge/types";
+import { LingueeListItemType } from "./dictionary/linguee/types";
+import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
 import { myPreferences } from "./preferences";
 import { Easydict } from "./releaseVersion/versionInfo";
-import { DicionaryType, QueryRecoredItem, QueryType, RequestErrorInfo } from "./types";
+import {
+  DicionaryType,
+  ListItemDisplayType,
+  QueryRecoredItem,
+  QueryType,
+  RequestErrorInfo,
+  RequestType,
+  TranslationType,
+} from "./types";
 
 /**
  * Max length for word to query dictionary.
@@ -130,10 +140,16 @@ export function getEnabledDictionaryServices(): DicionaryType[] {
 /**
  * Show error toast according to errorInfo.
  */
-export function showErrorToast(errorInfo: RequestErrorInfo) {
+export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
+  if (!errorInfo) {
+    return;
+  }
+
+  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 2)}`);
+  const type = errorInfo.type.toString();
   showToast({
     style: Toast.Style.Failure,
-    title: `${errorInfo.type} Error: ${errorInfo.code || ""}`,
+    title: `${type} Error: ${errorInfo.code || ""}`,
     message: errorInfo.message,
   });
 }
@@ -143,7 +159,7 @@ export function showErrorToast(errorInfo: RequestErrorInfo) {
  */
 export function getTypeErrorInfo(type: QueryType, error: AxiosError) {
   const errorCode = error.response?.status;
-  const errorMessage = error.message || error.response?.statusText || "Response error";
+  const errorMessage = error.message || error.response?.statusText || "something error 😭";
   const errorInfo: RequestErrorInfo = {
     type: type,
     code: `${errorCode || ""}`,
@@ -160,12 +176,70 @@ export function checkIsWordLength(word: string) {
 }
 
 /**
- * Check queryWordInfo is word.
+ * Check queryWordInfo is word, not accurate, just a rough judgment.
+ *
+ * * Use queryWordInfo `isWord` when need accurate judgment.
  */
 export function checkIsWord(queryWordInfo: QueryWordInfo) {
-  // If there is no dictionary to check if it is a word, then use word length to check.
-  if (queryWordInfo.isWord === undefined) {
-    return checkIsWordLength(queryWordInfo.word);
+  if (queryWordInfo.isWord !== undefined) {
+    return queryWordInfo.isWord;
   }
-  return queryWordInfo.isWord;
+  return checkIsWordLength(queryWordInfo.word);
+}
+
+/**
+ * Copy text to Clipboard.
+ */
+export function copyToClipboard(text: string) {
+  Clipboard.copy(text);
+}
+
+/**
+ * Check type is Dictionary type.
+ */
+export function checkIsDictionaryType(type: QueryType): boolean {
+  if (Object.values(DicionaryType).includes(type as DicionaryType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check type is Translation type.
+ */
+export function checkIsTranslationType(type: QueryType): boolean {
+  if (Object.values(TranslationType).includes(type as TranslationType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is LanguageDetect type.
+ */
+export function checkIsLanguageDetectType(type: RequestType): boolean {
+  if (Object.values(LanguageDetectType).includes(type as LanguageDetectType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is YoudaoDictionaryListItem type.
+ */
+export function checkIsYoudaoDictionaryListItemType(type: ListItemDisplayType): boolean {
+  if (Object.values(YoudaoDictionaryListItemType).includes(type as YoudaoDictionaryListItemType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is LingueeListItem type.
+ */
+export function checkIsLingueeListItemType(type: ListItemDisplayType): boolean {
+  if (Object.values(LingueeListItemType).includes(type as LingueeListItemType)) {
+    return true;
+  }
+  return false;
 }

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-01 10:44
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 11:15
+ * @lastEditTime: 2022-09-02 11:39
  * @fileName: parse.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -100,6 +100,10 @@ export function parseLingueeHTML(html: string): QueryTypeResult {
     wikipedias: wikipedia,
   };
   const hasEntries = hasLingueeDictionaryEntries(lingueeResult);
+  if (!hasEntries) {
+    console.warn("No entries found in Linguee dictionary.");
+  }
+
   queryWordInfo.hasDictionaryEntries = hasEntries;
   const result = hasEntries ? lingueeResult : undefined;
   const lingueeTypeResult: QueryTypeResult = {
