@@ -1,6 +1,7 @@
 import { getLocalStorageItem } from "@raycast/api";
 import { SearchResult } from "./types";
 import fetch from "node-fetch";
+import * as cheerio from 'cheerio';
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const historyString = (await getLocalStorageItem("history")) as string;
@@ -28,7 +29,7 @@ export async function getSearchResults(searchText: string, signal: AbortSignal):
   if (!response.ok) {
     return Promise.reject(response.statusText);
   }
-  const cheerio = require("cheerio");
+
   const body = await response.text();
   const parser = cheerio.load(body, null, false);
 
@@ -40,7 +41,7 @@ export async function getSearchResults(searchText: string, signal: AbortSignal):
     },
   ];
 
-  parser('ul#quickref_functions').find('li').map((i: string, item: object) => {
+  parser('ul#quickref_functions').find('li').map((i, item) => {
     const url = parser(item).find('a').attr('href');
     const description = parser(item).text();;
 
