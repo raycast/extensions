@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Image } from "@raycast/api";
+import { ActionPanel, List, Action, Image, Icon } from "@raycast/api";
 import debounce from "lodash.debounce";
 import { fetchSuggestions } from "../lib/fetchSuggestions";
 import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance } from "wagmi";
