@@ -45,6 +45,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="Show Profile"
+                icon={Icon.AppWindowSidebarLeft}
                 target={
                   <WagmiConfig client={client}>
                     <ProfileDetail name={name} />
