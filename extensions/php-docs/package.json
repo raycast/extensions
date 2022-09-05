@@ -4,7 +4,7 @@
   "title": "PHP Docs",
   "description": "Quickly search through official PHP documentation",
   "icon": "php.png",
-  "author": "jeremias-dev",
+  "author": "comes",
   "version": "1.0.0",
   "categories": [
     "Developer Tools",
