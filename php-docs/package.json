@@ -16,8 +16,9 @@
   "commands": [
     {
       "name": "php",
-      "title": "Search PHP Docs",
-      "description": "Search PHP",
+      "title": "Search Documentation",
+      "subtitle": "PHP",
+      "description": "Search the PHP.net documentation",
       "mode": "view"
     }
   ],
