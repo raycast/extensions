@@ -8,7 +8,7 @@ import {
   List,
   Icon,
 } from "@raycast/api";
-import { LANG_LIST, TRANS_SERVICES_AUTH_NAMES } from "./const";
+import { LANG_LIST, TRANS_SERVICES_AUTH_NAMES, TRANS_SERVICES_NAMES } from "./const";
 
 const icon = { source: Icon.XMarkCircle, tintColor: Color.Red };
 
@@ -66,7 +66,7 @@ export function ServiceProviderMiss() {
   ## Before using the extension, follow these steps:
   1. ⚙️ Please enter \`↵\` to open iTranslate Preferences
   2. Config ${auth_names?.map((n) => `**${n}**`).join(" and ")} in the right area of the preferences window
-  > ⚠️ The default translation service provider you selected is *${defaultServiceProvider}*\n
+  > ⚠️ The default translation service provider you selected is *${TRANS_SERVICES_NAMES.get(defaultServiceProvider)}*\n
   # 🍻 Enjoy it !
   `;
   return (
