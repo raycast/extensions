@@ -4,8 +4,7 @@
   "title": "PHP Docs",
   "description": "Quickly search through official PHP documentation",
   "icon": "php.png",
-  "author":  "Jeremias Wolff <raycast-php-docs@jeremias.dev> (https://github.com/comes)",
-  "owner": "jeremias-dev",
+  "author": "jeremias-dev",
   "version": "1.0.0",
   "categories": [
     "Developer Tools",
