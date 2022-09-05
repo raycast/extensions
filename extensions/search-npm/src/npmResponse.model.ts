@@ -1,10 +1,14 @@
-export type NpmsFetchResponse = NpmsResultModel[]
+export interface NpmSearchFetchResponse {
+  objects: NpmObject[]
+  total: number
+  time: string
+}
 
-export interface NpmsResultModel {
+export interface NpmObject {
   package: Package
   score: Score
   searchScore: number
-  highlight: string
+  flags?: Flags
 }
 
 export interface Package {
@@ -14,10 +18,10 @@ export interface Package {
   description: string
   date: string
   links: Links
-  author?: Author
   publisher: Publisher
   maintainers: Maintainer[]
   keywords?: string[]
+  author?: Author
 }
 
 export interface Links {
@@ -25,13 +29,6 @@ export interface Links {
   homepage?: string
   repository?: string
   bugs?: string
-}
-
-export interface Author {
-  name: string
-  email?: string
-  username?: string
-  url?: string
 }
 
 export interface Publisher {
@@ -44,6 +41,13 @@ export interface Maintainer {
   email: string
 }
 
+export interface Author {
+  name: string
+  url?: string
+  email?: string
+  username?: string
+}
+
 export interface Score {
   final: number
   detail: Detail
@@ -53,4 +57,8 @@ export interface Detail {
   quality: number
   popularity: number
   maintenance: number
+}
+
+export interface Flags {
+  unstable: boolean
 }

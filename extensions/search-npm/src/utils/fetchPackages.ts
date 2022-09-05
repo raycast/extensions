@@ -1,20 +1,20 @@
 import { showToast, Toast } from '@raycast/api'
 import fetch from 'node-fetch'
-import { NpmsFetchResponse } from '../npmsResponse.model'
+import { NpmObject, NpmSearchFetchResponse } from '../npmResponse.model'
 
 export const fetchPackages = async (
   searchTerm = '',
   signal: AbortSignal,
-): Promise<NpmsFetchResponse> => {
+): Promise<NpmObject[]> => {
   try {
     const response = await fetch(
-      `https://api.npms.io/v2/search/suggestions?q=${searchTerm}`,
+      `https://registry.npmjs.org/-/v1/search?text=${searchTerm}`,
       { signal },
     )
-    const json = await response.json()
-    return json as NpmsFetchResponse
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
+    const json = (await response.json()) as NpmSearchFetchResponse
+    return json.objects
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'AbortError') {
       return []
     }
 
