@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-17 16:02
+ * @lastEditTime: 2022-08-28 22:02
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { showToast, Toast } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from "https-proxy-agent";
 import { getMacSystemProxy } from "mac-system-proxy";
@@ -51,6 +51,15 @@ export function configAxiosProxy() {
     env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
     // console.log(`---> env: ${JSON.stringify(env, null, 2)}`);
 
+    if (environment.isDevelopment) {
+      /**
+       * handle error: unable to verify the first certificate
+       *
+       * Ref: https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
+       */
+      // env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+    }
+
     getMacSystemProxy()
       .then((systemProxy) => {
         if (systemProxy) {
@@ -61,6 +70,7 @@ export function configAxiosProxy() {
               port: systemProxy.HTTPPort,
             };
             const httpsAgent = new HttpsProxyAgent(proxyOptions);
+            // httpsAgent.options.ca = require("ssl-root-cas/latest").create();
             axios.defaults.httpsAgent = httpsAgent;
             // set proxy to env, so we can use it in other modules.
             env.PROXY = `http://${systemProxy.HTTPProxy}:${systemProxy.HTTPPort}`;

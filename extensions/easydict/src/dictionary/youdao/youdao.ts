@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 10:51
+ * @lastEditTime: 2022-09-04 10:01
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,30 +11,53 @@
 import axios, { AxiosError } from "axios";
 import CryptoJS from "crypto-js";
 import querystring from "node:querystring";
+import qs from "qs";
 import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
-import { YoudaoErrorCode } from "../../consts";
+import { userAgent, YoudaoErrorCode } from "../../consts";
 import { KeyStore } from "../../preferences";
-import { DicionaryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
+import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { formatYoudaoDictionaryResult } from "./formatData";
-import { QueryWordInfo, YoudaoDictionaryResult } from "./types";
+import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
+import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
+import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
 
 /**
  * Max length of text to download youdao tts audio
  */
 export const maxTextLengthOfDownloadYoudaoTTSAudio = 40;
 
+const youdaoTranslatURL = "https://fanyi.youdao.com";
+
+let youdaoCookie =
+  "OUTFOX_SEARCH_USER_ID=362474716@10.108.162.139; Domain=.youdao.com; Expires=Sat, 17-Aug-2052 15:39:50 GMT";
+
+/**
+ * Get youdao cookie from youdao web.
+ */
+axios.get(youdaoTranslatURL).then((response) => {
+  if (response.headers["set-cookie"]) {
+    youdaoCookie = response.headers["set-cookie"]?.join(";");
+    // console.warn(`youdaoCookie: ${youdaoCookie}`);
+  }
+});
+
 /**
  * Youdao translate, use official API. Cost time: 0.2s
  *
  * * Note: max length of text to translate must <= 1000, otherwise, will get error: "103	翻译文本过长"
  *
- * 有道翻译 https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html
+ * 有道（词典）翻译 https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html
  */
-export function requestYoudaoDictionary(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
-  console.log(`---> start request Youdao`);
+export function requestYoudaoApiDictionaryTranslate(
+  queryWordInfo: QueryWordInfo,
+  queryType?: QueryType
+): Promise<QueryTypeResult> {
+  console.log(`---> start request Youdao api dictionary`);
+
+  const type = queryType ?? DicionaryType.Youdao;
+
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   function truncate(q: string): string {
     const len = q.length;
@@ -78,19 +101,18 @@ export function requestYoudaoDictionary(queryWordInfo: QueryWordInfo): Promise<Q
         queryWordInfo.isWord = youdaoResult.isWord;
 
         const youdaoTypeResult: QueryTypeResult = {
-          type: TranslationType.Youdao,
+          type: type,
           result: youdaoFormatResult,
           wordInfo: youdaoFormatResult.queryWordInfo,
-          errorInfo: errorInfo,
-          translations: youdaoFormatResult.translations,
+          translations: youdaoFormatResult.translation.split("\n"),
         };
         console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
         resolve(youdaoTypeResult);
       })
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
-          console.log(`---> youdao canceled`);
-          return;
+          console.log(`---> youdao api dict canceled`);
+          return reject(undefined);
         }
 
         console.error(`---> Youdao translate error: ${error}`);
@@ -98,7 +120,200 @@ export function requestYoudaoDictionary(queryWordInfo: QueryWordInfo): Promise<Q
         // It seems that Youdao will never reject, always resolve...
         // ? Error: write EPROTO 6180696064:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:../deps/openssl/openssl/ssl/statem/statem_lib.c:1994:
 
-        const errorInfo = getTypeErrorInfo(DicionaryType.Youdao, error);
+        const errorInfo = getTypeErrorInfo(type, error);
+        reject(errorInfo);
+      });
+  });
+}
+
+/**
+ * Youdao web dictionary, unofficial API. Cost time: 0.2s
+ *
+ * Supported zh <--> targetLanguage, supported target language: en, fr, ja, ko
+ */
+export function requestYoudaoWebDictionary(
+  queryWordInfo: QueryWordInfo,
+  queryType?: QueryType
+): Promise<QueryTypeResult> {
+  console.log(`---> start requestYoudaoWebDictionary`);
+
+  const type = queryType ?? DicionaryType.Youdao;
+
+  // * Note: "fanyi" only works when responese dicts has only one item ["meta"]
+  const dicts = [["web_trans", "ec", "ce", "baike"]];
+
+  // English --> Chinese
+  // ["web_trans","video_sents", "simple", "phrs",  "syno", "collins", "word_video",  "discriminate", "ec", "ee", "blng_sents_part", "individual", "collins_primary", "rel_word", "auth_sents_part", "media_sents_part", "expand_ec", "etym", "special","baike", "meta", "senior", "webster","oxford", "oxfordAdvance", "oxfordAdvanceHtml"]
+
+  // Chinese --> English
+  // ["web_trans", "blng_sents_part", "ce", "wuguanghua", "ce_new", "simple", "media_sents_part", "special", "baike", "meta", "newhh"]
+
+  const queryYoudaoDictLanguageId = getYoudaoWebDictionaryLanguageId(queryWordInfo);
+  if (!queryYoudaoDictLanguageId) {
+    console.error(`Youdao dict not supported language: ${queryWordInfo.fromLanguage} --> ${queryWordInfo.toLanguage}`);
+    const errorInfo: RequestErrorInfo = {
+      type: type,
+      code: "",
+      message: "not supported language 😭",
+    };
+    return Promise.reject(errorInfo);
+  }
+
+  const params = {
+    q: queryWordInfo.word,
+    le: queryYoudaoDictLanguageId,
+    dicts: JSON.stringify({ count: 99, dicts: dicts }),
+  };
+
+  const queryString = qs.stringify(params);
+  console.log(`---> youdao web dict queryString: ${queryString}`);
+
+  const dictUrl = `https://dict.youdao.com/jsonapi?${queryString}`;
+  console.log(`dictUrl: ${dictUrl}`);
+
+  return new Promise((resolve, reject) => {
+    axios
+      .get(dictUrl)
+      .then((res) => {
+        console.log(`---> youdao web dict data: ${util.inspect(res.data, { depth: null })}`);
+        console.warn(`---> youdao web dict cost: ${res.headers[requestCostTime]} ms`);
+
+        const youdaoWebModel = res.data as YoudaoWebDictionaryModel;
+        const youdaoFormatResult = formateYoudaoWebDictionaryModel(youdaoWebModel);
+        const isValidResult = youdaoWebModel.input === queryWordInfo.word;
+        if (!isValidResult) {
+          console.warn(`---> invalid result : ${util.inspect(youdaoWebModel.meta, { depth: null })}`);
+        }
+
+        if (!youdaoFormatResult || !isValidResult) {
+          const youdaoTypeResult: QueryTypeResult = {
+            type: type,
+            result: undefined,
+            wordInfo: queryWordInfo,
+            translations: [],
+          };
+          return resolve(youdaoTypeResult);
+        }
+
+        // use Youdao dictionary check if query text is a word.
+        queryWordInfo.isWord = youdaoFormatResult.queryWordInfo.isWord;
+
+        const youdaoTypeResult: QueryTypeResult = {
+          type: type,
+          result: youdaoFormatResult,
+          wordInfo: youdaoFormatResult.queryWordInfo,
+          translations: youdaoFormatResult.translation.split("\n"),
+        };
+        resolve(youdaoTypeResult);
+      })
+      .catch((error: AxiosError) => {
+        if (error.message === "canceled") {
+          console.log(`---> youdao web dict canceled`);
+          return reject(undefined);
+        }
+
+        console.error(`---> Youdao web dict error: ${error}`);
+
+        // It seems that Youdao will never reject, always resolve...
+        // ? Error: write EPROTO 6180696064:error:1425F102:SSL routines:ssl_choose_client_version:unsupported protocol:../deps/openssl/openssl/ssl/statem/statem_lib.c:1994:
+
+        const errorInfo = getTypeErrorInfo(type, error);
+        reject(errorInfo);
+      });
+  });
+}
+
+/**
+ * Youdao translate, unofficial web API. Cost time: 0.2s
+ *
+ * Ref: https://mp.weixin.qq.com/s/AWL3et91N8T24cKs1v660g
+ */
+export function requestYoudaoWebTranslate(
+  queryWordInfo: QueryWordInfo,
+  queryType?: QueryType
+): Promise<QueryTypeResult> {
+  console.log(`---> start requestYoudaoWebTranslate: ${queryWordInfo.word}`);
+
+  const type = queryType ?? TranslationType.Youdao;
+  const isValidLanguage = isValidYoudaoWebTranslateLanguage(queryWordInfo);
+  if (!isValidLanguage) {
+    console.warn(
+      `---> invalid Youdao web translate language: ${queryWordInfo.fromLanguage} --> ${queryWordInfo.toLanguage}`
+    );
+    const nullResult: QueryTypeResult = {
+      type: type,
+      result: undefined,
+      wordInfo: queryWordInfo,
+      translations: [],
+    };
+    return Promise.resolve(nullResult);
+  }
+
+  const { fromLanguage, toLanguage, word } = queryWordInfo;
+
+  const timestamp = new Date().getTime();
+  const lts = timestamp.toString(); // 1661435375537
+  const salt = timestamp.toString() + Math.round(Math.random() * 10); // 16614353755371
+  const bv = CryptoJS.MD5(userAgent).toString();
+  const sign = CryptoJS.MD5("fanyideskweb" + word + salt + "Ygy_4c=r#e#4EX^NUGUc5").toString();
+
+  const url = `${youdaoTranslatURL}/translate_o?smartresult=dict&smartresult=rule`;
+  const data = {
+    salt,
+    sign,
+    lts,
+    bv,
+    i: word,
+    from: fromLanguage,
+    to: toLanguage,
+    smartresult: "dict",
+    client: "fanyideskweb",
+    doctype: "json",
+    version: "2.1",
+    keyfrom: "fanyi.web",
+    action: "FY_BY_REALTlME",
+  };
+  // console.log(`---> youdao web translate params: ${util.inspect(data, { depth: null })}`);
+
+  const headers = {
+    "User-Agent": userAgent,
+    Referer: youdaoTranslatURL,
+    Cookie: youdaoCookie,
+  };
+
+  return new Promise((resolve, reject) => {
+    axios
+      .post(url, querystring.stringify(data), { headers })
+      .then((response) => {
+        // console.log(`---> youdao web translate res: ${util.inspect(response.data, { depth: null })}`);
+        const youdaoWebResult = response.data as YoudaoWebTranslateResult;
+        if (youdaoWebResult.errorCode === 0) {
+          const translations = youdaoWebResult.translateResult.map((items) => items.map((item) => item.tgt).join(" "));
+          console.log(`youdao web translations: ${translations}, cost: ${response.headers[requestCostTime]} ms`);
+          const youdaoTypeResult: QueryTypeResult = {
+            type: type,
+            result: youdaoWebResult,
+            wordInfo: queryWordInfo,
+            translations: translations,
+          };
+          resolve(youdaoTypeResult);
+        } else {
+          const errorInfo: RequestErrorInfo = {
+            type: type,
+            code: youdaoWebResult.errorCode.toString(),
+            message: "",
+          };
+          reject(errorInfo);
+        }
+      })
+      .catch((error) => {
+        if (error.message === "canceled") {
+          console.log(`---> youdao web translate canceled`);
+          return reject(undefined);
+        }
+
+        console.log(`---> youdao translate error: ${error}`);
+        const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
   });
@@ -159,21 +374,16 @@ export function playYoudaoWordAudioAfterDownloading(queryWordInfo: QueryWordInfo
 }
 
 /**
- * Download word audio file. 
-*  If query text is a word (only English word?), download audio file from youdao web api, otherwise downloaded from youdao tts.
-
+ * Download word audio file.
+ *  If query text is a word (only English word?), download audio file from youdao web api, otherwise downloaded from youdao tts.
+ *
  * * NOTE: If query text is too long(>40), don't download audio file, later derectly use say command to play.
  */
 export function tryDownloadYoudaoAudio(queryWordInfo: QueryWordInfo, callback?: () => void, forceDownload = false) {
-  if (queryWordInfo.isWord && queryWordInfo.fromLanguage === "en") {
+  if (queryWordInfo.speechUrl) {
+    downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
+  } else if (queryWordInfo.isWord && queryWordInfo.fromLanguage === "en") {
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
-  } else if (queryWordInfo.word.length < maxTextLengthOfDownloadYoudaoTTSAudio) {
-    if (queryWordInfo.speechUrl) {
-      downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
-    } else {
-      console.warn(`youdao tts url not found: ${queryWordInfo.word}`);
-      callback && callback();
-    }
   } else {
     console.log(`text is too long, use say command to play derectly`);
     callback && callback();
@@ -188,7 +398,7 @@ export function tryDownloadYoudaoAudio(queryWordInfo: QueryWordInfo, callback?: 
  * Example: https://dict.youdao.com/dictvoice?type=0&audio=good
  */
 export function downloadYoudaoEnglishWordAudio(word: string, callback?: () => void, forceDownload = false) {
-  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(word)}`;
+  const url = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(word)}`;
   console.log(`download youdao English word audio: ${word}`);
   const audioPath = getWordAudioPath(word);
   downloadAudio(url, audioPath, callback, forceDownload);
