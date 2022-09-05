@@ -32,12 +32,10 @@
     "ethers": "^5.7.0",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
-    "lodash.debounce": "^4.0.8",
     "lodash.isempty": "^4.4.0",
     "wagmi": "^0.6.4"
   },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.isempty": "^4.4.7",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

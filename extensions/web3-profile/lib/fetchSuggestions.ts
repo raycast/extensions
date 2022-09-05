@@ -1,7 +1,7 @@
-import { constants } from 'ethers';
-import isEmpty from 'lodash.isempty';
-import { ensClient } from './apollo';
-import gql from 'graphql-tag';
+import { constants } from "ethers";
+import isEmpty from "lodash.isempty";
+import { ensClient } from "./apollo";
+import gql from "graphql-tag";
 
 const ENS_SUGGESTIONS = gql`
   query lookup($name: String!) {
@@ -45,12 +45,12 @@ export const fetchSuggestions = async (
     if (!isEmpty(result?.data?.domains)) {
       const domains = result.data.domains;
       const lookupResult = domains
-          ?.filter((domain) => domain.owner.id !== constants.AddressZero)
-          .map(({ name }) => name)
-          .sort((a, b) => a.length - b.length)
-          .slice(0, 40);
+        ?.filter((domain) => domain.owner.id !== constants.AddressZero)
+        .map(({ name }) => name)
+        .sort((a, b) => a.length - b.length)
+        .slice(0, 40);
 
-          setSuggestions(lookupResult);
+      setSuggestions(lookupResult);
     }
   } else {
     setSuggestions([]);

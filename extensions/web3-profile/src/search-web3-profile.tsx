@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, List, Action, Image, Icon } from "@raycast/api";
-import debounce from "lodash.debounce";
 import { fetchSuggestions } from "../lib/fetchSuggestions";
 import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance } from "wagmi";
 import { getDefaultProvider } from "ethers";
 import { useEnsRecords } from "../lib/useEnsRecords";
-
-const debounceFetchSuggestions = debounce(fetchSuggestions, 60);
 
 const client = createClient({
   autoConnect: true,
@@ -19,7 +16,15 @@ export default function Command() {
   const [ensSuggestions, setEnsSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
-    debounceFetchSuggestions(searchTerm, (results: string[]) => setEnsSuggestions(results), setIsLoading);
+    setEnsSuggestions([]);
+
+    fetchSuggestions(
+      searchTerm,
+      (results: string[]) => {
+        setEnsSuggestions(results);
+      },
+      setIsLoading
+    );
   }, [searchTerm]);
 
   return (
