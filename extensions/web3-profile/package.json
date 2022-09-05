@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "search-web3-profile",
-      "title": "Search Web3 Profiles",
+      "title": "Search Profiles",
       "subtitle": "View address, ENS records, and more.",
       "description": "Command used to search for ENS names and display a profile",
       "mode": "view"
