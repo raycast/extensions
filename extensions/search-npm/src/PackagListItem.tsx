@@ -118,7 +118,7 @@ export const PackageListItem = ({
               <Action.Push
                 title="View readme"
                 target={<Readme user={owner} repo={name} />}
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
               />
             ) : null}
             <Action.OpenInBrowser
