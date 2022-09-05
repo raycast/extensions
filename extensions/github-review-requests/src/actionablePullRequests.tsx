@@ -4,12 +4,13 @@ import PullRequestItem from "./components/PullRequestItem";
 import { PullRequestShort } from "./types";
 
 const actionablePullRequests = () => {
-  const { isLoading, login, updatedPulls, recentlyVisitedPulls, visitPull } = usePulls();
+  const { isLoading, login, updatedPulls, recentlyVisitedPulls, runPullIteration, visitPull } = usePulls();
 
   const title = getTitle(updatedPulls);
   const icon = getIcon(updatedPulls);
 
   const showSeparator = updatedPulls.length > 0 && recentlyVisitedPulls.length > 0;
+  const forceRefreshSeparator = updatedPulls.length > 0 || recentlyVisitedPulls.length > 0;
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={icon} title={title}>
@@ -36,6 +37,12 @@ const actionablePullRequests = () => {
           ))}
         </MenuBarExtra.Submenu>
       )}
+
+      {forceRefreshSeparator && <MenuBarExtra.Separator />}
+
+      <MenuBarExtra.Item
+        title="Force Refresh" icon="refresh" onAction={runPullIteration}
+      />
     </MenuBarExtra>
   );
 };
