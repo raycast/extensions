@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Search Swift Package Index] - 2022-09-02
+
+- Added "Search Swift Package Index" command to search the Swift Package Index and easily add a Swift Package to a Xcode Project.
+
 ## [Project Favorites & Swift Package Dependencies] - 2022-08-25
 
 - Added option to add Xcode Projects to favorites
