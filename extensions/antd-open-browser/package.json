@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antd-open-browser",
   "title": "Antd",
-  "description": "Quickly open the antd component",
+  "description": "Quickly open Antd components",
   "icon": "logo.png",
   "author": "crazyair",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Browse Antd",
-      "subtitle": "Quickly open the antd component",
-      "description": "Quickly open the antd component",
+      "title": "Browse Components",
+      "subtitle": "Antd",
+      "description": "Quickly open Antd components",
       "mode": "view"
     }
   ],
