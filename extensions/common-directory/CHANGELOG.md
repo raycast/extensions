@@ -1,6 +1,6 @@
 # Common Directory Changelog
 
-## [Add Menu Bar command] - {PR_MERGE_DATE}
+## [Add Menu Bar command] - 2022-09-05
 
 - Add Menu Bar command: Open Command Directory
 
