@@ -11,12 +11,7 @@ export default function Command() {
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search PHP Docs..."
-      throttle
-    >
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search PHP Docs..." throttle>
       <List.Section title="Results" subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
@@ -24,10 +19,10 @@ export default function Command() {
             title={item.description}
             icon="php.png"
             actions={
-                <ActionPanel>
-                    <OpenInBrowserAction url={item.url} />
-                    <CopyToClipboardAction title="Copy URL" content={item.url} />
-                </ActionPanel>
+              <ActionPanel>
+                <OpenInBrowserAction url={item.url} />
+                <CopyToClipboardAction title="Copy URL" content={item.url} />
+              </ActionPanel>
             }
           />
         ))}

@@ -35,7 +35,7 @@ export function useSearch() {
     }
 
     newHistory?.unshift({
-      ...result
+      ...result,
     });
 
     await setHistory(newHistory);
