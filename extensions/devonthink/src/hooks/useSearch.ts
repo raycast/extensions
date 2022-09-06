@@ -16,10 +16,9 @@ export type SearchResult = {
   score: number;
   path: string;
   tags: string[];
-
   numberOfHits: number;
   altitude: number;
-  geolocation: string;
+  geolocation: string | undefined;
   latitude: number;
   interval: number;
   numberOfReplicants: number;
@@ -95,7 +94,7 @@ export default useSearch;
 
 const searchInDEVONThink = async (databaseUUID: string, query: string) => {
   // language=JavaScript
-  const results = (await jxa({ parse: true })`
+  const resultsString = (await jxa({ parse: true })`
       const DT = Application("DEVONthink 3");
 
       let results;
@@ -112,16 +111,10 @@ const searchInDEVONThink = async (databaseUUID: string, query: string) => {
           return [];
       }
 
-      return results.map(result => ({
-          uuid: result.uuid(),
-          name: result.name(),
-          score: result.score(),
-          tags: result.tags(),
-          path: result.path(),
-          location: result.location(),
-          type: result.type()
-      }));
-  `) as SearchResult[];
+      return JSON.stringify(results.map(result => result.properties()));
+  `) as string;
+
+  const results = JSON.parse(resultsString) as SearchResult[];
 
   return results.sort((a, b) => b.score - a.score);
 };

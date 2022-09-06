@@ -4,7 +4,6 @@ import useSearch, { SearchResult } from "./hooks/useSearch";
 import SearchResultItem from "./components/SearchResultItem";
 import useAppExists from "./hooks/useAppExists";
 import useDevonDB from "./hooks/useDevonDB";
-import usePreferences from "./hooks/usePreferences";
 
 const search = () => {
   const appExists = useAppExists();
@@ -12,8 +11,6 @@ const search = () => {
   const [databaseUUID, setDatabaseUUID] = useState("");
   const { isLoading, results } = useSearch(appExists, query, databaseUUID);
   const { databasesAreLoading, databases } = useDevonDB(appExists);
-  const preferences = usePreferences();
-
 
   const mapResult = (result: SearchResult) => <SearchResultItem key={result.uuid} result={result} />;
 
@@ -34,7 +31,7 @@ const search = () => {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      isShowingDetail={results.length > 0 && preferences.searchIsShowingDetail}
+      isShowingDetail={results.length > 0}
       throttle
     >
       {appExists.appExists ? results.map(mapResult) : noApp}
