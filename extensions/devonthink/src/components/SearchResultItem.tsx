@@ -33,17 +33,13 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="date" title="Date" text={result.date}/>,
     <MyLabel key="additionDate" title="Addition Date" text={result.additionDate}/>,
     <MyLabel key="modificationDate" title="Modification Date" text={result.modificationDate}/>,
-    result.url
-      ? <Link key="url" title="URL" text={result.url} target={result.url}/>
-      : <MyLabel key="url" title="URL"/>,
+    <MyLink key="url" title="URL" text={result.url} target={result.url}/>,
     <MyLabel key="type" title="Type" text={result.type}/>,
     <MyLabel key="contentHash" title="Content Hash" text={result.contentHash}/>,
     <MyLabel key="location" title="Location" text={result.location}/>,
     <MyLabel key="filename" title="Filename" text={result.filename}/>,
     <MyLabel key="aliases" title="Aliases" text={result.aliases}/>,
-    result.referenceURL
-      ? <Link key="referenceURL" title="Reference URL" text="URL" target={result.referenceURL}/>
-      : <MyLabel key="referenceURL" title="Reference URL" text="No reference URL"/>,
+    <MyLink key="referenceURL" title="Reference URL" text="URL" target={result.referenceURL}/>,
     <MyLabel key="comment" title="Comment" text={result.comment}/>,
     <MyLabel key="tagType" title="Tag Type" text={result.tagType}/>,
     <MyLabel key="locationGroup" title="Location Group" text={result.locationGroup}/>,
@@ -81,9 +77,9 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="excludeFromTagging" title="Exclude from Tagging" text={result.excludeFromTagging ? "yes" : "no"}/>,
     <MyLabel key="stateVisibility" title="State Visibility" text={result.stateVisibility ? "yes" : "no"}/>,
     <MyLabel key="excludeFromWikiLinking" title="Exclude from Wiki Linking"
-           text={result.excludeFromWikiLinking ? "yes" : "no"}/>,
+             text={result.excludeFromWikiLinking ? "yes" : "no"}/>,
     <MyLabel key="excludeFromClassification" title="Exclude from Classification"
-           text={result.excludeFromClassification ? "yes" : "no"}/>,
+             text={result.excludeFromClassification ? "yes" : "no"}/>,
     <MyLabel key="locking" title="Locking" text={result.locking ? "yes" : "no"}/>,
     <MyLabel key="unread" title="Unread" text={result.unread ? "yes" : "no"}/>,
     <MyLabel key="indexed" title="Indexed" text={result.indexed ? "yes" : "no"}/>,
@@ -104,3 +100,17 @@ const MyLabel = ({title, text}: { title: string, text?: string }) => (
     ? null
     : <Label title={title} text={text}/>
 )
+
+const MyLink = ({title, text, target}: { title: string, text: string, target?: string }) => {
+  if (!preferences.hideEmptySearchResultItemProperties) {
+    return target
+      ? <Link title={title} text={text} target={target}/>
+      : <MyLabel title={title} text="No URL" />;
+  }
+
+  if (!target) {
+    return null;
+  }
+
+  return <Link title={title} text={text} target={target}/>;
+}
