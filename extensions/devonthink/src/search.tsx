@@ -1,4 +1,4 @@
-import {List} from "@raycast/api";
+import {getPreferenceValues, List} from "@raycast/api";
 import { useState } from "react";
 import useSearch, { SearchResult } from "./hooks/useSearch";
 import SearchResultItem from "./components/SearchResultItem";
@@ -11,6 +11,7 @@ const search = () => {
   const [databaseUUID, setDatabaseUUID] = useState("");
   const { isLoading, results } = useSearch(appExists, query, databaseUUID);
   const { databasesAreLoading, databases } = useDevonDB(appExists);
+  const preferences = getPreferenceValues() as Preferences;
 
   const mapResult = (result: SearchResult) => <SearchResultItem key={result.uuid} result={result} />;
 
@@ -31,7 +32,7 @@ const search = () => {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      isShowingDetail={results.length > 0}
+      isShowingDetail={preferences.searchIsShowingDetail && results.length > 0}
       throttle
     >
       {appExists.appExists ? results.map(mapResult) : noApp}
@@ -41,3 +42,7 @@ const search = () => {
 
 // noinspection JSUnusedGlobalSymbols
 export default search;
+
+type Preferences = {
+  searchIsShowingDetail: boolean;
+}
