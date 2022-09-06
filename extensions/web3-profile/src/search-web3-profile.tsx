@@ -30,12 +30,13 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="ENS search" onSearchTextChange={setSearchTerm} throttle>
       <List.EmptyView
-        title={
-          isLoading
-            ? "Searching..."
-            : searchTerm.length < 4 && ensSuggestions.length > 0
-            ? "Search For ENS Name"
-            : "No Results"
+        title={searchTerm.length < 3 ? "Search For ENS Name" : isLoading ? "Searching..." : "No Results"}
+        description={
+          searchTerm.length < 3
+            ? "Type 3 charecters to search..."
+            : isLoading
+            ? ""
+            : "Try to search for a different ENS name"
         }
         icon={{
           source: { light: "icon-light.png", dark: "icon-dark.png" },
