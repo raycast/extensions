@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, List, Action, Image, Icon } from "@raycast/api";
 import { fetchSuggestions } from "./lib/fetchSuggestions";
-import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance } from "wagmi";
+import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance, useEnsResolver } from "wagmi";
 import { getDefaultProvider } from "ethers";
 import { useEnsRecords } from "./lib/useEnsRecords";
 
@@ -73,10 +73,28 @@ export default function Command() {
 }
 
 function ProfileDetail({ name }: { name: string }) {
+  const [shouldFetchAvatar, setShouldFetchAvatar] = useState(false);
+
+  const { data: ensAvatar, isLoading: isEnsAvatarLoading } = useEnsAvatar({
+    addressOrName: name,
+    enabled: shouldFetchAvatar,
+  });
   const { data: ensAddress, isLoading: isEnsAddressLoading } = useEnsAddress({ name });
-  const { data: ensAvatar, isLoading: isEnsAvatarLoading } = useEnsAvatar({ addressOrName: name });
   const { data: ensRecords, isLoading: isEnsRecordsLoading } = useEnsRecords({ name });
   const { data: balance, isLoading: isBalanceLoading } = useBalance({ addressOrName: name });
+
+  useEnsResolver({
+    name,
+    onSuccess: async (resolver) => {
+      if (!resolver) return;
+      const avatarText = await resolver.getText("avatar");
+      // Ignore Avatars that use the Zora Contract
+      // https://github.com/ensdomains/ens-avatar/issues/21
+      if (!avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")) {
+        setShouldFetchAvatar(true);
+      }
+    },
+  });
 
   const isLoading = isEnsAddressLoading || isEnsAvatarLoading || isEnsRecordsLoading || isBalanceLoading;
 
