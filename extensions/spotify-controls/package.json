@@ -180,14 +180,23 @@
       "subtitle": "Spotify",
       "description": "Toggles repeat mode in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "changeDevice",
+      "title": "Spotify Devices",
+      "subtitle": "Change spotify devices",
+      "description": "A way to change which device spotify is playing on",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.39.2",
+    "node-fetch": "^3.2.10",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
+    "@types/node-fetch": "^2.6.2",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
