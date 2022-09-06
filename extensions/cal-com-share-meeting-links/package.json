@@ -28,15 +28,6 @@
       "description": "Cal.com API Key",
       "link": "https://app.cal.com/settings/developer",
       "placeholder": "Cal.com API Key"
-    },
-    {
-      "name": "username",
-      "type": "textfield",
-      "required": true,
-      "title": "Username",
-      "description": "The part of your URL for all your links",
-      "link": "https://app.cal.com/settings/profile",
-      "placeholder": "user-name"
     }
   ],
   "dependencies": {

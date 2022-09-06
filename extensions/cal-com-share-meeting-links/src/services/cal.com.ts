@@ -4,7 +4,6 @@ import { useCachedPromise } from "@raycast/utils";
 
 export interface Preferences {
   token: string;
-  username: string;
 }
 
 export interface CalUser {
@@ -32,7 +31,7 @@ export interface CalUser {
   invitedTo: null;
 }
 interface CalUserResp {
-  users: CalUser[];
+  user: CalUser;
 }
 
 export interface CalEventType {
@@ -93,12 +92,12 @@ async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
   return resp.data;
 }
 
-// export function useCurrentUser() {
-//   return useCachedPromise(async () => {
-//     const data = await calAPI<CalUserResp>({ url: "/users" });
-//     return data.users[0];
-//   });
-// }
+export function useCurrentUser() {
+  return useCachedPromise(async () => {
+    const data = await calAPI<CalUserResp>({ url: "/me" });
+    return data.user;
+  });
+}
 
 export function useEventTypes() {
   return useCachedPromise(async () => {

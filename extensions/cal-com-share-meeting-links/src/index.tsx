@@ -1,24 +1,22 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  openCommandPreferences,
-  Icon,
-} from "@raycast/api";
-import { Preferences, useEventTypes } from "./services/cal.com";
+import { ActionPanel, Action, List, showToast, Toast, openCommandPreferences, Icon } from "@raycast/api";
+import { CalEventType, useCurrentUser, useEventTypes } from "./services/cal.com";
 import { URL } from "url";
 
-const { username }: Preferences = getPreferenceValues();
-
 export default function Command() {
+  const { data: user, error: userError } = useCurrentUser();
   const { data: items, isLoading, error } = useEventTypes();
 
   if (error) {
     showToast({
       title: "Unable to load your events",
+      message: "Check your API key",
+      style: Toast.Style.Failure,
+      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
+    });
+  }
+  if (userError) {
+    showToast({
+      title: "Unable to load your username",
       message: "Check your API key",
       style: Toast.Style.Failure,
       primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
@@ -36,7 +34,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
-                content={new URL(`${username}/${item.slug}`, "https://cal.com").toString()}
+                content={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
                 icon={Icon.Link}
               />
             </ActionPanel>
@@ -47,8 +45,8 @@ export default function Command() {
   );
 }
 
-function getAccessories(item: CalEventType) {
-  let accessories = [];
+function getAccessories(item: CalEventType): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
   if (item.hidden) {
     accessories.push({ icon: Icon.EyeDisabled, text: "Hidden" });
   }
