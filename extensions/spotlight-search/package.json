@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Spotlight Search",
       "description": "Search for Files and Folders using Spotlight Search",
       "mode": "view"
     }
