@@ -54,7 +54,7 @@ export interface CalEventType {
   periodDays: null;
   periodCountCalendarDays: false;
   requiresConfirmation: false;
-  recurringEvent: null;
+  recurringEvent: null | recurringEvent;
   disableGuests: false;
   hideCalendarNotes: false;
   minimumBookingNotice: number;
@@ -68,6 +68,12 @@ export interface CalEventType {
   slotInterval: null;
   metadata: object;
   successRedirectUrl: null;
+}
+
+interface recurringEvent {
+  freq: number;
+  count: number;
+  interval: number;
 }
 
 interface CalEventTypeResp {
