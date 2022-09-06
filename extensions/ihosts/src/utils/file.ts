@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { runAppleScript } from "run-applescript";
 import { SystemHostFilePath, TempSystemHostFileName } from "../const";
+import { execSync } from "child_process";
 
 export function getSysHostFileHash(): string {
   const sysHostFileBuf = fs.readFileSync(SystemHostFilePath);
@@ -23,7 +24,7 @@ export async function writeSysHostFile(content: string) {
   const tempHostsPath = path.join(os.tmpdir(), TempSystemHostFileName);
   fs.writeFileSync(tempHostsPath, content, "utf8");
   checkSysHostAccess() || (await getSysHostAccess());
-  await runAppleScript(`do shell script "cat ${tempHostsPath} > ${SystemHostFilePath} && rm -rf ${tempHostsPath}"`);
+  execSync(`cat ${tempHostsPath} > ${SystemHostFilePath} && rm -rf ${tempHostsPath}`);
 }
 
 export function checkSysHostAccess(): boolean {
