@@ -31,6 +31,7 @@ const search = () => {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
+      isShowingDetail={results.length > 0}
       throttle
     >
       {appExists.appExists ? results.map(mapResult) : noApp}

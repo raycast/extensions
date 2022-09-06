@@ -12,6 +12,11 @@ const SearchResultItem = ({ result }: { result: SearchResult }) => (
         <Action.Open title="Reveal in DEVONthink" target={`x-devonthink-item://${result.uuid}?reveal=1`} />
       </ActionPanel>
     }
+    detail={<List.Item.Detail
+      metadata={<List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label  title="Type" text={result.type} />
+      </List.Item.Detail.Metadata>}
+    />}
   />
 );
 
