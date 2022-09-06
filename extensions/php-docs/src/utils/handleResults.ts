@@ -52,7 +52,7 @@ export async function getSearchResults(searchText: string, signal: AbortSignal):
       results.push({
         id: Math.random().toString(36),
         description: `${description}`,
-        url: `https://www.php.net/${url}`,
+        url: `https://www.php.net${url}`,
       });
     });
 
