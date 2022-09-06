@@ -1,3 +1,3 @@
 # Spotlight Search Changelog
 
-## [Initial Version] - 2022-09-02
+## [Initial Version] - 2022-09-06
