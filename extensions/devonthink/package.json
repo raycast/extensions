@@ -10,6 +10,7 @@
     {
       "name": "search",
       "title": "Search in Databases",
+      "subtitle": "DEVONthink",
       "description": "Search for documents in opened databases",
       "mode": "view"
     }
