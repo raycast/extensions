@@ -71,7 +71,7 @@ function FeedsList() {
             <ActionPanel>
               <ActionPanel.Section title={item.title}>
                 <PushAction
-                  title="Oped Feed"
+                  title="Open Feed"
                   target={<StoriesList feeds={[item]} />}
                   icon={{ source: Icon.TextDocument, tintColor: Color.Green }}
                 />
