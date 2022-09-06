@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  showToast,
-  ToastStyle,
-  Icon,
-  Color,
-  setLocalStorageItem,
-  getLocalStorageItem,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, List, showToast, Icon, Color, Action, LocalStorage, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
@@ -21,9 +11,12 @@ export interface Feed {
 
 function FeedsList() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
+  const [loading, setLoading] = useState(true);
 
   async function fetchFeeds() {
+    setLoading(true);
     setFeeds(await getFeeds());
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -35,9 +28,13 @@ function FeedsList() {
     const feedItems = [...feeds];
     feedItems.splice(index, 1);
 
-    await setLocalStorageItem("feeds", JSON.stringify(feedItems));
+    await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
     setFeeds(feedItems);
-    await showToast(ToastStyle.Success, "Unsubscribed from the feed!", removedFeed.title);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Unsubscribed from the feed!",
+      message: removedFeed.title,
+    });
   };
 
   const moveFeed = (index: number, change: number) => {
@@ -51,9 +48,11 @@ function FeedsList() {
 
   return (
     <List
+      isLoading={loading}
+      searchBarPlaceholder="Search feeds..."
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             title="Add Feed"
             target={<AddFeedForm callback={setFeeds} />}
             icon={{ source: Icon.Plus, tintColor: Color.Green }}
@@ -70,20 +69,20 @@ function FeedsList() {
           actions={
             <ActionPanel>
               <ActionPanel.Section title={item.title}>
-                <PushAction
+                <Action.Push
                   title="Open Feed"
                   target={<StoriesList feeds={[item]} />}
-                  icon={{ source: Icon.TextDocument, tintColor: Color.Green }}
+                  icon={{ source: Icon.BlankDocument, tintColor: Color.Green }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <PushAction
+                <Action.Push
                   title="Add Feed"
                   target={<AddFeedForm callback={setFeeds} />}
                   icon={{ source: Icon.Plus, tintColor: Color.Green }}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
-                <ActionPanel.Item
+                <Action
                   title="Remove Feed"
                   onAction={() => removeFeed(index)}
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -93,7 +92,7 @@ function FeedsList() {
               {feeds.length > 1 && (
                 <ActionPanel.Section>
                   {index != 0 && (
-                    <ActionPanel.Item
+                    <Action
                       title="Move Up in List"
                       onAction={() => moveFeed(index, -1)}
                       icon={{ source: Icon.ChevronUp }}
@@ -101,7 +100,7 @@ function FeedsList() {
                     />
                   )}
                   {index != feeds.length - 1 && (
-                    <ActionPanel.Item
+                    <Action
                       title="Move Down in List"
                       icon={{ source: Icon.ChevronDown }}
                       onAction={() => moveFeed(index, 1)}
@@ -119,7 +118,7 @@ function FeedsList() {
 }
 
 export async function getFeeds() {
-  const feedsString = (await getLocalStorageItem("feeds")) as string;
+  const feedsString = (await LocalStorage.getItem("feeds")) as string;
   if (feedsString === undefined) {
     return [];
   }
