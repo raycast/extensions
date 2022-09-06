@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
+import * as React from "react";
 
-import spotlight from "node-spotlight";
+import spotlight from "./libs/node-spotlight";
 
 interface SpotlightSearchPreferences {
   name: string;
@@ -25,6 +26,7 @@ const folderSpotlightSearchAttributes = [
 const searchSpotlight = (
   search: string,
   searchScope: string,
+  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
   callback: (result: SpotlightSearchResult) => void
 ): Promise<void> => {
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
@@ -33,7 +35,7 @@ const searchSpotlight = (
     const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
     let resultsCount = 0;
 
-    spotlight(search, safeSearchScope(searchScope), spotlightSearchAttributes)
+    spotlight(search, safeSearchScope(searchScope), spotlightSearchAttributes as [], abortable)
       .on("data", (result: SpotlightSearchResult) => {
         if (isFolder(result) && resultsCount < maxResults) {
           // keep emitting the match and

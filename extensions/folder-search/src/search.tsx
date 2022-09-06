@@ -1,7 +1,8 @@
 import { userInfo } from "os";
 
 import { Action, ActionPanel, Color, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 
 import { searchSpotlight } from "./search-spotlight";
 import { SpotlightSearchResult } from "./types";
@@ -16,31 +17,53 @@ export default function Command() {
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [canExecute, setCanExecute] = useState<boolean>(false);
 
-  useEffect(() => {
-    (async () => {
-      if (!searchText) {
-        return;
-      }
+  const abortable = useRef<AbortController>();
 
-      // always clear first
-      setResults([]);
-      setIsLoading(true);
-
-      try {
-        await searchSpotlight(searchText, searchScope, (result: SpotlightSearchResult) => {
-          // feed in the results in real-time
-          setResults((results) => [...results, result]);
-        });
-      } catch (_) {
+  usePromise(
+    searchSpotlight,
+    [
+      searchText,
+      searchScope,
+      abortable,
+      (result: SpotlightSearchResult) => {
+        setResults((results) => [result, ...results]);
+      },
+    ],
+    {
+      onWillExecute: () => {
+        setIsLoading(true);
+        setCanExecute(false);
+      },
+      onData: () => {
+        setIsLoading(false);
+      },
+      onError: () => {
         showToast({
           title: "An Error Occured",
           message: "Something went wrong. Try again.",
           style: Toast.Style.Failure,
         });
+
+        setIsLoading(false);
+      },
+      execute: canExecute && !!searchText,
+      abortable,
+    }
+  );
+
+  useEffect(() => {
+    (async () => {
+      abortable.current?.abort();
+
+      setResults([]);
+
+      if (!searchText) {
+        return;
       }
 
-      setIsLoading(false);
+      setCanExecute(true);
     })();
   }, [searchText, searchScope]);
 

@@ -6,7 +6,7 @@ const isFolder = (item: SpotlightSearchResult): boolean => {
   return item.kMDItemKind === "Folder";
 };
 
-const safeSearchScope = (searchScope: string) => {
+const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
 

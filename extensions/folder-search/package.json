@@ -34,7 +34,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.2",
-    "node-spotlight": "^0.1.3"
+    "@raycast/utils": "^1.3.3",
+    "binary-split": "^1.0.5",
+    "through2-map": "^3.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
