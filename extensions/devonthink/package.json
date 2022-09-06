@@ -17,11 +17,20 @@
   ],
   "preferences": [
     {
+      "title": "Presentation",
       "name": "searchIsShowingDetail",
       "label": "Show Details in Search Results",
       "description": "Show details of the search result",
       "type": "checkbox",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "hideEmptySearchResultItemProperties",
+      "label": "Hide Empty Properties in Search Results",
+      "description": "Hide empty properties in search results",
+      "type": "checkbox",
+      "default": false,
       "required": false
     }
   ],
