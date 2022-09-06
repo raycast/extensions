@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "spotlight-search",
-  "title": "Spotlight Search",
-  "description": "A simple wrapper around macOS Spotlight search",
-  "icon": "spotlight-search.png",
+  "name": "folder-search",
+  "title": "Folder Search",
+  "description": "Search for folders on your Mac",
+  "icon": "folder-search.png",
   "author": "GastroGeek",
   "license": "MIT",
   "categories": [
@@ -11,16 +11,14 @@
     "System"
   ],
   "keywords": [
-    "files",
     "folders",
-    "search",
-    "spotlight"
+    "search"
   ],
   "commands": [
     {
       "name": "search",
-      "title": "Spotlight Search",
-      "description": "Search for Files and Folders using Spotlight Search",
+      "title": "Folder Search",
+      "description": "Search for folders on your Mac",
       "mode": "view"
     }
   ],
@@ -28,7 +26,7 @@
     {
       "name": "maxResults",
       "title": "Maximum Results",
-      "description": "The maximum number of search results that Spotlight Search should return",
+      "description": "The maximum number of search results that Folder Search should return",
       "type": "textfield",
       "required": false,
       "default": "250"
