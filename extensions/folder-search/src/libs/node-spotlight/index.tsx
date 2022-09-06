@@ -80,9 +80,7 @@ const spotlight = (
   );
 
   search.on("error", (e) => {
-    if (e.name === "AbortError") {
-      results.emit("error", new Error("Aborted"));
-    }
+    results.emit("error", e);
   });
 
   search.on("close", (status: number) => {

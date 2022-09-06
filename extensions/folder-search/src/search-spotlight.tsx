@@ -49,8 +49,8 @@ const searchSpotlight = (
 
         // else keep searching...
       })
-      .on("error", () => {
-        reject(new Error("An error occured during your search"));
+      .on("error", (e: Error) => {
+        reject(e);
       })
       .on("end", () => {
         resolve();
