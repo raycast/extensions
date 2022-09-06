@@ -26,7 +26,7 @@
 - [x] Support to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
-- [x] Support to sort translation results manually.
+- [x] Support to sort query results manually.
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
@@ -103,8 +103,8 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 #### Dictionary
 
-- Youdao: Chinese (Simplified), Chinese (Traditional), English.
-- Linguee: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+- Youdao: Support 5 langauges, (Chinese), English, French, Japanese, Korean.
+- Linguee: Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Translation
 
@@ -198,23 +198,24 @@ Use `Cmd + S` to play the pronunciation of words manually.
 
 ### Select Target Language
 
-<details><summary> Specify the target language. This option is turned on by default. </summary>
+<details><summary> Specify the target language. This option is turned off by default. </summary>
 
 <p>
 
-By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can temporarily select another target language in the action panel.
+By default, the extension will automatically select the preferred language as the target translation language. However, sometimes if you want to manually specify a language as the target language, you can turn on this option in the preferences and then you can temporarily select another target language in the action panel.
 
 </p>
 
 </details>
 
-### Sort Translation Manually
+### Sort Query Results Manually
 
-<details> <summary> You can sort the translation results by your preference, default is DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
+<details> <summary> You can sort query results by your preference, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
 
 <p>
 
-Name case are insensitive, use comma to separate. Example: `deepl,google,apple,baidu,tencent,youdao,caiyun`. You can also specify a part of the sort, for example: `apple,tencent`，the actual sort is: `apple,tencent,deepl,google,baidu,youdao,caiyun`.
+Name case are insensitive, use comma to separate. Example: `youdao dictionary, linguee dictionary, deepl, google, apple, baidu, tencent, youdao, caiyun`.
+You can also specify a part of the sort, for example: `youdao dictionary, apple, tencent`，the actual sort is: `youdao dictionary, apple, tencent, linguee dictionary, deepl, google, baidu, youdao, caiyun`.
 
 > Note: This sort is the overall sort, if a translation service is not enabled, the sort will be automatically ignored.
 

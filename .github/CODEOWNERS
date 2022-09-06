@@ -16,6 +16,7 @@
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/ansible-documentation                    @Kcih4518
+/extensions/antd-open-browser                        @crazyair
 /extensions/anybox                                   @francisfeng
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-developer-docs                     @CaliCastle
@@ -31,6 +32,7 @@
 /extensions/battery-health                           @o1y
 /extensions/bazinga-tools                            @luin
 /extensions/bear                                     @hmarr @ron-myers
+/extensions/beat-per-minute                          @pernielsentikaer
 /extensions/better-uptime                            @andreaselia
 /extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/betterzip                                @koinzhang
@@ -124,6 +126,7 @@
 /extensions/dekudeals                                @rrroyal
 /extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
+/extensions/devonthink                               @kudrykv
 /extensions/dex-screener                             @wp-lai
 /extensions/dicom                                    @sedghi
 /extensions/dict-cc                                  @natterstefan
@@ -204,7 +207,7 @@
 /extensions/google-cloud-platform-search             @klaa97
 /extensions/google-drive                             @vishaltelangre @vishaltelangre @daniel-stoneuk
 /extensions/google-fonts                             @GastroGeek
-/extensions/google-maps-search                       @ratoru
+/extensions/google-maps-search                       @ratoru @aeither
 /extensions/google-maven-repository                  @koinzhang
 /extensions/google-meet                              @vitoorgomes
 /extensions/google-search                            @mblode
@@ -241,6 +244,7 @@
 /extensions/iconify                                  @Destiner @kidonng
 /extensions/iconpark                                 @koinzhang
 /extensions/icons8                                   @yug2005
+/extensions/ihosts                                   @404J
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/inkdrop                                  @yaeda
@@ -324,6 +328,7 @@
 /extensions/nextjs-docs                              @PrasadChinwal
 /extensions/nft-search                               @glazec
 /extensions/night-light                              @devmoath
+/extensions/nixpkgs-search                           @aiotter
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits @lukerandall
@@ -357,6 +362,7 @@
 /extensions/pastebin                                 @vimtor
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/pexels                                   @koinzhang
+/extensions/php-docs                                 @comes @pernielsentikaer
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pie-for-pihole                           @GLaDO8
 /extensions/pika                                     @rishimohan
@@ -484,6 +490,7 @@
 /extensions/text-shortcuts                           @koinzhang
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
+/extensions/tim                                      @tmwrnr
 /extensions/timers                                   @ThatNerdSquared @GastroGeek
 /extensions/timeular                                 @kudrykv
 /extensions/tinypng                                  @kawamataryo
@@ -530,6 +537,7 @@
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola
 /extensions/weather                                  @tonka3000
+/extensions/web3-profile                             @peduarte
 /extensions/whatsapp                                 @vimtor
 /extensions/wi-fi                                    @koinzhang
 /extensions/wikipedia                                @vimtor @shubzkothekar

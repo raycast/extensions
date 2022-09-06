@@ -10,7 +10,9 @@ function ThisWeekMeetings() {
   const { data, isLoading } = useCachedPromise(getUpcomingMeetings);
 
   const sections = useMemo(() => {
-    const thisWeekMeetings = data?.meetings?.filter((meeting) => isThisWeek(new Date(meeting.start_time)));
+    const thisWeekMeetings = data?.meetings?.filter(
+      (meeting) => "start_time" in meeting && isThisWeek(new Date(meeting.start_time))
+    );
     return getMeetingsSections(thisWeekMeetings);
   }, [data]);
 
@@ -22,13 +24,17 @@ function ThisWeekMeetings() {
             <Fragment key={section.title}>
               <MenuBarExtra.Item key={section.title} title={`${section.title}, ${section.subtitle}`} />
 
-              {section.meetings.map((meeting) => (
-                <MenuBarExtra.Item
-                  key={meeting.uuid}
-                  title={`${getMeetingTitle(meeting)}: ${meeting.topic}`}
-                  onAction={() => open(meeting.join_url)}
-                />
-              ))}
+              {section.meetings.map((meeting, index) => {
+                if ("start_time" in meeting) {
+                  return (
+                    <MenuBarExtra.Item
+                      key={`${meeting.uuid}-${index}`}
+                      title={`${getMeetingTitle(meeting)}: ${meeting.topic}`}
+                      onAction={() => open(meeting.join_url)}
+                    />
+                  );
+                }
+              })}
             </Fragment>
           );
         })

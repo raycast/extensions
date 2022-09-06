@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 11:24
+ * @lastEditTime: 2022-08-28 00:35
  * @fileName: languages.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -221,28 +221,10 @@ export function getEudicWebDictionaryURL(queryTextInfo: QueryWordInfo): string |
 }
 
 /**
- * Get youdao web dictionary URL.
- *
- * new: https://youdao.com/result?word=good&lang=en
- * old: https://www.youdao.com/w/eng/good
- *
- * crawler parser: https://github.com/keenwon/eazydict-youdao/blob/master/lib/parser.js
- */
-export function getYoudaoWebDictionaryURL(queryTextInfo: QueryWordInfo): string | undefined {
-  const languageId = getLanguageOfTwoExceptChinese([queryTextInfo.fromLanguage, queryTextInfo.toLanguage]);
-  if (!languageId) {
-    return;
-  }
-
-  const youdaoDictionaryLanguages = ["en", "fr", "ja", "ko"]; // 英语，法语，日语，韩语
-  if (youdaoDictionaryLanguages.includes(languageId)) {
-    const word = encodeURIComponent(queryTextInfo.word);
-    return `https://youdao.com/result?word=${word}&lang=${languageId}`;
-  }
-}
-
-/**
  * Get another language item expcept chinese from language item array.
+ *
+ * eg: [en, zh-CHS] --> en
+ * eg: [zh-CHS, fr] --> fr
  */
 export function getLanguageOfTwoExceptChinese(youdaoLanguageIds: [string, string]): string | undefined {
   if (youdaoLanguageIds.includes("zh-CHS")) {

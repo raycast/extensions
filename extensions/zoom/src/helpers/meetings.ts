@@ -10,20 +10,25 @@ import {
   isTomorrow,
   subDays,
 } from "date-fns";
-import { Meeting } from "../api/meetings";
+import { partition } from "lodash";
+import { Meeting, RecurringMeetingWithNoFixedTime, ScheduledMeeting } from "../api/meetings";
+
+export function isRecurringMeetingWithNoFixedTime(meeting: Meeting): meeting is RecurringMeetingWithNoFixedTime {
+  return meeting.type === 3;
+}
 
 function isNextWeek(date: Date) {
   return isThisWeek(subDays(date, 7));
 }
 
-export function getMeetingTitle(meeting: Meeting) {
+export function getMeetingTitle(meeting: ScheduledMeeting) {
   const startTime = new Date(meeting.start_time);
   const endTime = addMinutes(startTime, meeting.duration);
 
   return `${format(startTime, "HH:mm")} - ${format(endTime, "HH:mm")}`;
 }
 
-function getMeetingSection(meeting: Meeting) {
+function getMeetingSection(meeting: ScheduledMeeting) {
   const startTime = new Date(meeting.start_time);
 
   const subtitle = format(startTime, "dd MMM");
@@ -69,8 +74,11 @@ export function getMeetingsSections(meetings?: Meeting[]) {
     return [];
   }
 
+  const [recurringMeetingsWithNoFixedTime, otherMeetings] = partition(meetings, (meeting) => meeting.type === 3);
+  const scheduledMeetings = otherMeetings as ScheduledMeeting[];
+
   const sections = Object.values(
-    meetings.reduce<Record<string, MeetingSection>>((acc, meeting) => {
+    scheduledMeetings.reduce<Record<string, MeetingSection>>((acc, meeting) => {
       const { title, subtitle } = getMeetingSection(meeting);
 
       if (!acc[title]) {
@@ -90,6 +98,15 @@ export function getMeetingsSections(meetings?: Meeting[]) {
   );
 
   sections.sort((a, b) => compareAsc(a.date, b.date));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const sectionsWithoutDates = sections.map(({ date, ...section }) => section);
 
-  return sections;
+  if (recurringMeetingsWithNoFixedTime.length > 0) {
+    sectionsWithoutDates.push({
+      title: "Recurring",
+      meetings: recurringMeetingsWithNoFixedTime,
+    });
+  }
+
+  return sectionsWithoutDates;
 }

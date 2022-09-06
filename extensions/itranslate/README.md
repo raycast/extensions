@@ -15,6 +15,8 @@
 2. Support translate selected text of the frontmost application
 3. Support custom translation service provider (Will support more in the future)
 4. Support save the translation results to Snippet
+5. Support record translation history
+6. Support TTS(TextToSpeech)
 
 ## How to get the AppId and AppKey?
 
