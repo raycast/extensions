@@ -25,7 +25,7 @@ const actionablePullRequests = () => {
           />
         ))}
 
-      {updatedPulls.length === 0 && recentlyVisitedPulls.length === 0 && (
+      {updatedPulls.length === 0 && recentlyVisitedPulls.length === 0 && !isLoading && (
         <MenuBarExtra.Item title={`No updated pulls at this time`} />
       )}
 
@@ -41,12 +41,12 @@ const actionablePullRequests = () => {
 
       {forceRefreshSeparator && <MenuBarExtra.Separator />}
 
-      <MenuBarExtra.Item
+      {!isLoading && <MenuBarExtra.Item
         title="Force Refresh"
         onAction={runPullIteration}
         icon={Icon.RotateClockwise}
         shortcut={{key: "r", modifiers: ["cmd"]}}
-      />
+      />}
     </MenuBarExtra>
   );
 };
