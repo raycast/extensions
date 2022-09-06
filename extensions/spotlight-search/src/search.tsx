@@ -68,7 +68,7 @@ export default function Command() {
                 onShow={() => popToRoot({ clearSearchBar: true })}
               />
               <Action.CopyToClipboard
-                title="Copy Path To Clipboard"
+                title="Copy Path to Clipboard"
                 content={result.path}
                 onCopy={() => popToRoot({ clearSearchBar: true })}
               />
