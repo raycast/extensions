@@ -12,6 +12,9 @@
     "immint023",
     "pernielsentikaer"
   ],
+  "keywords": [
+    "vscode"
+  ],
   "license": "MIT",
   "commands": [
     {
