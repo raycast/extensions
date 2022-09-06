@@ -12,6 +12,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search PHP Docs..." throttle>
+      <List.EmptyView title="No Results" icon="phpnw.png" />
       <List.Section title="Results" subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item

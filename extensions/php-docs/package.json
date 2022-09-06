@@ -6,6 +6,9 @@
   "icon": "php.png",
   "author": "comes",
   "version": "1.0.0",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation",
