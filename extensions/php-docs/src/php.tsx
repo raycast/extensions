@@ -1,18 +1,14 @@
-import { ActionPanel, CopyToClipboardAction, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
-
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useSearch } from "./utils/useSearch";
-
 import { SearchResult } from "./utils/types";
 
 export default function Command() {
-  const { isLoading, history, results, searchText, search, addHistory, deleteAllHistory, deleteHistoryItem } =
-    useSearch();
-
+  const { isLoading, history, results, searchText, search } = useSearch();
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search PHP Docs..." throttle>
-      <List.EmptyView title="No Results" icon="phpnw.png" />
+      <List.EmptyView title={searchText.length === 0 ? "Search php.net" : "Searching..."} icon="phpnw.png" />
       <List.Section title="Results" subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
@@ -21,8 +17,8 @@ export default function Command() {
             icon="php.png"
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={item.url} />
-                <CopyToClipboardAction title="Copy URL" content={item.url} />
+                <Action.OpenInBrowser url={item.url} />
+                <Action.CopyToClipboard title="Copy URL" content={item.url} />
               </ActionPanel>
             }
           />
