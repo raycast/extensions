@@ -14,6 +14,14 @@ export const noBridgeConfiguredMessage = `
 Please use the ‘Manage Hue Bridge’ command to link your Hue Bridge.
 `;
 
+export const discoveringMessage = `
+# Discovering Hue Bridge
+
+![Not Found](${connectImagePath})
+
+Please wait while discovering a Hue Bridge.
+`;
+
 export const bridgeNotFoundMessage = `
 # Could not find the Hue Bridge
 
@@ -58,8 +66,8 @@ Please check your network connection and make sure you are connected to the same
 You can remove your saved Hue Bridge by using the ‘Remove Saved Hue Bridge’ action.
 `;
 
-export const connectedMessage = `
-# Connected to your Hue Bridge
+export const linkedMessage = `
+# Linked with your Hue Bridge
 
 ![Success](${successImagePath})
 

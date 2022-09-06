@@ -47,12 +47,6 @@
       "subtitle": "Hue",
       "description": "Turn off all the lights",
       "mode": "no-view"
-    },
-    {
-      "name": "manageHueBridge",
-      "title": "Manage Hue Bridge",
-      "description": "Set up or remove your Hue Bridge.",
-      "mode": "view"
     }
   ],
   "preferences": [

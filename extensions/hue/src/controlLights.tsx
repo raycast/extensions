@@ -5,6 +5,7 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
+  SendHueMessage,
   setLightBrightness,
   setLightColor,
   toggleLight,
@@ -14,21 +15,20 @@ import { getIconForColor, getLightIcon } from "./lib/utils";
 import { MutatePromise } from "@raycast/utils";
 import { CssColor, Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
-import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
-import NoHueBridgeConfigured from "./components/noHueBridgeConfigured";
-import BridgeNotFound from "./components/bridgeNotFound";
+import ManageHueBridge from "./components/ManageHueBridge";
+import UnlinkAction from "./components/UnlinkAction";
 import Style = Toast.Style;
 
 export default function ControlLights() {
-  const { isLoading, lights, mutateLights, lightsError, groups } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, mutateLights, groups } = useHue();
+
+  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   const rooms = groups.filter((group: Group) => group.type === "Room") as Group[];
   const entertainmentAreas = groups.filter((group: Group) => group.type === "Entertainment") as Group[];
   const zones = groups.filter((group: Group) => group.type === "Zone") as Group[];
   const groupTypes = Array.of(rooms, entertainmentAreas, zones);
-
-  if (lightsError instanceof NoHueBridgeConfiguredError) return <NoHueBridgeConfigured />;
-  if (lightsError instanceof CouldNotConnectToHueBridgeError) return <BridgeNotFound />;
 
   return (
     <List isLoading={isLoading}>
@@ -39,26 +39,50 @@ export default function ControlLights() {
               return group.lights.includes(`${light.id}`);
             }) ?? [];
 
-          return <Group key={group.id} lights={groupLights} group={group} mutateLights={mutateLights} />;
+          return (
+            <Group
+              key={group.id}
+              lights={groupLights}
+              group={group}
+              mutateLights={mutateLights}
+              sendHueMessage={sendHueMessage}
+            />
+          );
         });
       })}
     </List>
   );
 }
 
-function Group(props: { lights: Light[]; group: Group; mutateLights: MutatePromise<Light[]> }) {
+function Group(props: {
+  lights: Light[];
+  group: Group;
+  mutateLights: MutatePromise<Light[]>;
+  sendHueMessage: SendHueMessage;
+}) {
   return (
     <List.Section key={props.group.id} title={props.group.name} subtitle={props.group.type}>
       {props.lights.map(
         (light: Light): JSX.Element => (
-          <Light key={light.id} light={light} group={props.group} mutateLights={props.mutateLights} />
+          <Light
+            key={light.id}
+            light={light}
+            group={props.group}
+            mutateLights={props.mutateLights}
+            sendHueMessage={props.sendHueMessage}
+          />
         )
       )}
     </List.Section>
   );
 }
 
-function Light(props: { light: Light; group: Group; mutateLights: MutatePromise<Light[]> }) {
+function Light(props: {
+  light: Light;
+  group: Group;
+  mutateLights: MutatePromise<Light[]>;
+  sendHueMessage: SendHueMessage;
+}) {
   return (
     <List.Item
       title={props.light.name}
@@ -105,6 +129,7 @@ function Light(props: { light: Light; group: Group; mutateLights: MutatePromise<
 
           <ActionPanel.Section>
             <RefreshAction onRefresh={() => props.mutateLights()} />
+            <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }

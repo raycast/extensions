@@ -1,6 +1,6 @@
 import { discovery, v3 } from "node-hue-api";
 import { Api } from "node-hue-api/dist/esm/api/Api";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Group, Light, Scene } from "./types";
 import { hexToXy } from "./colors";
@@ -17,6 +17,9 @@ import {
 } from "./constants";
 import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./errors";
 import { getTransitionTimeInMs } from "./utils";
+import { useMachine } from "@xstate/react";
+import { manageHueBridgeMachine } from "./manageHueBridgeMachine";
+import Style = Toast.Style;
 
 let _api: Api;
 
@@ -37,6 +40,8 @@ export async function getAuthenticatedApi(): Promise<Api> {
   return _api;
 }
 
+export type SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => void;
+
 // TODO: Replace with Hue API V2 (for which there is no library yet) to enable more features.
 //  An example is lights have types (e.g. ‘Desk Lamp’ or ‘Ceiling Fixture’) which can be used to display relevant icons instead of circles.
 // TODO: Rapid successive calls to mutate functions will result in the optimistic updates and API results being out of sync.
@@ -47,7 +52,7 @@ export function useHue() {
     isLoading: isLoadingLights,
     data: lights,
     mutate: mutateLights,
-    error: lightsError,
+    revalidate: revalidateLights,
   } = useCachedPromise(
     async () => {
       const api = await getAuthenticatedApi();
@@ -58,6 +63,7 @@ export function useHue() {
     {
       keepPreviousData: true,
       initialData: [] as Light[],
+      onError: handleError,
     }
   );
 
@@ -65,7 +71,7 @@ export function useHue() {
     isLoading: isLoadingGroups,
     data: groups,
     mutate: mutateGroups,
-    error: groupsError,
+    revalidate: revalidateGroups,
   } = useCachedPromise(
     async () => {
       const api = await getAuthenticatedApi();
@@ -76,13 +82,15 @@ export function useHue() {
     {
       keepPreviousData: true,
       initialData: [] as Group[],
+      onError: handleError,
     }
   );
 
   const {
     isLoading: isLoadingScenes,
     data: scenes,
-    error: scenesError,
+    mutate: mutateScenes,
+    revalidate: revalidateScenes,
   } = useCachedPromise(
     async () => {
       const api = await getAuthenticatedApi();
@@ -93,20 +101,48 @@ export function useHue() {
     {
       keepPreviousData: true,
       initialData: [] as Scene[],
+      onError: handleError,
     }
   );
 
+  const [hueBridgeState, send] = useMachine(
+    manageHueBridgeMachine(() => {
+      revalidateLights();
+      revalidateGroups();
+      revalidateScenes();
+    })
+  );
+
+  const sendHueMessage: SendHueMessage = (message: "link" | "retry" | "done" | "unlink") => {
+    send(message.toUpperCase());
+  };
+
   return {
-    isLoading: isLoadingLights || isLoadingGroups || isLoadingScenes,
+    hueBridgeState,
+    sendHueMessage,
+    isLoading: hueBridgeState.context.shouldDisplay || isLoadingLights || isLoadingGroups || isLoadingScenes,
     lights,
     mutateLights,
-    lightsError,
     groups,
     mutateGroups,
-    groupsError,
     scenes,
-    scenesError,
+    mutateScenes,
   };
+}
+
+function handleError(error: Error): void {
+  console.debug({ name: error.name, message: error.message });
+  console.error(error);
+
+  if (error.message.match("429")) {
+    showToast(
+      Style.Failure,
+      "Too many requests",
+      "Too many requests were sent in a short time. Please try again."
+    ).then();
+  } else {
+    showToast(Style.Failure, "Error", "Something went wrong. Please try again.").then();
+  }
 }
 
 /**

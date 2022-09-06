@@ -4,6 +4,7 @@ import {
   adjustColorTemperature,
   calculateAdjustedBrightness,
   calculateAdjustedColorTemperature,
+  SendHueMessage,
   setGroupBrightness,
   setGroupColor,
   setScene,
@@ -16,20 +17,19 @@ import { CssColor, Group, Room, Scene } from "./lib/types";
 import { getIconForColor, getLightIcon } from "./lib/utils";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLOR_TEMP_MAX, COLOR_TEMP_MIN, COLORS } from "./lib/constants";
 import { hexToXy } from "./lib/colors";
-import NoHueBridgeConfigured from "./components/noHueBridgeConfigured";
-import BridgeNotFound from "./components/bridgeNotFound";
-import { CouldNotConnectToHueBridgeError, NoHueBridgeConfiguredError } from "./lib/errors";
+import ManageHueBridge from "./components/ManageHueBridge";
+import UnlinkAction from "./components/UnlinkAction";
 import Style = Toast.Style;
 
 export default function Command() {
-  const { isLoading, groups, mutateGroups, groupsError, scenes } = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, groups, mutateGroups, scenes } = useHue();
+
+  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   const rooms: Room[] = groups.filter((group: Group) => group.type == "Room") as Room[];
   const entertainmentAreas: Group[] = groups.filter((group: Group) => group.type == "Entertainment");
   const zones: Group[] = groups.filter((group: Group) => group.type == "Zone");
-
-  if (groupsError instanceof NoHueBridgeConfiguredError) return <NoHueBridgeConfigured />;
-  if (groupsError instanceof CouldNotConnectToHueBridgeError) return <BridgeNotFound />;
 
   return (
     <List isLoading={isLoading}>
@@ -37,7 +37,15 @@ export default function Command() {
         <List.Section title="Rooms">
           {rooms.map((room: Room) => {
             const roomScenes = scenes.filter((scene: Scene) => scene.group == room.id);
-            return <Group key={room.id} group={room} mutateGroups={mutateGroups} scenes={roomScenes} />;
+            return (
+              <Group
+                key={room.id}
+                group={room}
+                mutateGroups={mutateGroups}
+                scenes={roomScenes}
+                sendHueMessage={sendHueMessage}
+              />
+            );
           })}
         </List.Section>
       )}
@@ -51,6 +59,7 @@ export default function Command() {
                 group={entertainmentArea}
                 mutateGroups={mutateGroups}
                 scenes={entertainmentAreaScenes}
+                sendHueMessage={sendHueMessage}
               />
             );
           })}
@@ -60,7 +69,15 @@ export default function Command() {
         <List.Section title="Zones">
           {zones.map((zone: Group) => {
             const zoneScenes = scenes.filter((scene: Scene) => scene.group == zone.id);
-            return <Group key={zone.id} group={zone} mutateGroups={mutateGroups} scenes={zoneScenes} />;
+            return (
+              <Group
+                key={zone.id}
+                group={zone}
+                mutateGroups={mutateGroups}
+                scenes={zoneScenes}
+                sendHueMessage={sendHueMessage}
+              />
+            );
           })}
         </List.Section>
       )}
@@ -68,7 +85,12 @@ export default function Command() {
   );
 }
 
-function Group(props: { group: Group; mutateGroups: MutatePromise<Group[]>; scenes?: Scene[] }) {
+function Group(props: {
+  group: Group;
+  mutateGroups: MutatePromise<Group[]>;
+  scenes?: Scene[];
+  sendHueMessage: SendHueMessage;
+}) {
   return (
     <List.Item
       key={props.group.id}
@@ -127,6 +149,7 @@ function Group(props: { group: Group; mutateGroups: MutatePromise<Group[]>; scen
 
           <ActionPanel.Section>
             <RefreshAction onRefresh={() => props.mutateGroups()} />
+            <UnlinkAction sendHueMessage={props.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
