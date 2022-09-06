@@ -1,5 +1,5 @@
 # iHosts Changelog
 
-## [Added iHosts] - {PR_MERGE_DATE}
+## [Added iHosts] - 2022-09-06
 
 Initial version code
