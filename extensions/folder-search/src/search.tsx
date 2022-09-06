@@ -56,6 +56,7 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       abortable.current?.abort();
+      setIsLoading(false);
 
       setResults([]);
 
