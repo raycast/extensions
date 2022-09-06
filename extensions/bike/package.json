@@ -15,23 +15,23 @@
       "name": "new",
       "title": "New Bike",
       "description": "Creates a new Bike document.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "new-from-clipboard",
-      "title": "New Bike from Clipboard",
+      "title": "New Bike From Clipboard",
       "description": "Creates a new Bike document from the clipboard contents.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "append-from-clipboard",
-      "title": "Append to Bike from Clipboard",
+      "title": "Append to Bike From Clipboard",
       "description": "Adds the clipboard contents to the end of the most recently active Bike document.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "new-from-template",
-      "title": "New Bike from Template",
+      "title": "New Bike From Template",
       "description": "Creates a new Bike document from a user-selected template.",
       "mode": "view"
     },
@@ -39,19 +39,19 @@
       "name": "minimize-all",
       "title": "Minimize Bike",
       "description": "Minimizes all bike windows.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "close-all-but-current",
       "title": "Close Other Bikes",
       "description": "Gracefully closes all except the current Bike document, prompting to save as needed.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "force-close-all-but-current",
       "title": "Force Close Other Bikes",
       "description": "Force closes all except the current Bike document.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "set-background-color",
@@ -67,9 +67,9 @@
     },
     {
       "name": "copy-url",
-      "title": "Current Bike URL",
+      "title": "Copy Bike URL",
       "description": "Copies the URL for the current Bike document to the clipboard.",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "dependencies": {

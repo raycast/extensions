@@ -1,7 +1,13 @@
 import { closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import checkBikeInstalled from "./index";
 
-export default function Command() {
+export default function main() {
+  const error_alert = checkBikeInstalled();
+  if (error_alert !== undefined) {
+    return error_alert;
+  }
+
   return (
     <List>
       <List.Item
