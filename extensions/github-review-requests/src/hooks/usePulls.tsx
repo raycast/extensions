@@ -5,6 +5,7 @@ import { getLogin } from "../integration/getLogin";
 import { isActionUserInitiated } from "../util";
 import { processPulls } from "../flows/processPulls";
 import { PullRequestShort } from "../types";
+import {Icon, MenuBarExtra} from "@raycast/api";
 
 const usePulls = () => {
   const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls } =
@@ -57,7 +58,12 @@ const usePulls = () => {
     updatedPulls,
     recentlyVisitedPulls,
 
-    runPullIteration,
+    Refresh: isPullStoreLoading ? () => null : () => <MenuBarExtra.Item
+      title="Force Refresh"
+      onAction={runPullIteration}
+      icon={Icon.RotateClockwise}
+      shortcut={{ key: "r", modifiers: ["cmd"] }}
+    />,
 
     visitPull,
   };

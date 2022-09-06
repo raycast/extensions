@@ -1,10 +1,10 @@
-import { Color, Icon, MenuBarExtra, open } from "@raycast/api";
+import { Color, MenuBarExtra, open } from "@raycast/api";
 import usePulls from "./hooks/usePulls";
 import PullRequestItem from "./components/PullRequestItem";
 import { PullRequestShort } from "./types";
 
 const actionablePullRequests = () => {
-  const { isLoading, login, updatedPulls, recentlyVisitedPulls, runPullIteration, visitPull } = usePulls();
+  const { isLoading, login, updatedPulls, recentlyVisitedPulls, Refresh, visitPull } = usePulls();
 
   const title = getTitle(updatedPulls);
   const icon = getIcon(updatedPulls);
@@ -41,14 +41,7 @@ const actionablePullRequests = () => {
 
       {forceRefreshSeparator && <MenuBarExtra.Separator />}
 
-      {!isLoading && (
-        <MenuBarExtra.Item
-          title="Force Refresh"
-          onAction={runPullIteration}
-          icon={Icon.RotateClockwise}
-          shortcut={{ key: "r", modifiers: ["cmd"] }}
-        />
-      )}
+      <Refresh />
     </MenuBarExtra>
   );
 };
