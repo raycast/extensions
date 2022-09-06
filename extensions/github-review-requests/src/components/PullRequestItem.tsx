@@ -14,10 +14,12 @@ const PullRequestItem = ({ pull, index, showMyIcon, onAction }: PullRequestItemP
     key={pull.id}
     title={(showMyIcon ? pull.myIcon + " " : "") + pull.title}
     onAction={() => onAction()}
-    shortcut={index !== undefined && index <= 8 ? { modifiers: ["cmd"], key: (index + 1).toString() as ValidNumber } : undefined}
+    shortcut={
+      index !== undefined && index <= 8 ? { modifiers: ["cmd"], key: (index + 1).toString() as ValidNumber } : undefined
+    }
   />
 );
 
 export default PullRequestItem;
 
-type ValidNumber = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+type ValidNumber = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";

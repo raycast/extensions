@@ -40,11 +40,10 @@ const usePullStore = () => {
                 ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
               ] as PullRequestShort[],
 
-              hiddenPulls:
-                 ([
-                      { id: pull.id, lastVisitedAt },
-                      ...hiddenPulls.filter(pr => pr.id !== pull.id),
-                    ] as PullRequestLastVisit[]),
+              hiddenPulls: [
+                { id: pull.id, lastVisitedAt },
+                ...hiddenPulls.filter(pr => pr.id !== pull.id),
+              ] as PullRequestLastVisit[],
             } as PullStore)
         )
         .then(({ updatedPulls, recentlyVisitedPulls, hiddenPulls }: PullStore) => {
