@@ -96,6 +96,7 @@ export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code:
       params: {
         grant_type: "authorization_code",
         code,
+        client_id: CLIENT_ID,
         code_verifier: authRequest.codeVerifier,
         redirect_uri: authRequest.redirectURI,
       },
@@ -116,6 +117,7 @@ async function refreshTokens(refresh_token: string) {
     method: "POST",
     data: {
       grant_type: "refresh_token",
+      client_id: CLIENT_ID,
       refresh_token,
     },
   });
