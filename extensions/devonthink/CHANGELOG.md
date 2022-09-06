@@ -1,3 +1,3 @@
 # DEVONthink Changelog
 
-## [Initial Version] - 2022-08-09
+## [Initial Version] - 2022-09-06
