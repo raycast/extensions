@@ -63,7 +63,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.ShowInFinder
-                title="Show/View In Finder"
+                title="Show in Finder"
                 path={result.path}
                 onShow={() => popToRoot({ clearSearchBar: true })}
               />
