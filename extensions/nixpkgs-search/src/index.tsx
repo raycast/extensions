@@ -34,7 +34,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             {searchResult.homepage[0] ? (
-              <Action.OpenInBrowser title="Open Package Homepage" url={searchResult.homepage[0]} />
+              <Action.OpenInBrowser
+                title="Open Package Homepage"
+                url={searchResult.homepage[0]}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
             ) : null}
             {searchResult.source && (
               <Action.OpenInBrowser
