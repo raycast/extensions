@@ -27,21 +27,27 @@ export default function Command() {
     );
   }, [searchTerm]);
 
+  let title;
+
+  if (searchTerm.length === 0 && ensSuggestions.length === 0) {
+    title = "Search for ENS name";
+  }
+
+  if (searchTerm.length > 0 && searchTerm.length < 3) {
+    title = "Type at least 3 characters to search...";
+  }
+
+  if (searchTerm.length > 2 && ensSuggestions.length === 0) {
+    title = "No results";
+  }
+
+  if (searchTerm.length > 2 && isLoading) {
+    title = "Loading...";
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="ENS search" onSearchTextChange={setSearchTerm} throttle>
-      <List.EmptyView
-        title={searchTerm.length < 3 ? "Search For ENS Name" : isLoading ? "Searching..." : "No Results"}
-        description={
-          searchTerm.length < 3
-            ? "Type 3 charecters to search..."
-            : isLoading
-            ? ""
-            : "Try to search for a different ENS name"
-        }
-        icon={{
-          source: { light: "icon-light.png", dark: "icon-dark.png" },
-        }}
-      />
+      <List.EmptyView title={title} icon={{ source: { light: "icon-light.png", dark: "icon-dark.png" } }} />
 
       {ensSuggestions.map((name) => (
         <List.Item
