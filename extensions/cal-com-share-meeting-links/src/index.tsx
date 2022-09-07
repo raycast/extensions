@@ -37,6 +37,10 @@ export default function Command() {
                 content={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
                 icon={Icon.Link}
               />
+              <Action.OpenInBrowser
+                url={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
+                title="Preview URL"
+              />
             </ActionPanel>
           }
         />
