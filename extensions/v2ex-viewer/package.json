@@ -16,6 +16,13 @@
       "subtitle": "V2EX",
       "description": "View the latest or hot topics.",
       "mode": "view"
+    },
+    {
+      "name": "viewNotifications",
+      "title": "View Notifications",
+      "subtitle": "V2EX",
+      "description": "View the latest notifications.",
+      "mode": "view"
     }
   ],
   "preferences": [
