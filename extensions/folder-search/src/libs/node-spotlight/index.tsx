@@ -16,6 +16,7 @@ interface IDictionary {
 const spotlight = (
   query: string,
   dir: string | null = null,
+  filter: string | null = null,
   attrs = [],
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
 ) => {
@@ -28,6 +29,10 @@ const spotlight = (
 
   if (dir) {
     args.push("-onlyin", dir);
+  }
+
+  if (filter) {
+    args.push(filter);
   }
 
   for (const attr of attrs) {

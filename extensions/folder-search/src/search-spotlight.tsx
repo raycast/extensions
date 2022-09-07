@@ -10,7 +10,7 @@ interface SpotlightSearchPreferences {
 
 import { SpotlightSearchResult } from "./types";
 
-import { isFolder, safeSearchScope } from "./utils";
+import { safeSearchScope } from "./utils";
 
 const folderSpotlightSearchAttributes = [
   "kMDItemDisplayName",
@@ -26,6 +26,7 @@ const folderSpotlightSearchAttributes = [
 const searchSpotlight = (
   search: string,
   searchScope: string,
+  searchFilter: string,
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
   callback: (result: SpotlightSearchResult) => void
 ): Promise<void> => {
@@ -35,9 +36,10 @@ const searchSpotlight = (
     const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
     let resultsCount = 0;
 
-    spotlight(search, safeSearchScope(searchScope), spotlightSearchAttributes as [], abortable)
+    // folder hard-coded into search
+    spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
       .on("data", (result: SpotlightSearchResult) => {
-        if (isFolder(result) && resultsCount < maxResults) {
+        if (resultsCount < maxResults) {
           // keep emitting the match and
           // incr resultsCount since a folder was found
           resultsCount++;

@@ -2,10 +2,6 @@ import { Alert, Icon, confirmAlert, trash, showToast } from "@raycast/api";
 
 import { SpotlightSearchResult } from "./types";
 
-const isFolder = (item: SpotlightSearchResult): boolean => {
-  return item.kMDItemKind === "Folder";
-};
-
 const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
@@ -38,4 +34,4 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult) => {
   await confirmAlert(options);
 };
 
-export { isFolder, safeSearchScope, folderName, enclosingFolderName, maybeMoveResultToTrash };
+export { safeSearchScope, folderName, enclosingFolderName, maybeMoveResultToTrash };
