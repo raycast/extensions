@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Image, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Image, Icon, useNavigation } from "@raycast/api";
 import { fetchSuggestions } from "./lib/fetchSuggestions";
 import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance, useEnsResolver } from "wagmi";
 import { getDefaultProvider } from "ethers";
@@ -83,6 +83,8 @@ function ProfileDetail({ name }: { name: string }) {
   const { data: ensRecords, isLoading: isEnsRecordsLoading } = useEnsRecords({ name });
   const { data: balance, isLoading: isBalanceLoading } = useBalance({ addressOrName: name });
 
+  const { pop } = useNavigation();
+
   useEnsResolver({
     name,
     onSuccess: async (resolver) => {
@@ -103,7 +105,7 @@ function ProfileDetail({ name }: { name: string }) {
       <List.EmptyView title="Loading" description="Looking up ENS records and NFT collection. Hold tight!" />
     </List>
   ) : (
-    <List isShowingDetail searchBarPlaceholder={name} enableFiltering={false}>
+    <List isShowingDetail searchBarPlaceholder={name} enableFiltering={false} onSearchTextChange={() => pop()}>
       <List.Section title="Overview">
         <List.Item
           title="ENS Profile"
