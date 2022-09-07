@@ -32,6 +32,471 @@
       "type": "checkbox",
       "default": false,
       "required": false
+    },
+    {
+      "title": "Search Item Result Properties",
+      "name": "propertyID",
+      "label": "ID",
+      "description": "Show ID",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyUUID",
+      "label": "UUID",
+      "description": "Show UUID",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyName",
+      "label": "Name",
+      "description": "Show Name",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyScore",
+      "label": "score",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyPath",
+      "label": "path",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyTags",
+      "label": "tags",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyNumberOfHits",
+      "label": "numberOfHits",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAltitude",
+      "label": "altitude",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyGeolocation",
+      "label": "geolocation",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLatitude",
+      "label": "latitude",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyInterval",
+      "label": "interval",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyNumberOfReplicants",
+      "label": "numberOfReplicants",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyBatesNumber",
+      "label": "batesNumber",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyNameWithoutExtension",
+      "label": "nameWithoutExtension",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyState",
+      "label": "state",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAnnotationCount",
+      "label": "annotationCount",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyDate",
+      "label": "date",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyCharacterCount",
+      "label": "characterCount",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAdditionDate",
+      "label": "additionDate",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyModificationDate",
+      "label": "modificationDate",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyRating",
+      "label": "rating",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyUrl",
+      "label": "url",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLongitude",
+      "label": "longitude",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyPageCount",
+      "label": "pageCount",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyType",
+      "label": "type",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyExcludeFromTagging",
+      "label": "excludeFromTagging",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyContentHash",
+      "label": "contentHash",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLocation",
+      "label": "location",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyMetaData",
+      "label": "metaData",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyStateVisibility",
+      "label": "stateVisibility",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyWordCount",
+      "label": "wordCount",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyFilename",
+      "label": "filename",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAliases",
+      "label": "aliases",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyExcludeFromWikiLinking",
+      "label": "excludeFromWikiLinking",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertySize",
+      "label": "size",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyExcludeFromClassification",
+      "label": "excludeFromClassification",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyReferenceURL",
+      "label": "referenceURL",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAttachmentCount",
+      "label": "attachmentCount",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyComment",
+      "label": "comment",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyNumberOfDuplicates",
+      "label": "numberOfDuplicates",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyTagType",
+      "label": "tagType",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLocationGroup",
+      "label": "locationGroup",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyHeight",
+      "label": "height",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyKind",
+      "label": "kind",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLocking",
+      "label": "locking",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyMimeType",
+      "label": "mimeType",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyOpeningDate",
+      "label": "openingDate",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyUnread",
+      "label": "unread",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyIndexed",
+      "label": "indexed",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyDuration",
+      "label": "duration",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyAttachedScript",
+      "label": "attachedScript",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyExcludeFromSeeAlso",
+      "label": "excludeFromSeeAlso",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyDpi",
+      "label": "dpi",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyCreationDate",
+      "label": "creationDate",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyExcludeFromSearch",
+      "label": "excludeFromSearch",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyWidth",
+      "label": "width",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyLabel",
+      "label": "label",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyClass",
+      "label": "class",
+      "description": "",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "categories": [
