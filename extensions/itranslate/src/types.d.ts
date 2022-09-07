@@ -8,6 +8,10 @@ interface IPreferences {
   deeplAuthKey: string;
   deeplApiPro: boolean;
   disableDeepL: boolean;
+  microsoftAccessKey: string;
+  microsoftAPIEndpoint: string;
+  microsoftRegion: string;
+  disableMicrosoft: boolean;
   youdaoAppId: string;
   youdaoAppKey: string;
   disableYoudao: boolean;
@@ -34,6 +38,7 @@ interface ILangItem {
   tencentLangId?: string;
   youdaoLangId?: string;
   aliyunLangId?: string;
+  microsoftLangId?: string;
   langTitle: string;
   voice?: string;
 }
@@ -89,6 +94,17 @@ interface IDeepLTranslateResult {
 
 interface IDeepLTranslateItem {
   detected_source_language: string;
+  text: string;
+}
+
+interface IMicrosoftAzureTranslateResult {
+  detectedLanguage: {
+    language: string;
+  };
+  translations: IMicrosoftAzureTranslateItem[];
+}
+
+interface IMicrosoftAzureTranslateItem {
   text: string;
 }
 

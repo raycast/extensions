@@ -15,6 +15,7 @@ const apiFetchMap = new Map<
   [TransServiceProviderTp.Google, fetchGoogleTransAPI],
   [TransServiceProviderTp.GoogleCouldTrans, fetchGoogleCouldTransAPI],
   [TransServiceProviderTp.DeepL, fetchDeepLTransAPI],
+  [TransServiceProviderTp.MicrosoftAzure, fetchMicrosoftAzureTransAPI],
   [TransServiceProviderTp.Youdao, fetchYoudaoTransAPI],
   [TransServiceProviderTp.Baidu, fetchBaiduTransAPI],
   [TransServiceProviderTp.Tencent, fetchTencentTransAPI],
@@ -38,6 +39,9 @@ export function checkPreferences() {
       break;
     case TransServiceProviderTp.DeepL:
       if (!preferences.deeplAuthKey) checkService = false;
+      break;
+    case TransServiceProviderTp.MicrosoftAzure:
+      if (!preferences.microsoftAccessKey) checkService = false;
       break;
     case TransServiceProviderTp.Baidu:
       if (!preferences.baiduAppId || !preferences.baiduAppKey) checkService = false;
@@ -69,6 +73,7 @@ export function getLang(value: string): ILangItem {
         lang.tencentLangId,
         lang.youdaoLangId,
         lang.aliyunLangId,
+        lang.microsoftLangId,
       ].includes(value)
     ) || {
       langId: "unknown",
@@ -102,6 +107,14 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
         serviceProvider: preferences.defaultServiceProvider,
         appId: "",
         appKey: preferences.deeplAuthKey,
+      });
+      break;
+    case TransServiceProviderTp.MicrosoftAzure:
+      if (preferences.disableMicrosoft) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: preferences.microsoftAPIEndpoint,
+        appKey: preferences.microsoftAccessKey,
       });
       break;
     case TransServiceProviderTp.Baidu:
@@ -164,6 +177,17 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       serviceProvider: TransServiceProviderTp.DeepL,
       appId: "",
       appKey: preferences.deeplAuthKey,
+    });
+  }
+  if (
+    preferences.microsoftAccessKey &&
+    !preferences.disableMicrosoft &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.MicrosoftAzure
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.MicrosoftAzure, {
+      serviceProvider: TransServiceProviderTp.MicrosoftAzure,
+      appId: preferences.microsoftAPIEndpoint,
+      appKey: preferences.microsoftAccessKey,
     });
   }
   if (
@@ -295,6 +319,63 @@ function fetchDeepLTransAPI(
           to: targetLang,
           origin: queryText,
           res: code === TransAPIErrCode.Success ? resDate.translations[0].text : "",
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
+function fetchMicrosoftAzureTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  return new Promise<ITranslateRes>((resolve) => {
+    const preferences: IPreferences = getPreferenceValues<IPreferences>();
+    const fromLang = "auto";
+    const ENDPOINT = provider.appId;
+    const APP_KEY = provider.appKey;
+    const payload = [{ Text: queryText }];
+    axios
+      .post(
+        `${ENDPOINT}/translate?` +
+          querystring.stringify({
+            "api-version": "3.0",
+            to: targetLang.microsoftLangId || targetLang.langId,
+          }),
+        payload,
+        {
+          headers: {
+            "Ocp-Apim-Subscription-Key": APP_KEY,
+            "Content-Type": "application/json; charset=UTF-8",
+            "Ocp-Apim-Subscription-Region": preferences.microsoftRegion,
+          },
+        }
+      )
+      .then((res) => {
+        const resDate: IMicrosoftAzureTranslateResult[] = res.data;
+        let code = TransAPIErrCode.Success;
+        if (resDate.length == 0 || resDate[0].translations.length == 0) {
+          code = TransAPIErrCode.Fail;
+        }
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: code,
+          from: code === TransAPIErrCode.Success ? getLang(resDate[0].detectedLanguage.language) : getLang(""),
+          to: targetLang,
+          origin: queryText,
+          res: code === TransAPIErrCode.Success ? resDate[0].translations[0].text : "",
         };
         resolve(transRes);
       })
