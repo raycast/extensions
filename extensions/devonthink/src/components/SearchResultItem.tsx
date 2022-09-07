@@ -36,6 +36,7 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="openingDate" propKey="propertyOpeningDate" title="Opening Date" text={prettyDate(result.openingDate)}/>,
     <MyLabel key="additionDate" propKey="propertyAdditionDate" title="Addition Date" text={prettyDate(result.additionDate)}/>,
     <MyLabel key="location" propKey="propertyLocation" title="Location" text={result.location}/>,
+    <MyLabel key="size" propKey="propertySize" title="Size" text={"" + humanFileSize(result.size, preferences.useSIUnits)}/>,
 
     <MyLink key="referenceURL" propKey="propertyReferenceURL" title="Reference URL" text={getDomain(result.referenceURL)} target={result.referenceURL}/>,
     <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path}/>,
@@ -68,7 +69,6 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="rating" propKey="propertyRating" title="Rating" text={"" + result.rating}/>,
     <MyLabel key="pageCount" propKey="propertyPageCount" title="Page Count" text={"" + result.pageCount}/>,
     <MyLabel key="wordCount" propKey="propertyWordCount" title="Word Count" text={"" + result.wordCount}/>,
-    <MyLabel key="size" propKey="propertySize" title="Size" text={"" + humanFileSize(result.size, preferences.useSIUnits)}/>,
     <MyLabel key="attachmentCount" propKey="propertyAttachmentCount" title="Attachment Count" text={"" + result.attachmentCount}/>,
     <MyLabel key="numberOfDuplicates" propKey="propertyNumberOfDuplicates" title="Number of Duplicates" text={"" + result.numberOfDuplicates}/>,
     <MyLabel key="height" propKey="propertyHeight" title="Height" text={"" + result.height}/>,
