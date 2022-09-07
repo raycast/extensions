@@ -34,6 +34,15 @@
       "required": false
     },
     {
+      "title": "Properties order",
+      "name": "orderSearchResultItemProperties",
+      "label": "Properties order",
+      "description": "Order properties in search results",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
       "title": "Search Item Result Properties",
       "name": "propertyID",
       "label": "ID",

@@ -85,7 +85,7 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="indexed" propKey="propertyIndexed" title="Indexed" text={result.indexed ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSeeAlso" propKey="propertyExcludeFromSeeAlso" title="Exclude from See Also" text={result.excludeFromSeeAlso ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSearch" propKey="propertyExcludeFromSearch" title="Exclude from Search" text={result.excludeFromSearch ? "yes" : "no"}/>,
-  ];
+  ].filter(item => item !== null);
 }
 
 const Label = List.Item.Detail.Metadata.Label;
