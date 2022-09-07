@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ecosia-search",
-  "title": "ecosia-search",
+  "title": "Ecosia Search",
   "description": "Ecosia Search with autosuggestion",
   "icon": "command-icon.png",
   "author": "mcocirio",
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Ecosia Search",
-      "description": "Template for showing typeahead search with network results.",
+      "description": "Ecosia Search with autosuggestion",
       "mode": "view"
     }
   ],
