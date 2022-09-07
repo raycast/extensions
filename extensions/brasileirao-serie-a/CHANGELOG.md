@@ -1,3 +1,3 @@
 # Brasileiro Série A Changelog
 
-## [Initial Version] - 2022-09-04
+## [Initial Version] - 2022-09-07
