@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cal-com-share-meeting-links",
-  "title": "Cal.com Share Meeting Links",
+  "title": "Cal.com - Share Meeting Links",
   "description": "Quickly share your Cal.com meeting links",
   "icon": "logo.png",
   "author": "eluce2",
