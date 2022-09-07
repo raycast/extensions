@@ -1,6 +1,7 @@
 export type Preferences = {
   searchIsShowingDetail: boolean;
   hideEmptySearchResultItemProperties: boolean;
+  orderSearchResultItemProperties: string;
 
   propertyID: boolean;
   propertyUUID: boolean;

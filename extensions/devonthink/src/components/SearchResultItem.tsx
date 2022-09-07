@@ -23,8 +23,10 @@ const SearchResultItem = ({result}: { result: SearchResult }) => (
 
 export default SearchResultItem;
 
+const preferences: Preferences = getPreferenceValues();
+
 const searchResultMetadataItems = (result: SearchResult) => {
-  return [
+  const items = [
     <MyLabel key="uuid" propKey="propertyUUID" title="UUID" text={result.uuid}/>,
     <MyLabel key="name" propKey="propertyName" title="Name" text={result.name}/>,
     <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path}/>,
@@ -85,15 +87,30 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="indexed" propKey="propertyIndexed" title="Indexed" text={result.indexed ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSeeAlso" propKey="propertyExcludeFromSeeAlso" title="Exclude from See Also" text={result.excludeFromSeeAlso ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSearch" propKey="propertyExcludeFromSearch" title="Exclude from Search" text={result.excludeFromSearch ? "yes" : "no"}/>,
-  ].filter(item => item !== null);
+  ];
+
+  const orderKeys = preferences.orderSearchResultItemProperties.split(",").map((key) => key.trim().toLowerCase());
+  const ordered = [] as JSX.Element[];
+
+  orderKeys.forEach((key) => {
+    const index = items.findIndex(item => item.key?.toString().toLowerCase() === key);
+    if (index < 0) {
+      return;
+    }
+
+    ordered.push(items[index]);
+    items[index] = <></>;
+  });
+
+  const leftovers = items.filter(item => item.key !== null);
+
+  return ordered.concat(leftovers);
 }
 
 const Label = List.Item.Detail.Metadata.Label;
 const TagList = List.Item.Detail.Metadata.TagList;
 const Tag = TagList.Item;
 const Link = List.Item.Detail.Metadata.Link;
-
-const preferences: Preferences = getPreferenceValues();
 
 const MyLabel = ({propKey, title, text}: { propKey: PropertyKey, title: string, text?: string }) => {
   if (!preferences[propKey]) {
