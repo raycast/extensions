@@ -12,7 +12,7 @@ export default function Command() {
   return (
     <List enableFiltering={false} onSearchTextChange={setSearchText} isLoading={isLoading} isShowingDetail throttle>
       {isLoading ? (
-        <List.EmptyView title="Reticulating splines..." />
+        <List.EmptyView description="Reticulating splines..." />
       ) : (
         data?.casts.map((cast: Cast) => {
           return (
