@@ -49,7 +49,16 @@ export interface Reply {
   created: number;
   member: Pick<Member, "id" | "username" | "url">;
 }
-
+export interface Notification {
+  id: number;
+  member_id: number;
+  for_member_id: number;
+  text: string;
+  payload: string;
+  payload_rendered: string;
+  created: number;
+  member: Pick<Member, "username">;
+}
 export enum TopicSource {
   "Hot" = "hot",
   "Latest" = "latest",

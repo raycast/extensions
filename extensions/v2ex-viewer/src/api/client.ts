@@ -1,6 +1,6 @@
-import Axios from "axios";
-import { getToken, getProxy } from "../utils/preference";
-import { Reply, Topic, TopicSource } from "./types";
+import Axios, { AxiosResponse } from "axios";
+import { getToken, getProxy, hasToken } from "../utils/preference";
+import { Notification, Reply, Topic, TopicSource } from "./types";
 import { Response } from "./interfaces";
 import { showToast, Toast } from "@raycast/api";
 const client = Axios.create({
@@ -9,65 +9,63 @@ const client = Axios.create({
 });
 
 // Add Token
-client.interceptors.request.use(
-  (config) => {
-    if (!config.headers) {
-      config.headers = {};
-    }
-    const token = getToken();
-    token && (config.headers.Authorization = `Bearer ${token}`);
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+client.interceptors.request.use((config) => {
+  if (!config.headers) {
+    config.headers = {};
   }
-);
+  const token = getToken();
+  token && (config.headers.Authorization = `Bearer ${token}`);
+  return config;
+});
 // Add Proxy
+client.interceptors.request.use((config) => {
+  const proxy = getProxy();
+  config.proxy = proxy;
+  return config;
+});
+// Show Toast
 client.interceptors.request.use(
-  (config) => {
-    const proxy = getProxy();
-    config.proxy = proxy;
+  async (config) => {
+    showToast({ title: "Fetching", message: config.url, style: Toast.Style.Animated });
     return config;
   },
   (error) => {
+    showToast({ title: "Error", style: Toast.Style.Failure });
     return Promise.reject(error);
   }
 );
-// Show Toast
 client.interceptors.response.use(
   (response) => {
-    showToast({ title: "Success", style: Toast.Style.Success });
-    return response;
+    showToast({ title: "Success", message: response.config.url, style: Toast.Style.Success });
+    // console.log(`${response.status} - ${response.config.url}`);
+    return response?.data.result || response?.data;
   },
   (error) => {
-    if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
-      showToast({ title: "Timeout", message: "Please check the proxy settings", style: Toast.Style.Failure });
-    }
+    // console.log(`${error.response?.status || error.code} - ${error.config?.url || error.message}`);
     if (error.response) {
       if (error.response.status === 401) {
         showToast({
-          title: "Error",
-          message: error.response.data.message || "Please check the token setting",
+          title: "Authentication",
+          message: error.response.data.message,
           style: Toast.Style.Failure,
         });
       }
+      return;
     }
-    return error;
+    showToast({ title: error.code, message: error.message, style: Toast.Style.Failure });
+    return;
   }
 );
-
-const getTopics = async (source: TopicSource) => {
-  showToast({ title: `Fetching Topics`, style: Toast.Style.Animated });
-  const response = await client.get<Topic[]>(`/topics/${source}.json`);
-  return response.data;
+const getTopicsBySource = async (source: TopicSource) => {
+  const response = await client.get<Topic[], Topic[]>(`/topics/${source}.json`);
+  return response;
 };
-const getTopicReplies = async (topicId: number, signal?: AbortSignal) => {
-  const token = getToken();
-  if (!token) return;
-  showToast({ title: "Fetching Replies", style: Toast.Style.Animated });
-  const response = await client.get<Response<Reply[]>>(`/v2/topics/${topicId}/replies`, {
-    signal: signal,
-  });
-  return response.data;
+const getTopicReplies = async (topicId: number) => {
+  const response = await client.get<Response<Reply[]>, Reply[]>(`/v2/topics/${topicId}/replies`);
+  return response;
 };
-export { getTopics, getTopicReplies };
+const getNotifications = async () => {
+  const response = await client.get<Response<Notification[]>, Notification[]>(`/v2/notifications`);
+  return response;
+};
+export { getTopicsBySource, getTopicReplies, getNotifications };

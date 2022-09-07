@@ -4,7 +4,6 @@ export interface Preferences {
   hostname?: string;
   port?: string;
   token?: string;
-  isShowTopicDetail: boolean;
   topicDetailStyle: string;
 }
 export enum TopicDetailStyle {
@@ -25,9 +24,13 @@ const getToken = () => {
   const { token } = getPreferenceValues<Preferences>();
   return token;
 };
+const hasToken = () => {
+  const token = getToken();
+  return !!token;
+};
 const getTopicDetailStyle = () => {
   const { topicDetailStyle } = getPreferenceValues<Preferences>();
   return topicDetailStyle;
 };
 
-export { getProxy, getToken, getTopicDetailStyle };
+export { getProxy, hasToken, getToken, getTopicDetailStyle };

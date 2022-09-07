@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "v2ex-viewer",
   "title": "V2EX",
-  "description": "View V2EX topics in Raycast.",
+  "description": "View V2EX in Raycast.",
   "icon": "v2ex-icon.png",
   "author": "daikaiyu",
   "categories": [
@@ -19,15 +19,6 @@
     }
   ],
   "preferences": [
-    {
-      "required": true,
-      "name": "isShowTopicDetail",
-      "description": "Whether to display topic details by default",
-      "type": "checkbox",
-      "title": "Show Topic Detail By Default",
-      "default": false,
-      "label": "Show"
-    },
     {
       "required": true,
       "name": "topicDetailStyle",
@@ -75,7 +66,8 @@
     "@raycast/api": "^1.39.2",
     "@raycast/utils": "^1.3.1",
     "axios": "^0.27.2",
-    "dayjs": "^1.11.5"
+    "dayjs": "^1.11.5",
+    "immer": "^9.0.15"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

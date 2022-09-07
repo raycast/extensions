@@ -14,14 +14,14 @@ const Heading = (level: number, content: string) => {
 };
 
 const OP = (isOP: boolean) => {
-  return isOP ? Code("OP") : "";
+  return isOP ? ` ${Code("OP")} ` : "";
 };
 
-const getTopicMarkdownContent = (topic: Topic, replies: Reply[], includeHeader = false) => {
+const getTopicMarkdownContent = (topic: Topic, replies: Reply[], includeHeader = true) => {
   const topicTitle = `${Heading(1, topic.title)}`;
-  const topicMember = `${Bold(Link(topic.member.username, topic.member.url))} · ${getUnixFromNow(topic.created)} · ${
-    topic.replies
-  } 条回复`;
+  const topicMember = `${Code(topic.node.title)} · ${Bold(
+    Link(topic.member.username, topic.member.url)
+  )} · ${getUnixFromNow(topic.created)}`;
   const header = `${topicTitle}${LINE_BREAK}${topicMember}`;
 
   const topicContent = `${topic.content}`;
@@ -34,7 +34,9 @@ const getTopicMarkdownContent = (topic: Topic, replies: Reply[], includeHeader =
 };
 
 const getReplyMarkdownContent = (reply: Reply, isOP = false) => {
-  const replyMember = `${Bold(Link(reply.member.username, reply.member.url))} ${OP(isOP)}`;
+  const replyMember = `${Bold(Link(reply.member.username, reply.member.url))} ${OP(isOP)} ${getUnixFromNow(
+    reply.created
+  )}`;
   const replyContent = `${reply.content}`;
   return `${replyMember}${LINE_BREAK}${replyContent}`;
 };

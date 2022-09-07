@@ -1,28 +1,18 @@
-import { getPreferenceValues, List, Action, ActionPanel, Icon } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { List } from "@raycast/api";
 import { useState } from "react";
-import { getTopics } from "./api/client";
+import { useTopicsBySource } from "./api/hooks";
 import { Topic, TopicSource } from "./api/types";
 import TopicListItem from "./components/TopicListItem";
-import { Preferences } from "./utils/preference";
-
-interface TopicSourceDropdownProps {
-  sources: { title: string; value: string }[];
-  onSourceChange: (source: string) => void;
-}
 
 export default function Command() {
-  const [topicSource, setTopicSource] = useState<TopicSource>(TopicSource.Latest);
-  const { data: topics, isLoading } = useCachedPromise(getTopics, [topicSource], { keepPreviousData: true });
-  const [isShowingDetail, setIsShowingDetail] = useState(
-    () => getPreferenceValues<Preferences>().isShowTopicDetail || false
-  );
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [source, setSource] = useState<TopicSource>(TopicSource.Latest);
+  const topics = useTopicsBySource(source);
   return (
     <List
-      isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Topic Source" onChange={(source) => setTopicSource(source as TopicSource)}>
+        <List.Dropdown tooltip="Select Topic Source" onChange={(source) => setSource(source as TopicSource)}>
           <List.Dropdown.Section title="Source">
             <List.Dropdown.Item title="Latest" value={TopicSource.Latest} />
             <List.Dropdown.Item title="Hot" value={TopicSource.Hot} />
@@ -30,10 +20,14 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {topics &&
-        topics.map((topic: Topic) => (
-          <TopicListItem isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} topic={topic} />
-        ))}
+      {topics.map((topic: Topic) => (
+        <TopicListItem
+          key={topic.id}
+          isShowingDetail={isShowingDetail}
+          setIsShowingDetail={setIsShowingDetail}
+          topic={topic}
+        />
+      ))}
     </List>
   );
 }
