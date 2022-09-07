@@ -34,6 +34,14 @@
       "required": false
     },
     {
+      "name": "useSIUnits",
+      "label": "Use SI Units",
+      "description": "Use SI units for file sizes",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "title": "Properties order",
       "name": "orderSearchResultItemProperties",
       "label": "Properties order",

@@ -66,7 +66,7 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="rating" propKey="propertyRating" title="Rating" text={"" + result.rating}/>,
     <MyLabel key="pageCount" propKey="propertyPageCount" title="Page Count" text={"" + result.pageCount}/>,
     <MyLabel key="wordCount" propKey="propertyWordCount" title="Word Count" text={"" + result.wordCount}/>,
-    <MyLabel key="size" propKey="propertySize" title="Size" text={"" + result.size}/>,
+    <MyLabel key="size" propKey="propertySize" title="Size" text={"" + humanFileSize(result.size, preferences.useSIUnits)}/>,
     <MyLabel key="attachmentCount" propKey="propertyAttachmentCount" title="Attachment Count" text={"" + result.attachmentCount}/>,
     <MyLabel key="numberOfDuplicates" propKey="propertyNumberOfDuplicates" title="Number of Duplicates" text={"" + result.numberOfDuplicates}/>,
     <MyLabel key="height" propKey="propertyHeight" title="Height" text={"" + result.height}/>,
@@ -137,3 +137,25 @@ const MyLink = ({propKey, title, text, target}: { propKey: PropertyKey, title: s
 
   return <Link title={title} text={text} target={target}/>;
 }
+
+const humanFileSize = (bytes: number, si=false, decimalPlaces=1) => {
+  const thresh = si ? 1000 : 1024;
+
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' B';
+  }
+
+  const units = si
+    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  let unitIndex = -1;
+  const r = 10**decimalPlaces;
+
+  do {
+    bytes /= thresh;
+    ++unitIndex;
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && unitIndex < units.length - 1);
+
+
+  return bytes.toFixed(decimalPlaces) + ' ' + units[unitIndex];
+};
