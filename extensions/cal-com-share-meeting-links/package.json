@@ -10,6 +10,9 @@
     "Communication",
     "Productivity"
   ],
+  "contributors": [
+      "pernielsentikaer"
+  ]
   "commands": [
     {
       "name": "index",
