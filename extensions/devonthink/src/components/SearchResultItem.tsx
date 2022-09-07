@@ -32,9 +32,9 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path}/>,
     <TagList key="tags" title="Tags">{result.tags.map((tag) => <Tag key={tag} text={tag}/>)}</TagList>,
     <MyLabel key="geolocation" propKey="propertyGeolocation" title="Geolocation" text={result.geolocation}/>,
-    <MyLabel key="date" propKey="propertyDate" title="Date" text={result.date}/>,
-    <MyLabel key="additionDate" propKey="propertyAdditionDate" title="Addition Date" text={result.additionDate}/>,
-    <MyLabel key="modificationDate" propKey="propertyModificationDate" title="Modification Date" text={result.modificationDate}/>,
+    <MyLabel key="date" propKey="propertyDate" title="Date" text={prettyDate(result.date)}/>,
+    <MyLabel key="additionDate" propKey="propertyAdditionDate" title="Addition Date" text={prettyDate(result.additionDate)}/>,
+    <MyLabel key="modificationDate" propKey="propertyModificationDate" title="Modification Date" text={prettyDate(result.modificationDate)}/>,
     <MyLink key="url" propKey="propertyUrl" title="URL" text={result.url} target={result.url}/>,
     <MyLabel key="type" propKey="propertyType" title="Type" text={result.type}/>,
     <MyLabel key="contentHash" propKey="propertyContentHash" title="Content Hash" text={result.contentHash}/>,
@@ -47,9 +47,9 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="locationGroup" propKey="propertyLocationGroup" title="Location Group" text={result.locationGroup}/>,
     <MyLabel key="kind" propKey="propertyKind" title="Kind" text={result.kind}/>,
     <MyLabel key="mimeType" propKey="propertyMimeType" title="MIME Type" text={result.mimeType}/>,
-    <MyLabel key="openingDate" propKey="propertyOpeningDate" title="Opening Date" text={result.openingDate}/>,
+    <MyLabel key="openingDate" propKey="propertyOpeningDate" title="Opening Date" text={prettyDate(result.openingDate)}/>,
     <MyLabel key="attachedScript" propKey="propertyAttachedScript" title="Attached Script" text={result.attachedScript}/>,
-    <MyLabel key="creationDate" propKey="propertyCreationDate" title="Creation Date" text={result.creationDate}/>,
+    <MyLabel key="creationDate" propKey="propertyCreationDate" title="Creation Date" text={prettyDate(result.creationDate)}/>,
     <MyLabel key="class" propKey="propertyClass" title="Class" text={result.class}/>,
 
     <MyLabel key="id" propKey="propertyID" title="ID" text={"" + result.id}/>,
@@ -136,6 +136,12 @@ const MyLink = ({propKey, title, text, target}: { propKey: PropertyKey, title: s
   }
 
   return <Link title={title} text={text} target={target}/>;
+}
+
+const prettyDate = (date: string) => {
+  const dateObj = new Date(date);
+
+  return `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}`;
 }
 
 const humanFileSize = (bytes: number, si=false, decimalPlaces=1) => {

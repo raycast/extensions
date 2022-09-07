@@ -504,7 +504,7 @@
       "label": "Label",
       "description": "Show Label",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
