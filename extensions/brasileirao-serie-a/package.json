@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brasileirao-serie-a",
-  "title": "Brasileirão Série A",
+  "title": "Brasileiro Série A",
   "description": "View the brazilian first division upcoming games, standings and results.",
   "icon": "icon.png",
   "author": "willian",
@@ -13,18 +13,21 @@
     {
       "name": "upcoming",
       "title": "Upcoming",
+      "subtitle": "Brasileiro Série A",
       "description": "View upcoming games for the season",
       "mode": "view"
     },
     {
       "name": "results",
       "title": "Results",
+      "subtitle": "Brasileiro Série A",
       "description": "View games results for the season",
       "mode": "view"
     },
     {
       "name": "standings",
       "title": "Standings",
+      "subtitle": "Brasileiro Série A",
       "description": "View the league table for the current season",
       "mode": "view"
     }
