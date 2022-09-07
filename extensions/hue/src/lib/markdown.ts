@@ -45,7 +45,7 @@ export const linkWithBridgeMessage = `
 
 ![Press Button](${buttonImagePath})
 
-Press the button in the center and use the ‘Link With Bridge’ action to connect.
+Press the link button in the center of the bridge and press enter.
 `;
 
 export const failedToLinkMessage = `
