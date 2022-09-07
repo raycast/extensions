@@ -36,6 +36,7 @@
     "@raycast/api": "^1.39.2",
     "@raycast/utils": "^1.3.3",
     "binary-split": "^1.0.5",
+    "run-applescript": "^6.0.0",
     "through2-map": "^3.0.0"
   },
   "devDependencies": {

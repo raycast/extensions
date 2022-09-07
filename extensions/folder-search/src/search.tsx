@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchSpotlight } from "./search-spotlight";
 import { SpotlightSearchResult } from "./types";
 
-import { folderName, enclosingFolderName, maybeMoveResultToTrash } from "./utils";
+import { folderName, enclosingFolderName, maybeMoveResultToTrash, copyFolderToClipboard } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -140,24 +140,21 @@ export default function Command() {
                 onAction={toggleDetails}
               />
               <ActionPanel.Section>
-                {/* would be nice to implement this? */}
-                {/* <Action.CopyToClipboard
+                <Action.CopyToClipboard
                   title="Copy Folder"
                   shortcut={{ modifiers: ["cmd"], key: "." }}
-                  content={result.path}
-                  onCopy={() => popToRoot({ clearSearchBar: true })}
-                /> */}
+                  content={``}
+                  onCopy={() => copyFolderToClipboard(result)}
+                />
                 <Action.CopyToClipboard
                   title="Copy Name"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   content={folderName(result)}
-                  onCopy={() => popToRoot({ clearSearchBar: true })}
                 />
                 <Action.CopyToClipboard
                   title="Copy Path"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   content={result.path}
-                  onCopy={() => popToRoot({ clearSearchBar: true })}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
