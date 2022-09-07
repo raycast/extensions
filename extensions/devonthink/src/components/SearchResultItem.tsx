@@ -27,32 +27,34 @@ const preferences: Preferences = getPreferenceValues();
 
 const searchResultMetadataItems = (result: SearchResult) => {
   const items = [
-    <MyLabel key="uuid" propKey="propertyUUID" title="UUID" text={result.uuid}/>,
     <MyLabel key="name" propKey="propertyName" title="Name" text={result.name}/>,
-    <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path}/>,
     <TagList key="tags" title="Tags">{result.tags.map((tag) => <Tag key={tag} text={tag}/>)}</TagList>,
     <MyLabel key="geolocation" propKey="propertyGeolocation" title="Geolocation" text={result.geolocation}/>,
-    <MyLabel key="date" propKey="propertyDate" title="Date" text={prettyDate(result.date)}/>,
-    <MyLabel key="additionDate" propKey="propertyAdditionDate" title="Addition Date" text={prettyDate(result.additionDate)}/>,
+    <MyLink key="url" propKey="propertyUrl" title="URL" text={getDomain(result.url)} target={result.url}/>,
+    <MyLabel key="creationDate" propKey="propertyCreationDate" title="Creation Date" text={prettyDate(result.creationDate)}/>,
     <MyLabel key="modificationDate" propKey="propertyModificationDate" title="Modification Date" text={prettyDate(result.modificationDate)}/>,
-    <MyLink key="url" propKey="propertyUrl" title="URL" text={result.url} target={result.url}/>,
+    <MyLabel key="openingDate" propKey="propertyOpeningDate" title="Opening Date" text={prettyDate(result.openingDate)}/>,
+    <MyLabel key="additionDate" propKey="propertyAdditionDate" title="Addition Date" text={prettyDate(result.additionDate)}/>,
+    <MyLabel key="location" propKey="propertyLocation" title="Location" text={result.location}/>,
+
+    <MyLink key="referenceURL" propKey="propertyReferenceURL" title="Reference URL" text={getDomain(result.referenceURL)} target={result.referenceURL}/>,
+    <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path}/>,
+    <MyLabel key="id" propKey="propertyID" title="ID" text={"" + result.id}/>,
+    <MyLabel key="uuid" propKey="propertyUUID" title="UUID" text={result.uuid}/>,
+
+    <MyLabel key="date" propKey="propertyDate" title="Date" text={prettyDate(result.date)}/>,
     <MyLabel key="type" propKey="propertyType" title="Type" text={result.type}/>,
     <MyLabel key="contentHash" propKey="propertyContentHash" title="Content Hash" text={result.contentHash}/>,
-    <MyLabel key="location" propKey="propertyLocation" title="Location" text={result.location}/>,
     <MyLabel key="filename" propKey="propertyFilename" title="Filename" text={result.filename}/>,
     <MyLabel key="aliases" propKey="propertyAliases" title="Aliases" text={result.aliases}/>,
-    <MyLink key="referenceURL" propKey="propertyReferenceURL" title="Reference URL" text="URL" target={result.referenceURL}/>,
     <MyLabel key="comment" propKey="propertyComment" title="Comment" text={result.comment}/>,
     <MyLabel key="tagType" propKey="propertyTagType" title="Tag Type" text={result.tagType}/>,
     <MyLabel key="locationGroup" propKey="propertyLocationGroup" title="Location Group" text={result.locationGroup}/>,
     <MyLabel key="kind" propKey="propertyKind" title="Kind" text={result.kind}/>,
     <MyLabel key="mimeType" propKey="propertyMimeType" title="MIME Type" text={result.mimeType}/>,
-    <MyLabel key="openingDate" propKey="propertyOpeningDate" title="Opening Date" text={prettyDate(result.openingDate)}/>,
     <MyLabel key="attachedScript" propKey="propertyAttachedScript" title="Attached Script" text={result.attachedScript}/>,
-    <MyLabel key="creationDate" propKey="propertyCreationDate" title="Creation Date" text={prettyDate(result.creationDate)}/>,
     <MyLabel key="class" propKey="propertyClass" title="Class" text={result.class}/>,
 
-    <MyLabel key="id" propKey="propertyID" title="ID" text={"" + result.id}/>,
     <MyLabel key="score" propKey="propertyScore" title="Score" text={"" + result.score}/>,
     <MyLabel key="numberOfHits" propKey="propertyNumberOfHits" title="Number of Hits" text={"" + result.numberOfHits}/>,
     <MyLabel key="altitude" propKey="propertyAltitude" title="Altitude" text={"" + result.altitude}/>,
@@ -165,3 +167,5 @@ const humanFileSize = (bytes: number, si=false, decimalPlaces=1) => {
 
   return bytes.toFixed(decimalPlaces) + ' ' + units[unitIndex];
 };
+
+const getDomain = (url: string) => url.replace(/^[^:]+:\/\/([^/]+).*$/, "$1")
