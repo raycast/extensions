@@ -37,7 +37,7 @@
       "title": "Search Item Result Properties",
       "name": "propertyID",
       "label": "ID",
-      "description": "Show ID",
+      "description": "Show Item ID",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -61,7 +61,7 @@
     {
       "name": "propertyScore",
       "label": "score",
-      "description": "",
+      "description": "Show Score",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -69,7 +69,7 @@
     {
       "name": "propertyPath",
       "label": "path",
-      "description": "",
+      "description": "Show Path",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -77,7 +77,7 @@
     {
       "name": "propertyTags",
       "label": "tags",
-      "description": "",
+      "description": "Show Tags",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -85,7 +85,7 @@
     {
       "name": "propertyNumberOfHits",
       "label": "numberOfHits",
-      "description": "",
+      "description": "Show Number of Hits",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -93,7 +93,7 @@
     {
       "name": "propertyAltitude",
       "label": "altitude",
-      "description": "",
+      "description": "Show Altitude",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -101,7 +101,7 @@
     {
       "name": "propertyGeolocation",
       "label": "geolocation",
-      "description": "",
+      "description": "Show Geolocation",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -109,7 +109,7 @@
     {
       "name": "propertyLatitude",
       "label": "latitude",
-      "description": "",
+      "description": "Show Latitude",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -117,7 +117,7 @@
     {
       "name": "propertyInterval",
       "label": "interval",
-      "description": "",
+      "description": "Show Interval",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -125,7 +125,7 @@
     {
       "name": "propertyNumberOfReplicants",
       "label": "numberOfReplicants",
-      "description": "",
+      "description": "Show Number of Replicants",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -133,7 +133,7 @@
     {
       "name": "propertyBatesNumber",
       "label": "batesNumber",
-      "description": "",
+      "description": "Show Bates Number",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -141,7 +141,7 @@
     {
       "name": "propertyNameWithoutExtension",
       "label": "nameWithoutExtension",
-      "description": "",
+      "description": "Show Name Without Extension",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -149,7 +149,7 @@
     {
       "name": "propertyState",
       "label": "state",
-      "description": "",
+      "description": "Show State",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -157,7 +157,7 @@
     {
       "name": "propertyAnnotationCount",
       "label": "annotationCount",
-      "description": "",
+      "description": "Show Annotation Count",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -165,7 +165,7 @@
     {
       "name": "propertyDate",
       "label": "date",
-      "description": "",
+      "description": "Show Date",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -173,7 +173,7 @@
     {
       "name": "propertyCharacterCount",
       "label": "characterCount",
-      "description": "",
+      "description": "Show Character Count",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -181,7 +181,7 @@
     {
       "name": "propertyAdditionDate",
       "label": "additionDate",
-      "description": "",
+      "description": "Show Addition Date",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -189,7 +189,7 @@
     {
       "name": "propertyModificationDate",
       "label": "modificationDate",
-      "description": "",
+      "description": "Show Modification Date",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -197,7 +197,7 @@
     {
       "name": "propertyRating",
       "label": "rating",
-      "description": "",
+      "description": "Show Rating",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -205,7 +205,7 @@
     {
       "name": "propertyUrl",
       "label": "url",
-      "description": "",
+      "description": "Show URL",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -213,7 +213,7 @@
     {
       "name": "propertyLongitude",
       "label": "longitude",
-      "description": "",
+      "description": "Show Longitude",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -221,7 +221,7 @@
     {
       "name": "propertyPageCount",
       "label": "pageCount",
-      "description": "",
+      "description": "Show Page Count",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -229,7 +229,7 @@
     {
       "name": "propertyType",
       "label": "type",
-      "description": "",
+      "description": "Show Type",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -237,7 +237,7 @@
     {
       "name": "propertyExcludeFromTagging",
       "label": "excludeFromTagging",
-      "description": "",
+      "description": "Show Exclude From Tagging",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -245,7 +245,7 @@
     {
       "name": "propertyContentHash",
       "label": "contentHash",
-      "description": "",
+      "description": "Show Content Hash",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -253,7 +253,7 @@
     {
       "name": "propertyLocation",
       "label": "location",
-      "description": "",
+      "description": "Show Location",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -261,7 +261,7 @@
     {
       "name": "propertyMetaData",
       "label": "metaData",
-      "description": "",
+      "description": "Show Meta Data",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -269,7 +269,7 @@
     {
       "name": "propertyStateVisibility",
       "label": "stateVisibility",
-      "description": "",
+      "description": "Show State Visibility",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -277,7 +277,7 @@
     {
       "name": "propertyWordCount",
       "label": "wordCount",
-      "description": "",
+      "description": "Show Word Count",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -285,7 +285,7 @@
     {
       "name": "propertyFilename",
       "label": "filename",
-      "description": "",
+      "description": "Show Filename",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -293,7 +293,7 @@
     {
       "name": "propertyAliases",
       "label": "aliases",
-      "description": "",
+      "description": "Show Aliases",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -301,7 +301,7 @@
     {
       "name": "propertyExcludeFromWikiLinking",
       "label": "excludeFromWikiLinking",
-      "description": "",
+      "description": "Show Exclude From Wiki Linking",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -309,7 +309,7 @@
     {
       "name": "propertySize",
       "label": "size",
-      "description": "",
+      "description": "Show Size",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -317,7 +317,7 @@
     {
       "name": "propertyExcludeFromClassification",
       "label": "excludeFromClassification",
-      "description": "",
+      "description": "Show Exclude From Classification",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -325,7 +325,7 @@
     {
       "name": "propertyReferenceURL",
       "label": "referenceURL",
-      "description": "",
+      "description": "Show Reference URL",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -333,7 +333,7 @@
     {
       "name": "propertyAttachmentCount",
       "label": "attachmentCount",
-      "description": "",
+      "description": "Show Attachment Count",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -341,7 +341,7 @@
     {
       "name": "propertyComment",
       "label": "comment",
-      "description": "",
+      "description": "Show Comment",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -349,7 +349,7 @@
     {
       "name": "propertyNumberOfDuplicates",
       "label": "numberOfDuplicates",
-      "description": "",
+      "description": "Show Number Of Duplicates",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -357,7 +357,7 @@
     {
       "name": "propertyTagType",
       "label": "tagType",
-      "description": "",
+      "description": "Show Tag Type",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -365,7 +365,7 @@
     {
       "name": "propertyLocationGroup",
       "label": "locationGroup",
-      "description": "",
+      "description": "Show Location Group",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -373,7 +373,7 @@
     {
       "name": "propertyHeight",
       "label": "height",
-      "description": "",
+      "description": "Show Height",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -381,7 +381,7 @@
     {
       "name": "propertyKind",
       "label": "kind",
-      "description": "",
+      "description": "Show Kind",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -389,7 +389,7 @@
     {
       "name": "propertyLocking",
       "label": "locking",
-      "description": "",
+      "description": "Show Locking",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -397,7 +397,7 @@
     {
       "name": "propertyMimeType",
       "label": "mimeType",
-      "description": "",
+      "description": "Show MIME Type",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -405,7 +405,7 @@
     {
       "name": "propertyOpeningDate",
       "label": "openingDate",
-      "description": "",
+      "description": "Show Opening Date",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -413,7 +413,7 @@
     {
       "name": "propertyUnread",
       "label": "unread",
-      "description": "",
+      "description": "Show Unread",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -421,7 +421,7 @@
     {
       "name": "propertyIndexed",
       "label": "indexed",
-      "description": "",
+      "description": "Show Indexed",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -429,7 +429,7 @@
     {
       "name": "propertyDuration",
       "label": "duration",
-      "description": "",
+      "description": "Show Duration",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -437,7 +437,7 @@
     {
       "name": "propertyAttachedScript",
       "label": "attachedScript",
-      "description": "",
+      "description": "Show Attached Script",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -445,7 +445,7 @@
     {
       "name": "propertyExcludeFromSeeAlso",
       "label": "excludeFromSeeAlso",
-      "description": "",
+      "description": "Show Exclude From See Also",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -453,7 +453,7 @@
     {
       "name": "propertyDpi",
       "label": "dpi",
-      "description": "",
+      "description": "Show DPI",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -461,7 +461,7 @@
     {
       "name": "propertyCreationDate",
       "label": "creationDate",
-      "description": "",
+      "description": "Show Creation Date",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -469,7 +469,7 @@
     {
       "name": "propertyExcludeFromSearch",
       "label": "excludeFromSearch",
-      "description": "",
+      "description": "Show Exclude From Search",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -477,7 +477,7 @@
     {
       "name": "propertyWidth",
       "label": "width",
-      "description": "",
+      "description": "Show Width",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -485,7 +485,7 @@
     {
       "name": "propertyLabel",
       "label": "label",
-      "description": "",
+      "description": "Show Label",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -493,7 +493,7 @@
     {
       "name": "propertyClass",
       "label": "class",
-      "description": "",
+      "description": "Show Class",
       "type": "checkbox",
       "default": true,
       "required": false
