@@ -1,9 +1,15 @@
-# Ecosia Search Extension for Raycast
+# [Ecosia Search](ecosia.org) Extension for Raycast
 
 Ecosia Search with autosuggestion, is an extension for Raycast.
 
-## Author
+All rights reserved to [Ecosia](ecosia.org).
 
-(Twitter)[https://twitter.com/MarianoCocirio]
-(GitHub)[https://github.com/MFCo]
-(Website)[https://mcocirio.com]
+  
+
+## Extension Author
+
+[Twitter](https://twitter.com/MarianoCocirio)
+
+[GitHub](https://github.com/MFCo)
+
+[Website](https://mcocirio.com)
