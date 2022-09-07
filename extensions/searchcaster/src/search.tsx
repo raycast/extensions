@@ -23,7 +23,7 @@ export default function Command() {
                 { date: new Date(cast.body.publishedAt) },
                 { icon: { source: cast.meta.avatar ?? Icon.PersonCircle, mask: Image.Mask.Circle } },
               ]}
-              icon={cast.body.data.replyParentMerkleRoot ? Icon.Reply : undefined}
+              icon={cast.body.data.replyParentMerkleRoot ? Icon.Reply : Icon.Message}}
               detail={<CastDetails cast={cast} />}
               actions={<Actions cast={cast} farcasterInstalled={hasFarcaster} />}
             />
