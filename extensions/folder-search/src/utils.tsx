@@ -1,4 +1,4 @@
-import { Alert, Icon, confirmAlert, trash, showToast, showHUD } from "@raycast/api";
+import { Alert, Icon, confirmAlert, trash, showToast } from "@raycast/api";
 
 import { runAppleScriptSync } from "run-applescript";
 
@@ -20,7 +20,6 @@ const enclosingFolderName = (result: SpotlightSearchResult) => {
 
 const copyFolderToClipboard = (result: SpotlightSearchResult) => {
   runAppleScriptSync(`set the clipboard to POSIX file "${result.path}"`);
-  // showHUD(`Copied folder to clipboard`);
 };
 
 const maybeMoveResultToTrash = async (result: SpotlightSearchResult) => {
