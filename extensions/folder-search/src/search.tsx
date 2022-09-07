@@ -128,6 +128,12 @@ export default function Command() {
           }
           actions={
             <ActionPanel title={folderName(result)}>
+              <Action.Open
+                title="Open"
+                icon={Icon.Folder}
+                target={result.path}
+                onOpen={() => popToRoot({ clearSearchBar: true })}
+              />
               <Action.ShowInFinder
                 title="Show in Finder"
                 path={result.path}
@@ -148,7 +154,7 @@ export default function Command() {
                 />
                 <Action.CopyToClipboard
                   title="Copy Name"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   content={folderName(result)}
                 />
                 <Action.CopyToClipboard
