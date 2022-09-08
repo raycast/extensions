@@ -22,7 +22,7 @@
       "label": "Show Details in Search Results",
       "description": "Show details of the search result",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
