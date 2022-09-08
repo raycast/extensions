@@ -78,8 +78,7 @@
     "@api-blueprints/pathmaker": "^1.0.0",
     "@raycast/api": "^1.38.1",
     "node-fetch": "^3.2.6",
-    "open": "^8.4.0",
-    "turndown-rn": "^6.1.0"
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

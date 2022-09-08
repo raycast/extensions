@@ -16,6 +16,9 @@ export const Modules = (props: { id: number; url: string }) => {
     const getItems = async () => {
       try {
         const modules = await getModules(props.id);
+        for (const m of modules) {
+          console.log(m);
+        }
         setModules(modules);
       } catch {
         setModules(undefined);

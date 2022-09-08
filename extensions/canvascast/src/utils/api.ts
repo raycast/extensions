@@ -2,7 +2,6 @@ import API from "@api-blueprints/pathmaker";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, course, assignment, announcement, modulesection, moduleitem } from "./types";
 import { Colors, formatModuleItemTitle, formatModuleItemPasscode } from "./utils";
-import TurndownService from "turndown-rn";
 
 export function getApi(token: string, domain: string) {
   return new API({
@@ -16,7 +15,6 @@ export function getApi(token: string, domain: string) {
 
 const preferences: Preferences = getPreferenceValues();
 const api = getApi(preferences.token, preferences.domain);
-const service = new TurndownService();
 
 export const checkApi = async () => {
   return await api["courses?state=available&enrollment_state=active"].get();
@@ -39,15 +37,16 @@ export const getCourses = async (json: any): Promise<course[]> => {
 };
 
 export const getAssignments = async (courses: course[]): Promise<assignment[][]> => {
-  const promises = courses.map((course: any, i: number): assignment[] => {
+  const promises = courses.map((course: course, i: number): assignment[] => {
     return api.courses[course.id].assignments["?order_by=due_at"].get().then((json: any) => {
+      console.log(course.name); 
       return json
         .filter((assignment: any) => assignment.due_at && new Date(assignment.due_at).getTime() > Date.now())
         .map(
           (assignment: any): assignment => ({
             name: assignment.name,
             id: assignment.id,
-            description: `# ${assignment.name}\n\n` + service.turndown(assignment.description),
+            description: `# ${assignment.name}\n\n${assignment.description}`,
             date: new Date(assignment.created_at).toString().split(" ").slice(0, 4).join(" "),
             course: course.name,
             course_id: course.id,
@@ -73,7 +72,7 @@ export const getAnnouncements = async (courses: course[]): Promise<announcement[
         ],
       course: courses.filter((course) => course.id == announcement.context_code.substring(7))[0].name,
       id: announcement.id,
-      markdown: `# ${announcement.title}\n\n` + service.turndown(announcement.message),
+      markdown: `# ${announcement.title}\n\n${announcement.message}`,
       date: new Date(announcement.created_at).toString().split(" ").slice(0, 4).join(" "),
     })
   );

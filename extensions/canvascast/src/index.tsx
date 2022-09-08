@@ -27,12 +27,11 @@ export default function main() {
         }
         const courses = await getCourses(json);
         const assignments = await getAssignments(courses);
-        const announcements = await getAnnouncements(courses);
         courses.forEach((course: course, index: number) => {
           course.assignments = assignments[index];
         });
         setCourses(courses);
-        setAnnouncements(announcements);
+        setAnnouncements(await getAnnouncements(courses));
         setIsLoading(false);
       } catch {
         setCourses(null);
