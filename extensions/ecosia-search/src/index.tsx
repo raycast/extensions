@@ -103,24 +103,23 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   const json = (await response.json()) as
     | {
-      query: string,
-      suggestions: string[]
-      ;
-    }
+        query: string;
+        suggestions: string[];
+      }
     | { code: string; message: string };
 
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return searchText ? 
-    [{ name: searchText, url: "https://www.ecosia.org/search?q=" + searchText }, 
-    ...(json.suggestions
-      .map(
-        (suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + suggestion }))
-      .filter((suggestion) => suggestion.name !== searchText))]
-    : 
-    [];
+  return searchText
+    ? [
+        { name: searchText, url: "https://www.ecosia.org/search?q=" + searchText },
+        ...json.suggestions
+          .map((suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + suggestion }))
+          .filter((suggestion) => suggestion.name !== searchText),
+      ]
+    : [];
 }
 
 interface SearchState {
