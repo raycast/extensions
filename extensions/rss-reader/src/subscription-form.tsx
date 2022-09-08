@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Form,
-  SubmitFormAction,
-  showToast,
-  ToastStyle,
-  Icon,
-  Color,
-  setLocalStorageItem,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Form, showToast, Icon, Color, useNavigation, Action, LocalStorage, Toast } from "@raycast/api";
 import { useState } from "react";
 import { Feed, getFeeds } from "./feeds";
 import Parser from "rss-parser";
@@ -22,29 +12,44 @@ function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
   const addFeed = async (values: { feedURL: string }) => {
     try {
       setValue("");
-      showToast(ToastStyle.Animated, "Subscribing...");
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Subscribing...",
+      });
       const feed = await parser.parseURL(values.feedURL);
       const feedItem = {
         url: values.feedURL,
         title: feed.title || "No Title",
-        icon: feed.image?.url || Icon.TextDocument,
+        icon: feed.image?.url || Icon.BlankDocument,
       };
 
       const feedItems = await getFeeds();
       if (feedItems?.some((item) => item.url === feedItem.url)) {
-        await showToast(ToastStyle.Failure, "Feed already exists", feedItem.title);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Feed already exists",
+          message: feedItem.title,
+        });
         return;
       }
       feedItems?.push(feedItem);
-      await setLocalStorageItem("feeds", JSON.stringify(feedItems));
+      await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
 
-      await showToast(ToastStyle.Success, "Subscribed!", feedItem.title);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Subscribed!",
+        message: feedItem.title,
+      });
       if (props?.callback) {
         props.callback(feedItems);
         pop();
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Can't find feed", "No valid feed found on " + values.feedURL);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Can't find feed",
+        message: "No valid feed found on " + values.feedURL,
+      });
     }
   };
 
@@ -52,7 +57,7 @@ function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction
+          <Action.SubmitForm
             title="Subscribe"
             onSubmit={addFeed}
             icon={{ source: Icon.Plus, tintColor: Color.Green }}
