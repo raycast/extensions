@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Archive Indicator] - 2022-09-08
+
+- Add an archived status indicator.
+
 ## [MR Details] - 2022-08-04
 
 - Add date to list view MR details.

@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
@@ -22,11 +22,16 @@ import { ClearLocalCacheAction } from "./cache_actions";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
+  const accessories = [];
+  if (project.archived) {
+    accessories.push({ text: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } });
+  }
+  accessories.push({ text: project.star_count.toString(), icon: Icon.Star });
   return (
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
-      subtitle={"Stars " + project.star_count}
+      accessories={accessories}
       icon={projectIcon(project)}
       actions={
         <ActionPanel>
