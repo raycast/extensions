@@ -65,7 +65,6 @@ export default function Command() {
 export function Tiny() {
   const [searchText, setSearchText] = useState<undefined | string>(undefined);
   const [searchType, setSearchFilter] = useState<SearchFilters>("TOKEN_ID");
-  const [selectedId, setSelectedId] = useState<undefined | string>(undefined);
   const [ensAddress, setEnsAddress] = useState<undefined | string>(undefined);
   const [lookupENSAddress, setLookupENSAddress] = useState<boolean>(false);
 
@@ -122,7 +121,6 @@ export function Tiny() {
       searchBarPlaceholder={SEARCH_PLACEHOLDERS[searchType]}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      onSelectionChange={setSelectedId}
       searchBarAccessory={
         <SearchTypeDropdown
           searchTypes={Object.keys(SEARCH_TYPES) as SearchQueryStrings[]}
