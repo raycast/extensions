@@ -40,6 +40,20 @@ const SEARCH_QUERY_STRINGS: Record<SearchQueryStrings, string> = {
   MOUTH: "partial_mouth",
 };
 
+const SEARCH_PLACEHOLDERS: Record<SearchFilters, string> = {
+  TOKEN_ID: 'Eg: "34", "596", "2064", "3999"',
+  NAME: 'Eg: "Lisa", "Joe", "Yasmin", "Callum"',
+  ATMOSPHERE: 'Eg: "Confetti"',
+  BODY: 'Eg: "Army", "Apron", "Sailor", "Clown"',
+  COLOR: 'Eg: "Lemon Basil", "Ceramic", "Candy Ocean"',
+  EYE_COLOR: 'Eg: "Brown", "Blue", "Green", "Grey"',
+  FACE: 'Eg: "Drew", "Jordan", "Alex", "Taylor"',
+  GLASSES: 'Eg: "Modern", "Square", "Rectangle", "Mega"',
+  HAT: 'Eg: "Beanie", "Bear", "Cap", "Jazz", "Bell Boy"',
+  MOUTH: 'Eg: "Bubblegum", "Face Mask", "Mustache"',
+  OWNER: 'Eg: "ped.eth", "0x1d1A1...cB751"',
+};
+
 export default function Command() {
   return (
     <WagmiConfig client={client}>
@@ -105,7 +119,7 @@ export function Tiny() {
       throttle
       isShowingDetail={Boolean(selectedId)}
       isLoading={isLoading}
-      searchBarPlaceholder="Search for token ID, name, or trait"
+      searchBarPlaceholder={SEARCH_PLACEHOLDERS[searchType]}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       onSelectionChange={setSelectedId}
@@ -187,6 +201,8 @@ function TokenDetail({ data }: { data: TokenData }) {
             text={`${data.atmosphere === "Confetti" ? "🎉" : data.atmosphere}`}
           />
           <List.Item.Detail.Metadata.Label title="Name" text={data.name} />
+          <List.Item.Detail.Metadata.Label title="Color" text={data.color} />
+          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Hat" text={data.hat} />
           <List.Item.Detail.Metadata.Label title="Face" text={data.face} />
           <List.Item.Detail.Metadata.Label title="Glasses" text={data.glasses} />
@@ -209,6 +225,7 @@ function SharedAction({ data }: { data: TokenData }) {
       <Action.OpenInBrowser title="Open on OpenSea" url={data.opensea_url} />
       <Action.OpenInBrowser title="Open Hi-Res Image" url={data.direct_url} />
       <Action.CopyToClipboard title="Copy Token ID" content={`#${data.token_id}`} />
+      <Action.CopyToClipboard title="Copy Color" content={`#${data.color}`} />
     </ActionPanel>
   );
 }
