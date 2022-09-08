@@ -117,7 +117,7 @@ export function Tiny() {
   return (
     <List
       throttle
-      isShowingDetail={Boolean(selectedId)}
+      isShowingDetail
       isLoading={isLoading}
       searchBarPlaceholder={SEARCH_PLACEHOLDERS[searchType]}
       searchText={searchText}
