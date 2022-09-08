@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import { SearchResult } from "../hooks/useSearch";
 import { Preferences, PropertyKey } from "../types/Preferences";
+import {SearchResult} from "../types/SearchResult";
 
 const SearchResultItem = ({ result }: { result: SearchResult }) => (
   <List.Item

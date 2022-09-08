@@ -1,10 +1,11 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import useSearch, { SearchResult } from "./hooks/useSearch";
+import useSearch from "./hooks/useSearch";
 import SearchResultItem from "./components/SearchResultItem";
 import useAppExists from "./hooks/useAppExists";
 import useDevonDB from "./hooks/useDevonDB";
 import { Preferences } from "./types/Preferences";
+import {SearchResult} from "./types/SearchResult";
 
 const search = () => {
   const appExists = useAppExists();
