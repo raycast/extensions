@@ -1,3 +1,8 @@
+type SpotlightSearchPreferences = {
+  name: string;
+  maxResults: number;
+};
+
 type SpotlightSearchDefinition = string[];
 
 type SpotlightSearchResult = {
@@ -10,4 +15,4 @@ type SpotlightSearchResult = {
   kMDItemLastUsedDate: Date;
 };
 
-export type { SpotlightSearchDefinition, SpotlightSearchResult };
+export type { SpotlightSearchPreferences, SpotlightSearchDefinition, SpotlightSearchResult };

@@ -1,6 +1,17 @@
 import { userInfo } from "os";
 
-import { Action, ActionPanel, Color, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  LocalStorage,
+  Toast,
+  environment,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,16 +22,49 @@ import { folderName, enclosingFolderName, maybeMoveResultToTrash, copyFolderToCl
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
-  const [showingDetail, setShowingDetail] = useState<boolean>(true);
-
   const [searchScope, setSearchScope] = useState<string>("");
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [canExecute, setCanExecute] = useState<boolean>(false);
+
+  const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>();
 
+  // check prefs
+  usePromise(
+    async () => {
+      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+
+      if (maybePreferences) {
+        try {
+          return JSON.parse(maybePreferences as string);
+        } catch (_) {
+          // noop
+        }
+      }
+    },
+    [],
+    {
+      onData(preferences) {
+        setSearchScope(preferences.searchScope);
+        setHasCheckedPreferences(true);
+      },
+      onError() {
+        showToast({
+          title: "An Error Occured",
+          message: "Could not read preferences",
+          style: Toast.Style.Failure,
+        });
+
+        setHasCheckedPreferences(true);
+      },
+    }
+  );
+
+  // perform search
   usePromise(
     searchSpotlight,
     [
@@ -34,11 +78,11 @@ export default function Command() {
     ],
     {
       onWillExecute: () => {
-        setIsLoading(true);
+        setIsQuerying(true);
         setCanExecute(false);
       },
       onData: () => {
-        setIsLoading(false);
+        setIsQuerying(false);
       },
       onError: () => {
         showToast({
@@ -47,135 +91,144 @@ export default function Command() {
           style: Toast.Style.Failure,
         });
 
-        setIsLoading(false);
+        setIsQuerying(false);
       },
-      execute: canExecute && !!searchText,
+      execute: hasCheckedPreferences && canExecute && !!searchText,
       abortable,
     }
   );
 
+  // save preferences
+  useEffect(() => {
+    (async () => {
+      if (!hasCheckedPreferences) {
+        return;
+      }
+
+      await LocalStorage.setItem(
+        `${environment.extensionName}-preferences`,
+        JSON.stringify({
+          searchScope,
+        })
+      );
+    })();
+  }, [searchScope]);
+
   useEffect(() => {
     (async () => {
       abortable.current?.abort();
-      setIsLoading(false);
 
       setResults([]);
-
-      if (!searchText) {
-        return;
-      }
 
       setCanExecute(true);
     })();
   }, [searchText, searchScope]);
 
-  const toggleDetails = () => {
-    setShowingDetail(!showingDetail);
-  };
-
   return (
     <List
-      isLoading={isLoading}
-      throttle={true}
+      isLoading={isQuerying}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
-      isShowingDetail={showingDetail}
+      isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="Type" onChange={setSearchScope}>
-          <List.Dropdown.Item title="This Mac" value=""></List.Dropdown.Item>
-          <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir}></List.Dropdown.Item>
-        </List.Dropdown>
+        hasCheckedPreferences ? (
+          <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
+            <List.Dropdown.Item title="This Mac" value=""></List.Dropdown.Item>
+            <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir}></List.Dropdown.Item>
+          </List.Dropdown>
+        ) : null
       }
     >
-      {results.map((result: SpotlightSearchResult, resultIndex: number) => (
-        <List.Item
-          key={resultIndex}
-          title={folderName(result)}
-          subtitle={!showingDetail ? enclosingFolderName(result) : ""}
-          icon={{ fileIcon: result.path }}
-          detail={
-            <List.Item.Detail
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Metadata" />
-                  <List.Item.Detail.Metadata.Label title="Name" text={result.kMDItemFSName} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Where" text={result.path} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Size" text={result.kMDItemFSSize?.toLocaleString()} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={result.kMDItemFSCreationDate?.toLocaleString()}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Modified"
-                    text={result.kMDItemContentModificationDate?.toLocaleString()}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last opened"
-                    text={result.kMDItemLastUsedDate?.toLocaleString()}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-          actions={
-            <ActionPanel title={folderName(result)}>
-              <Action.Open
-                title="Open"
-                icon={Icon.Folder}
-                target={result.path}
-                onOpen={() => popToRoot({ clearSearchBar: true })}
+      <List.Section title={"Results"}>
+        {results.map((result: SpotlightSearchResult, resultIndex: number) => (
+          <List.Item
+            key={resultIndex}
+            title={folderName(result)}
+            subtitle={!isShowingDetail ? enclosingFolderName(result) : ""}
+            icon={{ fileIcon: result.path }}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Metadata" />
+                    <List.Item.Detail.Metadata.Label title="Name" text={result.kMDItemFSName} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Where" text={result.path} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Created"
+                      text={result.kMDItemFSCreationDate?.toLocaleString()}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Modified"
+                      text={result.kMDItemContentModificationDate?.toLocaleString()}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Last opened"
+                      text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                  </List.Item.Detail.Metadata>
+                }
               />
-              <Action.ShowInFinder
-                title="Show in Finder"
-                path={result.path}
-                onShow={() => popToRoot({ clearSearchBar: true })}
-              />
-              <Action
-                title="Toggle Details"
-                icon={Icon.Sidebar}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                onAction={toggleDetails}
-              />
-              <ActionPanel.Section>
-                <Action.CopyToClipboard
-                  title="Copy Folder"
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
-                  content={``}
-                  onCopy={() => copyFolderToClipboard(result)}
+            }
+            actions={
+              <ActionPanel title={folderName(result)}>
+                <Action.Open
+                  title="Open"
+                  icon={Icon.Folder}
+                  target={result.path}
+                  onOpen={() => popToRoot({ clearSearchBar: true })}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Name"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                  content={folderName(result)}
+                <Action.ShowInFinder
+                  title="Show in Finder"
+                  path={result.path}
+                  onShow={() => popToRoot({ clearSearchBar: true })}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Path"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-                  content={result.path}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
                 <Action
-                  title="Move to Trash"
-                  style={Action.Style.Destructive}
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onAction={() => maybeMoveResultToTrash(result)}
+                  title="Toggle Details"
+                  icon={Icon.Sidebar}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  onAction={() => setIsShowingDetail(!isShowingDetail)}
                 />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard
+                    title="Copy Folder"
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    content={``}
+                    onCopy={() => copyFolderToClipboard(result)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Name"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    content={folderName(result)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Path"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    content={result.path}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Move to Trash"
+                    style={Action.Style.Destructive}
+                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={() => maybeMoveResultToTrash(result)}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.EmptyView title="Start typing to search folders..." icon={Icon.MagnifyingGlass} />
     </List>
   );
 }

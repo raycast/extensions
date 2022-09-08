@@ -2,14 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import * as React from "react";
 
 import spotlight from "./libs/node-spotlight";
-
-interface SpotlightSearchPreferences {
-  name: string;
-  maxResults: number;
-}
-
-import { SpotlightSearchResult } from "./types";
-
+import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 import { safeSearchScope } from "./utils";
 
 const folderSpotlightSearchAttributes = [
@@ -41,18 +34,28 @@ const searchSpotlight = (
       .on("data", (result: SpotlightSearchResult) => {
         if (resultsCount < maxResults) {
           // keep emitting the match and
-          // incr resultsCount since a folder was found
+          // incr resultsCount (since a folder was found)
           resultsCount++;
           callback(result);
         } else if (resultsCount >= maxResults) {
-          // bail on results >= maxResults
-          resolve();
+          // bail/abort on results >= maxResults
+          abortable?.current?.abort();
+
+          // allow results to stabilize via usePromise()
+          // for onData()
+          setTimeout(() => {
+            resolve();
+          }, 0);
         }
 
-        // else keep searching...
+        // keep searching...
       })
       .on("error", (e: Error) => {
-        reject(e);
+        // conditially proxy upstream
+        // else usePromise() thinks we failed
+        if (e.name !== "AbortError") {
+          reject(e);
+        }
       })
       .on("end", () => {
         resolve();
