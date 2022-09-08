@@ -29,7 +29,7 @@ const SEARCH_TYPES: Record<SearchFilters, string> = {
 };
 
 const SEARCH_QUERY_STRINGS: Record<SearchQueryStrings, string> = {
-  NAME: "partial_name",
+  NAME: "name",
   ATMOSPHERE: "partial_atmosphere",
   BODY: "partial_body",
   COLOR: "partial_color",
