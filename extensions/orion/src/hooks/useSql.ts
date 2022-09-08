@@ -1,14 +1,13 @@
 import { environment } from "@raycast/api";
-import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { useEffect, useRef, useState } from "react";
-import initSqlJs, { Database } from "sql.js";
+import BetterSqlite, { Database } from "better-sqlite3";
 
 const loadDatabase = async (path: string) => {
-  const fileContents = await readFile(path);
-  const wasmBinary = await readFile(resolve(environment.assetsPath, "sql-wasm.wasm"));
-  const SQL = await initSqlJs({ wasmBinary });
-  return new SQL.Database(fileContents);
+  return BetterSqlite(path, {
+    readonly: true,
+    nativeBinding: resolve(environment.assetsPath, "better_sqlite3.node"),
+  });
 };
 
 const useSql = <T>(path: string, query: string) => {
@@ -30,15 +29,9 @@ const useSql = <T>(path: string, query: string) => {
       }
 
       try {
-        const newResults = new Array<T>();
         const statement = databaseRef.current.prepare(query);
-        while (statement.step()) {
-          newResults.push(statement.getAsObject() as unknown as T);
-        }
-
+        const newResults = statement.all() as T[];
         setResults(newResults);
-
-        statement.free();
       } catch (e) {
         setError(e);
       } finally {

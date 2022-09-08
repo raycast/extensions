@@ -11,10 +11,10 @@ const getHistoryQuery = (searchText?: string) => {
     ? searchText
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(URL LIKE "%${term}%" OR TITLE LIKE "%${term}%")`)
+        .map((term) => `(URL LIKE '%${term}%' OR TITLE LIKE '%${term}%')`)
         .join(" AND ")
     : undefined;
-  const query = `
+  return `
       SELECT DISTINCT history_items.ID as id,
                       TITLE            as title,
                       URL              as url,
@@ -26,7 +26,6 @@ const getHistoryQuery = (searchText?: string) => {
       ORDER BY LAST_VISIT_TIME DESC
           LIMIT ${LIMIT}
   `;
-  return query;
 };
 
 const useHistorySearch = (searchText?: string) => {

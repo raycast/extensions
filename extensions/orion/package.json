@@ -32,13 +32,13 @@
   "dependencies": {
     "@raycast/api": "^1.39.2",
     "@raycast/utils": "^1.3.1",
-    "@types/sql.js": "^1.4.3",
-    "bplist-parser": "^0.3.2",
-    "sql.js": "^1.7.0"
+    "better-sqlite3": "^7.6.2",
+    "bplist-parser": "^0.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "@types/better-sqlite3": "^7.6.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
