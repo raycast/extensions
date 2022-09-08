@@ -118,7 +118,7 @@ export default function NowPlayingMenuBar() {
 
   return (
     <MenuBarExtra
-      icon={spotifyInstalled && currentlyPlayingTrack ? "icon.png" : undefined}
+      icon={spotifyInstalled && currentlyPlayingTrack ? currentlyPlayingTrack.artwork_url || "icon.png" : undefined}
       title={optimizeTitle(trackTitle)}
       tooltip={trackTitle}
       isLoading={isLoading}
