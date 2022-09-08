@@ -95,7 +95,7 @@ function useSearch() {
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "ecosia" : searchText);
+  params.append("q", searchText);
 
   const response = await fetch("http://ac.ecosia.org/" + "?" + params.toString(), {
     method: "get",
@@ -113,7 +113,14 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  return json.suggestions.map((suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + suggestion }));
+  return searchText ? 
+    [{ name: searchText, url: "https://www.ecosia.org/search?q=" + searchText }, 
+    ...(json.suggestions
+      .map(
+        (suggestion) => ({ name: suggestion, url: "https://www.ecosia.org/search?q=" + suggestion }))
+      .filter((suggestion) => suggestion.name !== searchText))]
+    : 
+    [];
 }
 
 interface SearchState {
