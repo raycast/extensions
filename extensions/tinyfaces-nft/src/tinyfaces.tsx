@@ -19,16 +19,16 @@ const SEARCH_TYPES: Record<SearchFilters, string> = {
 };
 
 const SEARCH_QUERY_STRING: Record<SearchFilters, string> = {
-  TOKEN_ID: "token_id",
-  NAME: "name",
-  ATMOSPHERE: "atmosphere",
-  BODY: "body",
-  COLOR: "color",
-  EYE_COLOR: "eye_color",
-  FACE: "face",
-  GLASSES: "glasses",
-  HAT: "hat",
-  MOUTH: "mouth",
+  TOKEN_ID: "partial_token_id",
+  NAME: "partial_name",
+  ATMOSPHERE: "partial_atmosphere",
+  BODY: "partial_body",
+  COLOR: "partial_color",
+  EYE_COLOR: "partial_eye_color",
+  FACE: "partial_face",
+  GLASSES: "partial_glasses",
+  HAT: "partial_hat",
+  MOUTH: "partial_mouth",
 };
 
 export default function Command() {
