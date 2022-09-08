@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react";
-import {showToast, Toast} from "@raycast/api";
-import {jxa} from "osascript-tag";
-import {UseAppExists} from "./useAppExists";
-import {SearchResult} from "../types/SearchResult";
+import { useEffect, useState } from "react";
+import { showToast, Toast } from "@raycast/api";
+import { jxa } from "osascript-tag";
+import { UseAppExists } from "./useAppExists";
+import { SearchResult } from "../types/SearchResult";
 import Style = Toast.Style;
 
 type State = {

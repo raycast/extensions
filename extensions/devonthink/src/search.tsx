@@ -5,7 +5,7 @@ import SearchResultItem from "./components/SearchResultItem";
 import useAppExists from "./hooks/useAppExists";
 import useDevonDB from "./hooks/useDevonDB";
 import { Preferences } from "./types/Preferences";
-import {SearchResult} from "./types/SearchResult";
+import { SearchResult } from "./types/SearchResult";
 
 const search = () => {
   const appExists = useAppExists();
