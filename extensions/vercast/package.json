@@ -23,6 +23,12 @@
       "title": "Search Deployments",
       "description": "Explore your Vercel deployments",
       "mode": "view"
+    },
+    {
+      "name": "search-components",
+      "title": "Search Components",
+      "description": "Search the Vercel styleguide",
+      "mode": "view"
     }
   ],
   "preferences": [
