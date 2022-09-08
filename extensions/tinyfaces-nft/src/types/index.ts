@@ -28,4 +28,3 @@ export type SearchFilters =
   | "GLASSES"
   | "HAT"
   | "MOUTH";
-
