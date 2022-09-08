@@ -157,8 +157,8 @@ const humanFileSize = (bytes: number, si=false, decimalPlaces=1) => {
   }
 
   const units = si
-    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    ? ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    : ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   let unitIndex = -1;
   const r = 10**decimalPlaces;
 
