@@ -1,3 +1,3 @@
 # Folder Search Changelog
 
-## [Initial Version] - 2022-09-06
+## [Initial Version] - 2022-09-08
