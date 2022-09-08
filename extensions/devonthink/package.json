@@ -54,7 +54,7 @@
       "title": "Search Item Result Properties",
       "name": "propertyAdditionDate",
       "label": "Addition Date",
-      "description": "Show Addition Date",
+      "description": "Date when the record was added to the database.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -62,7 +62,7 @@
     {
       "name": "propertyAliases",
       "label": "Aliases",
-      "description": "Show Aliases",
+      "description": "Wiki aliases (separated by commas or semicolons) of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -70,7 +70,7 @@
     {
       "name": "propertyAltitude",
       "label": "Altitude",
-      "description": "Show Altitude",
+      "description": "The altitude in metres of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -78,7 +78,7 @@
     {
       "name": "propertyAnnotationCount",
       "label": "Annotation Count",
-      "description": "Show Annotation Count",
+      "description": "The number of annotations. Currently only supported for PDF documents.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -86,7 +86,7 @@
     {
       "name": "propertyAttachedScript",
       "label": "Attached Script",
-      "description": "Show Attached Script",
+      "description": "POSIX path of script attached to a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -94,7 +94,7 @@
     {
       "name": "propertyAttachmentCount",
       "label": "Attachment Count",
-      "description": "Show Attachment Count",
+      "description": "The number of attachments. Currently only supported for RTFD documents and emails.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -102,7 +102,7 @@
     {
       "name": "propertyBatesNumber",
       "label": "Bates Number",
-      "description": "Show Bates Number",
+      "description": "Bates number.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -110,7 +110,7 @@
     {
       "name": "propertyCharacterCount",
       "label": "Character Count",
-      "description": "Show Character Count",
+      "description": "The character count of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -118,7 +118,7 @@
     {
       "name": "propertyClass",
       "label": "Class",
-      "description": "Show Class",
+      "description": "The class of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -126,7 +126,7 @@
     {
       "name": "propertyComment",
       "label": "Comment",
-      "description": "Show Comment",
+      "description": "The comment of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -134,7 +134,7 @@
     {
       "name": "propertyContentHash",
       "label": "Content Hash",
-      "description": "Show Content Hash",
+      "description": "Stored SHA1 hash of files and document packages.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -142,7 +142,15 @@
     {
       "name": "propertyCreationDate",
       "label": "Creation Date",
-      "description": "Show Creation Date",
+      "description": "The creation date of a record.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyDate",
+      "label": "Date",
+      "description": "The (creation/modification) date of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -150,23 +158,15 @@
     {
       "name": "propertyDpi",
       "label": "DPI",
-      "description": "Show DPI",
+      "description": "The resultion of an image in dpi.",
       "type": "checkbox",
       "default": false,
       "required": false
     },
     {
-      "name": "propertyDate",
-      "label": "Date",
-      "description": "Show Date",
-      "type": "checkbox",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "propertyDuration",
       "label": "Duration",
-      "description": "Show Duration",
+      "description": "The duration of audio and video files.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -174,7 +174,7 @@
     {
       "name": "propertyExcludeFromClassification",
       "label": "Exclude From Classification",
-      "description": "Show Exclude From Classification",
+      "description": "Exclude group or record from classifying.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -182,7 +182,7 @@
     {
       "name": "propertyExcludeFromSearch",
       "label": "Exclude From Search",
-      "description": "Show Exclude From Search",
+      "description": "Exclude group or record from searching.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -190,7 +190,7 @@
     {
       "name": "propertyExcludeFromSeeAlso",
       "label": "Exclude From See Also",
-      "description": "Show Exclude From See Also",
+      "description": "Exclude record from see also.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -198,7 +198,7 @@
     {
       "name": "propertyExcludeFromTagging",
       "label": "Exclude From Tagging",
-      "description": "Show Exclude From Tagging",
+      "description": "Exclude group from tagging.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -206,7 +206,7 @@
     {
       "name": "propertyExcludeFromWikiLinking",
       "label": "Exclude From WikiLinking",
-      "description": "Show Exclude From Wiki Linking",
+      "description": "Exclude record from automatic Wiki linking.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -214,7 +214,7 @@
     {
       "name": "propertyFilename",
       "label": "Filename",
-      "description": "Show Filename",
+      "description": "The proposed file name for a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -222,7 +222,7 @@
     {
       "name": "propertyGeolocation",
       "label": "Geolocation",
-      "description": "Show Geolocation",
+      "description": "The human readable geogr. place of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -230,7 +230,7 @@
     {
       "name": "propertyHeight",
       "label": "Height",
-      "description": "Show Height",
+      "description": "The height of an image or PDF document in pixels.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -238,7 +238,7 @@
     {
       "name": "propertyID",
       "label": "ID",
-      "description": "Show Item ID",
+      "description": "The scripting identifier of a record. Optimizing or closing a database might modify this identifier.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -246,7 +246,7 @@
     {
       "name": "propertyIndexed",
       "label": "Indexed",
-      "description": "Show Indexed",
+      "description": "Indexed or imported record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -254,7 +254,7 @@
     {
       "name": "propertyInterval",
       "label": "Interval",
-      "description": "Show Interval",
+      "description": "Refresh interval of a feed. Currently overriden by preferences.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -262,7 +262,7 @@
     {
       "name": "propertyKind",
       "label": "Kind",
-      "description": "Show Kind",
+      "description": "The human readable and localized kind of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -270,7 +270,7 @@
     {
       "name": "propertyLabel",
       "label": "Label",
-      "description": "Show Label",
+      "description": "Index of label (0-7) of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -278,7 +278,7 @@
     {
       "name": "propertyLatitude",
       "label": "Latitude",
-      "description": "Show Latitude",
+      "description": "The latitude in degrees of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -286,7 +286,7 @@
     {
       "name": "propertyLocation",
       "label": "Location",
-      "description": "Show Location",
+      "description": "The primary location in the database as a POSIX path (/ in names is replaced with \/). This is the location of the first parent group.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -294,7 +294,7 @@
     {
       "name": "propertyLocationGroup",
       "label": "Location Group",
-      "description": "Show Location Group",
+      "description": "The group of the record's primary location. This is identical to the first parent group.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -302,7 +302,7 @@
     {
       "name": "propertyLocking",
       "label": "Locking",
-      "description": "Show Locking",
+      "description": "The locking of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -310,23 +310,23 @@
     {
       "name": "propertyLongitude",
       "label": "Longitude",
-      "description": "Show Longitude",
+      "description": "The longitude in degrees of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
     },
     {
-      "name": "propertyMimeType",
-      "label": "MIME Type",
-      "description": "Show MIME Type",
+      "name": "propertyMetaData",
+      "label": "Metadata",
+      "description": "Document metadata (e.g. of PDF or RTF) of a record as a dictionary containing key-value pairs.",
       "type": "checkbox",
       "default": true,
       "required": false
     },
     {
-      "name": "propertyMetaData",
-      "label": "Metadata",
-      "description": "Show Meta Data",
+      "name": "propertyMimeType",
+      "label": "MIME Type",
+      "description": "The (proposed) MIME type of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -334,7 +334,7 @@
     {
       "name": "propertyModificationDate",
       "label": "Modification Date",
-      "description": "Show Modification Date",
+      "description": "The modification date of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -342,7 +342,7 @@
     {
       "name": "propertyName",
       "label": "Name",
-      "description": "Show Name",
+      "description": "The name of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -350,7 +350,7 @@
     {
       "name": "propertyNameWithoutExtension",
       "label": "Name Without Extension",
-      "description": "Show Name Without Extension",
+      "description": "The name of a record without a file extension (independent of preferences).",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -358,7 +358,7 @@
     {
       "name": "propertyNumberOfDuplicates",
       "label": "Number Of Duplicates",
-      "description": "Show Number Of Duplicates",
+      "description": "The number of duplicates of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -366,7 +366,7 @@
     {
       "name": "propertyNumberOfHits",
       "label": "Number Of Hits",
-      "description": "Show Number of Hits",
+      "description": "The number of hits of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -374,7 +374,7 @@
     {
       "name": "propertyNumberOfReplicants",
       "label": "Number Of Replicants",
-      "description": "Show Number of Replicants",
+      "description": "The number of replicants of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -382,7 +382,7 @@
     {
       "name": "propertyOpeningDate",
       "label": "Opening Date",
-      "description": "Show Opening Date",
+      "description": "Date when a content was opened the last time or when a feed was refreshed the last time.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -390,7 +390,7 @@
     {
       "name": "propertyPageCount",
       "label": "Page Count",
-      "description": "Show Page Count",
+      "description": "The page count of a record. Currently only supported by PDF documents.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -398,7 +398,7 @@
     {
       "name": "propertyPath",
       "label": "Path",
-      "description": "Show Path",
+      "description": "The POSIX file path of a record. Only the path of external records can be changed.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -406,7 +406,7 @@
     {
       "name": "propertyRating",
       "label": "Rating",
-      "description": "Show Rating",
+      "description": "Rating (0-5) of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -414,7 +414,7 @@
     {
       "name": "propertyReferenceURL",
       "label": "Reference URL",
-      "description": "Show Reference URL",
+      "description": "The URL (x-devonthink-item://...) to reference/link back to a record. Append ?page= to specify the zero-based index of a page of a PDF document, ?time= to specify the time of a movie or ?search= to specify a string to search.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -422,7 +422,7 @@
     {
       "name": "propertyScore",
       "label": "Score",
-      "description": "Show Score",
+      "description": "The score of the last comparison, classification or search (value between 0.0 and 1.0) or undefined otherwise.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -430,7 +430,7 @@
     {
       "name": "propertySize",
       "label": "Size",
-      "description": "Show Size",
+      "description": "The size of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -438,7 +438,7 @@
     {
       "name": "propertyState",
       "label": "State",
-      "description": "Show State",
+      "description": "The state/flag of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -446,15 +446,7 @@
     {
       "name": "propertyStateVisibility",
       "label": "State Visibility",
-      "description": "Show State Visibility",
-      "type": "checkbox",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "propertyTagType",
-      "label": "Tag Type",
-      "description": "Show Tag Type",
+      "description": "Obsolete.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -462,23 +454,39 @@
     {
       "name": "propertyTags",
       "label": "Tags",
-      "description": "Show Tags",
+      "description": "The tags of a record.",
       "type": "checkbox",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "propertyTagType",
+      "label": "Tag Type",
+      "description": "The tag type of a record.",
+      "type": "checkbox",
+      "default": false,
       "required": false
     },
     {
       "name": "propertyType",
       "label": "Type",
-      "description": "Show Type",
+      "description": "The type of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
     },
     {
+      "name": "propertyUnread",
+      "label": "Unread",
+      "description": "The unread flag of a record.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "propertyUrl",
       "label": "URL",
-      "description": "Show URL",
+      "description": "The URL of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -486,15 +494,7 @@
     {
       "name": "propertyUUID",
       "label": "UUID",
-      "description": "Show UUID",
-      "type": "checkbox",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "propertyUnread",
-      "label": "Unread",
-      "description": "Show Unread",
+      "description": "The unique and persistent identifier of a record.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -502,7 +502,7 @@
     {
       "name": "propertyWidth",
       "label": "Width",
-      "description": "Show Width",
+      "description": "The width of an image or PDF document in pixels.",
       "type": "checkbox",
       "default": false,
       "required": false
@@ -510,7 +510,7 @@
     {
       "name": "propertyWordCount",
       "label": "Word Count",
-      "description": "Show Word Count",
+      "description": "The word count of a record.",
       "type": "checkbox",
       "default": true,
       "required": false
