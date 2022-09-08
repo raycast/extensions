@@ -62,10 +62,10 @@ export type Preferences = {
   propertyWidth: boolean;
   propertyLabel: boolean;
   propertyClass: boolean;
-}
+};
 
 export type PropertyKey =
-  "propertyID"
+  | "propertyID"
   | "propertyUUID"
   | "propertyName"
   | "propertyScore"

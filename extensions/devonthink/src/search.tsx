@@ -1,10 +1,10 @@
-import {getPreferenceValues, List} from "@raycast/api";
-import {useState} from "react";
-import useSearch, {SearchResult} from "./hooks/useSearch";
+import { getPreferenceValues, List } from "@raycast/api";
+import { useState } from "react";
+import useSearch, { SearchResult } from "./hooks/useSearch";
 import SearchResultItem from "./components/SearchResultItem";
 import useAppExists from "./hooks/useAppExists";
 import useDevonDB from "./hooks/useDevonDB";
-import {Preferences} from "./types/Preferences";
+import { Preferences } from "./types/Preferences";
 
 const search = () => {
   const appExists = useAppExists();
@@ -43,4 +43,3 @@ const search = () => {
 
 // noinspection JSUnusedGlobalSymbols
 export default search;
-
