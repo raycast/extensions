@@ -92,7 +92,7 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="indexed" propKey="propertyIndexed" title="Indexed" text={result.indexed ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSeeAlso" propKey="propertyExcludeFromSeeAlso" title="Exclude from See Also" text={result.excludeFromSeeAlso ? "yes" : "no"}/>,
     <MyLabel key="excludeFromSearch" propKey="propertyExcludeFromSearch" title="Exclude from Search" text={result.excludeFromSearch ? "yes" : "no"}/>,
-  ];
+  ].concat(createMetadataLabels({propKey: "propertyMetaData", record: result.metaData}));
 
   const orderKeys = preferences.orderSearchResultItemProperties.split(",").map((key) => key.trim().toLowerCase());
   const ordered = [] as JSX.Element[];
@@ -141,6 +141,24 @@ const MyLink = ({propKey, title, text, target}: { propKey: PropertyKey, title: s
   }
 
   return <Link title={title} text={text} target={target}/>;
+}
+
+const createMetadataLabels = ({propKey, record}: {propKey: PropertyKey, record: Record<string, unknown>}) => {
+  if (!preferences[propKey]) {
+    return <></>;
+  }
+
+  if (record === null) {
+    return <></>;
+  }
+
+  return Object.entries(record).map(([key, value]) => {
+    const text = typeof value === "string" ? value : JSON.stringify(value);
+
+    return (
+      <Label key={key} title={key} text={text}/>
+    );
+  })
 }
 
 const prettyDate = (date: string) => {
