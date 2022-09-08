@@ -1,6 +1,8 @@
 export type PaginatedData = { has_more: boolean; total: number; page: number; results: TokenData[] };
 
-export type TokenData = {
+export type OwnerData = { address: string; avatar: string; tokens: TokenData[] };
+
+export interface TokenData {
   atmosphere: string;
   birthday: string;
   body: string;
@@ -15,10 +17,9 @@ export type TokenData = {
   name: string;
   opensea_url: string;
   token_id: string;
-};
+}
 
-export type SearchFilters =
-  | "TOKEN_ID"
+export type SearchQueryStrings =
   | "NAME"
   | "ATMOSPHERE"
   | "BODY"
@@ -28,3 +29,5 @@ export type SearchFilters =
   | "GLASSES"
   | "HAT"
   | "MOUTH";
+
+export type SearchFilters = SearchQueryStrings | "TOKEN_ID" | "OWNER";

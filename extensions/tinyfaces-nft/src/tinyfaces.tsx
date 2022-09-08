@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Image } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { PaginatedData, SearchFilters, TokenData } from "./types";
+import { OwnerData, PaginatedData, SearchFilters, SearchQueryStrings, TokenData } from "./types";
+import { getDefaultProvider } from "ethers";
+import { WagmiConfig, createClient, useEnsAddress } from "wagmi";
 
-const API_ENDPOINT = "https://nft-api.tinyfac.es/token";
+const client = createClient({
+  autoConnect: true,
+  provider: getDefaultProvider(),
+});
+
+const isValidEthAddress = (address: string) => /^0x[a-fA-F0-9]{40}$/.test(address);
+
+const API_ENDPOINT = "https://nft-api.tinyfac.es";
 
 const SEARCH_TYPES: Record<SearchFilters, string> = {
   TOKEN_ID: "Token ID",
@@ -16,10 +25,10 @@ const SEARCH_TYPES: Record<SearchFilters, string> = {
   GLASSES: "Glasses",
   HAT: "Hat",
   MOUTH: "Mouth",
+  OWNER: "Owner",
 };
 
-const SEARCH_QUERY_STRING: Record<SearchFilters, string> = {
-  TOKEN_ID: "partial_token_id",
+const SEARCH_QUERY_STRINGS: Record<SearchQueryStrings, string> = {
   NAME: "partial_name",
   ATMOSPHERE: "partial_atmosphere",
   BODY: "partial_body",
@@ -32,30 +41,65 @@ const SEARCH_QUERY_STRING: Record<SearchFilters, string> = {
 };
 
 export default function Command() {
+  return (
+    <WagmiConfig client={client}>
+      <Tiny />
+    </WagmiConfig>
+  );
+}
+
+export function Tiny() {
   const [searchText, setSearchText] = useState<undefined | string>(undefined);
   const [searchType, setSearchFilter] = useState<SearchFilters>("TOKEN_ID");
   const [selectedId, setSelectedId] = useState<undefined | string>(undefined);
+  const [ensAddress, setEnsAddress] = useState<undefined | string>(undefined);
+  const [lookupENSAddress, setLookupENSAddress] = useState<boolean>(false);
+
+  const { isLoading: isLoadingEnsAddress } = useEnsAddress({
+    name: searchText,
+    enabled: lookupENSAddress,
+    onSuccess: (address) => address && setEnsAddress(address),
+  });
+
+  const isSearchingByQueryString = searchType !== "TOKEN_ID" && searchType !== "OWNER";
 
   const { isLoading: isLoadingTokenId = false, data: tokenIdData } = useFetch<TokenData>(
-    `${API_ENDPOINT}/${searchText}`,
+    `${API_ENDPOINT}/token/${searchText}`,
     {
       execute: searchType === "TOKEN_ID" && Boolean(searchText),
     }
   );
   const { isLoading: isLoadingName, data: nameData } = useFetch<PaginatedData>(
-    `${API_ENDPOINT}?page=0&limit=100&${SEARCH_QUERY_STRING[searchType]}=${searchText}`,
+    `${API_ENDPOINT}/token?page=0&limit=100&${
+      isSearchingByQueryString && SEARCH_QUERY_STRINGS[searchType]
+    }=${searchText}`,
     {
-      execute: searchType !== "TOKEN_ID" && Boolean(searchText),
+      execute: isSearchingByQueryString && Boolean(searchText),
     }
   );
+  const { isLoading: isLoadingOwner, data: ownerData } = useFetch<OwnerData>(`${API_ENDPOINT}/address/${ensAddress}`, {
+    execute: searchType === "OWNER" && Boolean(ensAddress),
+  });
+
+  useEffect(() => {
+    if (searchType === "OWNER" && searchText) {
+      if (searchText?.includes(".eth")) setLookupENSAddress(true);
+      if (isValidEthAddress(searchText)) setEnsAddress(searchText);
+    }
+  }, [searchText, searchType]);
 
   let isLoading;
+
   if (searchType === "TOKEN_ID") {
     isLoading = isLoadingTokenId && Boolean(searchText);
   }
   if (searchType === "NAME") {
     isLoading = isLoadingName && Boolean(searchText);
   }
+  if (searchType === "OWNER") {
+    isLoading = isLoadingEnsAddress || (isLoadingOwner && Boolean(ensAddress));
+  }
+
   return (
     <List
       throttle
@@ -67,7 +111,7 @@ export default function Command() {
       onSelectionChange={setSelectedId}
       searchBarAccessory={
         <SearchTypeDropdown
-          searchTypes={Object.keys(SEARCH_TYPES) as SearchFilters[]}
+          searchTypes={Object.keys(SEARCH_TYPES) as SearchQueryStrings[]}
           onChange={(searchFilter) => {
             setSearchText("");
             setSearchFilter(searchFilter);
@@ -96,23 +140,36 @@ export default function Command() {
             actions={<SharedAction data={token} />}
           />
         ))}
+      {ownerData?.tokens &&
+        Boolean(searchText) &&
+        ownerData?.tokens?.map((token) => (
+          <List.Item
+            key={token.token_id}
+            title={token.name}
+            accessories={[{ text: `#${token.token_id}` }]}
+            icon={{ source: `${token.direct_url}?width=120&height=120`, mask: Image.Mask.Circle }}
+            detail={<TokenDetail data={token} />}
+            actions={<SharedAction data={token} />}
+          />
+        ))}
     </List>
   );
 }
 
-function SearchTypeDropdown(props: { searchTypes: SearchFilters[]; onChange: (searchType: SearchFilters) => void }) {
+function SearchTypeDropdown(props: {
+  searchTypes: SearchQueryStrings[];
+  onChange: (searchType: SearchQueryStrings) => void;
+}) {
   const { searchTypes, onChange } = props;
   return (
     <List.Dropdown
       tooltip="Select Search Type"
       storeValue={true}
-      onChange={(newValue) => onChange(newValue as SearchFilters)}
+      onChange={(newValue) => onChange(newValue as SearchQueryStrings)}
     >
-      <List.Dropdown.Section title="Search Types">
-        {searchTypes.map((searchType) => (
-          <List.Dropdown.Item key={searchType} title={SEARCH_TYPES[searchType]} value={searchType} />
-        ))}
-      </List.Dropdown.Section>
+      {searchTypes.map((searchType) => (
+        <List.Dropdown.Item key={searchType} title={SEARCH_TYPES[searchType]} value={searchType} />
+      ))}
     </List.Dropdown>
   );
 }
