@@ -3,4 +3,6 @@ export interface Preferences {
   apiKey: string;
   username: string;
   url: string;
+  alertsQuery: string;
+  incidentsQuery: string;
 }

@@ -2,11 +2,16 @@ interface IPreferences {
   langFirst: string;
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
+  googleFreeTLD: GoogleFreeAPITLD;
   googleApiKey: string;
   disableGoogleCould: boolean;
   deeplAuthKey: string;
   deeplApiPro: boolean;
   disableDeepL: boolean;
+  microsoftAccessKey: string;
+  microsoftAPIEndpoint: string;
+  microsoftRegion: string;
+  disableMicrosoft: boolean;
   youdaoAppId: string;
   youdaoAppKey: string;
   disableYoudao: boolean;
@@ -22,6 +27,8 @@ interface IPreferences {
   selectedDefault: boolean;
   quickSwitchLang: boolean;
   delayTransInterval: number;
+  enableHistory: boolean;
+  historyLimit: number;
 }
 
 interface ILangItem {
@@ -31,7 +38,9 @@ interface ILangItem {
   tencentLangId?: string;
   youdaoLangId?: string;
   aliyunLangId?: string;
+  microsoftLangId?: string;
   langTitle: string;
+  voice?: string;
 }
 
 interface ITranslateRes {
@@ -88,6 +97,17 @@ interface IDeepLTranslateItem {
   text: string;
 }
 
+interface IMicrosoftAzureTranslateResult {
+  detectedLanguage: {
+    language: string;
+  };
+  translations: IMicrosoftAzureTranslateItem[];
+}
+
+interface IMicrosoftAzureTranslateItem {
+  text: string;
+}
+
 interface IYouDaoTranslateResult {
   l: string;
   query: string;
@@ -140,4 +160,15 @@ interface IAliyunTransResponse {
 
 interface IAliyunDetectLangResponse {
   DetectedLanguage: string;
+}
+
+interface TransHistory {
+  time: number;
+  from: string;
+  to: string;
+  text: string;
+  transList: {
+    serviceProvider: TransServiceProviderTp;
+    res: string;
+  }[];
 }

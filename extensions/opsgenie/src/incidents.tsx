@@ -1,42 +1,50 @@
-import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
 import { Preferences } from "./preferences";
+import { useDebounce } from "./useDebounce";
 
 const preferences: Preferences = getPreferenceValues();
 
-export default function IncidentList() {
-  const [state, setState] = useState<{ incidents: Incident[] }>({ incidents: [] });
+const IncidentList = () => {
+  const [query, setQuery] = useState(preferences.incidentsQuery);
+  const debouncedQuery = useDebounce<string>(query, 1000);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
 
-  async function fetch(query: string) {
-    const incidents = await fetchIncident(query);
+  const setSearchText = (text: string) => {
+    setQuery(text);
+  };
 
-    setState((oldState) => ({
-      ...oldState,
-      incidents: incidents,
-    }));
-  }
+  const fetch = async (query: string) => {
+    setIsLoading(true);
+    setIncidents(await fetchIncident(query));
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    fetch("");
-  }, []);
+    fetch(debouncedQuery);
+  }, [debouncedQuery]);
 
   return (
     <List
-      isLoading={state.incidents.length === 0}
+      searchText={query}
+      onSearchTextChange={setSearchText}
+      enableFiltering={false}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter incidents..."
-      throttle={true}
-      onSearchTextChange={(text: string) => fetch(text)}
     >
-      {state.incidents.map((incident) => (
+      {incidents.map((incident) => (
         <IncidentListItem key={incident.id} incident={incident} />
       ))}
     </List>
   );
-}
+};
 
-function IncidentListItem(props: { incident: Incident }) {
+export default IncidentList;
+
+const IncidentListItem = (props: { incident: Incident }) => {
   const incident = props.incident;
 
   const createdAt = new Date(incident.createdAt);
@@ -63,14 +71,14 @@ function IncidentListItem(props: { incident: Incident }) {
       accessoryTitle={`${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${preferences.url}/incident/detail/${incident.id}/details`} />
+          <Action.OpenInBrowser url={`${preferences.url}/incident/detail/${incident.id}/details`} />
         </ActionPanel>
       }
     />
   );
-}
+};
 
-async function fetchIncident(query: string): Promise<Incident[]> {
+const fetchIncident = async (query: string): Promise<Incident[]> => {
   try {
     const response = await fetch(
       `${preferences.apiUrl}/v1/incidents?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`,
@@ -95,10 +103,10 @@ async function fetchIncident(query: string): Promise<Incident[]> {
     }
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, `Could not load incidents: ${error.message}`);
+    showToast(Toast.Style.Failure, `Could not load incidents: ${error.message}`);
     return Promise.resolve([]);
   }
-}
+};
 
 type Incident = {
   id: string;

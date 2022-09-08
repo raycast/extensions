@@ -8,6 +8,7 @@ export interface Item {
   content: string;
   tags: [];
   authors_tag: [];
+  keywords: [];
   authors_string: string;
   pdf: string;
 }

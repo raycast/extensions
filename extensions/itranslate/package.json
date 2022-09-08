@@ -25,6 +25,20 @@
         "fanyi",
         "翻译"
       ]
+    },
+    {
+      "name": "history",
+      "title": "Translation History",
+      "subtitle": "iTranslate",
+      "description": "translation history logs",
+      "icon": "itranslate-icon.png",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "translation history",
+        "itranslate",
+        "his"
+      ]
     }
   ],
   "preferences": [
@@ -162,6 +176,10 @@
           "value": "deepl"
         },
         {
+          "title": "Microsoft Azure",
+          "value": "microsoftAzure"
+        },
+        {
           "title": "Youdao",
           "value": "youdao"
         },
@@ -176,6 +194,24 @@
         {
           "title": "Aliyun",
           "value": "aliyun"
+        }
+      ]
+    },
+    {
+      "name": "googleFreeTLD",
+      "type": "dropdown",
+      "required": false,
+      "title": "Google(Free) API TLD",
+      "description": "Select top level domain of Google(Free) API",
+      "default": "cn",
+      "data": [
+        {
+          "title": "com",
+          "value": "com"
+        },
+        {
+          "title": "cn",
+          "value": "cn"
         }
       ]
     },
@@ -217,6 +253,152 @@
       "required": false,
       "label": "Disable DeepL",
       "description": "Disable DeepL translation service provider",
+      "default": false
+    },
+    {
+      "name": "microsoftAccessKey",
+      "type": "password",
+      "required": false,
+      "title": "Microsoft Azure Access Key",
+      "description": "Microsoft Azure Access Key",
+      "placeholder": "Enter Microsoft Azure Access Key"
+    },
+    {
+      "name": "microsoftAPIEndpoint",
+      "type": "dropdown",
+      "required": false,
+      "title": "Microsoft Azure API Endpoint",
+      "description": "Microsoft Azure API Endpoint",
+      "data": [
+        {
+          "title": "api.cognitive.microsofttranslator.com",
+          "value": "https://api.cognitive.microsofttranslator.com"
+        },
+        {
+          "title": "api-apc.cognitive.microsofttranslator.com",
+          "value": "https://api-apc.cognitive.microsofttranslator.com"
+        },
+        {
+          "title": "api-eur.cognitive.microsofttranslator.com",
+          "value": "https://api-eur.cognitive.microsofttranslator.com"
+        },
+        {
+          "title": "api-nam.cognitive.microsofttranslator.com",
+          "value": "https://api-nam.cognitive.microsofttranslator.com"
+        }
+      ]
+    },
+    {
+      "name": "microsoftRegion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Microsoft Azure Location/Region",
+      "description": "Microsoft Azure Location/Region",
+      "data": [
+        {
+          "title": "East US",
+          "value": "eastus"
+        },
+        {
+          "title": "East US 2",
+          "value": "eastus2"
+        },
+        {
+          "title": "South Central US",
+          "value": "southcentralus"
+        },
+        {
+          "title": "West US 2",
+          "value": "westus2"
+        },
+        {
+          "title": "West US 3",
+          "value": "westus3"
+        },
+        {
+          "title": "Australia East",
+          "value": "australiaeast"
+        },
+        {
+          "title": "Southeast Asia",
+          "value": "southeastasia"
+        },
+        {
+          "title": "North Europe",
+          "value": "northeurope"
+        },
+        {
+          "title": "Sweden Central",
+          "value": "swedencentral"
+        },
+        {
+          "title": "West Europe",
+          "value": "westeurope"
+        },
+        {
+          "title": "Central US",
+          "value": "centralus"
+        },
+        {
+          "title": "Central India",
+          "value": "centralindia"
+        },
+        {
+          "title": "East Asia",
+          "value": "eastasia"
+        },
+        {
+          "title": "Japan East",
+          "value": "japaneast"
+        },
+        {
+          "title": "Korea Central",
+          "value": "koreacentral"
+        },
+        {
+          "title": "Canada Central",
+          "value": "canadacentral"
+        },
+        {
+          "title": "France Central",
+          "value": "francecentral"
+        },
+        {
+          "title": "Germany West Central",
+          "value": "germanywestcentral"
+        },
+        {
+          "title": "Norway East",
+          "value": "norwayeast"
+        },
+        {
+          "title": "Switzerland North",
+          "value": "switzerlandnorth"
+        },
+        {
+          "title": "Brazil South",
+          "value": "brazilsouth"
+        },
+        {
+          "title": "Global",
+          "value": "global"
+        },
+        {
+          "title": "North Central US",
+          "value": "northcentralus"
+        },
+        {
+          "title": "Switzerland West",
+          "value": "switzerlandwest"
+        }
+      ]
+    },
+    {
+      "name": "disableMicrosoft",
+      "type": "checkbox",
+      "required": false,
+      "label": "Disable Microsoft Azure",
+      "description": "Disable Microsoft Azure translation service provider",
       "default": false
     },
     {
@@ -356,6 +538,41 @@
         {
           "title": "1200ms",
           "value": "1200"
+        }
+      ]
+    },
+    {
+      "name": "enableHistory",
+      "type": "checkbox",
+      "required": false,
+      "title": "Translation History",
+      "label": "Enable Log History",
+      "description": "You can log the translation history",
+      "default": true
+    },
+    {
+      "name": "historyLimit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Limitations of the translation log",
+      "description": "Record the maximum number of translation logs",
+      "default": "100",
+      "data": [
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        },
+        {
+          "title": "500",
+          "value": "500"
         }
       ]
     }

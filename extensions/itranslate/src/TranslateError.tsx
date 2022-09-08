@@ -8,7 +8,7 @@ import {
   List,
   Icon,
 } from "@raycast/api";
-import { LANG_LIST, TRANS_SERVICES_AUTH_NAMES } from "./const";
+import { LANG_LIST, TRANS_SERVICES_AUTH_NAMES, TRANS_SERVICES_NAMES } from "./const";
 
 const icon = { source: Icon.XMarkCircle, tintColor: Color.Red };
 
@@ -62,11 +62,11 @@ export function ServiceProviderMiss() {
   const markdown = `
   # Welcome to use iTranslate 🎉🎉🎉 \n
   iTranslate is a translation extension that can customize translation service providers and support multiple languages\n
-  Now we support this translation service providers: [Google(Free)](https://translate.google.cn)、[Google Could Translation](https://cloud.google.com/translate)、[Deepl](https://www.deepl.com/pro-api?cta=header-pro-api)、[Youdao](https://ai.youdao.com)、[Baidu](https://fanyi-api.baidu.com)、[Tencent](https://fanyi.qq.com/translateapi)、[Aliyun](https://www.alibabacloud.com/product/machine-translation)\n
+  Now we support this translation service providers: [Google(Free)](https://translate.google.cn),[Google Could Translation](https://cloud.google.com/translate),[Deepl](https://www.deepl.com/pro-api?cta=header-pro-api),[Microsoft Azure](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-translator?tabs=csharp),[Youdao](https://ai.youdao.com),[Baidu](https://fanyi-api.baidu.com),[Tencent](https://fanyi.qq.com/translateapi),[Aliyun](https://www.alibabacloud.com/product/machine-translation)\n
   ## Before using the extension, follow these steps:
   1. ⚙️ Please enter \`↵\` to open iTranslate Preferences
   2. Config ${auth_names?.map((n) => `**${n}**`).join(" and ")} in the right area of the preferences window
-  > ⚠️ The default translation service provider you selected is *${defaultServiceProvider}*\n
+  > ⚠️ The default translation service provider you selected is *${TRANS_SERVICES_NAMES.get(defaultServiceProvider)}*\n
   # 🍻 Enjoy it !
   `;
   return (

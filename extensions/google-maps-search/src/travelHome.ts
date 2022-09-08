@@ -1,6 +1,7 @@
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { Preferences, makeDirectionsURL } from "./utils";
 import { exec } from "child_process";
+import { Preferences } from "./utils/types";
+import { makeDirectionsURL } from "./utils/url";
 
 export default async () => {
   const preferences: Preferences = getPreferenceValues();
