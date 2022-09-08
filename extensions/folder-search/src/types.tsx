@@ -1,5 +1,4 @@
 type SpotlightSearchPreferences = {
-  name: string;
   maxResults: number;
 };
 
