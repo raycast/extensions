@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Image } from "@raycast/api";
+import { List, ActionPanel, Action, Image, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { OwnerData, PaginatedData, SearchFilters, SearchQueryStrings, TokenData } from "./types";
 import { getDefaultProvider } from "ethers";
@@ -135,7 +135,11 @@ export function Tiny() {
         <List.Item
           title={tokenIdData.name}
           accessories={[{ text: `#${tokenIdData.token_id}` }]}
-          icon={{ source: `${tokenIdData.direct_url}?width=120&height=120`, mask: Image.Mask.Circle }}
+          icon={{
+            source: `${tokenIdData.direct_url}?width=120&height=120`,
+            mask: Image.Mask.Circle,
+            fallback: Icon.PersonCircle,
+          }}
           detail={<TokenDetail data={tokenIdData} />}
           actions={<SharedAction data={tokenIdData} />}
         />
@@ -147,7 +151,11 @@ export function Tiny() {
             key={token.token_id}
             title={token.name}
             accessories={[{ text: `#${token.token_id}` }]}
-            icon={{ source: `${token.direct_url}?width=120&height=120`, mask: Image.Mask.Circle }}
+            icon={{
+              source: `${token.direct_url}?width=120&height=120`,
+              mask: Image.Mask.Circle,
+              fallback: Icon.PersonCircle,
+            }}
             detail={<TokenDetail data={token} />}
             actions={<SharedAction data={token} />}
           />
