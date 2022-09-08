@@ -29,11 +29,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
+            <Action.OpenInBrowser url={searchResult.url} />
             <Action.CopyToClipboard
-              title="Copy search URL"
+              title="Copy Search URL"
               content={searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
