@@ -23,7 +23,7 @@ import { folderName, enclosingFolderName, maybeMoveResultToTrash, copyFolderToCl
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [searchScope, setSearchScope] = useState<string>("");
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
@@ -50,6 +50,7 @@ export default function Command() {
     {
       onData(preferences) {
         setSearchScope(preferences.searchScope);
+        setIsShowingDetail(preferences.isShowingDetail);
         setHasCheckedPreferences(true);
       },
       onError() {
@@ -109,10 +110,11 @@ export default function Command() {
         `${environment.extensionName}-preferences`,
         JSON.stringify({
           searchScope,
+          isShowingDetail,
         })
       );
     })();
-  }, [searchScope]);
+  }, [searchScope, isShowingDetail]);
 
   useEffect(() => {
     (async () => {
@@ -228,7 +230,6 @@ export default function Command() {
           />
         ))}
       </List.Section>
-      <List.EmptyView title="Start typing to search folders..." icon={Icon.MagnifyingGlass} />
     </List>
   );
 }
