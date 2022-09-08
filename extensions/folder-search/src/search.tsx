@@ -4,6 +4,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  Form,
   Icon,
   List,
   LocalStorage,
@@ -126,7 +127,10 @@ export default function Command() {
     })();
   }, [searchText, searchScope]);
 
-  return (
+  return !hasCheckedPreferences ? (
+    // prevent flicker due to details pref being async
+    <Form />
+  ) : (
     <List
       isLoading={isQuerying}
       enableFiltering={false}
