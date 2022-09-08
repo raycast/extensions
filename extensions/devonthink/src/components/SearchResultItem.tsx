@@ -168,7 +168,7 @@ const prettyDate = (date: string) => {
 }
 
 const humanFileSize = (bytes: number, si=false, decimalPlaces=1) => {
-  const thresh = si ? 1000 : 1024;
+  const thresh = si ? 1024 : 1000;
 
   if (Math.abs(bytes) < thresh) {
     return bytes + ' B';
