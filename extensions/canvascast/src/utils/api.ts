@@ -1,7 +1,7 @@
 import API from "@api-blueprints/pathmaker";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, course, assignment, announcement, modulesection, moduleitem } from "./types";
-import { Colors, formatModuleItemTitle, formatModuleItemPasscode } from "./utils";
+import { Colors, formatModuleItemTitle, formatModuleItemPasscode, getFormattedDate, convertHTMLToMD } from "./utils";
 
 export function getApi(token: string, domain: string) {
   return new API({
@@ -9,7 +9,7 @@ export function getApi(token: string, domain: string) {
       Authorization: "Bearer " + token,
       "Content-Type": "application/json",
     },
-    baseUrl: "https://" + domain + "/api/v1",
+    baseUrl: `https://${domain}/api/v1`,
   });
 }
 
@@ -22,60 +22,52 @@ export const checkApi = async () => {
 
 export const getCourses = async (json: any): Promise<course[]> => {
   const favorites = await api.users.self.favorites["courses?state=available&enrollment_state=active"].get();
-  const ids = favorites.map((favorite: any) => favorite.id);
-  return json
-    .filter((item: any) => ids.includes(item.id))
-    .map(
-      (course: any, index: number): course => ({
-        name: course.name,
-        code: course.course_code,
-        id: course.id,
-        color: Colors[index % Colors.length],
-        assignments: [],
-      })
-    );
-};
-
-export const getAssignments = async (courses: course[]): Promise<assignment[][]> => {
+  const ids = favorites.map((favorite) => favorite.id);
+  const courses: course[] = json
+    .filter((item) => ids.includes(item.id))
+    .map((course, index: number) => ({
+      name: course.name,
+      code: course.course_code,
+      id: course.id,
+      color: Colors[index % Colors.length],
+    }));
   const promises = courses.map((course: course, i: number): assignment[] => {
-    return api.courses[course.id].assignments["?order_by=due_at"].get().then((json: any) => {
-      console.log(course.name); 
+    return api.courses[course.id].assignments["?order_by=due_at"].get().then((json) => {
       return json
-        .filter((assignment: any) => assignment.due_at && new Date(assignment.due_at).getTime() > Date.now())
-        .map(
-          (assignment: any): assignment => ({
-            name: assignment.name,
-            id: assignment.id,
-            description: `# ${assignment.name}\n\n${assignment.description}`,
-            date: new Date(assignment.created_at).toString().split(" ").slice(0, 4).join(" "),
-            course: course.name,
-            course_id: course.id,
-            color: Colors[i % Colors.length],
-          })
-        );
+        .filter((assignment) => assignment.due_at && new Date(assignment.due_at).getTime() > Date.now())
+        .map((assignment) => ({
+          name: assignment.name,
+          id: assignment.id,
+          description: `# ${assignment.name}\n\n${convertHTMLToMD(assignment.description)}`,
+          date: getFormattedDate(assignment.due_at),
+          course: course.name,
+          course_id: course.id,
+          color: Colors[i % Colors.length],
+        }));
     });
   });
-  return await Promise.all(promises);
+  const assignments = await Promise.all(promises);
+  courses.forEach((course: course, index: number) => {
+    course.assignments = assignments[index];
+  });
+  return courses;
 };
 
 export const getAnnouncements = async (courses: course[]): Promise<announcement[]> => {
   const query = "announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&");
   const json = await api[query].get();
-  return json.map(
-    (announcement: any): announcement => ({
+  return json.map((announcement: any): announcement => {
+    const course = courses.filter((course: any) => course.id == announcement.context_code.substring(7))[0];
+    return {
       title: announcement.title,
-      course_id: +announcement.context_code.substring(7),
-      color:
-        Colors[
-          courses.indexOf(courses.filter((course: any) => course.id == announcement.context_code.substring(7))[0]) %
-            Colors.length
-        ],
-      course: courses.filter((course) => course.id == announcement.context_code.substring(7))[0].name,
+      course_id: announcement.context_code.substring(7),
+      color: Colors[courses.indexOf(course) % Colors.length],
+      course: course.name,
       id: announcement.id,
-      markdown: `# ${announcement.title}\n\n${announcement.message}`,
-      date: new Date(announcement.created_at).toString().split(" ").slice(0, 4).join(" "),
-    })
-  );
+      markdown: `# ${announcement.title}\n\n${convertHTMLToMD(announcement.message)}`,
+      date: getFormattedDate(announcement.created_at),
+    };
+  });
 };
 
 export const getModules = async (course_id: number): Promise<modulesection[]> => {
