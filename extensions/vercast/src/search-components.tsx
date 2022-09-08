@@ -289,7 +289,9 @@ export default function Command() {
       {ITEMS.map((item) => (
         <List.Item
           key={item.path}
-          icon={item.subtitle === "Styleguide" ? Icon.Book : item.subtitle === "Components" ? Icon.Box : "icon@dark.png"}
+          icon={
+            item.subtitle === "Styleguide" ? Icon.Book : item.subtitle === "Components" ? Icon.Box : "icon@dark.png"
+          }
           title={item.title}
           subtitle={item.subtitle}
           accessories={[{ icon: Icon.ArrowRight }]}
