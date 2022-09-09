@@ -56,7 +56,7 @@
       "label": "Addition Date",
       "description": "Date when the record was added to the database.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -80,7 +80,7 @@
       "label": "Annotation Count",
       "description": "The number of annotations. Currently only supported for PDF documents.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -112,7 +112,7 @@
       "label": "Character Count",
       "description": "The character count of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -152,7 +152,7 @@
       "label": "Date",
       "description": "The (creation/modification) date of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -216,7 +216,7 @@
       "label": "Filename",
       "description": "The proposed file name for a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -288,7 +288,7 @@
       "label": "Location",
       "description": "The primary location in the database as a POSIX path (/ in names is replaced with \/). This is the location of the first parent group.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -296,7 +296,7 @@
       "label": "Location Group",
       "description": "The group of the record's primary location. This is identical to the first parent group.",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
@@ -320,7 +320,7 @@
       "label": "Metadata",
       "description": "Document metadata (e.g. of PDF or RTF) of a record as a dictionary containing key-value pairs.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -328,7 +328,7 @@
       "label": "MIME Type",
       "description": "The (proposed) MIME type of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -368,7 +368,7 @@
       "label": "Number Of Hits",
       "description": "The number of hits of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -400,7 +400,7 @@
       "label": "Path",
       "description": "The POSIX file path of a record. Only the path of external records can be changed.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -424,7 +424,7 @@
       "label": "Score",
       "description": "The score of the last comparison, classification or search (value between 0.0 and 1.0) or undefined otherwise.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -512,7 +512,7 @@
       "label": "Word Count",
       "description": "The word count of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     }
   ],
