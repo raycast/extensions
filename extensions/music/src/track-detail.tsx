@@ -15,7 +15,7 @@ export const TrackDetail = (props: { track: Track }) => {
         const track = await getTrackDetails(props.track);
         const artwork = await getTrackArtwork(track);
         setTrack({ ...track, artwork });
-        let items = [];
+        const items = [];
         items.push({ h1: track.name });
         if (track.artwork && track.artwork !== "../assets/no-track.png") {
           items.push({

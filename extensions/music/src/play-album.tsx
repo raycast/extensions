@@ -32,7 +32,7 @@ export default function PlayLibraryAlbum() {
     getTracks();
   }, []);
 
-  let albums: Album[] = [];
+  const albums: Album[] = [];
   for (const track of tracks) {
     const id = `${track.album}-${track.albumArtist}`;
     const album = albums.find((a) => a.id === id);
