@@ -149,7 +149,7 @@ export default function MenuBar() {
             key={i}
             title={`${i * 25}`}
             onAction={async () => {
-              await handleTaskEitherError(music.player.setVolume(i * 10))();
+              await handleTaskEitherError(music.player.setVolume(i * 25))();
             }}
           />
         ))}
