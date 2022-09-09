@@ -70,6 +70,7 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="score" propKey="propertyScore" title="Score" text={"" + result.score} />,
 
     <MyLabel key="type" propKey="propertyType" title="Type" text={result.type} />,
+    <MyLabel key="kind" propKey="propertyKind" title="Kind" text={result.kind} />,
     <MyLink
       key="referenceURL"
       propKey="propertyReferenceURL"
@@ -80,7 +81,6 @@ const searchResultMetadataItems = (result: SearchResult) => {
     <MyLabel key="path" propKey="propertyPath" title="Path" text={result.path} />,
     <MyLabel key="filename" propKey="propertyFilename" title="Filename" text={result.filename} />,
     <MyLabel key="locationGroup" propKey="propertyLocationGroup" title="Location Group" text={result.locationGroup} />,
-    <MyLabel key="kind" propKey="propertyKind" title="Kind" text={result.kind} />,
     <MyLabel key="mimeType" propKey="propertyMimeType" title="MIME Type" text={result.mimeType} />,
     <MyLabel key="unread" propKey="propertyUnread" title="Unread" text={result.unread ? "yes" : "no"} />,
 
@@ -234,6 +234,10 @@ const MyLink = ({
   text: string;
   target?: string;
 }) => {
+  if (!preferences[propKey]) {
+    return null;
+  }
+
   if (!preferences.hideEmptySearchResultItemProperties) {
     return target ? (
       <Link title={title} text={text} target={target} />

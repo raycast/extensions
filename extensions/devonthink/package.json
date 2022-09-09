@@ -296,7 +296,7 @@
       "label": "Location Group",
       "description": "The group of the record's primary location. This is identical to the first parent group.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
@@ -472,7 +472,7 @@
       "label": "Type",
       "description": "The type of a record.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
