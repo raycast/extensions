@@ -65,7 +65,10 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
             track.artist.toLowerCase().includes(search)
           );
         })
-        .sort((a: Track, b: Track) => a.album.localeCompare(b.album) || a.name.localeCompare(b.name))
+        .sort(
+          (a: Track, b: Track) =>
+            a.artist.localeCompare(b.artist) || a.album.localeCompare(b.album) || a.name.localeCompare(b.name)
+        )
         .map((track) =>
           layout === LayoutType.Grid ? (
             <Grid.Item
