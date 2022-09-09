@@ -138,11 +138,16 @@ export default function Command() {
     return pinnedResults.map((pin) => pin.path).includes(result.path);
   };
 
+  const removeResultFromPinnedResults = (result: SpotlightSearchResult) => {
+    setPinnedResults((pinnedResults) => pinnedResults.filter((pinnedResult) => pinnedResult.path !== result.path));
+  };
+
   const toggleResultPinnedStatus = (result: SpotlightSearchResult, resultIndex: number) => {
     if (!resultIsPinned(result)) {
       setPinnedResults((pinnedResults) => [result, ...pinnedResults]);
     } else {
-      setPinnedResults((pinnedResults) => pinnedResults.filter((pinnedResult) => pinnedResult.path !== result.path));
+      // extracted out so we can re-use for maybeMoveResultToTrash calls
+      removeResultFromPinnedResults(result);
     }
 
     setSelectedItemId(`result-${resultIndex.toString()}`);
@@ -239,7 +244,7 @@ export default function Command() {
                     style={Action.Style.Destructive}
                     icon={{ source: Icon.Trash, tintColor: Color.Red }}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={() => maybeMoveResultToTrash(result)}
+                    onAction={() => maybeMoveResultToTrash(result, () => removeResultFromPinnedResults(result))}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
