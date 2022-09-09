@@ -230,7 +230,8 @@
     "Loskir",
     "immint023",
     "duboiss",
-    "metakirby5"
+    "metakirby5",
+    "macbookandrew"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

@@ -6,8 +6,6 @@ import {
   HarvestTimeEntryCreatedResponse,
   HarvestTimeEntryResponse,
   HarvestTimeEntry,
-  HarvestCompany,
-  HarvestClient,
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
@@ -15,7 +13,12 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isAxiosError(error: any): error is AxiosError {
+  return Object.keys(error).includes("isAxiosError");
+}
 
 interface Preferences {
   token: string;
@@ -39,38 +42,39 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
 }
 
 export function useCompany() {
-  const { data, error } = useSWR<HarvestCompany, AxiosError>("company", async () => {
+  return useCachedPromise(async () => {
     const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
     return resp.data;
   });
-  return { data, error, isLoading: !data && !error };
 }
 
 export function useActiveClients() {
-  const { data, error } = useSWR<HarvestClient[], AxiosError>("clients", async () => {
+  return useCachedPromise(async () => {
     const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
     return resp.data.clients;
   });
-  return { data, error, isLoading: !data && !error };
 }
 
 export function useMyProjects() {
-  const { data, error } = useSWR<HarvestProjectAssignment[], AxiosError>("project-assignments", async () => {
-    let project_assignments: HarvestProjectAssignment[] = [];
-    let page = 1;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
-        url: "/users/me/project_assignments",
-        params: { page },
-      });
-      project_assignments = project_assignments.concat(resp.data.project_assignments);
-      if (resp.data.total_pages >= resp.data.page) break;
-      page += 1;
-    }
-    return project_assignments;
-  });
-  return { data, error, isLoading: !data && !error };
+  return useCachedPromise(
+    async () => {
+      let project_assignments: HarvestProjectAssignment[] = [];
+      let page = 1;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
+          url: "/users/me/project_assignments",
+          params: { page },
+        });
+        project_assignments = project_assignments.concat(resp.data.project_assignments);
+        if (resp.data.total_pages >= resp.data.page) break;
+        page += 1;
+      }
+      return project_assignments;
+    },
+    [],
+    { initialData: [] }
+  );
 }
 
 export async function getMyId() {

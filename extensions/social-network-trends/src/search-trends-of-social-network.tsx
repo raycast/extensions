@@ -66,14 +66,16 @@ export default function TrendOfWeibo() {
         <List.Section title={"DouYin"}>
           {douYinTrends?.map((value, index) => {
             return (
-              <List.Item
-                id={index + value.name}
-                key={index + value.name}
-                icon={{ source: { light: `${listIcon[index]}`, dark: `${listIconDark[index]}` } }}
-                title={value.name}
-                accessories={[{ text: `${(value.hot / 10000).toFixed(1)}w` }]}
-                actions={<TrendActions url={douyinSearchUrl + encodeURIComponent(value.name)} name={value.name} />}
-              />
+              index < 10 && (
+                <List.Item
+                  id={index + value.name}
+                  key={index + value.name}
+                  icon={{ source: { light: `${listIcon[index]}`, dark: `${listIconDark[index]}` } }}
+                  title={value.name}
+                  accessories={[{ text: `${(value.hot / 10000).toFixed(1)}w` }]}
+                  actions={<TrendActions url={douyinSearchUrl + encodeURIComponent(value.name)} name={value.name} />}
+                />
+              )
             );
           })}
         </List.Section>

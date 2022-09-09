@@ -1,11 +1,26 @@
 # Changelog
 
+## 1.39.2 - 2022-09-01
+
+### ✨ New
+
+- **Bundler**: You can now import wasm files and they will bundle in the extension
+
+### 💎 Improvements
+
+- **SVG**: Accept a percentage for rect corner radius attributes
+- **Actions**: `Action.Trash` is now a Destructive Action (meaning it will show up in red)
+
+### 🐞 Fixes
+
+- **Metadata**: Fixes an issue where List Metadata would sometimes render Tags in the wrong position
+
 ## 1.39.0 - 2022-08-18
 
 ### ✨ New
 
 - **List.Item.Detail.Metadata**: We’ve added support for new `Link` and `TagList` item types.
-- **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ *via* `environment.commandMode`.
+- **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ _via_ `environment.commandMode`.
 
 ### 💎 Improvements
 
@@ -20,7 +35,6 @@
 - **Menu Bar Commands**: Fixed a bug where the error screen of menu bar commands would repeatedly be shown in the root search
 - **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn’t work entirely
 - **Form:** `TextArea` placeholder now won’t highlight markdowns if it has `enabledMarkdown`
-
 
 ## 1.38.3 - 2022-08-03
 

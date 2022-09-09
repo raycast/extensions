@@ -64,7 +64,8 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ## Extension Icon
 
 - The published extension in the Store should have a 512x512px icon in `png` format
-- The icon should look good in both dark and light themes (you can switch the theme in Raycast Preferences → Appearance)
+- The icon should look good in both light and dark themes (you can switch the theme in Raycast Preferences → Appearance)
+- If you have separate light and dark icons, refer to the `package.json` [manifest](https://developers.raycast.com/information/manifest#extension-properties) documentation on how to configure them
 - Extensions that use the default Raycast icon will be rejected
 - This [Icon Template](https://www.figma.com/community/file/1030764827259035122/Extensions-Icon-Template) can help you with making and exporting a proper icon
 - Make sure to remove unused assets and icons
@@ -266,6 +267,10 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 - For a better visual experience, add placeholders in text field and text area components. This includes preferences.
 - Don't leave the search bar without a placeholder
+
+### Analytics
+
+- It’s not allowed to include external analytics in extensions. Later on, we will add support to give developers more insights into how their extension is being used.
 
 ### Localization / Language
 
