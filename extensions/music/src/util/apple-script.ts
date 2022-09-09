@@ -1,20 +1,14 @@
-import { URLSearchParams } from "url";
-
+import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
-
 import { logScript } from "./logger";
-import { ScriptError } from "./models";
+import { URLSearchParams } from "url";
 
-function toScriptError(e: unknown): ScriptError {
-  return e as ScriptError;
-}
-
-export const runScript = (command: string) =>
-  TE.tryCatch(() => pipe(command, logScript, runAppleScript), toScriptError);
+export const runScript = (command: string) => TE.tryCatch(() => pipe(command, logScript, runAppleScript), E.toError);
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
+export const tellMusic = (command: string) => tell("Music", command);
 
 /**
  * Transforms an object to a querystring concatened in apple-script.
@@ -26,7 +20,7 @@ export const tell = (application: string, command: string) =>
  */
 export const createQueryString = <T extends object>(obj: T): string => {
   return Object.entries(obj).reduce((acc, [key, value], i) => {
-    const keyvalue = `"${i > 0 ? "&" : ""}${key}=" & ${value}`;
+    const keyvalue = `"${i > 0 ? "$break" : ""}${key}=" & ${value}`;
 
     if (!acc) return keyvalue;
 

@@ -1,3 +1,5 @@
+import { Grid } from "@raycast/api";
+
 export enum PlayerState {
   PLAYING = "playing",
   PAUSED = "paused",
@@ -5,12 +7,25 @@ export enum PlayerState {
 }
 
 export interface Track {
-  id?: string;
+  id: string;
   name: string;
   artist: string;
   album: string;
-  duration: string;
+  albumArtist: string;
+  genre: string;
+  artwork?: string;
+  duration?: string;
   state?: PlayerState;
+  time?: string;
+  playCount?: number;
+  loved?: boolean;
+  year?: string;
+}
+
+export enum PlaylistKind {
+  ALL = "all",
+  USER = "user",
+  SUBSCRIPTION = "subscription",
 }
 
 export interface Playlist {
@@ -18,25 +33,34 @@ export interface Playlist {
   name: string;
   duration: string;
   count: string;
-
   time: string;
-  description: string;
-  kind: `${"subscription" | "user" | "library"} playlist`;
+  kind: string | `${PlaylistKind} playlist`;
+  artwork?: string;
+  tracks?: Track[];
 }
 
 export interface Album {
   id: string;
   name: string;
   artist: string;
-  count?: string;
+  genre: string;
+  tracks: Track[];
+  artwork?: string;
+  count?: number;
 }
 
-export interface ScriptError extends Error {
-  shortMessage: string;
-  command: string;
-  failed: boolean;
+export interface MusicState {
+  title: string;
+  playing: boolean;
+  repeat: string;
+  shuffle: boolean;
+  loved: boolean;
+  added: boolean;
 }
 
-export const ScriptError = {
-  is: (error: Error): error is ScriptError => "shortMessaage" in error,
-};
+export interface Preferences {
+  layoutType: "list" | "grid";
+  gridItemSize: Grid.ItemSize;
+  albumTracksLayout: "list" | "grid";
+  playlistTracksLayout: "list" | "grid";
+}
