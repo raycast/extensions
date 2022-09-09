@@ -51,11 +51,7 @@ const searchSpotlight = (
         // keep searching...
       })
       .on("error", (e: Error) => {
-        // conditially proxy upstream
-        // else usePromise() thinks we failed
-        if (e.name !== "AbortError") {
-          reject(e);
-        }
+        reject(e);
       })
       .on("end", () => {
         resolve();

@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [New Feature] - 2022-09-09
+
+- **added** Ability to 'Pin' folders
+
 ## [Fixes & Improvements] - 2022-09-08
 
 - **removed** 'size' meta property from detail view
