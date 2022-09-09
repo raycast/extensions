@@ -181,6 +181,7 @@
 /extensions/flutter-documentation-search             @MattisBrizard
 /extensions/flutter-pub-dev-search                   @prasadsunny1
 /extensions/flypy-code-query                         @absir1949
+/extensions/folder-search                            @GastroGeek
 /extensions/fork-repositories                        @sxn
 /extensions/format-graphql                           @tngranados
 /extensions/frankerfacez                             @davidchalifoux
@@ -199,7 +200,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
-/extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5
+/extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew
 /extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger
 /extensions/go-package-search                        @bstncartwright
@@ -420,7 +421,7 @@
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
-/extensions/rss-reader                               @fuksman
+/extensions/rss-reader                               @fuksman @pernielsentikaer
 /extensions/rsync-commands                           @maxfahl
 /extensions/ruby-evaluate                            @obahareth
 /extensions/sabnzbd                                  @jesse-c
@@ -496,6 +497,7 @@
 /extensions/tim                                      @tmwrnr
 /extensions/timers                                   @ThatNerdSquared @GastroGeek
 /extensions/timeular                                 @kudrykv
+/extensions/tinyfaces-nft                            @peduarte
 /extensions/tinypng                                  @kawamataryo
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029
