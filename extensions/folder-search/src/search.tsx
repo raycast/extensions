@@ -50,8 +50,8 @@ export default function Command() {
     [],
     {
       onData(preferences) {
-        setSearchScope(preferences.searchScope);
-        setIsShowingDetail(preferences.isShowingDetail);
+        setSearchScope(preferences?.searchScope);
+        setIsShowingDetail(preferences?.isShowingDetail);
         setHasCheckedPreferences(true);
       },
       onError() {
