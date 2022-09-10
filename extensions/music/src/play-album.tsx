@@ -17,7 +17,7 @@ import { getAllTracks } from "./util/scripts/track";
 import { MusicIcon } from "./util/utils";
 
 export default function PlayLibraryAlbum() {
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [search, setSearch] = useState<string>("");
@@ -26,30 +26,30 @@ export default function PlayLibraryAlbum() {
   const [genre, setGenre] = useState<string>("all");
 
   useEffect(() => {
-    const getTracks = async () => {
-      setTracks(await getAllTracks());
+    const getAlbums = async () => {
+      const tracks = await getAllTracks();
+      const albums: Album[] = [];
+      for (const track of tracks) {
+        const id = `${track.album}-${track.albumArtist}`;
+        const album = albums.find((a) => a.id === id);
+        if (album) {
+          album.tracks.push(track);
+        } else {
+          albums.push({
+            id: id,
+            name: track.album,
+            artist: track.albumArtist,
+            artwork: track.artwork,
+            genre: track.genre,
+            tracks: [track],
+          });
+        }
+      }
+      setAlbums(albums);
       setIsLoading(false);
     };
-    getTracks();
+    getAlbums();
   }, []);
-
-  const albums: Album[] = [];
-  for (const track of tracks) {
-    const id = `${track.album}-${track.albumArtist}`;
-    const album = albums.find((a) => a.id === id);
-    if (album) {
-      album.tracks.push(track);
-    } else {
-      albums.push({
-        id: id,
-        name: track.album,
-        artist: track.albumArtist,
-        artwork: track.artwork,
-        genre: track.genre,
-        tracks: [track],
-      });
-    }
-  }
 
   return (
     <ListOrGrid
