@@ -139,7 +139,7 @@
       "subtitle": "Apple Music",
       "description": "Control Apple Music using the menu bar.",
       "mode": "menu-bar",
-      "interval": "1d"
+      "interval": "1h"
     },
     {
       "name": "current-track",
