@@ -2,9 +2,16 @@ interface IPreferences {
   langFirst: string;
   langSecond: string;
   defaultServiceProvider: TransServiceProviderTp;
+  googleFreeTLD: GoogleFreeAPITLD;
+  googleApiKey: string;
+  disableGoogleCould: boolean;
   deeplAuthKey: string;
   deeplApiPro: boolean;
   disableDeepL: boolean;
+  microsoftAccessKey: string;
+  microsoftAPIEndpoint: string;
+  microsoftRegion: string;
+  disableMicrosoft: boolean;
   youdaoAppId: string;
   youdaoAppKey: string;
   disableYoudao: boolean;
@@ -14,9 +21,14 @@ interface IPreferences {
   tencentAppId: string;
   tencentAppKey: string;
   disableTencent: boolean;
+  aliyunAccessKeyId: string;
+  aliyunAccessKeySecret: string;
+  disableAliyun: boolean;
   selectedDefault: boolean;
   quickSwitchLang: boolean;
   delayTransInterval: number;
+  enableHistory: boolean;
+  historyLimit: number;
 }
 
 interface ILangItem {
@@ -25,7 +37,10 @@ interface ILangItem {
   baiduLangId?: string;
   tencentLangId?: string;
   youdaoLangId?: string;
+  aliyunLangId?: string;
+  microsoftLangId?: string;
   langTitle: string;
+  voice?: string;
 }
 
 interface ITranslateRes {
@@ -64,12 +79,32 @@ interface IGoogleTranslateResult {
   };
 }
 
+interface IGoogleCloudTranslateResult {
+  translations: IGoogleCloudTranslateItem[];
+}
+
+interface IGoogleCloudTranslateItem {
+  translatedText: string;
+  detectedSourceLanguage: string;
+}
+
 interface IDeepLTranslateResult {
   translations: IDeepLTranslateItem[];
 }
 
 interface IDeepLTranslateItem {
   detected_source_language: string;
+  text: string;
+}
+
+interface IMicrosoftAzureTranslateResult {
+  detectedLanguage: {
+    language: string;
+  };
+  translations: IMicrosoftAzureTranslateItem[];
+}
+
+interface IMicrosoftAzureTranslateItem {
   text: string;
 }
 
@@ -113,4 +148,27 @@ interface ITencentTranslateResponse {
   Error: {
     Code: string;
   };
+}
+
+interface IAliyunTransResponse {
+  Data: {
+    WordCount: string;
+    Translated: string;
+  };
+  Code: string;
+}
+
+interface IAliyunDetectLangResponse {
+  DetectedLanguage: string;
+}
+
+interface TransHistory {
+  time: number;
+  from: string;
+  to: string;
+  text: string;
+  transList: {
+    serviceProvider: TransServiceProviderTp;
+    res: string;
+  }[];
 }

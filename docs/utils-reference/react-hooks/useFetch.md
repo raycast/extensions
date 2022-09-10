@@ -14,6 +14,7 @@ function useFetch<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
+    onWillExecute?: (args: [string, RequestInit]) -> void;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -25,8 +26,10 @@ function useFetch<T, U>(
 
 - `url` is the string representation of the URL to fetch.
 
+With a few options:
+
 - `options` extends [`RequestInit`](https://github.com/nodejs/undici/blob/v5.7.0/types/fetch.d.ts#L103-L117) allowing you to specify a body, headers, etc. to apply to the request.
-- `options.parseResponse` is a function that accepts the Response as an argument and returns the data the hooks will return. But default, the hook will return `response.json()` if the response has a JSON `Content-Type` header or `response.text()` otherwise.
+- `options.parseResponse` is a function that accepts the Response as an argument and returns the data the hooks will return. By default, the hook will return `response.json()` if the response has a JSON `Content-Type` header or `response.text()` otherwise.
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
@@ -38,7 +41,6 @@ Including the [useCachedState](./useCachedState.md)'s options:
 
 Including the [usePromise](./usePromise.md)'s options:
 
-- `options.abortable` is a reference to an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to cancel a previous call when triggering a new one.
 - `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
@@ -46,7 +48,7 @@ Including the [usePromise](./usePromise.md)'s options:
 
 ### Return
 
-Returns an object with the [AsyncState](#asyncstate) corresponding to the execution of the function as well as a couple of methods to manipulate it.
+Returns an object with the [AsyncState](#asyncstate) corresponding to the execution of the fetch as well as a couple of methods to manipulate it.
 
 - `data`, `error`, `isLoading` - see [AsyncState](#asyncstate).
 - `revalidate` is a method to manually call the function with the same arguments again.
@@ -55,6 +57,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
+import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 const Demo = () => {
@@ -87,7 +90,7 @@ import { useFetch } from "@raycast/utils";
 
 const Demo = () => {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, mutate } = useFetch(`https://api.example?q=${searchText}`, {
+  const { isLoading, data } = useFetch(`https://api.example?q=${searchText}`, {
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,
   });

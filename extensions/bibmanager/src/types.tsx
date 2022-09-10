@@ -8,13 +8,14 @@ export interface Item {
   content: string;
   tags: [];
   authors_tag: [];
+  keywords: [];
   authors_string: string;
   pdf: string;
 }
 
 export interface State {
   isLoading: boolean;
-  items: [];
+  items: Item[];
   error?: Error;
   searchText: string;
 }

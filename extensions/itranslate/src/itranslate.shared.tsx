@@ -1,20 +1,25 @@
-import { getPreferenceValues } from "@raycast/api";
-import { LANG_LIST, TransAPIErrCode, TransServiceProviderTp } from "./const";
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { HistoriesCacheKey, LANG_LIST, TransAPIErrCode, TransServiceProviderTp } from "./const";
 import axios from "axios";
 import crypto from "crypto";
 import querystring from "node:querystring";
 import { LanguageConflict, ServiceProviderMiss } from "./TranslateError";
 import translate from "@vitalets/google-translate-api";
+import Core from "@alicloud/pop-core";
+import { execSync } from "child_process";
 
 const apiFetchMap = new Map<
   TransServiceProviderTp,
   (queryText: string, targetLang: ILangItem, serviceProvider: ITransServiceProvider) => Promise<ITranslateRes>
 >([
   [TransServiceProviderTp.Google, fetchGoogleTransAPI],
+  [TransServiceProviderTp.GoogleCouldTrans, fetchGoogleCouldTransAPI],
   [TransServiceProviderTp.DeepL, fetchDeepLTransAPI],
+  [TransServiceProviderTp.MicrosoftAzure, fetchMicrosoftAzureTransAPI],
   [TransServiceProviderTp.Youdao, fetchYoudaoTransAPI],
   [TransServiceProviderTp.Baidu, fetchBaiduTransAPI],
   [TransServiceProviderTp.Tencent, fetchTencentTransAPI],
+  [TransServiceProviderTp.Aliyun, fetchAliyunTransAPI],
 ]);
 
 export function checkPreferences() {
@@ -29,8 +34,14 @@ export function checkPreferences() {
     case TransServiceProviderTp.Google:
       checkService = true;
       break;
+    case TransServiceProviderTp.GoogleCouldTrans:
+      if (!preferences.googleApiKey) checkService = false;
+      break;
     case TransServiceProviderTp.DeepL:
       if (!preferences.deeplAuthKey) checkService = false;
+      break;
+    case TransServiceProviderTp.MicrosoftAzure:
+      if (!preferences.microsoftAccessKey) checkService = false;
       break;
     case TransServiceProviderTp.Baidu:
       if (!preferences.baiduAppId || !preferences.baiduAppKey) checkService = false;
@@ -40,6 +51,9 @@ export function checkPreferences() {
       break;
     case TransServiceProviderTp.Tencent:
       if (!preferences.tencentAppId || !preferences.tencentAppKey) checkService = false;
+      break;
+    case TransServiceProviderTp.Aliyun:
+      if (!preferences.aliyunAccessKeyId || !preferences.aliyunAccessKeySecret) checkService = false;
       break;
   }
   if (!checkService) {
@@ -52,7 +66,15 @@ export function checkPreferences() {
 export function getLang(value: string): ILangItem {
   return (
     LANG_LIST.find((lang) =>
-      [lang.langId, lang.deeplLangId, lang.baiduLangId, lang.tencentLangId, lang.youdaoLangId].includes(value)
+      [
+        lang.langId,
+        lang.deeplLangId,
+        lang.baiduLangId,
+        lang.tencentLangId,
+        lang.youdaoLangId,
+        lang.aliyunLangId,
+        lang.microsoftLangId,
+      ].includes(value)
     ) || {
       langId: "unknown",
       langTitle: "unknown",
@@ -71,12 +93,28 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
         appKey: "",
       });
       break;
+    case TransServiceProviderTp.GoogleCouldTrans:
+      if (preferences.disableGoogleCould) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: "",
+        appKey: preferences.googleApiKey,
+      });
+      break;
     case TransServiceProviderTp.DeepL:
       if (preferences.disableDeepL) break;
       serviceProviderMap.set(preferences.defaultServiceProvider, {
         serviceProvider: preferences.defaultServiceProvider,
         appId: "",
         appKey: preferences.deeplAuthKey,
+      });
+      break;
+    case TransServiceProviderTp.MicrosoftAzure:
+      if (preferences.disableMicrosoft) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: preferences.microsoftAPIEndpoint,
+        appKey: preferences.microsoftAccessKey,
       });
       break;
     case TransServiceProviderTp.Baidu:
@@ -103,12 +141,31 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
         appKey: preferences.tencentAppKey,
       });
       break;
+    case TransServiceProviderTp.Aliyun:
+      if (preferences.disableAliyun) break;
+      serviceProviderMap.set(preferences.defaultServiceProvider, {
+        serviceProvider: preferences.defaultServiceProvider,
+        appId: preferences.aliyunAccessKeyId,
+        appKey: preferences.aliyunAccessKeySecret,
+      });
+      break;
   }
   if (preferences.defaultServiceProvider != TransServiceProviderTp.Google) {
     serviceProviderMap.set(TransServiceProviderTp.Google, {
       serviceProvider: TransServiceProviderTp.Google,
       appId: "",
       appKey: "",
+    });
+  }
+  if (
+    preferences.googleApiKey &&
+    !preferences.disableGoogleCould &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.GoogleCouldTrans
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.GoogleCouldTrans, {
+      serviceProvider: TransServiceProviderTp.GoogleCouldTrans,
+      appId: "",
+      appKey: preferences.googleApiKey,
     });
   }
   if (
@@ -120,6 +177,17 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       serviceProvider: TransServiceProviderTp.DeepL,
       appId: "",
       appKey: preferences.deeplAuthKey,
+    });
+  }
+  if (
+    preferences.microsoftAccessKey &&
+    !preferences.disableMicrosoft &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.MicrosoftAzure
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.MicrosoftAzure, {
+      serviceProvider: TransServiceProviderTp.MicrosoftAzure,
+      appId: preferences.microsoftAPIEndpoint,
+      appKey: preferences.microsoftAccessKey,
     });
   }
   if (
@@ -156,6 +224,18 @@ export function getServiceProviderMap(): Map<TransServiceProviderTp, ITransServi
       serviceProvider: TransServiceProviderTp.Tencent,
       appId: preferences.tencentAppId,
       appKey: preferences.tencentAppKey,
+    });
+  }
+  if (
+    preferences.aliyunAccessKeyId &&
+    preferences.aliyunAccessKeySecret &&
+    !preferences.disableAliyun &&
+    preferences.defaultServiceProvider != TransServiceProviderTp.Aliyun
+  ) {
+    serviceProviderMap.set(TransServiceProviderTp.Aliyun, {
+      serviceProvider: TransServiceProviderTp.Aliyun,
+      appId: preferences.aliyunAccessKeyId,
+      appKey: preferences.aliyunAccessKeySecret,
     });
   }
   return serviceProviderMap;
@@ -256,6 +336,112 @@ function fetchDeepLTransAPI(
   });
 }
 
+function fetchMicrosoftAzureTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  return new Promise<ITranslateRes>((resolve) => {
+    const preferences: IPreferences = getPreferenceValues<IPreferences>();
+    const fromLang = "auto";
+    const ENDPOINT = provider.appId;
+    const APP_KEY = provider.appKey;
+    const payload = [{ Text: queryText }];
+    axios
+      .post(
+        `${ENDPOINT}/translate?` +
+          querystring.stringify({
+            "api-version": "3.0",
+            to: targetLang.microsoftLangId || targetLang.langId,
+          }),
+        payload,
+        {
+          headers: {
+            "Ocp-Apim-Subscription-Key": APP_KEY,
+            "Content-Type": "application/json; charset=UTF-8",
+            "Ocp-Apim-Subscription-Region": preferences.microsoftRegion,
+          },
+        }
+      )
+      .then((res) => {
+        const resDate: IMicrosoftAzureTranslateResult[] = res.data;
+        let code = TransAPIErrCode.Success;
+        if (resDate.length == 0 || resDate[0].translations.length == 0) {
+          code = TransAPIErrCode.Fail;
+        }
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: code,
+          from: code === TransAPIErrCode.Success ? getLang(resDate[0].detectedLanguage.language) : getLang(""),
+          to: targetLang,
+          origin: queryText,
+          res: code === TransAPIErrCode.Success ? resDate[0].translations[0].text : "",
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
+function fetchGoogleCouldTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  return new Promise<ITranslateRes>((resolve) => {
+    const fromLang = "auto";
+    const APP_KEY = provider.appKey;
+    axios
+      .post(
+        `https://translation.googleapis.com/language/translate/v2?` +
+          querystring.stringify({
+            key: APP_KEY,
+            q: queryText,
+            format: "text",
+            target: targetLang.langId,
+          })
+      )
+      .then((res) => {
+        const resDate: IGoogleCloudTranslateResult = res.data.data;
+        let code = TransAPIErrCode.Success;
+        if (resDate.translations.length == 0) {
+          code = TransAPIErrCode.Fail;
+        }
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: code,
+          from:
+            code === TransAPIErrCode.Success ? getLang(resDate.translations[0].detectedSourceLanguage) : getLang(""),
+          to: targetLang,
+          origin: queryText,
+          res: code === TransAPIErrCode.Success ? resDate.translations[0].translatedText : "",
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
 function fetchGoogleTransAPI(
   queryText: string,
   targetLang: ILangItem,
@@ -263,7 +449,8 @@ function fetchGoogleTransAPI(
 ): Promise<ITranslateRes> {
   return new Promise<ITranslateRes>((resolve) => {
     const fromLang = "auto";
-    translate(queryText, { to: targetLang.langId, from: fromLang, tld: "cn" })
+    const preferences: IPreferences = getPreferenceValues<IPreferences>();
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD })
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {
@@ -551,4 +738,101 @@ function fetchTencentTransAPI(
         resolve(transRes);
       });
   });
+}
+
+async function fetchAliyunTransAPI(
+  queryText: string,
+  targetLang: ILangItem,
+  provider: ITransServiceProvider
+): Promise<ITranslateRes> {
+  let fromLang = "auto";
+  const APP_ID = provider.appId;
+  const APP_KEY = provider.appKey;
+  const client = new Core({
+    accessKeyId: APP_ID,
+    accessKeySecret: APP_KEY,
+    endpoint: "https://mt.cn-hangzhou.aliyuncs.com",
+    apiVersion: "2018-10-12",
+  });
+
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  if (provider.serviceProvider === preferences.defaultServiceProvider) {
+    try {
+      const from = await client.request<IAliyunDetectLangResponse>(
+        "GetDetectLanguage",
+        { SourceText: queryText },
+        { method: "POST" }
+      );
+      fromLang = from.DetectedLanguage;
+    } catch {
+      console.log("GetDetectLanguage err");
+    }
+  }
+  return new Promise<ITranslateRes>((resolve) => {
+    const params = {
+      RegionId: "cn-hangzhou",
+      FormatType: "text",
+      SourceLanguage: fromLang,
+      TargetLanguage: targetLang.aliyunLangId || targetLang.langId,
+      SourceText: queryText,
+    };
+
+    client
+      .request<IAliyunTransResponse>("TranslateGeneral", params, { method: "POST" })
+      .then((resDate) => {
+        let code = TransAPIErrCode.Fail;
+        if (resDate.Code === "10001") {
+          code = TransAPIErrCode.Retry;
+        }
+        if (resDate.Code === "200") {
+          code = TransAPIErrCode.Success;
+        }
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: code,
+          from: code === TransAPIErrCode.Success ? getLang(fromLang) : getLang(""),
+          to: targetLang,
+          origin: queryText,
+          res: code === TransAPIErrCode.Success ? resDate.Data.Translated : "",
+        };
+        resolve(transRes);
+      })
+      .catch(() => {
+        const transRes: ITranslateRes = {
+          serviceProvider: provider.serviceProvider,
+          code: TransAPIErrCode.Fail,
+          from: getLang(fromLang),
+          to: targetLang,
+          origin: queryText,
+          res: "",
+        };
+        resolve(transRes);
+      });
+  });
+}
+
+const cache = new Cache();
+
+export function getHistories(): TransHistory[] {
+  return JSON.parse(cache.get(HistoriesCacheKey) || "[]");
+}
+
+export function saveHistory(history: TransHistory, limit: number) {
+  const historiesCache: TransHistory[] = JSON.parse(cache.get(HistoriesCacheKey) || "[]");
+  if (historiesCache.unshift(history) > limit) historiesCache.pop();
+  cache.set(HistoriesCacheKey, JSON.stringify(historiesCache));
+}
+
+export function clearAllHistory() {
+  cache.remove(HistoriesCacheKey);
+}
+
+export function say(text: string, lang: ILangItem) {
+  if (!lang.voice) return;
+  try {
+    const command = `say -v ${lang.voice} "${text.replace(/"/g, " ")}"`;
+    execSync(command);
+  } catch (error) {
+    console.log(error);
+  }
 }
