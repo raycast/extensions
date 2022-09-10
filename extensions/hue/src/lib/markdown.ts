@@ -15,7 +15,7 @@ Please use the ‘Manage Hue Bridge’ command to link your Hue Bridge.
 `;
 
 export const discoveringMessage = `
-# Discovering Hue Bridge
+# Connecting to Hue Bridge
 
 ![Not Found](${connectImagePath})
 
@@ -41,7 +41,7 @@ Your Hue Bridge must be switched on, plugged into your router via an Ethernet ca
 `;
 
 export const linkWithBridgeMessage = `
-# Hue Bridge found
+# Connecting to Hue Bridge
 
 ![Press Button](${buttonImagePath})
 
