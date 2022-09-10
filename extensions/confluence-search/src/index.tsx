@@ -12,7 +12,8 @@ import {
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const prefs: { instanceType: string; user: string; instance: string; token: string } = getPreferenceValues();
+const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string } =
+  getPreferenceValues();
 export const confluenceUrl =
   prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
@@ -73,10 +74,15 @@ function useSearch() {
 }
 
 async function searchConfluence(searchText: string, signal: AbortSignal) {
+  const https = require("https");
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: !prefs.unsafeHttps,
+  });
   const init: RequestInit = {
     headers,
     method: "get",
     signal: signal,
+    agent: httpsAgent,
   };
   const apiUrl = `${confluenceUrl}/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
   return fetch(apiUrl, init).then((response) => {
