@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
+import https = require("https");
 
 const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string } =
   getPreferenceValues();
@@ -74,7 +75,6 @@ function useSearch() {
 }
 
 async function searchConfluence(searchText: string, signal: AbortSignal) {
-  const https = require("https");
   const httpsAgent = new https.Agent({
     rejectUnauthorized: !prefs.unsafeHttps,
   });
