@@ -130,11 +130,14 @@ const api = axios.create({
 });
 
 async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  await authorize(); // make sure we have a token before the request
+  const token = await client.getTokens();
+  if (!token) {
+    throw new Error("No token found");
+  }
   const resp = api.request<unknown, T>({
     method,
     ...props,
-    headers: { Authorization: `Bearer ${(await client.getTokens())?.accessToken}` },
+    headers: { Authorization: `Bearer ${token.accessToken}` },
   });
   return resp;
 }

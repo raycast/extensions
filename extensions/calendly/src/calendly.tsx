@@ -1,15 +1,14 @@
+import { useEffect } from "react";
 import {
   List,
   ActionPanel,
   Icon,
   Toast,
   showHUD,
-  Detail,
   showToast,
   getPreferenceValues,
   Action,
   Clipboard,
-  OAuth,
   Image,
 } from "@raycast/api";
 import {
@@ -18,25 +17,20 @@ import {
   createSingleUseLink,
   useEventTypes,
   useCurrentUser,
+  authorize,
 } from "./services/calendly";
-
-const tokenURL = "https://calendly.com/integrations/api_webhooks";
-
-const errorMd = `
-  # ⚠️ Calendly Access Token Error ⚠️
-
-  Your Calendly Personal Access Token is not valid. Go into Raycast preferences to change it.
-
-  ---
-
-  To get your personal access token go to [${tokenURL}](${tokenURL}) and click "Generate New Token". Give your token a name like "*raycast*" and then Create Token. The token will only be shown to you once. Copy that token into your Raycast preferences.
-`;
 
 export default function Calendly() {
   // const [showError, setShowError] = useState(false);
   const { user, error } = useCurrentUser();
   const { defaultAction }: Preferences = getPreferenceValues();
   const { eventTypes: items, isLoading, revalidate } = useEventTypes();
+
+  useEffect(() => {
+    (async () => {
+      await authorize();
+    })();
+  }, []);
 
   function RefreshAction() {
     return (
@@ -53,17 +47,7 @@ export default function Calendly() {
     );
   }
 
-  if (error)
-    return (
-      <Detail
-        markdown={errorMd}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url={tokenURL} title="Open Calendly Integrations Page" />
-          </ActionPanel>
-        }
-      />
-    );
+  console.log({ error });
 
   return (
     <List isLoading={isLoading}>
