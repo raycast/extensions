@@ -22,7 +22,7 @@ const copyFolderToClipboard = (result: SpotlightSearchResult) => {
   runAppleScriptSync(`set the clipboard to POSIX file "${result.path}"`);
 };
 
-const maybeMoveResultToTrash = async (result: SpotlightSearchResult) => {
+const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTrashed: () => void) => {
   const options: Alert.Options = {
     title: "Move to Trash",
     message: `Are you sure you want to move "${folderName(result)}" to the Trash?`,
@@ -33,6 +33,7 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult) => {
       onAction: () => {
         trash(result.path);
         showToast({ title: "Moved to Trash", message: folderName(result) });
+        resultWasTrashed();
       },
     },
   };
