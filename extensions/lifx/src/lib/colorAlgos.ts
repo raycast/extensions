@@ -7,8 +7,12 @@ const kelvinToRgb = require("kelvin-to-rgb");
 export function getLightIcon(lightState: Lights.Light) {
   const progress = lightState.brightness;
   if (lightState.color !== undefined) {
-    const hex = hsl(lightState.color.hue, 100, 60);
-    return getProgressIcon(progress, hex);
+    if (lightState.power == "off") {
+      return getProgressIcon(progress, Color.SecondaryText);
+    } else {
+      const hex = hsl(lightState.color.hue, 100, 60);
+      return getProgressIcon(progress, hex);
+    }
   } else {
     return getProgressIcon(progress, "white");
   }

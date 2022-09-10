@@ -2,7 +2,7 @@ import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel 
 import { Api } from "./lib/interfaces";
 import { checkApiKey, SetEffect } from "./lib/api";
 import { effects } from "./lib/constants";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function viewScenes() {
   const preferences = getPreferenceValues();
@@ -21,6 +21,7 @@ export default function viewScenes() {
     period: 5,
     direction: "forward",
   };
+
   async function setEffect(uuid: string, effect: Api.effectType) {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -28,18 +29,16 @@ export default function viewScenes() {
     });
     try {
       setIsLoading(true);
-      if (!preferences.has("lights")) {
-        const isTokenValid = await checkApiKey();
-        if (!isTokenValid) {
-          preferences.set("lifx_token", JSON.stringify({ valid: true }));
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid Token",
-            message: "Please check your token and try again",
-          });
-          setIsLoading(false);
-          return;
-        }
+      const isTokenValid = await checkApiKey();
+      if (!isTokenValid) {
+        preferences.set("lifx_token", JSON.stringify({ valid: true }));
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Token",
+          message: "Please check your token and try again",
+        });
+        setIsLoading(false);
+        return;
       }
       await SetEffect(uuid, effect, param, config);
       toast.style = Toast.Style.Success;
@@ -54,16 +53,39 @@ export default function viewScenes() {
     }
   }
 
+  async function checkKey() {
+    console.info("Checking Api Key");
+    setIsLoading(true);
+    const isTokenValid = await checkApiKey();
+    if (!isTokenValid) {
+      preferences.set("lifx_token", JSON.stringify({ valid: true }));
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Token",
+        message: "Please check your token and try again",
+      });
+      setIsLoading(false);
+      return;
+    } else {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    checkKey().catch(console.error);
+  }, []);
+
   return (
     <List isLoading={isLoading}>
       {effects.length === 0 ? (
         <List.EmptyView
           key="empty"
-          icon="lifx-extension-icon.png"
+          icon="lifx-icon-64.png"
           title="No effects found"
           description="Check if you have any effects for your lights"
         />
       ) : (
+        !isLoading &&
         effects.map((effect) => (
           <List.Item
             key={effect.value}

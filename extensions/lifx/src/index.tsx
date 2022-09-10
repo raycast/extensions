@@ -59,7 +59,16 @@ export default function Command() {
     });
     try {
       await toggleLight(id, { duration: 1 }, config);
-      updateState(id, 0.01);
+      updateState(
+        id,
+        undefined,
+        undefined,
+        data.find((i) => {
+          return i.id == id;
+        })?.power == "off"
+          ? "on"
+          : "off"
+      );
       toast.style = Toast.Style.Success;
       toast.title = "Light toggled";
     } catch (error) {
@@ -71,10 +80,12 @@ export default function Command() {
     }
   }
 
-  const updateState = (id: string, brig?: number, color?: string) => {
+  const updateState = (id: string, brig?: number, color?: string, power?: string) => {
     const newState = data.map((obj) => {
-      // 👇️ if id equals 2 replace object
       if (obj.id === id) {
+        if (power !== undefined) {
+          obj.power = power;
+        }
         if (brig !== undefined) {
           obj.brightness = brig;
         }
@@ -87,12 +98,10 @@ export default function Command() {
 
         return obj;
       }
-
-      // 👇️ otherwise return object as is
       return obj;
     });
-
     setData(newState);
+    cache.set("lights", JSON.stringify(data));
   };
 
   async function setBrightness(id: string, brightness: number) {
@@ -222,7 +231,7 @@ export default function Command() {
       {data.length === 0 ? (
         <List.EmptyView
           key="empty"
-          icon="lifx-extension-icon.png"
+          icon="lifx-icon-64.png"
           title="No lights found"
           description="Check if you have lights compatible with color"
         />
@@ -239,6 +248,7 @@ export default function Command() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Product Model" text={light.product.name} />
+                    <List.Item.Detail.Metadata.Label title="Light Power" text={light.power} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Hue"
@@ -252,7 +262,11 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Brightness"
-                      icon={getProgressIcon(light.brightness, Color.SecondaryText)}
+                      icon={
+                        light.power == "on"
+                          ? getProgressIcon(light.brightness, "#fffff")
+                          : getProgressIcon(light.brightness, Color.SecondaryText)
+                      }
                       text={light.brightness.toString()}
                     />
                     <List.Item.Detail.Metadata.Separator />
@@ -289,7 +303,7 @@ export default function Command() {
               <ActionPanel title="Manage Light">
                 <Action
                   icon={Icon.Power}
-                  title={light.power === "on" ? "Toggle Off" : "Toggle On"}
+                  title={light.power === "off" ? "Toggle On" : "Toggle Off"}
                   onAction={() => togglePowerLight(light.id)}
                 />
                 <ActionPanel.Submenu title="􀆭   Set Brightness">

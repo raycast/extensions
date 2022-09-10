@@ -15,6 +15,7 @@ export async function FetchLights(config: AxiosRequestConfig) {
     }
     if (data[0].connected === true) {
       cache.set("lights", JSON.stringify(data));
+      console.info(data[0]);
       return data;
     } else {
       const potentialErrorData: Api.Error = result.data;

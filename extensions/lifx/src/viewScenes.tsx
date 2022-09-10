@@ -22,18 +22,16 @@ export default function viewScenes() {
     });
 
     try {
-      if (!preferences.has("lights")) {
-        const isTokenValid = await checkApiKey();
-        if (!isTokenValid) {
-          preferences.set("lifx_token", JSON.stringify({ valid: true }));
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid Token",
-            message: "Please check your token and try again",
-          });
-          setIsLoading(false);
-          return;
-        }
+      const isTokenValid = await checkApiKey();
+      if (!isTokenValid) {
+        preferences.set("lifx_token", JSON.stringify({ valid: true }));
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Token",
+          message: "Please check your token and try again",
+        });
+        setIsLoading(false);
+        return;
       }
       const response = await FetchScenes(config);
       setData(response);
@@ -75,7 +73,7 @@ export default function viewScenes() {
       {data?.length === 0 ? (
         <List.EmptyView
           key="empty"
-          icon="lifx-extension-icon.png"
+          icon="lifx-icon-64.png"
           title="No scenes found"
           description="Check if you have any scenes for your lights"
         />
