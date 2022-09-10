@@ -1,5 +1,15 @@
 # Timers Changelog
 
+## [Support new Raycast features and add Stopwatch support] - 2022-09-10
+
+- Added MenuBarExtra support (thanks to @marcjulianschwarz)
+- Added inline argument support for the Start Custom Timer command
+- Improve form validation in Start Custom Timer command
+- Add stopwatch support (Start Stopwatch and Manage Stopwatches commands)
+- Add persistent timer support (alert for finished timer rings until dismissed)
+- Refactored state management out to a custom `useTimers` hook
+- Refactored out date and time formatter functions to `formatUtils`
+
 ## [Fixes] - 2022-08-16
 
 - Fixed an issue whereby timers incorrectly count down below zero - visible when viewing 'Currently Running' timers as they timeout.
