@@ -12,6 +12,9 @@
     "immint023",
     "pernielsentikaer"
   ],
+  "keywords": [
+    "vscode"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -44,6 +47,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.35.0",
+    "@raycast/utils": "^1.4.0",
     "lodash.get": "^4.4.2",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"

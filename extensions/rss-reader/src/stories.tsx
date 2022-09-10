@@ -1,18 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  getLocalStorageItem,
-  Icon,
-  ImageLike,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-  randomId,
-  setLocalStorageItem,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Color, Icon, List, randomId, showToast, Action, Image, LocalStorage, Toast } from "@raycast/api";
 import { Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
 import Parser from "rss-parser";
@@ -26,7 +12,7 @@ interface Story {
   guid: string;
   title: string;
   link?: string;
-  icon: ImageLike;
+  icon: Image.ImageLike;
   isNew: boolean;
   date: number;
   fromFeed: string;
@@ -44,9 +30,13 @@ function StoryListItem(props: { item: Story }) {
     <List.Item
       title={props.item.title}
       icon={props.item.icon}
-      accessoryTitle={timeAgo.format(props.item.date) as string}
-      accessoryIcon={props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined}
       actions={<Actions item={props.item} />}
+      accessories={[
+        {
+          text: timeAgo.format(props.item.date) as string,
+          icon: props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined,
+        },
+      ]}
     />
   );
 }
@@ -54,10 +44,10 @@ function StoryListItem(props: { item: Story }) {
 function Actions(props: { item: Story }) {
   return (
     <ActionPanel title={props.item.title}>
-      <ActionPanel.Section>{props.item.link && <OpenInBrowserAction url={props.item.link} />}</ActionPanel.Section>
+      <ActionPanel.Section>{props.item.link && <Action.OpenInBrowser url={props.item.link} />}</ActionPanel.Section>
       <ActionPanel.Section>
         {props.item.link && (
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
             shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -82,7 +72,7 @@ function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
 }
 
 async function getStories(feeds: Feed[]) {
-  const feedLastViewedString = (await getLocalStorageItem("feedLastViewed")) as string;
+  const feedLastViewedString = (await LocalStorage.getItem("feedLastViewed")) as string;
   const feedLastViewed = feedLastViewedString
     ? (JSON.parse(feedLastViewedString) as FeedLastViewed)
     : ({} as FeedLastViewed);
@@ -100,18 +90,22 @@ async function getStories(feeds: Feed[]) {
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
     } catch (error) {
-      await showToast(ToastStyle.Failure, "Can't get stories", "Error occured when fetching " + feedItem.title);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Can't get stories",
+        message: "Error occured when fetching " + feedItem.title,
+      });
     }
   }
   storyItems.sort((a, b) => b.date - a.date);
-  await setLocalStorageItem("feedLastViewed", JSON.stringify(feedLastViewed));
+  await LocalStorage.setItem("feedLastViewed", JSON.stringify(feedLastViewed));
   return storyItems;
 }
 
 export function StoriesList(props: { feeds?: Feed[] }) {
   const [feeds, setFeeds] = useState<Feed[]>([] as Feed[]);
   const [stories, setStories] = useState<Story[]>([] as Story[]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   async function fetchFeeds() {
     if (props?.feeds) {
@@ -144,7 +138,7 @@ export function StoriesList(props: { feeds?: Feed[] }) {
       actions={
         !props?.feeds && (
           <ActionPanel>
-            <PushAction
+            <Action.Push
               title="Add Feed"
               target={<AddFeedForm callback={setFeeds} />}
               icon={{ source: Icon.Plus, tintColor: Color.Green }}
