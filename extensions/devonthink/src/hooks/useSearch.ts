@@ -1,20 +1,13 @@
 import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { jxa } from "osascript-tag";
-import Style = Toast.Style;
 import { UseAppExists } from "./useAppExists";
+import { SearchResult } from "../types/SearchResult";
+import Style = Toast.Style;
 
 type State = {
   isLoading: boolean;
   results: SearchResult[];
-};
-
-export type SearchResult = {
-  uuid: string;
-  name: string;
-  score: number;
-  path: string;
-  tags: string[];
 };
 
 const useSearch = ({ appExists }: UseAppExists, query: string, databaseUUID: string) => {
@@ -41,7 +34,7 @@ export default useSearch;
 
 const searchInDEVONThink = async (databaseUUID: string, query: string) => {
   // language=JavaScript
-  const results = (await jxa({ parse: true })`
+  const resultsString = (await jxa({ parse: true })`
       const DT = Application("DEVONthink 3");
 
       let results;
@@ -55,19 +48,13 @@ const searchInDEVONThink = async (databaseUUID: string, query: string) => {
 
 
       if (results.length === 0) {
-          return [];
+          return "[]";
       }
 
-      return results.map(result => ({
-          uuid: result.uuid(),
-          name: result.name(),
-          score: result.score(),
-          tags: result.tags(),
-          path: result.path(),
-          location: result.location(),
-          type: result.type()
-      }));
-  `) as SearchResult[];
+      return JSON.stringify(results.map(result => result.properties()));
+  `) as string;
+
+  const results = JSON.parse(resultsString) as SearchResult[];
 
   return results.sort((a, b) => b.score - a.score);
 };
