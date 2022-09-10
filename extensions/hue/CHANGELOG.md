@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Initial Version] - 2022-07-28
+## [Initial Version] - 2022-09-10
 
 * Add command for linking your Hue Bridge
 * Add commands for controlling Hue groups, scenes and individual lights
