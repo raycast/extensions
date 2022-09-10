@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { Tracks } from "./tracks";
 import { Track, Album } from "./util/models";
 import { getAllTracks } from "./util/scripts/track";
+import { MusicIcon } from "./util/utils";
 
 export default function PlayLibraryAlbum() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -128,12 +129,7 @@ function Actions({ album }: { album: Album }) {
         />
         <Action
           title="Show in Apple Music"
-          icon={{
-            source: {
-              light: "../assets/music-light.svg",
-              dark: "../assets/music-dark.svg",
-            },
-          }}
+          icon={MusicIcon}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={async () => {
             await showAlbum(album);

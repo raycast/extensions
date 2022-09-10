@@ -1,4 +1,4 @@
-import { List, Toast, showToast, Color } from "@raycast/api";
+import { List, Toast, showToast, Color, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getTrackDetails } from "./util/scripts/track";
 import { Track } from "./util/models";
@@ -33,30 +33,39 @@ export const TrackDetail = (props: { track: Track }) => {
   return (
     <List.Item.Detail
       isLoading={markdown === undefined}
-      markdown={markdown && markdown}
-      metadata={
-        markdown &&
-        track && (
-          <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label
-              title="Loved"
-              icon={{
-                source: track.loved ? "../assets/heart-filled.svg" : "../assets/heart.svg",
-                tintColor: track.loved ? Color.Red : Color.PrimaryText,
-              }}
-            />
-            <List.Item.Detail.Metadata.Label title="Album" text={track.album} />
-            <List.Item.Detail.Metadata.Label title="Artist" text={track.artist} />
-            <List.Item.Detail.Metadata.Label title="Genre" text={track.genre} />
-            <List.Item.Detail.Metadata.Label title="Duration" text={track.time} />
-            <List.Item.Detail.Metadata.Label title="Year" text={track.year} />
-            <List.Item.Detail.Metadata.Label
-              title="Play Count"
-              text={track.playCount ? track.playCount.toString() : "0"}
-            />
-          </List.Item.Detail.Metadata>
-        )
-      }
+      markdown={markdown}
+      metadata={markdown && track && <DetailMetadata track={track} list={true} />}
     />
+  );
+};
+
+function Metadata<T>(props: any & { list: boolean }, context?: T) {
+  return props.list ? List.Item.Detail.Metadata(props, context) : Detail.Metadata(props, context);
+}
+
+function MetadataLabel<T>(props: any & { list: boolean }, context?: T) {
+  return props.list ? List.Item.Detail.Metadata.Label(props, context) : Detail.Metadata.Label(props, context);
+}
+
+export const DetailMetadata = (props: { track: Track; list?: boolean }) => {
+  const track = props.track;
+  return (
+    <Metadata {...props}>
+      <MetadataLabel
+        list={props.list}
+        title="Loved"
+        icon={{
+          source: track.loved ? "../assets/heart-filled.svg" : "../assets/heart.svg",
+          tintColor: track.loved ? Color.Red : Color.PrimaryText,
+        }}
+      />
+      <MetadataLabel list={props.list} title="Album" text={track.album} />
+      <MetadataLabel list={props.list} title="Artist" text={track.artist} />
+      <MetadataLabel list={props.list} title="Genre" text={track.genre} />
+      <MetadataLabel list={props.list} title="Duration" text={track.time} />
+      <MetadataLabel list={props.list} title="Play Count" text={track.playCount ? track.playCount.toString() : "0"} />
+      <MetadataLabel list={props.list} title="Rating" text={`${track.rating} Star${track.rating === 1 ? "" : "s"}`} />
+      <MetadataLabel list={props.list} title="Year" text={track.year} />
+    </Metadata>
   );
 };

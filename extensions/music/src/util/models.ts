@@ -19,6 +19,7 @@ export interface Track {
   time?: string;
   playCount?: number;
   loved?: boolean;
+  rating?: number;
   year?: string;
 }
 
@@ -56,6 +57,7 @@ export interface MusicState {
   shuffle: boolean;
   loved: boolean;
   added: boolean;
+  rating: number;
 }
 
 export interface Preferences {

@@ -78,10 +78,10 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
   const outputQuery = createQueryString({
     duration: "duration",
     time: "time",
-    genre: "genre",
     playCount: "played count",
     loved: "loved",
     year: "year",
+    rating: "rating",
   });
 
   const response = await runAppleScript(`
@@ -96,10 +96,53 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
   return {
     ...track,
     duration: getAttribute(response, "duration"),
-    genre: getAttribute(response, "genre"),
     time: getAttribute(response, "time"),
     playCount: parseInt(getAttribute(response, "playCount")),
     loved: getAttribute(response, "loved") === "true",
     year: getAttribute(response, "year"),
+    rating: parseInt(getAttribute(response, "rating")) / 20,
   };
+};
+
+export const getCurrentTrackDetails = async (): Promise<Track> => {
+  const outputQuery = createQueryString({
+    id: "database ID",
+    name: "name",
+    artist: "artist",
+    album: "album",
+    albumArtist: "album artist",
+    genre: "genre",
+    duration: "duration",
+    time: "time",
+    playCount: "played count",
+    loved: "loved",
+    year: "year",
+    rating: "rating",
+  });
+
+  const response = await runAppleScript(`
+    set output to ""
+    tell application "Music"
+      tell current track to set output to output & ${outputQuery} & "\n"
+    end tell
+    return output
+  `);
+
+  const track: Track = {
+    id: getAttribute(response, "id"),
+    name: getAttribute(response, "name"),
+    artist: getAttribute(response, "artist"),
+    album: getAttribute(response, "album"),
+    albumArtist: getAttribute(response, "albumArtist"),
+    genre: getAttribute(response, "genre"),
+    duration: getAttribute(response, "duration"),
+    time: getAttribute(response, "time"),
+    playCount: parseInt(getAttribute(response, "playCount")),
+    loved: getAttribute(response, "loved") === "true",
+    year: getAttribute(response, "year"),
+    rating: parseInt(getAttribute(response, "rating")) / 20,
+  };
+
+  const artwork = await getTrackArtwork(track);
+  return { ...track, artwork };
 };

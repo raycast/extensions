@@ -1,14 +1,11 @@
-import { tellMusic } from "../apple-script";
+import { tellMusic, runScript } from "../apple-script";
 import { MusicState } from "../models";
 import { getAttribute } from "../utils";
 import { createQueryString } from "../apple-script";
 import { runAppleScript } from "run-applescript";
 
 export const activate = tellMusic("activate");
-export const revealTrack = tellMusic(`
-    reveal current track
-    activate
-  `);
+export const revealTrack = tellMusic("reveal current track");
 
 export const pause = tellMusic("pause");
 export const play = tellMusic("play");
@@ -17,18 +14,22 @@ export const next = tellMusic("next track");
 export const previous = tellMusic("previous track");
 export const restart = tellMusic("back track");
 export const togglePlay = tellMusic("playpause");
+export const love = tellMusic("set loved of current track to true");
+export const dislike = tellMusic("set disliked of current track to true");
 export const toggleLove = tellMusic("set loved of current track to not loved of current track");
 export const addToLibrary = tellMusic(`duplicate current track to source "Library"`);
 
 export const setShuffle = (shuffle: boolean) => tellMusic(`set shuffle enabled to ${shuffle}`);
 export const setRepeatMode = (mode: "one" | "all" | "off") => tellMusic(`set song repeat to ${mode}`);
 export const setVolume = (volume: number) => tellMusic(`set sound volume to ${volume}`);
+export const setRating = (rating: number) => tellMusic(`set rating of current track to ${rating}`);
 
 export const getMusicState = async (): Promise<MusicState | undefined> => {
   const outputQuery = createQueryString({
     name: "name of current track",
     artist: "artist of current track",
     loved: "loved of current track",
+    rating: "rating of current track",
     inLibrary: "inLibrary",
     playing: "player state",
     repeat: "song repeat",
@@ -43,15 +44,15 @@ export const getMusicState = async (): Promise<MusicState | undefined> => {
       end tell
       return output
     `);
-    const state: MusicState = {
+    return {
       title: `${getAttribute(response, "name")} - ${getAttribute(response, "artist")}`,
       playing: getAttribute(response, "playing") === "playing",
       repeat: getAttribute(response, "repeat"),
       shuffle: getAttribute(response, "shuffle") === "true",
       loved: getAttribute(response, "loved") === "true",
       added: getAttribute(response, "inLibrary") === "true",
+      rating: parseInt(getAttribute(response, "rating")) / 20,
     };
-    return state;
   } catch {
     return undefined;
   }

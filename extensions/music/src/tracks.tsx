@@ -14,6 +14,7 @@ import { TrackDetail } from "./track-detail";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as music from "./util/scripts";
+import { MusicIcon } from "./util/utils";
 
 interface TracksComponent {
   tracks: Track[];
@@ -127,17 +128,7 @@ function Actions({ id, layout, toggle }: { id: string; layout: LayoutType; toggl
     <ActionPanel>
       <Action title="Play Track" icon={Icon.Play} onAction={playTrack} />
       <Action title="Play on Repeat" icon={Icon.Repeat} onAction={playOnRepeat} />
-      <Action
-        title="Show Track"
-        icon={{
-          source: {
-            light: "../assets/music-light.svg",
-            dark: "../assets/music-dark.svg",
-          },
-        }}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
-        onAction={showTrack}
-      />
+      <Action title="Show Track" icon={MusicIcon} shortcut={{ modifiers: ["cmd"], key: "o" }} onAction={showTrack} />
       <ActionPanel.Section>
         {layout === LayoutType.List && (
           <Action

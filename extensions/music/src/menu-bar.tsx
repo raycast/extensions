@@ -6,14 +6,7 @@ import * as music from "./util/scripts";
 import { MusicState, Playlist } from "./util/models";
 import { getAllTracks } from "./util/scripts/track";
 import { getPlaylists, getPlaylistTracks } from "./util/scripts/playlists";
-
-const AppleMusicColor = "#fb556d";
-const MusicIcon = {
-  source: {
-    light: "../assets/music-light.svg",
-    dark: "../assets/music-dark.svg",
-  },
-};
+import { MusicIcon, AppleMusicColor } from "./util/utils";
 
 export default function MenuBar() {
   const refreshCache = async () => {
@@ -69,6 +62,7 @@ export default function MenuBar() {
           icon={{ source: artwork || "", mask: Image.Mask.Circle }}
           onAction={async () => {
             await handleTaskEitherError(music.player.revealTrack)();
+            await handleTaskEitherError(music.player.activate)();
           }}
         />
       }
@@ -150,6 +144,17 @@ export default function MenuBar() {
             title={`${i * 25}`}
             onAction={async () => {
               await handleTaskEitherError(music.player.setVolume(i * 25))();
+            }}
+          />
+        ))}
+      </MenuBarExtra.Submenu>
+      <MenuBarExtra.Submenu title="Set Rating" icon={"../assets/star.svg"}>
+        {Array.from({ length: 6 }, (_, i) => i).map((i) => (
+          <MenuBarExtra.Item
+            key={i}
+            title={i.toString()}
+            onAction={async () => {
+              await handleTaskEitherError(music.player.setRating(i * 20))();
             }}
           />
         ))}

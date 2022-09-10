@@ -1,6 +1,6 @@
 import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { displayDuration } from "./util/utils";
+import { displayDuration, MusicIcon } from "./util/utils";
 import { PlaylistTracks } from "./playlist-tracks";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
@@ -143,12 +143,7 @@ function Actions({ playlist: { id }, pop }: ActionsProps) {
         />
         <Action
           title="Show in Apple Music"
-          icon={{
-            source: {
-              light: "../assets/music-light.svg",
-              dark: "../assets/music-dark.svg",
-            },
-          }}
+          icon={MusicIcon}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={showPlaylist}
         />

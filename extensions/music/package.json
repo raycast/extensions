@@ -140,6 +140,62 @@
       "description": "Control Apple Music using the menu bar.",
       "mode": "menu-bar",
       "interval": "1d"
+    },
+    {
+      "name": "current-track",
+      "title": "See Current Track",
+      "subtitle": "Apple Music",
+      "description": "See the current track playing in Apple Music.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "Apple Music",
+      "description": "Toggle play/pause in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Apple Music",
+      "description": "Go to the next track in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Apple Music",
+      "description": "Go to the previous track in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-track",
+      "title": "Restart Track",
+      "subtitle": "Apple Music",
+      "description": "Restart the current track in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "love-track",
+      "title": "Love Track",
+      "subtitle": "Apple Music",
+      "description": "Love the current track in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-track",
+      "title": "Dislike Track",
+      "subtitle": "Apple Music",
+      "description": "Dislike the current track in Apple Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-rating",
+      "title": "Set Rating",
+      "subtitle": "Apple Music",
+      "description": "Set the rating of the current track in Apple Music.",
+      "mode": "view"
     }
   ],
   "dependencies": {

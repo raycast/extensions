@@ -2,7 +2,14 @@ import { showToast, showHUD, Toast, getPreferenceValues } from "@raycast/api";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as A from "fp-ts/ReadonlyNonEmptyArray";
+
+export const AppleMusicColor = "#fb556d";
+export const MusicIcon = {
+  source: {
+    light: "../assets/music-light.svg",
+    dark: "../assets/music-dark.svg",
+  },
+};
 
 export const handleError = (error: Error) =>
   TE.tryCatch(() => showToast(Toast.Style.Failure, error.name, error.message), E.toError);
@@ -12,7 +19,7 @@ export const handleTaskEitherError = (te: TE.TaskEither<Error, unknown>) =>
     te,
     TE.mapLeft((error) => {
       console.error(error);
-      showHUD(`❌ An error is occurred.`);
+      showHUD(`An error has occurred.`);
     })
   );
 

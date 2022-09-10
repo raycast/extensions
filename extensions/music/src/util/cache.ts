@@ -7,7 +7,7 @@ export enum ExpirationTime {
   Day = 24 * Hour,
 }
 
-export const queryCache = (key: string, expirationTime = ExpirationTime.Day): any => {
+export const queryCache = (key: string, expirationTime = ExpirationTime.Hour): any => {
   if (cache.has(key)) {
     const data = cache.get(key);
     if (data) {
