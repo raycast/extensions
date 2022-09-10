@@ -1,0 +1,79 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"author": "FlorianWendelborn",
+	"categories": [
+		"System",
+		"Developer Tools"
+	],
+	"commands": [
+		{
+			"description": "Select a network service to disable, enable, or toggle",
+			"mode": "view",
+			"name": "index",
+			"subtitle": "Network Service Toggler",
+			"title": "View or Change Network Service"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.39.3",
+		"lodash.isequal": "^4.5.0"
+	},
+	"description": "List and toggle system network services (such as Ethernet, Wi-Fi) in macOS",
+	"devDependencies": {
+		"@types/lodash.isequal": "^4.5.6",
+		"@types/node": "~18.7.16",
+		"@types/react": "^18.0.19",
+		"@typescript-eslint/eslint-plugin": "^5.36.2",
+		"@typescript-eslint/parser": "^5.36.2",
+		"eslint": "^8.23.0",
+		"eslint-config-prettier": "^8.5.0",
+		"react-devtools": "^4.25.0",
+		"typescript": "^4.8.3"
+	},
+	"icon": "icon.png",
+	"license": "MIT",
+	"name": "network-service-toggler",
+	"preferences": [
+		{
+			"default": "",
+			"description": "Comma-separated list of network services to hide in the network list",
+			"name": "ignoredNetworks",
+			"placeholder": "Ethernet,Wi-Fi",
+			"required": false,
+			"title": "Ignored Networks",
+			"type": "textfield"
+		},
+		{
+			"default": "1.5",
+			"description": "How many seconds should be waited before re-checking the network state?",
+			"name": "refreshInterval",
+			"placeholder": "1.5",
+			"required": false,
+			"title": "Refresh Interval",
+			"type": "textfield"
+		},
+		{
+			"default": "3.5",
+			"description": "How many seconds should be waited in-between disabling and enabling the network?",
+			"name": "toggleDelay",
+			"placeholder": "3.5",
+			"required": false,
+			"title": "Toggle Delay",
+			"type": "textfield"
+		},
+		{
+			"default": true,
+			"description": "Show or hide the network service details, like IP Address, Router, and more.",
+			"label": "Show Network Details",
+			"name": "showNetworkDetails",
+			"required": false,
+			"title": "Show Network Details in List",
+			"type": "checkbox"
+		}
+	],
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop"
+	},
+	"title": "Network Service Toggler"
+}
