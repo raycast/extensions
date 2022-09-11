@@ -1,5 +1,20 @@
 # `Easydict` Changelog
 
+## [v2.2.0] - 2022-09-12
+
+## ✨ New
+
+- Added Youdao Dictionary Wikipedia definition.
+- Added Linguee word phonetic and exam type.
+
+### 🐞 Fixes
+
+- Fixed the problem that the Web Youdao translation may show an error toast.
+
+![Swift-1662903813](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Swift-1662903813.png)
+
+---
+
 ## [v2.1.0] - 2022-09-03
 
 ## ✨ New
@@ -9,8 +24,6 @@
 - Supported free sorting, you can adjust the dictionary or translation results display order arbitrarily.
 
 ![优雅-1662172376](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/优雅-1662172376.png)
-
----
 
 ## [v2.0.0] - 2022-08-20
 
@@ -23,7 +36,7 @@
 - Added query word and show dictionary and translation at the same time.
 - Added show query language from-to, like English🇺🇸 --> Chinese-Simplified🇨🇳.
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1660919430.png)
+![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
 
 ## 💎 Improvements
 

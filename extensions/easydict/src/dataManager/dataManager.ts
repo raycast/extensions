@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:32
+ * @lastEditTime: 2022-09-11 21:09
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -35,6 +35,7 @@ import {
   AbortObject,
   DicionaryType,
   DisplaySection,
+  ListAccessoryItem,
   ListDisplayItem,
   QueryResult,
   QueryType,
@@ -42,6 +43,7 @@ import {
   TranslationType,
 } from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, showErrorToast } from "../utils";
+import { englishLanguageItem } from "./../language/consts";
 import {
   checkIfEnableYoudaoDictionary,
   checkIfShowTranslationDetail,
@@ -314,6 +316,19 @@ export class DataManager {
             sourceResult: lingueeTypeResult,
           };
 
+          // * If has Youdao dictionary check if quey text is word, directly use it.
+          if (queryWordInfo.isWord !== undefined) {
+            lingueeTypeResult.wordInfo.isWord = queryWordInfo.isWord;
+          }
+
+          // Use Youdao phonetic as Linguee phonetic.
+          const accessoryItem: ListAccessoryItem = {
+            phonetic: queryWordInfo.phonetic,
+            examTypes: queryWordInfo.examTypes,
+          };
+
+          lingueeDisplaySections[0].items[0].accessoryItem = accessoryItem;
+
           // try use DeepL translate result as Linguee translation.
           this.updateLingueeTranslation(queryResult);
           this.updateQueryResultAndSections(queryResult);
@@ -384,6 +399,9 @@ export class DataManager {
 
           const formatYoudaoResult = youdaoDictionaryResult.result as YoudaoDictionaryFormatResult | undefined;
           const youdaoDisplaySections = updateYoudaoDictionaryDisplay(formatYoudaoResult);
+
+          // * use Youdao dictionary to check if query text is a word.
+          Object.assign(queryWordInfo, formatYoudaoResult?.queryWordInfo);
 
           const youdaoDictResult: QueryResult = {
             type: type,
@@ -756,7 +774,9 @@ export class DataManager {
   private downloadAndPlayWordAudio(queryTypeResult: QueryTypeResult) {
     const wordInfo = queryTypeResult.wordInfo;
     const isDictionaryType = checkIsDictionaryType(queryTypeResult.type);
-    const enableAutomaticDownloadAudio = myPreferences.enableAutomaticPlayWordAudio && wordInfo.isWord;
+    const isEnglishLanguage = wordInfo.fromLanguage === englishLanguageItem.youdaoId;
+    const enableAutomaticDownloadAudio =
+      myPreferences.enableAutomaticPlayWordAudio && wordInfo.isWord && isEnglishLanguage;
     if (isDictionaryType && enableAutomaticDownloadAudio && this.isLastQuery && !this.hasPlayedAudio) {
       playYoudaoWordAudioAfterDownloading(wordInfo);
       this.hasPlayedAudio = true;

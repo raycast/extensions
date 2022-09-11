@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:25
+ * @lastEditTime: 2022-09-11 21:04
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -200,7 +200,7 @@ function handleDetectedLanguageTypeResult(
   // 4. Iterate API detected language List, check if has detected `three` identical language id, if true, use it.
   let count = 1;
   for (const language of apiDetectedLanguageList) {
-    if (language.youdaoLanguageId === detectedYoudaoLanguageId) {
+    if (language.youdaoLanguageId === detectedYoudaoLanguageId && isValidLanguageId(detectedYoudaoLanguageId)) {
       count += 1;
     }
     if (count === 3) {

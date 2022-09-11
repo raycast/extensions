@@ -2,21 +2,20 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:54
+ * @lastEditTime: 2022-09-10 18:15
  * @fileName: baidu.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import axios, { AxiosError } from "axios";
-import CryptoJS from "crypto-js";
 import { requestCostTime } from "../axiosConfig";
 import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getBaiduLanguageId, getYoudaoLanguageIdFromBaiduId } from "../language/languages";
 import { KeyStore } from "../preferences";
 import { BaiduTranslateResult, QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
-import { getTypeErrorInfo } from "../utils";
+import { getTypeErrorInfo, md5 } from "../utils";
 
 /**
  * Baidu translate. Cost time: ~0.4s
@@ -29,7 +28,7 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
   const salt = Math.round(new Date().getTime() / 1000);
   const baiduAppId = KeyStore.baiduAppId;
   const md5Content = baiduAppId + word + salt + KeyStore.baiduAppSecret;
-  const sign = CryptoJS.MD5(md5Content).toString();
+  const sign = md5(md5Content);
   const url = "https://fanyi-api.baidu.com/api/trans/vip/translate";
   const from = getBaiduLanguageId(fromLanguage);
   const to = getBaiduLanguageId(toLanguage);
