@@ -41,7 +41,9 @@ export default function ProjectList(): JSX.Element {
   } else if (
     !appHistory.reduce((exists, appHistory) => exists || appHistory.tool !== false || appHistory.url !== false, false)
   ) {
-    const missingTools = appHistory.filter(appHistory => appHistory.tool !== appHistory.toolName && appHistory.toolName !== false).map(appHistory => appHistory.toolName)
+    const missingTools = appHistory
+      .filter((appHistory) => appHistory.tool !== appHistory.toolName && appHistory.toolName !== false)
+      .map((appHistory) => appHistory.toolName);
     const plural = missingTools.length > 1;
     const message = [
       "# There was a problem finding the JetBrains shell scripts",
