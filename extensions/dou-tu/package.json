@@ -22,6 +22,7 @@
   "preferences": [
     {
       "name": "select_mode",
+      "title": "Way to select images",
       "type": "dropdown",
       "required": true,
       "description": "Way to select images",
