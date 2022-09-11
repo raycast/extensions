@@ -79,7 +79,7 @@ export class JenkinsAPI {
 
     this.jenkins.version = resp.headers.get("X-Jenkins") ?? undefined;
 
-    const result = await resp.json() as Response;
+    const result = (await resp.json()) as Response;
     result.jobs?.map((job) => {
       const parts = job.url.split("/");
       job.path = parts[parts.length - (job.url.endsWith("/") ? 2 : 1)];
@@ -88,8 +88,6 @@ export class JenkinsAPI {
     return result;
   }
 }
-
-
 
 export const hasSubJobs = (job: Job): boolean => {
   return (

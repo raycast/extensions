@@ -1,13 +1,13 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { JenkinsAPI, Jenkins, Job, hasSubJobs } from './lib/api';
+import { JenkinsAPI, Jenkins, Job, hasSubJobs } from "./lib/api";
 
 interface SearchState {
   results: Job[];
   isLoading: boolean;
 }
 
-export function SearchJob(props: { jenkins: Jenkins, jobs?: string[] }) {
+export function SearchJob(props: { jenkins: Jenkins; jobs?: string[] }) {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
 
   const search = useCallback(
@@ -19,7 +19,7 @@ export function SearchJob(props: { jenkins: Jenkins, jobs?: string[] }) {
       try {
         const jenkinsAPI = new JenkinsAPI(props.jenkins);
         const resp = await jenkinsAPI.inspect(props.jobs);
-        const jobs = resp.jobs?.filter(job => job.name.toLowerCase().includes(searchText.toLowerCase()));
+        const jobs = resp.jobs?.filter((job) => job.name.toLowerCase().includes(searchText.toLowerCase()));
         setState((oldState) => ({
           ...oldState,
           results: jobs ?? [],
@@ -44,7 +44,7 @@ export function SearchJob(props: { jenkins: Jenkins, jobs?: string[] }) {
 
   const onChange = (value: string) => {
     console.log("onChange", value);
-  }
+  };
 
   return (
     <List
@@ -55,30 +55,29 @@ export function SearchJob(props: { jenkins: Jenkins, jobs?: string[] }) {
       searchBarAccessory={<SearchModeDropdown value="normal" onChange={onChange} />}
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map(job => (
+        {state.results.map((job) => (
           <List.Item
             key={job.url}
             title={job.name}
             subtitle={job._class}
             actions={
               <ActionPanel>
-                
-                {
-                  hasSubJobs(job) ?
-                  (
-                    <ActionPanel.Section title="Job">
-                      <Action.OpenInBrowser title="Open in Browser" url={job.url} />
-                      <Action.Push icon={Icon.Folder} title="Sub jobs" target={<SearchJob jenkins={props.jenkins} jobs={[...props.jobs ?? [], job.path]} />} />
-                      <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy job url" content={job.url} />
-                    </ActionPanel.Section>
-                  ) :
-                  (
-                    <ActionPanel.Section title="Job">
-                      <Action.OpenInBrowser title="Open in Browser" url={job.url} />
-                      <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy job url" content={job.url} />
-                    </ActionPanel.Section>
-                  )
-                }
+                {hasSubJobs(job) ? (
+                  <ActionPanel.Section title="Job">
+                    <Action.OpenInBrowser title="Open in Browser" url={job.url} />
+                    <Action.Push
+                      icon={Icon.Folder}
+                      title="Sub jobs"
+                      target={<SearchJob jenkins={props.jenkins} jobs={[...(props.jobs ?? []), job.path]} />}
+                    />
+                    <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy job url" content={job.url} />
+                  </ActionPanel.Section>
+                ) : (
+                  <ActionPanel.Section title="Job">
+                    <Action.OpenInBrowser title="Open in Browser" url={job.url} />
+                    <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy job url" content={job.url} />
+                  </ActionPanel.Section>
+                )}
               </ActionPanel>
             }
           />
@@ -88,7 +87,7 @@ export function SearchJob(props: { jenkins: Jenkins, jobs?: string[] }) {
   );
 }
 
-function SearchModeDropdown(props: {value?: string, onChange: (value: string) => void}) {
+function SearchModeDropdown(props: { value?: string; onChange: (value: string) => void }) {
   const { value, onChange } = props;
   return (
     <List.Dropdown

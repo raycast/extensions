@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { JenkinsAPI, Jenkins } from './lib/api';
+import { JenkinsAPI, Jenkins } from "./lib/api";
 import { addJenkins } from "./lib/storage";
-import { useState } from 'react';
+import { useState } from "react";
 
 export function AddJenkins(props: { jenkins?: Jenkins }) {
   const { pop } = useNavigation();
@@ -39,11 +39,7 @@ export function AddJenkins(props: { jenkins?: Jenkins }) {
                 await addJenkins(jenkinsAPI.jenkins);
                 pop();
               } catch (err) {
-                showToast(
-                  Toast.Style.Failure,
-                  action + " jenkins failed",
-                  String(err)
-                );
+                showToast(Toast.Style.Failure, action + " jenkins failed", String(err));
               }
             }}
           />
@@ -86,12 +82,7 @@ export function AddJenkins(props: { jenkins?: Jenkins }) {
         defaultValue={props.jenkins?.username}
         placeholder="Enter username"
       />
-      <Form.PasswordField
-        title="Token"
-        id="token"
-        defaultValue={props.jenkins?.token}
-        placeholder="Enter token"
-      />
+      <Form.PasswordField title="Token" id="token" defaultValue={props.jenkins?.token} placeholder="Enter token" />
     </Form>
   );
 }
