@@ -290,7 +290,7 @@ async function performExchange(
       .then((content) => {
         if (content) {
           const cachedData = JSON.parse(content) as CurrencyResult;
-          console.log(cachedData);
+          // console.log(cachedData);
           if (Math.round(Date.now() / 1000) - cachedData.time_next_update_unix < 0) {
             // cache valid
             return cachedData;
