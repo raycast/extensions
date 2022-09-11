@@ -1,8 +1,8 @@
-[![Support Me](https://raw.githubusercontent.com/slavarazum/slavarazum/main/support-banner.png)](https://github.com/sponsors/qruto)
-
 <p align="center">
   <img width="200" height="200" src="./assets/command-icon.png">
 </p>
+
+[![Support Me](https://raw.githubusercontent.com/slavarazum/slavarazum/main/support-banner.png)](https://github.com/sponsors/qruto)
 
 # Color Casket
 
@@ -46,6 +46,7 @@ Available keywords to find commands: `color`, `pick`, `eyedropper`, `pipette`, `
 - [x] render and pick history
 - [x] favorite color list
 - [x] configure preferred color format
+- [x] filter by formats
 
 ## Future updates
 
@@ -53,7 +54,6 @@ Let's make **Color Casket** as your favorite pocket color tools. Create a Pull R
 
 ### TODO schedule
 
-- [ ] filter by formats
 - [ ] generate shades (based on color)
 - [ ] generate color palette (based on color)
 - [ ] search in opinion recommended color palettes
