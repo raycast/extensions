@@ -15,7 +15,7 @@ import { TranslateHistory } from "./TranslateHistory";
 
 const preferences: IPreferences = getPreferenceValues();
 
-export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: (lang: ILangItem) => void }) {
+export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate?: (lang: ILangItem) => void }) {
   let duration = 0;
   if (props.transRes.end && props.transRes.start) {
     duration = props.transRes.end - props.transRes.start;
@@ -79,7 +79,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
     <List.Item
       key={props.transRes.serviceProvider}
       icon={{ source: `${props.transRes.serviceProvider}.png` }}
-      title={props.transRes.res}
+      title={props.transRes.res || ""}
       detail={<TranslateResultDetail />}
       accessories={[{ text: props.transRes.code === TransAPIErrCode.Loading ? "loading..." : `${duration} ms` }]}
       actions={
@@ -91,17 +91,16 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
               snippet={{
                 text: generateSnippetText(),
                 name: props.transRes.origin,
-                keyword: "Vocabulary",
               }}
             />
           )}
-          <ActionPanel.Submenu
-            title="Select Target Language"
-            icon={Icon.Repeat}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          >
-            {preferences.quickSwitchLang &&
-              LANG_LIST.map((lang) => {
+          {preferences.quickSwitchLang && props.onLangUpdate && (
+            <ActionPanel.Submenu
+              title="Select Target Language"
+              icon={Icon.Repeat}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+            >
+              {LANG_LIST.map((lang) => {
                 return (
                   <Action
                     key={lang.langId}
@@ -114,13 +113,14 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate: 
                         });
                         return;
                       }
-                      props.onLangUpdate(lang);
+                      props.onLangUpdate && props.onLangUpdate(lang);
                     }}
                     icon={props.transRes.to.langId === lang.langId ? Icon.CircleProgress100 : Icon.Circle}
                   />
                 );
               })}
-          </ActionPanel.Submenu>
+            </ActionPanel.Submenu>
+          )}
           {props.transRes.from.voice && (
             <Action
               title="Play Source Sound"

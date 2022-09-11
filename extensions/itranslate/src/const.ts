@@ -76,6 +76,128 @@ export const LANG_LIST: ILangItem[] = [
     langId: "vi",
     langTitle: "Vietnamese",
   },
+  {
+    langId: "ar",
+    baiduLangId: "ara",
+    langTitle: "Arabic",
+    voice: "Maged",
+  },
+  {
+    langId: "de",
+    langTitle: "German",
+    voice: "Anna",
+  },
+  {
+    langId: "it",
+    langTitle: "Italian",
+    voice: "Alice",
+  },
+  {
+    langId: "bg",
+    langTitle: "Bulgarian",
+  },
+  {
+    langId: "cs",
+    langTitle: "Czech",
+    voice: "Zuzana",
+  },
+  {
+    langId: "da",
+    baiduLangId: "dan",
+    langTitle: "Danish",
+    voice: "Sara",
+  },
+  {
+    langId: "el",
+    langTitle: "Greek",
+    voice: "Melina",
+  },
+  {
+    langId: "et",
+    baiduLangId: "est",
+    langTitle: "Estonian",
+  },
+  {
+    langId: "fi",
+    baiduLangId: "fin",
+    langTitle: "Finnish",
+    voice: "Satu",
+  },
+  {
+    langId: "hu",
+    langTitle: "Hungarian",
+    voice: "Mariska",
+  },
+  {
+    langId: "lt",
+    baiduLangId: "lit",
+    langTitle: "Lithuanian",
+  },
+  {
+    langId: "lv",
+    baiduLangId: "lav",
+    langTitle: "Latvian",
+  },
+  {
+    langId: "nl",
+    langTitle: "Dutch",
+    voice: "Xander",
+  },
+  {
+    langId: "pl",
+    langTitle: "Polish",
+    voice: "Zosia",
+  },
+  {
+    langId: "ro",
+    baiduLangId: "roma",
+    langTitle: "Romanian",
+    voice: "Ioana",
+  },
+  {
+    langId: "sk",
+    langTitle: "Slovak",
+    voice: "Laura",
+  },
+  {
+    langId: "sl",
+    baiduLangId: "slo",
+    langTitle: "Slovenian",
+  },
+  {
+    langId: "sv",
+    baiduLangId: "swe",
+    langTitle: "Swedish",
+    voice: "Alva",
+  },
+  {
+    langId: "tr",
+    langTitle: "Turkish",
+    voice: "Yelda",
+  },
+  {
+    langId: "uk",
+    langTitle: "Ukrainian",
+  },
+  {
+    langId: "no",
+    langTitle: "Norwegian",
+    voice: "Nora",
+  },
+  {
+    langId: "fa",
+    langTitle: "Persian",
+  },
+  {
+    langId: "sr",
+    microsoftLangId: "sr-Cyrl",
+    youdaoLangId: "sr-Cyrl",
+    langTitle: "Serbian (Cyrillic)",
+  },
+  {
+    langId: "cy",
+    langTitle: "Welsh",
+  },
 ];
 
 export enum TransAPIErrCode {
@@ -83,6 +205,7 @@ export enum TransAPIErrCode {
   Fail = "-1",
   Retry = "-2",
   Loading = "-3",
+  NotSupport = "-4",
 }
 
 export enum TransServiceProviderTp {
@@ -122,4 +245,39 @@ export const TRANS_SERVICES_NAMES = new Map<TransServiceProviderTp, string>([
   [TransServiceProviderTp.Baidu, "Baidu"],
   [TransServiceProviderTp.Tencent, "Tencent"],
   [TransServiceProviderTp.Aliyun, "Aliyun"],
+]);
+
+export const TRANS_SERVICES_NOT_SUPPORT_LANGS = new Map<TransServiceProviderTp, string[]>([
+  [TransServiceProviderTp.Google, []],
+  [TransServiceProviderTp.GoogleCouldTrans, []],
+  [TransServiceProviderTp.DeepL, ["ar", "hi", "ko", "th", "vi", "no", "fa", "sr", "cy"]],
+  [TransServiceProviderTp.MicrosoftAzure, []],
+  [TransServiceProviderTp.Youdao, []],
+  [TransServiceProviderTp.Baidu, ["tr", "uk", "no", "fa", "sr", "cy"]],
+  [
+    TransServiceProviderTp.Tencent,
+    [
+      "bg",
+      "cs",
+      "da",
+      "el",
+      "et",
+      "fi",
+      "hu",
+      "lt",
+      "lv",
+      "nl",
+      "pl",
+      "ro",
+      "sk",
+      "sl",
+      "sv",
+      "uk",
+      "no",
+      "fa",
+      "sr",
+      "cy",
+    ],
+  ],
+  [TransServiceProviderTp.Aliyun, ["uk", "sr"]],
 ]);

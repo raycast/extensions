@@ -1,6 +1,11 @@
 # iTranslate Changelog
 
-## [Add New Translation Service Providers] - {PR MERGE DATE}
+## [Add New Command & Support More Languages] - 2022-09-12
+
+- Add new command `Translate to Multiple`: Translate into multiple languages at the same time
+- Support more languages, 36 languages in total
+
+## [Add New Translation Service Providers] - 2022-09-07
 
 - Add Microsoft Azure option
 
