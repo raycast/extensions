@@ -1,4 +1,4 @@
-[![Support Me](./media/donate-banner.png)](https://ko-fi.com/slavarazum)
+[![Support Me](https://raw.githubusercontent.com/slavarazum/slavarazum/main/support-banner.png)](https://github.com/sponsors/qruto)
 
 <p align="center">
   <img width="200" height="200" src="./assets/command-icon.png">
