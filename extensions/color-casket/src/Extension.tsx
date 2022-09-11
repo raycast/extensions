@@ -63,9 +63,11 @@ export default function Extension({
 
         {renderer.state.colors?.length === 0 && !renderer.state.isLoading && <ColorPickers />}
 
-        {renderer.state.colors?.map((color, index) => (
-          <ColorListItem key={index} color={color} />
-        ))}
+        {renderer.state.colors
+          ?.filter((color) => filterType === "All" || color.type === filterType)
+          .map((color, index) => (
+            <ColorListItem key={index} color={color} />
+          ))}
         {renderer.state.colors?.length === 0 && (
           <Fragment>
             <List.Section title="Favorites">
