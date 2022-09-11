@@ -290,7 +290,7 @@ async function performExchange(
       .then((content) => {
         if (content) {
           const cachedData = JSON.parse(content) as CurrencyResult;
-          //console.log(cachedData);
+          console.log(cachedData);
           if (Math.round(Date.now() / 1000) - cachedData.time_next_update_unix < 0) {
             // cache valid
             return cachedData;
@@ -358,6 +358,7 @@ function enrichExchangeData(
     .filter(
       (it) =>
         (!pinned || pinned.indexOf(it) < 0) &&
+        currencyCode2Country[it] !== undefined && currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
@@ -371,6 +372,7 @@ function enrichExchangeData(
   currencyData.conversion_rate_pin_exchanged = pinned
     ?.filter(
       (it) =>
+        currencyCode2Country[it] !== undefined && currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
