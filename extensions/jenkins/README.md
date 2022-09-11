@@ -1,13 +1,20 @@
-# jenkins
+# Jenkins
 
-Manage your Jenkins.
+Manage your jenkins.
+
+## Features
+
+- Manage multi jenkins
+- Search jenkins jobs
 
 ## Todo
 
-- [ ] Manage multi Jenkins accounts
-  - searchBarAccessory
-  - List.Dropdown
-  - [Storage](https://developers.raycast.com/api-reference/storage)
-- [ ] Search jobs
-  - API: `{jenkins_url}/job/{job_name}/api/json`
-  - Cache
+- [ ] Global search jenkins jobs
+
+## Author
+
+K8sCat <k8scat@gmail.com>
+
+## License
+
+MIT

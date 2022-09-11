@@ -9,18 +9,8 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search jobs..."
+      searchBarPlaceholder="Search npm packages..."
       throttle
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Jenkins"
-          value="All"
-        >
-          <List.Dropdown.Item title="All" value="All" />
-          <List.Dropdown.Item title="Open" value="Open" />
-          <List.Dropdown.Item title="Completed" value="Completed" />
-        </List.Dropdown>
-      }
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
@@ -36,7 +26,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ text: searchResult.username }]}
+      accessoryTitle={searchResult.username}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -105,6 +95,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+  const params = new URLSearchParams();
   params.append("q", searchText.length === 0 ? "@raycast/api" : searchText);
 
   const response = await fetch("https://api.npms.io/v2/search" + "?" + params.toString(), {
