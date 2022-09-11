@@ -1,24 +1,28 @@
+import { useEffect, useState } from "react";
 import { List, getApplications, open, showToast, Toast } from "@raycast/api";
-
-export const noApp = (
-  <List>
-    <List.EmptyView />
-  </List>
-);
+import React from "react";
 
 export default function checkBikeInstalled() {
-  const app = Promise.resolve(getApplications()).then((apps) => apps.find((app) => app.name == "Bike"));
+  const [app, setApp] = useState<string | undefined>();
 
-  showToast({
-    style: Toast.Style.Failure,
-    title: "Bike is not installed",
-    primaryAction: {
-      title: "Download Bike",
-      onAction: (toast) => open("https://hogbaysoftware.netlify.app/bike/").then(() => toast.hide()),
-    },
-  });
+  useEffect(() => {
+    Promise.resolve(getApplications()).then((apps) => {
+      const app = apps.find((app) => app.name == "Bike");
+      setApp(app?.name);
+      if (app === undefined) setApp("");
+    });
+  }, []);
 
-  if (app === undefined) {
+  if (app === "") {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Bike is not installed",
+      primaryAction: {
+        title: "Download Bike",
+        onAction: (toast) => open("https://hogbaysoftware.netlify.app/bike/").then(() => toast.hide()),
+      },
+    });
+
     return (
       <List>
         <List.EmptyView title="You need to install Bike in order to use this extension." icon="command-icon.png" />

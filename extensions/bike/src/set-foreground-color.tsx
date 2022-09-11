@@ -1,6 +1,7 @@
-import { closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
+import React from "react";
 
 export default function main() {
   const error_alert = checkBikeInstalled();
@@ -154,55 +155,83 @@ export default function main() {
 }
 
 async function custom_tc() {
-  await closeMainWindow();
   await runAppleScript(`tell application "Bike"
-        try
-            set foreground color to choose color
-        end try
+      activate
+      try
+          set foreground color to choose color
+      end try
     end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function white_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {65535, 65535, 65535}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {65535, 65535, 65535}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function black_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {0, 0, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {0, 0, 0}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function red_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {32768, 0, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {32768, 0, 0}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function orange_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {65535, 22768, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {65535, 22768, 0}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function yellow_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {55535, 55535, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {55535, 55535, 0}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function green_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {0, 32768, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {0, 32768, 0}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function teal_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {0, 32768, 32768}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {0, 32768, 32768}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function blue_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {0, 0, 65535}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {0, 0, 65535}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }
 
 async function purple_tc() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set foreground color to {32768, 0, 32768}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set foreground color to {32768, 0, 32768}
+  end tell`);
+  showHUD("Set Bike foreground color");
 }

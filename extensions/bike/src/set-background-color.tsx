@@ -1,6 +1,7 @@
-import { closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
+import React from "react";
 
 export default function main() {
   const error_alert = checkBikeInstalled();
@@ -154,55 +155,83 @@ export default function main() {
 }
 
 async function custom_bg() {
-  await closeMainWindow();
   await runAppleScript(`tell application "Bike"
-        try
-            set background color to choose color
-        end try
+      activate
+      try
+          set background color to choose color
+      end try
     end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function white_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {65535, 65535, 65535}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {65535, 65535, 65535}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function black_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {0, 0, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {0, 0, 0}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function red_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {32768, 0, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {32768, 0, 0}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function orange_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {65535, 22768, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {65535, 22768, 0}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function yellow_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {55535, 55535, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {55535, 55535, 0}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function green_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {0, 32768, 0}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {0, 32768, 0}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function teal_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {0, 32768, 32768}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {0, 32768, 32768}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function blue_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {0, 0, 65535}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {0, 0, 65535}
+  end tell`);
+  showHUD("Set Bike background color");
 }
 
 async function purple_bg() {
-  await closeMainWindow();
-  await runAppleScript(`tell application "Bike" to set background color to {32768, 0, 32768}`);
+  await runAppleScript(`tell application "Bike"
+    activate
+    set background color to {32768, 0, 32768}
+  end tell`);
+  showHUD("Set Bike background color");
 }

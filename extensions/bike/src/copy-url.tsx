@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { popToRoot, showHUD } from "@raycast/api";
+import { showHUD, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
 
@@ -12,8 +12,17 @@ export default function main() {
   } else if (!ranScript) {
     setRanScript(true);
 
-    Promise.resolve(runAppleScript('tell application "Bike" to set the miniaturized of every window to true'));
-    showHUD("Minimized Bike");
+    // Copy the URL to the clipboard
+    Promise.resolve(
+      runAppleScript(`tell application "Bike"
+      set theURL to URL of document 1
+      set the clipboard to theURL
+    end tell`)
+    );
+
+    showHUD("Copied URL to clipboard!");
+
+    // Close the Raycast window
     Promise.resolve(popToRoot());
   }
 }

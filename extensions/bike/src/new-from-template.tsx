@@ -1,4 +1,5 @@
-import { closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, showHUD } from "@raycast/api";
+import React from "react";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
 
@@ -56,8 +57,8 @@ export default function main() {
 }
 
 async function daily_bike() {
-  await closeMainWindow();
   await runAppleScript(`tell application "Bike"
+    activate
     set docName to (current date) as string
     set newDoc to make new document with properties {name: docName}
 
@@ -103,11 +104,12 @@ async function daily_bike() {
 
     move startRow to front of rows of newDoc
   end tell`);
+  showHUD("Created new Bike");
 }
 
 async function cornell() {
-  await closeMainWindow();
   await runAppleScript(`tell application "Bike"
+    activate
     set docName to ((current date) as string) & " - Notes Summary"
     set newDoc to make new document with properties {name: docName}
 
@@ -147,11 +149,12 @@ async function cornell() {
 
     move startRow to front of rows of newDoc
   end tell`);
+  showHUD("Created new Bike");
 }
 
 async function shopping_list() {
-  await closeMainWindow();
   await runAppleScript(`tell application "Bike"
+    activate
     set docName to ((current date) as string) & " - Shopping List"
     set newDoc to make new document with properties {name: docName}
 
@@ -218,4 +221,5 @@ async function shopping_list() {
 
     move startRow to front of rows of newDoc
   end tell`);
+  showHUD("Created new Bike");
 }
