@@ -2,7 +2,7 @@
 
 ## [v2.2.0] - 2022-09-12
 
-## ✨ New
+### ✨ New
 
 - Added Youdao Dictionary Wikipedia definition.
 - Added Linguee word phonetic and exam type.
@@ -17,7 +17,7 @@
 
 ## [v2.1.0] - 2022-09-03
 
-## ✨ New
+### ✨ New
 
 - Added experimental feature: new Youdao Dictionary and Youdao Translation APIs that can be used without AppKey.
 - New Chinese-English Youdao Dictionary, supporting displaying richer explanation.
@@ -27,7 +27,7 @@
 
 ## [v2.0.0] - 2022-08-20
 
-## ✨ New
+### ✨ New
 
 - Added support for Linguee dictionary, supporting 19 languages.
 - Added support for Google language detection and Baidu language detection.
@@ -38,7 +38,7 @@
 
 ![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
 
-## 💎 Improvements
+### 💎 Improvements
 
 - Refactored the project code structure.
 - Improved the accuracy of automatic language detection.
