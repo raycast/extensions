@@ -19,6 +19,25 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "select_mode",
+      "type": "dropdown",
+      "required": true,
+      "description": "Way to select images",
+      "default": "actions",
+      "data": [
+        {
+          "title": "Select By Enter Key",
+          "value": "actions"
+        },
+        {
+          "title": "Select By Click",
+          "value": "click"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
     "@raycast/utils": "^1.3.0",

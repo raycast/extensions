@@ -17,6 +17,7 @@ export default {
       if (files.length >= 10) files.forEach((file) => fs.unlinkSync(`${tempDir}/${file}`));
     }
 
+    // console.log(imageUrl);
     const fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     const response = await fetch(imageUrl);
     const data = await response.arrayBuffer();

@@ -18,7 +18,7 @@ export class DouTuSource implements ISource {
   get = async (keyword: string | null, pageIndex: number): Promise<{ isEnd: boolean; images: IDoutuImage[] }> => {
     keyword = keyword && keyword.trim() !== "" ? keyword : defaultKeyword;
     const response = await fetch(
-      `https://doutu.lccyy.com/doutu/items?keyword=${keyword}&page=${pageIndex}&pageSize=50`
+      `https://doutu.lccyy.com/doutu/items?keyword=${keyword}&pageNum=${pageIndex}&pageSize=50`
     );
     const json = (await response.json()) as {
       totalSize: number;
@@ -29,7 +29,10 @@ export class DouTuSource implements ISource {
     if (json.items.length === 0) return { isEnd: true, images: [] };
     return {
       isEnd: json.totalPages === pageIndex,
-      images: json.items.map((item) => {
+      images: duplication(
+        json.items.filter((o) => !o.url.includes("/keyWordPic/")),
+        (o) => o.url
+      ).map((item) => {
         return { id: uuidv4(), url: item.url.replace("http:", "https:") };
       }),
     };
@@ -47,9 +50,23 @@ export class DouTuLaSource implements ISource {
     const nodes = $("div.search-result.list-group-item").find("img.img-responsive").toArray();
     return {
       isEnd: nodes.length < 72,
-      images: nodes.map((node) => {
-        return { id: uuidv4(), url: node.attribs["data-backup"] };
-      }),
+      images: duplication(
+        nodes.map((node) => {
+          return { id: uuidv4(), url: node.attribs["data-backup"] };
+        }),
+        (o) => o.url
+      ),
     };
   };
 }
+
+const duplication = <T>(listData: T[], filter: (item: T) => string): T[] => {
+  const temp: { [key: string]: boolean } = {};
+  return listData.reduce((item: T[], next) => {
+    if (!temp[filter?.(next)]) {
+      item.push(next);
+      temp[filter?.(next)] = true;
+    }
+    return item;
+  }, []);
+};
