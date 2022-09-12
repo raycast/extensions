@@ -19,10 +19,14 @@ export default function Command() {
 
   const [heightError, setHeightError] = useState<string | undefined>();
   const [widthError, setWidthError] = useState<string | undefined>();
+  const [emptyError, setEmptyError] = useState<string | undefined>();
 
   const dropError = {
     height: () => heightError && heightError.length > 0 && setHeightError(undefined),
     width: () => widthError && widthError.length > 0 && setWidthError(undefined),
+    empty: () => {
+      emptyError && emptyError.length > 0 && setEmptyError(undefined);
+    },
   };
 
   return (
@@ -33,7 +37,18 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="textfield" title="Wiggle text" placeholder="Enter text" defaultValue="Wiggle" />
+      <Form.TextField
+        id="textfield"
+        title="Wiggle text"
+        placeholder="Enter text"
+        error={emptyError}
+        onChange={dropError.empty}
+        onBlur={(e) => {
+          const val = e.target.value;
+          if (val?.length === 0) setEmptyError("Please enter a text");
+          else dropError.height();
+        }}
+      />
       <Form.TextField
         id="height"
         title="Wiggle height"
