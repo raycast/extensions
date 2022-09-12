@@ -36,11 +36,8 @@ interface gptCompletion {
   data: any;
 }
 
-interface formValues {
-  target: {
-    id: string;
-    value?: string;
-  };
+interface modelTokenLimit {
+  [model: string]: number;
 }
 
 const configuration = new Configuration({
@@ -49,10 +46,12 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
+  const maxTokensDavinci = 4096;
+  const maxTokensAdaBabbageCurie = 2048;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [numTokens, setNumTokens] = useState<number | undefined>(0);
+  const [numTokensPrompt, setNumTokensPrompt] = useState<number | undefined>(0);
   const [maxTokens, setMaxTokens] = useState<number>(256);
   const [promptError, setPromptError] = useState<string | undefined>();
   const [temperatureError, setTemperatureError] = useState<string | undefined>();
@@ -60,6 +59,13 @@ export default function Command() {
   const [topPError, setTopPError] = useState<string | undefined>();
   const [frequencyPenaltyError, setFrequencyPenaltyError] = useState<string | undefined>();
   const [presencePenaltyError, setPresencePenaltyError] = useState<string | undefined>();
+  const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
+
+  const modelLimit = {} as modelTokenLimit;
+  modelLimit["text-davinci-002"] = maxTokensDavinci;
+  modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
+  modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
+  modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -101,7 +107,7 @@ export default function Command() {
     setTextPrompt(prompt);
     dropPromptErrorIfNeeded();
     const encoded = encode(prompt);
-    setNumTokens(encoded.length);
+    setNumTokensPrompt(encoded.length);
   };
 
   const handleSubmit = async (formRequest: gptFormValues) => {
@@ -121,7 +127,7 @@ export default function Command() {
       const response = completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);
       setAnswer(response);
-      setNumTokens(completion.data.usage.total_tokens);
+      setNumTokensPrompt(completion.data.usage.total_tokens);
     } catch (error) {
       if (request.isAxiosError(error) && error.response) {
         await showToast({ style: Toast.Style.Failure, title: "Error:", message: error.response.data.error.message });
@@ -175,8 +181,8 @@ export default function Command() {
         error={promptError}
         onChange={(value) => {
           updatePromptAndTokens(value);
-          if (Number(numTokens) + maxTokens > 4096) {
-            setPromptError("Sum of prompt tokens and maximum tokens should be less than 4097");
+          if (Number(numTokensPrompt) + maxTokens > maxModelTokens) {
+            setPromptError(`Sum of prompt tokens and maximum tokens should be less or equal than ${maxModelTokens}`);
           }
         }}
         onBlur={(event) => {
@@ -187,10 +193,15 @@ export default function Command() {
           }
         }}
       />
-      <Form.Description text={`Prompt token count: ${numTokens}`} />
+      <Form.Description text={`Prompt token count: ${numTokensPrompt}`} />
       <Form.Separator />
       <Form.Description text="These are the model parameters" />
-      <Form.Dropdown id="model" title="AI Model" info={infoMessages.model}>
+      <Form.Dropdown
+        id="model"
+        title="AI Model"
+        info={infoMessages.model}
+        onChange={(newValue: string) => setMaxModelTokens(modelLimit[newValue])}
+      >
         <Form.Dropdown.Item value="text-davinci-002" title="text-davinci-002" />
         <Form.Dropdown.Item value="text-curie-001" title="text-curie-001" />
         <Form.Dropdown.Item value="text-babbage-001" title="text-babbage-001" />
@@ -223,14 +234,14 @@ export default function Command() {
             !Number.isInteger(Number(value)) ||
             value.length == 0 ||
             Number(value) < 0 ||
-            Number(value) > 4096
+            Number(value) > maxModelTokens
           ) {
-            setMaxTokensError("Value should be an integer between 0 and 4096");
-          } else if (Number(value) + Number(numTokens) > 4096) {
-            setMaxTokensError("Sum of prompt tokens and maximum tokens should be less than 4097");
+            setMaxTokensError(`Value should be an integer between 0 and ${maxModelTokens}`);
+          } else if (Number(value) + Number(numTokensPrompt) > maxModelTokens) {
+            setMaxTokensError(`Sum of prompt tokens and maximum tokens should be less or equal than ${maxModelTokens}`);
           } else {
             dropMaxTokensErrorIfNeeded();
-            if (promptError && Number(value) + Number(numTokens) <= 4096) {
+            if (promptError && Number(value) + Number(numTokensPrompt) <= maxModelTokens) {
               dropPromptErrorIfNeeded();
             }
           }

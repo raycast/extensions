@@ -8,7 +8,7 @@ export const model = `The model which will generate the completion. Some models 
 
 export const maxTokens = `The maximum number of tokens to generate in the completion.
 
-The token count of your prompt plus this parameter cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, e.g., "text-davinci-002", which support 4096).
+The token count of your prompt plus this parameter cannot exceed the model's context length. "text-davinci-002" model has a context length of 4096 tokens, while the others have 2048.
 
 Default: 256`;
 
