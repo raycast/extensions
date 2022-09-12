@@ -57,7 +57,7 @@ export default function PlayPlaylist() {
     <ListOrGrid
       itemSize={gridItemSize}
       isLoading={isLoading}
-      searchBarPlaceholder="Search A Playlist"
+      searchBarPlaceholder="Search a playlist"
       searchBarAccessory={
         <ListOrGridDropdown
           tooltip="Playlist Kind"

@@ -10,6 +10,7 @@ import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import json2md from "json2md";
+import { refreshCache, wait } from "./util/cache";
 
 export default function CurrentTrack() {
   const [track, setTrack] = useState<Track | undefined>(undefined);
@@ -99,9 +100,12 @@ export default function CurrentTrack() {
               <Action
                 title="Add to Library"
                 icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "a" }}
                 onAction={async () => {
                   await handleTaskEitherError(music.player.addToLibrary)();
                   setTrack({ ...track, inLibrary: true });
+                  await wait(3);
+                  await refreshCache();
                 }}
               />
             )}

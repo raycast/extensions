@@ -2,19 +2,13 @@ import { MenuBarExtra, Icon, Color, Image, environment, LaunchType, showHUD } fr
 import { useState, useEffect } from "react";
 import { handleTaskEitherError, trimTitle, MusicIcon, AppleMusicColor } from "./util/utils";
 import { getCurrentTrackArtwork } from "./util/artwork";
+import { refreshCache, wait } from "./util/cache";
 import * as music from "./util/scripts";
-import { MusicState, Playlist } from "./util/models";
+import { MusicState } from "./util/models";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
 export default function MenuBar() {
-  const refreshCache = async () => {
-    await music.track.getAllTracks(false);
-    const playlists = await music.playlists.getPlaylists(false);
-    const promises = playlists.map((playlist: Playlist) => music.playlists.getPlaylistTracks(playlist.id, false));
-    await Promise.all(promises);
-  };
-
   const [state, setState] = useState<MusicState | undefined>(undefined);
   const [artwork, setArtwork] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -133,6 +127,8 @@ export default function MenuBar() {
           onAction={async () => {
             setState({ ...state, added: true });
             await handleTaskEitherError(music.player.addToLibrary)();
+            await wait(3);
+            await refreshCache();
           }}
         />
       )}

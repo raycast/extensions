@@ -2,7 +2,7 @@ import { createQueryString, runScript, tell } from "../apple-script";
 import { runAppleScript } from "run-applescript";
 import { getAttribute } from "../utils";
 import { queryCache, setCache } from "../cache";
-import { getTrackArtwork } from "../artwork";
+import { getCurrentTrackArtwork, getTrackArtwork } from "../artwork";
 import { Track } from "../models";
 
 export const getAllTracks = async (useCache = true): Promise<Track[]> => {
@@ -154,6 +154,6 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     year: getAttribute(response, "year"),
   };
 
-  const artwork = await getTrackArtwork(track);
+  const artwork = await getCurrentTrackArtwork();
   return { ...track, artwork };
 };
