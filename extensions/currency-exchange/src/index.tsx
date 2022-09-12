@@ -358,7 +358,8 @@ function enrichExchangeData(
     .filter(
       (it) =>
         (!pinned || pinned.indexOf(it) < 0) &&
-        currencyCode2Country[it] !== undefined && currencyCode2Name[it] !== undefined &&
+        currencyCode2Country[it] !== undefined &&
+        currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
@@ -372,7 +373,8 @@ function enrichExchangeData(
   currencyData.conversion_rate_pin_exchanged = pinned
     ?.filter(
       (it) =>
-        currencyCode2Country[it] !== undefined && currencyCode2Name[it] !== undefined &&
+        currencyCode2Country[it] !== undefined &&
+        currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
