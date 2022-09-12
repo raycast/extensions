@@ -2,15 +2,15 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-05 23:14
+ * @lastEditTime: 2022-09-11 23:42
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
-import CryptoJS from "crypto-js";
 import { AxiosError } from "axios";
+import CryptoJS from "crypto-js";
 import { clipboardQueryTextKey } from "./consts";
 import { LanguageDetectType } from "./detectLanauge/types";
 import { LingueeListItemType } from "./dictionary/linguee/types";
@@ -158,7 +158,7 @@ export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
 /**
  * Get request error info.
  */
-export function getTypeErrorInfo(type: QueryType, error: AxiosError) {
+export function getTypeErrorInfo(type: RequestType, error: AxiosError): RequestErrorInfo {
   const errorCode = error.response?.status;
   const errorMessage = error.message || error.response?.statusText || "something error 😭";
   const errorInfo: RequestErrorInfo = {

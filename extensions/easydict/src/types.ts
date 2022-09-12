@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:44
+ * @lastEditTime: 2022-09-11 23:44
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -63,6 +63,7 @@ export type QueryResponse =
   | YoudaoDictionaryFormatResult
   | YoudaoWebTranslateResult
   | BaiduTranslateResult
+  | BaiduWebLanguageDetect
   | TencentTranslateResult
   | CaiyunTranslateResult
   | DeepLTranslateResult
@@ -87,6 +88,12 @@ export interface BaiduTranslateResult {
 export interface BaiduTranslateItem {
   src: string;
   dst: string;
+}
+
+export interface BaiduWebLanguageDetect {
+  error?: number; // 0
+  msg?: string; // "success"
+  lan?: string; // "en"
 }
 
 export interface TencentTranslateResult extends TextTranslateResponse {
